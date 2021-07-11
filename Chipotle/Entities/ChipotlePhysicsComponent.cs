@@ -34,10 +34,6 @@ namespace Game.Entities
         private int _rotationStep;
         private int _plannedRotations;
 
-        public ChipotlePhysicsComponent()
-        {
-
-        }
 
         public override void Start()
         {
@@ -50,7 +46,11 @@ namespace Game.Entities
             RegisterMessageHandlers(
                 new Dictionary<Type, Action<Message>>()
                 {
+                    // Test messages
                     [typeof(TerrainInfo)] =(message)=> OnTerrainInfo((TerrainInfo)message),
+
+
+                    [typeof(LocalityAnnouncement)] = (m) => OnLocalityAnnouncement((LocalityAnnouncement)m),
                     [typeof(Movement)] =(m)=> OnMovement((Movement)m),
                     [typeof(Turnover)] =(message)=> OnTurnover((Turnover)message),
                     [typeof(InteractionStartMessage)] = OnInteractionStart
@@ -59,9 +59,12 @@ namespace Game.Entities
 
         }
 
+        private void OnLocalityAnnouncement(LocalityAnnouncement m)
+=>  SayDelegate(World.Map[Area.UpperLeftCorner].Locality.Name.Friendly);
+
         private void OnTerrainInfo(TerrainInfo message)
         {
-            WriteDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
+            SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
         }
 
         private void OnInteractionStart(Message message)

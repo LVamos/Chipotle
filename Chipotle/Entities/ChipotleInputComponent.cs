@@ -17,12 +17,15 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
-                // Shortcuts for testing purpose
+                // Shortcuts for testing purposes
                 [new KeyShortcut(Keys.Space)] = Test,
+                [new KeyShortcut(Keys.T)] = TerrainInfo,
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight,
+                [new KeyShortcut(Keys.O)] = SayOrientation,
 
                 // Other shortcuts
-                [new KeyShortcut(Keys.O)] = SayOrientation,
-                [new KeyShortcut(Keys.T)] = TerrainInfo,
+                [new KeyShortcut(Keys.L)] = SayLocality,
                 [new KeyShortcut(Keys.Up)] = MoveForward,
                 [new KeyShortcut(Keys.Down)] = MoveBack,
                 [new KeyShortcut(Keys.Left)] = TurnLeft,
@@ -31,12 +34,15 @@ namespace Game.Entities
                 [new KeyShortcut(KeyShortcut.Modifiers.Control, Keys.Right)] = TurnSharplyRight,
                 [new KeyShortcut(KeyShortcut.Modifiers.Control, Keys.Down)] = TurnAround,
                 [new KeyShortcut(Keys.Return)] = Interact,
-                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
-                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight
             }
             );
 
         }
+
+		private void SayLocality()
+            => Owner.ReceiveMessage(new LocalityAnnouncement(this));
+
+
         public ChipotleInputComponent():base()
         {
         }

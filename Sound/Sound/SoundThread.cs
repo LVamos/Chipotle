@@ -1047,9 +1047,8 @@ private Vector3 _listenerVelocity;
                 {
                     // init logic
                     _openALSystem = OpenALSystem.CreateAndBindToThisThread(true);
-                    RunCommand(() => _openALSystem.EnableReverb());
-                    _opusFileDecoder = new OpusFileDecoder();
                     _lSFDecoder = new LSFDecoder();
+                    _opusFileDecoder = new OpusFileDecoder();
                     _nAudioDecoder = new NAudioDecoder();
                     ProcessMessages(_millisecondsPerTick);
                 }
@@ -1067,6 +1066,7 @@ private Vector3 _listenerVelocity;
 
             t.IsBackground = true; // this ensures it closes when the main thread closes, safe for threads that read from files, but not for those that write to files. Though Environment.Exit takes care of this when an exception is caught, and for normal shutdown scenarios we should be calling dispose, so I'm leaving this commented.
             t.Start();
+            RunCommand(() => _openALSystem.EnableReverb());
         }
 
         /// <summary>

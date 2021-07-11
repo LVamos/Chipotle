@@ -100,10 +100,10 @@ namespace Luky
             _effectExtension = new EffectsExtension();
             ALAnnounceError("Creating instance of EffectsExtension.");
 
-                        _effectHandle = _effectExtension.GenEffect();
+                            _effectHandle = _effectExtension.GenEffect();
             ALAnnounceError("Geneffect.");
 
-            _effectExtension.BindEffect(_effectHandle, EfxEffectType.EaxReverb);
+                _effectExtension.BindEffect(_effectHandle, EfxEffectType.EaxReverb);
             ALAnnounceError("efx.BindEffect");
 
             _effectSlot = _effectExtension.GenAuxiliaryEffectSlot();
@@ -466,6 +466,7 @@ namespace Luky
                 else
                     text = prefix + " " + text;
                 WriteDelegate(text);
+                System.Diagnostics.Debugger.Break();
             }
         }
 
