@@ -1,0 +1,116 @@
+﻿using Luky;
+using Game.Terrain;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Game.Terrain
+{
+    /// <summary>
+    /// Represents a passage between two localities e.g. a door.
+    /// </summary>
+  public      class Passage: MapElement
+    {
+		protected override void Disappear()
+		{
+            _localities.ForEach(l => l.Unregister(this));
+            _area.GetTiles().Foreach(t => t.UnregisterPassage());
+        }
+
+        public string GetDescription()
+		{
+            if (!IsDoor)
+                return "Průchod";
+            return Closed ? "Otevřené dveře" : "Zavřené dveře";
+		}
+        private bool _isDoor;
+        public bool IsDoor
+		{
+            get => _isDoor;
+            set=> _isDoor= _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
+        }
+
+        private bool _closed;
+        public bool Closed
+		{
+            get => _closed;
+            set => _closed= _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
+        }
+
+        private void Close()
+        {
+            //todo Passage.Close
+
+        }
+
+        /// <summary>
+        /// Closes the passage if possible.
+        /// </summary>
+        private void Open()
+        {
+            //todo Passage.Open
+            throw new NotImplementedException();
+
+        }
+
+
+        public  readonly  IReadOnlyList<Locality> Localities;
+
+
+        public  readonly  Locality ContainingLocality;
+
+
+
+
+
+
+
+
+        private List<Locality> _localities;
+
+
+        /// <summary>
+        /// Returns another side of this passage.
+        /// </summary>
+        /// <param name="comparedLocality">source locality</param>
+        /// <returns>remaining Locality</returns>
+        public Locality AnotherLocality(Locality comparedLocality)
+                    => _localities.First(l => l != comparedLocality);
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="isDoor">Is it a door?</param>
+        /// <param name="closed">Is the passage closed from the beginning?</param>
+        /// <param name="area">Area occupied with the passage</param>
+        /// <param name="localities">Two localities connected with the passage</param>
+        public Passage(Name name, bool isDoor, bool closed, Plane area, IEnumerable<Locality> localities, bool editMode=false) : base(name, area, editMode)
+        {
+            _isDoor = isDoor;
+            _closed = closed;
+
+
+            // Check if passage isn't on map edge and if it occupies just one row.
+            Assert(area.Height==1 ||area.Height==2  ||area.Width==1 || area.Width ==2, "Passage must consist of two rows or two points.");
+            var coordinates = area.GetPoints().First();
+
+            Assert(localities != null && localities?.Count() == 2 && localities.First() !=null && localities.Last() != null && localities.First()!=localities.Last(), "Two different localities required");
+            _localities = localities.ToList<Locality>();
+            Localities = _localities.AsReadOnly();
+
+            // Validate passage location
+            Assert(area.GetIntersectingObjects().IsNullOrEmpty() && area.GetIntersectingPassages().IsNullOrEmpty(), "No objects or nested passages allowed");
+
+            Appear();
+        }
+
+		protected override void Appear()
+		{
+            _area.GetTiles().Foreach(t => t.Register(this));
+            _localities.Foreach(l => l.Register(this));
+        }
+    }
+}

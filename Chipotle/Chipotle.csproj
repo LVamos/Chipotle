@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BDFAA4F3-4E00-411D-8166-E1A93AC5C468}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Chipotle</RootNamespace>
+    <AssemblyName>Chipotle</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TolkDotNet, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\lib\Tolk\TolkDotNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CollisionMessage.cs" />
+    <Compile Include="CutSceneEndMessage.cs" />
+    <Compile Include="CutSceneStartMessage.cs" />
+    <Compile Include="Entities\AIComponent.cs" />
+    <Compile Include="Entities\Chipotle.cs" />
+    <Compile Include="Entities\ChipotleInputComponent.cs" />
+    <Compile Include="Entities\ChipotlePhysicsComponent.cs" />
+    <Compile Include="Entities\ChipotleSoundComponent.cs" />
+    <Compile Include="Entities\DumpObject.cs" />
+    <Compile Include="Entities\EntityComponent.cs" />
+    <Compile Include="Entities\Entity.cs" />
+    <Compile Include="Entities\GameObject.cs" />
+    <Compile Include="Entities\InputComponent.cs" />
+    <Compile Include="EntityAppearedMessage.cs" />
+    <Compile Include="EntityDisappearedMessage.cs" />
+    <Compile Include="InpermeableTerrainCollisionMessage.cs" />
+    <Compile Include="InteractionStartMessage.cs" />
+    <Compile Include="KeydownMessage.cs" />
+    <Compile Include="MessagingObject.cs" />
+    <Compile Include="Movement.cs" />
+    <Compile Include="MovementDoneMessage.cs" />
+    <Compile Include="ObjectAppearedMessage.cs" />
+    <Compile Include="ObjectDisappeared.cs" />
+    <Compile Include="PassageAppearedMessage.cs" />
+    <Compile Include="PassageDisappearedMessage.cs" />
+    <Compile Include="TerrainInfo.cs" />
+    <Compile Include="Terrain\Angle.cs" />
+    <Compile Include="Terrain\CardinalDirection.cs" />
+    <Compile Include="Terrain\EntityAppeared.cs" />
+    <Compile Include="Terrain\LocalityType.cs" />
+    <Compile Include="Terrain\MapElement.cs" />
+    <Compile Include="Terrain\Orientation2D.cs" />
+    <Compile Include="Terrain\Passage.cs" />
+    <Compile Include="Entities\PhysicsComponent.cs" />
+    <Compile Include="Entities\SoundComponent.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="Terrain\Direction.cs" />
+    <Compile Include="Terrain\Plane.cs" />
+    <Compile Include="Terrain\Locality.cs" />
+    <Compile Include="Terrain\TerrainType.cs" />
+    <Compile Include="Terrain\Tile.cs" />
+    <Compile Include="Terrain\TileMap.cs" />
+    <Compile Include="Terrain\TurnType.cs" />
+    <Compile Include="Turnover.cs" />
+    <Compile Include="TurnoverDoneMessage.cs" />
+    <Compile Include="UI\GameWindow.cs" />
+    <Compile Include="UI\KeyEventParams.cs" />
+    <Compile Include="UI\KeyShortcut.cs" />
+    <Compile Include="UI\MainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\VirtualWindow.cs" />
+    <Compile Include="UI\WindowHandler.cs" />
+    <Compile Include="World.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Map.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Audio\" />
+    <Folder Include="Input\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dokumenty\todo.txt" />
+    <Content Include="Terrain\Map.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core\Core.csproj">
+      <Project>{e4525846-a882-43d8-a581-5c39f0978855}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sound\Sound\Sound.csproj">
+      <Project>{c15f7cbf-194a-49ac-92eb-e263d64f936e}</Project>
+      <Name>Sound</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
