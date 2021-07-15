@@ -38,7 +38,7 @@ namespace Game.Entities
         /// Creates the Columbo entity
         /// </summary>
         /// <returns>Instance of Columbo</returns>
-        public static Chipotle CreateColumbo()
+        public static Chipotle CreatePlayer()
             => new Chipotle(new ChipotleInputComponent(), new ChipotlePhysicsComponent(), new ChipotleSoundComponent());
 
 
