@@ -1,5 +1,0 @@
-Had to rename libsndfile-1.dll to libsndfile.dll.
-Got it from the C:\Program Files (x86)\Mega-Nerd\libsndfile\bin folder.
-
-Also built my own NLibsndfile.Native.dll because the methods for getting errors give an ArgumentException when you pass a null pointer, and yet the libsndfile.dll expects you to pass in a null pointer at times to get the correct error.
-And later I added the wrapper code for doing virtual IO.
