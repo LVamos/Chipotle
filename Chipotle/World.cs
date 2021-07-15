@@ -278,8 +278,7 @@ public static Passage GetPassage(string name)
                int.Parse(Attribute(l, "height")),
                new Plane(Attribute(l, "coordinates")),
                Attribute(l, "defaultTerrain", false).ToTerrainType(),
-                              Attribute(l, "indexedname") == "příjezdová cesta u wagnerů" ? "snd17":null,
-
+null,
                editMode);
 
                 // Create perimeter walls if they are specified in the map
