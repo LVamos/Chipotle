@@ -18,7 +18,7 @@ namespace Game.Terrain
 		public float MinimumHeight { get; set; }
         public float MinimumWidth { get; set; }
 
-        public Vector2 Center { get => new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);  }
+        public Vector2 Center { get =>Size==1 ? UpperLeftCorner : new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);  }
 
         public bool IsInMapBoundaries()
             => World.Map.IsInBoundaries(UpperLeftCorner) && World.Map.IsInBoundaries(LowerRightCorner);
