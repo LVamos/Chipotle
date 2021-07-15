@@ -20,7 +20,8 @@ namespace Game
     /// </summary>
   public  static  class World
     {
-        //todo World: vyřešit posílání zpráv
+        public static Chipotle Player;
+
         /// <summary>
         /// Enumerates all game objects around a point sorted by distance.
         /// </summary>
@@ -277,6 +278,8 @@ public static Passage GetPassage(string name)
                int.Parse(Attribute(l, "height")),
                new Plane(Attribute(l, "coordinates")),
                Attribute(l, "defaultTerrain", false).ToTerrainType(),
+                              Attribute(l, "indexedname") == "příjezdová cesta u wagnerů" ? "snd17":null,
+
                editMode);
 
                 // Create perimeter walls if they are specified in the map

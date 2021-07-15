@@ -71,6 +71,8 @@
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Entities\GameObject.cs" />
     <Compile Include="Entities\InputComponent.cs" />
+    <Compile Include="LocalityLeft.cs" />
+    <Compile Include="LocalityEntered.cs" />
     <Compile Include="NearestObjectAnnouncement.cs" />
     <Compile Include="LocalityAnnouncement.cs" />
     <Compile Include="EntityAppearedMessage.cs" />

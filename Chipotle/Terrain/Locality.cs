@@ -173,11 +173,12 @@ _entities.Remove(e);
         /// All exits from the locality
         /// </summary>
         public   readonly IReadOnlyList<Passage> Passages;
+		protected readonly string _backgroundSound;
 
-        /// <summary>
-        ///  Defines the lowest layer of terrain
-        /// </summary>
-        public TerrainType DefaultTerrain { get; }
+		/// <summary>
+		///  Defines the lowest layer of terrain
+		/// </summary>
+		public TerrainType DefaultTerrain { get; }
 
 
 
@@ -220,12 +221,13 @@ _entities.Remove(e);
         private LocalityType _type;
 
         private List<Passage> _passages;
+		protected int _backgroundSoundId;
 
-        /// <summary>
-        ///  Draws walls around the locality
-        /// </summary>
-        /// <param name="walls">Specifies which walls should be drawn</param>
-        public void DrawWalls(string walls)
+		/// <summary>
+		///  Draws walls around the locality
+		/// </summary>
+		/// <param name="walls">Specifies which walls should be drawn</param>
+		public void DrawWalls(string walls)
         {
             IEnumerable<Vector2> wallCoordinates;
 
@@ -253,16 +255,38 @@ _entities.Remove(e);
             wallCoordinates.Foreach(c=> World.Map[c].Register(TerrainType.Wall, false));
         }
 
+        public override void Start()
+        {
+            base.Start();
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Name of the locality</param>
-        /// <param name="type">Is it a rom or an outdoor locality?</param>
-        /// <param name="defaultTerrain">Lowest layer of the terrain</param>
-        /// <param name="ceiling">Ceiling height (should be 0 for outdoor localities)</param>
-        /// <param name="area">Area occupied with the locality</param>
-        public Locality(Name name, LocalityType type,  int ceiling,  Plane area, TerrainType defaultTerrain, bool editMode=false):base(name, area, editMode)
+            RegisterMessageHandlers(new Dictionary<Type, Action<Message>>() 
+            { 
+                [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m), 
+                [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
+            });
+        }
+
+		private void OnLocalityLeft(LocalityLeft m)
+		{
+            if (_backgroundSoundId > 0)
+                World.Sound.Stop(_backgroundSoundId);
+		}
+
+		private void OnLocalityEntered(LocalityEntered m)
+        {
+            if(m.Entity is Chipotle && !string.IsNullOrEmpty(_backgroundSound))
+                _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Area.Center, true);
+        }
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="name">Name of the locality</param>
+		/// <param name="type">Is it a rom or an outdoor locality?</param>
+		/// <param name="defaultTerrain">Lowest layer of the terrain</param>
+		/// <param name="ceiling">Ceiling height (should be 0 for outdoor localities)</param>
+		/// <param name="area">Area occupied with the locality</param>
+		public Locality(Name name, LocalityType type,  int ceiling,  Plane area, TerrainType defaultTerrain, string backgroundSound=null, bool editMode=false):base(name, area, editMode)
         {
             _type= type;
             _ceiling= Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
@@ -276,6 +300,7 @@ _entities.Remove(e);
             DefaultTerrain = defaultTerrain;
             _area.MinimumHeight = MinimumHeight;
             _area.MinimumWidth = MinimumWidth;
+            _backgroundSound = backgroundSound;
 
             Appear();
         }

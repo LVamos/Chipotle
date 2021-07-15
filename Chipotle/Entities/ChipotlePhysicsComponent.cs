@@ -9,137 +9,152 @@ using System.Threading.Tasks;
 using Luky;
 
 using System.Windows.Forms;
-namespace Game.Entities
+using Game.Entities;
+
+namespace Game
 {
-    public class ChipotlePhysicsComponent : PhysicsComponent
-    {
-        public override void Update()
-        {
-            base.Update();
-            UpdateRotation();
-        }
-
-        private void UpdateRotation()
-        {
-            if(_plannedRotations>0)
-            {
-                _orientation.Rotate(_rotationStep);
-            _plannedRotations--;
-
-                if(_plannedRotations==0)
-            Owner.ReceiveMessage(new TurnoverDoneMessage(this,_orientation));
-            }
-        }
-
-        private int _rotationStep;
-        private int _plannedRotations;
-
-
-        public override void Start()
-        {
-            // set initial position.
-            SetPosition(new Plane(new Vector2(1027, 1005)));
-            _orientation = new Orientation2D(0, 1);
-
-            base.Start();
-
-            RegisterMessageHandlers(
-                new Dictionary<Type, Action<Message>>()
-                {
-                    // Test messages
-                    [typeof(TerrainInfo)] =(message)=> OnTerrainInfo((TerrainInfo)message),
-
-                    // Other messages
-                    [typeof(NearestObjectAnnouncement)] = (m) => OnLocalityAnnouncement((NearestObjectAnnouncement)m),
-                    [typeof(LocalityAnnouncement)] = (m) => OnLocalityAnnouncement((LocalityAnnouncement)m),
-                    [typeof(Movement)] =(m)=> OnMovement((Movement)m),
-                    [typeof(Turnover)] =(message)=> OnTurnover((Turnover)message),
-                    [typeof(InteractionStartMessage)] = OnInteractionStart
-                }
-                );
-
-        }
-
-		private void OnLocalityAnnouncement(NearestObjectAnnouncement m)
+	public class ChipotlePhysicsComponent : PhysicsComponent
+	{
+		public override void Update()
 		{
-            GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj=> obj.Locality == _area.GetLocality()).FirstOrDefault();
-            if (o == null)
+			base.Update();
+			UpdateRotation();
+		}
+
+		private void UpdateRotation()
+		{
+			if (_plannedRotations > 0)
 			{
-                Say("Nic tu není");
-                return;
+				_orientation.Rotate(_rotationStep);
+				_plannedRotations--;
+
+				if (_plannedRotations == 0)
+					Owner.ReceiveMessage(new TurnoverDoneMessage(this, _orientation));
 			}
-                string msg = o.Name.Friendly;
+		}
 
-				if (o.Area.LowerRightCorner.Y > _area.Center.Y)
-					msg += " před tebou";
-				else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
-					msg += " za tebou";
-                else if(o.Area.LowerRightCorner.Y<=_area.Center.Y && o.Area.UpperRightCorner.Y>=_area.Center.Y)
+		private int _rotationStep;
+		private int _plannedRotations;
+
+
+		public override void Start()
+		{
+			// set initial position.
+			SetPosition(new Plane(new Vector2(1027, 1005)));
+			_orientation = new Orientation2D(0, 1);
+			_area.GetLocality().ReceiveMessage(new LocalityEntered(this, Owner));
+
+			base.Start();
+
+			RegisterMessageHandlers(
+				new Dictionary<Type, Action<Message>>()
 				{
-                    if(o.Area.UpperRightCorner.X<_area.Center.X)
-				msg += " vlevo";
-                    else 
-                            msg += " vpravo";
-                }
+					// Test messages
+					[typeof(TerrainInfo)] = (message) => OnTerrainInfo((TerrainInfo)message),
 
-                Say(msg);
+					// Other messages
+					[typeof(NearestObjectAnnouncement)] = (m) => OnNearestObjectAnnouncement((NearestObjectAnnouncement)m),
+					[typeof(LocalityAnnouncement)] = (m) => OnLocalityAnnouncement((LocalityAnnouncement)m),
+					[typeof(Movement)] = (m) => OnMovement((Movement)m),
+					[typeof(Turnover)] = (message) => OnTurnover((Turnover)message),
+					[typeof(InteractionStartMessage)] = OnInteractionStart
+				}
+				);
+
+		}
+
+
+		private void OnNearestObjectAnnouncement(NearestObjectAnnouncement m)
+		{
+			GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
+			if (o == null)
+			{
+				Say("Nic tu není");
+				return;
+			}
+			string msg = o.Name.Friendly;
+
+			if (o.Area.LowerRightCorner.Y > _area.Center.Y)
+				msg += " před tebou";
+			else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
+				msg += " za tebou";
+			else if (o.Area.LowerRightCorner.Y <= _area.Center.Y && o.Area.UpperRightCorner.Y >= _area.Center.Y)
+			{
+				if (o.Area.UpperRightCorner.X < _area.Center.X)
+					msg += " vlevo";
+				else
+					msg += " vpravo";
+			}
+
+			Say(msg);
 		}
 
 		private void OnLocalityAnnouncement(LocalityAnnouncement m)
-=>  SayDelegate(World.Map[Area.UpperLeftCorner].Locality.Name.Friendly);
+=> SayDelegate(World.Map[Area.UpperLeftCorner].Locality.Name.Friendly);
 
-        private void OnTerrainInfo(TerrainInfo message)
-        {
-            SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
-        }
+		private void OnTerrainInfo(TerrainInfo message)
+		{
+			SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
+		}
 
-        private void OnInteractionStart(Message message)
-        {
-            Tolk.Speak("OnUseObject neimplementováno.");
-        }
+		private void OnInteractionStart(Message message)
+		{
+			Tolk.Speak("OnUseObject neimplementováno.");
+		}
 
-        private void OnTurnover(Turnover message)
-        {
-             _rotationStep =message.Degrees>=0 ? 1 : -1;
-            _plannedRotations = Math.Abs(message.Degrees);
-        }
+		private void OnTurnover(Turnover message)
+		{
+			_rotationStep = message.Degrees >= 0 ? 1 : -1;
+			_plannedRotations = Math.Abs(message.Degrees);
+		}
 
-        private void OnMovement(Movement message)
-        {
-            // Get target coordinates
-            var finalOrientation = _orientation;
+		private void OnMovement(Movement message)
+		{
+			// Get target coordinates
+			var finalOrientation = _orientation;
 
-            if (message.Direction!= TurnType.None)
-                finalOrientation.Rotate((TurnType)message.Direction);
+			if (message.Direction != TurnType.None)
+				finalOrientation.Rotate(message.Direction);
 
-            var target = Area;
-            target.Move(finalOrientation, 1);
+			var target = Area;
+			target.Move(finalOrientation, 1);
 
-            // Is the terrain occupable?
-            Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
-            Tile targetTile = World.Map[target.UpperLeftCorner] ?? throw new InvalidOperationException($"{nameof(OnMovement)}: empty tile."); // Null test
+			// Is the terrain occupable?
+			Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
+			Tile targetTile = World.Map[target.UpperLeftCorner] ?? throw new InvalidOperationException($"{nameof(OnMovement)}: empty tile."); // Null test
 
-            if (!targetTile.Permeable)
-            {
-                Owner.ReceiveMessage(new InpermeableTerrainCollisionMessage(this, targetTile));
-                return;
-            }
+			if (!targetTile.Permeable)
+			{
+				Owner.ReceiveMessage(new InpermeableTerrainCollisionMessage(this, targetTile));
+				return;
+			}
 
-            // Isn't an entity or object over there?
-if(targetTile.IsOccupied&& targetTile.Object!=Owner)
-            {
-                Owner.ReceiveMessage(new CollisionMessage(this,targetTile));
-                return;
-            }
+			// Isn't an entity or object over there?
+			if (targetTile.IsOccupied && targetTile.Object != Owner)
+			{
+				Owner.ReceiveMessage(new CollisionMessage(this, targetTile));
+				return;
+			}
 
-            // The road is clear! Move!
-                SetPosition(target);
-            Owner.ReceiveMessage(new MovementDoneMessage(this,targetTile));
-        }
+			// The road is clear! Move!
+			Locality sourceLocality = _area.GetLocality();
+			Locality targetLocality = World.Map[target.Center].Locality;
+
+			if (targetLocality != sourceLocality)
+			{
+				sourceLocality.ReceiveMessage(new LocalityLeft(this, Owner));
+				targetLocality.ReceiveMessage(new LocalityEntered(this, Owner));
+			}
+			SetPosition(target);
+			Owner.ReceiveMessage(new MovementDoneMessage(this, targetTile));
+
+		}
 
 
 
 
 
-    }
+	}
+
+	
 }
