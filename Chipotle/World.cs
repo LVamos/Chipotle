@@ -20,7 +20,6 @@ namespace Game
     /// </summary>
   public  static  class World
     {
-        public static Chipotle Player;
 
         /// <summary>
         /// Enumerates all game objects around a point sorted by distance.
@@ -75,7 +74,7 @@ namespace Game
         private static Dictionary<string, GameObject> _objects;
         private static Dictionary<string, Entity> _entities;
         private static Dictionary<string, Passage> _passages;
-        public static Chipotle Columbo;
+        public static Chipotle Player;
 
 
         public static void RenameLocality(string indexedName, string newName)
@@ -225,8 +224,8 @@ public static Passage GetPassage(string name)
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());
             _objects.Foreach(p => p.Value.Start());
-            Columbo = Entity.CreateColumbo();
-            Add(Columbo);
+            Player = Entity.CreatePlayer();
+            Add(Player);
             _entities.Foreach(p => p.Value.Start());
             Program.MainWindow.GameLoopEnabled = true;
         }
