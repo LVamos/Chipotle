@@ -20,7 +20,7 @@ namespace Luky
     public abstract class DebugSO
     {
         public static string DataPath = @"Data\";
-        public static readonly string MapPath = Path.Combine(DataPath, @"Map\map.xml");
+        public static readonly string MapPath = Path.Combine(DataPath, @"Map\chipotle.xml");
 
         public static void Say(object o)
             => SayDelegate(o.ToString());
