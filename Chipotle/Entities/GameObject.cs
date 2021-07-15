@@ -24,10 +24,14 @@ namespace Game.Entities
 
             switch(type)
             {
-                case "columbovo auto": return new DumpObject(name, area, type, null, null, "carloop");
+                //case "chipotlovo auto": return new DumpObject(name, area, type, null, null, "carloop");
+                case "zahradní gril": return CreateGardenGril(name, area);
                 default: return new DumpObject(name, area);
             }
         }
+
+        public static DumpObject CreateGardenGril(Name name, Plane area)
+=> new DumpObject(name, area, "zahradní gril", null, null, "snd17");
 
 		//todo Gameobject: předělat na abstraktní třídu
 
@@ -36,7 +40,7 @@ namespace Game.Entities
 
 
 
-        protected  override void Disappear()
+		protected  override void Disappear()
 		{
             base.Disappear();
             _area.GetTiles().Foreach(t => t.UnregisterObject());

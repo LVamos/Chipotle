@@ -10,7 +10,7 @@ using Game.Terrain;
 
 namespace Game.Entities
 {
-    class DumpObject:GameObject
+    public class DumpObject:GameObject
     {
         public override void Destroy()
         {
@@ -51,10 +51,10 @@ namespace Game.Entities
         [typeof(InteractionStartMessage)] = (m)=> OnUse((InteractionStartMessage)m)
     });
 
-            //if (!string.IsNullOrEmpty(_sounds.loop))
-            //    _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true);
+			if (!string.IsNullOrEmpty(_sounds.loop))
+				_loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true);
 
-        }
+		}
 
 
         protected void OnCollision(Message message)
