@@ -65,7 +65,12 @@ namespace Game.Entities
         private void OnCollision(CollisionMessage message)
         {
             var collidingObject = message.Tile.Object;
-            Say(collidingObject);
+
+            // Announce
+            Timer t = new Timer();
+            t.Interval = 500;
+            t.Tick += (object s, EventArgs e) => { Say(collidingObject); t.Stop(); };
+            t.Start();
             _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true);
         }
 
