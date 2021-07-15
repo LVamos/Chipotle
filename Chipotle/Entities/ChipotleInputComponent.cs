@@ -25,6 +25,7 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.O)] = SayOrientation,
 
                 // Other shortcuts
+                [new KeyShortcut(Keys.O)] = SayNearestObject,
                 [new KeyShortcut(Keys.L)] = SayLocality,
                 [new KeyShortcut(Keys.Up)] = MoveForward,
                 [new KeyShortcut(Keys.Down)] = MoveBack,
@@ -39,6 +40,8 @@ namespace Game.Entities
 
         }
 
+		private void SayNearestObject()
+=> Owner.ReceiveMessage(new NearestObjectAnnouncement(this));
 		private void SayLocality()
             => Owner.ReceiveMessage(new LocalityAnnouncement(this));
 

@@ -49,7 +49,8 @@ namespace Game.Entities
                     // Test messages
                     [typeof(TerrainInfo)] =(message)=> OnTerrainInfo((TerrainInfo)message),
 
-
+                    // Other messages
+                    [typeof(NearestObjectAnnouncement)] = (m) => OnLocalityAnnouncement((NearestObjectAnnouncement)m),
                     [typeof(LocalityAnnouncement)] = (m) => OnLocalityAnnouncement((LocalityAnnouncement)m),
                     [typeof(Movement)] =(m)=> OnMovement((Movement)m),
                     [typeof(Turnover)] =(message)=> OnTurnover((Turnover)message),
@@ -59,7 +60,32 @@ namespace Game.Entities
 
         }
 
-        private void OnLocalityAnnouncement(LocalityAnnouncement m)
+		private void OnLocalityAnnouncement(NearestObjectAnnouncement m)
+		{
+            GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj=> obj.Locality == _area.GetLocality()).FirstOrDefault();
+            if (o == null)
+			{
+                Say("Nic tu není");
+                return;
+			}
+                string msg = o.Name.Friendly;
+
+				if (o.Area.LowerRightCorner.Y > _area.Center.Y)
+					msg += " před tebou";
+				else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
+					msg += " za tebou";
+                else if(o.Area.LowerRightCorner.Y<=_area.Center.Y && o.Area.UpperRightCorner.Y>=_area.Center.Y)
+				{
+                    if(o.Area.UpperRightCorner.X<_area.Center.X)
+				msg += " vlevo";
+                    else 
+                            msg += " vpravo";
+                }
+
+                Say(msg);
+		}
+
+		private void OnLocalityAnnouncement(LocalityAnnouncement m)
 =>  SayDelegate(World.Map[Area.UpperLeftCorner].Locality.Name.Friendly);
 
         private void OnTerrainInfo(TerrainInfo message)
@@ -87,7 +113,7 @@ namespace Game.Entities
                 finalOrientation.Rotate((TurnType)message.Direction);
 
             var target = Area;
-            target.Move(finalOrientation, .3f);
+            target.Move(finalOrientation, 1);
 
             // Is the terrain occupable?
             Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
