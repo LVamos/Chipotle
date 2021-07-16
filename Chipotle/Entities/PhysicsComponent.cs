@@ -11,7 +11,7 @@ namespace Game.Entities
 {
   public abstract class PhysicsComponent: EntityComponent
     {
-        protected int _walkSpeed; // In milliseconds
+        protected int _walkSpeed;
 
         private void Appear(Plane target)
         {

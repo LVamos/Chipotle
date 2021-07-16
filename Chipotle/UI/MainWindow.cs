@@ -14,7 +14,6 @@ namespace Game.UI
     {
         private Timer _tmrGameLoop;
         private bool _gameLoopEnabled=false;
-        public const int FramesPerSecond = 1000 / 66;
         public bool GameLoopEnabled
         {
             get => _gameLoopEnabled;
@@ -45,7 +44,7 @@ public MainWindow()
 
 
             _tmrGameLoop = new Timer();
-            _tmrGameLoop.Interval = FramesPerSecond;
+            _tmrGameLoop.Interval = World.FramesPerSecond;
             _tmrGameLoop.Tick += GameLoop;
             _tmrGameLoop.Enabled = false;
 

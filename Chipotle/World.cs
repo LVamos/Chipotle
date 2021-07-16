@@ -1,4 +1,7 @@
-﻿using System.Xml.Linq;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using System.Xml.Linq;
 using Luky;
 using Game.Terrain;
 using Game.Entities;
@@ -20,6 +23,8 @@ namespace Game
     /// </summary>
   public  static  class World
     {
+        public const int FramesPerSecond = 66;
+        public const int DeltaTime = 1000 / FramesPerSecond;
 
         /// <summary>
         /// Enumerates all game objects around a point sorted by distance.
@@ -74,7 +79,7 @@ namespace Game
         private static Dictionary<string, GameObject> _objects;
         private static Dictionary<string, Entity> _entities;
         private static Dictionary<string, Passage> _passages;
-        public static Chipotle Player;
+        public static Entity Player;
 
 
         public static void RenameLocality(string indexedName, string newName)
@@ -224,7 +229,7 @@ public static Passage GetPassage(string name)
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());
             _objects.Foreach(p => p.Value.Start());
-            Player = Entity.CreatePlayer();
+            Player = Entity.CreateChipotle();
             Add(Player);
             _entities.Foreach(p => p.Value.Start());
             Program.MainWindow.GameLoopEnabled = true;
@@ -320,7 +325,7 @@ null,
 		public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
            => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
 
-        public static void ReceiveMessage(Message message)
+        public static void ReceiveMessage(GameMessage message)
         {
             throw new NotImplementedException();
         }

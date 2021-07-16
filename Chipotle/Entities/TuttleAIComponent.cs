@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Game.Entities
 {
-    public class AIComponent: EntityComponent
-    {
-    }
+	class TuttleAIComponent: AIComponent
+	{
+	}
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -33,7 +36,7 @@ namespace Game.Entities
         protected void SayOrientation()
             => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription());
 
-        private void OnTurnoverDone(TurnoverDoneMessage message)
+        private void OnTurnoverDone(TurnEntityResult  message)
         {
             SayOrientation();
         }
@@ -44,12 +47,12 @@ namespace Game.Entities
             base.Start();
 
             RegisterMessageHandlers(
-            new Dictionary<Type, Action<Message>>()
+            new Dictionary<Type, Action<GameMessage>>()
             {
-                [typeof(TurnoverDoneMessage)] =(m)=> OnTurnoverDone((TurnoverDoneMessage)m),
-                [typeof(MovementDoneMessage)] =(m)=> OnMovementDone((MovementDoneMessage)m),
-                [typeof(CollisionMessage)] = (m)=> OnCollision((CollisionMessage)m),
-                [typeof(InpermeableTerrainCollisionMessage)] = (m)=> OnInpermeableTerrainCollision((InpermeableTerrainCollisionMessage)m)
+                [typeof(TurnEntityResult )] =(m)=> OnTurnoverDone((TurnEntityResult )m),
+                [typeof(EntityMoved )] =(m)=> OnMovementDone((EntityMoved )m),
+                [typeof(ObjectsCollided)] = (m)=> OnCollision((ObjectsCollided)m),
+                [typeof(TerrainCollided )] = (m)=> OnInpermeableTerrainCollision((TerrainCollided )m)
             }
             );
 
@@ -57,12 +60,12 @@ namespace Game.Entities
 
 
 
-        private void OnInpermeableTerrainCollision(Message message)
+        private void OnInpermeableTerrainCollision(GameMessage message)
         {
             Tolk.Speak("penetráces");
         }
 
-        private void OnCollision(CollisionMessage message)
+        private void OnCollision(ObjectsCollided message)
         {
             var collidingObject = message.Tile.Object;
 
@@ -86,7 +89,7 @@ namespace Game.Entities
                 _sound.ListenerOrientationFacing = orientation.AsOpenALVector();
         }
 
-        private void OnMovementDone(MovementDoneMessage message)
+        private void OnMovementDone(EntityMoved  message)
         {
             PlayTerrain(message.Target);
         }

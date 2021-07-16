@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,7 +35,7 @@ namespace Game.Entities
         protected int _loopSoundId;
 
 
-        private void OnUse(Message message)
+        private void OnUse(GameMessage message)
         {
             if (!string.IsNullOrEmpty(_sounds.action))
                 World.Sound.Play(_sounds.action, null, false, PositionType.Absolute, Area.Center);
@@ -45,10 +48,10 @@ namespace Game.Entities
             base.Start();
 
             RegisterMessageHandlers(
-    new Dictionary<Type, Action<Message>>()
+    new Dictionary<Type, Action<GameMessage>>()
     {
-        [typeof(CollisionMessage)] =(m)=> OnCollision((CollisionMessage)m),
-        [typeof(InteractionStartMessage)] = (m)=> OnUse((InteractionStartMessage)m)
+        [typeof(ObjectsCollided)] =(m)=> OnCollision((ObjectsCollided)m),
+        [typeof(UseObject )] = (m)=> OnUse((UseObject )m)
     });
 
 			if (!string.IsNullOrEmpty(_sounds.loop))
@@ -57,7 +60,7 @@ namespace Game.Entities
 		}
 
 
-        protected void OnCollision(Message message)
+        protected void OnCollision(GameMessage message)
         {
             if (!string.IsNullOrEmpty(_sounds.collision))
                 World.Sound.Play(_sounds.collision, null, false, PositionType.Absolute, Area.Center);

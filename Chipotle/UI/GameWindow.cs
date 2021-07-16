@@ -1,4 +1,7 @@
-﻿using Luky;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using Luky;
 using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -43,12 +46,12 @@ namespace Game.UI
 
         private void SayCoordinates()
         {
-            Tolk.Speak(World.Columbo.Area.Center.ToString());
+            Tolk.Speak(World.Player.Area.Center.ToString());
         }
 
         private void CopyCoordinates()
         {
-            Clipboard.SetText(World.Columbo.Area.UpperLeftCorner.ToString());
+            Clipboard.SetText(World.Player.Area.UpperLeftCorner.ToString());
             WriteDelegate("Soiuřadnice zkopírovány.");
 
         }
@@ -85,7 +88,7 @@ namespace Game.UI
         public override void OnKeyDown(KeyEventParams e)
         {
             base.OnKeyDown(e);
-            World.Columbo.ReceiveMessage(new KeydownMessage(this, new KeyShortcut(e)));
+            World.Player.ReceiveMessage(new KeyPressed (this, new KeyShortcut(e)));
         }
     }
 }

@@ -1,17 +1,15 @@
-﻿using System;
+﻿using Game.Messaging;
+using Game.Messaging.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using Luky;
 
 using Game.UI;
 
 namespace Game.Entities
 {
-  public abstract  class InputComponent: EntityComponent
+	public abstract  class InputComponent: EntityComponent
     {
 
 
@@ -19,20 +17,20 @@ namespace Game.Entities
         public InputComponent():base()
         {
             // Assign an KeyDown handler
-            var handlers = new Dictionary<Type, Action<Message>>()
+            var handlers = new Dictionary<Type, Action<GameMessage>>()
             {
-                [typeof(KeydownMessage)] =(m)=>  OnKeyDown((KeydownMessage)m),
-                [typeof(CutSceneStartMessage)] =(m)=>  OnCutSceneStart((CutSceneStartMessage)m),
-                [typeof(CutSceneEndMessage)] =(m)=>  OnCutSceneEnd((CutSceneEndMessage)m)
+                [typeof(KeyPressed )] =(m)=>  OnKeyDown((KeyPressed )m),
+                [typeof(CutsceneBegan)] =(m)=>  OnCutSceneStart((CutsceneBegan)m),
+                [typeof(CutsceneEnded)] =(m)=>  OnCutSceneEnd((CutsceneEnded)m)
             };
             RegisterMessageHandlers(handlers);
             _shortcuts = new Dictionary<KeyShortcut, Action>();
         }
 
-        private void OnCutSceneEnd(Message message)
+        private void OnCutSceneEnd(GameMessage message)
 => _messagingEnabled = false;
 
-        private void OnCutSceneStart(CutSceneStartMessage message)
+        private void OnCutSceneStart(CutsceneBegan message)
 => _messagingEnabled = true;
 
 
@@ -41,7 +39,7 @@ namespace Game.Entities
         /// Responds on a keypress.
         /// </summary>
         /// <param name="shortcut"></param>
-        protected void OnKeyDown(KeydownMessage message)
+        protected void OnKeyDown(KeyPressed  message)
         {
             if (_shortcuts != null && _shortcuts.TryGetValue(message.Shortcut, out var action))
                 action();

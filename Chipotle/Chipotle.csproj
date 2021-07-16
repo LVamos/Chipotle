@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{BDFAA4F3-4E00-411D-8166-E1A93AC5C468}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Chipotle</RootNamespace>
+    <RootNamespace>Game</RootNamespace>
     <AssemblyName>Chipotle</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -58,36 +58,53 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CollisionMessage.cs" />
-    <Compile Include="CutSceneEndMessage.cs" />
-    <Compile Include="CutSceneStartMessage.cs" />
+    <Compile Include="Messaging\Events\ObjectsCollided.cs" />
+    <Compile Include="Messaging\Events\CutsceneEnded.cs" />
+    <Compile Include="Messaging\Events\CutsceneBegan.cs" />
     <Compile Include="Entities\AIComponent.cs" />
-    <Compile Include="Entities\Chipotle.cs" />
+    <Compile Include="Entities\BartenderAIComponent.cs" />
+    <Compile Include="Entities\BartenderPhysicsComponent.cs" />
+    <Compile Include="Entities\BartenderSoundComponent.cs" />
+    <Compile Include="Entities\CarsonAIComponent.cs" />
+    <Compile Include="Entities\CarsonPhysicsComponent.cs" />
+    <Compile Include="Entities\CarsonSoundComponent.cs" />
     <Compile Include="Entities\ChipotleInputComponent.cs" />
     <Compile Include="Entities\ChipotlePhysicsComponent.cs" />
     <Compile Include="Entities\ChipotleSoundComponent.cs" />
+    <Compile Include="Entities\ChristineAIComponent.cs" />
+    <Compile Include="Entities\ChristinePhysicsComponent.cs" />
+    <Compile Include="Entities\ChristineSoundComponent.cs" />
     <Compile Include="Entities\DumpObject.cs" />
     <Compile Include="Entities\EntityComponent.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Entities\GameObject.cs" />
     <Compile Include="Entities\InputComponent.cs" />
-    <Compile Include="LocalityLeft.cs" />
-    <Compile Include="LocalityEntered.cs" />
-    <Compile Include="NearestObjectAnnouncement.cs" />
-    <Compile Include="LocalityAnnouncement.cs" />
-    <Compile Include="EntityAppearedMessage.cs" />
-    <Compile Include="EntityDisappearedMessage.cs" />
-    <Compile Include="InpermeableTerrainCollisionMessage.cs" />
-    <Compile Include="InteractionStartMessage.cs" />
-    <Compile Include="KeydownMessage.cs" />
-    <Compile Include="MessagingObject.cs" />
-    <Compile Include="Movement.cs" />
-    <Compile Include="MovementDoneMessage.cs" />
-    <Compile Include="ObjectAppearedMessage.cs" />
-    <Compile Include="ObjectDisappeared.cs" />
-    <Compile Include="PassageAppearedMessage.cs" />
-    <Compile Include="PassageDisappearedMessage.cs" />
-    <Compile Include="TerrainInfo.cs" />
+    <Compile Include="Entities\MariottiAIComponent.cs" />
+    <Compile Include="Entities\MariottiPhysicsComponent.cs" />
+    <Compile Include="Entities\MariottiSoundComponent.cs" />
+    <Compile Include="Entities\SweeneyAIComponent.cs" />
+    <Compile Include="Entities\SweeneyPhysicsComponent.cs" />
+    <Compile Include="Entities\SweeneySoundComponent.cs" />
+    <Compile Include="Entities\TuttleAIComponent.cs" />
+    <Compile Include="Entities\TuttlePhysicsComponent.cs" />
+    <Compile Include="Entities\TuttleSoundComponent.cs" />
+    <Compile Include="Messaging\Events\LocalityLeft.cs" />
+    <Compile Include="Messaging\Events\LocalityEntered.cs" />
+    <Compile Include="Messaging\Commands\SayNearestObject.cs" />
+    <Compile Include="Messaging\Commands\SayLocality.cs" />
+    <Compile Include="Messaging\Events\EntityShown.cs" />
+    <Compile Include="Messaging\Events\EntityHidden.cs" />
+    <Compile Include="Messaging\Events\TerrainCollided.cs" />
+    <Compile Include="Messaging\Commands\UseObject.cs" />
+    <Compile Include="Messaging\Events\KeyPressed.cs" />
+    <Compile Include="Messaging\MessagingObject.cs" />
+    <Compile Include="Messaging\Commands\MakeStep.cs" />
+    <Compile Include="Messaging\Events\EntityMoved.cs" />
+    <Compile Include="Messaging\Events\ObjectShown.cs" />
+    <Compile Include="Messaging\Events\ObjectHidden.cs" />
+    <Compile Include="Messaging\Events\PassageShown.cs" />
+    <Compile Include="Messaging\Events\PassageDisappearedMessage.cs" />
+    <Compile Include="Messaging\Commands\SayTerrain.cs" />
     <Compile Include="Terrain\Angle.cs" />
     <Compile Include="Terrain\CardinalDirection.cs" />
     <Compile Include="Terrain\EntityAppeared.cs" />
@@ -97,7 +114,7 @@
     <Compile Include="Terrain\Passage.cs" />
     <Compile Include="Entities\PhysicsComponent.cs" />
     <Compile Include="Entities\SoundComponent.cs" />
-    <Compile Include="Message.cs" />
+    <Compile Include="Messaging\GameMessage.cs" />
     <Compile Include="Terrain\Direction.cs" />
     <Compile Include="Terrain\Plane.cs" />
     <Compile Include="Terrain\Locality.cs" />
@@ -105,8 +122,8 @@
     <Compile Include="Terrain\Tile.cs" />
     <Compile Include="Terrain\TileMap.cs" />
     <Compile Include="Terrain\TurnType.cs" />
-    <Compile Include="Turnover.cs" />
-    <Compile Include="TurnoverDoneMessage.cs" />
+    <Compile Include="Messaging\Commands\TurnEntity.cs" />
+    <Compile Include="Messaging\Events\TurnEntityResult.cs" />
     <Compile Include="UI\GameWindow.cs" />
     <Compile Include="UI\KeyEventParams.cs" />
     <Compile Include="UI\KeyShortcut.cs" />
