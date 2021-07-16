@@ -75,10 +75,10 @@ namespace Game.Entities
             => Owner.ReceiveMessage(new SayTerrain (this));
 
         private void MoveLeft()
-             => Owner.ReceiveMessage(new MoveEntity (this, TurnType.SharplyLeft));
+             => Owner.ReceiveMessage(new MakeStep (this, TurnType.SharplyLeft));
 
         private void MoveRight()
-            => Owner.ReceiveMessage(new MoveEntity (this, TurnType.SharplyRight));
+            => Owner.ReceiveMessage(new MakeStep (this, TurnType.SharplyRight));
 
         private void TurnSharplyLeft()
 => Owner.ReceiveMessage(new TurnEntity (this, TurnType.SharplyLeft));
@@ -99,10 +99,10 @@ namespace Game.Entities
             => Owner.ReceiveMessage(new TurnEntity (this, TurnType.Around));
 
         private void MoveBack()
-            => Owner.ReceiveMessage(new MoveEntity (this, TurnType.Around));
+            => Owner.ReceiveMessage(new MakeStep (this, TurnType.Around));
 
         private void MoveForward()
-            => Owner.ReceiveMessage(new MoveEntity (this, TurnType.None));
+            => Owner.ReceiveMessage(new MakeStep (this, TurnType.None));
 
     }
 }

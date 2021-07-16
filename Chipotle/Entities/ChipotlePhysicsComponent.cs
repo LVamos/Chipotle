@@ -43,7 +43,7 @@ namespace Game
 		public override void Start()
 		{
 			// set initial position.
-			SetPosition(new Plane(new Vector2(1027, 1005)));
+			SetPosition(new Plane(new Vector2(1025, 1030)));
 			_orientation = new Orientation2D(0, 1);
 			_area.GetLocality().ReceiveMessage(new LocalityEntered(this, Owner));
 
@@ -53,21 +53,21 @@ namespace Game
 				new Dictionary<Type, Action<GameMessage>>()
 				{
 					// Test messages
-					[typeof(SayTerrain )] = (message) => OnTerrainInfo((SayTerrain )message),
+					[typeof(SayTerrain )] = (message) => OnSayTerrain((SayTerrain )message),
 
 					// Other messages
-					[typeof(SayNearestObject)] = (m) => OnNearestObjectAnnouncement((SayNearestObject)m),
-					[typeof(SayLocality)] = (m) => OnLocalityAnnouncement((SayLocality)m),
-					[typeof(MoveEntity )] = (m) => OnMovement((MoveEntity )m),
-					[typeof(TurnEntity )] = (message) => OnTurnover((TurnEntity )message),
-					[typeof(UseObject )] = (message) => OnInteractionStart(message)
+					[typeof(SayNearestObject)] = (m) => OnSayNearestObject((SayNearestObject)m),
+					[typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
+					[typeof(MakeStep )] = (m) => OnMakeStep((MakeStep )m),
+					[typeof(TurnEntity )] = (message) => OnTurnEntity((TurnEntity )message),
+					[typeof(UseObject )] = (message) => OnUseObject((UseObject)message)
 				}
 				);
 
 		}
 
 
-		private void OnNearestObjectAnnouncement(SayNearestObject m)
+		private void OnSayNearestObject(SayNearestObject m)
 		{
 			GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
 			if (o == null)
@@ -92,26 +92,26 @@ namespace Game
 			Say(msg);
 		}
 
-		private void OnLocalityAnnouncement(SayLocality m)
+		private void OnSayLocality(SayLocality m)
 => SayDelegate(World.Map[Area.UpperLeftCorner].Locality.Name.Friendly);
 
-		private void OnTerrainInfo(SayTerrain  message)
+		private void OnSayTerrain(SayTerrain  message)
 		{
 			SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
 		}
 
-		private void OnInteractionStart(GameMessage message)
+		private void OnUseObject(UseObject message)
 		{
 			Tolk.Speak("OnUseObject neimplementováno.");
 		}
 
-		private void OnTurnover(TurnEntity  message)
+		private void OnTurnEntity(TurnEntity  message)
 		{
 			_rotationStep = message.Degrees >= 0 ? 1 : -1;
 			_plannedRotations = Math.Abs(message.Degrees);
 		}
 
-		private void OnMovement(MoveEntity  message)
+		private void OnMakeStep(MakeStep  message)
 		{
 			// Get target coordinates
 			var finalOrientation = _orientation;
@@ -124,7 +124,7 @@ namespace Game
 
 			// Is the terrain occupable?
 			Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
-			Tile targetTile = World.Map[target.UpperLeftCorner] ?? throw new InvalidOperationException($"{nameof(OnMovement)}: empty tile."); // Null test
+			Tile targetTile = World.Map[target.UpperLeftCorner] ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
 			if (!targetTile.Permeable)
 			{

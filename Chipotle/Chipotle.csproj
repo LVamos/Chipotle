@@ -98,7 +98,7 @@
     <Compile Include="Messaging\Commands\UseObject.cs" />
     <Compile Include="Messaging\Events\KeyPressed.cs" />
     <Compile Include="Messaging\MessagingObject.cs" />
-    <Compile Include="Messaging\Commands\MoveEntity.cs" />
+    <Compile Include="Messaging\Commands\MakeStep.cs" />
     <Compile Include="Messaging\Events\EntityMoved.cs" />
     <Compile Include="Messaging\Events\ObjectShown.cs" />
     <Compile Include="Messaging\Events\ObjectHidden.cs" />

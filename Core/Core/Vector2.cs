@@ -17,7 +17,6 @@ namespace Luky
     => new Vector3(X, 0, Y);
 
 
-        //todo Vector2: zjistit, jestli se dá nahradit vektorem z OpenTK
         /// <summary>
         /// The X component of the V2.
         /// </summary>
