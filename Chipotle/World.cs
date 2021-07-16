@@ -77,7 +77,7 @@ namespace Game
         private static Dictionary<string, GameObject> _objects;
         private static Dictionary<string, Entity> _entities;
         private static Dictionary<string, Passage> _passages;
-        public static Chipotle Player;
+        public static Entity Player;
 
 
         public static void RenameLocality(string indexedName, string newName)
@@ -227,7 +227,7 @@ public static Passage GetPassage(string name)
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());
             _objects.Foreach(p => p.Value.Start());
-            Player = Entity.CreatePlayer();
+            Player = Entity.CreateChipotle();
             Add(Player);
             _entities.Foreach(p => p.Value.Start());
             Program.MainWindow.GameLoopEnabled = true;

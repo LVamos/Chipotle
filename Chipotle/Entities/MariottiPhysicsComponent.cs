@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Game.Entities
 {
-	class MariottiPhysicsComponent
+	class MariottiPhysicsComponent: PhysicsComponent
 	{
 	}
 }

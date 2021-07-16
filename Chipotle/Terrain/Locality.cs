@@ -277,7 +277,7 @@ _entities.Remove(e);
 
 		private void OnLocalityEntered(LocalityEntered m)
         {
-            if(m.Entity is Chipotle && !string.IsNullOrEmpty(_backgroundSound))
+            if(m.Entity == World.Player&& !string.IsNullOrEmpty(_backgroundSound))
                 _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Area.Center, true);
         }
 

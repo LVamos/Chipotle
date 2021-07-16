@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Game.Entities
 {
-	class BartenderSoundComponent
+	public class BartenderSoundComponent: SoundComponent
 	{
 	}
 }

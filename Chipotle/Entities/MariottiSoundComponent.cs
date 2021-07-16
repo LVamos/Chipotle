@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Game.Entities
 {
-	class MariottiSoundComponent
+	class MariottiSoundComponent: SoundComponent
 	{
 	}
 }
