@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace Game
+namespace Game.Messaging
 {
 
-	public abstract  class Message
+	public abstract  class GameMessage
     {
         public override int GetHashCode()
             => unchecked(7984 *(1357 +Sender.GetHashCode()));
@@ -14,7 +14,7 @@ namespace Game
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public Message(object sender)
+        public GameMessage(object sender)
             => Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
     }

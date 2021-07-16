@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 using Game.Terrain;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	class TurnoverDoneMessage: Message
+	class TurnEntityResult : GameMessage
 	{
 		Orientation2D NewOrientation;
 
@@ -17,6 +17,6 @@ namespace Game
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="newOrientation">Final orientation vector</param>
-		public TurnoverDoneMessage(object sender, Orientation2D newOrientation) : base(sender) => NewOrientation = newOrientation;
+		public TurnEntityResult (object sender, Orientation2D newOrientation) : base(sender) => NewOrientation = newOrientation;
 	}
 }

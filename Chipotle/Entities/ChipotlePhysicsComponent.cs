@@ -1,4 +1,7 @@
-﻿using Game.Terrain;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using Game.Terrain;
 using DavyKager;
 using System;
 using System.Collections.Generic;
@@ -29,7 +32,7 @@ namespace Game
 				_plannedRotations--;
 
 				if (_plannedRotations == 0)
-					Owner.ReceiveMessage(new TurnoverDoneMessage(this, _orientation));
+					Owner.ReceiveMessage(new TurnEntityResult (this, _orientation));
 			}
 		}
 
@@ -47,24 +50,24 @@ namespace Game
 			base.Start();
 
 			RegisterMessageHandlers(
-				new Dictionary<Type, Action<Message>>()
+				new Dictionary<Type, Action<GameMessage>>()
 				{
 					// Test messages
-					[typeof(TerrainInfo)] = (message) => OnTerrainInfo((TerrainInfo)message),
+					[typeof(SayTerrain )] = (message) => OnTerrainInfo((SayTerrain )message),
 
 					// Other messages
-					[typeof(NearestObjectAnnouncement)] = (m) => OnNearestObjectAnnouncement((NearestObjectAnnouncement)m),
-					[typeof(LocalityAnnouncement)] = (m) => OnLocalityAnnouncement((LocalityAnnouncement)m),
-					[typeof(Movement)] = (m) => OnMovement((Movement)m),
-					[typeof(Turnover)] = (message) => OnTurnover((Turnover)message),
-					[typeof(InteractionStartMessage)] = OnInteractionStart
+					[typeof(SayNearestObject)] = (m) => OnNearestObjectAnnouncement((SayNearestObject)m),
+					[typeof(SayLocality)] = (m) => OnLocalityAnnouncement((SayLocality)m),
+					[typeof(MoveEntity )] = (m) => OnMovement((MoveEntity )m),
+					[typeof(TurnEntity )] = (message) => OnTurnover((TurnEntity )message),
+					[typeof(UseObject )] = (message) => OnInteractionStart(message)
 				}
 				);
 
 		}
 
 
-		private void OnNearestObjectAnnouncement(NearestObjectAnnouncement m)
+		private void OnNearestObjectAnnouncement(SayNearestObject m)
 		{
 			GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
 			if (o == null)
@@ -89,26 +92,26 @@ namespace Game
 			Say(msg);
 		}
 
-		private void OnLocalityAnnouncement(LocalityAnnouncement m)
+		private void OnLocalityAnnouncement(SayLocality m)
 => SayDelegate(World.Map[Area.UpperLeftCorner].Locality.Name.Friendly);
 
-		private void OnTerrainInfo(TerrainInfo message)
+		private void OnTerrainInfo(SayTerrain  message)
 		{
 			SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
 		}
 
-		private void OnInteractionStart(Message message)
+		private void OnInteractionStart(GameMessage message)
 		{
 			Tolk.Speak("OnUseObject neimplementováno.");
 		}
 
-		private void OnTurnover(Turnover message)
+		private void OnTurnover(TurnEntity  message)
 		{
 			_rotationStep = message.Degrees >= 0 ? 1 : -1;
 			_plannedRotations = Math.Abs(message.Degrees);
 		}
 
-		private void OnMovement(Movement message)
+		private void OnMovement(MoveEntity  message)
 		{
 			// Get target coordinates
 			var finalOrientation = _orientation;
@@ -125,14 +128,14 @@ namespace Game
 
 			if (!targetTile.Permeable)
 			{
-				Owner.ReceiveMessage(new InpermeableTerrainCollisionMessage(this, targetTile));
+				Owner.ReceiveMessage(new TerrainCollided (this, targetTile));
 				return;
 			}
 
 			// Isn't an entity or object over there?
 			if (targetTile.IsOccupied && targetTile.Object != Owner)
 			{
-				Owner.ReceiveMessage(new CollisionMessage(this, targetTile));
+				Owner.ReceiveMessage(new ObjectsCollided(this, targetTile));
 				return;
 			}
 
@@ -146,7 +149,7 @@ namespace Game
 				targetLocality.ReceiveMessage(new LocalityEntered(this, Owner));
 			}
 			SetPosition(target);
-			Owner.ReceiveMessage(new MovementDoneMessage(this, targetTile));
+			Owner.ReceiveMessage(new EntityMoved (this, targetTile));
 
 		}
 

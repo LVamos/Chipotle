@@ -1,4 +1,7 @@
-﻿        using System;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+        using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Game.Terrain;
@@ -41,9 +44,9 @@ namespace Game.Entities
         }
 
 		private void SayNearestObject()
-=> Owner.ReceiveMessage(new NearestObjectAnnouncement(this));
+=> Owner.ReceiveMessage(new SayNearestObject(this));
 		private void SayLocality()
-            => Owner.ReceiveMessage(new LocalityAnnouncement(this));
+            => Owner.ReceiveMessage(new SayLocality(this));
 
 
         public ChipotleInputComponent():base()
@@ -69,37 +72,37 @@ namespace Game.Entities
 
 
         private void TerrainInfo()
-            => Owner.ReceiveMessage(new TerrainInfo(this));
+            => Owner.ReceiveMessage(new SayTerrain (this));
 
         private void MoveLeft()
-             => Owner.ReceiveMessage(new Movement(this, TurnType.SharplyLeft));
+             => Owner.ReceiveMessage(new MoveEntity (this, TurnType.SharplyLeft));
 
         private void MoveRight()
-            => Owner.ReceiveMessage(new Movement(this, TurnType.SharplyRight));
+            => Owner.ReceiveMessage(new MoveEntity (this, TurnType.SharplyRight));
 
         private void TurnSharplyLeft()
-=> Owner.ReceiveMessage(new Turnover(this, TurnType.SharplyLeft));
+=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SharplyLeft));
 
         private void Interact()
-=> Owner.ReceiveMessage(new InteractionStartMessage(this));
+=> Owner.ReceiveMessage(new UseObject (this));
 
         private void TurnSharplyRight()
-=> Owner.ReceiveMessage(new Turnover(this, TurnType.SharplyRight));
+=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SharplyRight));
 
         private void TurnRight()
-=> Owner.ReceiveMessage(new Turnover(this, TurnType.SlightlyRight));
+=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SlightlyRight));
 
         private void TurnLeft()
-=> Owner.ReceiveMessage(new Turnover(this, TurnType.SlightlyLeft));
+=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SlightlyLeft));
 
         private void TurnAround()
-            => Owner.ReceiveMessage(new Turnover(this, TurnType.Around));
+            => Owner.ReceiveMessage(new TurnEntity (this, TurnType.Around));
 
         private void MoveBack()
-            => Owner.ReceiveMessage(new Movement(this, TurnType.Around));
+            => Owner.ReceiveMessage(new MoveEntity (this, TurnType.Around));
 
         private void MoveForward()
-            => Owner.ReceiveMessage(new Movement(this, TurnType.None));
+            => Owner.ReceiveMessage(new MoveEntity (this, TurnType.None));
 
     }
 }

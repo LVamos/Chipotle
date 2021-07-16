@@ -3,22 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Game.Terrain;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	class MovementDoneMessage: Message
+	class ObjectsCollided: GameMessage
 	{
-		public readonly Tile Target;
-
+		public readonly Tile Tile;
 
 		/// <summary>
 		/// Constructs new instance of the message.
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		/// <param name="target">Final location</param>
-		public MovementDoneMessage(object sender, Tile target) : base(sender) => Target=target;
-
+		/// <param name="tile">Tile with the colliding object</param>
+		public ObjectsCollided(object sender, Tile tile) : base(sender) => Tile=tile;
 	}
 }

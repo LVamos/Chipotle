@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Game.Terrain;
-namespace Game
+namespace Game.Messaging.Events
 {
-	class InpermeableTerrainCollisionMessage: Message
+	class TerrainCollided : GameMessage
 	{
 		public readonly Tile Tile;
 
@@ -16,6 +16,6 @@ namespace Game
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="collidingTile">The inpermeable tile</param>
-		public InpermeableTerrainCollisionMessage(object sender, Tile tile) : base(sender) => Tile = tile;
+		public TerrainCollided (object sender, Tile tile) : base(sender) => Tile = tile;
 	}
 }

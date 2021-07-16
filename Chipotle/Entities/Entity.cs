@@ -1,4 +1,7 @@
-﻿using DavyKager;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using DavyKager;
 
 using Luky;
 
@@ -20,7 +23,7 @@ namespace Game.Entities
         public new Plane Area { get => _physics.Area; }
 
 
-        public override void ReceiveMessage(Message message)
+        public override void ReceiveMessage(GameMessage message)
         {
             base.ReceiveMessage(message);
 
@@ -49,7 +52,7 @@ namespace Game.Entities
         /// Sends message to al components.
         /// </summary>
         /// <param name="message">Message to redistribute</param>
-        protected virtual void SendInnerMessage(Message message)
+        protected virtual void SendInnerMessage(GameMessage message)
         {
             foreach(var c in _components)
             {

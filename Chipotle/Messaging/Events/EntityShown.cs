@@ -1,8 +1,8 @@
 ﻿using Game.Entities;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	public class EntityAppearedMessage: Message
+	public class EntityShown: GameMessage
 	{
 		public readonly Entity Entity;
 
@@ -11,7 +11,7 @@ namespace Game
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="newEntity">the entity which just appeared</param>
-		public EntityAppearedMessage(MessagingObject sender, Entity entity) : base(sender) => Entity= entity;
+		public EntityShown(MessagingObject sender, Entity entity) : base(sender) => Entity= entity;
 
 	}
 }

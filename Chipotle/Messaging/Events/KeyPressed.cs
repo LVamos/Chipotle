@@ -7,13 +7,13 @@ using Game;
 using Luky;
 using Game.UI;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	public class KeydownMessage: Message
+	public class KeyPressed : GameMessage
 	{
 		public readonly KeyShortcut Shortcut;
 
-		public KeydownMessage(object sender, KeyShortcut shortcut) : base(sender) 
+		public KeyPressed (object sender, KeyShortcut shortcut) : base(sender) 
 			=> Shortcut= shortcut;
 	}
 }

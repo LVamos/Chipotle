@@ -1,4 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using System.Text.RegularExpressions;
 using Luky;
 
 using System;
@@ -57,7 +60,7 @@ namespace Game.Terrain
             _area.GetPoints().Foreach(p => World.Map[p] = null);
 		}
 
-		public override void ReceiveMessage(Message message)
+		public override void ReceiveMessage(GameMessage message)
 		{
 			base.ReceiveMessage(message);
 
@@ -66,10 +69,10 @@ namespace Game.Terrain
 
 		}
 
-        private void MessageEntities(Message message)
+        private void MessageEntities(GameMessage message)
 => _entities.ForEach(e => e.ReceiveMessage(message));
 
-        protected void MessageObjects(Message message)
+        protected void MessageObjects(GameMessage message)
 => _objects.ForEach(o => o.ReceiveMessage(message));
 
 		/// <summary>
@@ -95,7 +98,7 @@ namespace Game.Terrain
             _passages.Add(p);
 
             if (_messagingEnabled && !_editMode)
-                ReceiveMessage(new PassageAppearedMessage(this, p));
+                ReceiveMessage(new PassageShown (this, p));
         }
 
         /// <summary>
@@ -110,7 +113,7 @@ namespace Game.Terrain
             if (_messagingEnabled && !_editMode)
 
             if (_messagingEnabled && !_editMode)
-                    ReceiveMessage(new ObjectAppearedMessage(this, o));
+                    ReceiveMessage(new ObjectShown (this, o));
         }
 
         /// <summary>
@@ -133,7 +136,7 @@ namespace Game.Terrain
         public void Unregister(GameObject o)
 		{
 _objects.Remove(o);
-            ReceiveMessage(new ObjectDisappeared(this, o));
+            ReceiveMessage(new ObjectHidden (this, o));
 }
 
         /// <summary>
@@ -143,7 +146,7 @@ _objects.Remove(o);
         public void Unregister(Entity e)
 		{
 _entities.Remove(e);
-            ReceiveMessage(new EntityDisappearedMessage(this, e));
+            ReceiveMessage(new EntityHidden (this, e));
 		}
 
         public void Unregister(Passage p)
@@ -259,7 +262,7 @@ _entities.Remove(e);
         {
             base.Start();
 
-            RegisterMessageHandlers(new Dictionary<Type, Action<Message>>() 
+            RegisterMessageHandlers(new Dictionary<Type, Action<GameMessage>>() 
             { 
                 [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m), 
                 [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)

@@ -1,4 +1,7 @@
-﻿using System.Xml.Linq;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using System.Xml.Linq;
 using Luky;
 using Game.Terrain;
 using Game.Entities;
@@ -320,7 +323,7 @@ null,
 		public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
            => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
 
-        public static void ReceiveMessage(Message message)
+        public static void ReceiveMessage(GameMessage message)
         {
             throw new NotImplementedException();
         }

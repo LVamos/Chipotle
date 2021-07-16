@@ -1,8 +1,8 @@
 ﻿using Game.Terrain;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	class PassageAppearedMessage: Message
+	class PassageShown : GameMessage
 	{
 		public readonly Passage Passage;
 
@@ -11,7 +11,7 @@ namespace Game
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="passage">New passage</param>
-		public PassageAppearedMessage(MessagingObject sender, Passage passage) : base(sender) => Passage = passage;
+		public PassageShown (MessagingObject sender, Passage passage) : base(sender) => Passage = passage;
 
 	}
 }

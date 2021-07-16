@@ -7,9 +7,9 @@ using Game.Entities;
 
 using Game.Terrain;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	class ObjectAppearedMessage: Message
+	class ObjectShown : GameMessage
 	{
 		public readonly GameObject  NewObject;
 
@@ -18,6 +18,6 @@ namespace Game
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="newObject">Newly appeared object</param>
-		public ObjectAppearedMessage(MessagingObject sender, GameObject newObject) : base(sender) => NewObject = newObject;
+		public ObjectShown (MessagingObject sender, GameObject newObject) : base(sender) => NewObject = newObject;
 	}
 }

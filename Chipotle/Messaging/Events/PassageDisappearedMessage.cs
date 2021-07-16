@@ -1,8 +1,8 @@
 ﻿using Game.Terrain;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	class PassageDisappearedMessage: PassageAppearedMessage
+	class PassageDisappearedMessage: PassageShown 
 	{
 		/// <summary>
 		/// Constructs new instance of the message.

@@ -58,9 +58,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CollisionMessage.cs" />
-    <Compile Include="CutSceneEndMessage.cs" />
-    <Compile Include="CutSceneStartMessage.cs" />
+    <Compile Include="Messaging\Events\ObjectsCollided.cs" />
+    <Compile Include="Messaging\Events\CutsceneEnded.cs" />
+    <Compile Include="Messaging\Events\CutsceneBegan.cs" />
     <Compile Include="Entities\AIComponent.cs" />
     <Compile Include="Entities\Bartender.cs" />
     <Compile Include="Entities\BartenderAIComponent.cs" />
@@ -95,23 +95,23 @@
     <Compile Include="Entities\TuttleAIComponent.cs" />
     <Compile Include="Entities\TuttlePhysicsComponent.cs" />
     <Compile Include="Entities\TuttleSoundComponent.cs" />
-    <Compile Include="LocalityLeft.cs" />
-    <Compile Include="LocalityEntered.cs" />
-    <Compile Include="NearestObjectAnnouncement.cs" />
-    <Compile Include="LocalityAnnouncement.cs" />
-    <Compile Include="EntityAppearedMessage.cs" />
-    <Compile Include="EntityDisappearedMessage.cs" />
-    <Compile Include="InpermeableTerrainCollisionMessage.cs" />
-    <Compile Include="InteractionStartMessage.cs" />
-    <Compile Include="KeydownMessage.cs" />
-    <Compile Include="MessagingObject.cs" />
-    <Compile Include="Movement.cs" />
-    <Compile Include="MovementDoneMessage.cs" />
-    <Compile Include="ObjectAppearedMessage.cs" />
-    <Compile Include="ObjectDisappeared.cs" />
-    <Compile Include="PassageAppearedMessage.cs" />
-    <Compile Include="PassageDisappearedMessage.cs" />
-    <Compile Include="TerrainInfo.cs" />
+    <Compile Include="Messaging\Events\LocalityLeft.cs" />
+    <Compile Include="Messaging\Events\LocalityEntered.cs" />
+    <Compile Include="Messaging\Commands\SayNearestObject.cs" />
+    <Compile Include="Messaging\Commands\SayLocality.cs" />
+    <Compile Include="Messaging\Events\EntityShown.cs" />
+    <Compile Include="Messaging\Events\EntityHidden.cs" />
+    <Compile Include="Messaging\Events\TerrainCollided.cs" />
+    <Compile Include="Messaging\Commands\UseObject.cs" />
+    <Compile Include="Messaging\Events\KeyPressed.cs" />
+    <Compile Include="Messaging\MessagingObject.cs" />
+    <Compile Include="Messaging\Commands\MoveEntity.cs" />
+    <Compile Include="Messaging\Events\EntityMoved.cs" />
+    <Compile Include="Messaging\Events\ObjectShown.cs" />
+    <Compile Include="Messaging\Events\ObjectHidden.cs" />
+    <Compile Include="Messaging\Events\PassageShown.cs" />
+    <Compile Include="Messaging\Events\PassageDisappearedMessage.cs" />
+    <Compile Include="Messaging\Commands\SayTerrain.cs" />
     <Compile Include="Terrain\Angle.cs" />
     <Compile Include="Terrain\CardinalDirection.cs" />
     <Compile Include="Terrain\EntityAppeared.cs" />
@@ -121,7 +121,7 @@
     <Compile Include="Terrain\Passage.cs" />
     <Compile Include="Entities\PhysicsComponent.cs" />
     <Compile Include="Entities\SoundComponent.cs" />
-    <Compile Include="Message.cs" />
+    <Compile Include="Messaging\GameMessage.cs" />
     <Compile Include="Terrain\Direction.cs" />
     <Compile Include="Terrain\Plane.cs" />
     <Compile Include="Terrain\Locality.cs" />
@@ -129,8 +129,8 @@
     <Compile Include="Terrain\Tile.cs" />
     <Compile Include="Terrain\TileMap.cs" />
     <Compile Include="Terrain\TurnType.cs" />
-    <Compile Include="Turnover.cs" />
-    <Compile Include="TurnoverDoneMessage.cs" />
+    <Compile Include="Messaging\Commands\TurnEntity.cs" />
+    <Compile Include="Messaging\Events\TurnEntityResult.cs" />
     <Compile Include="UI\GameWindow.cs" />
     <Compile Include="UI\KeyEventParams.cs" />
     <Compile Include="UI\KeyShortcut.cs" />

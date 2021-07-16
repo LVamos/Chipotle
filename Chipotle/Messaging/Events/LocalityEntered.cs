@@ -1,8 +1,8 @@
 ﻿using Game.Entities;
 
-namespace Game
+namespace Game.Messaging.Events
 {
-	public class LocalityEntered : Message
+	public class LocalityEntered : GameMessage
 	{
 		public readonly object Sender;
 		public readonly Entity Entity;
