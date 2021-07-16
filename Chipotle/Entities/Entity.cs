@@ -25,6 +25,9 @@ namespace Game.Entities
 
         public override void ReceiveMessage(GameMessage message)
         {
+            if (message.Sender == this)
+                return;
+
             base.ReceiveMessage(message);
 
             if(_messagingEnabled)

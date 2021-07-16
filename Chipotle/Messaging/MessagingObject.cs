@@ -41,7 +41,7 @@ namespace Game.Messaging
         /// <param name="message"></param>
         public virtual void ReceiveMessage(GameMessage message)
         {
-            if(_messagingEnabled)
+            if(_messagingEnabled && message.Sender!=this)
             EnqueueMessage(message);
         }
 
