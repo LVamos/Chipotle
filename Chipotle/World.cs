@@ -23,6 +23,8 @@ namespace Game
     /// </summary>
   public  static  class World
     {
+        public const int FramesPerSecond = 66;
+        public const int DeltaTime = 1000 / FramesPerSecond;
 
         /// <summary>
         /// Enumerates all game objects around a point sorted by distance.
