@@ -11,6 +11,8 @@ namespace Game.Entities
 {
   public abstract class PhysicsComponent: EntityComponent
     {
+        protected int _walkSpeed; // In milliseconds
+
         private void Appear(Plane target)
         {
             target.GetTiles().Foreach(t => t.Register(Owner));
