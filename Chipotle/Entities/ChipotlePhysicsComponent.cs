@@ -45,7 +45,9 @@ namespace Game
 			// set initial position.
 			SetPosition(new Plane(new Vector2(1025, 1030)));
 			_orientation = new Orientation2D(0, 1);
-			_area.GetLocality().ReceiveMessage(new LocalityEntered(this, Owner));
+			Locality locality = _area.GetLocality();
+			locality.Register(Owner);
+			locality.ReceiveMessage(new LocalityEntered(this, Owner));
 
 			base.Start();
 
@@ -149,7 +151,9 @@ namespace Game
 				targetLocality.ReceiveMessage(new LocalityEntered(this, Owner));
 			}
 			SetPosition(target);
-			Owner.ReceiveMessage(new EntityMoved (this, targetTile));
+
+			Owner.ReceiveMessage(new EntityMoved(this, targetTile));
+			_area.GetLocality().ReceiveMessage(new EntityMoved(Owner, targetTile));
 
 		}
 
