@@ -22,11 +22,8 @@ namespace Game.Entities
         /// <param name="input">Input component for Columbo entity</param>
         /// <param name="phisics">Physics component for Columbo entity</param>
         /// <param name="sound">Sound component for Columbo</param>
-        public Chipotle(ChipotleInputComponent input, ChipotlePhysicsComponent phisics, ChipotleSoundComponent sound):base(new Name("Chipotle", "detektiv Chipotle"), "Columbo", phisics, sound)
+        public Chipotle(ChipotleInputComponent input, ChipotlePhysicsComponent phisics, ChipotleSoundComponent sound):base(new Name("Chipotle", "detektiv Chipotle"), "Chipotle", phisics, sound, null, input)
         {
-            _inputComponent = input ?? throw new ArgumentNullException(nameof(input));
-            _inputComponent.Owner = this;
-            _components.Add(_inputComponent);
         }
 
 

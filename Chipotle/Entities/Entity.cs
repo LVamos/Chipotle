@@ -32,10 +32,11 @@ namespace Game.Entities
         }
 
 
-        protected PhysicsComponent _physics;
+        protected AIComponent _ai;
+		protected InputComponent _input;
+		protected PhysicsComponent _physics;
         protected SoundComponent _sound;
 
-        //todo Entity
 
         /// <summary>
         /// Creates the Columbo entity
@@ -89,12 +90,15 @@ namespace Game.Entities
         /// <summary>
         /// Constructor
         /// </summary>
-        public Entity(Name name, string type, PhysicsComponent physics, SoundComponent sound):base(name, type, null)
+        public Entity(Name name, string type, PhysicsComponent physics, SoundComponent sound, AIComponent ai, InputComponent input):base(name, type, null)
         {
             _physics = physics;
             _sound = sound;
-            _components = new List<EntityComponent>
-            {_physics, _sound };
+            _ai = ai;
+            _input = input;
+            _components = (new EntityComponent[] { ai, input, sound, physics }).Where(c => c != null).ToList<EntityComponent>();
+
+
 
             _components.ForEach(c => c.Owner = this);
         }
