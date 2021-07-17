@@ -43,7 +43,7 @@ namespace Game.Terrain
 
 
 
-        public (bool found, List<Vector2> path) FindPath(Vector2 start, Vector2 goal)
+        public (bool found, Queue<Vector2> path) FindPath(Vector2 start, Vector2 goal)
         {
 
         List<Node> active = new List<Node>();
@@ -83,10 +83,10 @@ namespace Game.Terrain
             }
 
             // Reconstruct path
-                List<Vector2> coords = new List<Vector2>();
+                Queue<Vector2> coords = new List<Vector2>();
                 while (node!= null)
                 {
-                    coords.Add(node.Position);
+                    coords.Enqueue(node.Position);
                     node = node.Parent;
                 }
 
