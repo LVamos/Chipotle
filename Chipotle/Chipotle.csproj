@@ -116,6 +116,7 @@
     <Compile Include="Entities\SoundComponent.cs" />
     <Compile Include="Messaging\GameMessage.cs" />
     <Compile Include="Terrain\Direction.cs" />
+    <Compile Include="Terrain\PathFinder.cs" />
     <Compile Include="Terrain\Plane.cs" />
     <Compile Include="Terrain\Locality.cs" />
     <Compile Include="Terrain\TerrainType.cs" />
