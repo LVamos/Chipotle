@@ -44,7 +44,7 @@ public MainWindow()
 
 
             _tmrGameLoop = new Timer();
-            _tmrGameLoop.Interval = World.FramesPerSecond;
+            _tmrGameLoop.Interval = 1000/World.FramesPerSecond;
             _tmrGameLoop.Tick += GameLoop;
             _tmrGameLoop.Enabled = false;
 

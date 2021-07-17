@@ -23,7 +23,7 @@ namespace Game.Entities
                 [typeof(CutsceneBegan)] =(m)=>  OnCutSceneStart((CutsceneBegan)m),
                 [typeof(CutsceneEnded)] =(m)=>  OnCutSceneEnd((CutsceneEnded)m)
             };
-            RegisterMessageHandlers(handlers);
+            RegisterMessages(handlers);
             _shortcuts = new Dictionary<KeyShortcut, Action>();
         }
 

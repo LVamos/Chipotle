@@ -73,12 +73,21 @@ namespace Game.Entities
         /// <param name="message">Message to redistribute</param>
         protected virtual void SendInnerMessage(GameMessage message)
         {
-            foreach(var c in _components)
-            {
-                if (c != message.Sender)
-                    c.ReceiveMessage(message);
-            }
+            List<EntityComponent> targetComponents =new List<EntityComponent>();
+            targetComponents=_components.Where(c => c != message.Sender).ToList<EntityComponent>();
+            if (!IsInternal(message))
+                targetComponents.Remove(_sound);
+
+            targetComponents.Foreach(c => c.ReceiveMessage(message));
+            //foreach(var c in _components)
+            //{
+            //    if (c != message.Sender)
+            //        c.ReceiveMessage(message);
+            //}
         }
+
+        private bool IsInternal(GameMessage message)
+            => _components.Any(c => c == message.Sender);
 
         protected List<EntityComponent> _components;
 
@@ -90,9 +99,7 @@ namespace Game.Entities
         /// </summary>
         public override void Update()
         {
-
-            if (_messages.Count > 0)
-                HandleMessage(DequeueMessage());
+            base.Update();
             _components.ForEach(c => c.Update());
         }
 

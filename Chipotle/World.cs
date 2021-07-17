@@ -69,9 +69,9 @@ namespace Game
         public static void Update()
         {
             _localities.Foreach(v => v.Value.Update());
-            _passages.Foreach(v => v.Value.Update());
-            _objects.Foreach(v => v.Value.Update());
-            _entities.Foreach(v => v.Value.Update());
+			_passages.Foreach(v => v.Value.Update());
+			_objects.Foreach(v => v.Value.Update());
+			_entities.Foreach(v => v.Value.Update());
         }
 
         public  static  TileMap Map { get; set; }
@@ -223,7 +223,7 @@ public static Passage GetPassage(string name)
             // Sound
             Sound = SoundThread.CreateAndStartThread(Program.OnError);
             Sound.LoadSounds();
-            Sound.SetGroupVolume("master", .3f);
+            Sound.SetGroupVolume("master", 1);
 
             _map = LoadMap();
             _localities.Foreach(p => p.Value.Start());
@@ -231,6 +231,7 @@ public static Passage GetPassage(string name)
             _objects.Foreach(p => p.Value.Start());
             Player = Entity.CreateChipotle();
             Add(Player);
+            Add(Entity.CreateTuttle());
             _entities.Foreach(p => p.Value.Start());
             Program.MainWindow.GameLoopEnabled = true;
         }

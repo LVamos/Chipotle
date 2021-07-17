@@ -45,7 +45,7 @@ namespace Game
             _orientation = new Orientation2D(0, 1);
             Locality locality = _area.GetLocality();
             locality.Register(Owner);
-            locality.ReceiveMessage(new LocalityEntered(this, Owner));
+            locality.ReceiveMessage(new LocalityEntered(Owner, Owner));
 
             base.Start();
 
@@ -141,35 +141,20 @@ namespace Game
 
             // The road is clear! Move!
             SetPosition(target);
-            EntityMoved moved = new EntityMoved(Owner, targetTile);
-            Owner.ReceiveMessage(moved);
+            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
 
             Locality sourceLocality = _area.GetLocality();
             Locality targetLocality = World.Map[target.Center].Locality;
+            EntityMoved moved = new EntityMoved(Owner, targetTile);
 
             if (targetLocality != sourceLocality)
             {
                 sourceLocality.ReceiveMessage(moved);
                 sourceLocality.ReceiveMessage(new LocalityLeft(this, Owner));
-                targetLocality.ReceiveMessage(new LocalityEntered(this, Owner));
+                targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
             }
 
             targetLocality.ReceiveMessage(moved);
-
-
-            //Locality sourceLocality = _area.GetLocality();
-            //Locality targetLocality = World.Map[target.Center].Locality;
-
-            //if (targetLocality != sourceLocality)
-            //{
-            //    sourceLocality.ReceiveMessage(new LocalityLeft(this, Owner));
-            //    targetLocality.ReceiveMessage(new LocalityEntered(this, Owner));
-            //}
-            //SetPosition(target);
-
-            //Owner.ReceiveMessage(new EntityMoved(this, targetTile));
-            //_area.GetLocality().ReceiveMessage(new EntityMoved(Owner, targetTile));
-
         }
 
 

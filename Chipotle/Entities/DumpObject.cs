@@ -47,7 +47,7 @@ namespace Game.Entities
         {
             base.Start();
 
-            RegisterMessageHandlers(
+            RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {
         [typeof(ObjectsCollided)] =(m)=> OnCollision((ObjectsCollided)m),

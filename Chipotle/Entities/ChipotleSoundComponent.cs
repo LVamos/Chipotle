@@ -46,7 +46,7 @@ namespace Game.Entities
             _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
             base.Start();
 
-            RegisterMessageHandlers(
+            RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
                 [typeof(TurnEntityResult )] =(m)=> OnTurnoverDone((TurnEntityResult )m),

@@ -123,10 +123,7 @@ namespace Game.Terrain
         public void Register(Entity e)
         {
             Assert(!IsItHere(e), "Entity already registered.");
-            _objects.Add(e);
-
-            if (_messagingEnabled && !_editMode)
-                ReceiveMessage(new EntityAppeared(this, e));
+            _entities.Add(e);
         }
 
         /// <summary>
@@ -262,9 +259,8 @@ _entities.Remove(e);
         {
             base.Start();
 
-            RegisterMessageHandlers(new Dictionary<Type, Action<GameMessage>>() 
+            RegisterMessages(new Dictionary<Type, Action<GameMessage>>() 
             { 
-                [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m), 
                 [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
             });
         }

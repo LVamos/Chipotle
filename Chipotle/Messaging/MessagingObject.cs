@@ -32,7 +32,7 @@ namespace Game.Messaging
         protected bool _messagingEnabled;
 
 
-        protected void RegisterMessageHandlers(Dictionary<Type, Action<GameMessage>> handlers)
+        protected void RegisterMessages(Dictionary<Type, Action<GameMessage>> handlers)
         => _messageHandlers = _messageHandlers.Concat(handlers).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
 
         /// <summary>
