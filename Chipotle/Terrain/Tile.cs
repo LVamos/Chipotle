@@ -99,9 +99,12 @@ else             throw new InvalidOperationException("No passage");
 		/// <summary>
 		/// Lists all nearest valid neighbours of the tile
 		/// </summary>
+		public IEnumerable<Tile> GetNeighbours8()
+            => DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(d)).Where(t => t != null && t!=this);
 
-		public IEnumerable<Tile> GetClosestNeighbours()
-            => DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(d)).Where(t => t != null);
+        public IEnumerable<Tile> GetNeighbours4()
+            => DirectionExtension.BasicDirections.Select(d => GetNeighbour(d)).Where(t => t != null);
+
 
 
         /// <summary>
