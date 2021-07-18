@@ -19,8 +19,8 @@ namespace Game.Terrain
             public int Priority { get => Cost + Distance; }
             public Node Parent { get; set; }
 
-            public void ComputeDistance(Vector2 point)
-=> Distance = (int)Math.Abs(Position.X - point.X) + (int)Math.Abs(Position.Y - point.Y);
+            public void ComputeDistance(Vector2 goal)
+=> Distance = (int)(Math.Abs(goal.X - Position.X) + Math.Abs(goal.Y - Position.Y));
 
             public Node(Vector2 position, Node parent = null)
             {
@@ -56,48 +56,46 @@ namespace Game.Terrain
             active.Add(first);
 
             Node node = null;
-            while (active.Count > 0)
+            while (active.Any())
             {
-                int highestPriority = active.Min(n => n.Priority);
-                node = active.First(n => n.Priority == highestPriority);
+                node = active.OrderByDescending(n=>n.Priority).Last();
 
-                visited.Add(node);
-
-                if (visited.FirstOrDefault(n => n.Position == goal) != null)
+                if (node.Position == goal)
                     break;
 
+                visited.Add(node);
                 active.Remove(node);
 
-                foreach (Node neighbour in node.GetNeighbours(goal))
+
+                List<Node> neighbours = node.GetNeighbours(goal);
+                foreach (Node neighbour in neighbours)
                 {
-                    if (visited.FirstOrDefault(n => n.Position == neighbour.Position) != null)
+                            if (visited.Any(n => n.Position == neighbour.Position))
                         continue;
 
-                    if (active.FirstOrDefault(n => n.Position == neighbour.Position) == null)
-                        active.Insert(0, neighbour);
-                    else
+                    if (active.Any(n => n.Position == neighbour.Position))
                     {
                         Node compared = active.First(n => n.Position == neighbour.Position);
-
                         if (compared.Priority > node.Priority)
                         {
                             active.Remove(compared);
                             active.Add(neighbour);
                         }
-                        else active.Add(neighbour);
                     }
+                    else active.Add(neighbour);
                 }
             }
 
+
             // Reconstruct path
+            bool found = node.Position == goal;
             Queue<Vector2> coords = new Queue<Vector2>();
             while (node != null)
             {
                 coords.Enqueue(node.Position);
                 node = node.Parent;
             }
-
-            return (false, coords);
+            return (found, new Queue<Vector2>(coords.Reverse()));
         }
 
     }

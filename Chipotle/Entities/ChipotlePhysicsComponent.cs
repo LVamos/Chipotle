@@ -41,7 +41,7 @@ namespace Game
         public override void Start()
         {
             // set initial position.
-            SetPosition(new Plane(new Vector2(1025, 1030)));
+            SetPosition(new Plane(new Vector2(1031, 1030)));
             _orientation = new Orientation2D(0, 1);
             Locality locality = _area.GetLocality();
             locality.Register(Owner);

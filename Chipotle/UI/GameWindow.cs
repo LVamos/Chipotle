@@ -22,8 +22,11 @@ namespace Game.UI
         {
                 var shortcuts = new Dictionary<KeyShortcut, Action>()
             {
-                // Test shortcuts for reverb settings
-                [new KeyShortcut(Keys.PageDown)] = () => World.Sound.SwitchToNextReverbPreset(),
+                    // test shortcuts for pathfinder
+                    [new KeyShortcut(Keys.P)] = () => (new Terrain.PathFinder()).FindPath(new Vector2(1030, 1030), new Vector2(1030, 1029)),
+
+                    // Test shortcuts for reverb settings
+                    [new KeyShortcut(Keys.PageDown)] = () => World.Sound.SwitchToNextReverbPreset(),
                 [new KeyShortcut(Keys.F1)] =() => World.Sound.PreviousReverbParameter(),
                 [new KeyShortcut(Keys.F2)] =() =>  World.Sound.NextReverbParameter(),
                 [new KeyShortcut(Keys.F3)] =() =>  World.Sound.DecreaseReverbParameter(),

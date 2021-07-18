@@ -28,7 +28,7 @@ namespace Game.Entities
         public override void Start()
         {
             // set initial position.
-            SetPosition(new Plane(new Vector2(1029, 1030)));
+            SetPosition(new Plane(new Vector2(1030, 1030)));
             _orientation = new Orientation2D(0, 1);
             _area.GetLocality().ReceiveMessage(new LocalityEntered(Owner, Owner));
             _player = World.Player;
@@ -47,8 +47,6 @@ namespace Game.Entities
             if (message.Sender != _player)
                 return;
 
-            if (_approachingToPlayer)
-                GoToPlayer();
                 CheckDistanceFromPlayer();
         }
 
