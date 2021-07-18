@@ -12,6 +12,7 @@ namespace Game.Entities
     {
 
         private Random _random= new Random();
+        private PathFinder _finder = new PathFinder();
 
         private Entity _player;
         private bool _approachingToPlayer;
@@ -19,9 +20,10 @@ namespace Game.Entities
         private float _stepInterval;
         private int _minWalkSpeed = 100;
         private int _maxWalkSpeed = 300;
-        private const int _maxDistanceFromPlayer = 3;
+        private const int _maxDistanceFromPlayer = 10;
         private const int _minDistanceFromPlayer= 2;
         private int _desiredDistanceFromPlayer;
+        private Queue<Vector2> _path;
 
         public override void Start()
         {
@@ -42,7 +44,11 @@ namespace Game.Entities
 
         private void OnEntityMoved(EntityMoved message)
         {
-            if (message.Sender == _player)
+            if (message.Sender != _player)
+                return;
+
+            if (_approachingToPlayer)
+                GoToPlayer();
                 CheckDistanceFromPlayer();
         }
 
@@ -51,14 +57,14 @@ namespace Game.Entities
             int distance = GetDistanceFromPlayer();
             if (distance > _maxDistanceFromPlayer && !_approachingToPlayer)
                 GoToPlayer();
-            else if (_approachingToPlayer&& distance <= _desiredDistanceFromPlayer)
+            else if (_approachingToPlayer&& (distance <= _desiredDistanceFromPlayer || _path.Count==0))
                 StopApproachingToPlayer();
         }
 
         private void StopApproachingToPlayer()
         {
             _walking = _approachingToPlayer = false;
-
+            _path = null;
         }
 
         private int GetDistanceFromPlayer()
@@ -66,6 +72,11 @@ namespace Game.Entities
 
         private void GoToPlayer()
         {
+            (bool found, Queue<Vector2> path) pathInfo = _finder.FindPath(_area.Center, _player.Area.Center);
+            if (pathInfo.path.IsNullOrEmpty())
+                return;
+
+            _path = pathInfo.path;
             _approachingToPlayer =_walking= true;
             _walkSpeed = _random.Next(_minWalkSpeed, _maxWalkSpeed);
             _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
@@ -83,34 +94,21 @@ namespace Game.Entities
         private void PerformWalk()
         {
             CheckDistanceFromPlayer();
+
             if (_stepInterval >= _walkSpeed)
             {
                 _stepInterval = 0;
-                StepToPlayer();
+                Step();
             }
             else _stepInterval += World.DeltaTime;
         }
 
-        private void StepToPlayer()
-        {
-            Vector2 direction = _player.Area.Center - _area.Center;
-            direction = new Vector2((float)Math.Round(direction.X), (float)Math.Round(direction.Y));
-            direction.Normalize();
-            direction.X = (float)(direction.X < 0 ? Math.Floor(direction.X) : Math.Ceiling(direction.X));
-            direction.Y = (float)(direction.Y < 0 ? Math.Floor(direction.Y) : Math.Ceiling(direction.Y));
-            _orientation = new Orientation2D(direction);
-            Step();
-        }
 
         private void Step()
         {
-// Get target tile
-            var target = Area;
-            target.Move(_orientation, 1);
-
-            // Is the terrain occupable?
-            Assert(target.IsInMapBoundaries(), "Off the map!"); // Verify map boundaries.
-            Tile targetTile = World.Map[target.Center] ?? throw new InvalidOperationException($"{nameof(Step)}: empty tile."); // Null test
+            // Get target tile
+            Plane target = new Plane(_path.Dequeue());
+            Tile targetTile = World.Map[target.Center];
 
             if (!targetTile.Permeable || (targetTile.IsOccupied && targetTile.Object != Owner))
             {
