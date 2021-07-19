@@ -1,4 +1,5 @@
-﻿using Game.Messaging.Events;
+﻿using System.Linq;
+using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
@@ -15,6 +16,7 @@ namespace Game.Entities
         private PathFinder _finder = new PathFinder();
 
         private Entity _player;
+        private int _pathIndex;
         private bool _approachingToPlayer;
         private bool _walking;
         private float _stepInterval;
@@ -23,7 +25,7 @@ namespace Game.Entities
         private const int _maxDistanceFromPlayer = 10;
         private const int _minDistanceFromPlayer= 2;
         private int _desiredDistanceFromPlayer;
-        private Queue<Vector2> _path;
+        private List<Vector2> _path;
 
         public override void Start()
         {
@@ -70,11 +72,13 @@ namespace Game.Entities
 
         private void GoToPlayer()
         {
-            (bool found, Queue<Vector2> path) pathInfo = _finder.FindPath(_area.Center, _player.Area.Center);
-            if (pathInfo.path.IsNullOrEmpty())
+            Vector2 target;
+            _path = _finder.FindPath(_area.Center, World.Map[_player.Area.Center].GetNeighbours8().Where(t=> t.Permeable && !t.IsOccupied).First().Position);
+
+            if (_path == null)
                 return;
 
-            _path = pathInfo.path;
+            _pathIndex = _path.Count-1;
             _approachingToPlayer =_walking= true;
             _walkSpeed = _random.Next(_minWalkSpeed, _maxWalkSpeed);
             _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
@@ -105,7 +109,7 @@ namespace Game.Entities
         private void Step()
         {
             // Get target tile
-            Plane target = new Plane(_path.Dequeue());
+            Plane target = new Plane(_path[_pathIndex--]);
             Tile targetTile = World.Map[target.Center];
 
             if (!targetTile.Permeable || (targetTile.IsOccupied && targetTile.Object != Owner))

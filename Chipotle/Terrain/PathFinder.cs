@@ -1,102 +1,126 @@
-﻿using Luky;
-
+﻿using System.Text;
+using Game.Terrain;
+using Luky;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
+//A* Search Pathfinding Example from : https://dotnetcoretutorials.com/2020/07/25/a-search-pathfinding-algorithm-in-c/ 
 namespace Game.Terrain
 {
-    /// <summary>
-    /// A* algorithm
-    /// </summary>
-    class PathFinder
+    public class PathFinder
     {
-        private class Node
+        public List<Vector2> FindPath(Vector2 initial, Vector2 final)
         {
-            public Vector2 Position { get; set; }
-            public int Distance { get; set; }
-            public int Cost { get; set; }
-            public int Priority { get => Cost + Distance; }
-            public Node Parent { get; set; }
+            StringBuilder b = new StringBuilder();
 
-            public void ComputeDistance(Vector2 goal)
-=> Distance = (int)(Math.Abs(goal.X - Position.X) + Math.Abs(goal.Y - Position.Y));
+            var start = new Node();
+            start.Y = (int)initial.Y;
+            start.X = (int)initial.X;
 
-            public Node(Vector2 position, Node parent = null)
+
+            var finish = new Node();
+            finish.Y = (int)final.Y;
+            finish.X = (int)final.X;
+
+            start.SetDistance(finish.X, finish.Y);
+
+            var activeNodes = new List<Node>();
+            activeNodes.Add(start);
+            var visitedNodes = new List<Node>();
+
+            while (activeNodes.Any())
             {
-                Position = position;
-                Parent = parent;
-            }
+                var checkNode = activeNodes.OrderBy(x => x.CostDistance).First();
 
-            public List<Node> GetNeighbours(Vector2 goal)
-            {
-                List<Node> nodes = new List<Node>();
-                foreach (Tile t in World.Map[Position].GetNeighbours4().Where(t => t.Permeable && !t.IsOccupied))
+                if (checkNode.X == finish.X && checkNode.Y == finish.Y)
                 {
-                    Node n = new Node(t.Position, this) { Cost = this.Cost + 1 };
-                    n.ComputeDistance(goal);
-                    nodes.Add(n);
-                }
-                return nodes;
-            }
-        }
-
-
-
-
-        public (bool found, Queue<Vector2> path) FindPath(Vector2 start, Vector2 goal)
-        {
-
-            List<Node> active = new List<Node>();
-            List<Node> visited = new List<Node>();
-            Node first = new Node(start);
-            Node last = new Node(goal);
-            first.ComputeDistance(goal);
-
-            active.Add(first);
-
-            Node node = null;
-            while (active.Any())
-            {
-                node = active.OrderByDescending(n=>n.Priority).Last();
-
-                if (node.Position == goal)
-                    break;
-
-                visited.Add(node);
-                active.Remove(node);
-
-
-                List<Node> neighbours = node.GetNeighbours(goal);
-                foreach (Node neighbour in neighbours)
-                {
-                            if (visited.Any(n => n.Position == neighbour.Position))
-                        continue;
-
-                    if (active.Any(n => n.Position == neighbour.Position))
+                    //We found the destination and we can be sure (Because the the OrderBy above)
+                    //That it's the most low cost option. 
+                    var node = checkNode;
+                    b.AppendLine("Retracing steps backwards...");
+                    List<Vector2> coords = new List<Vector2>();
+                    while (true)
                     {
-                        Node compared = active.First(n => n.Position == neighbour.Position);
-                        if (compared.Priority > node.Priority)
+                        b.AppendLine($"{node.X} : {node.Y}");
+                        coords.Add(new Vector2(node.X, node.Y));
+                        node = node.Parent;
+                        if (node == null)
                         {
-                            active.Remove(compared);
-                            active.Add(neighbour);
+                            b.AppendLine("Done!");
+                            System.Windows.Forms.Clipboard.SetText(b.ToString());
+                            return coords;
                         }
                     }
-                    else active.Add(neighbour);
+                }
+
+                visitedNodes.Add(checkNode);
+                activeNodes.Remove(checkNode);
+
+                var walkableNodes = GetWalkableNodes(checkNode, finish);
+
+                foreach (var walkableNode in walkableNodes)
+                {
+                    //We have already visited this node so we don't need to do so again!
+                    if (visitedNodes.Any(x => x.X == walkableNode.X && x.Y == walkableNode.Y))
+                        continue;
+
+                    //It's already in the active list, but that's OK, maybe this new node has a better value (e.g. We might zigzag earlier but this is now straighter). 
+                    if (activeNodes.Any(x => x.X == walkableNode.X && x.Y == walkableNode.Y))
+                    {
+                        var existingNode = activeNodes.First(x => x.X == walkableNode.X && x.Y == walkableNode.Y);
+                        if (existingNode.CostDistance > checkNode.CostDistance)
+                        {
+                            activeNodes.Remove(existingNode);
+                            activeNodes.Add(walkableNode);
+                        }
+                    }
+                    else
+                    {
+                        //We've never seen this node before so add it to the list. 
+                        activeNodes.Add(walkableNode);
+                    }
                 }
             }
 
-
-            // Reconstruct path
-            bool found = node.Position == goal;
-            Queue<Vector2> coords = new Queue<Vector2>();
-            while (node != null)
-            {
-                coords.Enqueue(node.Position);
-                node = node.Parent;
-            }
-            return (found, new Queue<Vector2>(coords.Reverse()));
+            b.AppendLine("No Path Found!");
+            System.Windows.Forms.Clipboard.SetText(base.ToString());
+            return null;
         }
 
+        private List<Node> GetWalkableNodes(Node currentNode, Node targetNode)
+        {
+            var possibleNodes = new List<Node>()
+            {
+                new Node { X = currentNode.X, Y = currentNode.Y - 1, Parent = currentNode, Cost = currentNode.Cost + 1 },
+                new Node { X = currentNode.X, Y = currentNode.Y + 1, Parent = currentNode, Cost = currentNode.Cost + 1},
+                new Node { X = currentNode.X - 1, Y = currentNode.Y, Parent = currentNode, Cost = currentNode.Cost + 1 },
+                new Node { X = currentNode.X + 1, Y = currentNode.Y, Parent = currentNode, Cost = currentNode.Cost + 1 },
+            };
+
+            possibleNodes.ForEach(node => node.SetDistance(targetNode.X, targetNode.Y));
+
+
+            return possibleNodes
+                    .Where(node => World.Map[node.X, node.Y]!=null && World.Map[node.X, node.Y].Permeable && !World.Map[node.X, node.Y].IsOccupied)
+                    .ToList<Node>();
+        }
+    }
+
+    class Node
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Cost { get; set; }
+        public int Distance { get; set; }
+        public int CostDistance => Cost + Distance;
+        public Node Parent { get; set; }
+
+        //The distance is essentially the estimated distance, ignoring walls to our target. 
+        //So how many nodes left and right, up and down, ignoring walls, to get there. 
+        public void SetDistance(int targetX, int targetY)
+        {
+            this.Distance = Math.Abs(targetX - X) + Math.Abs(targetY - Y);
+        }
     }
 }
