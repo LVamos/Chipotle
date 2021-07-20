@@ -261,18 +261,23 @@ _entities.Remove(e);
 
             RegisterMessages(new Dictionary<Type, Action<GameMessage>>() 
             { 
+
+                [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                 [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
             });
         }
 
 		private void OnLocalityLeft(LocalityLeft m)
 		{
+            Unregister(m.Sender as Entity);
             if (_backgroundSoundId > 0)
                 World.Sound.Stop(_backgroundSoundId);
 		}
 
 		private void OnLocalityEntered(LocalityEntered m)
         {
+            Register(m.Sender as Entity);
+
             if(m.Entity == World.Player&& !string.IsNullOrEmpty(_backgroundSound))
                 _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Area.Center, true);
         }

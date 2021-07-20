@@ -32,16 +32,25 @@ namespace Game.Entities
             // set initial position.
             SetPosition(new Plane(new Vector2(1030, 1030)));
             _orientation = new Orientation2D(0, 1);
-            _area.GetLocality().ReceiveMessage(new LocalityEntered(Owner, Owner));
             _player = World.Player;
             RegisterMessages(new Dictionary<Type, Action<Messaging.GameMessage>>
             {
+                [typeof(LocalityLeft)] = (message) => OnLocalityLeft((LocalityLeft)message),
                 [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message)
             }
                 );
 
-            _area.GetLocality().Register(Owner);
+            _area.GetLocality().ReceiveMessage(new LocalityEntered(Owner, Owner));
             base.Start();
+        }
+
+        private void OnLocalityLeft(LocalityLeft message)
+        {
+            if (message.Sender != _player)
+                return;
+
+            StopApproachingToPlayer();
+            GoToPlayer();
         }
 
         private void OnEntityMoved(EntityMoved message)
@@ -57,7 +66,7 @@ namespace Game.Entities
             int distance = GetDistanceFromPlayer();
             if (distance > _maxDistanceFromPlayer && !_approachingToPlayer)
                 GoToPlayer();
-            else if (_approachingToPlayer&& (distance <= _desiredDistanceFromPlayer || _path.Count==0))
+            else if (_approachingToPlayer&& (distance <= _desiredDistanceFromPlayer || _pathIndex<=0))
                 StopApproachingToPlayer();
         }
 
@@ -68,7 +77,7 @@ namespace Game.Entities
         }
 
         private int GetDistanceFromPlayer()
-=> (int)Math.Round(Math.Sqrt(Math.Pow(_area.Center.X - _player.Area.Center.X, 2) + Math.Pow(_area.Center.Y - _player.Area.Center.Y, 2)));
+=> (int)(Math.Abs(_player.Area.Center.X - _area.Center.X) + Math.Abs(_player.Area.Center.Y - _area.Center.Y));
 
         private void GoToPlayer()
         {
@@ -81,7 +90,7 @@ namespace Game.Entities
             _pathIndex = _path.Count-1;
             _approachingToPlayer =_walking= true;
             _walkSpeed = _random.Next(_minWalkSpeed, _maxWalkSpeed);
-            _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
+            _desiredDistanceFromPlayer = 1;//_random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
             _stepInterval = 0;
         }
 
@@ -120,21 +129,19 @@ namespace Game.Entities
             }
 
             // The road is clear! Move!
-            SetPosition(target);
-            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
-
             Locality sourceLocality = _area.GetLocality();
             Locality targetLocality = World.Map[target.Center].Locality;
             EntityMoved moved = new EntityMoved(Owner, targetTile);
+            SetPosition(target);
+            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
+            targetLocality.ReceiveMessage(moved);
 
             if (targetLocality != sourceLocality)
             {
-                sourceLocality.ReceiveMessage(moved);
                 sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
                 targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
             }
 
-            targetLocality.ReceiveMessage(moved);
         }
     }
 }

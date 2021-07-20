@@ -44,7 +44,6 @@ namespace Game
             SetPosition(new Plane(new Vector2(1031, 1030)));
             _orientation = new Orientation2D(0, 1);
             Locality locality = _area.GetLocality();
-            locality.Register(Owner);
             locality.ReceiveMessage(new LocalityEntered(Owner, Owner));
 
             base.Start();
@@ -93,7 +92,7 @@ namespace Game
         }
 
         private void OnSayLocality(SayLocality m)
-=> SayDelegate(World.Map[Area.UpperLeftCorner].Locality.Name.Friendly);
+=> SayDelegate(Area.GetLocality().Name.Friendly);
 
         private void OnSayTerrain(SayTerrain message)
         {
@@ -140,21 +139,18 @@ namespace Game
             }
 
             // The road is clear! Move!
-            SetPosition(target);
-            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
-
             Locality sourceLocality = _area.GetLocality();
             Locality targetLocality = World.Map[target.Center].Locality;
             EntityMoved moved = new EntityMoved(Owner, targetTile);
+            SetPosition(target);
+            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
 
             if (targetLocality != sourceLocality)
             {
-                sourceLocality.ReceiveMessage(moved);
-                sourceLocality.ReceiveMessage(new LocalityLeft(this, Owner));
+                sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
                 targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
             }
-
-            targetLocality.ReceiveMessage(moved);
+                targetLocality.ReceiveMessage(moved);
         }
 
 
