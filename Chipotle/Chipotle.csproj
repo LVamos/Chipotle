@@ -107,6 +107,7 @@
     <Compile Include="Messaging\Commands\SayTerrain.cs" />
     <Compile Include="Terrain\Angle.cs" />
     <Compile Include="Terrain\CardinalDirection.cs" />
+    <Compile Include="Terrain\Door.cs" />
     <Compile Include="Terrain\EntityAppeared.cs" />
     <Compile Include="Terrain\LocalityType.cs" />
     <Compile Include="Terrain\MapElement.cs" />

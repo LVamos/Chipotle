@@ -33,28 +33,8 @@ namespace Game.Terrain
             set=> _isDoor= _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
         }
 
-        private bool _closed;
-        public bool Closed
-		{
-            get => _closed;
-            set => _closed= _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
-        }
+        public bool Closed { get; protected set; }
 
-        private void Close()
-        {
-            //todo Passage.Close
-
-        }
-
-        /// <summary>
-        /// Closes the passage if possible.
-        /// </summary>
-        private void Open()
-        {
-            //todo Passage.Open
-            throw new NotImplementedException();
-
-        }
 
 
         public  readonly  IReadOnlyList<Locality> Localities;
@@ -90,7 +70,7 @@ namespace Game.Terrain
         public Passage(Name name, bool isDoor, bool closed, Plane area, IEnumerable<Locality> localities, bool editMode=false) : base(name, area, editMode)
         {
             _isDoor = isDoor;
-            _closed = closed;
+            Closed = closed;
 
 
             // Check if passage isn't on map edge and if it occupies just one row.
