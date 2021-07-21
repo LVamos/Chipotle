@@ -41,7 +41,8 @@ namespace Game
         public override void Start()
         {
             // set initial position.
-            SetPosition(new Plane(new Vector2(1031, 1030)));
+            // 1035, 1063, 1040, 1058} }
+            SetPosition(new Plane(new Vector2(1035, 1063)));
             _orientation = new Orientation2D(0, 1);
             Locality locality = _area.GetLocality();
             locality.ReceiveMessage(new LocalityEntered(Owner, Owner));
@@ -122,8 +123,8 @@ namespace Game
             target.Move(finalOrientation, 1);
 
             // Is the terrain occupable?
-            Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
-            Tile targetTile = World.Map[target.Center]??throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
+            //Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
+                Tile targetTile = World.Map[target.Center]??throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
             if (!targetTile.Permeable)
             {

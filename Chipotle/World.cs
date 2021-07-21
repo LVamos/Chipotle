@@ -314,10 +314,12 @@ null,
                 var isDoor = Attribute(p, "door").ToBool();
                 var closed = Attribute(p, "closed").ToBool();
                 var area = new Plane(Attribute(p, "coordinates"));
-                List<Locality> localities = new List<Locality>{ GetLocality(Attribute(p, "from")), GetLocality(Attribute(p, "to").PrepareForIndexing()) };
+                List<Locality> localities = new List<Locality> { GetLocality(Attribute(p, "from")), GetLocality(Attribute(p, "to").PrepareForIndexing()) };
 
                 // Create and register new passage
-                Add(new Passage(pIndexedName, isDoor, closed, area, localities, editMode));
+                if (isDoor)
+                    Add(new Door(pIndexedName, closed, area, localities));
+                else Add(new Passage(pIndexedName, isDoor, closed, area, localities, editMode));
             }
 
             return xDocument;
