@@ -58,8 +58,6 @@ namespace Game.Entities
             if (message.Sender != _player)
                 return;
 
-            if (_player.Area.GetLocality().Name.Friendly == "u bazénu")
-                SayDelegate("hnul se");
             {
 
             }
