@@ -58,9 +58,6 @@ namespace Game.Entities
             if (message.Sender != _player)
                 return;
 
-            {
-
-            }
                 CheckDistanceFromPlayer();
         }
 
