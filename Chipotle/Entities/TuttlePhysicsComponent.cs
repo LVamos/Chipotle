@@ -20,8 +20,8 @@ namespace Game.Entities
         private bool _approachingToPlayer;
         private bool _walking;
         private float _stepInterval;
-        private int _minWalkSpeed = 100;
-        private int _maxWalkSpeed = 300;
+        private int _minWalkSpeed = 400;
+        private int _maxWalkSpeed = 900;
         private const int _maxDistanceFromPlayer = 10;
         private const int _minDistanceFromPlayer= 2;
         private int _desiredDistanceFromPlayer;
@@ -58,6 +58,11 @@ namespace Game.Entities
             if (message.Sender != _player)
                 return;
 
+            if (_player.Area.GetLocality().Name.Friendly == "u bazénu")
+                SayDelegate("hnul se");
+            {
+
+            }
                 CheckDistanceFromPlayer();
         }
 
@@ -77,21 +82,57 @@ namespace Game.Entities
         }
 
         private int GetDistanceFromPlayer()
-=> (int)(Math.Abs(_player.Area.Center.X - _area.Center.X) + Math.Abs(_player.Area.Center.Y - _area.Center.Y));
+=> GetDistance(_area.Center, _player.Area.Center);
+
+        private int GetDistance(Vector2 a, Vector2 b)
+=> (int) (Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
 
         private void GoToPlayer()
         {
-            Vector2 target;
-            _path = _finder.FindPath(_area.Center, World.Map[_player.Area.Center].GetNeighbours8().Where(t=> t.Permeable && !t.IsOccupied).First().Position);
+            _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
+            (bool found, Vector2 target) target = FindPlaceNearPlayer();
+
+            if (!target.found)
+                return;
+
+            _path = _finder.FindPath(_area.Center, target.target);
 
             if (_path == null)
                 return;
 
             _pathIndex = _path.Count-1;
             _approachingToPlayer =_walking= true;
-            _walkSpeed = _random.Next(_minWalkSpeed, _maxWalkSpeed);
-            _desiredDistanceFromPlayer = 1;//_random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
+            _walkSpeed = ComputeWalkSpeed(GetDistanceFromPlayer());
             _stepInterval = 0;
+        }
+
+        private int ComputeWalkSpeed(int distance)
+        {
+            if (distance < 5)
+                return 1200;
+            if (distance < 7)
+                return 1000;
+            if (distance < 10)
+                return 900;
+            if (distance < 15)
+                return 500;
+            if (distance < 20)
+                return 300;
+            return 150;
+        }
+
+        private (bool found, Vector2 point) FindPlaceNearPlayer()
+        {
+            Plane aroundPlayer = new Plane(_player.Area);
+            for(int i=0; i<=_maxDistanceFromPlayer; i++)
+            {
+                aroundPlayer.Extend();
+                Tile walkable = aroundPlayer.GetPerimeterTiles().FirstOrDefault(t=> t.Walkable);
+
+                if (walkable != null)
+                    return (true, walkable.Position);
+            }
+            return (false, default);
         }
 
         public override void Update()

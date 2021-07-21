@@ -94,12 +94,14 @@ else             throw new InvalidOperationException("No passage");
         public bool Permeable { get; set; }
         public TerrainType Terrain { get; private set; }
         public bool IsOccupied { get => Object != null; }
-		public bool IsOnPassage  => Passage != null; 
+		public bool IsOnPassage  => Passage != null;
 
-		/// <summary>
-		/// Lists all nearest valid neighbours of the tile
-		/// </summary>
-		public IEnumerable<Tile> GetNeighbours8()
+        public bool Walkable { get=>Permeable&&!IsOccupied; }
+
+        /// <summary>
+        /// Lists all nearest valid neighbours of the tile
+        /// </summary>
+        public IEnumerable<Tile> GetNeighbours8()
             => DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(d)).Where(t => t != null && t!=this);
 
         public IEnumerable<Tile> GetNeighbours4()

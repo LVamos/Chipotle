@@ -123,7 +123,7 @@ namespace Game
 
             // Is the terrain occupable?
             Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
-            Tile targetTile = World.Map[target.UpperLeftCorner] ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
+            Tile targetTile = World.Map[target.Center]??throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
             if (!targetTile.Permeable)
             {

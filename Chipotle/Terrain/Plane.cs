@@ -319,6 +319,10 @@ public void Reduce(Direction direction)
         public IEnumerable<Vector2> GetPerimeterPoints()
 => GetPerimeterPoints(Direction.Left).Union(GetPerimeterPoints(Direction.Up)).Union(GetPerimeterPoints(Direction.Right)).Union(GetPerimeterPoints(Direction.Down));
 
+        public IEnumerable<Tile> GetPerimeterTiles()
+            => GetPerimeterPoints().Select(p => World.Map[p]).Where(t => t != null);
+
+
         /// <summary>
         /// Enumerates all tiles of specified side of the plane.
         /// </summary>
@@ -384,6 +388,9 @@ public void Reduce(Direction direction)
         /// <returns></returns>
         public IEnumerable<Tile> GetTiles()
 => GetPoints().Select(p=> World.Map[p]).Where(p=> p!=null);
+
+        public IEnumerable<Tile> GetWalkableTiles()
+            => GetTiles().Where(t => t.Walkable);
 
 
 		public override string ToString()

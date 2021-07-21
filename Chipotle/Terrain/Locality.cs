@@ -276,7 +276,7 @@ _entities.Remove(e);
 
 		private void OnLocalityEntered(LocalityEntered m)
         {
-            Register(m.Sender as Entity);
+                Register(m.Sender as Entity);
 
             if(m.Entity == World.Player&& !string.IsNullOrEmpty(_backgroundSound))
                 _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Area.Center, true);

@@ -53,11 +53,11 @@ namespace Game.Terrain
         /// <returns>The shortest path from start to end stored in List<Vector2>. If no possible path exists then it returns null.</Vector2></returns>
         public List<Vector2> FindPath(Vector2 start, Vector2 end)
         {
-            List<Vector2> FinalPath(Node lastStep)
+            List<Vector2> GetPath(Node lastStep)
             {
                 List<Vector2> coords = new List<Vector2>();
 
-                for (Node step = lastStep; step != null; step = step.Parent)
+                for (Node step = lastStep.Parent; step != null; step = step.Parent)
                     coords.Add(step.Coords);
 
                 return coords;
@@ -77,7 +77,7 @@ namespace Game.Terrain
                 Node node = open.OrderByDescending(n => n.Priority).Last();
 
                 if (node.Coords == last.Coords)
-                    return FinalPath(node);
+                    return GetPath(node);
 
                 closed.Add(node);
                 open.Remove(node);
