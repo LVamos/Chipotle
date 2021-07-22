@@ -102,7 +102,15 @@ namespace Game
 
         private void OnUseObject(UseObject message)
         {
-            Tolk.Speak("OnUseObject neimplementováno.");
+            Tile tile = World.Map[_area.Center].GetNeighbours8().FirstOrDefault(t => t.Passage!=null && t.Passage.IsDoor);
+                if (tile == null)
+                return;
+
+                Door door =tile.Passage as Door;
+                if (door.Closed)
+                door.Open();
+            else door.Close();
+
         }
 
         private void OnTurnEntity(TurnEntity message)
