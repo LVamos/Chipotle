@@ -174,7 +174,7 @@ namespace Game.Entities
 
             if (targetLocality != sourceLocality)
             {
-                sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
+                    sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
                 targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
             }
 

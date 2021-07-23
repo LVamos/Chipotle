@@ -46,7 +46,7 @@ namespace Game.Entities
 		protected  override void Disappear()
 		{
             base.Disappear();
-            _area.GetTiles().Foreach(t => t.UnregisterObject());
+            Area.GetTiles().Foreach(t => t.UnregisterObject());
 		}
 
         //todo GameObject
@@ -69,23 +69,22 @@ namespace Game.Entities
 /// </summary>
 /// <param name="name">Name of new object</param>
 /// <param name="area">Area to be occupied with new object</param>
-       public GameObject(Name name, string type, Plane area, bool editMode=false): base(name, area, editMode)
+       public GameObject(Name name, string type, Plane area): base(name, area)
         {
-            _type = type.PrepareForIndexing();
+            Type = type.PrepareForIndexing();
             
-            if(_area!=null)
+            if(area!=null)
             Appear();
             Locality?.Register(this);
         }
 
-public void Move(Plane targetArea)
+protected void Move(Plane targetArea)
 		{
-            Assert(_editMode, "Allowed only in edit mode");
             if (targetArea == null)
                 throw new ArgumentNullException(nameof(targetArea));
 
             Disappear();
-            _area = targetArea;
+            Area = targetArea;
             Appear();
 		}
 
@@ -97,23 +96,19 @@ public void Move(Plane targetArea)
         protected override void Appear()
         {
             // Check if all the object lays in one locality
-            Locality = _area.GetLocality();
+            Locality = Area.GetLocality();
             Assert(Locality!= null, "Game object must occupy just one locality.");
 
-            _area.GetTiles().Foreach(t => t.Register(this));
+            Area.GetTiles().Foreach(t => t.Register(this));
         }
 
         public override string ToString()
             => Name.Friendly;
-        protected string _type;
-        public string Type
-		{
-            get => _type;
-            set => _type= _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
-        }
+
+        public readonly string Type;
 
         public override int GetHashCode()
-            => unchecked(3000 * (2000 + _area.GetHashCode()) * (3000 + _type.GetHashCode()) * (4000 + Locality.GetHashCode()));
+            => unchecked(3000 * (2000 + Area.GetHashCode()) * (3000 + Type.GetHashCode()) * (4000 + Locality.GetHashCode()));
 
     }
 }

@@ -22,37 +22,16 @@ public abstract  class MapElement: MessagingObject
 		}
 
 
-		protected bool _editMode;
 
-		public MapElement(Name name, Plane area, bool editMode=false):base()
+		public MapElement(Name name, Plane area):base()
 		{
-			_editMode = editMode;
-			_name = name ?? throw new ArgumentException(nameof(name));
-			_area = area;// ?? throw new ArgumentException(nameof(area));
+			Name = name ?? throw new ArgumentException(nameof(name));
+			Area = area;// ?? throw new ArgumentException(nameof(area));
 		}
 
-		public Name Name
-		{
-			get => _name;
-			set =>_name = _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
-		}
+		public readonly  Name Name;
 
-
-
-
-
-
-
-
-
-		protected Name _name;
-		protected Plane _area;
-
-		public Plane Area 
-		{ 
-			get =>_area==null ?null :  new Plane(_area); 
-			set => _area= _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
-		}
+		public  Plane Area { get; protected set; }
 
 		public override string ToString()
 => Name.Friendly;

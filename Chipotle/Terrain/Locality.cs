@@ -29,11 +29,7 @@ namespace Game.Terrain
         /// <summary>
         /// Height of ceiling (is 0 in case of outdoor localities)
         /// </summary>
-        public int Ceiling
-		{
-            get => _ceiling;
-            set=> _ceiling = _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
-        }
+        public readonly  int Ceiling;
 
 
         private const int MinimumHeight = 3;
@@ -42,7 +38,7 @@ namespace Game.Terrain
 
 		protected override void Appear()
 		{
-            foreach(var point in _area.GetPoints())
+            foreach(var point in Area.GetPoints())
                 World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain, point, this) : throw new InvalidOperationException("Tile must be empty");
 		}
 
@@ -57,7 +53,7 @@ namespace Game.Terrain
             if (_entities.IsNotEmpty())
                 new List<Entity>(_entities).ForEach(e => World.Remove(e));
 
-            _area.GetPoints().Foreach(p => World.Map[p] = null);
+            Area.GetPoints().Foreach(p => World.Map[p] = null);
 		}
 
 		public override void ReceiveMessage(GameMessage message)
@@ -97,7 +93,7 @@ namespace Game.Terrain
             Assert(!IsItHere(p), "exit already registered");
             _passages.Add(p);
 
-            if (_messagingEnabled && !_editMode)
+            if (_messagingEnabled)
                 ReceiveMessage(new PassageShown (this, p));
         }
 
@@ -110,9 +106,9 @@ namespace Game.Terrain
             Assert(!IsItHere(o), "Object already registered.");
             
             _objects.Add(o);
-            if (_messagingEnabled && !_editMode)
+            if (_messagingEnabled)
 
-            if (_messagingEnabled && !_editMode)
+            if (_messagingEnabled)
                     ReceiveMessage(new ObjectShown (this, o));
         }
 
@@ -212,13 +208,8 @@ _entities.Remove(e);
         /// <summary>
         ///  Specifies if the locality is a room or an outdoor place
         /// </summary>
-        public LocalityType Type 
-        { 
-            get=>_type; 
-             set=> _type = _editMode ? value : throw new InvalidOperationException("Forbidden in game mode"); 
-        }
+        public readonly  LocalityType Type;
 
-        private LocalityType _type;
 
         private List<Passage> _passages;
 		protected int _backgroundSoundId;
@@ -290,9 +281,9 @@ _entities.Remove(e);
 		/// <param name="defaultTerrain">Lowest layer of the terrain</param>
 		/// <param name="ceiling">Ceiling height (should be 0 for outdoor localities)</param>
 		/// <param name="area">Area occupied with the locality</param>
-		public Locality(Name name, LocalityType type,  int ceiling,  Plane area, TerrainType defaultTerrain, string backgroundSound=null, bool editMode=false):base(name, area, editMode)
+		public Locality(Name name, LocalityType type,  int ceiling,  Plane area, TerrainType defaultTerrain, string backgroundSound=null):base(name, area)
         {
-            _type= type;
+            Type = type;
             _ceiling= Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
             _ceiling     = type == LocalityType.Outdoor ? 0 : ceiling;
             _passages = new List<Passage>();
@@ -302,8 +293,8 @@ _entities.Remove(e);
             _objects = new List<GameObject>();
             Objects = _objects.AsReadOnly();
             DefaultTerrain = defaultTerrain;
-            _area.MinimumHeight = MinimumHeight;
-            _area.MinimumWidth = MinimumWidth;
+            Area.MinimumHeight = MinimumHeight;
+            Area.MinimumWidth = MinimumWidth;
             _backgroundSound = backgroundSound;
 
             Appear();

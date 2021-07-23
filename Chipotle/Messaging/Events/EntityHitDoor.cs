@@ -1,4 +1,5 @@
-﻿using Game.Messaging;
+﻿using Luky;
+using Game.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,9 @@ namespace Game.Messaging.Events
 {
     public class EntityHitDoor: GameMessage
     {
+
         public EntityHitDoor(object sender) : base(sender)
-        { }
+        {
+        }
     }
 }

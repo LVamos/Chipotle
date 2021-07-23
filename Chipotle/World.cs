@@ -249,7 +249,7 @@ public static Passage GetPassage(string name)
         /// Loads map from file
         /// </summary>
         /// <param name="fileName">Name of the map file</param>
-        public static XDocument LoadMap(string fileName, bool editMode=false)
+        public static XDocument LoadMap(string fileName)
         {
             string Attribute(XElement element, string attribute, bool prepareForIndexing= true)
                 => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
@@ -283,8 +283,7 @@ public static Passage GetPassage(string name)
                int.Parse(Attribute(l, "height")),
                new Plane(Attribute(l, "coordinates")),
                Attribute(l, "defaultTerrain", false).ToTerrainType(),
-null,
-               editMode);
+null);
 
                 // Create perimeter walls if they are specified in the map
                 string wallDefinition = Attribute(l, "walls", false);
@@ -300,7 +299,7 @@ null,
                     var oName = new Name(Attribute(o, "indexedname"), Attribute(o, "friendlyname"));
                     var oType = Attribute(o, "type");
                     var coordinates = new Plane(Attribute(o, "coordinates")).ToAbsolute(locality);
-                    Add(editMode ?new GameObject(oName, oType, coordinates, editMode) : GameObject.CreateObject(oName, coordinates, oType));
+                    Add( GameObject.CreateObject(oName, coordinates, oType));
                 }
 
                 // register locality
@@ -319,7 +318,7 @@ null,
                 // Create and register new passage
                 if (isDoor)
                     Add(new Door(pIndexedName, closed, area, localities));
-                else Add(new Passage(pIndexedName, isDoor, closed, area, localities, editMode));
+                else Add(new Passage(pIndexedName, area, localities));
             }
 
             return xDocument;

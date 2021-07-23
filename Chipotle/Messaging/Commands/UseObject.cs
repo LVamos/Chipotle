@@ -1,9 +1,15 @@
-﻿namespace Game.Messaging.Commands
-{
-	class UseObject : GameMessage
-	{
+﻿using Game.Terrain;
 
-		public UseObject (object sender) : base(sender) { }
+namespace Game.Messaging.Commands
+{
+	public class UseObject : GameMessage
+	{
+		public readonly Tile Tile;
+
+		public UseObject (object sender, Tile tile=null) : base(sender) 
+		{
+			Tile = tile;
+		}
 
 	}
 }

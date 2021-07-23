@@ -14,7 +14,7 @@ namespace Game.Terrain
         protected override void Disappear()
         {
             _localities.ForEach(l => l.Unregister(this));
-            _area.GetTiles().Foreach(t => t.UnregisterPassage());
+            Area.GetTiles().Foreach(t => t.UnregisterPassage());
         }
 
 
@@ -51,7 +51,7 @@ namespace Game.Terrain
         /// <param name="closed">Is the passage closed from the beginning?</param>
         /// <param name="area">Area occupied with the passage</param>
         /// <param name="localities">Two localities connected with the passage</param>
-        public Passage(Name name, Plane area, IEnumerable<Locality> localities, bool editMode = false) : base(name, area, editMode)
+        public Passage(Name name, Plane area, IEnumerable<Locality> localities) : base(name, area)
         {
 
             // Check if passage isn't on map edge and if it occupies just one row.
@@ -70,7 +70,7 @@ namespace Game.Terrain
 
         protected override void Appear()
         {
-            _area.GetTiles().Foreach(t => t.Register(this));
+            Area.GetTiles().Foreach(t => t.Register(this));
             _localities.Foreach(l => l.Register(this));
         }
     }
