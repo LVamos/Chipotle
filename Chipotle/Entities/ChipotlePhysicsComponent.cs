@@ -102,15 +102,13 @@ namespace Game
 
         private void OnUseObject(UseObject message)
         {
-            Tile tile = World.Map[_area.Center].GetNeighbours8().FirstOrDefault(t => t.Passage!=null && t.Passage.IsDoor);
+            Tile tile = World.Map[_area.Center].GetNeighbours8().FirstOrDefault(t => t.Passage!=null && t is Door);
+
                 if (tile == null)
                 return;
 
                 Door door =tile.Passage as Door;
-                if (door.Closed)
-                door.Open();
-            else door.Close();
-
+            door.ReceiveMessage(new UseObject(Owner));
         }
 
         private void OnTurnEntity(TurnEntity message)
@@ -131,7 +129,6 @@ namespace Game
             target.Move(finalOrientation, 1);
 
             // Is the terrain occupable?
-            //Assert(target.IsInMapBoundaries(), "Columbo off the map!"); // Verify map boundaries.
                 Tile targetTile = World.Map[target.Center]??throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
             if (!targetTile.Permeable)
@@ -146,6 +143,20 @@ namespace Game
                 Owner.ReceiveMessage(new ObjectsCollided(this, targetTile));
                 return;
             }
+
+            // Isn't a closed door over there?
+            if (targetTile.Passage!=null && targetTile.Passage is Door)
+            {
+                Door door =targetTile.Passage as Door;
+                if (door.Closed)
+                {
+                    Owner.ReceiveMessage(new EntityHitDoor(this));
+                    return;
+                }
+            }
+
+
+
 
             // The road is clear! Move!
             Locality sourceLocality = _area.GetLocality();

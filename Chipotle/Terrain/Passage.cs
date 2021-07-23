@@ -17,20 +17,7 @@ namespace Game.Terrain
             _area.GetTiles().Foreach(t => t.UnregisterPassage());
         }
 
-        public string GetDescription()
-        {
-            if (!IsDoor)
-                return "Průchod";
-            return Closed ? "Otevřené dveře" : "Zavřené dveře";
-        }
-        private bool _isDoor;
-        public bool IsDoor
-        {
-            get => _isDoor;
-            set => _isDoor = _editMode ? value : throw new InvalidOperationException("Forbidden in game mode");
-        }
 
-        public bool Closed { get; protected set; }
 
 
 
@@ -64,11 +51,8 @@ namespace Game.Terrain
         /// <param name="closed">Is the passage closed from the beginning?</param>
         /// <param name="area">Area occupied with the passage</param>
         /// <param name="localities">Two localities connected with the passage</param>
-        public Passage(Name name, bool isDoor, bool closed, Plane area, IEnumerable<Locality> localities, bool editMode = false) : base(name, area, editMode)
+        public Passage(Name name, Plane area, IEnumerable<Locality> localities, bool editMode = false) : base(name, area, editMode)
         {
-            _isDoor = isDoor;
-            Closed = closed;
-
 
             // Check if passage isn't on map edge and if it occupies just one row.
             Assert(area.Height == 1 || area.Height == 2 || area.Width == 1 || area.Width == 2, "Passage must consist of two rows or two points.");

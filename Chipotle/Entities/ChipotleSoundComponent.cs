@@ -49,32 +49,33 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(EntityHitDoor)] = (m) => OnEntityHitDoor((EntityHitDoor)m),
                 [typeof(TurnEntityResult )] =(m)=> OnTurnoverDone((TurnEntityResult )m),
                 [typeof(EntityMoved )] =(m)=> OnMovementDone((EntityMoved )m),
-                [typeof(ObjectsCollided)] = (m)=> OnCollision((ObjectsCollided)m),
+                [typeof(ObjectsCollided)] = (m)=> OnObjectsCollided((ObjectsCollided)m),
                 [typeof(TerrainCollided )] = (m)=> OnInpermeableTerrainCollision((TerrainCollided )m)
             }
             );
 
         }
 
-
-
+        private void OnEntityHitDoor(EntityHitDoor m)
+=> SayDelegate("dveře");
         private void OnInpermeableTerrainCollision(GameMessage message)
         {
             Tolk.Speak("penetráces");
         }
 
-        private void OnCollision(ObjectsCollided message)
+        private void OnObjectsCollided(ObjectsCollided message)
         {
             var collidingObject = message.Tile.Object;
 
             // Announce
             Timer t = new Timer();
             t.Interval = 500;
-            t.Tick += (object s, EventArgs e) => { Say(collidingObject); t.Stop(); };
+            t.Tick += (object s, EventArgs e) => { Say(collidingObject.Name.Friendly); t.Stop(); };
             t.Start();
-            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true);
+            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true);
         }
 
         protected void UpdateListener()

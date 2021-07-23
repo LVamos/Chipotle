@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messaging\Events\EntityHitDoor.cs" />
     <Compile Include="Messaging\Events\ObjectsCollided.cs" />
     <Compile Include="Messaging\Events\CutsceneEnded.cs" />
     <Compile Include="Messaging\Events\CutsceneBegan.cs" />
