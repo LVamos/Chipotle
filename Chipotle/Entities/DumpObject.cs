@@ -35,6 +35,8 @@ namespace Game.Entities
         protected (string collision, string action, string loop) _sounds = ("MovCrashDefault", null, null);
 
 
+
+        public bool UsedOnce { get; protected set; }
         protected int _loopSoundId;
 
 
@@ -48,7 +50,13 @@ namespace Game.Entities
                 return;
 
               _actionSoundID=  World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
-            Used = true;
+
+            if (!Used)
+            {
+                Used = true;
+                UsedOnce = true;
+            }
+            else UsedOnce = false;
         }
 
 
