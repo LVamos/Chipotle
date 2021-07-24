@@ -29,9 +29,14 @@ namespace Game.Entities
             {
                 //case "chipotlovo auto": return new DumpObject(name, area, type, null, null, "carloop");
                 case "zahradní gril": return CreateGardenGril(name, area);
+                case "zahradní hadice": return CreateGardenHose(name, area);
+
                 default: return new DumpObject(name, area);
             }
         }
+
+        public static GameObject CreateGardenHose(Name name, Plane area)
+=> new DumpObject(name, area, "zahradní hadice", null, "snd1", null);
 
         public static DumpObject CreateGardenGril(Name name, Plane area)
 => new DumpObject(name, area, "zahradní gril", null, null, "snd17");
