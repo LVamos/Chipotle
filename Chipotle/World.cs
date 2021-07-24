@@ -327,12 +327,6 @@ null);
 		public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
            => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
 
-        public static void ReceiveMessage(GameMessage message)
-        {
-            throw new NotImplementedException();
-        }
-
-
         public static void Remove(Locality l)
         {
             _localities.Remove(l.Name.Indexed);
