@@ -20,18 +20,14 @@ namespace Game.Entities
             var handlers = new Dictionary<Type, Action<GameMessage>>()
             {
                 [typeof(KeyPressed )] =(m)=>  OnKeyDown((KeyPressed )m),
-                [typeof(CutsceneBegan)] =(m)=>  OnCutSceneStart((CutsceneBegan)m),
-                [typeof(CutsceneEnded)] =(m)=>  OnCutSceneEnd((CutsceneEnded)m)
+                [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
+                [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
             };
             RegisterMessages(handlers);
             _shortcuts = new Dictionary<KeyShortcut, Action>();
         }
 
-        private void OnCutSceneEnd(GameMessage message)
-=> _messagingEnabled = false;
 
-        private void OnCutSceneStart(CutsceneBegan message)
-=> _messagingEnabled = true;
 
 
 
@@ -39,7 +35,7 @@ namespace Game.Entities
         /// Responds on a keypress.
         /// </summary>
         /// <param name="shortcut"></param>
-        protected void OnKeyDown(KeyPressed  message)
+        protected virtual void OnKeyDown(KeyPressed  message)
         {
             if (_shortcuts != null && _shortcuts.TryGetValue(message.Shortcut, out var action))
                 action();
@@ -56,8 +52,6 @@ namespace Game.Entities
         }
 
 
-
         protected Dictionary<KeyShortcut, Action> _shortcuts;
-
     }
 }

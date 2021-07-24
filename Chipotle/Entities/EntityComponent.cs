@@ -17,14 +17,32 @@ namespace Game.Entities
 
 
 
-        //todo EntityComponent
+
 
 
 
         public Entity Owner;
+        protected  bool _cutsceneInProgress;
 
+        public new Name Name { get => Owner?.Name; }
 
+        public override void Start()
+        {
+            base.Start();
 
-public new Name Name { get => Owner?.Name; }
-    }
+            RegisterMessages(
+                new Dictionary<Type, Action<GameMessage>>()
+                {
+                    [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
+                    [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
+
+                }
+                );
+        }
+
+        protected virtual void OnCutsceneBegan(CutsceneBegan m)
+            => _cutsceneInProgress = true;
+
+        protected virtual void OnCutsceneEnded(CutsceneEnded m)
+=> _cutsceneInProgress= false;    }
 }

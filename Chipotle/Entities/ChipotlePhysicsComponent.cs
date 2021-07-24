@@ -42,7 +42,7 @@ namespace Game
         {
             // set initial position.
             // 1035, 1063, 1040, 1058} }
-            SetPosition(new Plane(new Vector2(1035, 1063)));
+            SetPosition(new Plane(World.GetObject("lavička w1").Area.UpperLeftCorner +new Vector2(0, 1)));
             _orientation = new Orientation2D(0, 1);
             Locality locality = _area.GetLocality();
             locality.ReceiveMessage(new LocalityEntered(Owner, Owner));

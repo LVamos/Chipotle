@@ -13,6 +13,7 @@ namespace Game.Entities
 {
     public class ChipotleInputComponent : InputComponent
     {
+
 		public override void Start()
 		{
 			base.Start();
@@ -104,5 +105,16 @@ namespace Game.Entities
         private void MoveForward()
             => Owner.ReceiveMessage(new MakeStep (this, TurnType.None));
 
+        protected override void OnKeyDown(KeyPressed message)
+        {
+            if (_cutsceneInProgress)
+            {
+                _cutsceneInProgress = false;
+                World.StopCutscene(Owner);
+                Owner.ReceiveMessage(new CutsceneEnded(this));
+            }
+
+            base.OnKeyDown(message);
+        }
     }
 }

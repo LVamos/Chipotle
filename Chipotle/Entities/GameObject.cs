@@ -27,6 +27,7 @@ namespace Game.Entities
 
             switch(type)
             {
+                case "lavička u bazénu": return CreatePoolsideBench(name, area);
                 //case "chipotlovo auto": return new DumpObject(name, area, type, null, null, "carloop");
                 case "schůdky u bazénu": return CreatePoolStairs(name, area);
                 case "zahradní gril": return CreateGardenGril(name, area);
@@ -35,6 +36,9 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        public static GameObject CreatePoolsideBench(Name name, Plane area)
+            => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
 
         public static GameObject CreatePoolStairs(Name name, Plane area)
 => new DumpObject(name, area, "schůdky u bazénu", null, "snd3");
@@ -119,4 +123,5 @@ protected void Move(Plane targetArea)
             => unchecked(3000 * (2000 + Area.GetHashCode()) * (3000 + Type.GetHashCode()) * (4000 + Locality.GetHashCode()));
 
     }
+
 }
