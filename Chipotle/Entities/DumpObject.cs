@@ -15,6 +15,7 @@ namespace Game.Entities
 {
     public class DumpObject : GameObject
     {
+        public bool Used { get; protected set; }
         public override void Destroy()
         {
             base.Destroy();
@@ -37,8 +38,11 @@ namespace Game.Entities
 
         private void OnUseObject(UseObject message)
         {
-            if (!string.IsNullOrEmpty(_sounds.action))
+            if (string.IsNullOrEmpty(_sounds.action))
+                return;
+
                 World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+            Used = true;
         }
 
 
