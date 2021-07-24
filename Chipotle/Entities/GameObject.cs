@@ -28,6 +28,7 @@ namespace Game.Entities
             switch(type)
             {
                 //case "chipotlovo auto": return new DumpObject(name, area, type, null, null, "carloop");
+                case "schůdky u bazénu": return CreatePoolStairs(name, area);
                 case "zahradní gril": return CreateGardenGril(name, area);
                 case "zahradní hadice": return CreateGardenHose(name, area);
 
@@ -35,6 +36,8 @@ namespace Game.Entities
             }
         }
 
+        public static GameObject CreatePoolStairs(Name name, Plane area)
+=> new DumpObject(name, area, "schůdky u bazénu", null, "snd3");
         public static GameObject CreateGardenHose(Name name, Plane area)
 => new DumpObject(name, area, "zahradní hadice", null, "snd1", null);
 
