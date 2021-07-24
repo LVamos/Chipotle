@@ -36,7 +36,7 @@ namespace Game.Entities
         protected int _loopSoundId;
 
 
-        private void OnUseObject(UseObject message)
+        protected void OnUseObject(UseObject message)
         {
             if (string.IsNullOrEmpty(_sounds.action))
                 return;
