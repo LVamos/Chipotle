@@ -102,13 +102,16 @@ namespace Game
 
         private void OnUseObject(UseObject message)
         {
-            Tile tile = World.Map[_area.Center].GetNeighbours8().FirstOrDefault(t => t.IsOnPassage && t.Passage is Door);
+            IEnumerable<Tile> tiles = World.Map[_area.Center].GetNeighbours8();
+            Tile tile = tiles.FirstOrDefault(t => t.Passage is Door || t.Object != null);
 
-                if (tile == null)
+            if (tile== null)
                 return;
 
-                Door door =tile.Passage as Door;
-            door.ReceiveMessage(new UseObject(Owner, tile));
+            UseObject m= new UseObject(Owner, tile);
+            if (tile.Object != null)
+                tile.Object.ReceiveMessage(m);
+            else tile.Passage.ReceiveMessage(m);
         }
 
         private void OnTurnEntity(TurnEntity message)
