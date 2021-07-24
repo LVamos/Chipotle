@@ -13,7 +13,7 @@ using Game.Terrain;
 
 namespace Game.Entities
 {
-    public class DumpObject:GameObject
+    public class DumpObject : GameObject
     {
         public override void Destroy()
         {
@@ -35,7 +35,7 @@ namespace Game.Entities
         protected int _loopSoundId;
 
 
-        private void OnUse(GameMessage message)
+        private void OnUseObject(UseObject message)
         {
             if (!string.IsNullOrEmpty(_sounds.action))
                 World.Sound.Play(_sounds.action, null, false, PositionType.Absolute, Area.Center);
@@ -51,7 +51,7 @@ namespace Game.Entities
     new Dictionary<Type, Action<GameMessage>>()
     {
         [typeof(ObjectsCollided)] =(m)=> OnCollision((ObjectsCollided)m),
-        [typeof(UseObject )] = (m)=> OnUse((UseObject )m)
+        [typeof(UseObject )] = (m)=> OnUseObject((UseObject )m)
     });
 
 			if (!string.IsNullOrEmpty(_sounds.loop))
