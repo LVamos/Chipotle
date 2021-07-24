@@ -1,8 +1,7 @@
 ﻿namespace Game.Messaging.Events
 {
-	class CutsceneBegan: GameMessage
+	public class CutsceneBegan: GameMessage
 	{
-		public readonly string SoundName;
 
 
 		/// <summary>
@@ -10,7 +9,8 @@
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="soundName">Identifier of the audio cut scene file</param>
-		public CutsceneBegan(object sender, string soundName) : base(sender) => SoundName=soundName;
+		public CutsceneBegan(object sender) : base(sender) 
+		{ }
 
 	}
 }
