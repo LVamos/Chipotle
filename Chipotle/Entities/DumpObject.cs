@@ -26,12 +26,24 @@ namespace Game.Entities
                 World.Sound.Stop(_loopSoundId);
         }
 
-        public DumpObject(Name name, Plane area, string type=null, string collisionSound=null, string actionSound=null, string loopSound=null) : base(name, type, area)
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Location of the object</param>
+        /// <param name="type">Type of the object</param>
+        /// <param name="collisionSound">Sound that should be played when an entity bumps to the object</param>
+        /// <param name="actionSound">Sound that should be played when an entity uses the object</param>
+        /// <param name="loopSound">Sound that should be played in loop</param>
+        /// <param name="usableOnce">Determines if the object shall be used just once</param>
+        public DumpObject(Name name, Plane area, string type=null, string collisionSound=null, string actionSound=null, string loopSound=null, bool usableOnce=false) : base(name, type, area)
         {
+            _usableOnce = usableOnce;
             _sounds = (collisionSound?? _sounds.collision, actionSound??_sounds.action, loopSound?? _sounds.loop); // Modify sounds of the object.
 
         }
 
+        private bool _usableOnce;
         protected (string collision, string action, string loop) _sounds = ("MovCrashDefault", null, null);
 
 
@@ -42,7 +54,7 @@ namespace Game.Entities
 
         protected void OnUseObject(UseObject message)
         {
-            if (string.IsNullOrEmpty(_sounds.action))
+            if ((_usableOnce && Used) || string.IsNullOrEmpty(_sounds.action))
                 return;
 
             World.Sound.GetDynamicInfo(_actionSoundID, out SoundState state, out int _);
