@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace Game.Messaging.Events
 {
-    public class EntityHitDoor: GameMessage
+    public class DoorHit: GameMessage
     {
 
-        public EntityHitDoor(object sender) : base(sender)
+        public DoorHit(object sender) : base(sender)
         {
         }
     }

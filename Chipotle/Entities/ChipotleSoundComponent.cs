@@ -49,7 +49,7 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
-                [typeof(EntityHitDoor)] = (m) => OnEntityHitDoor((EntityHitDoor)m),
+                [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
                 [typeof(TurnEntityResult )] =(m)=> OnTurnoverDone((TurnEntityResult )m),
                 [typeof(EntityMoved )] =(m)=> OnMovementDone((EntityMoved )m),
                 [typeof(ObjectsCollided)] = (m)=> OnObjectsCollided((ObjectsCollided)m),
@@ -59,7 +59,7 @@ namespace Game.Entities
 
         }
 
-        private void OnEntityHitDoor(EntityHitDoor m)
+        private void OnEntityHitDoor(DoorHit m)
 => SayDelegate("dveře");
         private void OnInpermeableTerrainCollision(GameMessage message)
         {

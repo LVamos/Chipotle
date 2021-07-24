@@ -153,7 +153,7 @@ namespace Game
                 Door door =targetTile.Passage as Door;
                 if (door.Closed)
                 {
-                    Owner.ReceiveMessage(new EntityHitDoor(this));
+                    Owner.ReceiveMessage(new DoorHit(this));
                     return;
                 }
             }
