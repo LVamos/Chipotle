@@ -16,6 +16,8 @@ namespace Game.Entities
     public class DumpObject : GameObject
     {
         public bool Used { get; protected set; }
+        protected int _actionSoundID { get; private set; }
+
         public override void Destroy()
         {
             base.Destroy();
@@ -41,7 +43,11 @@ namespace Game.Entities
             if (string.IsNullOrEmpty(_sounds.action))
                 return;
 
-                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+            World.Sound.GetDynamicInfo(_actionSoundID, out SoundState state, out int _);
+            if (state == SoundState.Playing)
+                return;
+
+              _actionSoundID=  World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
             Used = true;
         }
 
