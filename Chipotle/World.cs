@@ -72,10 +72,30 @@ namespace Game
 			_passages.Foreach(v => v.Value.Update());
 			_objects.Foreach(v => v.Value.Update());
 			_entities.Foreach(v => v.Value.Update());
+
+            if(_cutsceneID>0)
+            {
+                Sound.GetDynamicInfo(_cutsceneID, out SoundState state, out int _);
+                if (state != SoundState.Playing)
+                {
+                    _cutsceneID = 0;
+                    ReceiveMessage(new CutsceneEnded(_cutsceneSender));
+                }
+            }
         }
 
         public static void ReceiveMessage(GameMessage message)
             => _entities.Values.Foreach(e => e.ReceiveMessage(message));
+
+        public static void PlayCutscene(object sender, string cutscene)
+        {
+            if (string.IsNullOrEmpty(cutscene))
+                throw new ArgumentNullException(nameof(cutscene));
+
+            _cutsceneSender = sender;
+            ReceiveMessage(new CutsceneBegan(sender));
+            _cutsceneID = Sound.Play(cutscene);
+        }
 
         public  static  TileMap Map { get; set; }
 
@@ -84,6 +104,13 @@ namespace Game
         private static Dictionary<string, Passage> _passages;
         public static Entity Player;
 
+        public  static void StopCutscene(object sender)
+        {
+            Sound.Stop(_cutsceneID);
+            _cutsceneID = 0;
+            _cutsceneSender = null;
+            ReceiveMessage(new CutsceneEnded(sender));
+        }
 
         public static void RenameLocality(string indexedName, string newName)
         {
@@ -217,6 +244,7 @@ public static Passage GetPassage(string name)
 
         public static SoundThread Sound;
         private static int _cutsceneID;
+        private static object _cutsceneSender;
 
         /// <summary>
         /// Starts game from begining.
