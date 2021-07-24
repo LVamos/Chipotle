@@ -38,8 +38,7 @@ namespace Game.Entities
         private void OnUseObject(UseObject message)
         {
             if (!string.IsNullOrEmpty(_sounds.action))
-                World.Sound.Play(_sounds.action, null, false, PositionType.Absolute, Area.Center);
-
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
         }
 
 
