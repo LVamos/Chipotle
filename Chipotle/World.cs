@@ -74,6 +74,9 @@ namespace Game
 			_entities.Foreach(v => v.Value.Update());
         }
 
+        public static void ReceiveMessage(GameMessage message)
+            => _entities.Values.Foreach(e => e.ReceiveMessage(message));
+
         public  static  TileMap Map { get; set; }
 
         private static Dictionary<string, GameObject> _objects;
@@ -213,6 +216,7 @@ public static Passage GetPassage(string name)
         }
 
         public static SoundThread Sound;
+        private static int _cutsceneID;
 
         /// <summary>
         /// Starts game from begining.
