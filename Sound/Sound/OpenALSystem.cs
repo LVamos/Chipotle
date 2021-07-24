@@ -205,12 +205,13 @@ namespace Luky
             else if (pt == PositionType.Absolute)
             {
                 ALSetPosition(info.SourceID, position.AsOpenTKV3());
-                //AL.DistanceModel(ALDistanceModel.InverseDistance);
-                //AL.Source(info.SourceID, ALSourcef.ReferenceDistance, 0);
-                //ALAnnounceError("set reference distance");
-                //AL.Source(info.SourceID, ALSourcef.RolloffFactor, 1);
-                //ALAnnounceError("set rolloff factor");
-                //this.MuteDistance = SL.tetMuteDistanceBasedOnMuteGain(cfg.MuteGain, minDistance, cfg.SoundRolloffFactor);
+                AL.DistanceModel(ALDistanceModel.LinearDistanceClamped);
+                AL.Source(info.SourceID, ALSourcef.ReferenceDistance, 1);
+                ALAnnounceError("set reference distance");
+                AL.Source(info.SourceID, ALSourcef.RolloffFactor, 1);
+                ALAnnounceError("set rolloff factor");
+                AL.Source(info.SourceID, ALSourcef.MaxDistance, 20);
+                ALAnnounceError("set max distancefactor");
             }
 
             if (frequencyMultiplier != 1f)
