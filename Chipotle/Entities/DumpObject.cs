@@ -52,7 +52,7 @@ namespace Game.Entities
         protected int _loopSoundId;
 
 
-        protected void OnUseObject(UseObject message)
+        protected virtual void OnUseObject(UseObject message)
         {
             if ((_usableOnce && Used) || string.IsNullOrEmpty(_sounds.action))
                 return;
