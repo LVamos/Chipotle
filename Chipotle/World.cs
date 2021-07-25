@@ -348,9 +348,7 @@ null);
                 List<Locality> localities = new List<Locality> { GetLocality(Attribute(p, "from")), GetLocality(Attribute(p, "to").PrepareForIndexing()) };
 
                 // Create and register new passage
-                if (isDoor)
-                    Add(new Door(pIndexedName, closed, area, localities));
-                else Add(new Passage(pIndexedName, area, localities));
+                Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed));
             }
 
             return xDocument;
