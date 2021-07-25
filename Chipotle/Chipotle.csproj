@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\PoolsideBin.cs" />
     <Compile Include="Messaging\Events\DoorHit.cs" />
     <Compile Include="Messaging\Events\ObjectsCollided.cs" />
     <Compile Include="Messaging\Events\CutsceneEnded.cs" />
