@@ -20,7 +20,7 @@ namespace Game.Entities
             Locality.Unregister(this);
         }
 
-        public static GameObject CreateObject(Name name, Plane area, string type)
+        public static DumpObject CreateObject(Name name, Plane area, string type)
         {
             if (string.IsNullOrEmpty(name.Indexed))
                 throw new ArgumentException(nameof(name));
@@ -37,18 +37,17 @@ namespace Game.Entities
             }
         }
 
-        public static GameObject CreatePoolsideBench(Name name, Plane area)
+        public static DumpObject CreatePoolsideBench(Name name, Plane area)
             => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
 
-        public static GameObject CreatePoolStairs(Name name, Plane area)
+        public static DumpObject CreatePoolStairs(Name name, Plane area)
 => new DumpObject(name, area, "schůdky u bazénu", null, "snd3");
-        public static GameObject CreateGardenHose(Name name, Plane area)
+        public static DumpObject CreateGardenHose(Name name, Plane area)
 => new DumpObject(name, area, "zahradní hadice", null, "snd1", null);
 
         public static DumpObject CreateGardenGril(Name name, Plane area)
 => new DumpObject(name, area, "zahradní gril", null, null, "snd17");
 
-		//todo Gameobject: předělat na abstraktní třídu
 
 
 

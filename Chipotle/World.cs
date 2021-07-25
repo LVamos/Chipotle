@@ -99,7 +99,7 @@ namespace Game
 
         public  static  TileMap Map { get; set; }
 
-        private static Dictionary<string, GameObject> _objects;
+        private static Dictionary<string, DumpObject> _objects;
         private static Dictionary<string, Entity> _entities;
         private static Dictionary<string, Passage> _passages;
         public static Entity Player;
@@ -183,7 +183,7 @@ public static Passage GetPassage(string name)
         /// Registers a game object.
         /// </summary>
         /// <param name="o">The game object to be added</param>
-        public static void Add(GameObject o)
+        public static void Add(DumpObject o)
         {
             // Do a null check and look if object isn't already registered.
             if (o == null)
@@ -236,7 +236,7 @@ public static Passage GetPassage(string name)
         /// </summary>
         public static void Initialize()
         {
-            _objects = new Dictionary<string, GameObject>();
+            _objects = new Dictionary<string, DumpObject>();
             _localities = new Dictionary<string, Locality>();
             _entities = new Dictionary<string, Entity>();
             _passages = new Dictionary<string, Passage>();
@@ -390,7 +390,7 @@ null);
 
 		public static void RenameObject(string indexedName, string newName)
 		{
-            GameObject value = _objects[indexedName];
+            DumpObject value = _objects[indexedName];
             _objects.Remove(indexedName);
             _objects[newName] = value;
         }
