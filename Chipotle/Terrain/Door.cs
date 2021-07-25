@@ -32,7 +32,7 @@ namespace Game.Terrain
             Closed = closed;
         }
 
-        private void OnUseObject(UseObject m)
+        protected  void OnUseObject(UseObject m)
         {
             if (Closed)
                 Open(m.Tile.Position);
