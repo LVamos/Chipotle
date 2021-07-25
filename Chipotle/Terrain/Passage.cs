@@ -1,4 +1,6 @@
-﻿using Luky;
+﻿using Game.Entities;
+
+using Luky;
 
 using System;
 using System.Collections.Generic;
@@ -73,5 +75,17 @@ namespace Game.Terrain
             Area.GetTiles().Foreach(t => t.Register(this));
             _localities.Foreach(l => l.Register(this));
         }
+
+        public  static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, bool closed)
+        {
+switch(name.Indexed)
+            {
+                case "d hala w1": return CreateHallDoor(name, area, localities);
+                default: return isDoor ? new Door(name, closed, area, localities) : new Passage(name, area, localities);
+            }
+        }
+
+        public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<Locality> localities)
+=> new HallDoor(name, area, localities);
     }
 }
