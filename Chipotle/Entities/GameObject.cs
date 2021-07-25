@@ -27,6 +27,7 @@ namespace Game.Entities
 
             switch(type)
             {
+                case "mrtvola": return CreateCorpse(name, area);
                 case "prkno u bazénu": return CreatePoolsidePlank(name, area);
                 case "popelnice u bazénu": return CreatePoolsideBin(name, area);
                 case "lavička u bazénu": return CreatePoolsideBench(name, area);
@@ -37,6 +38,10 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        public static DumpObject CreateCorpse(Name name, Plane area)
+    => new DumpObject(name, area, "mrtvola", null, null, null, "cs5", true);
+
 
         public static DumpObject CreatePoolsidePlank(Name name, Plane area)
             => new DumpObject(name, area, "prkno u bazénu", null, null, null, "cs4", true);
