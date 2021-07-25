@@ -27,9 +27,9 @@ namespace Game.Entities
 
             switch(type)
             {
+                case "prkno u bazénu": return CreatePoolsidePlank(name, area);
                 case "popelnice u bazénu": return CreatePoolsideBin(name, area);
                 case "lavička u bazénu": return CreatePoolsideBench(name, area);
-                //case "chipotlovo auto": return new DumpObject(name, area, type, null, null, "carloop");
                 case "schůdky u bazénu": return CreatePoolStairs(name, area);
                 case "zahradní gril": return CreateGardenGril(name, area);
                 case "zahradní hadice": return CreateGardenHose(name, area);
@@ -38,8 +38,13 @@ namespace Game.Entities
             }
         }
 
+        public static DumpObject CreatePoolsidePlank(Name name, Plane area)
+            => new DumpObject(name, area, "prkno u bazénu", null, null, null, "cs4", true);
+
+
         public static DumpObject CreatePoolsideBin(Name name, Plane area)
 => new PoolsideBin(name, area);
+
         public static DumpObject CreatePoolsideBench(Name name, Plane area)
             => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
 
