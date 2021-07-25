@@ -168,8 +168,8 @@ public static Passage GetPassage(string name)
         /// </summary>
         /// <param name="name">Name of desired object</param>
         /// <returns>The game object or null</returns>
-        public static GameObject GetObject(string name)
-=> _objects.TryGetValue(name, out GameObject o) ? o : null;
+        public static DumpObject GetObject(string name)
+=> _objects.TryGetValue(name, out DumpObject o) ? o : null;
 
 
 
