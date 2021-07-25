@@ -43,7 +43,7 @@ namespace Game.Terrain
         /// <summary>
         /// Closes the door if possible.
         /// </summary>
-        protected void Open(Vector2 coords)
+        protected virtual void Open(Vector2 coords)
         {
             Closed = false;
             World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd23"), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
