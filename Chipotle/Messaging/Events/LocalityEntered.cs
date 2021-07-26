@@ -2,13 +2,10 @@
 
 namespace Game.Messaging.Events
 {
-	public class LocalityEntered : GameMessage
-	{
-		public readonly Entity Entity;
+    public class LocalityEntered : GameMessage
+    {
+        public readonly Entity Entity;
 
-		public LocalityEntered(object sender, Entity entity):base(sender)
-		{
-			this.Entity= entity;
-		}
-	}
+        public LocalityEntered(object sender, Entity entity) : base(sender) => Entity = entity;
+    }
 }

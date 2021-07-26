@@ -1,8 +1,6 @@
-﻿using Game.Entities;
-
+﻿
 using Luky;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -58,7 +56,7 @@ namespace Game.Terrain
 
             // Check if passage isn't on map edge and if it occupies just one row.
             Assert(area.Height == 1 || area.Height == 2 || area.Width == 1 || area.Width == 2, "Passage must consist of two rows or two points.");
-            var coordinates = area.GetPoints().First();
+            Vector2 coordinates = area.GetPoints().First();
 
             Assert(localities != null && localities?.Count() == 2 && localities.First() != null && localities.Last() != null && localities.First() != localities.Last(), "Two different localities required");
             _localities = localities.ToList<Locality>();
@@ -76,9 +74,9 @@ namespace Game.Terrain
             _localities.Foreach(l => l.Register(this));
         }
 
-        public  static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, bool closed)
+        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, bool closed)
         {
-switch(name.Indexed)
+            switch (name.Indexed)
             {
                 case "d hala w1": return CreateHallDoor(name, area, localities);
                 default: return isDoor ? new Door(name, closed, area, localities) : new Passage(name, area, localities);

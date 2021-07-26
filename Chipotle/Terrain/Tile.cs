@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using Luky;
-using System.Linq;
+﻿using Game.Entities;
 
-using Game.Entities;
+using Luky;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Terrain
 {
@@ -12,7 +12,7 @@ namespace Game.Terrain
     /// Stores reference to a tile and its position
     /// </summary>
     ///
-    public class Tile: DebugSO
+    public class Tile : DebugSO
     {
         public Locality Locality { get; private set; }
         public Passage Passage { get; private set; }
@@ -25,50 +25,57 @@ namespace Game.Terrain
         public readonly Vector2 Position;
 
         public void UnregisterPassage()
-		{
+        {
             if (Passage != null)
+            {
                 Passage = null;
-else             throw new InvalidOperationException("No passage");
-		}
+            }
+            else
+            {
+                throw new InvalidOperationException("No passage");
+            }
+        }
 
 
 
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="terrain">Terrain type for this tile</param>
-		/// <param name="position">Coordinates of the tile</param>
-		/// <param name="locality">Associatet locality</param>
-		/// <param name="permeable">Specifies if an entity or another game object can be placed on this tile</param>
-		/// <param name="passage">Associatet passage</param>
-		public Tile(TerrainType terrain, Vector2 position, Locality locality, bool permeable=true, Passage passage = null)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="terrain">Terrain type for this tile</param>
+        /// <param name="position">Coordinates of the tile</param>
+        /// <param name="locality">Associatet locality</param>
+        /// <param name="permeable">Specifies if an entity or another game object can be placed on this tile</param>
+        /// <param name="passage">Associatet passage</param>
+        public Tile(TerrainType terrain, Vector2 position, Locality locality, bool permeable = true, Passage passage = null)
         {
             Terrain = terrain;
             Assert(!position.IsNegative(), "Coordinates cannot be negative");
             Position = position;
-            Assert((locality == null && passage == null) || (locality==null ^ passage==null), "locality and passage cann't be both null");
+            Assert((locality == null && passage == null) || (locality == null ^ passage == null), "locality and passage cann't be both null");
             Locality = locality ?? throw new ArgumentNullException(nameof(locality));
             Permeable = permeable;
             Passage = passage;
         }
 
 
-        public void Register(TerrainType terrain, bool permeable=true)
-		{
+        public void Register(TerrainType terrain, bool permeable = true)
+        {
             Terrain = terrain;
             Permeable = permeable;
-		}
+        }
 
         public void Register(Passage p)
-		{
-            Passage= !IsOnPassage ? p ?? throw new ArgumentNullException(nameof(p)) : throw new InvalidOperationException(nameof(p));
+        {
+            Passage = !IsOnPassage ? p ?? throw new ArgumentNullException(nameof(p)) : throw new InvalidOperationException(nameof(p));
 
             if (Terrain == TerrainType.Wall)
+            {
                 Terrain = Locality.DefaultTerrain;
-		}
+            }
+        }
 
         public void Register(Locality l)
-            => Locality= l ?? throw new ArgumentNullException(nameof(l));
+            => Locality = l ?? throw new ArgumentNullException(nameof(l));
 
 
         public void Register(Entity e)
@@ -82,27 +89,32 @@ else             throw new InvalidOperationException("No passage");
             => Object = (Permeable || Terrain == TerrainType.Wall) && !IsOccupied ? (o ?? throw new ArgumentNullException(nameof(o))) : throw new InvalidOperationException(nameof(o));
 
         public void UnregisterObject()
-		{
+        {
             if (Object != null)
+            {
                 Object = null;
-            else    throw new InvalidOperationException("No object");
-		}
+            }
+            else
+            {
+                throw new InvalidOperationException("No object");
+            }
+        }
 
 
         public GameObject Object { get; private set; }
         private bool _permeable;
         public bool Permeable { get; set; }
         public TerrainType Terrain { get; private set; }
-        public bool IsOccupied { get => Object != null; }
-		public bool IsOnPassage  => Passage != null;
+        public bool IsOccupied => Object != null;
+        public bool IsOnPassage => Passage != null;
 
-        public bool Walkable { get=>Permeable&&!IsOccupied; }
+        public bool Walkable => Permeable && !IsOccupied;
 
         /// <summary>
         /// Lists all nearest valid neighbours of the tile
         /// </summary>
         public IEnumerable<Tile> GetNeighbours8()
-            => DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(d)).Where(t => t != null && t!=this);
+            => DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(d)).Where(t => t != null && t != this);
 
         public IEnumerable<Tile> GetNeighbours4()
             => DirectionExtension.BasicDirections.Select(d => GetNeighbour(d)).Where(t => t != null);
@@ -126,7 +138,7 @@ else             throw new InvalidOperationException("No passage");
         /// <param name="step">Directional vector</param>
         /// <returns>Neighbour tile</returns>
         public Tile GetNeighbour(Vector2 step)
-            => World.Map[Position +step];
+            => World.Map[Position + step];
 
     }
 }

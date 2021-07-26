@@ -1,10 +1,6 @@
 ﻿using Luky;
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Game.Terrain
 {
@@ -19,7 +15,9 @@ namespace Game.Terrain
         protected override void Open(Vector2 coords)
         {
             if (!World.GetObject("lavička w1").Used)
+            {
                 return;
+            }
 
             base.Open(coords);
         }

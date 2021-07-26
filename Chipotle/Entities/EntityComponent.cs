@@ -1,18 +1,14 @@
 ﻿using Game.Messaging;
-using Game.Messaging.Commands;
 using Game.Messaging.Events;
 
 using Luky;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Game.Entities
 {
-    public  abstract  class EntityComponent: MessagingObject
+    public abstract class EntityComponent : MessagingObject
     {
 
 
@@ -22,9 +18,9 @@ namespace Game.Entities
 
 
         public Entity Owner;
-        protected  bool _cutsceneInProgress;
+        protected bool _cutsceneInProgress;
 
-        public new Name Name { get => Owner?.Name; }
+        public new Name Name => Owner?.Name;
 
         public override void Start()
         {
@@ -44,5 +40,6 @@ namespace Game.Entities
             => _cutsceneInProgress = true;
 
         protected virtual void OnCutsceneEnded(CutsceneEnded m)
-=> _cutsceneInProgress= false;    }
+=> _cutsceneInProgress = false;
+    }
 }

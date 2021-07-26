@@ -1,5 +1,4 @@
-﻿using DavyKager;
-
+﻿
 using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Commands;
@@ -30,7 +29,9 @@ namespace Game
                 _plannedRotations--;
 
                 if (_plannedRotations == 0)
+                {
                     Owner.ReceiveMessage(new TurnEntityResult(this, _orientation));
+                }
             }
         }
 
@@ -42,7 +43,7 @@ namespace Game
         {
             // set initial position.
             // 1035, 1063, 1040, 1058} }
-            SetPosition(new Plane(World.GetObject("lavička w1").Area.UpperLeftCorner +new Vector2(0, 1)));
+            SetPosition(new Plane(World.GetObject("lavička w1").Area.UpperLeftCorner + new Vector2(0, 1)));
             _orientation = new Orientation2D(0, 1);
             Locality locality = _area.GetLocality();
             locality.ReceiveMessage(new LocalityEntered(Owner, Owner));
@@ -78,15 +79,23 @@ namespace Game
             string msg = o.Name.Friendly;
 
             if (o.Area.LowerRightCorner.Y > _area.Center.Y)
+            {
                 msg += " před tebou";
+            }
             else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
+            {
                 msg += " za tebou";
+            }
             else if (o.Area.LowerRightCorner.Y <= _area.Center.Y && o.Area.UpperRightCorner.Y >= _area.Center.Y)
             {
                 if (o.Area.UpperRightCorner.X < _area.Center.X)
+                {
                     msg += " vlevo";
+                }
                 else
+                {
                     msg += " vpravo";
+                }
             }
 
             Say(msg);
@@ -95,23 +104,27 @@ namespace Game
         private void OnSayLocality(SayLocality m)
 => SayDelegate(Area.GetLocality().Name.Friendly);
 
-        private void OnSayTerrain(SayTerrain message)
-        {
-            SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
-        }
+        private void OnSayTerrain(SayTerrain message) => SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
 
         private void OnUseObject(UseObject message)
         {
             IEnumerable<Tile> tiles = World.Map[_area.Center].GetNeighbours8();
             Tile tile = tiles.FirstOrDefault(t => t.Passage is Door || t.Object != null);
 
-            if (tile== null)
+            if (tile == null)
+            {
                 return;
+            }
 
-            UseObject m= new UseObject(Owner, tile);
+            UseObject m = new UseObject(Owner, tile);
             if (tile.Object != null)
+            {
                 tile.Object.ReceiveMessage(m);
-            else tile.Passage.ReceiveMessage(m);
+            }
+            else
+            {
+                tile.Passage.ReceiveMessage(m);
+            }
         }
 
         private void OnTurnEntity(TurnEntity message)
@@ -123,16 +136,18 @@ namespace Game
         private void OnMakeStep(MakeStep message)
         {
             // Get target coordinates
-            var finalOrientation = _orientation;
+            Orientation2D finalOrientation = _orientation;
 
             if (message.Direction != TurnType.None)
+            {
                 finalOrientation.Rotate(message.Direction);
+            }
 
-            var target = Area;
+            Plane target = Area;
             target.Move(finalOrientation, 1);
 
             // Is the terrain occupable?
-                Tile targetTile = World.Map[target.Center]??throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
+            Tile targetTile = World.Map[target.Center] ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
             if (!targetTile.Permeable)
             {
@@ -148,9 +163,9 @@ namespace Game
             }
 
             // Isn't a closed door over there?
-            if (targetTile.Passage!=null && targetTile.Passage is Door)
+            if (targetTile.Passage != null && targetTile.Passage is Door)
             {
-                Door door =targetTile.Passage as Door;
+                Door door = targetTile.Passage as Door;
                 if (door.Closed)
                 {
                     Owner.ReceiveMessage(new DoorHit(this));
@@ -173,7 +188,7 @@ namespace Game
                 sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
                 targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
             }
-                targetLocality.ReceiveMessage(moved);
+            targetLocality.ReceiveMessage(moved);
         }
 
 

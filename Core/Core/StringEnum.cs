@@ -13,17 +13,23 @@
         /// </summary>
         /// <param name="values"></param>
         protected StringEnum(params string[] values)
-        => this.Values = values; 
+        => Values = values;
 
         public string Name
         {
             get
             {
-                if (this.Values.Length == 0)
+                if (Values.Length == 0)
+                {
                     return "";
-                if (!Index.IsValidIndexFor(this.Values))
+                }
+
+                if (!Index.IsValidIndexFor(Values))
+                {
                     Index = 0;
-                return this.Values[Index];
+                }
+
+                return Values[Index];
             }
         }
 
@@ -40,8 +46,10 @@
         public virtual void MoveNext()
         {
             Index++;
-            if (!Index.IsValidIndexFor(this.Values))
+            if (!Index.IsValidIndexFor(Values))
+            {
                 Index = 0;
+            }
         }
 
         /// <summary>
@@ -50,18 +58,17 @@
         public virtual void MovePrevious()
         {
             Index--;
-            if (!Index.IsValidIndexFor(this.Values))
+            if (!Index.IsValidIndexFor(Values))
+            {
                 Index = Values.Length - 1;
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
-            return this.Name;
-        }
+        public override string ToString() => Name;
 
         // just a note, I didn't overload assignment operator because you can't in C#.
         // I could have changed this from a class to a struct and then I could make constructors that basically work like the assignment operator overloading, but I chose to leave it as is.

@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 
 namespace Luky
 {
@@ -20,7 +18,7 @@ namespace Luky
         /// </summary>
         public void AnnounceStackTrace()
         {
-            var st = new StackTrace(true);
+            StackTrace st = new StackTrace(true);
             DebugSO.WriteDelegate(st.ToString());
         }
 
@@ -46,16 +44,16 @@ namespace Luky
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public T[] EmptyArray<T>()
-        =>  new T[0]; 
+        => new T[0];
 
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <returns></returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GetCallerLineAndFileText()
         {
-            var st = new StackTrace(true);
-            var sf = st.GetFrame(2);
+            StackTrace st = new StackTrace(true);
+            StackFrame sf = st.GetFrame(2);
             return " at line " + sf.GetFileLineNumber() + " in " + sf.GetFileName();
         }
 
@@ -85,7 +83,7 @@ namespace Luky
         /// <returns></returns>
         public string GetStackTraceText()
         {
-            var st = new StackTrace(true);
+            StackTrace st = new StackTrace(true);
             return st.ToString();
         }
 
@@ -124,7 +122,7 @@ namespace Luky
         /// <param name="items"></param>
         /// <returns></returns>
         public T[] MakeArray<T>(params T[] items)
-        => items; 
+        => items;
 
         /// <summary>
         /// 
@@ -134,7 +132,7 @@ namespace Luky
         /// <returns></returns>
         public List<T> MakeList<T>(T item)
         {
-            var list = new List<T>(1);
+            List<T> list = new List<T>(1);
             list.Add(item);
             return list;
         }

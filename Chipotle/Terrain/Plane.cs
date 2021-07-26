@@ -1,24 +1,26 @@
-﻿using System.Text.RegularExpressions;
+﻿using Game.Entities;
+
+using Luky;
+
 using System;
 using System.Collections.Generic;
-using Luky;
 using System.Linq;
-using Game.Entities;
+using System.Text.RegularExpressions;
 
 namespace Game.Terrain
 {
-	/// <summary>
-	/// Represents a rectangle slice of tile map from static class named World. Should be used for exploring or searching the map. It's guaranted that top left corner has always lower coordinates than bottom right one.
-	/// </summary>
-	public class Plane:DebugSO
+    /// <summary>
+    /// Represents a rectangle slice of tile map from static class named World. Should be used for exploring or searching the map. It's guaranted that top left corner has always lower coordinates than bottom right one.
+    /// </summary>
+    public class Plane : DebugSO
     {
         public override int GetHashCode()
-            => unchecked(4112 *(8121 +UpperLeftCorner.GetHashCode()) *(6988 + LowerRightCorner.GetHashCode()));
+            => unchecked(4112 * (8121 + UpperLeftCorner.GetHashCode()) * (6988 + LowerRightCorner.GetHashCode()));
 
-		public float MinimumHeight { get; set; }
+        public float MinimumHeight { get; set; }
         public float MinimumWidth { get; set; }
 
-        public Vector2 Center { get =>Size==1 ? UpperLeftCorner : new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);  }
+        public Vector2 Center => Size == 1 ? UpperLeftCorner : new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);
 
         public bool IsInMapBoundaries()
             => World.Map.IsInBoundaries(UpperLeftCorner) && World.Map.IsInBoundaries(LowerRightCorner);
@@ -30,7 +32,7 @@ namespace Game.Terrain
         {
             World.Map[absolute].Locality.Area.ArrangeCorners();
             Vector2 corner = World.Map[absolute].Locality.Area.UpperLeftCorner;
-            return new Vector2(absolute.X -corner.X, corner.Y-absolute.Y);
+            return new Vector2(absolute.X - corner.X, corner.Y - absolute.Y);
         }
 
 
@@ -53,16 +55,12 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="plane">The plane to compare</param>
         /// <returns>True if the plane lays on this plane</returns>
-        public bool LaysOnPlane(Plane plane)
-        {
-            return
-                (from c in GetPoints()
-                where (!LaysOnPlane(c))
-                select c).Take(1).IsNullOrEmpty();
-        }
+        public bool LaysOnPlane(Plane plane) => (from c in GetPoints()
+                                                 where (!LaysOnPlane(c))
+                                                 select c).Take(1).IsNullOrEmpty();
 
         public Vector2 GetPerimeterPoint(Vector2 start, Direction direction)
-=> GetPerimeterPoints(direction).Where (p=> p.X == start.X || p.Y == start.Y).First();
+=> GetPerimeterPoints(direction).Where(p => p.X == start.X || p.Y == start.Y).First();
 
 
         /// <summary>
@@ -79,7 +77,7 @@ namespace Game.Terrain
             LowerRightCorner += direction;
             return this;
         }
-                
+
         public Plane Move(Vector2 direction)
             => Move(direction, 1f);
 
@@ -93,14 +91,18 @@ namespace Game.Terrain
             => GetSurroundingPoints().Select(p => World.Map[p]).Where(t => t != null);
 
         public IEnumerable<Vector2> GetSurroundingPoints()
-		{
+        {
             Vector2 largerUpperLeft = UpperLeftCorner + Direction.UpLeft.AsVector2();
-            Vector2 largerLowerRight = LowerRightCorner+ Direction.DownRight.AsVector2();
+            Vector2 largerLowerRight = LowerRightCorner + Direction.DownRight.AsVector2();
 
             Vector2 point;
             for (point.X = largerUpperLeft.X; point.X <= largerLowerRight.X; point.X++)
+            {
                 for (point.Y = largerLowerRight.Y; point.Y < largerUpperLeft.Y; point.Y++)
+                {
                     yield return point;
+                }
+            }
         }
 
         /// <summary>
@@ -118,11 +120,15 @@ namespace Game.Terrain
         /// <param name="direction">To which side should it be extended?</param>
         public void Extend(Direction direction)
         {
-            var step = direction.AsVector2();
+            Vector2 step = direction.AsVector2();
             if (direction == Direction.Left || direction == Direction.Up)
+            {
                 UpperLeftCorner += step;
+            }
             else if (direction == Direction.Right || direction == Direction.Down)
+            {
                 LowerRightCorner += step;
+            }
         }
 
 
@@ -132,18 +138,24 @@ namespace Game.Terrain
         /// Reduces the plane in given direction. Moves one side.
         /// </summary>
         /// <param name="direction"></param>
-public void Reduce(Direction direction)
+        public void Reduce(Direction direction)
         {
-            Assert((direction.IsVertical() && Height>=MinimumHeight) || (direction.IsHorizontal() && Width>=MinimumWidth), "Minimum size exceeded.");
+            Assert((direction.IsVertical() && Height >= MinimumHeight) || (direction.IsHorizontal() && Width >= MinimumWidth), "Minimum size exceeded.");
 
             if (((direction == Direction.Left || direction == Direction.Right) && Width == 1) || ((direction == Direction.Up || direction == Direction.Down) && Height == 1))
+            {
                 return;
+            }
 
             Vector2 step = direction.GetOpposite().AsVector2();
             if (direction == Direction.Left || direction == Direction.Up)
+            {
                 UpperLeftCorner += step;
+            }
             else if (direction == Direction.Right || direction == Direction.Down)
+            {
                 LowerRightCorner += step;
+            }
         }
 
         /// <summary>
@@ -166,63 +178,66 @@ public void Reduce(Direction direction)
         public bool IsNegative()
 => GetPoints().Any(c => c.IsNegative());
 
-		public bool IsPerpendicularToSide(Direction side, Vector2 vector)
-		{
+        public bool IsPerpendicularToSide(Direction side, Vector2 vector)
+        {
             Vector2 sideLineVector = GetVectorOfSide(side);
             sideLineVector.Normalize();
 
             return vector == sideLineVector.PerpendicularLeft || vector == sideLineVector.PerpendicularLeft;
-		}
+        }
 
-		public Vector2 GetVectorOfSide(Direction side)
-		{
-            var sideDefinition = GetSideDefinition(side);
+        public Vector2 GetVectorOfSide(Direction side)
+        {
+            (Vector2 Point1, Vector2 Point2) sideDefinition = GetSideDefinition(side);
             return sideDefinition.Point2 - sideDefinition.Point1;
-		}
+        }
 
-		public (Vector2 Point1, Vector2 Point2) GetSideDefinition(Direction side)
-		{
-            switch(side)
-			{
+        public (Vector2 Point1, Vector2 Point2) GetSideDefinition(Direction side)
+        {
+            switch (side)
+            {
                 case Direction.Left: return (LowerLeftCorner, UpperLeftCorner);
                 case Direction.Up: return (UpperLeftCorner, UpperRightCorner);
                 case Direction.Right: return (LowerRightCorner, UpperRightCorner);
                 case Direction.Down: return (LowerLeftCorner, LowerRightCorner);
                 default: throw ArgumentException(nameof(side));
-			}
-		}
+            }
+        }
 
 
 
 
-		/// <summary>
-		/// Checks if a point lays on this plane.
-		/// </summary>
-		/// <param name="point">The point to check</param>
-		/// <returns>True if the point lays on the plane</returns>
-		public bool LaysOnPlane(Vector2 point)
+        /// <summary>
+        /// Checks if a point lays on this plane.
+        /// </summary>
+        /// <param name="point">The point to check</param>
+        /// <returns>True if the point lays on the plane</returns>
+        public bool LaysOnPlane(Vector2 point)
         {
             if (point.X == 2 && point.Y == 7)
+            {
                 throw new Exception();
-            return point.X >= UpperLeftCorner.X && point.X <= LowerRightCorner.X && point.Y >= LowerRightCorner.Y  && point.Y <= UpperLeftCorner.Y;
+            }
+
+            return point.X >= UpperLeftCorner.X && point.X <= LowerRightCorner.X && point.Y >= LowerRightCorner.Y && point.Y <= UpperLeftCorner.Y;
         }
 
         public Direction GetIntersectingSide(Vector2 point)
             => DirectionExtension.BasicDirections.Where(d => IntersectsWithSide(d, point)).FirstOrDefault();
 
-		public bool IntersectsWithSide(Direction side, Vector2 point)
-		{
-                var definition = GetSideDefinition(side);
-                return point.X >= definition.Point1.X && point.Y>=definition.Point1.Y && point.X<= definition.Point2.X && point.Y<=definition.Point2.Y;
-		}
+        public bool IntersectsWithSide(Direction side, Vector2 point)
+        {
+            (Vector2 Point1, Vector2 Point2) definition = GetSideDefinition(side);
+            return point.X >= definition.Point1.X && point.Y >= definition.Point1.Y && point.X <= definition.Point2.X && point.Y <= definition.Point2.Y;
+        }
 
-		/// <summary>
-		/// Enumerates all coordinates in given direction which belong to this plane.
-		/// </summary>
-		/// <param name="start">Start coordinates</param>
-		/// <param name="side">Direction of the range</param>
-		/// <returns>Enumeration of coordinates</returns>
-		public IEnumerable<Vector2> GetPointsToEdge(Vector2 start, Direction side)
+        /// <summary>
+        /// Enumerates all coordinates in given direction which belong to this plane.
+        /// </summary>
+        /// <param name="start">Start coordinates</param>
+        /// <param name="side">Direction of the range</param>
+        /// <returns>Enumeration of coordinates</returns>
+        public IEnumerable<Vector2> GetPointsToEdge(Vector2 start, Direction side)
             => World.Map.GetPointsToEdge(start, side).Where(p => LaysOnPlane(p));
 
         public bool IntersectsWithPassages()
@@ -252,9 +267,13 @@ public void Reduce(Direction direction)
         public IEnumerable<Vector2> GetPoints()
         {
             Vector2 position;
-            for (position.X= UpperLeftCorner.X; position.X <= LowerRightCorner.X; position.X++)
-                for (position.Y = LowerRightCorner.Y; position.Y<= UpperLeftCorner.Y; position.Y++)
+            for (position.X = UpperLeftCorner.X; position.X <= LowerRightCorner.X; position.X++)
+            {
+                for (position.Y = LowerRightCorner.Y; position.Y <= UpperLeftCorner.Y; position.Y++)
+                {
                     yield return position;
+                }
+            }
         }
 
 
@@ -274,10 +293,10 @@ public void Reduce(Direction direction)
 => GetTiles().Foreach(t => t.Register(l));
 
         public bool ContainsEmptyTiles()
-=> GetPoints().Any(p => World.Map[p]==null);
+=> GetPoints().Any(p => World.Map[p] == null);
 
         public IEnumerable<Passage> GetIntersectingPassages()
-            => (from t in GetTiles() where (t?.Passage!= null) select t.Passage).Distinct();
+            => (from t in GetTiles() where (t?.Passage != null) select t.Passage).Distinct();
 
 
         public IEnumerable<GameObject> GetIntersectingObjects()
@@ -294,10 +313,12 @@ public void Reduce(Direction direction)
 
         public bool IsOnPerimeter(Plane area)
         {
-            foreach(var c in area.GetPoints())
+            foreach (Vector2 c in area.GetPoints())
             {
                 if (!IsOnPerimeter(c))
+                {
                     return false;
+                }
             }
 
             return true;
@@ -310,10 +331,12 @@ public void Reduce(Direction direction)
         /// <summary>
         /// All tiles laying on perimeter of the locality rectangle.
         /// </summary>
-        public IEnumerable<Tile> GetPerimeter ()
+        public IEnumerable<Tile> GetPerimeter()
         {
-            foreach (var c in GetPerimeterPoints())
+            foreach (Vector2 c in GetPerimeterPoints())
+            {
                 yield return World.Map[c];
+            }
         }
 
         public IEnumerable<Vector2> GetPerimeterPoints()
@@ -334,7 +357,7 @@ public void Reduce(Direction direction)
         public IEnumerable<Vector2> GetPerimeterPoints(IEnumerable<Direction> directions)
             => directions.Select(d => GetPerimeterPoints(d)).SelectMany(p => p).Distinct();
 
-        public IEnumerable<Vector2> GetPerimeterPoints (Direction direction)
+        public IEnumerable<Vector2> GetPerimeterPoints(Direction direction)
         {
             float x, y;
             float left = UpperLeftCorner.X;
@@ -342,29 +365,41 @@ public void Reduce(Direction direction)
             float top = UpperLeftCorner.Y;
             float bottom = LowerRightCorner.Y;
 
-            switch(direction)
+            switch (direction)
             {
                 case Direction.Left:
                     for (y = bottom; y <= top; y++)
-                    yield  return  new Vector2(left, y);
+                    {
+                        yield return new Vector2(left, y);
+                    }
+
                     break;
 
-                        case Direction.Right:
+                case Direction.Right:
                     for (y = bottom; y <= top; y++)
+                    {
                         yield return new Vector2(right, y);
+                    }
+
                     break;
 
 
                 case Direction.Up:
                     for (x = left; x <= right; x++)
+                    {
                         yield return new Vector2(x, top);
+                    }
+
                     break;
 
 
 
                 case Direction.Down:
                     for (x = left; x <= right; x++)
+                    {
                         yield return new Vector2(x, bottom);
+                    }
+
                     break;
 
                 default:
@@ -376,10 +411,10 @@ public void Reduce(Direction direction)
             => new Vector2(locality.Area.UpperLeftCorner.X + relative.X, locality.Area.UpperLeftCorner.Y - relative.Y);
 
 
-        public Tile this [int x, int y] { get => World.Map[x, y]; set => World.Map[x, y] = value; }
-            
-        public float Width { get =>1 +LowerRightCorner.X - UpperLeftCorner.X; }
-        public float Height { get => 1 +UpperLeftCorner.Y -LowerRightCorner.Y; }
+        public Tile this[int x, int y] { get => World.Map[x, y]; set => World.Map[x, y] = value; }
+
+        public float Width => 1 + LowerRightCorner.X - UpperLeftCorner.X;
+        public float Height => 1 + UpperLeftCorner.Y - LowerRightCorner.Y;
 
 
         /// <summary>
@@ -387,13 +422,13 @@ public void Reduce(Direction direction)
         /// </summary>
         /// <returns></returns>
         public IEnumerable<Tile> GetTiles()
-=> GetPoints().Select(p=> World.Map[p]).Where(p=> p!=null);
+=> GetPoints().Select(p => World.Map[p]).Where(p => p != null);
 
         public IEnumerable<Tile> GetWalkableTiles()
             => GetTiles().Where(t => t.Walkable);
 
 
-		public override string ToString()
+        public override string ToString()
 => $"{UpperLeftCorner}, {LowerRightCorner}";
 
 
@@ -401,7 +436,7 @@ public void Reduce(Direction direction)
         /// <summary>
         /// Defines the rectangle
         /// </summary>
-        public Vector2 UpperLeftCorner { get;  set; }
+        public Vector2 UpperLeftCorner { get; set; }
 
         /// <summary>
         /// Transforms relative coordinates of one plane  to absolute coordinates according to second plane.
@@ -409,7 +444,7 @@ public void Reduce(Direction direction)
         /// <param name="a">Plane with relative coordinates</param>
         /// <param name="b">Default plane</param>
         /// <returns>New plane with absolute coordinates</returns>
-        public static   Plane ToAbsolute(Plane a, Plane b)
+        public static Plane ToAbsolute(Plane a, Plane b)
         {
             Vector2 absoluteTopLeft = b.UpperLeftCorner;
             Vector2 absoluteBottomRight = b.UpperLeftCorner;
@@ -436,10 +471,10 @@ public void Reduce(Direction direction)
         public Vector2 LowerRightCorner { get; set; }
 
         public Locality GetLocality()
-            =>      IsInOneLocality() ? GetTiles().First().Locality : null;
+            => IsInOneLocality() ? GetTiles().First().Locality : null;
 
         public IEnumerable<Locality> GetIntersectingLocalities()
-            => GetTiles().Select(t=> t.Locality).Distinct();
+            => GetTiles().Select(t => t.Locality).Distinct();
 
         public bool IsInOneLocality()
             => GetTiles().All(t => t != null && t.Locality == GetTiles().First().Locality);
@@ -453,46 +488,47 @@ public void Reduce(Direction direction)
         /// <returns>True if the planes intersect with each other</returns>
         public bool Intersects(Plane plane)
         {
-            foreach (var c in GetPoints())
+            foreach (Vector2 c in GetPoints())
             {
                 if (plane.LaysOnPlane(c))
+                {
                     return true;
-
+                }
             }
             return false;
         }
-            //=> !(from c in GetCoordinates() where (plane.LaysOnPlane(c)) select c).IsNullOrEmpty();
+        //=> !(from c in GetCoordinates() where (plane.LaysOnPlane(c)) select c).IsNullOrEmpty();
 
-        public Vector2 LowerLeftCorner { get => new Vector2(UpperLeftCorner.X, LowerRightCorner.Y); }
-        public Vector2 UpperRightCorner { get => new Vector2(LowerRightCorner.X, UpperLeftCorner.Y); }
-		public float Size { get=>Height*Width; }
+        public Vector2 LowerLeftCorner => new Vector2(UpperLeftCorner.X, LowerRightCorner.Y);
+        public Vector2 UpperRightCorner => new Vector2(LowerRightCorner.X, UpperLeftCorner.Y);
+        public float Size => Height * Width;
 
 
 
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="topLeft">Coordinates of top left corner of the rectangle</param>
-		/// <param name="bottomRight">Coordinates of bottom right corner of the rectangle</param>
-		public Plane(Vector2 topLeft, Vector2 bottomRight)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="topLeft">Coordinates of top left corner of the rectangle</param>
+        /// <param name="bottomRight">Coordinates of bottom right corner of the rectangle</param>
+        public Plane(Vector2 topLeft, Vector2 bottomRight)
         {
             UpperLeftCorner = topLeft;
             LowerRightCorner = bottomRight;
 
-            MinimumHeight=MinimumWidth= 1;
+            MinimumHeight = MinimumWidth = 1;
         }
 
         /// <summary>
         /// Verify that UpperLeft is more on the left and upper than LowerRight
         /// </summary>
 		public void ArrangeCorners()
-		{
+        {
             float temp;
             if (UpperLeftCorner.X > LowerRightCorner.X)
             { // Swap them
                 temp = UpperLeftCorner.X;
-                UpperLeftCorner =  new Vector2(LowerRightCorner.X, UpperLeftCorner.Y);
-                LowerRightCorner =new Vector2(temp, LowerRightCorner.Y);
+                UpperLeftCorner = new Vector2(LowerRightCorner.X, UpperLeftCorner.Y);
+                LowerRightCorner = new Vector2(temp, LowerRightCorner.Y);
             }
 
             if (UpperLeftCorner.Y < LowerRightCorner.Y)
@@ -503,7 +539,7 @@ public void Reduce(Direction direction)
             }
         }
 
-        public Plane(Vector2 coordinates): this(coordinates, coordinates)
+        public Plane(Vector2 coordinates) : this(coordinates, coordinates)
         { }
 
 
@@ -515,22 +551,24 @@ public void Reduce(Direction direction)
         public Plane(string coordinates)
         {
             // Null check
-Assert(!string.IsNullOrEmpty(coordinates), $"{nameof(coordinates)} cann't be null.");
+            Assert(!string.IsNullOrEmpty(coordinates), $"{nameof(coordinates)} cann't be null.");
 
-    // Parse the values
-            var coordinateList = new List<int>();
-          coordinates  = coordinates.Trim();
-            foreach (var coordinate in Regex.Split(coordinates, @"\D+"))
+            // Parse the values
+            List<int> coordinateList = new List<int>();
+            coordinates = coordinates.Trim();
+            foreach (string coordinate in Regex.Split(coordinates, @"\D+"))
+            {
                 coordinateList.Add(int.Parse(coordinate));
+            }
 
             // Check format
             Assert(coordinateList.Count == 4 || coordinateList.Count == 2, $"{nameof(coordinates)} in invalid format");
 
             UpperLeftCorner = new Vector2(coordinateList[0], coordinateList[1]);
-            LowerRightCorner =coordinateList.Count==2 ?UpperLeftCorner:   new Vector2(coordinateList[2], coordinateList[3]);
+            LowerRightCorner = coordinateList.Count == 2 ? UpperLeftCorner : new Vector2(coordinateList[2], coordinateList[3]);
         }
 
-        public Plane(Plane plane):this(plane.UpperLeftCorner, plane.LowerRightCorner)
+        public Plane(Plane plane) : this(plane.UpperLeftCorner, plane.LowerRightCorner)
         {
             MinimumHeight = plane.MinimumHeight;
             MinimumWidth = plane.MinimumWidth;

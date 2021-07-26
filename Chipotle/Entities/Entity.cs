@@ -1,43 +1,39 @@
 ﻿using Game.Messaging;
-using Game.Messaging.Commands;
-using Game.Messaging.Events;
-using DavyKager;
+using Game.Terrain;
 
 using Luky;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using Game.Terrain;
 
 namespace Game.Entities
 {
-    public class Entity: GameObject
+    public class Entity : GameObject
     {
-        public Orientation2D Orientation { get => _physics.Orientation; }
+        public Orientation2D Orientation => _physics.Orientation;
 
-        public new Plane Area { get => _physics.Area; }
+        public new Plane Area => _physics.Area;
 
 
         public override void ReceiveMessage(GameMessage message)
         {
             if (message.Sender == this)
+            {
                 return;
+            }
 
             base.ReceiveMessage(message);
 
-            if(_messagingEnabled)
-            SendInnerMessage(message);
+            if (_messagingEnabled)
+            {
+                SendInnerMessage(message);
+            }
         }
 
 
         protected AIComponent _ai;
-		protected InputComponent _input;
-		protected PhysicsComponent _physics;
+        protected InputComponent _input;
+        protected PhysicsComponent _physics;
         protected SoundComponent _sound;
 
 
@@ -73,10 +69,12 @@ namespace Game.Entities
         /// <param name="message">Message to redistribute</param>
         protected virtual void SendInnerMessage(GameMessage message)
         {
-            List<EntityComponent> targetComponents =new List<EntityComponent>();
-            targetComponents=_components.Where(c => c != message.Sender).ToList<EntityComponent>();
+            List<EntityComponent> targetComponents = new List<EntityComponent>();
+            targetComponents = _components.Where(c => c != message.Sender).ToList<EntityComponent>();
             if (!IsInternal(message))
+            {
                 targetComponents.Remove(_sound);
+            }
 
             targetComponents.Foreach(c => c.ReceiveMessage(message));
             //foreach(var c in _components)
@@ -107,7 +105,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            _components.ForEach(c =>    c.Start());
+            _components.ForEach(c => c.Start());
         }
 
 
@@ -115,7 +113,7 @@ namespace Game.Entities
         /// <summary>
         /// Constructor
         /// </summary>
-        public Entity(Name name, string type, AIComponent ai, InputComponent input, PhysicsComponent physics, SoundComponent sound):base(name, type, null)
+        public Entity(Name name, string type, AIComponent ai, InputComponent input, PhysicsComponent physics, SoundComponent sound) : base(name, type, null)
         {
             _physics = physics;
             _sound = sound;

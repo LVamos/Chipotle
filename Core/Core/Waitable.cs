@@ -19,11 +19,11 @@ namespace Luky
         public bool WorkImmediatelyAvailable; // set by the Waitable owner if there is more work to do without waiting for a timeout or a WaitHandle.
                                               // set by WaitAny, and cleared by the Waitable owner, null means not triggered, -1 means timeout triggered, -2 means WorkImmediatelyAvailable, anything else is the wait handle index.
 
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="waitables"></param>
-            /// <returns></returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="waitables"></param>
+        /// <returns></returns>
         public static int WaitAny(Waitable[] waitables)
         { // returns the index of the waitable that can now perform work, and sets the result field of that waitable.
           // first check for waitables that already have work available
@@ -59,7 +59,7 @@ namespace Luky
                     return timeoutIndex;
                 }
             }
-            var handles = waitables.SelectMany(p => p.WaitHandles).ToArray();
+            WaitHandle[] handles = waitables.SelectMany(p => p.WaitHandles).ToArray();
             int index = WaitHandle.WaitAny(handles, timeout);
 
             if (index == WaitHandle.WaitTimeout)
@@ -80,5 +80,5 @@ namespace Luky
             } // end foreach waitable
             throw new Exception("Should not get here");
         }
-    } 
+    }
 }

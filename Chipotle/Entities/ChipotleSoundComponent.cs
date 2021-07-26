@@ -1,19 +1,14 @@
-﻿using Game.Messaging;
-using Game.Messaging.Commands;
-using Game.Messaging.Events;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using DavyKager;
 
-using DavyKager;
+using Game.Messaging;
+using Game.Messaging.Events;
+using Game.Terrain;
 
 using Luky;
 
-using Game.Terrain;
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace Game.Entities
 {
@@ -27,7 +22,7 @@ namespace Game.Entities
 
 
 
-        public ChipotleSoundComponent():base()
+        public ChipotleSoundComponent() : base()
         {
 
 
@@ -36,10 +31,7 @@ namespace Game.Entities
         protected void SayOrientation()
             => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription());
 
-        private void OnTurnoverDone(TurnEntityResult  message)
-        {
-            SayOrientation();
-        }
+        private void OnTurnoverDone(TurnEntityResult message) => SayOrientation();
 
         public override void Start()
         {
@@ -50,10 +42,10 @@ namespace Game.Entities
             new Dictionary<Type, Action<GameMessage>>()
             {
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
-                [typeof(TurnEntityResult )] =(m)=> OnTurnoverDone((TurnEntityResult )m),
-                [typeof(EntityMoved )] =(m)=> OnMovementDone((EntityMoved )m),
-                [typeof(ObjectsCollided)] = (m)=> OnObjectsCollided((ObjectsCollided)m),
-                [typeof(TerrainCollided )] = (m)=> OnInpermeableTerrainCollision((TerrainCollided )m)
+                [typeof(TurnEntityResult)] = (m) => OnTurnoverDone((TurnEntityResult)m),
+                [typeof(EntityMoved)] = (m) => OnMovementDone((EntityMoved)m),
+                [typeof(ObjectsCollided)] = (m) => OnObjectsCollided((ObjectsCollided)m),
+                [typeof(TerrainCollided)] = (m) => OnInpermeableTerrainCollision((TerrainCollided)m)
             }
             );
 
@@ -61,14 +53,11 @@ namespace Game.Entities
 
         private void OnEntityHitDoor(DoorHit m)
 => SayDelegate("dveře");
-        private void OnInpermeableTerrainCollision(GameMessage message)
-        {
-            Tolk.Speak("penetráces");
-        }
+        private void OnInpermeableTerrainCollision(GameMessage message) => Tolk.Speak("penetráces");
 
         private void OnObjectsCollided(ObjectsCollided message)
         {
-            var collidingObject = message.Tile.Object;
+            GameObject collidingObject = message.Tile.Object;
 
             // Announce
             Timer t = new Timer();
@@ -84,21 +73,22 @@ namespace Game.Entities
             Vector2 orientation = Owner.Orientation.UnitVector;
 
             if (_sound.ListenerPosition.X != position.X || _sound.ListenerPosition.Z != position.Y)
+            {
                 _sound.ListenerPosition = position.AsOpenALVector();
+            }
 
             if (_sound.ListenerOrientationFacing.X != orientation.X || _sound.ListenerOrientationFacing.Z != orientation.Y)
+            {
                 _sound.ListenerOrientationFacing = orientation.AsOpenALVector();
+            }
         }
 
-        private void OnMovementDone(EntityMoved  message)
-        {
-            PlayTerrain(message.Target);
-        }
+        private void OnMovementDone(EntityMoved message) => PlayTerrain(message.Target);
 
         private void PlayTerrain(Tile tile)
         {
             string soundName = "movstep" + Enum.GetName(tile.Terrain.GetType(), tile.Terrain);
-            _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role:  null, looping:  false, PositionType.Relative, new Vector3(0, -1.7f, 0), true, 1f, null, 1f, 0, Playback.OpenAL);
+            _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, new Vector3(0, -1.7f, 0), true, 1f, null, 1f, 0, Playback.OpenAL);
         }
     }
 }

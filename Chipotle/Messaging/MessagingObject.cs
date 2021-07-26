@@ -9,17 +9,19 @@ namespace Game.Messaging
 {
 
 
-	public delegate void MessageHandler(GameMessage message);
+    public delegate void MessageHandler(GameMessage message);
 
-    public abstract class MessagingObject:DebugSO
+    public abstract class MessagingObject : DebugSO
     {
         public override int GetHashCode()
-            => unchecked(4565 *(566 +_messagingEnabled.GetHashCode()) *(7193 +(_messages==null ? 0 : _messages.GetHashCode())));
+            => unchecked(4565 * (566 + _messagingEnabled.GetHashCode()) * (7193 + (_messages == null ? 0 : _messages.GetHashCode())));
 
-		public virtual void Update()
+        public virtual void Update()
         {
             if (_messagingEnabled && !_messages.IsNullOrEmpty())
+            {
                 HandleMessage(DequeueMessage());
+            }
         }
 
 
@@ -41,8 +43,10 @@ namespace Game.Messaging
         /// <param name="message"></param>
         public virtual void ReceiveMessage(GameMessage message)
         {
-            if(_messagingEnabled && message.Sender!=this)
-            EnqueueMessage(message);
+            if (_messagingEnabled && message.Sender != this)
+            {
+                EnqueueMessage(message);
+            }
         }
 
         protected Dictionary<Type, Action<GameMessage>> _messageHandlers;
@@ -53,8 +57,10 @@ namespace Game.Messaging
         /// <param name="message"></param>
         protected virtual void HandleMessage(GameMessage message)
         {
-                if (_messageHandlers.TryGetValue(message.GetType(), out var handler))
+            if (_messageHandlers.TryGetValue(message.GetType(), out Action<GameMessage> handler))
+            {
                 handler(message);
+            }
         }
 
 
@@ -71,7 +77,7 @@ namespace Game.Messaging
         /// Adds incoming message to queue.
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void EnqueueMessage            (GameMessage message)
+        protected virtual void EnqueueMessage(GameMessage message)
             => _messages.Enqueue(message);
 
         /// <summary>
@@ -89,9 +95,6 @@ namespace Game.Messaging
         /// <summary>
         /// Constructor
         /// </summary>
-        protected MessagingObject()
-        {
-            _messageHandlers = new Dictionary<Type, Action<GameMessage>>();
-        }
+        protected MessagingObject() => _messageHandlers = new Dictionary<Type, Action<GameMessage>>();
     }
 }

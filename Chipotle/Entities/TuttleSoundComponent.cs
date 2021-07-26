@@ -1,18 +1,11 @@
 ﻿using Game.Messaging;
-using Game.Messaging.Commands;
 using Game.Messaging.Events;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
+using Game.Terrain;
 
 using Luky;
 
-using Game.Terrain;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -41,10 +34,7 @@ namespace Game.Entities
 
 
 
-        private void OnEntityMoved(EntityMoved message)
-        {
-            PlayTerrain(message.Target);
-        }
+        private void OnEntityMoved(EntityMoved message) => PlayTerrain(message.Target);
 
         private void PlayTerrain(Tile tile)
         {

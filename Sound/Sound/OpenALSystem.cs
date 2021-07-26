@@ -1,18 +1,11 @@
-﻿using EaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb;
-using EfxEaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EfxEaxReverb;
+﻿using OpenTK.Audio;
+using OpenTK.Audio.OpenAL;
 
 using System;
 using System.Collections.Generic;
 
-using OpenTK;
-using OpenTK.Audio;
-using OpenTK.Audio.OpenAL;
-
-using Sound;
-
-using Presets = OpenTK.Audio.OpenAL.EffectsExtension.ReverbPresets;
-using System.ComponentModel;
-using NAudio.SoundFont;
+using EaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb;
+using EfxEaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EfxEaxReverb;
 
 namespace Luky
 {
@@ -27,7 +20,7 @@ namespace Luky
             //AL.Source(_table[soundId].SourceID, ALSource3i.EfxAuxiliarySendFilter, _effectSlot, 0, 0);
         }
 
-        public void ApplyEaxReverbPreset(EaxReverb preset, string name=null)
+        public void ApplyEaxReverbPreset(EaxReverb preset, string name = null)
         {
             EaxReverb eaxReverb = preset;
             EfxEaxReverb efxReverb;
@@ -35,7 +28,7 @@ namespace Luky
             SetEaxReverbProperties(efxReverb, name);
         }
 
-        public void SetEaxReverbProperties(EfxEaxReverb reverb, string name=null)
+        public void SetEaxReverbProperties(EfxEaxReverb reverb, string name = null)
         {
             // Load effect properties
             Alc.SuspendContext(_alContext.context_handle);
@@ -50,7 +43,7 @@ namespace Luky
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbGainLF, reverb.GainLF);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.GainLF)}.");
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayTime, reverb.DecayTime);
-                ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayTime)}.");
+            ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayTime)}.");
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayHFRatio, reverb.DecayHFRatio);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayHFRatio)}: {reverb.DecayHFRatio.ToString("0.00")}");
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayLFRatio, reverb.DecayLFRatio);
@@ -92,7 +85,9 @@ namespace Luky
 
 
             if (!string.IsNullOrEmpty(name))
-            DebugSO.WriteDelegate(name);
+            {
+                DebugSO.WriteDelegate(name);
+            }
         }
 
         public void EnableReverb()
@@ -100,10 +95,10 @@ namespace Luky
             _effectExtension = new EffectsExtension();
             ALAnnounceError("Creating instance of EffectsExtension.");
 
-                            _effectHandle = _effectExtension.GenEffect();
+            _effectHandle = _effectExtension.GenEffect();
             ALAnnounceError("Geneffect.");
 
-                _effectExtension.BindEffect(_effectHandle, EfxEffectType.EaxReverb);
+            _effectExtension.BindEffect(_effectHandle, EfxEffectType.EaxReverb);
             ALAnnounceError("efx.BindEffect");
 
             _effectSlot = _effectExtension.GenAuxiliaryEffectSlot();
@@ -148,7 +143,7 @@ namespace Luky
         /// 
         /// </summary>
         public void Dispose()
-        => _alContext.Dispose(); 
+        => _alContext.Dispose();
 
         /// <summary>
         /// 
@@ -156,7 +151,7 @@ namespace Luky
         /// <param name="soundID"></param>
         public void DisposeSound(int soundID)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             AlDeleteSource(info.SourceID);
             ALAnnounceError("AlDeleteSource");
             foreach (int bid in info.QueuedBufferIDs)
@@ -178,7 +173,7 @@ namespace Luky
         /// <param name="frequencyMultiplier"></param>
         public void InitSound(int soundID, int channels, int sampleRate, PositionType pt, Vector3 position, float frequencyMultiplier)
         {
-            var info = new Info();
+            Info info = new Info();
             info.Channels = channels;
             info.SampleRate = sampleRate;
             info.SourceID = AL.GenSource();
@@ -230,8 +225,8 @@ namespace Luky
         /// <returns></returns>
         public bool IsPlaying(int soundID)
         {
-            var info = _table[soundID];
-            var state = AlGetState(info.SourceID);
+            Info info = _table[soundID];
+            ALSourceState state = AlGetState(info.SourceID);
             return state == ALSourceState.Playing;
         }
 
@@ -242,7 +237,7 @@ namespace Luky
         /// <returns></returns>
         public bool IsReadyForBuffer(int soundID)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             int processed;
             AL.GetSource(info.SourceID, ALGetSourcei.BuffersProcessed, out processed);
             ALAnnounceError("AL.GetSource BuffersProcessed");
@@ -256,8 +251,8 @@ namespace Luky
         /// <returns></returns>
         public bool IsStopped(int soundID)
         {
-            var info = _table[soundID];
-            var state = AlGetState(info.SourceID);
+            Info info = _table[soundID];
+            ALSourceState state = AlGetState(info.SourceID);
             return state == ALSourceState.Stopped;
         }
 
@@ -267,7 +262,7 @@ namespace Luky
         /// <param name="soundID"></param>
         public void Pause(int soundID)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             ALPause(info.SourceID);
             info.ShouldBePlaying = false;
         }
@@ -280,12 +275,15 @@ namespace Luky
         public void Play(int soundID, List<ShortBuffer> initialBuffers)
         {
             if (initialBuffers.Count != MaxQueuedBuffers)
+            {
                 throw ArgumentException("initialBuffers should have length {0} but have length {1}", MaxQueuedBuffers, initialBuffers.Count);
-            var info = _table[soundID];
+            }
+
+            Info info = _table[soundID];
             if (info.QueuedBufferIDs == null)
             { // this is the first time we are initializing the buffers
                 info.QueuedBufferIDs = new List<int>(MaxQueuedBuffers);
-                foreach (var buffer in initialBuffers)
+                foreach (ShortBuffer buffer in initialBuffers)
                 {
                     //Say(buffer.Length);
                     int bid = AL.GenBuffer();
@@ -306,14 +304,16 @@ namespace Luky
                   // now that all the buffers are dequeued, we can requeue them using the same buffer IDs.
                 for (int i = 0; i < MaxQueuedBuffers; i++)
                 {
-                    var buffer = initialBuffers[i];
+                    ShortBuffer buffer = initialBuffers[i];
                     int bid = info.QueuedBufferIDs[i];
                     AssociateAndQueueBuffer(info, bid, buffer.Data, buffer.Filled);
                 } // end for the number of max queued buffers
             }
 
-            if(_effectSlot!=0)
-            BindSourceToAuxiliarysend(soundID);
+            if (_effectSlot != 0)
+            {
+                BindSourceToAuxiliarysend(soundID);
+            }
 
             ALPlay(info.SourceID);
             info.ShouldBePlaying = true;
@@ -327,8 +327,11 @@ namespace Luky
         public void QueueBuffer(int soundID, ShortBuffer buffer)
         {
             if (buffer == null)
+            {
                 throw new ArgumentException("buffer cannot be null");
-            var info = _table[soundID];
+            }
+
+            Info info = _table[soundID];
             // we assume that our caller ran the IsReadyForBuffer method to ensure we are ready for a new buffer.
             int bid = AL.SourceUnqueueBuffer(info.SourceID);
             ALAnnounceError("AL.SourceUnqueueBuffer");
@@ -349,7 +352,7 @@ namespace Luky
         /// <param name="sampleRate"></param>
         public void ReconfigureSound(int soundID, int channels, int sampleRate)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             info.Channels = channels;
             info.SampleRate = sampleRate;
         }
@@ -365,8 +368,8 @@ namespace Luky
         /// <param name="up"></param>
         public void SetListenerOrientation(Vector3 at, Vector3 up)
         {
-            var oAt = at.AsOpenTKV3();
-            var oUp = up.AsOpenTKV3();
+            OpenTK.Vector3 oAt = at.AsOpenTKV3();
+            OpenTK.Vector3 oUp = up.AsOpenTKV3();
             // the defaults for a fresh OpenAL context are: at is (0, 0, -1), up is (0, 1, 0)
             // but I set them to this when we startup: at is (0, -1, 0), up is (0, 0, -1)
             AL.Listener(ALListenerfv.Orientation, ref oAt, ref oUp);
@@ -379,7 +382,7 @@ namespace Luky
         /// <param name="position"></param>
         public void SetListenerPosition(Vector3 position)
         {
-            var otkPos = position.AsOpenTKV3();
+            OpenTK.Vector3 otkPos = position.AsOpenTKV3();
             AL.Listener(ALListener3f.Position, ref otkPos);
             ALAnnounceError("set listener position");
         }
@@ -391,7 +394,7 @@ namespace Luky
         /// <param name="position"></param>
         public void SetPosition(int soundID, Vector3 position)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             ALSetPosition(info.SourceID, position.AsOpenTKV3());
         }
 
@@ -402,7 +405,7 @@ namespace Luky
         /// <param name="value"></param>
         public void SetVolume(int soundID, float value)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             ALSetVolume(info.SourceID, value);
         }
 
@@ -410,7 +413,7 @@ namespace Luky
         /// 
         /// </summary>
         public void SpeakHRTF()
-        => Say("HRTF: ", _alContext.GetHRTFEnabled(), _alContext.GetHRTFStatus()); 
+        => Say("HRTF: ", _alContext.GetHRTFEnabled(), _alContext.GetHRTFStatus());
 
         /// <summary>
         /// 
@@ -418,7 +421,7 @@ namespace Luky
         /// <param name="soundID"></param>
         public void Stop(int soundID)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             ALStop(info.SourceID);
             info.ShouldBePlaying = false;
         }
@@ -439,10 +442,12 @@ namespace Luky
         /// <param name="soundID"></param>
         public void Unpause(int soundID)
         {
-            var info = _table[soundID];
+            Info info = _table[soundID];
             // we could alternatively just do nothing if the sound has never been played before this.
             if (info.QueuedBufferIDs == null)
+            {
                 return;
+            }
             //if (info.QueuedBufferIDs == null)
             //    throw Exception("Called Unpause on a sound that had never been played");
             ALPlay(info.SourceID);
@@ -456,16 +461,21 @@ namespace Luky
         /// <param name="args"></param>
         private void ALAnnounceError(string prefix, params object[] args)
         {
-            var error = AL.GetError();
+            ALError error = AL.GetError();
             if (error != ALError.NoError)
             {
-                var text = error + ", " + AL.GetErrorString(error);
+                string text = error + ", " + AL.GetErrorString(error);
                 text += _core.GetCallerLineAndFileText();
                 text += Environment.NewLine + _core.GetStackTraceText();
                 if (args.Length > 0)
+                {
                     text = String.Format(prefix, args) + " " + text;
+                }
                 else
+                {
                     text = prefix + " " + text;
+                }
+
                 WriteDelegate(text);
                 System.Diagnostics.Debugger.Break();
             }
@@ -555,7 +565,7 @@ namespace Luky
         /// <param name="length"></param>
         private void AssociateAndQueueBuffer(Info info, int bufferID, short[] buffer, int length)
         {
-            var format = info.Channels == 1 ? ALFormat.Mono16 : ALFormat.Stereo16;
+            ALFormat format = info.Channels == 1 ? ALFormat.Mono16 : ALFormat.Stereo16;
             AL.BufferData(bufferID, format, buffer, length * 2, info.SampleRate);
             ALAnnounceError("AL.BufferData");
             AL.SourceQueueBuffer(info.SourceID, bufferID);

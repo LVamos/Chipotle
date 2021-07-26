@@ -1,6 +1,8 @@
-﻿using static System.Math;
+﻿using Luky;
+
 using System;
-using Luky;
+
+using static System.Math;
 
 
 namespace Game.Terrain
@@ -10,27 +12,41 @@ namespace Game.Terrain
 
         public CardinalDirection GetCardinalDirection()
         {
-            var d = CompassDegrees;
+            float d = CompassDegrees;
             if (d >= 0 && d < 45)
+            {
                 return CardinalDirection.North;
+            }
 
             if (d >= 45 && d < 90)
+            {
                 return CardinalDirection.NorthEast;
+            }
 
             if (d >= 90 && d < 135)
+            {
                 return CardinalDirection.East;
+            }
 
             if (d >= 135 && d < 180)
+            {
                 return CardinalDirection.SouthEast;
+            }
 
             if (d >= 180 && d < 225)
+            {
                 return CardinalDirection.South;
+            }
 
             if (d >= 225 && d < 270)
+            {
                 return CardinalDirection.SouthWest;
+            }
 
             if (d >= 270 && d < 315)
+            {
                 return CardinalDirection.West;
+            }
 
             return CardinalDirection.NorthWest;
         }
@@ -63,7 +79,9 @@ namespace Game.Terrain
         public static Angle operator /(Angle a, Angle b)
         {
             if (b.Radians == 0)
+            {
                 throw new DivideByZeroException(nameof(b.Radians));
+            }
 
             return new Angle(a.Radians / b.Radians);
         }
@@ -85,9 +103,9 @@ namespace Game.Terrain
             => NormalizeDegrees(360 + 90 - compassDegrees);
 
         private static float CartesianToCompas(float cartesianDegrees)
-            => NormalizeDegrees(450 -cartesianDegrees);
+            => NormalizeDegrees(450 - cartesianDegrees);
 
-        public float CartesianDegrees { get => RadiansToCartesianDegrees(Radians); }
+        public float CartesianDegrees => RadiansToCartesianDegrees(Radians);
 
 
         public Angle North()
@@ -116,7 +134,7 @@ namespace Game.Terrain
 
 
 
-        public float CompassDegrees { get => CartesianToCompas(CartesianDegrees); }
+        public float CompassDegrees => CartesianToCompas(CartesianDegrees);
 
         private static float RadiansToCartesianDegrees(float radians)
             => NormalizeDegrees((float)(radians * 180 / PI));
@@ -126,7 +144,7 @@ namespace Game.Terrain
             => MathHelper.Modulo(degrees, 360);
 
         private static float NormalizeRadians(float radians)
-            =>  radians;//MathHelper.Modulo(radians, 2 * (float)PI);
+            => radians;//MathHelper.Modulo(radians, 2 * (float)PI);
 
         public static Angle FromCompassDegrees(float degrees)
             => FromCartesianDegrees(CompassToCartesian(degrees));
@@ -139,7 +157,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="degrees"></param>
         /// <returns></returns>
-        public   static float DegreesToRadians(float degrees)
+        public static float DegreesToRadians(float degrees)
             => degrees * (float)PI / 180;
 
 

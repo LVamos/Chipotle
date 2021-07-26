@@ -1,17 +1,13 @@
 ﻿using Game.Messaging.Commands;
 using Game.Terrain;
+
 using Luky;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Game.Entities
 {
-    public class PoolsideBin: DumpObject
+    public class PoolsideBin : DumpObject
     {
-        public PoolsideBin(Name name, Plane area): base(name, area, "popelnice u bazénu", null,null, null, "cs3", true)
+        public PoolsideBin(Name name, Plane area) : base(name, area, "popelnice u bazénu", null, null, null, "cs3", true)
         { }
 
         protected override void OnUseObject(UseObject message)
@@ -19,7 +15,9 @@ namespace Game.Entities
             base.OnUseObject(message);
 
             if (UsedOnce)
+            {
                 Move(new Plane(new Vector2(911, 1042)));
+            }
         }
     }
 }

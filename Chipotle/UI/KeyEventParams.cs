@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace Game.UI
 {
-    public  struct KeyEventParams
+    public struct KeyEventParams
     {
         /// <summary>
         /// Value of pressed key
@@ -23,7 +23,7 @@ namespace Game.UI
         /// <summary>
         /// Indicates whether control key was pressed.
         /// </summary>
-            public readonly bool Control;
+        public readonly bool Control;
 
         /// <summary>
         /// Indicates whether a digit key was pressed.
@@ -64,5 +64,5 @@ namespace Game.UI
             ArrowKey = new HashSet<Keys>() { Keys.Left, Keys.Right, Keys.Up, Keys.Down }.Contains(Key);
         }
 
-    } 
+    }
 }

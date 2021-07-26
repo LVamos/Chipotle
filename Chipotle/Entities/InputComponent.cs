@@ -1,25 +1,24 @@
 ﻿using Game.Messaging;
 using Game.Messaging.Events;
+using Game.UI;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
-
-using Game.UI;
 
 namespace Game.Entities
 {
-	public abstract  class InputComponent: EntityComponent
+    public abstract class InputComponent : EntityComponent
     {
 
 
 
-        public InputComponent():base()
+        public InputComponent() : base()
         {
             // Assign an KeyDown handler
-            var handlers = new Dictionary<Type, Action<GameMessage>>()
+            Dictionary<Type, Action<GameMessage>> handlers = new Dictionary<Type, Action<GameMessage>>()
             {
-                [typeof(KeyPressed )] =(m)=>  OnKeyDown((KeyPressed )m),
+                [typeof(KeyPressed)] = (m) => OnKeyDown((KeyPressed)m),
                 [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                 [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
             };
@@ -35,10 +34,12 @@ namespace Game.Entities
         /// Responds on a keypress.
         /// </summary>
         /// <param name="shortcut"></param>
-        protected virtual void OnKeyDown(KeyPressed  message)
+        protected virtual void OnKeyDown(KeyPressed message)
         {
-            if (_shortcuts != null && _shortcuts.TryGetValue(message.Shortcut, out var action))
+            if (_shortcuts != null && _shortcuts.TryGetValue(message.Shortcut, out Action action))
+            {
                 action();
+            }
         }
 
 
@@ -46,10 +47,7 @@ namespace Game.Entities
         /// Adds set of keyboard shortcuts and coresponding actions into _shortcuts dictionary.
         /// </summary>
         /// <param name="shortcuts">Set of shortcuts to be registered</param>
-        protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts)
-        {
-            _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
-        }
+        protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
 
 
         protected Dictionary<KeyShortcut, Action> _shortcuts;

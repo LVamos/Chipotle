@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Luky;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
-using DavyKager;
-using Luky;
 
 namespace Game.UI
 {
     /// <summary>
     /// Base class for all windows
     /// </summary>
-    public abstract class VirtualWindow:DebugSO
+    public abstract class VirtualWindow : DebugSO
     {
         /// <summary>
         /// Construktor
@@ -23,10 +22,7 @@ namespace Game.UI
         /// Adds set of keyboard shortcuts and coresponding actions into _shortcuts dictionary.
         /// </summary>
         /// <param name="shortcuts">Set of shortcuts to be registered</param>
-        protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts)
-        {
-            _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
-        }
+        protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
 
 
         /// <summary>
@@ -44,11 +40,13 @@ namespace Game.UI
         /// </summary>
         public virtual void Close()
         {
-            this.Closed = true;
+            Closed = true;
 
             // Try to switch to parent window.
-            if (_parentWindow !=null)
+            if (_parentWindow != null)
+            {
                 WindowHandler.Switch(_parentWindow);
+            }
         }
 
 
@@ -62,26 +60,21 @@ namespace Game.UI
 
             Action action = null;
             KeyShortcut tmpShortcut = new KeyShortcut(e);
-                        if (_shortcuts!=null && _shortcuts.TryGetValue(tmpShortcut, out action))
+            if (_shortcuts != null && _shortcuts.TryGetValue(tmpShortcut, out action))
+            {
                 action();
+            }
         }
 
         /// <summary>
         /// OnActivate event handler
         /// </summary>
-        public virtual void OnActivate()
-        {
-            Closed = false;
-
-        }
+        public virtual void OnActivate() => Closed = false;
 
         /// <summary>
         /// OnClose event handler
         /// </summary>
-        public virtual void OnDeactivate()
-        {
-            Closed = true;
-        }
+        public virtual void OnDeactivate() => Closed = true;
 
         /// <summary>
         /// Key commands and their handlers

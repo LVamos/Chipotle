@@ -1,7 +1,5 @@
 ﻿using System.Threading;
 using System.Windows.Forms;
-using DavyKager;
-using Luky;
 
 namespace Game.UI
 {
@@ -10,10 +8,10 @@ namespace Game.UI
     /// </summary>
     public static class WindowHandler
     {
-         /// <summary>
+        /// <summary>
         /// Currently focused window
         /// </summary>
-        public static VirtualWindow ActiveWindow        { get => _activeWindow; private set => _activeWindow = value; }
+        public static VirtualWindow ActiveWindow { get => _activeWindow; private set => _activeWindow = value; }
 
         /// <summary>
         /// Reference to previously active window
@@ -25,7 +23,7 @@ namespace Game.UI
         /// Closes currently active window and activates another one.
         /// </summary>
         /// <param name="window">New window</param>
-public static  void  Switch(VirtualWindow window)
+        public static void Switch(VirtualWindow window)
         {
             _activeWindow?.OnDeactivate(); // Let active window react on deactivating
             PreviousWindow = ActiveWindow; // Backing up for future use
@@ -40,7 +38,7 @@ public static  void  Switch(VirtualWindow window)
         public static void OpenModalWindow(VirtualWindow modalWindow)
         {
             PreviousWindow = ActiveWindow;
-          _activeWindow  = modalWindow;
+            _activeWindow = modalWindow;
             _activeWindow.OnActivate();
             while (!ActiveWindow.Closed)
             {
@@ -57,10 +55,7 @@ public static  void  Switch(VirtualWindow window)
         /// <summary>
         /// Static constructor
         /// </summary>
-        static WindowHandler()
-        {
-            _activeWindow = null;
-        }
+        static WindowHandler() => _activeWindow = null;
 
         /// <summary>
         /// Internal reference to currently active window
@@ -71,7 +66,7 @@ public static  void  Switch(VirtualWindow window)
         /// Delegates event to event handler of active window
         /// </summary>
         /// <param name="e">Event parameters</param>
-       public  static void OnKeyDown(KeyEventParams e)
-          =>  ActiveWindow?.OnKeyDown(e);
+        public static void OnKeyDown(KeyEventParams e)
+           => ActiveWindow?.OnKeyDown(e);
     }
 }

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Luky
@@ -31,12 +28,16 @@ namespace Luky
 
 
         public static void Say(bool and, params object[] args)
-		{
+        {
             if (and)
+            {
                 SayDelegate(FormatList(args));
-            else SayDelegate(FormatListNoAnd(args));
-
-		}
+            }
+            else
+            {
+                SayDelegate(FormatListNoAnd(args));
+            }
+        }
 
 
 
@@ -45,7 +46,7 @@ namespace Luky
 
         protected static string FormatList(params object[] args)
         {
-            var strings = args.Select(a => a.ToString()).ToArray<string>();
+            string[] strings = args.Select(a => a.ToString()).ToArray<string>();
 
             switch (strings.Length)
             {
@@ -55,7 +56,9 @@ namespace Luky
                     StringBuilder message = new StringBuilder();
 
                     for (int i = 0; i < strings.Length - 2; i++)
+                    {
                         message.Append(strings[i] + ", ");
+                    }
 
                     message.Append(strings[args.Length - 2] + " a " + args.Last());
                     return message.ToString();
@@ -82,16 +85,18 @@ namespace Luky
         /// <param name="args"></param>
         /// <returns></returns>
         protected static ArgumentException ArgumentException(string s, params object[] args)
-        => new ArgumentException(String.Format(s, args)); 
+        => new ArgumentException(String.Format(s, args));
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="condition"></param>
         protected static void Assert(bool condition)
-        { 
-            if (!condition) 
-                throw new Exception("Assert failed"); 
+        {
+            if (!condition)
+            {
+                throw new Exception("Assert failed");
+            }
         }
 
         /// <summary>
@@ -100,9 +105,11 @@ namespace Luky
         /// <param name="condition"></param>
         /// <param name="message"></param>
         protected static void Assert(bool condition, string message)
-        { 
-            if (!condition) 
-                                throw new Exception(message); 
+        {
+            if (!condition)
+            {
+                throw new Exception(message);
+            }
         }
 
 
@@ -123,6 +130,6 @@ namespace Luky
         /// <param name="args"></param>
         /// <returns>new construction</returns>
         protected static Exception Exception(string s, params object[] args)
-        => new Exception(String.Format(s, args)); 
+        => new Exception(String.Format(s, args));
     } // cls
 }

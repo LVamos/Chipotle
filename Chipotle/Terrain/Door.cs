@@ -1,17 +1,15 @@
 ﻿using Game.Messaging;
 using Game.Messaging.Commands;
-using Game.Messaging.Events;
+
 using Luky;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Game.Terrain
 {
-    public class Door: Passage
+    public class Door : Passage
     {
         public bool Closed { get; protected set; }
 
@@ -27,16 +25,18 @@ namespace Game.Terrain
 
         }
 
-        public Door(Name name, bool closed, Plane area, IEnumerable<Locality> localities) : base(name, area, localities)
-        {
-            Closed = closed;
-        }
+        public Door(Name name, bool closed, Plane area, IEnumerable<Locality> localities) : base(name, area, localities) => Closed = closed;
 
-        protected  virtual void OnUseObject(UseObject m)
+        protected virtual void OnUseObject(UseObject m)
         {
             if (Closed)
+            {
                 Open(m.Tile.Position);
-            else Close(m.Tile.Position);
+            }
+            else
+            {
+                Close(m.Tile.Position);
+            }
         }
 
 
@@ -57,7 +57,7 @@ namespace Game.Terrain
         /// </summary>
         protected void Close(Vector2 coords)
         {
-if(Area.GetTiles().All(t=> t.Walkable))
+            if (Area.GetTiles().All(t => t.Walkable))
             {
                 Closed = true;
                 World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd24"), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);

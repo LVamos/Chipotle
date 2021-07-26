@@ -1,17 +1,10 @@
 ﻿using Game.Entities;
+
 using Luky;
+
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Schema;
-using System.Windows.Forms;
-using System.Drawing;
-using System.Deployment.Application;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
 using System.Xml.Linq;
 
 namespace Game.Terrain
@@ -19,9 +12,9 @@ namespace Game.Terrain
     /// <summary>
     /// Generic base class for storing a tile map
     /// </summary>
-  public class TileMap: DebugSO
+    public class TileMap : DebugSO
     {
-        public readonly  string FileName;
+        public readonly string FileName;
 
         public TileMap(string fileName = null)
             => FileName = fileName;
@@ -36,7 +29,7 @@ namespace Game.Terrain
         {
             Vector2 point;
 
-            switch(direction)
+            switch (direction)
             {
                 case Direction.Left: point = new Vector2(LeftBorder, start.Y); break;
                 case Direction.Up: point = new Vector2(start.X, TopBorder); break;
@@ -46,7 +39,9 @@ namespace Game.Terrain
             }
 
             while (World.Map[point] == null)
+            {
                 point += direction.GetOpposite().AsVector2();
+            }
 
             return point;
         }
@@ -59,25 +54,27 @@ namespace Game.Terrain
         /// <param name="point">The coordinates to check</param>
         /// <returns>True if coordinates point on edge</returns>
         public bool IsOnEdge(Vector2 point)
-            => point.X == LeftBorder || point.X == RightBorder || point.Y == BottomBorder|| point.Y == TopBorder;
+            => point.X == LeftBorder || point.X == RightBorder || point.Y == BottomBorder || point.Y == TopBorder;
 
 
         //todo TileMap<T>: zrevidovat
 
 
 
-            /// <summary>
-            /// Enumerates all coordinates from start to map edge in given direction.
-            /// </summary>
-            /// <param name="start">The beginning</param>
-            /// <param name="direction">Direction of map edge</param>
-            /// <returns>Collection of coordinates</returns>
-            public IEnumerable<Vector2> GetPointsToEdge(Vector2 start, Direction direction)
+        /// <summary>
+        /// Enumerates all coordinates from start to map edge in given direction.
+        /// </summary>
+        /// <param name="start">The beginning</param>
+        /// <param name="direction">Direction of map edge</param>
+        /// <returns>Collection of coordinates</returns>
+        public IEnumerable<Vector2> GetPointsToEdge(Vector2 start, Direction direction)
         {
             Vector2 step = direction.AsVector2();
 
             for (Vector2 point = start; IsInBoundaries(point); point += step)
+            {
                 yield return point;
+            }
         }
 
         public bool IsInBoundaries(Vector2 point)
@@ -89,22 +86,22 @@ namespace Game.Terrain
         /// Backing array containing the tiles
         /// </summary>
         private Dictionary<Vector2, Tile> _tiles = new Dictionary<Vector2, Tile>();
-		private float _bottomBorder;
-		private float _leftBorder;
-		private float _rightBorder;
-		private float _topBorder;
+        private float _bottomBorder;
+        private float _leftBorder;
+        private float _rightBorder;
+        private float _topBorder;
 
-		/// <summary>
-		/// Count of all rows in the map
-		/// </summary>
-		public float TopBorder { get => _topBorder; private set => _topBorder = value; }
+        /// <summary>
+        /// Count of all rows in the map
+        /// </summary>
+        public float TopBorder { get => _topBorder; private set => _topBorder = value; }
 
         /// <summary>
         /// Count of all columns of the map
         /// </summary>
         public float RightBorder { get => _rightBorder; private set => _rightBorder = value; }
 
-        public  float LeftBorder { get => _leftBorder; private set => _leftBorder=value; }
+        public float LeftBorder { get => _leftBorder; private set => _leftBorder = value; }
         public float BottomBorder { get => _bottomBorder; private set => _bottomBorder = value; }
 
 
@@ -130,38 +127,49 @@ namespace Game.Terrain
         private Vector2 RoundCoordinates(float x, float y)
             => new Vector2((float)Math.Round(x), (float)Math.Round(y));
 
-        
+
         public void PutTile(float x, float y, Tile tile)
             => PutTile(new Vector2(x, y), tile);
 
         public void PutTile(Vector2 point, Tile tile)
-		{
-_tiles[RoundCoordinates(point.X, point.Y)] = tile;
+        {
+            _tiles[RoundCoordinates(point.X, point.Y)] = tile;
             UpdateBorders(point);
-		}
+        }
 
-		private void UpdateBorders(Vector2 point)
-		{
+        private void UpdateBorders(Vector2 point)
+        {
             if (LeftBorder > point.X)
+            {
                 LeftBorder = point.X;
-            if (RightBorder < point.X)
-                RightBorder = point.X;
-            if (TopBorder < point.Y)
-                TopBorder = point.Y;
-            if (BottomBorder > point.Y)
-                BottomBorder = point.Y;
-		}
+            }
 
-		/// <summary>
-		/// Indexer for easier acces to individual tiles
-		/// </summary>
-		/// <param name="point"></param>
-		/// <returns>Structure with information about one tile</returns>
-		public Tile this [Vector2 point]        
+            if (RightBorder < point.X)
+            {
+                RightBorder = point.X;
+            }
+
+            if (TopBorder < point.Y)
+            {
+                TopBorder = point.Y;
+            }
+
+            if (BottomBorder > point.Y)
+            {
+                BottomBorder = point.Y;
+            }
+        }
+
+        /// <summary>
+        /// Indexer for easier acces to individual tiles
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>Structure with information about one tile</returns>
+        public Tile this[Vector2 point]
         {
             get => GetTile(point); //_tiles[(int)position.X - LeftBorder, (int)position.Y - BottomBorder];
             set => PutTile(point, value); // _tiles[(int)position.X - LeftBorder, (int)position.Y - BottomBorder]=value;
-            }
+        }
 
         public Tile this[float x, float y] { get => GetTile(x, y); set => PutTile(x, y, value); }
 
@@ -181,26 +189,28 @@ _tiles[RoundCoordinates(point.X, point.Y)] = tile;
         /// <param name="terrain">Type of the terrain to draw</param>
         /// <param name="permeable">Specifies if the terrain should be accessible for objects and entities/// <param name="locality"></param>
         public void DrawTerrain(Plane area, TerrainType terrain, bool permeable, Locality locality)
-		{
+        {
             Assert(!area.IsNegative(), "Invalid coordinates");
 
-            foreach(Vector2 point in area.GetPoints())
-			{
+            foreach (Vector2 point in area.GetPoints())
+            {
                 Tile tile = this[point];
 
-                if(tile== null)
+                if (tile == null)
+                {
                     this[point] = new Tile(terrain, point, locality, permeable);
+                }
                 else
-				{
+                {
                     tile.Register(terrain);
                     tile.Permeable = permeable;
                     tile.Register(locality);
-				}
-			}
-		}
+                }
+            }
+        }
 
         public void DrawTerrain(Plane area, GameObject gameObject)
-		{
+        {
             Assert(!area.IsNegative(), "Invalid coordinates");
 
             area.GetTiles().Foreach(t => t.Register(gameObject));
@@ -214,14 +224,14 @@ _tiles[RoundCoordinates(point.X, point.Y)] = tile;
 		public void Erase(Plane area)
 => area.GetPoints().Foreach(p => this[p] = null);
 
-		public void DrawTerrain(Plane area, TerrainType terrain, bool permeable)
-		{
+        public void DrawTerrain(Plane area, TerrainType terrain, bool permeable)
+        {
             Assert(area.IsInOneLocality(), "Terrain can be drawn only inside one locality at once.");
             area.GetTiles().Foreach(t => t.Register(terrain, permeable));
-			}
+        }
 
-		public void DrawTerrain(XElement xPanel, Locality locality)
+        public void DrawTerrain(XElement xPanel, Locality locality)
             => DrawTerrain(new Plane(xPanel.Attribute("coordinates").Value).ToAbsolute(locality), xPanel.Attribute("terrain").Value.ToTerrainType(), xPanel.Attribute("canBeOccupied").Value.ToBool(), locality);
 
-	}
+    }
 }

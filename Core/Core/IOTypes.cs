@@ -6,7 +6,7 @@ namespace Luky
     /// 
     /// </summary>
     public struct FilePath
-    { 
+    {
         // just to make things more type safe I'd rather pass around a type of FilePath than a type of string.
         public readonly string Path;
         public readonly string Extension;
@@ -17,7 +17,7 @@ namespace Luky
         /// <param name="path"></param>
         public FilePath(string path)
         {
-         Path = path;
+            Path = path;
             Extension = System.IO.Path.GetExtension(Path);
         }
 
@@ -26,21 +26,21 @@ namespace Luky
         /// </summary>
         /// <param name="s"></param>
         public static implicit operator FilePath(string s)
-        => new FilePath(s); 
+        => new FilePath(s);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="fp"></param>
         public static implicit operator string(FilePath fp)
-         => fp.Path; 
+         => fp.Path;
 
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <returns></returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
-        => Path; 
+        => Path;
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ namespace Luky
         /// <param name="stream"></param>
         public ReadStream(string path, Stream stream)
         {
-            this.Path = path;
+            Path = path;
             Stream = stream;
         }
 
@@ -67,7 +67,7 @@ namespace Luky
         /// <param name="path"></param>
         /// <returns></returns>
         public static ReadStream FromFileSystem(string path)
-       => new ReadStream(path, File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read)); 
+       => new ReadStream(path, File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read));
     } // cls
 
 }

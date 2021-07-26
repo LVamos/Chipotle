@@ -1,7 +1,4 @@
-﻿using System.Text;
-using System.Linq;
-using System.Collections.Generic;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -36,10 +33,12 @@ namespace Luky
         /// <param name="elapsedMS"></param>
         /// <returns></returns>
         public static bool RecordMethod(PerfInfo pi, double elapsedMS)
-        { 
+        {
             // returns true if RunsToSkip was 0, and so the recording actually occurred.
             if (!_running)
+            {
                 return false;
+            }
             // we can skip a number of initial runs to ensure things get jitted.
             if (pi.RunsToSkip > 0)
             {
@@ -50,9 +49,15 @@ namespace Luky
             pi.NumberOfRuns++;
             pi.TotalTime += elapsedMS;
             if (elapsedMS < pi.Shortest)
+            {
                 pi.Shortest = elapsedMS;
+            }
+
             if (elapsedMS > pi.Longest)
+            {
                 pi.Longest = elapsedMS;
+            }
+
             return true;
         }
 
@@ -62,12 +67,15 @@ namespace Luky
         public static void StartTiming()
         {
             if (_running)
+            {
                 return; // already enabled
+            }
+
             _running = true;
             _waitEvent = new ManualResetEvent(false);
-            var t = new Thread(() =>
+            Thread t = new Thread(() =>
             {
-                var sw = Stopwatch.StartNew();
+                Stopwatch sw = Stopwatch.StartNew();
                 int msToSleep = 10000;
                 // we use a wait event so if StopTiming is called we can close our thread immediately instead of waiting the rest of the 10 seconds.
                 _waitEvent.WaitOne(msToSleep);
@@ -96,8 +104,7 @@ namespace Luky
         /// <summary>
         /// 
         /// </summary>
-        public static void StopWatchingGC()
-        { _gcWatcherRunning = false; }
+        public static void StopWatchingGC() => _gcWatcherRunning = false;
 
         /// <summary>
         /// 
@@ -106,15 +113,20 @@ namespace Luky
         /// <param name="spi"></param>
         /// <param name="command"></param>
         public static void TimeIt(PerfInfo pi, SystemPerfInfo spi, Action command)
-        { 
+        {
             // a big benefit of this method is that by wrapping the command in a closure, we ensure we time the runs that break out early with a return keyword.
-            var sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew();
             command();
             double elapsedMS = sw.Elapsed.TotalMilliseconds;
             if (pi != null)
+            {
                 RecordMethod(pi, elapsedMS);
+            }
+
             if (spi != null)
+            {
                 RecordSystem(spi, elapsedMS);
+            }
         }
 
         /// <summary>
@@ -126,15 +138,21 @@ namespace Luky
         /// <param name="command"></param>
         /// <returns></returns>
         public static T TimeIt<T>(PerfInfo pi, SystemPerfInfo spi, Func<T> command)
-        { 
+        {
             // a big benefit of this method is that by wrapping the command in a closure, we ensure we time the runs that break out early with a return keyword.
-            var sw = Stopwatch.StartNew();
-            var returnValue = command();
+            Stopwatch sw = Stopwatch.StartNew();
+            T returnValue = command();
             double elapsedMS = sw.Elapsed.TotalMilliseconds;
             if (pi != null)
+            {
                 RecordMethod(pi, elapsedMS);
+            }
+
             if (spi != null)
+            {
                 RecordSystem(spi, elapsedMS);
+            }
+
             return returnValue;
         }
 
@@ -144,10 +162,13 @@ namespace Luky
         public static void WatchGC()
         {
             if (_gcWatcherRunning)
+            {
                 throw new Exception("Called WatchGC while it was already running.");
+            }
+
             _gcWatcherRunning = true;
             _gcCounts = new int[GC.MaxGeneration];
-            var t = new Thread(() =>
+            Thread t = new Thread(() =>
                 {
                     while (_gcWatcherRunning)
                     {
@@ -212,7 +233,10 @@ namespace Luky
         private static void RecordSystem(SystemPerfInfo spi, double elapsedMS)
         {
             if (!_running)
+            {
                 return;
+            }
+
             spi.TotalTime += elapsedMS;
         }
 
@@ -223,9 +247,12 @@ namespace Luky
         /// <param name="pi"></param>
         private static void WritePerfLine(string systemName, PerfInfo pi)
         {
-            var average = pi.GetAverageTime();
+            double average = pi.GetAverageTime();
             if (average < .05 || double.IsNaN(average))
+            {
                 return; // don't log the method if it is taking less than 50 microseconds to complete.
+            }
+
             _streamWriter.WriteLine("{0} {1}", systemName, pi.GetMicrosecondsMessage());
         }
 
@@ -236,7 +263,7 @@ namespace Luky
         /// <param name="spi"></param>
         /// <param name="seconds"></param>
         private static void WriteSystemPerfLine(string systemName, SystemPerfInfo spi, int seconds)
-          =>  _streamWriter.WriteLine("{0} {1}ms per second", systemName, Math.Round(spi.TotalTime / seconds)); 
+          => _streamWriter.WriteLine("{0} {1}ms per second", systemName, Math.Round(spi.TotalTime / seconds));
     } // cls
 
     /// <summary>
@@ -256,35 +283,35 @@ namespace Luky
         /// </summary>
         /// <param name="initialRunsToSkip"></param>
         public PerfInfo(int initialRunsToSkip)
-        => this.RunsToSkip = initialRunsToSkip; 
+        => RunsToSkip = initialRunsToSkip;
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         public double GetAverageTime()
-        => TotalTime / NumberOfRuns; 
+        => TotalTime / NumberOfRuns;
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         public string GetLastMicrosecondsMessage()
-        => String.Format("{0} microseconds, {1} average over {2} runs, shortest is {3}, longest is {4}", Math.Round(LastTime * 1000), Math.Round(GetAverageTime() * 1000), NumberOfRuns, Math.Round(Shortest * 1000), Math.Round(Longest * 1000)); 
+        => String.Format("{0} microseconds, {1} average over {2} runs, shortest is {3}, longest is {4}", Math.Round(LastTime * 1000), Math.Round(GetAverageTime() * 1000), NumberOfRuns, Math.Round(Shortest * 1000), Math.Round(Longest * 1000));
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         public string GetMicrosecondsMessage()
-        => String.Format("{0} microseconds average over {1} runs, shortest is {2}, longest is {3}", Math.Round(GetAverageTime() * 1000), NumberOfRuns, Math.Round(Shortest * 1000), Math.Round(Longest * 1000)); 
+        => String.Format("{0} microseconds average over {1} runs, shortest is {2}, longest is {3}", Math.Round(GetAverageTime() * 1000), NumberOfRuns, Math.Round(Shortest * 1000), Math.Round(Longest * 1000));
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         public string GetMillisecondsMessage()
-        => String.Format("{0}ms average over {1} runs, shortest is {2}, longest is {3}", Math.Round(GetAverageTime()), NumberOfRuns, Math.Round(Shortest), Math.Round(Longest)); 
+        => String.Format("{0}ms average over {1} runs, shortest is {2}, longest is {3}", Math.Round(GetAverageTime()), NumberOfRuns, Math.Round(Shortest), Math.Round(Longest));
     } // cls
 
     /// <summary>

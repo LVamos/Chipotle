@@ -83,17 +83,39 @@ namespace Luky
         {
             get
             {
-                if (index == 0) return X;
-                else if (index == 1) return Y;
-                else if (index == 2) return Z;
+                if (index == 0)
+                {
+                    return X;
+                }
+                else if (index == 1)
+                {
+                    return Y;
+                }
+                else if (index == 2)
+                {
+                    return Z;
+                }
+
                 throw new IndexOutOfRangeException("You tried to access this vector at index: " + index);
             }
             set
             {
-                if (index == 0) X = value;
-                else if (index == 1) Y = value;
-                else if (index == 2) Z = value;
-                else throw new IndexOutOfRangeException("You tried to set this vector at index: " + index);
+                if (index == 0)
+                {
+                    X = value;
+                }
+                else if (index == 1)
+                {
+                    Y = value;
+                }
+                else if (index == 2)
+                {
+                    Z = value;
+                }
+                else
+                {
+                    throw new IndexOutOfRangeException("You tried to set this vector at index: " + index);
+                }
             }
         }
 
@@ -102,7 +124,7 @@ namespace Luky
         /// </summary>
         /// <see cref="LengthFast"/>
         /// <seealso cref="LengthSquared"/>
-        public float Length { get => (float)System.Math.Sqrt(X * X + Y * Y + Z * Z); }
+        public float Length => (float)System.Math.Sqrt(X * X + Y * Y + Z * Z);
 
         /// <summary>
         /// Gets an approximation of the vector length (magnitude).
@@ -113,7 +135,7 @@ namespace Luky
         /// </remarks>
         /// <see cref="Length"/>
         /// <seealso cref="LengthSquared"/>
-        public float LengthFast { get => 1.0f / MathHelper.InverseSqrtFast(X * X + Y * Y + Z * Z); }
+        public float LengthFast => 1.0f / MathHelper.InverseSqrtFast(X * X + Y * Y + Z * Z);
 
         /// <summary>
         /// Gets the square of the vector length (magnitude).
@@ -124,7 +146,7 @@ namespace Luky
         /// </remarks>
         /// <see cref="Length"/>
         /// <seealso cref="LengthFast"/>
-        public float LengthSquared { get => X * X + Y * Y + Z * Z; }
+        public float LengthSquared => X * X + Y * Y + Z * Z;
 
         /// <summary>
         /// Returns a copy of the V3 scaled to unit length.
@@ -141,7 +163,7 @@ namespace Luky
         /// </summary>
         public void Normalize()
         {
-            float scale = 1.0f / this.Length;
+            float scale = 1.0f / Length;
             X *= scale;
             Y *= scale;
             Z *= scale;
@@ -186,10 +208,10 @@ namespace Luky
         public bool IsNegative()
 => X < 0 || Y < 0 || Z < 0;
 
-		/// <summary>
-		/// Defines the size of the V3 struct in bytes.
-		/// </summary>
-		public static readonly int SizeInBytes = Marshal.SizeOf(new Vector3());
+        /// <summary>
+        /// Defines the size of the V3 struct in bytes.
+        /// </summary>
+        public static readonly int SizeInBytes = Marshal.SizeOf(new Vector3());
 
         /// <summary>
         /// Adds two vectors.
@@ -510,12 +532,9 @@ namespace Luky
         /// <param name="right">Second operand</param>
         /// <returns>The cross product of the two inputs</returns>
         /// <param name="result">The cross product of the two inputs</param>
-        public static void Cross(ref Vector3 left, ref Vector3 right, out Vector3 result)
-        {
-            result = new Vector3(left.Y * right.Z - left.Z * right.Y,
+        public static void Cross(ref Vector3 left, ref Vector3 right, out Vector3 result) => result = new Vector3(left.Y * right.Z - left.Z * right.Y,
                 left.Z * right.X - left.X * right.Z,
                 left.X * right.Y - left.Y * right.X);
-        }
 
         /// <summary>
         /// Returns a new Vector that is the linear blend of the 2 given Vectors
@@ -605,100 +624,100 @@ namespace Luky
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the X and Y components of this instance.
         /// </summary>
-        public Vector2 Xy 
-        { 
-            get => new Vector2(X, Y);  
-        set { X = value.X; Y = value.Y; } 
-}
+        public Vector2 Xy
+        {
+            get => new Vector2(X, Y);
+            set { X = value.X; Y = value.Y; }
+        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the X and Z components of this instance.
         /// </summary>
-        public Vector2 Xz 
-        { 
-            get => new Vector2(X, Z);  
-            set { X = value.X; Z = value.Y; } 
+        public Vector2 Xz
+        {
+            get => new Vector2(X, Z);
+            set { X = value.X; Z = value.Y; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Y and X components of this instance.
         /// </summary>
-        public Vector2 Yx 
-        { 
-            get =>new Vector2(Y, X);  
-            set { Y = value.X; X = value.Y; } 
+        public Vector2 Yx
+        {
+            get => new Vector2(Y, X);
+            set { Y = value.X; X = value.Y; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Y and Z components of this instance.
         /// </summary>
-        public Vector2 Yz 
-        { 
-            get => new Vector2(Y, Z);  
-            set { Y = value.X; Z = value.Y; } 
+        public Vector2 Yz
+        {
+            get => new Vector2(Y, Z);
+            set { Y = value.X; Z = value.Y; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Z and X components of this instance.
         /// </summary>
-        public Vector2 Zx 
-        { 
-            get => new Vector2(Z, X);  
-            set { Z = value.X; X = value.Y; } 
+        public Vector2 Zx
+        {
+            get => new Vector2(Z, X);
+            set { Z = value.X; X = value.Y; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Z and Y components of this instance.
         /// </summary>
-        public Vector2 Zy 
-        { 
-            get => new Vector2(Z, Y);  
-            set { Z = value.X; Y = value.Y; } 
+        public Vector2 Zy
+        {
+            get => new Vector2(Z, Y);
+            set { Z = value.X; Y = value.Y; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the X, Z, and Y components of this instance.
         /// </summary>
-        public Vector3 Xzy 
-        { 
-            get => new Vector3(X, Z, Y);  
-            set { X = value.X; Z = value.Y; Y = value.Z; } 
+        public Vector3 Xzy
+        {
+            get => new Vector3(X, Z, Y);
+            set { X = value.X; Z = value.Y; Y = value.Z; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Y, X, and Z components of this instance.
         /// </summary>
-        public Vector3 Yxz 
-        { 
-            get => new Vector3(Y, X, Z);  
-            set { Y = value.X; X = value.Y; Z = value.Z; } 
+        public Vector3 Yxz
+        {
+            get => new Vector3(Y, X, Z);
+            set { Y = value.X; X = value.Y; Z = value.Z; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Y, Z, and X components of this instance.
         /// </summary>
-        public Vector3 Yzx 
-        { 
-            get => new Vector3(Y, Z, X);  
-            set { Y = value.X; Z = value.Y; X = value.Z; } 
+        public Vector3 Yzx
+        {
+            get => new Vector3(Y, Z, X);
+            set { Y = value.X; Z = value.Y; X = value.Z; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Z, X, and Y components of this instance.
         /// </summary>
-        public Vector3 Zxy 
-        { 
-            get => new Vector3(Z, X, Y);  
-            set { Z = value.X; X = value.Y; Y = value.Z; } 
+        public Vector3 Zxy
+        {
+            get => new Vector3(Z, X, Y);
+            set { Z = value.X; X = value.Y; Y = value.Z; }
         }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Z, Y, and X components of this instance.
         /// </summary>
-        public Vector3 Zyx 
-        { 
-            get => new Vector3(Z, Y, X);  
-            set { Z = value.X; Y = value.Y; X = value.Z; } 
+        public Vector3 Zyx
+        {
+            get => new Vector3(Z, Y, X);
+            set { Z = value.X; Y = value.Y; X = value.Z; }
         }
 
         /// <summary>
@@ -803,14 +822,14 @@ namespace Luky
         public static bool operator !=(Vector3 left, Vector3 right)
             => !left.Equals(right);
 
-        private static string _listSeparator  = CultureInfo.CurrentCulture.TextInfo.ListSeparator;
+        private static string _listSeparator = CultureInfo.CurrentCulture.TextInfo.ListSeparator;
 
         /// <summary>
         /// Returns a System.String that represents the current V3.
         /// </summary>
         /// <returns></returns>
         public override string ToString()
-            => String.Format("({0}{3} {1}{3} {2})", X, Y, Z, _listSeparator );
+            => String.Format("({0}{3} {1}{3} {2})", X, Y, Z, _listSeparator);
 
         /// <summary>
         /// Returns the hashcode for this instance.
@@ -827,9 +846,11 @@ namespace Luky
         public override bool Equals(object obj)
         {
             if (!(obj is Vector3))
+            {
                 return false;
+            }
 
-            return this.Equals((Vector3)obj);
+            return Equals((Vector3)obj);
         }
 
         /// <summary>Indicates whether the current vector is equal to another vector.</summary>

@@ -2,14 +2,11 @@
 
 namespace Game.Messaging.Commands
 {
-	public class UseObject : GameMessage
-	{
-		public readonly Tile Tile;
+    public class UseObject : GameMessage
+    {
+        public readonly Tile Tile;
 
-		public UseObject (object sender, Tile tile=null) : base(sender) 
-		{
-			Tile = tile;
-		}
+        public UseObject(object sender, Tile tile = null) : base(sender) => Tile = tile;
 
-	}
+    }
 }

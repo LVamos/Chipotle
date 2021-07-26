@@ -1,7 +1,7 @@
-using System.Text.RegularExpressions;
 using System;
-using System.Runtime.InteropServices;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Luky
 {
@@ -57,11 +57,15 @@ namespace Luky
         public Vector2(string coordinates)
         {
             if (string.IsNullOrEmpty(coordinates))
+            {
                 throw new ArgumentException(nameof(coordinates));
+            }
 
-            var numbers = Regex.Split(coordinates, @", +");
+            string[] numbers = Regex.Split(coordinates, @", +");
             if (numbers == null || numbers.Count() != 2)
+            {
                 throw new FormatException(nameof(coordinates));
+            }
 
             X = float.Parse(numbers[0]);
             Y = float.Parse(numbers[1]);
@@ -76,15 +80,31 @@ namespace Luky
         {
             get
             {
-                if (index == 0) return X;
-                else if (index == 1) return Y;
+                if (index == 0)
+                {
+                    return X;
+                }
+                else if (index == 1)
+                {
+                    return Y;
+                }
+
                 throw new IndexOutOfRangeException("You tried to access this vector at index: " + index);
             }
             set
             {
-                if (index == 0) X = value;
-                else if (index == 1) Y = value;
-                else throw new IndexOutOfRangeException("You tried to set this vector at index: " + index);
+                if (index == 0)
+                {
+                    X = value;
+                }
+                else if (index == 1)
+                {
+                    Y = value;
+                }
+                else
+                {
+                    throw new IndexOutOfRangeException("You tried to set this vector at index: " + index);
+                }
             }
         }
 
@@ -93,13 +113,7 @@ namespace Luky
         /// </summary>
         /// <see cref="LengthFast"/>
         /// <seealso cref="LengthSquared"/>
-        public float Length
-        {
-            get
-            {
-                return (float)System.Math.Sqrt(X * X + Y * Y);
-            }
-        }
+        public float Length => (float)System.Math.Sqrt(X * X + Y * Y);
 
         /// <summary>
         /// Gets an approximation of the vector length (magnitude).
@@ -110,13 +124,7 @@ namespace Luky
         /// </remarks>
         /// <see cref="Length"/>
         /// <seealso cref="LengthSquared"/>
-        public float LengthFast
-        {
-            get
-            {
-                return 1.0f / MathHelper.InverseSqrtFast(X * X + Y * Y);
-            }
-        }
+        public float LengthFast => 1.0f / MathHelper.InverseSqrtFast(X * X + Y * Y);
 
         /// <summary>
         /// Gets the square of the vector length (magnitude).
@@ -127,23 +135,17 @@ namespace Luky
         /// </remarks>
         /// <see cref="Length"/>
         /// <seealso cref="LengthFast"/>
-        public float LengthSquared
-        {
-            get
-            {
-                return X * X + Y * Y;
-            }
-        }
+        public float LengthSquared => X * X + Y * Y;
 
         /// <summary>
         /// Gets the perpendicular vector on the right side of this vector.
         /// </summary>
-        public Vector2 PerpendicularRight        { get => new Vector2(Y, -X); }
+        public Vector2 PerpendicularRight => new Vector2(Y, -X);
 
         /// <summary>
         /// Gets the perpendicular vector on the left side of this vector.
         /// </summary>
-        public Vector2 PerpendicularLeft { get => new Vector2(-Y, X); }
+        public Vector2 PerpendicularLeft => new Vector2(-Y, X);
 
         /// <summary>
         /// Returns a copy of the V2 scaled to unit length.
@@ -161,7 +163,7 @@ namespace Luky
         /// </summary>
         public void Normalize()
         {
-            float scale = 1.0f / this.Length;
+            float scale = 1.0f / Length;
             X *= scale;
             Y *= scale;
         }
@@ -188,10 +190,10 @@ namespace Luky
 
         public bool IsNegative()
 => X < 0 || Y < 0;
-		/// <summary>
-		/// Defines a zero-length V2.
-		/// </summary>
-		public static readonly Vector2 Zero = new Vector2(0, 0);
+        /// <summary>
+        /// Defines a zero-length V2.
+        /// </summary>
+        public static readonly Vector2 Zero = new Vector2(0, 0);
 
         /// <summary>
         /// Defines an instance with all components set to 1.
@@ -221,10 +223,7 @@ namespace Luky
         /// <param name="a">Left operand.</param>
         /// <param name="b">Right operand.</param>
         /// <param name="result">Result of operation.</param>
-        public static void Add(ref Vector2 a, ref Vector2 b, out Vector2 result)
-        {
-            result = new Vector2(a.X + b.X, a.Y + b.Y);
-        }
+        public static void Add(ref Vector2 a, ref Vector2 b, out Vector2 result) => result = new Vector2(a.X + b.X, a.Y + b.Y);
 
         /// <summary>
         /// Subtract one Vector from another
@@ -244,10 +243,7 @@ namespace Luky
         /// <param name="a">First operand</param>
         /// <param name="b">Second operand</param>
         /// <param name="result">Result of subtraction</param>
-        public static void Subtract(ref Vector2 a, ref Vector2 b, out Vector2 result)
-        {
-            result = new Vector2(a.X - b.X, a.Y - b.Y);
-        }
+        public static void Subtract(ref Vector2 a, ref Vector2 b, out Vector2 result) => result = new Vector2(a.X - b.X, a.Y - b.Y);
 
         /// <summary>
         /// Multiplies a vector by a scalar.
@@ -267,10 +263,7 @@ namespace Luky
         /// <param name="vector">Left operand.</param>
         /// <param name="scale">Right operand.</param>
         /// <param name="result">Result of the operation.</param>
-        public static void Multiply(ref Vector2 vector, float scale, out Vector2 result)
-        {
-            result = new Vector2(vector.X * scale, vector.Y * scale);
-        }
+        public static void Multiply(ref Vector2 vector, float scale, out Vector2 result) => result = new Vector2(vector.X * scale, vector.Y * scale);
 
         /// <summary>
         /// Multiplies a vector by the components a vector (scale).
@@ -290,10 +283,7 @@ namespace Luky
         /// <param name="vector">Left operand.</param>
         /// <param name="scale">Right operand.</param>
         /// <param name="result">Result of the operation.</param>
-        public static void Multiply(ref Vector2 vector, ref Vector2 scale, out Vector2 result)
-        {
-            result = new Vector2(vector.X * scale.X, vector.Y * scale.Y);
-        }
+        public static void Multiply(ref Vector2 vector, ref Vector2 scale, out Vector2 result) => result = new Vector2(vector.X * scale.X, vector.Y * scale.Y);
 
         /// <summary>
         /// Divides a vector by a scalar.
@@ -313,10 +303,7 @@ namespace Luky
         /// <param name="vector">Left operand.</param>
         /// <param name="scale">Right operand.</param>
         /// <param name="result">Result of the operation.</param>
-        public static void Divide(ref Vector2 vector, float scale, out Vector2 result)
-        {
-            Multiply(ref vector, 1 / scale, out result);
-        }
+        public static void Divide(ref Vector2 vector, float scale, out Vector2 result) => Multiply(ref vector, 1 / scale, out result);
 
         /// <summary>
         /// Divides a vector by the components of a vector (scale).
@@ -490,10 +477,7 @@ namespace Luky
         /// <param name="left">First operand</param>
         /// <param name="right">Second operand</param>
         /// <returns>The dot product of the two inputs</returns>
-        public static float Dot(Vector2 left, Vector2 right)
-        {
-            return left.X * right.X + left.Y * right.Y;
-        }
+        public static float Dot(Vector2 left, Vector2 right) => left.X * right.X + left.Y * right.Y;
 
         /// <summary>
         /// Calculate the dot (scalar) product of two vectors
@@ -501,10 +485,7 @@ namespace Luky
         /// <param name="left">First operand</param>
         /// <param name="right">Second operand</param>
         /// <param name="result">The dot product of the two inputs</param>
-        public static void Dot(ref Vector2 left, ref Vector2 right, out float result)
-        {
-            result = left.X * right.X + left.Y * right.Y;
-        }
+        public static void Dot(ref Vector2 left, ref Vector2 right, out float result) => result = left.X * right.X + left.Y * right.Y;
 
         /// <summary>
         /// Calculate the perpendicular dot (scalar) product of two vectors
@@ -522,7 +503,7 @@ namespace Luky
         /// <param name="right">Second operand</param>
         /// <param name="result">The perpendicular dot product of the two inputs</param>
         public static void PerpDot(ref Vector2 left, ref Vector2 right, out float result)
-          =>  result = left.X * right.Y - left.Y * right.X;
+          => result = left.X * right.Y - left.Y * right.X;
 
         /// <summary>
         /// Returns a new Vector that is the linear blend of the 2 given Vectors
@@ -588,7 +569,7 @@ namespace Luky
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Y and X components of this instance.
         /// </summary>
-        public Vector2 Yx { get => new Vector2(Y, X);  set { Y = value.X; X = value.Y; } }
+        public Vector2 Yx { get => new Vector2(Y, X); set { Y = value.X; X = value.Y; } }
 
         /// <summary>
         /// Adds the specified instances.
@@ -682,21 +663,21 @@ namespace Luky
         public static bool operator !=(Vector2 left, Vector2 right)
             => !left.Equals(right);
 
-        private static string _listSeparator  = ",";
+        private static string _listSeparator = ",";
 
         /// <summary>
         /// Returns a System.String that represents the current V2.
         /// </summary>
         /// <returns></returns>
         public override string ToString()
-            => String.Format("{0}{2} {1}", X, Y, _listSeparator );
+            => String.Format("{0}{2} {1}", X, Y, _listSeparator);
 
         /// <summary>
         /// Returns the hashcode for this instance.
         /// </summary>
         /// <returns>A System.Int32 containing the unique hashcode for this instance.</returns>
         public override int GetHashCode()
-          =>  X.GetHashCode() ^ Y.GetHashCode();
+          => X.GetHashCode() ^ Y.GetHashCode();
 
         /// <summary>
         /// Indicates whether this instance and a specified object are equal.
@@ -706,9 +687,11 @@ namespace Luky
         public override bool Equals(object obj)
         {
             if (!(obj is Vector2))
+            {
                 return false;
+            }
 
-            return this.Equals((Vector2)obj);
+            return Equals((Vector2)obj);
         }
 
         /// <summary>Indicates whether the current vector is equal to another vector.</summary>

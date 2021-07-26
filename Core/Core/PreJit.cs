@@ -37,7 +37,9 @@ namespace Luky
                 {
                     if (curMethod.IsAbstract ||
                         curMethod.ContainsGenericParameters)
+                    {
                         continue;
+                    }
 
                     RuntimeHelpers.PrepareMethod(curMethod.MethodHandle);
                 }
@@ -54,7 +56,9 @@ namespace Luky
         {
             bool alreadyLoaded = !loadedAssemblies.Add(assembly);
             if (alreadyLoaded)
+            {
                 return;
+            }
 
             AssemblyName[] refrencedAssemblies =
                 assembly.GetReferencedAssemblies();
@@ -63,7 +67,9 @@ namespace Luky
             {
                 Assembly nextAssembly = Assembly.Load(curAssemblyName);
                 if (nextAssembly.GlobalAssemblyCache)
+                {
                     continue;
+                }
 
                 ForceLoadAll(nextAssembly, loadedAssemblies);
             }

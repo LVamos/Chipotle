@@ -1,31 +1,32 @@
-﻿using Game.Messaging;
-using Game.Messaging.Commands;
-using Game.Messaging.Events;
+﻿using Game.Terrain;
+
 using Luky;
-using Game.Terrain;
+
 using System;
 
 namespace Game.Entities
 {
 
 
-	/// <summary>
-	/// Defines a simple subject in game world e.g. a table, chair or bed.
-	/// </summary>
-	public    class GameObject: MapElement
+    /// <summary>
+    /// Defines a simple subject in game world e.g. a table, chair or bed.
+    /// </summary>
+    public class GameObject : MapElement
     {
-		public override void Destroy()
-		{
-			base.Destroy();
+        public override void Destroy()
+        {
+            base.Destroy();
             Locality.Unregister(this);
         }
 
         public static DumpObject CreateObject(Name name, Plane area, string type)
         {
             if (string.IsNullOrEmpty(name.Indexed))
+            {
                 throw new ArgumentException(nameof(name));
+            }
 
-            switch(type)
+            switch (type)
             {
                 case "mrtvola": return CreateCorpse(name, area);
                 case "prkno u bazénu": return CreatePoolsidePlank(name, area);
@@ -67,11 +68,11 @@ namespace Game.Entities
 
 
 
-		protected  override void Disappear()
-		{
+        protected override void Disappear()
+        {
             base.Disappear();
             Area.GetTiles().Foreach(t => t.UnregisterObject());
-		}
+        }
 
         //todo GameObject
 
@@ -88,29 +89,34 @@ namespace Game.Entities
 
 
 
-/// <summary>
-/// Constructor
-/// </summary>
-/// <param name="name">Name of new object</param>
-/// <param name="area">Area to be occupied with new object</param>
-       public GameObject(Name name, string type, Plane area): base(name, area)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name of new object</param>
+        /// <param name="area">Area to be occupied with new object</param>
+        public GameObject(Name name, string type, Plane area) : base(name, area)
         {
             Type = type.PrepareForIndexing();
-            
-            if(area!=null)
-            Appear();
+
+            if (area != null)
+            {
+                Appear();
+            }
+
             Locality?.Register(this);
         }
 
-protected void Move(Plane targetArea)
-		{
+        protected void Move(Plane targetArea)
+        {
             if (targetArea == null)
+            {
                 throw new ArgumentNullException(nameof(targetArea));
+            }
 
             Disappear();
             Area = targetArea;
             Appear();
-		}
+        }
 
 
 
@@ -121,7 +127,7 @@ protected void Move(Plane targetArea)
         {
             // Check if all the object lays in one locality
             Locality = Area.GetLocality();
-            Assert(Locality!= null, "Game object must occupy just one locality.");
+            Assert(Locality != null, "Game object must occupy just one locality.");
 
             Area.GetTiles().Foreach(t => t.Register(this));
         }

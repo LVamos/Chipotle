@@ -1,27 +1,21 @@
-﻿using Game.Messaging;
-using Game.Messaging.Commands;
+﻿using Game.Entities;
+using Game.Messaging;
 using Game.Messaging.Events;
-using System.Xml.Linq;
-using Luky;
 using Game.Terrain;
-using Game.Entities;
+
+using Luky;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Windows.Forms;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Drawing.Drawing2D;
+using System.Xml.Linq;
 
 namespace Game
 {
     /// <summary>
     /// 
     /// </summary>
-  public  static  class World
+    public static class World
     {
         public const int FramesPerSecond = 66;
         public const int DeltaTime = 1000 / FramesPerSecond;
@@ -32,7 +26,7 @@ namespace Game
         /// <param name="point">A point on the map whose surroundings are to be explored</param>
         /// <returns>Enumeration of game objects</returns>
         public static IEnumerable<GameObject> GetNearestObjects(Vector2 point)
-            => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point)).Where(o =>o.Value !=Map[point]?.Object).Select(o=> o.Value);
+            => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point)).Where(o => o.Value != Map[point]?.Object).Select(o => o.Value);
 
         /// <summary>
         /// Enumerates all localities sroted by distance from default point.
@@ -40,7 +34,7 @@ namespace Game
         /// <param name="point">Coordinates of the point whose surroundings should be explored</param>
         /// <returns>Enumeration of localities</returns>
         public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
-           =>_localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Locality).Select(p=> p.Value);
+           => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Locality).Select(p => p.Value);
 
 
         public static Locality GetNearestLocality(Vector2 point)
@@ -69,11 +63,11 @@ namespace Game
         public static void Update()
         {
             _localities.Foreach(v => v.Value.Update());
-			_passages.Foreach(v => v.Value.Update());
-			_objects.Foreach(v => v.Value.Update());
-			_entities.Foreach(v => v.Value.Update());
+            _passages.Foreach(v => v.Value.Update());
+            _objects.Foreach(v => v.Value.Update());
+            _entities.Foreach(v => v.Value.Update());
 
-            if(_cutsceneID>0)
+            if (_cutsceneID > 0)
             {
                 Sound.GetDynamicInfo(_cutsceneID, out SoundState state, out int _);
                 if (state != SoundState.Playing)
@@ -90,21 +84,23 @@ namespace Game
         public static void PlayCutscene(object sender, string cutscene)
         {
             if (string.IsNullOrEmpty(cutscene))
+            {
                 throw new ArgumentNullException(nameof(cutscene));
+            }
 
             _cutsceneSender = sender;
             ReceiveMessage(new CutsceneBegan(sender));
             _cutsceneID = Sound.Play(cutscene);
         }
 
-        public  static  TileMap Map { get; set; }
+        public static TileMap Map { get; set; }
 
         private static Dictionary<string, DumpObject> _objects;
         private static Dictionary<string, Entity> _entities;
         private static Dictionary<string, Passage> _passages;
         public static Entity Player;
 
-        public  static void StopCutscene(object sender)
+        public static void StopCutscene(object sender)
         {
             Sound.Stop(_cutsceneID);
             _cutsceneID = 0;
@@ -121,13 +117,13 @@ namespace Game
 
         public static Locality GetLocality(string name)
         {
-            _localities.TryGetValue(name.PrepareForIndexing(), out var locality);
+            _localities.TryGetValue(name.PrepareForIndexing(), out Locality locality);
             return locality;
         }
 
-public static Passage GetPassage(string name)
+        public static Passage GetPassage(string name)
         {
-            _passages.TryGetValue(name, out var passage);
+            _passages.TryGetValue(name, out Passage passage);
             return passage;
         }
 
@@ -143,10 +139,14 @@ public static Passage GetPassage(string name)
         {
             // Do a null check and look if entity isn't already registered.
             if (e == null)
+            {
                 throw new ArgumentNullException(nameof(e));
+            }
 
             if (_entities.ContainsKey(e.Name.Indexed))
+            {
                 throw new ArgumentException("entity already registered");
+            }
 
             _entities.Add(e.Name.Indexed, e);
         }
@@ -187,10 +187,14 @@ public static Passage GetPassage(string name)
         {
             // Do a null check and look if object isn't already registered.
             if (o == null)
+            {
                 throw new ArgumentNullException(nameof(o));
+            }
 
             if (_objects.ContainsKey(o.Name.Indexed))
+            {
                 throw new ArgumentException("Object already registered");
+            }
 
             _objects.Add(o.Name.Indexed, o); // Added to dictionary
         }
@@ -205,11 +209,15 @@ public static Passage GetPassage(string name)
         {
             // null check
             if (l == null)
+            {
                 throw new ArgumentNullException(nameof(l));
+            }
 
             // Isn't the locality already registered?
             if (_localities.ContainsKey(l.Name.Indexed))
+            {
                 throw new ArgumentException("Locality already registered");
+            }
 
             _localities.Add(l.Name.Indexed, l);
         }
@@ -222,10 +230,14 @@ public static Passage GetPassage(string name)
         public static void Add(Passage p)
         {
             if (p == null)
+            {
                 throw new ArgumentNullException(nameof(p));
+            }
 
             if (_passages.ContainsKey(p.Name.Indexed))
+            {
                 throw new ArgumentException("Passage already registered");
+            }
 
             _passages.Add(p.Name.Indexed, p);
         }
@@ -283,18 +295,18 @@ public static Passage GetPassage(string name)
         /// <param name="fileName">Name of the map file</param>
         public static XDocument LoadMap(string fileName)
         {
-            string Attribute(XElement element, string attribute, bool prepareForIndexing= true)
+            string Attribute(XElement element, string attribute, bool prepareForIndexing = true)
                 => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
-          var  xDocument = XDocument.Load(fileName);
-            var root = xDocument.Root;
-            var xLocalities = root.Element("localities").Elements("locality");
-            var xPassages = root.Element("passages").Elements("passage");
+            XDocument xDocument = XDocument.Load(fileName);
+            XElement root = xDocument.Root;
+            IEnumerable<XElement> xLocalities = root.Element("localities").Elements("locality");
+            IEnumerable<XElement> xPassages = root.Element("passages").Elements("passage");
 
             Initialize(); // Prepare data structures for objects, entities, localities etc.
 
             // Get map size
-            var areas =
+            IEnumerable<Plane> areas =
                 from l in xLocalities
                 select new Plane(Attribute(l, "coordinates"));
 
@@ -307,7 +319,7 @@ public static Passage GetPassage(string name)
             Map = new TileMap(fileName);
 
             // Load localities
-            foreach (var l in xLocalities)
+            foreach (XElement l in xLocalities)
             { // Create locality
                 Locality locality = new Locality(
                new Name(Attribute(l, "indexedname"), Attribute(l, "friendlyname")),
@@ -320,18 +332,20 @@ null);
                 // Create perimeter walls if they are specified in the map
                 string wallDefinition = Attribute(l, "walls", false);
                 if (wallDefinition != "None")
+                {
                     locality.DrawWalls(wallDefinition);
+                }
 
                 // Draw terrain
                 l.Elements("panel").Foreach(p => Map.DrawTerrain(p, locality));
 
                 // Load game objects
-                foreach(var o in l.Elements("object"))
+                foreach (XElement o in l.Elements("object"))
                 {
-                    var oName = new Name(Attribute(o, "indexedname"), Attribute(o, "friendlyname"));
-                    var oType = Attribute(o, "type");
-                    var coordinates = new Plane(Attribute(o, "coordinates")).ToAbsolute(locality);
-                    Add( GameObject.CreateObject(oName, coordinates, oType));
+                    Name oName = new Name(Attribute(o, "indexedname"), Attribute(o, "friendlyname"));
+                    string oType = Attribute(o, "type");
+                    Plane coordinates = new Plane(Attribute(o, "coordinates")).ToAbsolute(locality);
+                    Add(GameObject.CreateObject(oName, coordinates, oType));
                 }
 
                 // register locality
@@ -339,12 +353,12 @@ null);
             }
 
             // Place passages
-            foreach (var p in xPassages)
+            foreach (XElement p in xPassages)
             {
-                var pIndexedName = new Name(Attribute(p, "indexedname"));
-                var isDoor = Attribute(p, "door").ToBool();
-                var closed = Attribute(p, "closed").ToBool();
-                var area = new Plane(Attribute(p, "coordinates"));
+                Name pIndexedName = new Name(Attribute(p, "indexedname"));
+                bool isDoor = Attribute(p, "door").ToBool();
+                bool closed = Attribute(p, "closed").ToBool();
+                Plane area = new Plane(Attribute(p, "coordinates"));
                 List<Locality> localities = new List<Locality> { GetLocality(Attribute(p, "from")), GetLocality(Attribute(p, "to").PrepareForIndexing()) };
 
                 // Create and register new passage
@@ -354,7 +368,7 @@ null);
             return xDocument;
         }
 
-		public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
+        public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
            => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
 
         public static void Remove(Locality l)
@@ -370,7 +384,7 @@ null);
         }
 
         public static void Remove(GameObject o)
-		{
+        {
             _objects.Remove(o.Name.Indexed);
             o.Destroy();
         }
@@ -381,20 +395,20 @@ null);
 => _objects.ContainsKey(indexedName);
 
         public static IEnumerable<string> GetObjectTypes()
-=> _objects.Where(p=> !string.IsNullOrEmpty(p.Value.Type)).Select(p => p.Value.Type);
+=> _objects.Where(p => !string.IsNullOrEmpty(p.Value.Type)).Select(p => p.Value.Type);
 
         public static Passage GetNearestPassage(Vector2 point)
 => GetNearestPassages(point).FirstOrDefault();
 
-		public static void RenameObject(string indexedName, string newName)
-		{
+        public static void RenameObject(string indexedName, string newName)
+        {
             DumpObject value = _objects[indexedName];
             _objects.Remove(indexedName);
             _objects[newName] = value;
         }
 
-		public static void RenamePassage(string indexedName, string newName)
-		{
+        public static void RenamePassage(string indexedName, string newName)
+        {
             Passage value = _passages[indexedName];
             _passages.Remove(indexedName);
             _passages[newName] = value;

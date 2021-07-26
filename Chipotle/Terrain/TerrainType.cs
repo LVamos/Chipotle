@@ -1,31 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Luky;
 
-using Luky;
+using System;
+using System.Linq;
 
 namespace Game.Terrain
 {
     /// <summary>
     /// Defines types of 
     /// </summary>
- public  enum  TerrainType: byte
+    public enum TerrainType : byte
     {
-        Grass=0,
-        Linoleum=1,
-        Carpet=2,
-        Gravel=3,
-        Asphalt=4,
-        Cobblestones=5,
-        Tiles=6,
-        Wood=7,
-        Mud=8,
-        Puddle=9,
-        Concrete=10,
-        Clay=11,
-        Wall=12,
+        Grass = 0,
+        Linoleum = 1,
+        Carpet = 2,
+        Gravel = 3,
+        Asphalt = 4,
+        Cobblestones = 5,
+        Tiles = 6,
+        Wood = 7,
+        Mud = 8,
+        Puddle = 9,
+        Concrete = 10,
+        Clay = 11,
+        Wall = 12,
         Bush = 13
     }
 
@@ -87,14 +84,20 @@ namespace Game.Terrain
         /// <returns></returns>
         public static TerrainType ToTerrainType(this string value)
         {
-            var terrainDescription = value.PrepareForIndexing();
-          var index =   Array.IndexOf(_descriptions, terrainDescription);
-            var index2 = Array.IndexOf(_descriptions4Case, terrainDescription);
+            string terrainDescription = value.PrepareForIndexing();
+            int index = Array.IndexOf(_descriptions, terrainDescription);
+            int index2 = Array.IndexOf(_descriptions4Case, terrainDescription);
 
             if (index != -1)
+            {
                 return (TerrainType)index;
+            }
+
             if (index2 != -1)
+            {
                 return (TerrainType)index2;
+            }
+
             return (TerrainType)Enum.Parse(typeof(TerrainType), value);
         }
     }

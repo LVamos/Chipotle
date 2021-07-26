@@ -1,22 +1,24 @@
-﻿using Game.Messaging;
+﻿using DavyKager;
+
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
-        using System;
+using Game.Terrain;
+using Game.UI;
+
+using Luky;
+
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Game.Terrain;
-using DavyKager;
-using Luky;
-using Game.UI;
 
 namespace Game.Entities
 {
     public class ChipotleInputComponent : InputComponent
     {
 
-		public override void Start()
-		{
-			base.Start();
+        public override void Start()
+        {
+            base.Start();
 
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
@@ -44,13 +46,13 @@ namespace Game.Entities
 
         }
 
-		private void SayNearestObject()
+        private void SayNearestObject()
 => Owner.ReceiveMessage(new SayNearestObject(this));
-		private void SayLocality()
+        private void SayLocality()
             => Owner.ReceiveMessage(new SayLocality(this));
 
 
-        public ChipotleInputComponent():base()
+        public ChipotleInputComponent() : base()
         {
         }
 
@@ -60,50 +62,58 @@ namespace Game.Entities
 
         private void Test()
         {
-            if (!DebugSO.TestModeEnabled) return;
+            if (!DebugSO.TestModeEnabled)
+            {
+                return;
+            }
+
             World.Sound.Play(stream: World.Sound.GetRandomSoundStream("agojstereo"), role: null, looping: false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
 
         }
 
         private void SayOrientation()
         {
-            if (!DebugSO.TestModeEnabled) return;
+            if (!DebugSO.TestModeEnabled)
+            {
+                return;
+            }
+
             Tolk.Speak($"Columbo orientation: {Owner.Orientation.UnitVector.ToString()}, listener facing: {World.Sound.ListenerOrientationFacing.ToString()}, listener up: {World.Sound.ListenerOrientationUp.ToString()}, listener position: {World.Sound.ListenerPosition.ToString()}.");
         }
 
 
         private void TerrainInfo()
-            => Owner.ReceiveMessage(new SayTerrain (this));
+            => Owner.ReceiveMessage(new SayTerrain(this));
 
         private void MoveLeft()
-             => Owner.ReceiveMessage(new MakeStep (this, TurnType.SharplyLeft));
+             => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyLeft));
 
         private void MoveRight()
-            => Owner.ReceiveMessage(new MakeStep (this, TurnType.SharplyRight));
+            => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyRight));
 
         private void TurnSharplyLeft()
-=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SharplyLeft));
+=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyLeft));
 
         private void Interact()
-=> Owner.ReceiveMessage(new UseObject (this));
+=> Owner.ReceiveMessage(new UseObject(this));
 
         private void TurnSharplyRight()
-=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SharplyRight));
+=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyRight));
 
         private void TurnRight()
-=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SlightlyRight));
+=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyRight));
 
         private void TurnLeft()
-=> Owner.ReceiveMessage(new TurnEntity (this, TurnType.SlightlyLeft));
+=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyLeft));
 
         private void TurnAround()
-            => Owner.ReceiveMessage(new TurnEntity (this, TurnType.Around));
+            => Owner.ReceiveMessage(new TurnEntity(this, TurnType.Around));
 
         private void MoveBack()
-            => Owner.ReceiveMessage(new MakeStep (this, TurnType.Around));
+            => Owner.ReceiveMessage(new MakeStep(this, TurnType.Around));
 
         private void MoveForward()
-            => Owner.ReceiveMessage(new MakeStep (this, TurnType.None));
+            => Owner.ReceiveMessage(new MakeStep(this, TurnType.None));
 
         protected override void OnKeyDown(KeyPressed message)
         {

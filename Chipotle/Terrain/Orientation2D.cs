@@ -1,7 +1,6 @@
-﻿using static System.Math;
-using Luky;
-using System.Windows.Forms;
-using DavyKager;
+﻿using Luky;
+
+using static System.Math;
 
 namespace Game.Terrain
 {
@@ -16,7 +15,7 @@ namespace Game.Terrain
         private float VectorToRadians(Vector2 v)
             => (float)Atan2(v.Y, v.X);
 
-        public Angle Angle { get => new Angle(VectorToRadians(UnitVector)); }
+        public Angle Angle => new Angle(VectorToRadians(UnitVector));
         public Vector2 UnitVector
         {
             get => _unitVector;
@@ -25,7 +24,7 @@ namespace Game.Terrain
                 _unitVector = value;
                 _unitVector.Normalize();
             }
-    }
+        }
 
 
         private static Vector2 RadiansToVector2(double radians)
@@ -43,16 +42,24 @@ namespace Game.Terrain
             float sin = (float)Sin(radians);
 
             if (compassDegrees == -90)
+            {
                 _unitVector = _unitVector.PerpendicularLeft;
+            }
             else if (compassDegrees == 90)
+            {
                 _unitVector = _unitVector.PerpendicularRight;
+            }
             else if (Abs(compassDegrees) == 180)
+            {
                 _unitVector = _unitVector.PerpendicularRight.PerpendicularRight;
+            }
             else
-            _unitVector = new Vector2(cos *_unitVector.X -sin * _unitVector.Y, sin *_unitVector.X +cos *_unitVector.Y);
+            {
+                _unitVector = new Vector2(cos * _unitVector.X - sin * _unitVector.Y, sin * _unitVector.X + cos * _unitVector.Y);
+            }
         }
 
-        public Orientation2D(float x, float y):this(new Vector2(x, y))
+        public Orientation2D(float x, float y) : this(new Vector2(x, y))
         { }
 
 
@@ -62,7 +69,7 @@ namespace Game.Terrain
             _unitVector.Normalize();
         }
 
-        public Orientation2D(Angle angle):this(RadiansToVector2(angle.Radians)) { }
+        public Orientation2D(Angle angle) : this(RadiansToVector2(angle.Radians)) { }
 
         public Orientation2D(Orientation2D o) : this(o.UnitVector) { }
 
@@ -76,7 +83,7 @@ namespace Game.Terrain
         public static implicit operator Orientation2D(Vector2 v)
             => new Orientation2D(v);
 
-        public static implicit operator Orientation2D (Angle a)
+        public static implicit operator Orientation2D(Angle a)
             => new Orientation2D(RadiansToVector2(a));
 
         public override bool Equals(object o)

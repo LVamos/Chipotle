@@ -3,12 +3,12 @@
 namespace Game.Messaging
 {
 
-	public abstract  class GameMessage
+    public abstract class GameMessage
     {
         public override int GetHashCode()
-            => unchecked(7984 *(1357 +Sender.GetHashCode()));
+            => unchecked(7984 * (1357 + Sender.GetHashCode()));
 
-		public readonly object Sender;
+        public readonly object Sender;
 
         /// <summary>
         /// Constructor

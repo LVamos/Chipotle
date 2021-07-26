@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Game.Terrain
 {
@@ -31,19 +30,19 @@ namespace Game.Terrain
     }
 
     [Flags]
-  public enum Directions : byte
+    public enum Directions : byte
     {
-        None =    0,
-        Right =    1 << (Direction.Right - 1),
-        UpRight =    1 << (Direction.UpRight - 1),
-        Up =    1 << (Direction.Up - 1),
-        UpLeft =    1 << (Direction.UpLeft - 1),
-        Left =    1 << (Direction.Left - 1),
-        DownLeft =    1 << (Direction.DownLeft - 1),
-        Down =    1 << (Direction.Down - 1),
-        DownRight =    1 << (Direction.DownRight - 1),
+        None = 0,
+        Right = 1 << (Direction.Right - 1),
+        UpRight = 1 << (Direction.UpRight - 1),
+        Up = 1 << (Direction.Up - 1),
+        UpLeft = 1 << (Direction.UpLeft - 1),
+        Left = 1 << (Direction.Left - 1),
+        DownLeft = 1 << (Direction.DownLeft - 1),
+        Down = 1 << (Direction.Down - 1),
+        DownRight = 1 << (Direction.DownRight - 1),
 
-        All = Right    | UpRight | Up | UpLeft | Left | DownLeft | Down | DownRight
+        All = Right | UpRight | Up | UpLeft | Left | DownLeft | Down | DownRight
     }
 
 
@@ -72,17 +71,17 @@ new  Vector2(1, -1),
 
         public static bool IsVertical(this Direction d) => d == Direction.Up || d == Direction.Down;
 
-        public static bool IsHorizontal(this Direction d) => d == Direction.Left|| d == Direction.Right;
+        public static bool IsHorizontal(this Direction d) => d == Direction.Left || d == Direction.Right;
 
         public static Direction[] BasicDirections = new Direction[] { Direction.Left, Direction.Up, Direction.Right, Direction.Down };
 
         public static bool IsBasic(this Direction direction)
-            => Array.IndexOf(BasicDirections, direction)!=-1;
+            => Array.IndexOf(BasicDirections, direction) != -1;
 
 
-        public static Direction GetOpposite(this     Direction direction)
+        public static Direction GetOpposite(this Direction direction)
         {
-            switch(direction)
+            switch (direction)
             {
                 case Direction.Down: return Direction.Up;
                 case Direction.Up: return Direction.Down;
@@ -121,10 +120,12 @@ new  Vector2(1, -1),
 
         public static IEnumerable<Direction> Enumerate(this Directions directions)
         {
-            foreach (var direction in _directionList)
+            foreach (Direction direction in _directionList)
             {
                 if (directions.Includes(direction))
+                {
                     yield return direction;
+                }
             }
         }
 

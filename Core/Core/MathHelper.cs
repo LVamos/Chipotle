@@ -16,7 +16,9 @@ namespace Luky
         public static float Modulo(float a, float n)
         {
             if (n == 0)
+            {
                 throw new DivideByZeroException(nameof(n));
+            }
 
             float remainder = a % n; // puts a in the [-n+1, n-1] range using the remainder operator.
 
@@ -25,7 +27,9 @@ namespace Luky
             if the remainder is greater than zero, add n to put it in the [n-1, 0] range if n is negative
             */
             if ((n > 0 && remainder < 0) || (n < 0 && remainder > 0))
+            {
                 return remainder + n;
+            }
 
             return remainder;
         }
@@ -88,7 +92,11 @@ namespace Luky
         /// <returns>The next power of two.</returns>
         public static long NextPowerOfTwo(long n)
         {
-            if (n < 0) throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            }
+
             return (long)System.Math.Pow(2, System.Math.Ceiling(System.Math.Log((double)n, 2)));
         }
 
@@ -99,7 +107,11 @@ namespace Luky
         /// <returns>The next power of two.</returns>
         public static int NextPowerOfTwo(int n)
         {
-            if (n < 0) throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            }
+
             return (int)System.Math.Pow(2, System.Math.Ceiling(System.Math.Log((double)n, 2)));
         }
 
@@ -110,7 +122,11 @@ namespace Luky
         /// <returns>The next power of two.</returns>
         public static float NextPowerOfTwo(float n)
         {
-            if (n < 0) throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            }
+
             return (float)System.Math.Pow(2, System.Math.Ceiling(System.Math.Log((double)n, 2)));
         }
 
@@ -121,7 +137,11 @@ namespace Luky
         /// <returns>The next power of two.</returns>
         public static double NextPowerOfTwo(double n)
         {
-            if (n < 0) throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n", "Must be positive.");
+            }
+
             return System.Math.Pow(2, System.Math.Ceiling(System.Math.Log((double)n, 2)));
         }
 
@@ -134,7 +154,9 @@ namespace Luky
             long result = 1;
 
             for (; n > 1; n--)
+            {
                 result *= n;
+            }
 
             return result;
         }
@@ -183,10 +205,7 @@ namespace Luky
         /// http://www.codemaestro.com/reviews/review00000105.html. For the history of this method, see
         /// http://www.beyond3d.com/content/articles/8/
         /// </remarks>
-        public static double InverseSqrtFast(double x)
-        {
-            return InverseSqrtFast((float)x);
-            // TODO: The following code is wrong. Fix it, to improve precision.
+        public static double InverseSqrtFast(double x) => InverseSqrtFast((float)x);// TODO: The following code is wrong. Fix it, to improve precision.
 #if false
             unsafe
             {
@@ -198,7 +217,7 @@ namespace Luky
                 return x;
             }
 #endif
-        }
+
 
         /// <summary>
         /// Convert degrees to radians

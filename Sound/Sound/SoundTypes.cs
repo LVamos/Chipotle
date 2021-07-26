@@ -117,7 +117,10 @@ namespace Luky
         public void AddGroupVolume(Name name, float value)
         {
             if (Immutable)
+            {
                 throw new Exception("Attempted to change a snapshot after it had been set as immutable");
+            }
+
             GroupVolumes.Add(name, value);
         }
     }
@@ -135,6 +138,6 @@ namespace Luky
         /// </summary>
         /// <param name="length"></param>
         public ShortBuffer(int length)
-        => this.Data = new short[length]; 
+        => Data = new short[length];
     }
 }

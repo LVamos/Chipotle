@@ -1,26 +1,22 @@
-﻿using System.Reflection;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Audio.OpenAL;
-using Presets = OpenTK.Audio.OpenAL.EffectsExtension.ReverbPresets;
+
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
 using EaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb;
 using EfxEaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EfxEaxReverb;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Runtime.CompilerServices;
+using Presets = OpenTK.Audio.OpenAL.EffectsExtension.ReverbPresets;
 //using Luky;
 
 namespace Sound
 {
     public static class EaxReverbDefaults
     {
-        public static EfxEaxReverb  GetDefaultSetting()
+        public static EfxEaxReverb GetDefaultSetting()
         {
-            var _ = new EfxEaxReverb();
+            EfxEaxReverb _ = new EfxEaxReverb();
             _.AirAbsorptionGainHF = AirAbsorptionGainHF;
             _.DecayHFLimit = DecayHFLimit ? 1 : 0;
             _.DecayHFRatio = DecayHFRatio;
@@ -54,12 +50,14 @@ namespace Sound
         {
             Directory.CreateDirectory(folder);
             string file = Path.Combine(folder, name + " preset.txt");
-            using (var sw =new StreamWriter(file))
+            using (StreamWriter sw = new StreamWriter(file))
             {
                 void Save(bool expression, string parameterName, object value) //local function
                 {
                     if (expression)
-                       sw.WriteLine($"{parameterName} {value.ToString()}");
+                    {
+                        sw.WriteLine($"{parameterName} {value.ToString()}");
+                    }
                 }
 
                 // Here are the 13 standard reverb settings
@@ -97,8 +95,8 @@ namespace Sound
 
         public static void SaveAllEaxPresets()
         {
-           foreach(var  preset in GetEaxPresets())
-                {
+            foreach ((string Name, EaxReverb Preset) preset in GetEaxPresets())
+            {
                 EaxReverb eaxReverb = preset.Preset;
                 EfxEaxReverb efxReverb;
                 EffectsExtension.GetEaxFromEfxEax(ref eaxReverb, out efxReverb);
@@ -109,8 +107,8 @@ namespace Sound
 
         // Here are the standard reverb defaults
         public const float Density = 1f;
-        public const float MinDensity=0f;
-        public const float MaxDensity=1f;
+        public const float MinDensity = 0f;
+        public const float MaxDensity = 1f;
 
         public const float Diffusion = 1f;
         public const float MinDiffusion = 0f;
@@ -197,4 +195,4 @@ namespace Sound
     }
 
 
-    }
+}

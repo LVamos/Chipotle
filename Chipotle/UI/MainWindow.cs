@@ -1,19 +1,16 @@
-﻿using Luky;
-using System;
+﻿using System;
 using System.Drawing;
-using System.Security.Cryptography.X509Certificates;
 using System.Windows.Forms;
-using Game.UI;
 
 namespace Game.UI
 {
     /// <summary>
     /// The only visible window which catches keyboard events.
     /// </summary>
-  public  class MainWindow: Form
+    public class MainWindow : Form
     {
         private Timer _tmrGameLoop;
-        private bool _gameLoopEnabled=false;
+        private bool _gameLoopEnabled = false;
         public bool GameLoopEnabled
         {
             get => _gameLoopEnabled;
@@ -23,7 +20,7 @@ namespace Game.UI
         /// <summary>
         /// Constructor
         /// </summary>
-public MainWindow()
+        public MainWindow()
         {
             SuspendLayout();
             AutoScaleDimensions = new SizeF(9F, 20F);
@@ -44,7 +41,7 @@ public MainWindow()
 
 
             _tmrGameLoop = new Timer();
-            _tmrGameLoop.Interval = 1000/World.FramesPerSecond;
+            _tmrGameLoop.Interval = 1000 / World.FramesPerSecond;
             _tmrGameLoop.Tick += GameLoop;
             _tmrGameLoop.Enabled = false;
 
@@ -52,10 +49,7 @@ public MainWindow()
             Shown += MainWindow_Shown;
         }
 
-        private void GameLoop(object sender, EventArgs e)
-        {
-            World.Update();
-        }
+        private void GameLoop(object sender, EventArgs e) => World.Update();
 
         private void MainWindow_Shown(object sender, EventArgs e)
         {

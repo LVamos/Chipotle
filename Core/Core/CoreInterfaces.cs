@@ -14,7 +14,7 @@ namespace Luky
     /// for a more generic serialization service
     /// </summary>
     public interface ISerializationService
-    { 
+    {
         // Serialize would traverse the entire object graph, perhaps assigning IDs to each complex object as it goes, so we can handle circular references. It would know about the specific classes used in our project.
         /// <summary>
         /// 

@@ -1,18 +1,18 @@
-﻿using System.Linq;
-using Game.Messaging.Events;
+﻿using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
-    class TuttlePhysicsComponent : PhysicsComponent
+    internal class TuttlePhysicsComponent : PhysicsComponent
     {
 
-        private Random _random= new Random();
+        private Random _random = new Random();
         private PathFinder _finder = new PathFinder();
 
         private Entity _player;
@@ -23,7 +23,7 @@ namespace Game.Entities
         private int _minWalkSpeed = 400;
         private int _maxWalkSpeed = 900;
         private const int _maxDistanceFromPlayer = 10;
-        private const int _minDistanceFromPlayer= 2;
+        private const int _minDistanceFromPlayer = 2;
         private int _desiredDistanceFromPlayer;
         private List<Vector2> _path;
 
@@ -47,7 +47,9 @@ namespace Game.Entities
         private void OnLocalityLeft(LocalityLeft message)
         {
             if (message.Sender != _player)
+            {
                 return;
+            }
 
             StopApproachingToPlayer();
             GoToPlayer();
@@ -56,18 +58,24 @@ namespace Game.Entities
         private void OnEntityMoved(EntityMoved message)
         {
             if (message.Sender != _player)
+            {
                 return;
+            }
 
-                CheckDistanceFromPlayer();
+            CheckDistanceFromPlayer();
         }
 
         private void CheckDistanceFromPlayer()
         {
             int distance = GetDistanceFromPlayer();
             if (distance > _maxDistanceFromPlayer && !_approachingToPlayer)
+            {
                 GoToPlayer();
-            else if (_approachingToPlayer&& (distance <= _desiredDistanceFromPlayer || _pathIndex<=0))
+            }
+            else if (_approachingToPlayer && (distance <= _desiredDistanceFromPlayer || _pathIndex <= 0))
+            {
                 StopApproachingToPlayer();
+            }
         }
 
         private void StopApproachingToPlayer()
@@ -80,7 +88,7 @@ namespace Game.Entities
 => GetDistance(_area.Center, _player.Area.Center);
 
         private int GetDistance(Vector2 a, Vector2 b)
-=> (int) (Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
+=> (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
 
         private void GoToPlayer()
         {
@@ -88,15 +96,19 @@ namespace Game.Entities
             (bool found, Vector2 target) target = FindPlaceNearPlayer();
 
             if (!target.found)
+            {
                 return;
+            }
 
             _path = _finder.FindPath(_area.Center, target.target);
 
             if (_path == null)
+            {
                 return;
+            }
 
-            _pathIndex = _path.Count-1;
-            _approachingToPlayer =_walking= true;
+            _pathIndex = _path.Count - 1;
+            _approachingToPlayer = _walking = true;
             _walkSpeed = ComputeWalkSpeed(GetDistanceFromPlayer());
             _stepInterval = 0;
         }
@@ -104,28 +116,45 @@ namespace Game.Entities
         private int ComputeWalkSpeed(int distance)
         {
             if (distance < 5)
+            {
                 return 1200;
+            }
+
             if (distance < 7)
+            {
                 return 1000;
+            }
+
             if (distance < 10)
+            {
                 return 900;
+            }
+
             if (distance < 15)
+            {
                 return 500;
+            }
+
             if (distance < 20)
+            {
                 return 300;
+            }
+
             return 150;
         }
 
         private (bool found, Vector2 point) FindPlaceNearPlayer()
         {
             Plane aroundPlayer = new Plane(_player.Area);
-            for(int i=0; i<=_maxDistanceFromPlayer; i++)
+            for (int i = 0; i <= _maxDistanceFromPlayer; i++)
             {
                 aroundPlayer.Extend();
-                Tile walkable = aroundPlayer.GetPerimeterTiles().FirstOrDefault(t=> t.Walkable);
+                Tile walkable = aroundPlayer.GetPerimeterTiles().FirstOrDefault(t => t.Walkable);
 
                 if (walkable != null)
+                {
                     return (true, walkable.Position);
+                }
             }
             return (false, default);
         }
@@ -135,7 +164,9 @@ namespace Game.Entities
             base.Update();
 
             if (_walking)
+            {
                 PerformWalk();
+            }
         }
 
         private void PerformWalk()
@@ -147,7 +178,10 @@ namespace Game.Entities
                 _stepInterval = 0;
                 Step();
             }
-            else _stepInterval += World.DeltaTime;
+            else
+            {
+                _stepInterval += World.DeltaTime;
+            }
         }
 
 
@@ -174,7 +208,7 @@ namespace Game.Entities
 
             if (targetLocality != sourceLocality)
             {
-                    sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
+                sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
                 targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
             }
 

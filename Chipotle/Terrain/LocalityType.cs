@@ -1,5 +1,6 @@
-﻿using System;
-using Luky;
+﻿using Luky;
+
+using System;
 
 namespace Game.Terrain
 {
@@ -12,33 +13,37 @@ namespace Game.Terrain
         /// <summary>
         /// A room or corridor in a building
         /// </summary>
-        Indoor=0,
+        Indoor = 0,
         /// <summary>
         /// An openair place like yard or meadow
         /// </summary>
-        Outdoor=1
+        Outdoor = 1
     }
 
-    public static class     LocalityTypeExtensions
+    public static class LocalityTypeExtensions
     {
         public static LocalityType ToLocalityType(this string value)
-		{
-            var type = value.PrepareForIndexing();
+        {
+            string type = value.PrepareForIndexing();
 
             if (type == "venkovní" || type == "outdoor")
+            {
                 return LocalityType.Outdoor;
+            }
 
             if (type == "vnitřní" || type == "indoor")
+            {
                 return LocalityType.Indoor;
+            }
 
             throw new ArgumentException(value);
-		}
+        }
 
 
         public static string GetDescription(this LocalityType type)
 => type == LocalityType.Indoor ? "vnitřní" : "venkovní";
 
-        
+
     }
 
 }

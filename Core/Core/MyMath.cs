@@ -29,9 +29,9 @@ namespace Luky
         /// <param name="point"></param>
         /// <returns></returns>
         public static Vector3 GetNearestPointOnPlane(Vector3 planeStart, Vector3 planeEnd, Vector3 point)
-        { 
+        {
             // taken from http://stackoverflow.com/questions/9368436/3d-perpendicular-point-on-line-from-3d-point
-          // hmm, reviewing this later I realize the article was about 3D lines, not planes at all.
+            // hmm, reviewing this later I realize the article was about 3D lines, not planes at all.
             Vector3 p1 = planeStart;
             Vector3 p2 = planeEnd;
             Vector3 q = point;
@@ -70,7 +70,7 @@ namespace Luky
             // Also note I multiply Y by negative 1.
             float headingX = (float)Math.Sin(angleInRadians);
             float headingY = -(float)Math.Cos(angleInRadians);
-            var vec = new Vector2(headingX, headingY);
+            Vector2 vec = new Vector2(headingX, headingY);
             // not sure if it was already normalized, but did it for good measure
             vec.Normalize();
             return vec;
@@ -104,6 +104,6 @@ namespace Luky
         /// <param name="radian"></param>
         /// <returns></returns>
         private static Vector2 RadianToVector2f(float radian)
-        => new Vector2((float)Math.Cos(radian), (float)Math.Sin(radian)); 
+        => new Vector2((float)Math.Cos(radian), (float)Math.Sin(radian));
     } // cls
 }

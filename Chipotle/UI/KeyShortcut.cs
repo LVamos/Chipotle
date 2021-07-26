@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Security.Permissions;
 using System.Windows.Forms;
 
 namespace Game.UI
 {
-    public  struct KeyShortcut
+    public struct KeyShortcut
     {
         [Flags]
         public enum Modifiers
@@ -67,7 +66,7 @@ namespace Game.UI
         /// Construktor
         /// </summary>
         /// <param name="key">Value of pressed key</param>
-        public KeyShortcut(Keys key):this(false, false, false, key)
+        public KeyShortcut(Keys key) : this(false, false, false, key)
         {
         }
 
@@ -76,7 +75,7 @@ namespace Game.UI
         /// Constructor
         /// </summary>
         /// <param name="e">Event parameters</param>
-        public KeyShortcut(KeyEventParams e):this(e.Control, e.Shift, e.Alt, e.Key)
+        public KeyShortcut(KeyEventParams e) : this(e.Control, e.Shift, e.Alt, e.Key)
         {
         }
 
@@ -87,7 +86,7 @@ namespace Game.UI
             => Key.GetHashCode();
 
         public static bool operator ==(KeyShortcut k1, KeyShortcut k2)
-            => (k1.Control==k2.Control && k1.Shift==k2.Shift && k1.Alt==k2.Alt && k1.Key==k2.Key);
+            => (k1.Control == k2.Control && k1.Shift == k2.Shift && k1.Alt == k2.Alt && k1.Key == k2.Key);
 
 
         public static bool operator !=(KeyShortcut k1, KeyShortcut k2)
