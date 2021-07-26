@@ -60,6 +60,9 @@
   <ItemGroup>
     <Compile Include="Messaging\Commands\GotoPoint.cs" />
     <Compile Include="Entities\PoolsideBin.cs" />
+    <Compile Include="Messaging\Commands\SetPosition.cs" />
+    <Compile Include="Messaging\Commands\StartFollowing.cs" />
+    <Compile Include="Messaging\Commands\StopFollowing.cs" />
     <Compile Include="Messaging\Events\DoorHit.cs" />
     <Compile Include="Messaging\Events\ObjectsCollided.cs" />
     <Compile Include="Messaging\Events\CutsceneEnded.cs" />

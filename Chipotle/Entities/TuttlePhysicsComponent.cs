@@ -1,4 +1,5 @@
-﻿using Game.Messaging.Events;
+﻿using Game.Messaging.Commands;
+using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
@@ -16,16 +17,16 @@ namespace Game.Entities
         private PathFinder _finder = new PathFinder();
 
         private Entity _player;
-        private int _pathIndex;
-        private bool _approachingToPlayer;
-        private bool _walking;
+        private bool _approachToPlayer;
+        private bool _walk;
         private float _stepInterval;
         private int _minWalkSpeed = 400;
         private int _maxWalkSpeed = 900;
         private const int _maxDistanceFromPlayer = 10;
         private const int _minDistanceFromPlayer = 2;
         private int _desiredDistanceFromPlayer;
-        private List<Vector2> _path;
+        private Queue<Vector2> _path;
+        private bool _followPlayer;
 
         public override void Start()
         {
@@ -33,16 +34,32 @@ namespace Game.Entities
             SetPosition(new Plane(new Vector2(1030, 1030)));
             _orientation = new Orientation2D(0, 1);
             _player = World.Player;
+
             RegisterMessages(new Dictionary<Type, Action<Messaging.GameMessage>>
             {
+                [typeof(GotoPoint)] = (m) => OnGotoPoint((GotoPoint)m),
+                [typeof(StartFollowing)] = (m) => OnStartFollowing((StartFollowing)m),
+                [typeof(StopFollowing)] = (m) => OnStopFollowing((StopFollowing)m),
                 [typeof(LocalityLeft)] = (message) => OnLocalityLeft((LocalityLeft)message),
                 [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message)
             }
                 );
 
-            _area.GetLocality().ReceiveMessage(new LocalityEntered(Owner, Owner));
             base.Start();
         }
+
+        private void OnGotoPoint(GotoPoint m)
+        {
+            _path = m.Path;
+            _walkSpeed = m.StepLength;
+            _walk = true;
+        }
+
+        private void OnStartFollowing(StartFollowing m)
+            => _followPlayer = true;
+
+        private void OnStopFollowing(StopFollowing m)
+            => _followPlayer = false;
 
         private void OnLocalityLeft(LocalityLeft message)
         {
@@ -62,17 +79,18 @@ namespace Game.Entities
                 return;
             }
 
-            CheckDistanceFromPlayer();
+            if (_followPlayer)
+                CheckDistanceFromPlayer();
         }
 
         private void CheckDistanceFromPlayer()
         {
             int distance = GetDistanceFromPlayer();
-            if (distance > _maxDistanceFromPlayer && !_approachingToPlayer)
+            if (distance > _maxDistanceFromPlayer && !_approachToPlayer)
             {
                 GoToPlayer();
             }
-            else if (_approachingToPlayer && (distance <= _desiredDistanceFromPlayer || _pathIndex <= 0))
+            else if (_approachToPlayer && (distance <= _desiredDistanceFromPlayer || _path.IsNullOrEmpty()))
             {
                 StopApproachingToPlayer();
             }
@@ -80,7 +98,7 @@ namespace Game.Entities
 
         private void StopApproachingToPlayer()
         {
-            _walking = _approachingToPlayer = false;
+            _walk = _approachToPlayer = false;
             _path = null;
         }
 
@@ -103,12 +121,9 @@ namespace Game.Entities
             _path = _finder.FindPath(_area.Center, target.target);
 
             if (_path == null)
-            {
                 return;
-            }
 
-            _pathIndex = _path.Count - 1;
-            _approachingToPlayer = _walking = true;
+            _approachToPlayer = _walk = true;
             _walkSpeed = ComputeWalkSpeed(GetDistanceFromPlayer());
             _stepInterval = 0;
         }
@@ -163,7 +178,7 @@ namespace Game.Entities
         {
             base.Update();
 
-            if (_walking)
+            if (_walk)
             {
                 PerformWalk();
             }
@@ -171,7 +186,8 @@ namespace Game.Entities
 
         private void PerformWalk()
         {
-            CheckDistanceFromPlayer();
+            if (_approachToPlayer)
+                CheckDistanceFromPlayer();
 
             if (_stepInterval >= _walkSpeed)
             {
@@ -182,36 +198,33 @@ namespace Game.Entities
             {
                 _stepInterval += World.DeltaTime;
             }
+
+            if (_path.IsNullOrEmpty())
+                StopWalk();
         }
 
+        private void StopWalk()
+        {
+            _walk = false;
+            _path = null;
+            _stepInterval = 0;
+        }
 
         private void Step()
         {
             // Get target tile
-            Plane target = new Plane(_path[_pathIndex--]);
+            Plane target = new Plane(_path.Dequeue());
             Tile targetTile = World.Map[target.Center];
 
             if (!targetTile.Permeable || (targetTile.IsOccupied && targetTile.Object != Owner))
             {
-                SayDelegate("Kam mám jít?");
+                throw new InvalidOperationException("Lost");
                 StopApproachingToPlayer();
                 return;
             }
 
             // The road is clear! Move!
-            Locality sourceLocality = _area.GetLocality();
-            Locality targetLocality = World.Map[target.Center].Locality;
-            EntityMoved moved = new EntityMoved(Owner, targetTile);
             SetPosition(target);
-            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
-            targetLocality.ReceiveMessage(moved);
-
-            if (targetLocality != sourceLocality)
-            {
-                sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
-                targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
-            }
-
         }
     }
 }

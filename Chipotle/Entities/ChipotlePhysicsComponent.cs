@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Game
+namespace Game.Entities
 {
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
@@ -42,10 +42,8 @@ namespace Game
         public override void Start()
         {
             // set initial position.
-            SetPosition(1037, 1063);
+            SetPosition(1028, 1034);
             _orientation = new Orientation2D(0, 1);
-            Locality locality = _area.GetLocality();
-            locality.ReceiveMessage(new LocalityEntered(Owner, Owner));
 
             base.Start();
 
@@ -66,6 +64,7 @@ namespace Game
 
             // Play intro cutscene
             World.PlayCutscene(Owner, "cs6");
+
         }
 
 
@@ -179,25 +178,8 @@ namespace Game
 
 
             // The road is clear! Move!
-            Locality sourceLocality = _area.GetLocality();
-            Locality targetLocality = World.Map[target.Center].Locality;
-            EntityMoved moved = new EntityMoved(Owner, targetTile);
             SetPosition(target);
-            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
-
-            if (targetLocality != sourceLocality)
-            {
-                sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
-                targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
-
-            }
-            targetLocality.ReceiveMessage(moved);
         }
-
-
-
-
-
     }
 
 
