@@ -2,7 +2,7 @@
 
 namespace Game.Messaging.Events
 {
-    public class PositionChanged
+    public class PositionChanged : GameMessage
     {
         public readonly Plane Area;
 

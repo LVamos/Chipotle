@@ -1,5 +1,5 @@
-﻿using Game.Messaging.Events;
-using Game.Messaging;
+﻿using Game.Messaging;
+using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
@@ -13,15 +13,15 @@ namespace Game.Entities
     {
         public Orientation2D Orientation => _physics.Orientation;
 
-        public new Plane Area => _physics.Area;
-
+        public new Plane Area
+            => new Plane(_area);
 
         public override void ReceiveMessage(GameMessage message)
         {
             if (message.Sender == this)
             {
-                if(!(message is CutsceneBegan) && !(message is  CutsceneEnded))
-                return;
+                if (!(message is CutsceneBegan) && !(message is CutsceneEnded))
+                    return;
             }
 
             base.ReceiveMessage(message);
@@ -90,6 +90,7 @@ namespace Game.Entities
             => _components.Any(c => c == message.Sender);
 
         protected List<EntityComponent> _components;
+        private Plane _area;
 
 
 
@@ -107,7 +108,23 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            _components.ForEach(c => c.Start());
+            _physics?.Start();
+            _sound?.Start();
+            _ai?.Start();
+            _input?.Start();
+
+            RegisterMessages(
+                new Dictionary<System.Type, System.Action<GameMessage>>
+                {
+                    [typeof(PositionChanged)] = (m) => OnPositionChanged((PositionChanged)m),
+                }
+                );
+        }
+
+        protected void OnPositionChanged(PositionChanged m)
+        {
+            _area = m.Area;
+            _ai?.ReceiveMessage(m);
         }
 
 

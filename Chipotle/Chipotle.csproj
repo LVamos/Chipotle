@@ -97,6 +97,7 @@
     <Compile Include="Messaging\Commands\SayLocality.cs" />
     <Compile Include="Messaging\Events\EntityShown.cs" />
     <Compile Include="Messaging\Events\EntityHidden.cs" />
+    <Compile Include="Messaging\Events\PositionChanged.cs" />
     <Compile Include="Messaging\Events\TerrainCollided.cs" />
     <Compile Include="Messaging\Commands\UseObject.cs" />
     <Compile Include="Messaging\Events\KeyPressed.cs" />

@@ -1,4 +1,5 @@
-﻿using Game.Terrain;
+﻿using Game.Messaging.Events;
+using Game.Terrain;
 
 using Luky;
 
@@ -10,7 +11,7 @@ namespace Game.Entities
 
         private void Appear(Plane target) => target.GetTiles().Foreach(t => t.Register(Owner));
 
-        private void DisAppear() 
+        private void DisAppear()
             => _area.GetTiles()
             .Foreach(t => t.UnregisterObject());
 
@@ -22,22 +23,35 @@ namespace Game.Entities
 
         protected void SetPosition(Plane target)
         {
+            Tile targetTile = World.Map[target.Center];
+            Locality sourceLocality = _area?.GetLocality();
+            Locality targetLocality = target.GetLocality();
+
+
             if (_area != null)
-            {
                 DisAppear();
-            }
 
             Appear(target);
             _area = new Plane(target);
+
+            // Announce changes
+            Owner.ReceiveMessage(new PositionChanged(this, _area));
+            EntityMoved moved = new EntityMoved(Owner, targetTile);
+            Owner.ReceiveMessage(new EntityMoved(this, targetTile));
+            targetLocality.ReceiveMessage(moved);
+
+            if (targetLocality != sourceLocality)
+            {
+                sourceLocality?.ReceiveMessage(new LocalityLeft(Owner, Owner));
+                targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
+            }
         }
 
 
-        //todo PhisicsComponent
 
         protected Orientation2D _orientation;
         public Orientation2D Orientation => new Orientation2D(_orientation);
 
-        public Plane Area => new Plane(_area);
         protected Plane _area;
 
 
