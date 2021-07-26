@@ -1,4 +1,5 @@
-﻿
+﻿using Game.Messaging.Events;
+
 using Luky;
 
 using System;
@@ -43,10 +44,9 @@ namespace Game.Messaging
         /// <param name="message"></param>
         public virtual void ReceiveMessage(GameMessage message)
         {
-            if (_messagingEnabled && message.Sender != this)
-            {
-                EnqueueMessage(message);
-            }
+            if (_messagingEnabled)
+                if (message.Sender != this || (message.Sender == this && (message is CutsceneBegan || message is CutsceneEnded)))
+                    EnqueueMessage(message);
         }
 
         protected Dictionary<Type, Action<GameMessage>> _messageHandlers;

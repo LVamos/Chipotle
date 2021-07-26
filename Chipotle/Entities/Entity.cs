@@ -18,18 +18,10 @@ namespace Game.Entities
 
         public override void ReceiveMessage(GameMessage message)
         {
-            if (message.Sender == this)
-            {
-                if (!(message is CutsceneBegan) && !(message is CutsceneEnded))
-                    return;
-            }
-
             base.ReceiveMessage(message);
 
             if (_messagingEnabled)
-            {
                 SendInnerMessage(message);
-            }
         }
 
 
@@ -79,11 +71,6 @@ namespace Game.Entities
             }
 
             targetComponents.Foreach(c => c.ReceiveMessage(message));
-            //foreach(var c in _components)
-            //{
-            //    if (c != message.Sender)
-            //        c.ReceiveMessage(message);
-            //}
         }
 
         private bool IsInternal(GameMessage message)
@@ -108,10 +95,10 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            _physics?.Start();
             _sound?.Start();
-            _ai?.Start();
             _input?.Start();
+            _physics?.Start();
+            _ai?.Start();
 
             RegisterMessages(
                 new Dictionary<System.Type, System.Action<GameMessage>>
