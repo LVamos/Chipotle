@@ -121,7 +121,6 @@ namespace Game.Entities
             {
                 _cutsceneInProgress = false;
                 World.StopCutscene(Owner);
-                Owner.ReceiveMessage(new CutsceneEnded(this));
             }
 
             base.OnKeyDown(message);

@@ -1,4 +1,5 @@
-﻿using Game.Messaging;
+﻿using Game.Messaging.Events;
+using Game.Messaging;
 using Game.Terrain;
 
 using Luky;
@@ -19,6 +20,7 @@ namespace Game.Entities
         {
             if (message.Sender == this)
             {
+                if(!(message is CutsceneBegan) && !(message is  CutsceneEnded))
                 return;
             }
 

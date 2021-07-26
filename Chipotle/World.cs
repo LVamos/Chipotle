@@ -66,14 +66,19 @@ namespace Game
             _passages.Foreach(v => v.Value.Update());
             _objects.Foreach(v => v.Value.Update());
             _entities.Foreach(v => v.Value.Update());
+            HandleCutscene();
+        }
 
-            if (_cutsceneID > 0)
+        private static void HandleCutscene()
+        {
+            if (_cutsceneBegan!=null)
             {
-                Sound.GetDynamicInfo(_cutsceneID, out SoundState state, out int _);
+                Sound.GetDynamicInfo(_cutsceneBegan.SoundID, out SoundState state, out int _);
+
                 if (state != SoundState.Playing)
                 {
-                    _cutsceneID = 0;
-                    ReceiveMessage(new CutsceneEnded(_cutsceneSender));
+                    ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
+                    _cutsceneBegan = null;
                 }
             }
         }
@@ -88,9 +93,9 @@ namespace Game
                 throw new ArgumentNullException(nameof(cutscene));
             }
 
-            _cutsceneSender = sender;
-            ReceiveMessage(new CutsceneBegan(sender));
-            _cutsceneID = Sound.Play(cutscene);
+             int id = Sound.Play(cutscene);
+            _cutsceneBegan = new CutsceneBegan(sender, cutscene, id);
+            ReceiveMessage(_cutsceneBegan);
         }
 
         public static TileMap Map { get; set; }
@@ -102,10 +107,9 @@ namespace Game
 
         public static void StopCutscene(object sender)
         {
-            Sound.Stop(_cutsceneID);
-            _cutsceneID = 0;
-            _cutsceneSender = null;
-            ReceiveMessage(new CutsceneEnded(sender));
+            Sound.Stop(_cutsceneBegan.SoundID);
+            ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
+            _cutsceneBegan = null;
         }
 
         public static void RenameLocality(string indexedName, string newName)
@@ -255,8 +259,7 @@ namespace Game
         }
 
         public static SoundThread Sound;
-        private static int _cutsceneID;
-        private static object _cutsceneSender;
+        private static CutsceneBegan _cutsceneBegan;
 
         /// <summary>
         /// Starts game from begining.
