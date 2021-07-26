@@ -1,12 +1,18 @@
-﻿using Game.Messaging.Events;
+﻿using Game.Messaging.Commands;
+using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
+
+using System;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
     public abstract class PhysicsComponent : EntityComponent
     {
+
+
         protected int _walkSpeed;
 
         private void Appear(Plane target) => target.GetTiles().Foreach(t => t.Register(Owner));
@@ -47,7 +53,20 @@ namespace Game.Entities
             }
         }
 
+        public override void Start()
+        {
+            base.Start();
 
+            RegisterMessages(
+                new Dictionary<Type, Action<Messaging.GameMessage>>
+                {
+                    [typeof(SetPosition)] = (m) => OnSetPosition((SetPosition)m),
+                }
+                );
+        }
+
+        private void OnSetPosition(SetPosition m)
+            => SetPosition(m.Target);
 
         protected Orientation2D _orientation;
         public Orientation2D Orientation => new Orientation2D(_orientation);
