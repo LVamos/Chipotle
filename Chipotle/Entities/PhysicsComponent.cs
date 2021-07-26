@@ -12,6 +12,11 @@ namespace Game.Entities
 
         private void DisAppear() => Area.GetTiles().Foreach(t => t.UnregisterObject());
 
+        protected void SetPosition(float x, float y)
+            => SetPosition(new Vector2(x, y));
+
+        protected void SetPosition(Vector2 coords)
+            => SetPosition(new Plane(coords));
 
         protected void SetPosition(Plane target)
         {
