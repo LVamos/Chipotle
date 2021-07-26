@@ -10,7 +10,9 @@ namespace Game.Entities
 
         private void Appear(Plane target) => target.GetTiles().Foreach(t => t.Register(Owner));
 
-        private void DisAppear() => Area.GetTiles().Foreach(t => t.UnregisterObject());
+        private void DisAppear() 
+            => _area.GetTiles()
+            .Foreach(t => t.UnregisterObject());
 
         protected void SetPosition(float x, float y)
             => SetPosition(new Vector2(x, y));

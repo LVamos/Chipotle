@@ -103,9 +103,10 @@ namespace Game
         }
 
         private void OnSayLocality(SayLocality m)
-=> SayDelegate(Area.GetLocality().Name.Friendly);
+=> SayDelegate(_area.GetLocality().Name.Friendly);
 
-        private void OnSayTerrain(SayTerrain message) => SayDelegate(World.Map[Area.UpperLeftCorner].Terrain.GetDescription());
+        private void OnSayTerrain(SayTerrain message) 
+            => SayDelegate(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
 
         private void OnUseObject(UseObject message)
         {
@@ -144,7 +145,7 @@ namespace Game
                 finalOrientation.Rotate(message.Direction);
             }
 
-            Plane target = Area;
+            Plane target = new Plane(_area);
             target.Move(finalOrientation, 1);
 
             // Is the terrain occupable?
