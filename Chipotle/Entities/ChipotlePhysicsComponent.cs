@@ -42,8 +42,7 @@ namespace Game
         public override void Start()
         {
             // set initial position.
-            // 1035, 1063, 1040, 1058} }
-            SetPosition(new Plane(World.GetObject("lavička w1").Area.UpperLeftCorner + new Vector2(0, 1)));
+            SetPosition(1037, 1063);
             _orientation = new Orientation2D(0, 1);
             Locality locality = _area.GetLocality();
             locality.ReceiveMessage(new LocalityEntered(Owner, Owner));
@@ -65,6 +64,8 @@ namespace Game
                 }
                 );
 
+            // Play intro cutscene
+            World.PlayCutscene(Owner, "cs6");
         }
 
 
@@ -187,6 +188,7 @@ namespace Game
             {
                 sourceLocality.ReceiveMessage(new LocalityLeft(Owner, Owner));
                 targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
+
             }
             targetLocality.ReceiveMessage(moved);
         }
