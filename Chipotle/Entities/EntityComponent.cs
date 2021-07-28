@@ -20,7 +20,7 @@ namespace Game.Entities
         public Entity Owner;
         protected bool _cutsceneInProgress;
 
-        public new Name Name => Owner?.Name;
+        public Name Name => Owner?.Name;
 
         public override void Start()
         {
