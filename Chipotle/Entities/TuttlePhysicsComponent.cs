@@ -30,8 +30,6 @@ namespace Game.Entities
 
         public override void Start()
         {
-            // set initial position.
-            SetPosition(new Plane(new Vector2(1030, 1030)));
             _orientation = new Orientation2D(0, 1);
             _player = World.Player;
 
@@ -216,7 +214,7 @@ namespace Game.Entities
             Plane target = new Plane(_path.Dequeue());
             Tile targetTile = World.Map[target.Center];
 
-            if (!targetTile.Permeable || (targetTile.IsOccupied && targetTile.Object != Owner))
+            if (!targetTile.Walkable && (targetTile.IsOccupied && targetTile.Object != Owner))
             {
                 throw new InvalidOperationException("Lost");
                 StopApproachingToPlayer();

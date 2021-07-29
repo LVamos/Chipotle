@@ -42,7 +42,7 @@ namespace Game.Entities
         public override void Start()
         {
             // set initial position.
-            SetPosition(1028, 1034);
+            SetPosition(1028, 1034, true);
             _orientation = new Orientation2D(0, 1);
 
             base.Start();

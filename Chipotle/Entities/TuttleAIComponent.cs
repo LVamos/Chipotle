@@ -26,7 +26,7 @@ namespace Game.Entities
                 }
                 );
 
-            Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(1030, 1036))));
+            Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(1030, 1036)), true));
         }
 
         private readonly Entity _player = World.Player;
