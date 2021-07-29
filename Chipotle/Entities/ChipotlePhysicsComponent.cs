@@ -37,7 +37,7 @@ namespace Game.Entities
 
         private int _rotationStep;
         private int _plannedRotations;
-
+        private bool _steppedIntoPuddle;
 
         public override void Start()
         {
@@ -104,7 +104,7 @@ namespace Game.Entities
         private void OnSayLocality(SayLocality m)
 => SayDelegate(_area.GetLocality().Name.Friendly);
 
-        private void OnSayTerrain(SayTerrain message) 
+        private void OnSayTerrain(SayTerrain message)
             => SayDelegate(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
 
         private void OnUseObject(UseObject message)
@@ -179,6 +179,22 @@ namespace Game.Entities
 
             // The road is clear! Move!
             SetPosition(target);
+
+            // Check if player walked in a puddle
+            WatchPuddle(targetTile.Position);
+        }
+
+        private void WatchPuddle(Vector2 point)
+        {
+            if (_steppedIntoPuddle)
+                return;
+
+            Plane puddle = new Plane("937, 1081, 941, 1065");
+            if(puddle.LaysOnPlane(point))
+            {
+                _steppedIntoPuddle = true;
+                World.PlayCutscene(Owner, "cs2");
+            }
         }
     }
 
