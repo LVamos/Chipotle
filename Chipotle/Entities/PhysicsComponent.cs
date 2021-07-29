@@ -21,13 +21,13 @@ namespace Game.Entities
             => _area.GetTiles()
             .Foreach(t => t.UnregisterObject());
 
-        protected void SetPosition(float x, float y)
-            => SetPosition(new Vector2(x, y));
+        protected void SetPosition(float x, float y, bool silently=false)
+            => SetPosition(new Vector2(x, y), silently);
 
-        protected void SetPosition(Vector2 coords)
-            => SetPosition(new Plane(coords));
+        protected void SetPosition(Vector2 coords, bool silently=false)
+            => SetPosition(new Plane(coords), silently);
 
-        protected void SetPosition(Plane target)
+        protected void SetPosition(Plane target, bool silently=false)
         {
             Tile targetTile = World.Map[target.Center];
             Locality sourceLocality = _area?.GetLocality();
@@ -42,9 +42,13 @@ namespace Game.Entities
 
             // Announce changes
             Owner.ReceiveMessage(new PositionChanged(this, _area));
+
+            if(!silently)
+            {
             EntityMoved moved = new EntityMoved(Owner, targetTile);
             Owner.ReceiveMessage(new EntityMoved(this, targetTile));
             targetLocality.ReceiveMessage(moved);
+            }
 
             if (targetLocality != sourceLocality)
             {
@@ -66,7 +70,7 @@ namespace Game.Entities
         }
 
         private void OnSetPosition(SetPosition m)
-            => SetPosition(m.Target);
+            => SetPosition(m.Target, m.Silently);
 
         protected Orientation2D _orientation;
         public Orientation2D Orientation => new Orientation2D(_orientation);
