@@ -15,6 +15,8 @@ namespace Game.Entities
 {
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
+        private HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
+
         public override void Update()
         {
             base.Update();
@@ -179,9 +181,16 @@ namespace Game.Entities
 
             // The road is clear! Move!
             SetPosition(target);
+            RecordLocality(targetTile.Locality);
 
             // Check if player walked in a puddle
             WatchPuddle(targetTile.Position);
+        }
+
+        private void RecordLocality(Locality locality)
+        {
+            if (!_visitedLocalities.Contains(locality))
+                _visitedLocalities.Add(locality);
         }
 
         private void WatchPuddle(Vector2 point)
