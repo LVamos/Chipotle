@@ -88,7 +88,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-
+                
             RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {

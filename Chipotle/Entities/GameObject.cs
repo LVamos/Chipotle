@@ -56,7 +56,7 @@ namespace Game.Entities
             => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
 
         public static DumpObject CreateChipotlesCar(Name name, Plane area)
-    => new DumpObject(name, area, "detektivovo auto");
+    => new ChipotlesCar(name, area);
 
 
         public static DumpObject CreatePoolStairs(Name name, Plane area)

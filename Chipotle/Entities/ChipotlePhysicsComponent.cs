@@ -1,6 +1,4 @@
-﻿
-using Game.Entities;
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -15,6 +13,7 @@ namespace Game.Entities
 {
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
+        private HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
 
         public override void Update()
         {
@@ -114,20 +113,17 @@ namespace Game.Entities
             Tile tile = tiles.FirstOrDefault(t => t.Passage is Door || t.Object != null);
 
             if (tile == null)
+                return;
+
+            UseObject newMessage = new UseObject(this, tile);
+            if (tile.Passage != null)
             {
+                tile.Passage.ReceiveMessage(newMessage);
                 return;
             }
-
-            UseObject m = new UseObject(Owner, tile);
-            if (tile.Object != null)
-            {       
-                tile.Object.ReceiveMessage(m);
-            }
-            else
-            {
-                tile.Passage.ReceiveMessage(m);
-            }
+                tile.Object.ReceiveMessage(newMessage);
         }
+
 
         private void OnTurnEntity(TurnEntity message)
         {
@@ -180,11 +176,17 @@ namespace Game.Entities
 
             // The road is clear! Move!
             SetPosition(target);
+            RecordLocality(targetTile.Locality);
 
             // Check if player walked in a puddle
             WatchPuddle(targetTile.Position);
         }
 
+        private void RecordLocality(Locality locality)
+        {
+            if (!_visitedLocalities.Contains(locality))
+                _visitedLocalities.Add(locality);
+        }
 
         private void WatchPuddle(Vector2 point)
         {
