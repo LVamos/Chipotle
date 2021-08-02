@@ -120,7 +120,7 @@ namespace Game.Entities
 
             UseObject m = new UseObject(Owner, tile);
             if (tile.Object != null)
-            {
+            {       
                 tile.Object.ReceiveMessage(m);
             }
             else

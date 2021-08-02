@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "detektivovo auto": return CreateChipotlesCar(name, area);
                 case "mrtvola": return CreateCorpse(name, area);
                 case "prkno u bazénu": return CreatePoolsidePlank(name, area);
                 case "popelnice u bazénu": return CreatePoolsideBin(name, area);
@@ -53,6 +54,10 @@ namespace Game.Entities
 
         public static DumpObject CreatePoolsideBench(Name name, Plane area)
             => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
+
+        public static DumpObject CreateChipotlesCar(Name name, Plane area)
+    => new DumpObject(name, area, "detektivovo auto");
+
 
         public static DumpObject CreatePoolStairs(Name name, Plane area)
 => new DumpObject(name, area, "schůdky u bazénu", null, "snd3");

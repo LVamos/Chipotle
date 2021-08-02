@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\ChipotlesCar.cs" />
     <Compile Include="Messaging\Commands\GotoPoint.cs" />
     <Compile Include="Entities\PoolsideBin.cs" />
     <Compile Include="Messaging\Commands\SetPosition.cs" />
