@@ -13,7 +13,7 @@ namespace Game.Entities
     public class DumpObject : GameObject
     {
         public bool Used { get; protected set; }
-        protected int _actionSoundID { get; private set; }
+        protected int _actionSoundID { get; protected set; }
 
         public override void Destroy()
         {
