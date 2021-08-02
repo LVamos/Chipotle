@@ -11,6 +11,21 @@ namespace Game.Entities
 {
     public class Entity : GameObject
     {
+        protected HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
+        public IReadOnlyCollection<Locality> VisitedLocalities
+        {
+            get => _visitedLocalities;
+                }
+
+        protected  void RecordLocality()
+        {
+            Locality locality = _area.GetLocality();
+            if (!VisitedLocalities.Contains(locality))
+                _visitedLocalities.Add(locality);
+        }
+
+
+
         public Orientation2D Orientation => _physics.Orientation;
 
         public new Plane Area
@@ -111,6 +126,7 @@ namespace Game.Entities
         protected void OnPositionChanged(PositionChanged m)
         {
             _area = m.Area;
+            RecordLocality();
             _ai?.ReceiveMessage(m);
         }
 
