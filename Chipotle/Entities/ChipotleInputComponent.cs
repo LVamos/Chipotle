@@ -1,4 +1,6 @@
-﻿using DavyKager;
+﻿using Microsoft.VisualBasic;
+
+using DavyKager;
 
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
@@ -24,6 +26,9 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Shortcuts for testing purposes
+                [new KeyShortcut(KeyShortcut.Modifiers.Alt, Keys.J)] = JumpToCoordsFromClipBoard,
+                [new KeyShortcut(Keys.J)] = JumpToCoords,
+
                 [new KeyShortcut(Keys.Space)] = Test,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
@@ -45,6 +50,19 @@ namespace Game.Entities
             );
 
         }
+
+        // Just for testing purpose
+        private void JumpToCoords()
+        {
+            Vector2 coords = new Vector2(Interaction.InputBox("Zadej souřadnice", "Skok na souřadnice", ""));
+            Owner.ReceiveMessage(new SetPosition(this, new Plane(coords)));
+        }
+
+        // For testing only
+        private void JumpToCoordsFromClipBoard()
+            => Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(Clipboard.GetText()))));
+
+
 
         private void SayNearestObject()
 => Owner.ReceiveMessage(new SayNearestObject(this));
