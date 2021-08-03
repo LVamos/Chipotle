@@ -34,7 +34,7 @@ namespace Game.Entities
             // Check if some important objects were used
             bool ObjectsUsed =
                  (new string[]
-                 {"tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w3"})
+                 {"tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w1"})
             .All(o => Used(o));
 
             bool leftArea = !_visitedLocalities.IsNullOrEmpty(); // Checks if player left Walsh area with the car
