@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "bazének": return CreateBathroomPool(name, area);
                 case "detektivovo auto": return CreateChipotlesCar(name, area);
                 case "mrtvola": return CreateCorpse(name, area);
                 case "prkno u bazénu": return CreatePoolsidePlank(name, area);
@@ -40,6 +41,10 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        private static DumpObject CreateBathroomPool(Name name, Plane area)
+    => new DumpObject(name, area, "bazének", null, "snd7");
+
 
         public static DumpObject CreateCorpse(Name name, Plane area)
     => new DumpObject(name, area, "mrtvola", null, null, null, "cs5", true);
