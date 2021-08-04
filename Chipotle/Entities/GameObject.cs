@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "lednice": return CreateFridge(name, area);
                 case "kávovar": return CreateCoffeemaker(name, area);
                 case "umyvadlo": return CreateBathroomSink(name, area);
                 case "bazének": return CreateBathroomPool(name, area);
@@ -46,6 +47,11 @@ namespace Game.Entities
 
         private static DumpObject CreateBathroomSink(Name name, Plane area)
                 => new DumpObject(name, area, "umyvadlo", null, "snd8");
+
+        private static DumpObject CreateFridge(Name name, Plane area)
+=> new DumpObject(name, area, "lednice", null, "snd10");
+
+
 
         private static DumpObject CreateCoffeemaker(Name name, Plane area)
     => new DumpObject(name, area, "kávovar", null, "snd9");
