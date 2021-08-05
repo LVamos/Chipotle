@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "auto vanilla crunch": return CreateVanillaCrunchCar(name, area);
                 case "pinball": return CreatePinball(name, area);
                 case "automat na zmrzlinu": return CreateIcecreamMachine(name, area);
                 case "židle": return CreateChair(name, area);
@@ -48,6 +49,10 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        private static DumpObject CreateVanillaCrunchCar(Name name, Plane area)
+=> new DumpObject(name, area, "auto Vanilla crunch", null, "snd4");
+
 
         private static DumpObject CreatePinball(Name name, Plane area)
     => new DumpObject(name, area, "pinball", null, "snd15");
