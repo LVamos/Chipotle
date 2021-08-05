@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "automat na zmrzlinu": return CreateIcecreamMachine(name, area);
                 case "židle": return CreateChair(name, area);
                 case "myčka": return CreateDishwasher(name, area);
                 case "lednice": return CreateFridge(name, area);
@@ -47,6 +48,8 @@ namespace Game.Entities
             }
         }
 
+        private static DumpObject CreateIcecreamMachine(Name name, Plane area)
+            => new IcecreamMachine(name, area);
         private static DumpObject CreateBathroomSink(Name name, Plane area)
                 => new DumpObject(name, area, "umyvadlo", null, "snd8");
 
