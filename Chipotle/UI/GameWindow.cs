@@ -22,6 +22,7 @@ namespace Game.UI
                 [new KeyShortcut(Keys.P)] = () => (new Terrain.PathFinder()).FindPath(new Vector2(1030, 1030), new Vector2(1030, 1029)),
 
                 // Test shortcuts for reverb settings
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.J)] = MoveTuttleFromClipboard,
                 [new KeyShortcut(Keys.PageDown)] = () => World.Sound.SwitchToNextReverbPreset(),
                 [new KeyShortcut(Keys.F1)] = () => World.Sound.PreviousReverbParameter(),
                 [new KeyShortcut(Keys.F2)] = () => World.Sound.NextReverbParameter(),
@@ -42,6 +43,9 @@ namespace Game.UI
 
 
         }
+
+        private void MoveTuttleFromClipboard()
+            => World.GetEntity("tuttle").ReceiveMessage(new Game.Messaging.Commands.SetPosition(this, new Terrain.Plane(new Vector2(Clipboard.GetText()))));
 
         private void SayCoordinates() => Tolk.Speak(World.Player.Area.Center.ToString());
 
