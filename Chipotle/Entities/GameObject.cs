@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "počítač u sweeneyho": return CreateSweeneysComputer(name, area);
                 case "mobil u sweeneyho": return CreateSweeneysPhone(name, area);
                 case "auto vanilla crunch": return CreateVanillaCrunchCar(name, area);
                 case "pinball": return CreatePinball(name, area);
@@ -51,8 +52,11 @@ namespace Game.Entities
             }
         }
 
+        private static DumpObject CreateSweeneysComputer(Name name, Plane area)
+                => new DumpObject(name, area, "počítač u sweeneyho", null, null, null, "cs16", true);
+
         private static DumpObject CreateSweeneysPhone(Name name, Plane area)
-                => new DumpObject(name, area, "mobil u Sweeneyho", null, null, null, "cs15", true);
+                => new DumpObject(name, area, "mobil u Sweeneyho", null, null, null, "cs15");
 
         private static DumpObject CreateVanillaCrunchCar(Name name, Plane area)
 => new DumpObject(name, area, "auto Vanilla crunch", null, "snd4");
