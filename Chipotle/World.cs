@@ -71,7 +71,7 @@ namespace Game
 
         private static void HandleCutscene()
         {
-            if (_cutsceneBegan!=null)
+            if (_cutsceneBegan != null)
             {
                 Sound.GetDynamicInfo(_cutsceneBegan.SoundID, out SoundState state, out int _);
 
@@ -93,7 +93,7 @@ namespace Game
                 throw new ArgumentNullException(nameof(cutscene));
             }
 
-             int id = Sound.Play(cutscene);
+            int id = Sound.Play(cutscene);
             _cutsceneBegan = new CutsceneBegan(sender, cutscene, id);
             ReceiveMessage(_cutsceneBegan);
         }
@@ -163,8 +163,13 @@ namespace Game
         public static Entity GetEntity(string name)
 => _entities.TryGetValue(name, out Entity e) ? e : null;
 
-
-
+        /// <summary>
+        /// Finds all game objects of required type
+        /// </summary>
+        /// <param name="type">Type of requested game objects</param>
+        /// <returns>Collection with objects of same type</returns>
+        public static IEnumerable<DumpObject> GetObjectsByType(string type)
+            => _objects.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower() == type.ToLower());
 
 
         /// <summary>
