@@ -284,6 +284,8 @@ namespace Game
             Player = Entity.CreateChipotle();
             Add(Player);
             Add(Entity.CreateTuttle());
+            Add(Entity.CreateCarson());
+
             _entities.Foreach(p => p.Value.Start());
             Program.MainWindow.GameLoopEnabled = true;
         }
