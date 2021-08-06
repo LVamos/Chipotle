@@ -48,7 +48,7 @@ namespace Game.Entities
                 case "popelnice u bazénu": return CreatePoolsideBin(name, area);
                 case "lavička u bazénu": return CreatePoolsideBench(name, area);
                 case "schůdky u bazénu": return CreatePoolStairs(name, area);
-                case "zahradní gril": return CreateGardenGril(name, area);
+                case "gril u carsona": return CreateGardenGril(name, area);
                 case "zahradní hadice": return CreateGardenHose(name, area);
 
                 default: return new DumpObject(name, area);
@@ -125,7 +125,7 @@ namespace Game.Entities
 => new DumpObject(name, area, "zahradní hadice", null, "snd1", null);
 
         public static DumpObject CreateGardenGril(Name name, Plane area)
-=> new DumpObject(name, area, "zahradní gril", null, null, "snd17");
+=> new CarsonsGrill(name, area);
 
 
 
