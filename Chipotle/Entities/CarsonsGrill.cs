@@ -36,8 +36,7 @@ namespace Game.Entities
 
 
             // Start loop if Carson is present
-            Entity carson = World.GetEntity("carson");
-            if (carson!=null && Locality.IsItHere(carson))
+            if (Locality.IsItHere(World.GetEntity("carson")))
             {
                 _sounds.loop = "snd17";
                 _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, World.GetObject("gril c1").Area.Center, true);
