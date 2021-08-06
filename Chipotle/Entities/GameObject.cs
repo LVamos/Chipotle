@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "lavice u carsona": return CreateCarsonsBench(name, area);
                 case "trezor": return CreateSafe(name, area);
                 case "stůl u sweeneyho": return CreateSweeneysTable(name, area);
                 case "počítač u sweeneyho": return CreateSweeneysComputer(name, area);
@@ -54,6 +55,8 @@ namespace Game.Entities
             }
         }
 
+        private static DumpObject CreateCarsonsBench(Name name, Plane area)
+            => new CarsonsBench(name, area);
         private static DumpObject CreateSafe(Name name, Plane area)
                 => new DumpObject(name, area, "trezor", null, null, null, "cs18", true);
 

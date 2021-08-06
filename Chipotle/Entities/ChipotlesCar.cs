@@ -21,6 +21,7 @@ namespace Game.Entities
         protected override void OnUseObject(UseObject message)
         {
             base.OnUseObject(message);
+            CheckCarsonsBenches();
 
             // Local function to check if an object from Walsh area was used
             bool Used(string name)
@@ -64,5 +65,16 @@ namespace Game.Entities
                 World.PlayCutscene(this, "cs20");
             }
         }
+
+        private void CheckCarsonsBenches()
+        {
+            bool benchUsed = World.GetObjectsByType("lavice u carsona").Any(o => o.Used);
+            Locality street = World.GetLocality("ulice v1");
+
+            if (benchUsed && !_destinations.Contains(street))
+                _destinations.Add(street);
+        }
+
     }
+
 }
