@@ -15,7 +15,7 @@ namespace Game.Messaging
         /// </summary>
         /// <param name="sender">Source of the message</param>
         public GameMessage(object sender)
-            => Sender = sender ?? throw new ArgumentNullException(nameof(sender));
+            => Sender = sender;
 
     }
 }

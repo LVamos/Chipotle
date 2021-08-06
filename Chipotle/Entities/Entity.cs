@@ -1,4 +1,5 @@
 ﻿using Game.Messaging;
+using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
@@ -12,12 +13,9 @@ namespace Game.Entities
     public class Entity : GameObject
     {
         protected HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
-        public IReadOnlyCollection<Locality> VisitedLocalities
-        {
-            get => _visitedLocalities;
-                }
+        public IReadOnlyCollection<Locality> VisitedLocalities => _visitedLocalities;
 
-        protected  void RecordLocality()
+        protected void RecordLocality()
         {
             Locality locality = _area.GetLocality();
             if (!VisitedLocalities.Contains(locality))
@@ -89,7 +87,7 @@ namespace Game.Entities
         }
 
         private bool IsInternal(GameMessage message)
-            => _components.Any(c => c == message.Sender);
+            => message.Sender is EntityComponent c && c.Owner == this;
 
         protected List<EntityComponent> _components;
         private Plane _area;
@@ -122,6 +120,13 @@ namespace Game.Entities
                 }
                 );
         }
+
+        private void OnDestroy(Destroy message)
+        {
+            Assert(IsInternal(message), "This message can be sent only from an inner component.");
+            Destroy();
+        }
+
 
         protected void OnPositionChanged(PositionChanged m)
         {

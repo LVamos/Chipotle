@@ -379,23 +379,11 @@ null);
         public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
            => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
 
-        public static void Remove(Locality l)
-        {
-            _localities.Remove(l.Name.Indexed);
-            l.Destroy();
-        }
+        public static void Remove(Locality l) => _localities.Remove(l.Name.Indexed);
 
-        public static void Remove(Passage p)
-        {
-            _passages.Remove(p.Name.Indexed);
-            p.Destroy();
-        }
+        public static void Remove(Passage p) => _passages.Remove(p.Name.Indexed);
 
-        public static void Remove(GameObject o)
-        {
-            _objects.Remove(o.Name.Indexed);
-            o.Destroy();
-        }
+        public static void Remove(GameObject o) => _objects.Remove(o.Name.Indexed);
 
 
 

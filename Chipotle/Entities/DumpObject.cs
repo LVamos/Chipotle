@@ -15,7 +15,7 @@ namespace Game.Entities
         public bool Used { get; protected set; }
         protected int _actionSoundID;
 
-        public override void Destroy()
+        protected override void Destroy()
         {
             base.Destroy();
 
@@ -88,7 +88,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-                
+
             RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {

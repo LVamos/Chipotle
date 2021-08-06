@@ -13,10 +13,11 @@ namespace Game.Entities
     /// </summary>
     public class GameObject : MapElement
     {
-        public override void Destroy()
+        protected override void Destroy()
         {
             base.Destroy();
             Locality.Unregister(this);
+            World.Remove(this);
         }
 
         public static DumpObject CreateObject(Name name, Plane area, string type)

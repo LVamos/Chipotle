@@ -1,15 +1,22 @@
 ﻿using Game.Messaging;
+using Game.Messaging.Commands;
 
 using Luky;
 
 using System;
+using System.Collections.Generic;
 
 namespace Game.Terrain
 {
     public abstract class MapElement : MessagingObject
     {
-        public virtual void Destroy()
-=> Disappear();
+
+
+        protected virtual void Destroy()
+        {
+            _messagingEnabled = false;
+            Disappear();
+        }
 
         protected virtual void Appear() { }
         protected virtual void Disappear()
@@ -30,5 +37,19 @@ namespace Game.Terrain
 
         public override string ToString()
 => Name.Friendly;
+        public override void Start()
+        {
+            base.Start();
+
+            RegisterMessages(
+                new Dictionary<Type, Action<GameMessage>>
+                {
+                    [typeof(Destroy)] = (m) => OnDestroy((Destroy)m)
+                }
+                );
+        }
+
+        protected virtual void OnDestroy(Destroy m)
+            => Destroy();
     }
 }
