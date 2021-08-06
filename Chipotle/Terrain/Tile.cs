@@ -88,17 +88,7 @@ namespace Game.Terrain
         public void Register(GameObject o)
             => Object = (Permeable || Terrain == TerrainType.Wall) && !IsOccupied ? (o ?? throw new ArgumentNullException(nameof(o))) : throw new InvalidOperationException(nameof(o));
 
-        public void UnregisterObject()
-        {
-            if (Object != null)
-            {
-                Object = null;
-            }
-            else
-            {
-                throw new InvalidOperationException("No object");
-            }
-        }
+        public void UnregisterObject() => Object = null;
 
 
         public GameObject Object { get; private set; }
