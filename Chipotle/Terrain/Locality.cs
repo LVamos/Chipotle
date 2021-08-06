@@ -272,14 +272,17 @@ namespace Game.Terrain
             }
         }
 
-        private void OnLocalityEntered(LocalityEntered m)
+        private void OnLocalityEntered(LocalityEntered message)
         {
-            Register(m.Sender as Entity);
+            Register(message.Sender as Entity);
 
-            if (m.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
+            if (message.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
             {
                 _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Area.Center, true);
             }
+
+            _entities.ForEach(e => e.ReceiveMessage(message));
+            _objects.ForEach(o => o.ReceiveMessage(message));
         }
 
         /// <summary>
