@@ -28,6 +28,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "trezor": return CreateSafe(name, area);
                 case "stůl u sweeneyho": return CreateSweeneysTable(name, area);
                 case "počítač u sweeneyho": return CreateSweeneysComputer(name, area);
                 case "mobil u sweeneyho": return CreateSweeneysPhone(name, area);
@@ -52,6 +53,9 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        private static DumpObject CreateSafe(Name name, Plane area)
+                => new DumpObject(name, area, "trezor", null, null, null, "cs18", true);
 
         private static DumpObject CreateSweeneysTable(Name name, Plane area)
                 => new DumpObject(name, area, "stůl u sweeneyho", null, null, null, "cs17", true);
