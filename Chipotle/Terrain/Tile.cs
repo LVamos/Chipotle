@@ -90,14 +90,8 @@ namespace Game.Terrain
 
         public void UnregisterObject()
         {
-            if (Object != null)
-            {
-                Object = null;
-            }
-            else
-            {
-                throw new InvalidOperationException("No object");
-            }
+            Assert(Object != null, "No object here.");
+            Object = null;
         }
 
 

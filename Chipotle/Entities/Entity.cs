@@ -26,8 +26,6 @@ namespace Game.Entities
 
         public Orientation2D Orientation => _physics.Orientation;
 
-        public new Plane Area
-            => new Plane(_area);
 
         public override void ReceiveMessage(GameMessage message)
         {
@@ -90,7 +88,6 @@ namespace Game.Entities
             => message.Sender is EntityComponent c && c.Owner == this;
 
         protected List<EntityComponent> _components;
-        private Plane _area;
 
 
 
@@ -121,6 +118,13 @@ namespace Game.Entities
                 );
         }
 
+        protected override void Destroy()
+        {
+            Locality?.Unregister(this);
+            World.Remove(this);
+            _area.GetTiles().Foreach(t => t.UnregisterObject());
+
+        }
         private void OnDestroy(Destroy message)
         {
             Assert(IsInternal(message), "This message can be sent only from an inner component.");

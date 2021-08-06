@@ -15,9 +15,9 @@ namespace Game.Entities
     {
         protected override void Destroy()
         {
-            base.Destroy();
-            Locality.Unregister(this);
+            Locality?.Unregister(this);
             World.Remove(this);
+            Disappear();
         }
 
         public static DumpObject CreateObject(Name name, Plane area, string type)
@@ -137,7 +137,7 @@ namespace Game.Entities
         protected override void Disappear()
         {
             base.Disappear();
-            Area.GetTiles().Foreach(t => t.UnregisterObject());
+            _area.GetTiles().Foreach(t => t.UnregisterObject());
         }
 
         //todo GameObject
@@ -180,7 +180,7 @@ namespace Game.Entities
             }
 
             Disappear();
-            Area = targetArea;
+            _area = targetArea;
             Appear();
         }
 
