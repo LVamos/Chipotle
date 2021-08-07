@@ -63,7 +63,10 @@ namespace Game.Entities
 
         public override void Update()
         {
-             base.Update();
+            base.Update();
+
+            if (!_messagingEnabled)
+                return;
 
             WatchChipotlesCar();
         }
@@ -73,7 +76,10 @@ namespace Game.Entities
             Locality road = World.GetLocality("asfaltka c1");
             DumpObject car = World.GetObject("detektivovo auto");
             if (_saidGoodbyeToChipotle && !road.IsItHere(car)) // Chipotle left the area
-                Owner.Destroy();
+            {
+                _messagingEnabled = false;
+                Owner.ReceiveMessage(new Destroy(this));
+            }
         }
 
 
