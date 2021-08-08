@@ -63,6 +63,7 @@
     <Compile Include="Entities\CarsonsGrill.cs" />
     <Compile Include="Entities\ChipotlesCar.cs" />
     <Compile Include="Entities\IcecreamMachine.cs" />
+    <Compile Include="Entities\PubTable.cs" />
     <Compile Include="Messaging\Commands\Destroy.cs" />
     <Compile Include="Messaging\Commands\GotoPoint.cs" />
     <Compile Include="Entities\PoolsideBin.cs" />

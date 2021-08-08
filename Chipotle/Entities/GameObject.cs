@@ -29,6 +29,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "hospodský stůl": return CreatePubTable(name, area);
                 case "lavice u carsona": return CreateCarsonsBench(name, area);
                 case "trezor": return CreateSafe(name, area);
                 case "stůl u sweeneyho": return CreateSweeneysTable(name, area);
@@ -55,6 +56,9 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        private static PubTable CreatePubTable(Name name, Plane area)
+                => new PubTable(name, area);
 
         private static DumpObject CreateCarsonsBench(Name name, Plane area)
             => new CarsonsBench(name, area);
