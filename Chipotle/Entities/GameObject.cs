@@ -120,7 +120,7 @@ namespace Game.Entities
         public static DumpObject CreatePoolsideBench(Name name, Plane area)
             => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
 
-        public static DumpObject CreateChipotlesCar(Name name, Plane area)
+        public static ChipotlesCar CreateChipotlesCar(Name name, Plane area)
     => new ChipotlesCar(name, area);
 
 
