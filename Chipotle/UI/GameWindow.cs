@@ -1,6 +1,9 @@
 ﻿using DavyKager;
 
+using Game.Entities;
+using Game.Messaging.Commands;
 using Game.Messaging.Events;
+using Game.Terrain;
 
 using Luky;
 
@@ -18,11 +21,12 @@ namespace Game.UI
         {
             Dictionary<KeyShortcut, Action> shortcuts = new Dictionary<KeyShortcut, Action>()
             {
-                // test shortcuts for pathfinder
-                [new KeyShortcut(Keys.P)] = () => (new Terrain.PathFinder()).FindPath(new Vector2(1030, 1030), new Vector2(1030, 1029)),
+                // test shortcuts for moving entities and objects
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.J)] = MoveTuttleFromClipboard,
+                [new KeyShortcut(KeyShortcut.Modifiers.Alt, Keys.K)] = MoveChipotlesCarFromClipboard,
+
 
                 // Test shortcuts for reverb settings
-                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.J)] = MoveTuttleFromClipboard,
                 [new KeyShortcut(Keys.PageDown)] = () => World.Sound.SwitchToNextReverbPreset(),
                 [new KeyShortcut(Keys.F1)] = () => World.Sound.PreviousReverbParameter(),
                 [new KeyShortcut(Keys.F2)] = () => World.Sound.NextReverbParameter(),
@@ -43,6 +47,17 @@ namespace Game.UI
 
 
         }
+
+        // For testing purpose
+        private void MoveChipotlesCarFromClipboard()
+        {
+            ChipotlesCar car = World.GetObject("detektivovo auto") as ChipotlesCar;
+            car.ReceiveMessage(new Destroy(null));
+            World.Remove(car);
+            car = GameObject.CreateChipotlesCar(car.Name, new Plane(Clipboard.GetText()));
+            World.Add(car);
+        }
+
 
         private void MoveTuttleFromClipboard()
             => World.GetEntity("tuttle").ReceiveMessage(new Game.Messaging.Commands.SetPosition(this, new Terrain.Plane(new Vector2(Clipboard.GetText()))));
