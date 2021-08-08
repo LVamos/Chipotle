@@ -45,7 +45,7 @@ namespace Game.Entities
 
         private bool _usableOnce;
         protected (string collision, string action, string loop) _sounds = ("MovCrashDefault", null, null);
-        private string _cutscene;
+        protected string _cutscene;
 
         public bool UsedOnce { get; protected set; }
         protected int _loopSoundId;
