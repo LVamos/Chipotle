@@ -51,11 +51,7 @@ namespace Game.UI
         // For testing purpose
         private void MoveChipotlesCarFromClipboard()
         {
-            ChipotlesCar car = World.GetObject("detektivovo auto") as ChipotlesCar;
-            car.ReceiveMessage(new Destroy(null));
-            World.Remove(car);
-            car = GameObject.CreateChipotlesCar(car.Name, new Plane(Clipboard.GetText()));
-            World.Add(car);
+            World.GetObject("detektivovo auto").Move(new Plane(Clipboard.GetText()));
         }
 
 

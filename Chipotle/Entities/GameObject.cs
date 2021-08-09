@@ -176,7 +176,7 @@ namespace Game.Entities
             Locality?.Register(this);
         }
 
-        protected void Move(Plane targetArea)
+        public  void Move(Plane targetArea)
         {
             if (targetArea == null)
             {
@@ -190,10 +190,12 @@ namespace Game.Entities
             _area = targetArea;
             Appear();
 
-            if (sourceLocality != targetLocality)
+
+            if (sourceLocality!=targetLocality)
             {
                 sourceLocality.Unregister(this);
                 targetLocality.Register(this);
+                Locality = targetLocality;
             }
         }
 
@@ -204,6 +206,8 @@ namespace Game.Entities
         /// </summary>
         protected override void Appear()
         {
+            base.Appear();
+
             // Check if all the object lays in one locality
             Locality = Area.GetLocality();
             Assert(Locality != null, "Game object must occupy just one locality.");

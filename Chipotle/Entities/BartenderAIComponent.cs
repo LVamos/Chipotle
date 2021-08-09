@@ -49,13 +49,13 @@ namespace Game.Entities
                 )
             {
                 World.PlayCutscene(Owner, IsChipotleAlone() ? "cs28" : "cs29");
-                //_sayGoodbyeToChipotle = false;
+                _sayGoodbyeToChipotle = false;
             }
         }
 
         private bool _sayGoodbyeToChipotle;
         private bool _velcomeChipotle = true;
-        private bool _isChipotleInArea;
+        private bool _wasCarNearBy;
 
         public override void Update()
         {
@@ -75,7 +75,15 @@ namespace Game.Entities
         }
 
         private void WatchChipotlesCar()
-            => _velcomeChipotle = !_velcomeChipotle && !_isChipotleInArea;
+        {
+            bool isCarNearBy= IsChipotlesCarNearBy();
+            if(isCarNearBy!=_wasCarNearBy)
+            {
+
+            _velcomeChipotle = isCarNearBy;
+                _wasCarNearBy = isCarNearBy;
+            }
+        }
 
         private readonly Locality BonitaStreet = World.GetLocality("ulice h1");
         private ChipotlesCar ChipotlesCar
