@@ -183,9 +183,18 @@ namespace Game.Entities
                 throw new ArgumentNullException(nameof(targetArea));
             }
 
+            Locality sourceLocality = Locality;
+            Locality targetLocality = targetArea.GetLocality();
+
             Disappear();
             _area = targetArea;
             Appear();
+
+            if (sourceLocality != targetLocality)
+            {
+                sourceLocality.Unregister(this);
+                targetLocality.Register(this);
+            }
         }
 
 
