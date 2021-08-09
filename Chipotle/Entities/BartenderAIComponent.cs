@@ -75,12 +75,14 @@ namespace Game.Entities
         }
 
         private void WatchChipotlesCar()
-        {
-            bool isCarNearby = World.GetLocality("ulice h1").IsItHere(World.GetObject("detektivovo auto"));
+            => _velcomeChipotle = !_velcomeChipotle && !_isChipotleInArea;
 
-            if(isCarNearby!=_isChipotleInArea)
-                _velcomeChipotle= !isCarNearby;
-        }
+        private readonly Locality BonitaStreet = World.GetLocality("ulice h1");
+        private ChipotlesCar ChipotlesCar
+            => World.GetObject("detektivovo auto") as ChipotlesCar;
+
+        private bool IsChipotlesCarNearBy()
+            => BonitaStreet.IsItHere(ChipotlesCar);
 
         private void OnLocalityEntered(LocalityEntered message)
         {
