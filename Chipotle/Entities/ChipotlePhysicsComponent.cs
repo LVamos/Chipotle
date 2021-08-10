@@ -13,6 +13,8 @@ namespace Game.Entities
 {
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
+        private bool _sittingAtPubTable;
+
         private HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
 
         public override void Update()
@@ -38,6 +40,7 @@ namespace Game.Entities
         private int _rotationStep;
         private int _plannedRotations;
         private bool _steppedIntoPuddle;
+        private bool _sittingOnChair;
 
         public override void Start()
         {
@@ -54,6 +57,7 @@ namespace Game.Entities
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
 
                     // Other messages
+                    [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(SayNearestObject)] = (m) => OnSayNearestObject((SayNearestObject)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
                     [typeof(MakeStep)] = (m) => OnMakeStep((MakeStep)m),
@@ -121,7 +125,7 @@ namespace Game.Entities
                 tile.Passage.ReceiveMessage(newMessage);
                 return;
             }
-                tile.Object.ReceiveMessage(newMessage);
+            tile.Object.ReceiveMessage(newMessage);
         }
 
 
@@ -131,8 +135,22 @@ namespace Game.Entities
             _plannedRotations = Math.Abs(message.Degrees);
         }
 
+        protected override void OnCutsceneBegan(CutsceneBegan message) => CatchSitting(message);
+
+        private void CatchSitting(CutsceneBegan message)
+        {
+            switch (message.CutsceneName)
+            {
+                case "cs24": case "cs25": _sittingAtPubTable = true; break;
+                case "snd12": _sittingOnChair = true; break;
+            }
+        }
+
         private void OnMakeStep(MakeStep message)
         {
+            if (StandUp())
+                return;
+
             // Get target coordinates
             Orientation2D finalOrientation = _orientation;
 
@@ -182,6 +200,28 @@ namespace Game.Entities
             WatchPuddle(targetTile.Position);
         }
 
+        private bool StandUp()
+        {
+            if (_sittingAtPubTable)
+            {
+                _sittingAtPubTable = false;
+                World.PlayCutscene(Owner, IsTuttleNearBy() ? "cs27" : "cs26");
+                return true;
+            }
+
+            if (_sittingOnChair)
+            {
+                _sittingOnChair = false;
+                World.PlayCutscene(Owner, "snd13");
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool IsTuttleNearBy()
+=> _area.GetLocality().IsItHere(World.GetEntity("tuttle"));
+
         private void RecordLocality(Locality locality)
         {
             if (!_visitedLocalities.Contains(locality))
@@ -194,7 +234,7 @@ namespace Game.Entities
                 return;
 
             Plane puddle = new Plane("937, 1081, 941, 1065");
-            if(puddle.LaysOnPlane(point))
+            if (puddle.LaysOnPlane(point))
             {
                 _steppedIntoPuddle = true;
                 World.PlayCutscene(Owner, "cs2");

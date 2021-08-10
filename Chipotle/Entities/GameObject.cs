@@ -91,7 +91,7 @@ namespace Game.Entities
 => new DumpObject(name, area, "lednice", null, "snd10");
 
         private static DumpObject CreateChair(Name name, Plane area)
-=> new DumpObject(name, area, "židle", null, "snd12");
+=> new DumpObject(name, area, "židle", null, null, null, "snd12");
 
 
 
