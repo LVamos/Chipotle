@@ -29,6 +29,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "věšák na klíče": return CreateKeyHanger(name, area);
                 case "hospodský stůl": return CreatePubTable(name, area);
                 case "lavice u carsona": return CreateCarsonsBench(name, area);
                 case "trezor": return CreateSafe(name, area);
@@ -56,6 +57,8 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        private static DumpObject CreateKeyHanger(Name name, Plane area) => new KeyHanger(name, area);
 
         private static PubTable CreatePubTable(Name name, Plane area)
                 => new PubTable(name, area);
@@ -176,7 +179,7 @@ namespace Game.Entities
             Locality?.Register(this);
         }
 
-        public  void Move(Plane targetArea)
+        public void Move(Plane targetArea)
         {
             if (targetArea == null)
             {
@@ -191,7 +194,7 @@ namespace Game.Entities
             Appear();
 
 
-            if (sourceLocality!=targetLocality)
+            if (sourceLocality != targetLocality)
             {
                 sourceLocality.Unregister(this);
                 targetLocality.Register(this);
