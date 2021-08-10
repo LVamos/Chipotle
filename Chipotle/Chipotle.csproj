@@ -64,6 +64,7 @@
     <Compile Include="Entities\ChipotlesCar.cs" />
     <Compile Include="Entities\IcecreamMachine.cs" />
     <Compile Include="Entities\KeyHanger.cs" />
+    <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Entities\PubTable.cs" />
     <Compile Include="Entities\VanillaCrunchCar.cs" />
     <Compile Include="Messaging\Commands\Destroy.cs" />

@@ -14,6 +14,18 @@ namespace Game.Entities
     {
         private bool _playerWasByPool;
 
+        /// <summary>
+        /// Jumps just before pub. Chiptole should do the same in the same time.
+        /// </summary>
+        private void JumpToPub()
+        {
+            SetPosition message = new SetPosition(this, new Plane("1552, 1014"), true);
+            Owner.ReceiveMessage(message);
+        }
+
+            
+
+
         public override void Start()
         {
             base.Start();
@@ -21,6 +33,7 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>
                 {
+                    [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
                     [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                     [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
                 }
@@ -39,17 +52,27 @@ namespace Game.Entities
             }
         }
 
-        protected override void OnCutsceneEnded(CutsceneEnded m)
+        protected override void OnCutsceneEnded(CutsceneEnded message)
         {
-            base.OnCutsceneEnded(m);
+            base.OnCutsceneEnded(message);
 
-            if (m.CutsceneName == "cs6")
+            switch (message.CutsceneName)
             {
-                // Go to corpse and wait there for Chipotle
-                Queue<Vector2> path = _finder.FindPath(_area.Center, new Vector2(936, 1059)) ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
-                Owner.ReceiveMessage(new StopFollowing(this));
-                Owner.ReceiveMessage(new GotoPoint(this, path, 400));
+                case "cs6": GoToCorpse(); break;
+                case "cs8": JumpToPub(); break; 
             }
+        }
+
+        /// <summary>
+        /// Instructs Tuttle to get to corpse and wait there for Chipotle
+        /// </summary>
+        private void GoToCorpse()
+        {
+            Queue<Vector2> path = 
+                _finder.FindPath(_area.Center, new Vector2(936, 1059)) 
+                ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
+            Owner.ReceiveMessage(new StopFollowing(this));
+            Owner.ReceiveMessage(new GotoPoint(this, path, 400));
         }
     }
 }

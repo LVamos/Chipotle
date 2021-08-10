@@ -58,6 +58,7 @@ namespace Game.Entities
 
                     // Other messages
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
+                    [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
                     [typeof(SayNearestObject)] = (m) => OnSayNearestObject((SayNearestObject)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
                     [typeof(MakeStep)] = (m) => OnMakeStep((MakeStep)m),
@@ -136,6 +137,28 @@ namespace Game.Entities
         }
 
         protected override void OnCutsceneBegan(CutsceneBegan message) => CatchSitting(message);
+
+        protected override void OnCutsceneEnded(CutsceneEnded message)
+        {
+            base.OnCutsceneEnded(message);
+
+            switch(message.CutsceneName)
+            {
+                case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
+                case "cs7": PlayFinalScene(); break;
+                case "cs35": QuitGame(); break;
+            }
+        }
+
+        private void QuitGame()
+        {
+            // todo Implement ChiipotlePhysiicsComponent.QuitGame
+            Environment.Exit(0);
+        }
+        private void JumpToPub()
+            => SetPosition(1550, 1014, true); // Jumps just before pub.
+
+        private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
 
         private void CatchSitting(CutsceneBegan message)
         {

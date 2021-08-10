@@ -29,6 +29,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "vražedné auto": return CreateKillersCar(name, area);
                 case "věšák na klíče": return CreateKeyHanger(name, area);
                 case "hospodský stůl": return CreatePubTable(name, area);
                 case "lavice u carsona": return CreateCarsonsBench(name, area);
@@ -58,6 +59,7 @@ namespace Game.Entities
             }
         }
 
+        private static KillersCar CreateKillersCar(Name name, Plane area) => new KillersCar(name, area);
         private static DumpObject CreateKeyHanger(Name name, Plane area) => new KeyHanger(name, area);
 
         private static PubTable CreatePubTable(Name name, Plane area)
