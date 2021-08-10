@@ -20,8 +20,6 @@ namespace Game.Entities
 
         protected override void OnUseObject(UseObject message)
         {
-            base.OnUseObject(message);
-
             Entity tuttle = World.GetEntity("tuttle");
             Locality garage = World.GetLocality("garáž v1");
             if (
@@ -30,12 +28,14 @@ namespace Game.Entities
                 && World.Player.VisitedLocalities.Contains(garage)
                 )
             {
-                World.PlayCutscene(this, "cs10");
+                _cutscene = "cs10";
             }
             else
             {
-                World.PlayCutscene(this, "cs9");
+                _cutscene = "cs9";
             }
+
+            base.OnUseObject(message);
         }
 
     }
