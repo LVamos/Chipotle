@@ -1,14 +1,11 @@
-﻿using Game.Terrain;
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
+using Game.Terrain;
 
-using Luky;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 
@@ -29,7 +26,7 @@ namespace Game.Entities
                 }
                 );
             Owner.ReceiveMessage(new SetPosition(this, new Plane("1577, 1037")));
-        
+
         }
 
         private void OnEntityMoved(EntityMoved message)
@@ -43,7 +40,7 @@ namespace Game.Entities
 
             if (
                 _sayGoodbyeToChipotle
-                &&tableUsed
+                && tableUsed
               && _area.GetLocality().IsItHere(player)
               && door.Area.GetDistanceFrom(player.Area.Center) == 1
                 )
@@ -76,11 +73,11 @@ namespace Game.Entities
 
         private void WatchChipotlesCar()
         {
-            bool isCarNearBy= IsChipotlesCarNearBy();
-            if(isCarNearBy!=_wasCarNearBy)
+            bool isCarNearBy = IsChipotlesCarNearBy();
+            if (isCarNearBy != _wasCarNearBy)
             {
 
-            _velcomeChipotle = isCarNearBy;
+                _velcomeChipotle = isCarNearBy;
                 _wasCarNearBy = isCarNearBy;
             }
         }
@@ -94,10 +91,10 @@ namespace Game.Entities
 
         private void OnLocalityEntered(LocalityEntered message)
         {
-            if (message.Sender !=    World.Player)
+            if (message.Sender != World.Player)
                 return;
 
-            if(_velcomeChipotle)
+            if (_velcomeChipotle)
             {
                 World.PlayCutscene(Owner, IsChipotleAlone() ? "cs30" : "cs31");
                 _velcomeChipotle = false;
