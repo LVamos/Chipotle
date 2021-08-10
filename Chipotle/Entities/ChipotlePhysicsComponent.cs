@@ -142,19 +142,24 @@ namespace Game.Entities
         {
             base.OnCutsceneEnded(message);
 
-            switch(message.CutsceneName)
+            switch (message.CutsceneName)
             {
-                case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
                 case "cs7": case "cs10": PlayFinalScene(); break;
+                case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
+                case "cs14": JumpToBelvedereStreet(); break;
                 case "cs35": QuitGame(); break;
             }
         }
 
-        private void QuitGame()
-        {
+        /// <summary>
+        /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
+        /// </summary>
+        private void JumpToBelvedereStreet()
+            => SetPosition(1805, 1121, true);
+
+        private void QuitGame() =>
             // todo Implement ChiipotlePhysiicsComponent.QuitGame
             Environment.Exit(0);
-        }
         private void JumpToPub()
             => SetPosition(1550, 1014, true); // Jumps just before pub.
 

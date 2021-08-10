@@ -23,7 +23,7 @@ namespace Game.Entities
             Owner.ReceiveMessage(message);
         }
 
-            
+
 
 
         public override void Start()
@@ -59,8 +59,19 @@ namespace Game.Entities
             switch (message.CutsceneName)
             {
                 case "cs6": GoToCorpse(); break;
-                case "cs8": JumpToPub(); break; 
+                case "cs8": JumpToPub(); break;
+                case "cs14": JumpToBelvedereStreet(); break;
             }
+        }
+
+
+        /// <summary>
+        /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
+        /// </summary>
+        private void JumpToBelvedereStreet()
+        {
+            SetPosition message = new SetPosition(this, new Plane("1806, 1121"), true);
+            Owner.ReceiveMessage(message);
         }
 
         /// <summary>
@@ -68,8 +79,8 @@ namespace Game.Entities
         /// </summary>
         private void GoToCorpse()
         {
-            Queue<Vector2> path = 
-                _finder.FindPath(_area.Center, new Vector2(936, 1059)) 
+            Queue<Vector2> path =
+                _finder.FindPath(_area.Center, new Vector2(936, 1059))
                 ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
             Owner.ReceiveMessage(new StopFollowing(this));
             Owner.ReceiveMessage(new GotoPoint(this, path, 400));
