@@ -1,7 +1,5 @@
 ﻿using DavyKager;
 
-using Game.Entities;
-using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
@@ -22,6 +20,8 @@ namespace Game.UI
             Dictionary<KeyShortcut, Action> shortcuts = new Dictionary<KeyShortcut, Action>()
             {
                 // test shortcuts for moving entities and objects
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.T)] = SayTuttlesPosition,
+
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.J)] = MoveTuttleFromClipboard,
                 [new KeyShortcut(KeyShortcut.Modifiers.Alt, Keys.K)] = MoveChipotlesCarFromClipboard,
 
@@ -48,11 +48,10 @@ namespace Game.UI
 
         }
 
+        private void SayTuttlesPosition() => SayDelegate(World.GetEntity("tuttle").Area.Center.ToString());
+
         // For testing purpose
-        private void MoveChipotlesCarFromClipboard()
-        {
-            World.GetObject("detektivovo auto").Move(new Plane(Clipboard.GetText()));
-        }
+        private void MoveChipotlesCarFromClipboard() => World.GetObject("detektivovo auto").Move(new Plane(Clipboard.GetText()));
 
 
         private void MoveTuttleFromClipboard()
