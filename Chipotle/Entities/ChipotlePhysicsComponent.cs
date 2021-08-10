@@ -145,7 +145,7 @@ namespace Game.Entities
             switch(message.CutsceneName)
             {
                 case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
-                case "cs7": PlayFinalScene(); break;
+                case "cs7": case "cs10": PlayFinalScene(); break;
                 case "cs35": QuitGame(); break;
             }
         }
