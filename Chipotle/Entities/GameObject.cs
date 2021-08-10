@@ -78,7 +78,7 @@ namespace Game.Entities
                 => new DumpObject(name, area, "mobil u Sweeneyho", null, null, null, "cs15");
 
         private static DumpObject CreateVanillaCrunchCar(Name name, Plane area)
-=> new DumpObject(name, area, "auto Vanilla crunch", null, "snd4");
+=> new VanillaCrunchCar(name, area);
 
 
         private static DumpObject CreatePinball(Name name, Plane area)

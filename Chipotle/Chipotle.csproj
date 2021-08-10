@@ -65,6 +65,7 @@
     <Compile Include="Entities\IcecreamMachine.cs" />
     <Compile Include="Entities\KeyHanger.cs" />
     <Compile Include="Entities\PubTable.cs" />
+    <Compile Include="Entities\VanillaCrunchCar.cs" />
     <Compile Include="Messaging\Commands\Destroy.cs" />
     <Compile Include="Messaging\Commands\GotoPoint.cs" />
     <Compile Include="Entities\PoolsideBin.cs" />
