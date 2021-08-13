@@ -29,6 +29,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "christinin zvonek": return CreateChristinesBell(name, area);
                 case "zrcadlo u kristýny": return CreateChristinesMirror(name, area);
                 case "vražedné auto": return CreateKillersCar(name, area);
                 case "věšák na klíče": return CreateKeyHanger(name, area);
@@ -59,6 +60,9 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        private static DumpObject CreateChristinesBell(Name name, Plane area)
+            => new ChristinesBell(name, area);
 
         private static DumpObject CreateChristinesMirror(Name name, Plane area)
             => new DumpObject(name, area, "zrcadlo u Kristýny", null, null, null, "cs14", true);
