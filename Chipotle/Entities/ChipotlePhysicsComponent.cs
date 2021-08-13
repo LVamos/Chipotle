@@ -129,6 +129,19 @@ namespace Game.Entities
             tile.Object.ReceiveMessage(newMessage);
         }
 
+        private void WatchSweeneysRoom()
+        {
+            if (
+                 World.GetObject("trezor s1").Used
+                && (World.GetObject("stůl s1").Used || World.GetObject("stůl s5").Used)
+                && World.GetObject("počítač s1").Used
+                && World.GetObject("mobil s1").Used
+                )
+            {
+                World.PlayCutscene(Owner, "cs19");
+            }
+        }
+
 
         private void OnTurnEntity(TurnEntity message)
         {
@@ -147,9 +160,17 @@ namespace Game.Entities
                 case "cs7": case "cs10": PlayFinalScene(); break;
                 case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
                 case "cs14": JumpToBelvedereStreet(); break;
+                case "cs15":
+                case "cs16":
+                case "cs17":
+                case "cs18": WatchSweeneysRoom(); break;
+                case "cs19": JumpToAsphaltRoad(); break;
                 case "cs35": QuitGame(); break;
             }
         }
+
+        private void JumpToAsphaltRoad()
+            => SetPosition(1207, 984, true);
 
         /// <summary>
         /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.

@@ -35,6 +35,7 @@ namespace Game.Entities
 
             RegisterMessages(new Dictionary<Type, Action<Messaging.GameMessage>>
             {
+                [typeof(Hide)] = (message) => OnHide((Hide)message),
                 [typeof(GotoPoint)] = (m) => OnGotoPoint((GotoPoint)m),
                 [typeof(StartFollowing)] = (m) => OnStartFollowing((StartFollowing)m),
                 [typeof(StopFollowing)] = (m) => OnStopFollowing((StopFollowing)m),
@@ -45,6 +46,17 @@ namespace Game.Entities
 
             base.Start();
         }
+
+
+        private bool _hidden;
+
+        private void OnHide(Hide message)
+        {
+            StopFollowing();
+            DisAppear();
+            _hidden = true;
+        }
+
 
         private void OnGotoPoint(GotoPoint m)
         {
@@ -57,7 +69,7 @@ namespace Game.Entities
             => _followPlayer = true;
 
         private void OnStopFollowing(StopFollowing m)
-            => _followPlayer = false;
+            => StopFollowing();
 
         private void OnLocalityLeft(LocalityLeft message)
         {
@@ -70,6 +82,11 @@ namespace Game.Entities
             GoToPlayer();
         }
 
+        private void StopFollowing()
+        {
+            _followPlayer = false;
+            StopWalk();
+        }
         private void OnEntityMoved(EntityMoved message)
         {
             if (message.Sender != _player)

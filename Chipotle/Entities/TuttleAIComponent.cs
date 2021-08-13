@@ -12,6 +12,7 @@ namespace Game.Entities
 {
     public class TuttleAIComponent : AIComponent
     {
+        private bool _hidden;
         private bool _playerWasByPool;
 
         /// <summary>
@@ -61,9 +62,15 @@ namespace Game.Entities
                 case "cs6": GoToCorpse(); break;
                 case "cs8": JumpToPub(); break;
                 case "cs14": JumpToBelvedereStreet(); break;
+                case "cs19": Hide(); break;
             }
         }
 
+        private void Hide()
+        {
+            _hidden = true;
+            Owner.ReceiveMessage(new Hide(this));
+        }
 
         /// <summary>
         /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
