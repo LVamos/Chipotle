@@ -70,6 +70,7 @@
     <Compile Include="Messaging\Commands\Destroy.cs" />
     <Compile Include="Messaging\Commands\GotoPoint.cs" />
     <Compile Include="Entities\PoolsideBin.cs" />
+    <Compile Include="Messaging\Commands\Hide.cs" />
     <Compile Include="Messaging\Commands\SetPosition.cs" />
     <Compile Include="Messaging\Commands\StartFollowing.cs" />
     <Compile Include="Messaging\Commands\StopFollowing.cs" />
@@ -183,7 +184,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Audio\" />
     <Folder Include="Input\" />
   </ItemGroup>
   <ItemGroup>
