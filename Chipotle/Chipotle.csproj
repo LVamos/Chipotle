@@ -62,6 +62,7 @@
     <Compile Include="Entities\CarsonsBench.cs" />
     <Compile Include="Entities\CarsonsGrill.cs" />
     <Compile Include="Entities\ChipotlesCar.cs" />
+    <Compile Include="Entities\ChristinesBell.cs" />
     <Compile Include="Entities\IcecreamMachine.cs" />
     <Compile Include="Entities\KeyHanger.cs" />
     <Compile Include="Entities\KillersCar.cs" />

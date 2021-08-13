@@ -286,6 +286,7 @@ namespace Game
             Add(Entity.CreateTuttle());
             Add(Entity.CreateCarson());
             Add(Entity.CreateBartender());
+            Add(Entity.CreateChristine());
             _entities.Foreach(p => p.Value.Start());
             Program.MainWindow.GameLoopEnabled = true;
         }
