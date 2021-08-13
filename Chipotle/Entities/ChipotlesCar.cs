@@ -46,15 +46,15 @@ namespace Game.Entities
                 => World.GetObject(name).Used;
 
             // Check if all localities of Walsh area were visited.
-            bool walshAreaExplored =
-            World.Player.VisitedLocalities.Count == 14
-                    && World.Player.VisitedLocalities.All(l => l.Name.Indexed.ToLower().Contains("w1"));
+            bool walshAreaExplored = true;
+            //World.Player.VisitedLocalities.Count == 14
+            //        && World.Player.VisitedLocalities.All(l => l.Name.Indexed.ToLower().Contains("w1"));
 
             // Check if some important objects were used
-            bool ObjectsUsed =
-                 (new string[]
-                 {"tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w1"})
-            .All(o => Used(o));
+            bool ObjectsUsed = true;
+            //     (new string[]
+            //     {"tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w1"})
+            //.All(o => Used(o));
 
             bool leftArea = !_visitedLocalities.IsNullOrEmpty(); // Checks if player left Walsh area with the car
 
@@ -80,6 +80,7 @@ namespace Game.Entities
             if (!leftArea && ObjectsUsed && walshAreaExplored)
             {
                 _destinations.Add(World.GetLocality("ulice p1"));
+                Move(new Plane("1810, 1100, 1812, 1096"));
                 World.PlayCutscene(this, "cs20");
             }
         }

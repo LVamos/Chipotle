@@ -50,7 +50,7 @@ namespace Game.Entities
         private bool _sittingOnChair;
         private bool _phoneCountdown;
         private int _phoneDeltaTime;
-        private int _phoneIInterval;
+        private int _phoneInterval;
 
         public override void Start()
         {
@@ -169,17 +169,20 @@ namespace Game.Entities
             {
                 case "cs7": case "cs10": PlayFinalScene(); break;
                 case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
-                case "cs14": JumpToBelvedereStreet(); break;
+                case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs15":
                 case "cs16":
                 case "cs17":
                 case "cs18": WatchSweeneysRoom(); break;
                 case "cs19": JumpToAsphaltRoad(); break;
+                case "cs20": JumpToBelvedereStreet1(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs35": QuitGame(); break;
             }
         }
 
+        private void JumpToBelvedereStreet1()
+            => SetPosition(1810, 1112, true);
         private void JumpToChristinesHall()
             => SetPosition(1797, 1125, true);
 
@@ -187,13 +190,13 @@ namespace Game.Entities
             => SetPosition(1207, 984, true);
 
         /// <summary>
-        /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
+        /// Chipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
         /// </summary>
-        private void JumpToBelvedereStreet()
+        private void JumpToBelvedereStreet2()
         {
             _phoneCountdown = true;
             Random r = new Random();
-            _phoneIInterval = r.Next(30000, 120000);
+            _phoneInterval = r.Next(30000, 120000);
             _phoneDeltaTime = 0;
             SetPosition(1805, 1121, true);
         }
@@ -271,7 +274,7 @@ namespace Game.Entities
 
         private void WatchPhone()
         {
-            if (_phoneCountdown && _phoneDeltaTime >= _phoneIInterval)
+            if (_phoneCountdown && _phoneDeltaTime >= _phoneInterval)
             {
                 _phoneCountdown = false;
                 World.GetObject("detektivovo auto").ReceiveMessage(new UnblockLocality(Owner, World.GetLocality("ulice s1")));

@@ -61,11 +61,15 @@ namespace Game.Entities
             {
                 case "cs6": GoToCorpse(); break;
                 case "cs8": JumpToPub(); break;
-                case "cs14": JumpToBelvedereStreet(); break;
+                case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs19": Hide(); break;
+                case "cs20": JumpToBelvedereStreet1(); break;
                 case "cs21": JumpToChristinesHall(); break;
             }
         }
+
+        private void JumpToBelvedereStreet1()
+            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1813, 1112"), true));
 
         private void JumpToChristinesHall()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));
@@ -79,7 +83,7 @@ namespace Game.Entities
         /// <summary>
         /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
         /// </summary>
-        private void JumpToBelvedereStreet()
+        private void JumpToBelvedereStreet2()
         {
             SetPosition message = new SetPosition(this, new Plane("1806, 1121"), true);
             Owner.ReceiveMessage(message);
