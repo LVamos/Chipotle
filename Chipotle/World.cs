@@ -368,11 +368,12 @@ null);
                 Name pIndexedName = new Name(Attribute(p, "indexedname"));
                 bool isDoor = Attribute(p, "door").ToBool();
                 bool closed = Attribute(p, "closed").ToBool();
+                bool openable = Attribute(p, "openable").ToBool();
                 Plane area = new Plane(Attribute(p, "coordinates"));
                 List<Locality> localities = new List<Locality> { GetLocality(Attribute(p, "from")), GetLocality(Attribute(p, "to").PrepareForIndexing()) };
 
                 // Create and register new passage
-                Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed));
+                Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed, openable));
             }
 
             return xDocument;

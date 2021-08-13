@@ -74,12 +74,12 @@ namespace Game.Terrain
             _localities.Foreach(l => l.Register(this));
         }
 
-        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, bool closed)
+        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, bool closed, bool openable)
         {
             switch (name.Indexed)
             {
                 case "d hala w1": return CreateHallDoor(name, area, localities);
-                default: return isDoor ? new Door(name, closed, area, localities) : new Passage(name, area, localities);
+                default: return isDoor ? new Door(name, closed, area, localities, openable) : new Passage(name, area, localities);
             }
         }
 

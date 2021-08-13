@@ -25,10 +25,27 @@ namespace Game.Terrain
 
         }
 
-        public Door(Name name, bool closed, Plane area, IEnumerable<Locality> localities) : base(name, area, localities) => Closed = closed;
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="name">Inner name for the door</param>
+        /// <param name="closed">Specifies whether the door should be implicitly closed or open</param>
+        /// <param name="area">Location of the door</param>
+        /// <param name="localities">Two localities, between which the door is.</param>
+        /// <param name="openable">Specifies whether the door should be openable</param>
+        public Door(Name name, bool closed, Plane area, IEnumerable<Locality> localities, bool openable=true) : base(name, area, localities)
+        {
+            Closed = closed;
+            _openable = openable;
+        }
+
+        protected  readonly  bool _openable;
 
         protected virtual void OnUseObject(UseObject m)
         {
+            if (!_openable)
+                return;
+
             if (Closed)
             {
                 Open(m.Tile.Position);
