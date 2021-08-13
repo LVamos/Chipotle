@@ -1,6 +1,6 @@
 ﻿namespace Game.Entities
 {
-    internal class ChristinePhysicsComponent : PhysicsComponent
+    public class ChristinePhysicsComponent : PhysicsComponent
     {
     }
 }

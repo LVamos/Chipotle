@@ -165,9 +165,13 @@ namespace Game.Entities
                 case "cs17":
                 case "cs18": WatchSweeneysRoom(); break;
                 case "cs19": JumpToAsphaltRoad(); break;
+                case "cs21": JumpToChristinesHall(); break;
                 case "cs35": QuitGame(); break;
             }
         }
+
+        private void JumpToChristinesHall()
+            => SetPosition(1797, 1125, true);
 
         private void JumpToAsphaltRoad()
             => SetPosition(1207, 984, true);
