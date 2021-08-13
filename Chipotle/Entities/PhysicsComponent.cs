@@ -15,9 +15,9 @@ namespace Game.Entities
 
         protected int _walkSpeed;
 
-        private void Appear(Plane target) => target.GetTiles().Foreach(t => t.Register(Owner));
+        protected void Appear(Plane target) => target.GetTiles().Foreach(t => t.Register(Owner));
 
-        private void DisAppear()
+        protected void DisAppear()
             => _area.GetTiles()
             .Foreach(t => t.UnregisterObject());
 
