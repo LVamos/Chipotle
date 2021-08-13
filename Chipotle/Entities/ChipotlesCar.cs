@@ -10,6 +10,24 @@ namespace Game.Entities
 {
     public class ChipotlesCar : DumpObject
     {
+        public override void Start()
+        {
+            base.Start();
+
+            RegisterMessages(
+                new Dictionary<System.Type, System.Action<Messaging.GameMessage>>
+                {
+                    [typeof(UnblockLocality)] = (message) => OnUnblockLocality((UnblockLocality)message)
+                }
+                );
+        }
+
+        private void OnUnblockLocality(UnblockLocality message)
+        {
+            if (!_destinations.Contains(message.Locality))
+                _destinations.Add(message.Locality);
+        }
+
         protected HashSet<Locality> _destinations = new HashSet<Locality>();
 
         protected HashSet<Locality> _visitedLocalities = new HashSet<Locality>();

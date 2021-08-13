@@ -21,6 +21,13 @@ namespace Game.Entities
         {
             base.Update();
             UpdateRotation();
+            CountPhone();
+        }
+
+        private void CountPhone()
+        {
+            if (_phoneCountdown)
+                _phoneDeltaTime += World.DeltaTime;
         }
 
         private void UpdateRotation()
@@ -41,6 +48,9 @@ namespace Game.Entities
         private int _plannedRotations;
         private bool _steppedIntoPuddle;
         private bool _sittingOnChair;
+        private bool _phoneCountdown;
+        private int _phoneDeltaTime;
+        private int _phoneIInterval;
 
         public override void Start()
         {
@@ -180,7 +190,13 @@ namespace Game.Entities
         /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
         /// </summary>
         private void JumpToBelvedereStreet()
-            => SetPosition(1805, 1121, true);
+        {
+            _phoneCountdown = true;
+            Random r = new Random();
+            _phoneIInterval = r.Next(30000, 120000);
+            _phoneDeltaTime = 0;
+            SetPosition(1805, 1121, true);
+        }
 
         private void QuitGame() =>
             // todo Implement ChiipotlePhysiicsComponent.QuitGame
@@ -249,8 +265,18 @@ namespace Game.Entities
             SetPosition(target);
             RecordLocality(targetTile.Locality);
 
-            // Check if player walked in a puddle
-            WatchPuddle(targetTile.Position);
+            WatchPuddle(targetTile.Position); // Check if player walked in a puddle
+            WatchPhone();
+        }
+
+        private void WatchPhone()
+        {
+            if (_phoneCountdown && _phoneDeltaTime >= _phoneIInterval)
+            {
+                _phoneCountdown = false;
+                World.GetObject("detektivovo auto").ReceiveMessage(new UnblockLocality(Owner, World.GetLocality("ulice s1")));
+                World.PlayCutscene(Owner, "cs22");
+            }
         }
 
         private bool StandUp()
