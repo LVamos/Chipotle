@@ -65,8 +65,12 @@ namespace Game.Entities
                 case "cs19": Hide(); break;
                 case "cs20": JumpToBelvedereStreet1(); break;
                 case "cs21": JumpToChristinesHall(); break;
+                case "cs23": JumpToSweeneysRoom(); break;
             }
         }
+
+        private void JumpToSweeneysRoom()
+            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1411, 974"), true));
 
         private void JumpToBelvedereStreet1()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1813, 1112"), true));
