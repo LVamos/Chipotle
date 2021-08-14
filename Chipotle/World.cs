@@ -288,6 +288,7 @@ namespace Game
             Add(Entity.CreateBartender());
             Add(Entity.CreateChristine());
             Add(Entity.CreateSweeney());
+            Add(Entity.CreateMariotti());
             _entities.Foreach(p => p.Value.Start());
             Program.MainWindow.GameLoopEnabled = true;
         }
