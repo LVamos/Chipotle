@@ -169,6 +169,7 @@ namespace Game.Entities
             {
                 case "cs7": case "cs10": PlayFinalScene(); break;
                 case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
+                case "cs12": JumpToVanillaCrunchGarage(); break;
                 case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs15":
                 case "cs16":
@@ -181,6 +182,9 @@ namespace Game.Entities
                 case "cs35": QuitGame(); break;
             }
         }
+
+        private void JumpToVanillaCrunchGarage()
+            => SetPosition(2006, 1166, true);
 
         private void JumpToSweeneysHall()
             => SetPosition(1405, 965, true);

@@ -29,6 +29,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "křeslo u mariottiho": return CreateMariottisChair(name, area);
                 case "sweeneyho zvonek": return CreateSweeneysBell(name, area);
                 case "christinin zvonek": return CreateChristinesBell(name, area);
                 case "zrcadlo u kristýny": return CreateChristinesMirror(name, area);
@@ -61,6 +62,9 @@ namespace Game.Entities
                 default: return new DumpObject(name, area);
             }
         }
+
+        private static DumpObject CreateMariottisChair(Name name, Plane area)
+            => new DumpObject(name, area, "křeslo u Mariottiho", null, null, null, "cs12", true);
 
         private static DumpObject CreateSweeneysBell(Name name, Plane area)
             => new SweeneysBell(name, area);
