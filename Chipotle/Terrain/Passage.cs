@@ -78,10 +78,15 @@ namespace Game.Terrain
         {
             switch (name.Indexed)
             {
+                case "dhkv1": return CreateMariottisDoor(name, area, localities);
                 case "d hala w1": return CreateHallDoor(name, area, localities);
                 default: return isDoor ? new Door(name, closed, area, localities, openable) : new Passage(name, area, localities);
             }
         }
+
+        public static MariottisDoor CreateMariottisDoor(Name name, Plane area, IEnumerable<Locality> localities)
+=> new MariottisDoor(name, area, localities);
+
 
         public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<Locality> localities)
 => new HallDoor(name, area, localities);

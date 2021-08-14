@@ -169,6 +169,7 @@ namespace Game.Entities
             {
                 case "cs7": case "cs10": PlayFinalScene(); break;
                 case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
+                case "cs11": WatchIcecreamMachine(); JumpToMariottisOffice(); break;
                 case "cs12": JumpToVanillaCrunchGarage(); break;
                 case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs15":
@@ -181,6 +182,15 @@ namespace Game.Entities
                 case "cs23": JumpToSweeneysHall(); break;
                 case "cs35": QuitGame(); break;
             }
+        }
+
+        private void JumpToMariottisOffice()
+            => SetPosition(2018, 1123, true);
+
+        private void WatchIcecreamMachine()
+        {
+            if (World.GetObject("automat v1").Used)
+                World.PlayCutscene(this, "cs13");
         }
 
         private void JumpToVanillaCrunchGarage()
