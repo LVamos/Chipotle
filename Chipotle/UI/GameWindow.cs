@@ -23,7 +23,6 @@ namespace Game.UI
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.T)] = SayTuttlesPosition,
 
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.J)] = MoveTuttleFromClipboard,
-                [new KeyShortcut(KeyShortcut.Modifiers.Alt, Keys.K)] = MoveChipotlesCarFromClipboard,
 
 
                 // Test shortcuts for reverb settings
@@ -49,9 +48,6 @@ namespace Game.UI
         }
 
         private void SayTuttlesPosition() => SayDelegate(World.GetEntity("tuttle").Area.Center.ToString());
-
-        // For testing purpose
-        private void MoveChipotlesCarFromClipboard() => World.GetObject("detektivovo auto").Move(new Plane(Clipboard.GetText()));
 
 
         private void MoveTuttleFromClipboard()
