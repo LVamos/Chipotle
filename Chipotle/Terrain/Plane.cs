@@ -1,11 +1,11 @@
-﻿using Game.Entities;
-
-using Luky;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+
+using Game.Entities;
+
+using Luky;
 
 namespace Game.Terrain
 {
@@ -14,6 +14,47 @@ namespace Game.Terrain
     /// </summary>
     public class Plane : DebugSO
     {
+        /// <summary>
+        /// Searches nearest surrounding of plane and select random walkable tile.
+        /// </summary>
+        /// <param name="maxDistance">Specifies maximum distance from plane</param>
+        /// <returns>Coordinates of a walkable tile or null if no tile is found</returns>
+        public Vector2? FindRandomWalkableTile(int maxDistance)
+        {
+            Plane around = new Plane(
+                new Vector2(UpperLeftCorner.X - maxDistance, UpperLeftCorner.Y + maxDistance),
+                new Vector2(LowerRightCorner.X + maxDistance, LowerRightCorner.Y - maxDistance));
+            IEnumerable<Tile> walkables = around.GetWalkableTiles();
+
+            if (walkables.IsNullOrEmpty())
+                return (Vector2?)null;
+
+            int index = (new Random()).Next(walkables.Count());
+            return (Vector2?)walkables.ElementAt(index).Position;
+        }
+
+
+        /// <summary>
+        /// Finds nearest walkable tile in surroundings.
+        /// </summary>
+        /// <param name="maxDistance"></param>
+        /// <returns></returns>
+        public Vector2? FindNearestWalkableTile(int maxDistance)
+        {
+            Plane around = new Plane(this);
+            for (int i = 0; i <= maxDistance; i++)
+            {
+                around.Extend();
+                Tile walkable = around.GetPerimeterTiles().FirstOrDefault(t => t.Walkable);
+
+                if (walkable != null)
+                {
+                    return (Vector2?)walkable.Position;
+                }
+            }
+            return (Vector2?)null;
+        }
+
         public override int GetHashCode()
             => unchecked(4112 * (8121 + UpperLeftCorner.GetHashCode()) * (6988 + LowerRightCorner.GetHashCode()));
 
