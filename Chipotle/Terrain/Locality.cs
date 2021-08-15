@@ -283,6 +283,7 @@ namespace Game.Terrain
 
             _entities.ForEach(e => e.ReceiveMessage(message));
             _objects.ForEach(o => o.ReceiveMessage(message));
+            _passages.ForEach(p => p.ReceiveMessage(message));
         }
 
         /// <summary>
