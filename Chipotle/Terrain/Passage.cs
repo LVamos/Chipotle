@@ -1,8 +1,8 @@
 ﻿
-using Luky;
-
 using System.Collections.Generic;
 using System.Linq;
+
+using Luky;
 
 namespace Game.Terrain
 {
@@ -78,12 +78,15 @@ namespace Game.Terrain
         {
             switch (name.Indexed)
             {
+                case "dcgv1": return CreateVanillaCrunchGarageDoor(name, area, localities);
                 case "dhkv1": return CreateMariottisDoor(name, area, localities);
                 case "d hala w1": return CreateHallDoor(name, area, localities);
                 default: return isDoor ? new Door(name, closed, area, localities, openable) : new Passage(name, area, localities);
             }
         }
 
+        private static Passage CreateVanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities)
+            => new VanillaCrunchGarageDoor(name, area, localities);
         public static MariottisDoor CreateMariottisDoor(Name name, Plane area, IEnumerable<Locality> localities)
 => new MariottisDoor(name, area, localities);
 

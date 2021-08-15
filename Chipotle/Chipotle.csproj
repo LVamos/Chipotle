@@ -149,6 +149,7 @@
     <Compile Include="Terrain\TurnType.cs" />
     <Compile Include="Messaging\Commands\TurnEntity.cs" />
     <Compile Include="Messaging\Events\TurnEntityResult.cs" />
+    <Compile Include="Terrain\VanillaCrunchGarageDoor.cs" />
     <Compile Include="UI\GameWindow.cs" />
     <Compile Include="UI\KeyEventParams.cs" />
     <Compile Include="UI\KeyShortcut.cs" />
