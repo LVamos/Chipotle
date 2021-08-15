@@ -9,6 +9,27 @@ namespace Game.UI
     public static class WindowHandler
     {
         /// <summary>
+        /// Runs a voice menu
+        /// </summary>
+        /// <param name="items">Items for the menu</param>
+        /// <param name="introText">Text to announce when menu is activated</param>
+        /// <param name="wrappingAllowed">Enables or disables menu wrapping</param>
+        /// <param name="introSound">Name of a sound to be played when the menu is activated</param>
+        /// <param name="outroSound">Name of a sound to be played when menu is closed</param>
+        /// <param name="selectionSound">Name of a sound to be played when user selects an item</param>
+        /// <param name="wrapDownSound">Name of a sound to be played when the menu wraps to lower edge</param>
+        /// <param name="wrapUpSound">Name of a sound to be played when the menu wraps to upper edge</param>
+        /// <param name="upperEdgeSound">Name of a sound to be palyed when cursor gets to upper edge fo the menu</param>
+        /// <param name="lowerEdgeSound">Name of a sound to be played when cursor gets to lower edge of the menu</param>
+        /// <returns>Tuple with index of selected item and value of selected item</returns>
+        public static int Menu(string[] items, string introText, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
+        {
+            MenuWindow menu = new MenuWindow(items, introText, wrappingAllowed, introSound, outroSound, selectionSound, wrapDownSound, wrapUpSound, upperEdgeSound, lowerEdgeSound);
+            OpenModalWindow(menu);
+            return menu.Cursor;
+        }
+
+        /// <summary>
         /// Currently focused window
         /// </summary>
         public static VirtualWindow ActiveWindow { get => _activeWindow; private set => _activeWindow = value; }
