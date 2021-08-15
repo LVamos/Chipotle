@@ -195,7 +195,7 @@ namespace Game.Entities
             Locality?.Register(this);
         }
 
-        public void Move(Plane targetArea)
+        protected virtual void Move    (Plane targetArea)
         {
             if (targetArea == null)
             {
