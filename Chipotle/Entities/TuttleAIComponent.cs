@@ -1,12 +1,12 @@
-﻿using Game.Messaging;
+﻿using System;
+using System.Collections.Generic;
+
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
-
-using System;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
