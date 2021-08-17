@@ -1,14 +1,14 @@
-﻿using Game.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
+
+using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
 
 namespace Game
 {
@@ -62,6 +62,7 @@ namespace Game
         /// </summary>
         public static void Update()
         {
+            PerformDelayedActions();
             _localities.Foreach(v => v.Value.Update());
             _passages.Foreach(v => v.Value.Update());
             _objects.Foreach(v => v.Value.Update());
@@ -385,11 +386,22 @@ null);
         public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
            => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
 
-        public static void Remove(Locality l) => _localities.Remove(l.Name.Indexed);
+        public static void Remove(Locality l)
+            => _delayedActions.Enqueue(() => _localities.Remove(l.Name.Indexed));
 
-        public static void Remove(Passage p) => _passages.Remove(p.Name.Indexed);
+        private static Queue<Action> _delayedActions = new Queue<Action>();
 
-        public static void Remove(GameObject o) => _objects.Remove(o.Name.Indexed);
+        private static void PerformDelayedActions()
+        {
+            while (!_delayedActions.IsNullOrEmpty())
+                _delayedActions.Dequeue()();
+        }
+
+        public static void Remove(Passage p)
+            => _delayedActions.Enqueue(() => _passages.Remove(p.Name.Indexed));
+
+        public static void Remove(GameObject o)
+            => _delayedActions.Enqueue(() => _objects.Remove(o.Name.Indexed));
 
 
 
