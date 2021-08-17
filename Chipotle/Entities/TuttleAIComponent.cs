@@ -20,6 +20,19 @@ namespace Game.Entities
         private void OnChipotlesCarMoved(ChipotlesCarMoved message)
 => _carMovement = message;
 
+        protected override void OnCutsceneBegan(CutsceneBegan message)
+        {
+            base.OnCutsceneBegan(message);
+
+            switch (message.CutsceneName)
+            {
+                case "cs7": case "cs8": Reveal(); break;
+            }
+
+        }
+
+
+
         public override void Start()
         {
             base.Start();
@@ -28,6 +41,7 @@ namespace Game.Entities
                 new Dictionary<Type, Action<GameMessage>>
                 {
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
+                    [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
                     [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                     [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
