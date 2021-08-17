@@ -90,9 +90,10 @@ namespace Game
         public static void PlayCutscene(object sender, string cutscene)
         {
             if (string.IsNullOrEmpty(cutscene))
-            {
                 throw new ArgumentNullException(nameof(cutscene));
-            }
+
+            if(_cutsceneBegan!=null)
+            StopCutscene(null);
 
             int id = Sound.Play(cutscene);
             _cutsceneBegan = new CutsceneBegan(sender, cutscene, id);
