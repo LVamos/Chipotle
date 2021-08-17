@@ -66,6 +66,8 @@
     <Compile Include="Entities\IcecreamMachine.cs" />
     <Compile Include="Entities\KeyHanger.cs" />
     <Compile Include="Entities\KillersCar.cs" />
+    <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
+    <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
     <Compile Include="Entities\PubTable.cs" />
     <Compile Include="Entities\SweeneysBell.cs" />

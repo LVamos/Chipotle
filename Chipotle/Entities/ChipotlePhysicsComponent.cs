@@ -1,13 +1,13 @@
-﻿using Game.Messaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -67,6 +67,7 @@ namespace Game.Entities
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
 
                     // Other messages
+                    [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
                     [typeof(SayNearestObject)] = (m) => OnSayNearestObject((SayNearestObject)m),
@@ -82,6 +83,8 @@ namespace Game.Entities
 
         }
 
+        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
+=> _carMovement = message;
 
         private void OnSayNearestObject(SayNearestObject m)
         {
@@ -149,8 +152,11 @@ namespace Game.Entities
                 )
             {
                 World.PlayCutscene(Owner, "cs19");
+                Car.ReceiveMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
             }
         }
+        private Locality AsphaltRoad => World.GetLocality("asfaltka c1");
+        private ChipotlesCar Car => World.GetObject("detektivovo auto") as ChipotlesCar;
 
 
         private void OnTurnEntity(TurnEntity message)
@@ -164,11 +170,11 @@ namespace Game.Entities
         protected override void OnCutsceneEnded(CutsceneEnded message)
         {
             base.OnCutsceneEnded(message);
+            WatchCar();
 
             switch (message.CutsceneName)
             {
                 case "cs7": case "cs10": PlayFinalScene(); break;
-                case "cs8": JumpToPub(); break; // Chipotle moves to pub and sits at table. Tuttle will do the same.
                 case "cs11": WatchIcecreamMachine(); JumpToMariottisOffice(); break;
                 case "cs12": JumpToVanillaCrunchGarage(); break;
                 case "cs14": JumpToBelvedereStreet2(); break;
@@ -176,13 +182,25 @@ namespace Game.Entities
                 case "cs16":
                 case "cs17":
                 case "cs18": WatchSweeneysRoom(); break;
-                case "cs19": JumpToAsphaltRoad(); break;
-                case "cs20": JumpToBelvedereStreet1(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs23": JumpToSweeneysHall(); break;
                 case "cs35": QuitGame(); break;
             }
         }
+
+        private ChipotlesCarMoved _carMovement;
+
+        private void WatchCar()
+        {
+            if (_carMovement == null)
+                return;
+
+            Vector2? target = _carMovement.TargetLocation.FindRandomWalkableTile(1);
+            Assert(target.HasValue, "No walkable tile found.");
+            SetPosition((Vector2)target, true);
+            _carMovement = null;
+        }
+
 
         private void JumpToMariottisOffice()
             => SetPosition(2018, 1123, true);
@@ -199,13 +217,9 @@ namespace Game.Entities
         private void JumpToSweeneysHall()
             => SetPosition(1405, 965, true);
 
-        private void JumpToBelvedereStreet1()
-            => SetPosition(1810, 1112, true);
         private void JumpToChristinesHall()
             => SetPosition(1797, 1125, true);
 
-        private void JumpToAsphaltRoad()
-            => SetPosition(1207, 984, true);
 
         /// <summary>
         /// Chipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
@@ -220,10 +234,8 @@ namespace Game.Entities
         }
 
         private void QuitGame() =>
-            // todo Implement ChiipotlePhysiicsComponent.QuitGame
             Environment.Exit(0);
-        private void JumpToPub()
-            => SetPosition(1550, 1014, true); // Jumps just before pub.
+
 
         private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
 

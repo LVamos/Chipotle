@@ -14,18 +14,11 @@ namespace Game.Entities
     {
         private bool _hidden;
         private bool _playerWasByPool;
-
-        /// <summary>
-        /// Jumps just before pub. Chiptole should do the same in the same time.
-        /// </summary>
-        private void JumpToPub()
-        {
-            SetPosition message = new SetPosition(this, new Plane("1552, 1014"), true);
-            Owner.ReceiveMessage(message);
-        }
+        private ChipotlesCarMoved _carMovement;
 
 
-
+        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
+=> _carMovement = message;
 
         public override void Start()
         {
@@ -34,6 +27,7 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>
                 {
+                    [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
                     [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                     [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
@@ -56,24 +50,32 @@ namespace Game.Entities
         protected override void OnCutsceneEnded(CutsceneEnded message)
         {
             base.OnCutsceneEnded(message);
+            WatchCar();
+
 
             switch (message.CutsceneName)
             {
                 case "cs6": GoToCorpse(); break;
-                case "cs8": JumpToPub(); break;
                 case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs19": Hide(); break;
-                case "cs20": JumpToBelvedereStreet1(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs23": JumpToSweeneysRoom(); break;
             }
         }
 
+        private void WatchCar()
+        {
+            if (_hidden || _carMovement == null)
+                return;
+
+            Vector2? target = _carMovement.TargetLocation.FindRandomWalkableTile(1);
+            Assert(target.HasValue, "No walkable tile found.");
+            Owner.ReceiveMessage(new SetPosition(this, new Plane((Vector2)target), true));
+            _carMovement = null;
+        }
         private void JumpToSweeneysRoom()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1411, 974"), true));
 
-        private void JumpToBelvedereStreet1()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1813, 1112"), true));
 
         private void JumpToChristinesHall()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));

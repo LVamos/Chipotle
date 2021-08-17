@@ -1,12 +1,11 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+using System.Collections.Generic;
+
+using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -126,14 +125,14 @@ namespace Game.Entities
         private void GoToPlayer()
         {
             _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
-            (bool found, Vector2 target) target = FindPlaceNearPlayer();
+            Vector2? target = FindPlaceNearPlayer();
 
-            if (!target.found)
+            if (!target.HasValue)
             {
                 return;
             }
 
-            _path = _finder.FindPath(_area.Center, target.target);
+            _path = _finder.FindPath(_area.Center, (Vector2)target);
 
             if (_path == null)
                 return;
@@ -173,21 +172,8 @@ namespace Game.Entities
             return 150;
         }
 
-        private (bool found, Vector2 point) FindPlaceNearPlayer()
-        {
-            Plane aroundPlayer = new Plane(_player.Area);
-            for (int i = 0; i <= _maxDistanceFromPlayer; i++)
-            {
-                aroundPlayer.Extend();
-                Tile walkable = aroundPlayer.GetPerimeterTiles().FirstOrDefault(t => t.Walkable);
-
-                if (walkable != null)
-                {
-                    return (true, walkable.Position);
-                }
-            }
-            return (false, default);
-        }
+        private Vector2? FindPlaceNearPlayer()
+=> _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
 
         public override void Update()
         {
