@@ -125,21 +125,22 @@ namespace Game.Entities
         private void OnSayTerrain(SayTerrain message)
             => SayDelegate(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
 
+        private Tile CuurrentTile => World.Map[_area.Center];
+
         private void OnUseObject(UseObject message)
         {
-            IEnumerable<Tile> tiles = World.Map[_area.Center].GetNeighbours8();
-            Tile tile = tiles.FirstOrDefault(t => t.Passage is Door || t.Object != null);
+            // Detect door and use it if possible.
+            IEnumerable<Tile> adjectingTiles = CuurrentTile.GetNeighbours8();
+            Tile tileWithDoor = adjectingTiles.Where(t => t.Passage != null && t.Passage is Door).FirstOrDefault();
+            if (tileWithDoor != null)
+                tileWithDoor.Passage.ReceiveMessage(new UseObject(Owner, tileWithDoor));
 
-            if (tile == null)
-                return;
 
-            UseObject newMessage = new UseObject(this, tile);
-            if (tile.Passage != null)
-            {
-                tile.Passage.ReceiveMessage(newMessage);
-                return;
-            }
-            tile.Object.ReceiveMessage(newMessage);
+            // Detect object in front of Chipotle.
+            Tile tileInFront = GetNextTile();
+
+            if (tileInFront.Object != null)
+                tileInFront.Object.ReceiveMessage(new UseObject(Owner, tileInFront));
         }
 
         private void WatchSweeneysRoom()
