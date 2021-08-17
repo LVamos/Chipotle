@@ -29,7 +29,6 @@ namespace Game.Entities
                 [new KeyShortcut(KeyShortcut.Modifiers.Alt, Keys.J)] = JumpToCoordsFromClipBoard,
                 [new KeyShortcut(Keys.J)] = JumpToCoords,
 
-                [new KeyShortcut(Keys.Space)] = Test,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight,
@@ -78,16 +77,6 @@ namespace Game.Entities
 
 
 
-        private void Test()
-        {
-            if (!DebugSO.TestModeEnabled)
-            {
-                return;
-            }
-
-            World.Sound.Play(stream: World.Sound.GetRandomSoundStream("agojstereo"), role: null, looping: false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
-
-        }
 
         private void SayOrientation()
         {
@@ -133,15 +122,5 @@ namespace Game.Entities
         private void MoveForward()
             => Owner.ReceiveMessage(new MakeStep(this, TurnType.None));
 
-        protected override void OnKeyDown(KeyPressed message)
-        {
-            if (_cutsceneInProgress)
-            {
-                _cutsceneInProgress = false;
-                World.StopCutscene(Owner);
-            }
-
-            base.OnKeyDown(message);
-        }
     }
 }
