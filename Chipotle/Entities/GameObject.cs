@@ -126,7 +126,7 @@ namespace Game.Entities
 
 
         public static DumpObject CreateCorpse(Name name, Plane area)
-    => new DumpObject(name, area, "mrtvola", null, null, null, "cs5", true);
+    => new Corpse(name, area);
 
 
         public static DumpObject CreatePoolsidePlank(Name name, Plane area)
