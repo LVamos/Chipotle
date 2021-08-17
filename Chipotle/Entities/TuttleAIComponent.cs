@@ -80,6 +80,15 @@ namespace Game.Entities
         private void JumpToChristinesHall()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));
 
+        private void Reveal()
+        {
+            Vector2? target = _player.Area.FindNearestWalkableTile(10);
+            Assert(target.HasValue, "No walkable tile near player");
+
+            _hidden = false;
+            Owner.ReceiveMessage(new Reveal(this, new Plane((Vector2)target)));
+        }
+
         private void Hide()
         {
             _hidden = true;

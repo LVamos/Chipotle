@@ -34,6 +34,7 @@ namespace Game.Entities
 
             RegisterMessages(new Dictionary<Type, Action<Messaging.GameMessage>>
             {
+                [typeof(Reveal)] = (message) => OnReveal((Reveal)message),
                 [typeof(Hide)] = (message) => OnHide((Hide)message),
                 [typeof(GotoPoint)] = (m) => OnGotoPoint((GotoPoint)m),
                 [typeof(StartFollowing)] = (m) => OnStartFollowing((StartFollowing)m),
@@ -48,6 +49,17 @@ namespace Game.Entities
 
 
         private bool _hidden;
+
+        private void OnReveal(Reveal message)
+        {
+            _area = message.Location;
+            Appear(message.Location);
+            _hidden = false;
+            StartFollowing();
+        }
+
+        private void StartFollowing() => _followPlayer = true;
+
 
         private void OnHide(Hide message)
         {
