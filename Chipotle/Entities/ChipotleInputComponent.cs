@@ -1,22 +1,24 @@
-﻿using Microsoft.VisualBasic;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
 
 using DavyKager;
 
 using Game.Messaging.Commands;
-using Game.Messaging.Events;
 using Game.Terrain;
 using Game.UI;
 
 using Luky;
 
-using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
+using Microsoft.VisualBasic;
 
 namespace Game.Entities
 {
     public class ChipotleInputComponent : InputComponent
     {
+        public ChipotleInputComponent() : base()
+        {
+        }
 
         public override void Start()
         {
@@ -29,6 +31,7 @@ namespace Game.Entities
                 [new KeyShortcut(KeyShortcut.Modifiers.Alt, Keys.J)] = JumpToCoordsFromClipBoard,
                 [new KeyShortcut(Keys.J)] = JumpToCoords,
 
+                [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight,
@@ -47,8 +50,10 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
-
         }
+
+        private void Interact()
+=> Owner.ReceiveMessage(new UseObject(this));
 
         // Just for testing purpose
         private void JumpToCoords()
@@ -61,22 +66,23 @@ namespace Game.Entities
         private void JumpToCoordsFromClipBoard()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(Clipboard.GetText()))));
 
+        private void MoveBack()
+            => Owner.ReceiveMessage(new MakeStep(this, TurnType.Around));
 
+        private void MoveForward()
+            => Owner.ReceiveMessage(new MakeStep(this, TurnType.None));
 
-        private void SayNearestObject()
-=> Owner.ReceiveMessage(new SayNearestObject(this));
+        private void MoveLeft()
+             => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyLeft));
+
+        private void MoveRight()
+            => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyRight));
+
         private void SayLocality()
             => Owner.ReceiveMessage(new SayLocality(this));
 
-
-        public ChipotleInputComponent() : base()
-        {
-        }
-
-
-
-
-
+        private void SayNearestObject()
+=> Owner.ReceiveMessage(new SayNearestObject(this));
 
         private void SayOrientation()
         {
@@ -88,39 +94,31 @@ namespace Game.Entities
             Tolk.Speak($"Columbo orientation: {Owner.Orientation.UnitVector.ToString()}, listener facing: {World.Sound.ListenerOrientationFacing.ToString()}, listener up: {World.Sound.ListenerOrientationUp.ToString()}, listener position: {World.Sound.ListenerPosition.ToString()}.");
         }
 
+        private void StopCutscene()
+        {
+            if (_cutsceneInProgress)
+            {
+                _cutsceneInProgress = false;
+                World.StopCutscene(Owner);
+            }
+        }
 
         private void TerrainInfo()
             => Owner.ReceiveMessage(new SayTerrain(this));
 
-        private void MoveLeft()
-             => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyLeft));
-
-        private void MoveRight()
-            => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyRight));
-
-        private void TurnSharplyLeft()
-=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyLeft));
-
-        private void Interact()
-=> Owner.ReceiveMessage(new UseObject(this));
-
-        private void TurnSharplyRight()
-=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyRight));
-
-        private void TurnRight()
-=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyRight));
+        private void TurnAround()
+            => Owner.ReceiveMessage(new TurnEntity(this, TurnType.Around));
 
         private void TurnLeft()
 => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyLeft));
 
-        private void TurnAround()
-            => Owner.ReceiveMessage(new TurnEntity(this, TurnType.Around));
+        private void TurnRight()
+=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyRight));
 
-        private void MoveBack()
-            => Owner.ReceiveMessage(new MakeStep(this, TurnType.Around));
+        private void TurnSharplyLeft()
+                        => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyLeft));
 
-        private void MoveForward()
-            => Owner.ReceiveMessage(new MakeStep(this, TurnType.None));
-
+        private void TurnSharplyRight()
+=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyRight));
     }
 }
