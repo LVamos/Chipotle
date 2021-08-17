@@ -248,6 +248,16 @@ namespace Game.Entities
             }
         }
 
+        private Tile GetNextTile(Orientation2D orientation, int step = 1)
+        {
+            Plane target = new Plane(_area);
+            target.Move(orientation, step);
+            return World.Map[target.Center];
+        }
+
+        private Tile GetNextTile(int step = 1)
+            => GetNextTile(Orientation, step);
+
         private void OnMakeStep(MakeStep message)
         {
             if (StandUp())
@@ -261,11 +271,8 @@ namespace Game.Entities
                 finalOrientation.Rotate(message.Direction);
             }
 
-            Plane target = new Plane(_area);
-            target.Move(finalOrientation, 1);
-
             // Is the terrain occupable?
-            Tile targetTile = World.Map[target.Center] ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
+            Tile targetTile = GetNextTile(finalOrientation) ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
             if (!targetTile.Permeable)
             {
@@ -295,7 +302,7 @@ namespace Game.Entities
 
 
             // The road is clear! Move!
-            SetPosition(target);
+            SetPosition(targetTile.Position);
             RecordLocality(targetTile.Locality);
 
             WatchPuddle(targetTile.Position); // Check if player walked in a puddle
