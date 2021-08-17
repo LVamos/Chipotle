@@ -25,7 +25,7 @@ namespace Game.Entities
         {
             World.PlayCutscene(this, cutscene);
             Move(targetLocation);
-            _moved = true;
+            Moved = true;
         }
 
 
@@ -96,7 +96,7 @@ namespace Game.Entities
         protected HashSet<Locality> _allowedDestinations = new HashSet<Locality>();
 
         protected HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
-        private bool _moved;
+        public bool Moved;
 
         public IReadOnlyCollection<Locality> VisitedLocalities => _visitedLocalities;
 
@@ -109,14 +109,14 @@ namespace Game.Entities
 
             // When it's not allowed to use the car, play a knocking souund.
             if (
-                            (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !_moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
+                            (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
             || (_area.GetLocality().Name.Indexed == "asfaltka c1" && !CarsonsBenchesUsed()))
             {
                 _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1, null, 1, 0, Playback.OpenAL);
             }
 
             // If player didn't leave Walsh area but used required objects and went through all area
-            else if (!_moved && WalshAreaObjectsUsed() && WalshAreaExplored())
+            else if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
             {
                 AllowDestination(World.GetLocality("ulice p1"));
                 DestinationMenu("cs20");
