@@ -1,5 +1,8 @@
-﻿using OpenTK.Audio;
+﻿using static Sound.EaxReverbDefaults;
+using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
+
+using Sound;
 
 using System;
 using System.Collections.Generic;
@@ -25,7 +28,39 @@ namespace Luky
             EaxReverb eaxReverb = preset;
             EfxEaxReverb efxReverb;
             EffectsExtension.GetEaxFromEfxEax(ref eaxReverb, out efxReverb);
+            ValidateReverbPreset(ref efxReverb);
             SetEaxReverbProperties(efxReverb, name);
+        }
+
+        private void ValidateReverbPreset(ref EfxEaxReverb r)
+        {
+            void Validate(ref float parameter, float min, float max)
+            {
+                parameter = Math.Max(parameter, min);
+                parameter = Math.Min(parameter, max);
+            }
+
+            Validate(ref r.Density, MinDensity, MaxDensity);
+            Validate(ref r.LFReference, MinLFReference, MaxLFReference);
+            Validate(ref r.HFReference, MinHFReference, MaxHFReference);
+            Validate(ref r.AirAbsorptionGainHF, MinAirAbsorptionGainHF, MaxAirAbsorptionGainHF);
+            Validate(ref r.ModulationDepth, MinModulationDepth, MaxModulationDepth);
+            Validate(ref r.ModulationTime, MinModulationTime, MaxModulationTime);
+            Validate(ref r.EchoDepth, MinEchoDepth, MaxEchoDepth);
+            Validate(ref r.EchoTime, MinEchoTime, MaxEchoTime);
+            Validate(ref r.LateReverbDelay, MinLateReverbDelay, MaxLateReverbDelay);
+            Validate(ref r.RoomRolloffFactor, MinRoomRolloffFactor, MaxRoomRolloffFactor);
+            Validate(ref r.LateReverbGain, MinLateReverbGain, MaxLateReverbGain);
+            Validate(ref r.ReflectionsDelay, MinReflectionsDelay, MaxReflectionsDelay);
+            Validate(ref r.ReflectionsGain, MinReflectionsGain, MaxReflectionsGain);
+            Validate(ref r.DecayLFRatio, MinDecayLFRatio, MaxDecayLFRatio);
+            Validate(ref r.DecayHFRatio, MinDecayHFRatio, MaxDecayHFRatio);
+            Validate(ref r.DecayTime, MinDecayTime, MaxDecayTime);
+            Validate(ref r.GainLF, MinGainLF, MaxGainLF);
+            Validate(ref r.GainHF, MinGainHF, MaxGainHF);
+            Validate(ref r.Gain, MinGain, MaxGain);
+            Validate(ref r.Diffusion, MinDiffusion, MaxDiffusion);
+
         }
 
         public void SetEaxReverbProperties(EfxEaxReverb reverb, string name = null)
@@ -86,7 +121,7 @@ namespace Luky
 
             if (!string.IsNullOrEmpty(name))
             {
-                DebugSO.WriteDelegate(name);
+                DebugSO.SayDelegate(name);
             }
         }
 
@@ -476,8 +511,8 @@ namespace Luky
                     text = prefix + " " + text;
                 }
 
-                WriteDelegate(text);
-                System.Diagnostics.Debugger.Break();
+                SayDelegate(text);
+                        System.Diagnostics.Debugger.Break();
             }
         }
 

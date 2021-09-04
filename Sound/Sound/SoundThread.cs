@@ -46,6 +46,8 @@ namespace Luky
                 "LateReverbPan"
             };
 
+        public void SayReverbPresetName() => DebugSO.SayDelegate(string.IsNullOrEmpty(ReverbPresetName) ? "nic" : ReverbPresetName);
+
         public void DecreaseReverbParameter()
         {
             if (DebugSO.TestModeEnabled)
@@ -122,7 +124,7 @@ namespace Luky
             }
 
             void Say(float parameter)
-                => DebugSO.WriteDelegate(parameter.ToString("0.0000"));
+                =>                      DebugSO.SayDelegate(parameter.ToString("0.0000"));
 
             switch (_reverbParameterIndex)
             {
@@ -138,7 +140,7 @@ namespace Luky
                 case 9: Say(_reverbSetting.LateReverbDelay); break;
                 case 10: Say(_reverbSetting.AirAbsorptionGainHF); break;
                 case 11: Say(_reverbSetting.RoomRolloffFactor); break;
-                case 12: DebugSO.WriteDelegate(_reverbSetting.DecayHFLimit.ToString()); break;
+                case 12: DebugSO.SayDelegate(_reverbSetting.DecayHFLimit.ToString()); break;
                 case 13: Say(_reverbSetting.DecayLFRatio); break;
                 case 14: Say(_reverbSetting.EchoDepth); break;
                 case 15: Say(_reverbSetting.EchoTime); break;
@@ -147,14 +149,14 @@ namespace Luky
                 case 18: Say(_reverbSetting.LFReference); break;
                 case 19: Say(_reverbSetting.ModulationDepth); break;
                 case 20: Say(_reverbSetting.ModulationTime); break;
-                case 21: DebugSO.WriteDelegate(_reverbSetting.ReflectionsPan.ToString()); break;
-                case 22: DebugSO.WriteDelegate(_reverbSetting.LateReverbPan.ToString()); break;
+                case 21: DebugSO.SayDelegate(_reverbSetting.ReflectionsPan.ToString()); break;
+                case 22: DebugSO.SayDelegate(_reverbSetting.LateReverbPan.ToString()); break;
             }
 
         }
 
         private void SpeakReverbParameter()
-          => DebugSO.WriteDelegate(_reverbParameters[_reverbParameterIndex]);
+          => DebugSO.SayDelegate(_reverbParameters[_reverbParameterIndex]);
 
         public void IncreaseReverbParameter()
         {
@@ -172,7 +174,7 @@ namespace Luky
                 return;
             }
 
-            DebugSO.WriteDelegate("Minimum");
+            DebugSO.SayDelegate("Minimum");
 
             switch (_reverbParameterIndex)
             {
@@ -207,11 +209,9 @@ namespace Luky
         public void SetReverbParameterToMaximum()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
-            DebugSO.WriteDelegate("Maximum");
+            DebugSO.SayDelegate("Maximum");
 
             switch (_reverbParameterIndex)
             {
@@ -250,7 +250,7 @@ namespace Luky
                 return;
             }
 
-            DebugSO.WriteDelegate("Výchozí.");
+            DebugSO.SayDelegate("Výchozí.");
 
             switch (_reverbParameterIndex)
             {
@@ -320,32 +320,47 @@ namespace Luky
             }
 
             _reverbPresets = EaxReverbDefaults.GetEaxPresets().ToList();
-            _presetInx = -1;
         }
+
+
+        public void SwitchToPreviousReverbPreset()
+        {
+            if (!DebugSO.TestModeEnabled)
+                return;
+
+            if (_reverbPresets == null)
+                LoadReverbPresets();
+
+            (string Name, EaxReverb Preset) preset = _reverbPresets[_presetInx];
+            ReverbPresetName = preset.Name;
+            RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset.Preset, preset.Name));
+
+            if (_presetInx == 0)
+                _presetInx = _reverbPresets.Count-1;
+            else _presetInx--;
+
+        }
+
 
         public void SwitchToNextReverbPreset()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             if (_reverbPresets == null)
-            {
                 LoadReverbPresets();
-            }
 
-            _presetInx++;
             (string Name, EaxReverb Preset) preset = _reverbPresets[_presetInx];
-            if (_presetInx == _reverbPresets.Count)
-            {
-                _presetInx = -1;
-            }
-
+            ReverbPresetName = preset.Name;
             RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset.Preset, preset.Name));
+
+            if (_presetInx == _reverbPresets.Count -1)
+                _presetInx = 0;
+            else _presetInx++;
+
         }
 
-        private List<(string Name, OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb Preset)> _reverbPresets;
+        private List<(string Name,  EaxReverb Preset)> _reverbPresets;
         private int _presetInx;
 
         public ReadStream GetSoundStream(string name, int variant = 1)
@@ -639,6 +654,7 @@ namespace Luky
         private Vector3 _listenerPosition;
         private Vector3 _listenerOrientationFacing;
         private Vector3 _listenerOrientationUp;
+        public string ReverbPresetName;
 
         public void SetSourcePosition(int soundID, Vector3 soundPosition)
             => RunCommand(() => _openALSystem.SetPosition(soundID, soundPosition));
