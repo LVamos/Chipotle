@@ -54,6 +54,7 @@ namespace Game.Entities
             {
                 sourceLocality?.ReceiveMessage(new LocalityLeft(Owner, Owner));
                 targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
+                Owner.ReceiveMessage(new LocalityChanged(this, sourceLocality, targetLocality));
             }
         }
 
