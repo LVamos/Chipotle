@@ -1158,8 +1158,14 @@ namespace Luky
             } // end foreach sound
         }
 
-        public void ApplyEaxReverbPreset(EaxReverb preset)
-                  => RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset));
+
+        public void ApplyEaxReverbPreset(string name)
+        {
+            EaxReverb preset = _reverbPresets.First(p => p.Name.ToLower() == name.ToLower()).Preset;
+                  RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset));
+
+        }
+
 
         /// <summary>
         /// 
@@ -1192,6 +1198,7 @@ namespace Luky
             t.IsBackground = true; // this ensures it closes when the main thread closes, safe for threads that read from files, but not for those that write to files. Though Environment.Exit takes care of this when an exception is caught, and for normal shutdown scenarios we should be calling dispose, so I'm leaving this commented.
             t.Start();
             RunCommand(() => _openALSystem.EnableReverb());
+            LoadReverbPresets();
         }
 
         /// <summary>
