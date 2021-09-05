@@ -14,53 +14,54 @@ namespace Game.Entities
 {
     public class ChipotleSoundComponent : SoundComponent
     {
-        private Dictionary<string, string> _reverbPresets = new Dictionary<string, string>
+        private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
         {
-            ["asfaltka c1"] = "plain",
-            ["cesta c1"] = "pipesmall",
-            ["zahrada c1"] = "outdoorsbackyard",
-            ["dvorek s1"] = "outdoorsbackyard",
-            ["garáž s1"] = "parkinglot",
-            ["hala s1"] = "castlecupboard",
-            ["koupelna s1"] = "prefabcaravan",
-            ["kuchyň s1"] = "carpettedhallway",
-            ["ložnice w1"] = "carpettedhallway",
-            ["pokoj s1"] = "carpettedhallway",
-            ["ulice s1"] = "prefabouthouse",
-            ["chodba h1"] = "woodenshortpassage",
-            ["ulice h1"] = "prefabouthouse",
-            ["výčep h1"] = "castlesmallroom",
-            ["záchod h2"] = "icepalacecupboard",
-            ["záchod h3"] = "drivingincarracer",
-            ["záchod h4"] = "drivingincarsports",
-            ["balkon p1"] = "prefabouthouse",
-            ["garáž p1"] = "parkinglot",
-            ["hala p1"] = "carpettedhallway",
-            ["jídelna p1"] = "woodencourtyard",
-            ["koupelna p1"] = "prefabcaravan",
-            ["kuchyň p1"] = "prefabpractiseroom",
-            ["ložnice p1"] = "carpettedhallway",
-            ["obývák p1"] = "livingroom",
-            ["ulice p1"] = "prefabouthouse",
-            ["záchod p1"] = "drivingincarsports",
-            ["garáž w1"] = "parkinglot",
-            ["hala w1"] = "woodencourtyard",
-            ["chodba w1"] = "woodenshortpassage",
-            ["jídelna w1"] = "woodencourtyard",
-            ["koupelna w1"] = "bathroom",
-            ["kuchyň w1"] = "room",
-            ["ložnice w1"] = "paddedcell",
-            ["obývák w1"] = "livingroom",
-            ["pokoj pro hosty w1"] = "paddedcell",
-            ["příjezdová cesta w1"] = "sewerpipe",
-            ["salón w1"] = "castlecupboard",
-            ["sklep w1"] = "dustyroom",
-            ["terasa w1"] = "icepalacecourtyard",
-            ["garáž v1"] = "spacestationlargeroom",
-            ["hala v1"] = "prefabworkshop",
-            ["chodba v1"] = "prefabschoolroom",
-            ["kancelář v1"] = "paddedcell",
-            ["ulice v1"] = "prefabouthouse"
+            ["asfaltka c1"] = ("plain", .1f),
+            ["cesta c1"] = ("pipesmall", .08f),
+            ["zahrada c1"] = ("outdoorsbackyard", .1f),
+            ["dvorek s1"] = ("outdoorsbackyard", .1f),
+            ["garáž s1"] = ("parkinglot", .1f),
+            ["hala s1"] = ("castlecupboard", .13f),
+            ["koupelna s1"] = ("prefabcaravan", .1f),
+            ["kuchyň s1"] = ("carpettedhallway", .1f),
+            ["ložnice w1"] = ("carpettedhallway", .1f),
+            ["pokoj s1"] = ("carpettedhallway", .1f),
+            ["ulice s1"] = ("prefabouthouse", .2f),
+            ["chodba h1"] = ("woodenshortpassage", .1f),
+            ["ulice h1"] = ("prefabouthouse", .2f),
+            ["výčep h1"] = ("castlesmallroom", .1f),
+            ["záchod h2"] = ("icepalacecupboard", .05f),
+            ["záchod h3"] = ("drivingincarracer", .25f),
+            ["záchod h4"] = ("drivingincarsports", .1f),
+            ["balkon p1"] = ("prefabouthouse", .1f),
+            ["garáž p1"] = ("parkinglot", .2f),
+            ["hala p1"] = ("carpettedhallway", .9f),
+            ["jídelna p1"] = ("castlecupboard", .2f),
+            ["koupelna p1"] = ("prefabcaravan", .1f),
+            ["kuchyň p1"] = ("prefabpractiseroom", .1f),
+            ["ložnice p1"] = ("carpettedhallway", .8f),
+            ["obývák p1"] = ("livingroom", .9f),
+            ["ulice p1"] = ("prefabouthouse", .1f),
+            ["záchod p1"] = ("drivingincarsports", .7f),
+            ["bazén w1"] = ("SportFullStadium", .1f),
+            ["garáž w1"] = ("parkinglot", .2f),
+            ["hala w1"] = ("woodencourtyard", .05f),
+            ["chodba w1"] = ("castlelongpassage", .03f),
+            ["jídelna w1"] = ("castlesmallroom", .01f),
+            ["koupelna w1"] = ("sportsmallswimmingpool", .05f),
+            ["kuchyň w1"] = ("room", .2f),
+            ["ložnice w1"] = ("paddedcell", .1f),
+            ["obývák w1"] = ("livingroom", .6f),
+            ["pokoj pro hosty w1"] = ("paddedcell", .1f),
+            ["příjezdová cesta w1"] = ("sewerpipe", .1f),
+            ["salón w1"] = ("castlecupboard", .1f),
+            ["sklep w1"] = ("dustyroom", .1f),
+            ["terasa w1"] = ("icepalacecourtyard", .01f),
+            ["garáž v1"] = ("parkinglot", .2f),
+            ["hala v1"] = ("prefabworkshop", .2f),
+            ["chodba v1"] = ("castleshortpassage", .1f),
+            ["kancelář v1"] = ("paddedcell", .1f),
+            ["ulice v1"] = ("prefabouthouse", .3f)
         };
 
         public override void Update()
@@ -106,7 +107,8 @@ namespace Game.Entities
 
         private void OnLocalityChanged(LocalityChanged message)
         {
-            _sound.ApplyEaxReverbPreset(_reverbPresets[message.Target.Name.Indexed.ToLower()]);
+            (string name, float gain) record = _reverbPresets[message.Target.Name.Indexed.ToLower()];
+            _sound.ApplyEaxReverbPreset(record.name, record.gain);
         }
 
         private void OnEntityHitDoor(DoorHit m)

@@ -1159,11 +1159,10 @@ namespace Luky
         }
 
 
-        public void ApplyEaxReverbPreset(string name)
+        public void ApplyEaxReverbPreset(string name, float gain)
         {
             EaxReverb preset = _reverbPresets.First(p => p.Name.ToLower() == name.ToLower()).Preset;
-                  RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset));
-
+                      RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset, null, gain));
         }
 
 

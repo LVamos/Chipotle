@@ -23,12 +23,13 @@ namespace Luky
             //AL.Source(_table[soundId].SourceID, ALSource3i.EfxAuxiliarySendFilter, _effectSlot, 0, 0);
         }
 
-        public void ApplyEaxReverbPreset(EaxReverb preset, string name = null)
+        public void ApplyEaxReverbPreset(EaxReverb preset, string name = null, float gain=0)
         {
             EaxReverb eaxReverb = preset;
             EfxEaxReverb efxReverb;
             EffectsExtension.GetEaxFromEfxEax(ref eaxReverb, out efxReverb);
             ValidateReverbPreset(ref efxReverb);
+                efxReverb.Gain = gain;
             SetEaxReverbProperties(efxReverb, name);
         }
 
