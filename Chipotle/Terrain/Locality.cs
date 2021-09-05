@@ -278,7 +278,7 @@ namespace Game.Terrain
 
             if (message.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
             {
-                _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Area.Center, true);
+                _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Vector3.Zero, false);
             }
 
             _entities.ForEach(e => e.ReceiveMessage(message));
