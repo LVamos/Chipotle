@@ -298,7 +298,28 @@ namespace Game
         public static bool LocalityExists(string name)
             => _localities.ContainsKey(name.PrepareForIndexing());
 
+        private static Dictionary<string, string> _localityLoops = new Dictionary<string, string>()
+        {
+            ["chodba h1"] = "CzechPubLoop",
+            ["balkon p1"] = "BalconyLoop",
+            ["terasa w1"] = "BalconyLoop",
+            ["výčep h1"] = "CzechPubLoop",
+            ["ulice h1"] = "BonitaStreetLoop",
+            ["příjezdová cesta w1"] = "DriveWayLoop",
+            ["bazén w1"] = "PoolLoop",
+            ["zahrada c1"] = "CarsonsGardenLoop",
+            ["asfaltka c1"] = "AsphaltRoadLoop",
+            ["cesta c1"] = "AsphaltRoadLoop",
+            ["ulice p1"] = "BelvedereStreetLoop",
+            ["ulice v1"] = "GordonStreetLoop",
+            ["garáž v1"] = "GarageLoop",
+            ["garáž s1"] = "GarageLoop",
+            ["garáž w1"] = "GarageLoop",
+            ["garáž p1"] = "GarageLoop",
+            ["ulice s1"] = "BonitaStreetLoop",
+            ["dvorek s1"] = "DriveWayLoop",
 
+        };
 
 
         public static XDocument LoadMap()
@@ -320,29 +341,23 @@ namespace Game
 
             Initialize(); // Prepare data structures for objects, entities, localities etc.
 
-            // Get map size
-            IEnumerable<Plane> areas =
-                from l in xLocalities
-                select new Plane(Attribute(l, "coordinates"));
-
-            int leftBorder = (int)(from a in areas select a.UpperLeftCorner.X).Min();
-            int rightBorder = (int)(from a in areas select a.LowerRightCorner.X).Max();
-            int topBorder = (int)(from a in areas select a.UpperLeftCorner.Y).Max();
-            int bottomBorder = (int)(from a in areas select a.LowerRightCorner.Y).Min();
-
             // Create map
             Map = new TileMap(fileName);
 
             // Load localities
             foreach (XElement l in xLocalities)
-            { // Create locality
+            {
+                string lIndexedName = Attribute(l, "indexedname");
+                string lLoop = null;
+                _localityLoops.TryGetValue(lIndexedName.ToLower(), out lLoop);
+
                 Locality locality = new Locality(
-               new Name(Attribute(l, "indexedname"), Attribute(l, "friendlyname")),
+               new Name(lIndexedName, Attribute(l, "friendlyname")),
                Attribute(l, "type").ToLocalityType(),
                int.Parse(Attribute(l, "height")),
                new Plane(Attribute(l, "coordinates")),
                Attribute(l, "defaultTerrain", false).ToTerrainType(),
-null);
+lLoop);
 
                 // Create perimeter walls if they are specified in the map
                 string wallDefinition = Attribute(l, "walls", false);
