@@ -263,10 +263,10 @@ namespace Game.Terrain
             });
         }
 
-        private void OnLocalityLeft(LocalityLeft m)
+        private void OnLocalityLeft(LocalityLeft message)
         {
-            Unregister(m.Sender as Entity);
-            if (_backgroundSoundId > 0)
+            Unregister(message.Sender as Entity);
+            if (message.Sender== World.Player && _backgroundSoundId > 0)
             {
                 World.Sound.Stop(_backgroundSoundId);
             }
@@ -278,7 +278,7 @@ namespace Game.Terrain
 
             if (message.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
             {
-                _backgroundSoundId = World.Sound.Play(_backgroundSound, null, true, PositionType.None, Area.Center, true);
+                _backgroundSoundId = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
             }
 
             _entities.ForEach(e => e.ReceiveMessage(message));
