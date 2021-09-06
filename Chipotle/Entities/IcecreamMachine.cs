@@ -15,7 +15,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Name of the machine</param>
         /// <param name="area">Location of the machine</param>
-        public IcecreamMachine(Name name, Plane area) : base(name, area, "automat na zmrzlinu")
+        public IcecreamMachine(Name name, Plane area) : base(name, area, "automat na zmrzlinu", null, null, "VendingMachineLoop")
         { }
 
         protected override void OnUseObject(UseObject message)

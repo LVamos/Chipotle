@@ -20,6 +20,14 @@ namespace Game.Entities
             Disappear();
         }
 
+        private static DumpObject CreateFishTank(Name name, Plane area)
+=> new DumpObject(name, area, "akvárko", null, null, "FishTankLoop");
+
+
+        private static DumpObject CreateElectricalBox(Name name, Plane area)
+=> new DumpObject(name, area, "rozvodna", null, null, "ElectricalBoxLoop");
+
+
         public static DumpObject CreateObject(Name name, Plane area, string type)
         {
             if (string.IsNullOrEmpty(name.Indexed))
@@ -29,6 +37,13 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "rozvodna": return CreateElectricalBox(name, area);
+                case "větrák": return CreateFan(name, area);
+                case "krb": return CreateFireplace(name, area);
+                case "mrazák": return CreateFreezer(name, area);
+                case "akvárko": return CreateFishTank(name, area);
+                case "hodiny": return CreateWallClock(name, area);
+                case "kukačkové hodiny": return CreateCuckooClock(name, area);
                 case "křeslo u mariottiho": return CreateMariottisChair(name, area);
                 case "sweeneyho zvonek": return CreateSweeneysBell(name, area);
                 case "christinin zvonek": return CreateChristinesBell(name, area);
@@ -87,11 +102,31 @@ namespace Game.Entities
         private static DumpObject CreateSweeneysTable(Name name, Plane area)
                 => new DumpObject(name, area, "stůl u sweeneyho", null, null, null, "cs17", true);
 
+
+        private static DumpObject CreateFan(Name name, Plane area)
+=> new DumpObject(name, area, "větrák", null, null, "FanLoop");
+
+
         private static DumpObject CreateSweeneysComputer(Name name, Plane area)
-                => new DumpObject(name, area, "počítač u sweeneyho", null, null, null, "cs16", true);
+                => new DumpObject(name, area, "počítač u sweeneyho", null, null, "ComputerLoop", "cs16", true);
 
         private static DumpObject CreateSweeneysPhone(Name name, Plane area)
                 => new DumpObject(name, area, "mobil u Sweeneyho", null, null, null, "cs15");
+
+
+        private static DumpObject CreateWallClock(Name name, Plane area)
+=> new DumpObject(name, area, "hodiny", null, null, "WallClockLoop");
+
+        private static DumpObject CreateFreezer(Name name, Plane area)
+=> new DumpObject(name, area, "mrazák", null, null, "FreezerLoop");
+
+        private static DumpObject CreateCuckooClock(Name name, Plane area)
+=> new DumpObject(name, area, "kukačkové hodiny", null, null, "CuckooClockLoop");
+
+
+
+
+
 
         private static DumpObject CreateVanillaCrunchCar(Name name, Plane area)
 => new VanillaCrunchCar(name, area);
@@ -103,11 +138,16 @@ namespace Game.Entities
 
         private static DumpObject CreateIcecreamMachine(Name name, Plane area)
             => new IcecreamMachine(name, area);
+
         private static DumpObject CreateBathroomSink(Name name, Plane area)
                 => new DumpObject(name, area, "umyvadlo", null, "snd8");
 
         private static DumpObject CreateFridge(Name name, Plane area)
-=> new DumpObject(name, area, "lednice", null, "snd10");
+=> new DumpObject(name, area, "lednice", null, "snd10", "FridgeLoop");
+
+        private static DumpObject CreateFireplace(Name name, Plane area)
+=> new DumpObject(name, area, "krb", null, null, "FirePlaceLoop");
+
 
         private static DumpObject CreateChair(Name name, Plane area)
 => new DumpObject(name, area, "židle", null, null, null, "snd12");
