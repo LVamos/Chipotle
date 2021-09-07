@@ -37,7 +37,7 @@ namespace Game.Entities
 
             switch (type)
             {
-                case "rozvodna": return CreateElectricalBox(name, area);
+                            case "rozvodna": return CreateElectricalBox(name, area);
                 case "větrák": return CreateFan(name, area);
                 case "krb": return CreateFireplace(name, area);
                 case "mrazák": return CreateFreezer(name, area);

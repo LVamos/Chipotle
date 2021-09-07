@@ -58,7 +58,7 @@ namespace Game.UI
         private void CopyCoordinates()
         {
             Clipboard.SetText(World.Player.Area.UpperLeftCorner.ToString());
-            WriteDelegate("Soiuřadnice zkopírovány.");
+            SayDelegate("Soiuřadnice zkopírovány.");
 
         }
 

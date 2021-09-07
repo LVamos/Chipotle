@@ -6,13 +6,6 @@ using System.Text;
 
 namespace Luky
 {
-    public static class UsefulExtensions
-    {
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
-    => collection == null || !collection.Any();
-
-    }
-
     [Serializable]
     public abstract class DebugSO
     {
@@ -72,9 +65,7 @@ namespace Luky
         /// <summary>
         /// This is a static variable that makes it easy for me to output from any class. It is meant for debugging, but not meant to be used in production output.
         /// </summary>
-        public static Action<string> WriteDelegate;
 
-        protected static CoreLogic _core = CoreLogic.Instance;
 
         public const bool TestModeEnabled = true;
 
@@ -87,10 +78,6 @@ namespace Luky
         protected static ArgumentException ArgumentException(string s, params object[] args)
         => new ArgumentException(String.Format(s, args));
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="condition"></param>
         protected static void Assert(bool condition)
         {
             if (!condition)
@@ -131,5 +118,5 @@ namespace Luky
         /// <returns>new construction</returns>
         protected static Exception Exception(string s, params object[] args)
         => new Exception(String.Format(s, args));
-    } // cls
+    }
 }

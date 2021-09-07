@@ -96,7 +96,6 @@ namespace Game.Terrain
 
 
         public GameObject Object { get; private set; }
-        private bool _permeable;
         public bool Permeable { get; set; }
         public TerrainType Terrain { get; private set; }
         public bool IsOccupied => Object != null;

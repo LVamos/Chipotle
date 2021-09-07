@@ -1,4 +1,5 @@
-﻿using DavyKager;
+﻿using System.Reflection;
+using DavyKager;
 
 using Game.UI;
 
@@ -22,8 +23,6 @@ namespace Game
 
 
 
-            //PreJit.ForceLoadAll(Assembly.GetCallingAssembly());
-            //PreJit.PreJITMethods(Assembly.GetCallingAssembly());
 
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);

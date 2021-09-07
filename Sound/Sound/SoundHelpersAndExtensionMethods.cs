@@ -27,29 +27,7 @@ namespace Luky
         public static OpenTK.Vector3 AsOpenTKV3(this Vector3 v)
         => new OpenTK.Vector3(v.X, v.Y, v.Z);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static OpenTK.Vector3 AsOpenTKV3(this Vector2 v)
-        => new OpenTK.Vector3(v.X, v.Y, 0);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static Vector2 AsV2(this OpenTK.Vector2 v)
-        => new Vector2(v.X, v.Y);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        internal static Vector3 AsV3(this OpenTK.Vector3 v)
-        => new Vector3(v.X, v.Y, v.Z);
     }
 
     /// <summary>

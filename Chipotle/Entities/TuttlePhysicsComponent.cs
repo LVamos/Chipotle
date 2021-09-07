@@ -19,8 +19,6 @@ namespace Game.Entities
         private bool _approachToPlayer;
         private bool _walk;
         private float _stepInterval;
-        private int _minWalkSpeed = 400;
-        private int _maxWalkSpeed = 900;
         private const int _maxDistanceFromPlayer = 10;
         private const int _minDistanceFromPlayer = 2;
         private int _desiredDistanceFromPlayer;

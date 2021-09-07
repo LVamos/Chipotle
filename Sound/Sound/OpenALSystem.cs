@@ -501,8 +501,6 @@ namespace Luky
             if (error != ALError.NoError)
             {
                 string text = error + ", " + AL.GetErrorString(error);
-                text += _core.GetCallerLineAndFileText();
-                text += Environment.NewLine + _core.GetStackTraceText();
                 if (args.Length > 0)
                 {
                     text = String.Format(prefix, args) + " " + text;

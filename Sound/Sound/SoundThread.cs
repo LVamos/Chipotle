@@ -236,8 +236,8 @@ namespace Luky
                 case 18: _reverbSetting.LFReference = EaxReverbDefaults.MaxLFReference; break;
                 case 19: _reverbSetting.ModulationDepth = EaxReverbDefaults.MaxModulationDepth; break;
                 case 20: _reverbSetting.ModulationTime = EaxReverbDefaults.MaxModulationTime; break;
-                case 21: _reverbSetting.ReflectionsPan = MyMath.GetUnitVectorFromCompassDegrees(359).AsOpenALVector().AsOpenTKV3(); break;
-                case 22: _reverbSetting.LateReverbPan = MyMath.GetUnitVectorFromCompassDegrees(359).AsOpenALVector().AsOpenTKV3(); break;
+                case 21: _reverbSetting.ReflectionsPan = MathHelper.GetUnitVectorFromCompassDegrees(359).AsOpenALVector().AsOpenTKV3(); break;
+                case 22: _reverbSetting.LateReverbPan = MathHelper.GetUnitVectorFromCompassDegrees(359).AsOpenALVector().AsOpenTKV3(); break;
             }
 
             RunCommand(() => _openALSystem.SetEaxReverbProperties(_reverbSetting));
@@ -423,7 +423,6 @@ namespace Luky
 
         private const int _millisecondsPerTick = 10;
 
-        private static readonly bool _debug = true; // making it static readonly instead of const gets rid of an unreachable code warning.
 
         private readonly ShortBuffer _buffer = new ShortBuffer(_bufferSize);
 
