@@ -19,8 +19,8 @@ namespace Luky
     {
         public void BindSourceToAuxiliarysend(int soundId)
         {
-            //if(_effectSlot!=0)
-            //AL.Source(_table[soundId].SourceID, ALSource3i.EfxAuxiliarySendFilter, _effectSlot, 0, 0);
+            if (_effectSlot != 0)
+                AL.Source(_table[soundId].SourceID, ALSource3i.EfxAuxiliarySendFilter, _effectSlot, 0, 0);
         }
 
         public void ApplyEaxReverbPreset(EaxReverb preset, string name = null, float gain=0)
@@ -321,7 +321,6 @@ namespace Luky
                 info.QueuedBufferIDs = new List<int>(MaxQueuedBuffers);
                 foreach (ShortBuffer buffer in initialBuffers)
                 {
-                    //Say(buffer.Length);
                     int bid = AL.GenBuffer();
                     ALAnnounceError("AL.GenBuffer");
                     info.QueuedBufferIDs.Add(bid);
