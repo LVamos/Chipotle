@@ -18,7 +18,7 @@ namespace Game
     /// </summary>
     public static class World
     {
-        public const int FramesPerSecond = 66;
+        public const int FramesPerSecond = 100;
         public const int DeltaTime = 1000 / FramesPerSecond;
 
         /// <summary>
@@ -75,12 +75,16 @@ namespace Game
         {
             if (_cutsceneBegan != null)
             {
-                Sound.GetDynamicInfo(_cutsceneBegan.SoundID, out SoundState state, out int _);
+                Sound.GetDynamicInfo(_cutsceneBegan.SoundID, out SoundState state, out int sample);
 
                 if (state != SoundState.Playing)
                 {
-                    ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
-                    _cutsceneBegan = null;
+                    Sound.GetStaticInfo(_cutsceneBegan.SoundID, out int _, out int totalSamples, out int __);
+                    if (sample == totalSamples)
+                    {
+                        ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
+                        _cutsceneBegan = null;
+                    }
                 }
             }
         }

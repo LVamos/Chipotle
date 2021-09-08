@@ -421,7 +421,7 @@ namespace Luky
 
         private const int _bufferSize = 1920;
 
-        private const int _millisecondsPerTick = 10;
+        private const int _millisecondsPerTick = 1;
 
 
         private readonly ShortBuffer _buffer = new ShortBuffer(_bufferSize);
