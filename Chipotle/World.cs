@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Game.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -268,17 +269,25 @@ namespace Game
         public static SoundThread Sound;
         private static CutsceneBegan _cutsceneBegan;
 
+        public static void QuitGame()
+        {
+            Program.MainWindow.GameLoopEnabled = false;
+            Sound.StopAll();
+            WindowHandler.MainMenu();
+        }
+
+        public static void SoundInit()
+        {
+            Sound = SoundThread.CreateAndStartThread(Program.OnError);
+            Sound.LoadSounds();
+            Sound.SetGroupVolume("master", 1);
+        }
+
         /// <summary>
         /// Starts game from begining.
         /// </summary>
         public static void StartGame()
         {
-
-            // Sound
-            Sound = SoundThread.CreateAndStartThread(Program.OnError);
-            Sound.LoadSounds();
-            Sound.SetGroupVolume("master", 1);
-
             _map = LoadMap();
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());

@@ -54,8 +54,7 @@ namespace Game.UI
         private void MainWindow_Shown(object sender, EventArgs e)
         {
             Focus();
-            WindowHandler.Switch(new GameWindow());
-            World.StartGame();
+            WindowHandler.MainMenu();
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)

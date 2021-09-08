@@ -872,6 +872,29 @@ namespace Luky
         public void SpeakHRTF()
         => RunCommand(_openALSystem.SpeakHRTF);
 
+        public void StopAll() => RunCommand(() =>
+        {
+            // check for sounds that hadn't started playing yet.
+            foreach(DelayedSound ds in _delayedSounds)
+            {
+                if (ds != null)
+                    ds.ReadStream.Stream.Dispose();
+            }
+            _delayedSounds = new List<DelayedSound>();
+
+            // otherwise we check for a normal playing sounds.
+            foreach (Sound sound in _sounds)
+            {
+                if (sound != null)
+                {
+                    IPlayback playback = GetPlayback(sound);
+                    playback.Stop(sound.ID);
+                    DisposeSound(sound);
+                }
+            }
+            _sounds = new List<Sound>();
+        });
+
         /// <summary>
         /// 
         /// </summary>

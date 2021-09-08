@@ -26,14 +26,15 @@ namespace Game
 
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            DataPath = @"Data\";
+            SoundAssetsPath = Path.Combine(DataPath, "Sounds");
 
             try
             {
                 Tolk.Load();
                 Tolk.TrySAPI(true);
                 SayDelegate = (message) => Tolk.Speak(message);
-                DataPath = @"Data\";
-                SoundAssetsPath = Path.Combine(DataPath, "Sounds");
+            World.SoundInit();
                 MainWindow = new MainWindow();
                 Application.Run(MainWindow);
             }

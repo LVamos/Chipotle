@@ -158,6 +158,7 @@
     <Compile Include="UI\GameWindow.cs" />
     <Compile Include="UI\KeyEventParams.cs" />
     <Compile Include="UI\KeyShortcut.cs" />
+    <Compile Include="UI\MainMenuWindow.cs" />
     <Compile Include="UI\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -98,7 +98,7 @@ namespace Game.Entities
                 [typeof(TurnEntityResult)] = (m) => OnTurnoverDone((TurnEntityResult)m),
                 [typeof(EntityMoved)] = (m) => OnMovementDone((EntityMoved)m),
                 [typeof(ObjectsCollided)] = (m) => OnObjectsCollided((ObjectsCollided)m),
-                [typeof(TerrainCollided)] = (m) => OnInpermeableTerrainCollision((TerrainCollided)m)
+                [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
             }
             );
 
@@ -113,7 +113,8 @@ namespace Game.Entities
 
         private void OnEntityHitDoor(DoorHit m)
 => SayDelegate("dveře");
-        private void OnInpermeableTerrainCollision(GameMessage message) => Tolk.Speak("penetráces");
+
+        private void OnInpermeableTerrainCollision(TerrainCollided message) => PlayTerrain(message.Tile);
 
         private void OnObjectsCollided(ObjectsCollided message)
         {

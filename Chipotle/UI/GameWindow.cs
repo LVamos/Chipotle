@@ -62,9 +62,7 @@ namespace Game.UI
 
         }
 
-        private void QuitGame() =>
-            // todo GameWindow.QuitGame
-            Environment.Exit(0);
+        private void QuitGame() => World.QuitGame();
 
 
 

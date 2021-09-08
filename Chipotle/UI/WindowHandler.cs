@@ -8,6 +8,14 @@ namespace Game.UI
     /// </summary>
     public static class WindowHandler
     {
+        public static void StartGame()
+        {
+            Switch(new GameWindow());
+            World.StartGame();
+        }
+
+        public static void MainMenu() => Switch(new MainMenuWindow());
+
         /// <summary>
         /// Runs a voice menu
         /// </summary>
