@@ -30,6 +30,7 @@ namespace Game
             try
             {
                 Tolk.Load();
+                Tolk.TrySAPI(true);
                 SayDelegate = (message) => Tolk.Speak(message);
                 DataPath = @"Data\";
                 SoundAssetsPath = Path.Combine(DataPath, "Sounds");
