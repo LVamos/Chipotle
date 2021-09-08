@@ -75,7 +75,10 @@ namespace Game.Entities
         }
 
         private void OnStartFollowing(StartFollowing m)
-            => _followPlayer = true;
+        {
+            _path = null;
+            _followPlayer = true;
+        }
 
         private void OnStopFollowing(StopFollowing m)
             => StopFollowing();
