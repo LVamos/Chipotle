@@ -18,7 +18,11 @@ namespace Game.Entities
 
 
         private void OnChipotlesCarMoved(ChipotlesCarMoved message)
-=> _carMovement = message;
+        {
+            if(message.TargetLocation.GetLocality().Name.Indexed!= "asfaltka c1")
+_carMovement = message;
+
+        }
 
         protected override void OnCutsceneBegan(CutsceneBegan message)
         {
@@ -27,6 +31,7 @@ namespace Game.Entities
             switch (message.CutsceneName)
             {
                 case "cs7": case "cs8": Reveal(); break;
+                case "cs19": Hide(); break;
             }
 
         }
@@ -71,7 +76,6 @@ namespace Game.Entities
             {
                 case "cs6": GoToCorpse(); break;
                 case "cs14": JumpToBelvedereStreet2(); break;
-                case "cs19": Hide(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs23": JumpToSweeneysRoom(); break;
             }

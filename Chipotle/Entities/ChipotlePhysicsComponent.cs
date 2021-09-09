@@ -152,8 +152,8 @@ namespace Game.Entities
                 && World.GetObject("mobil s1").Used
                 )
             {
-                World.PlayCutscene(Owner, "cs19");
                 Car.ReceiveMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
+                World.PlayCutscene(Owner, "cs19");
             }
         }
         private Locality AsphaltRoad => World.GetLocality("asfaltka c1");
