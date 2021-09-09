@@ -27,6 +27,8 @@ namespace Game.Entities
         private static DumpObject CreateElectricalBox(Name name, Plane area)
 => new DumpObject(name, area, "rozvodna", null, null, "ElectricalBoxLoop");
 
+        private static DumpObject CreateHighway(Name name, Plane area)
+=> new DumpObject(name, area, "dálnice", null, null, "HighwayLoop");
 
         public static DumpObject CreateObject(Name name, Plane area, string type)
         {
@@ -37,6 +39,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "dálnice": return CreateHighway(name, area);
                             case "rozvodna": return CreateElectricalBox(name, area);
                 case "větrák": return CreateFan(name, area);
                 case "krb": return CreateFireplace(name, area);
