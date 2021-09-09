@@ -84,7 +84,14 @@ namespace Game.Entities
 
         private void OnTurnoverDone(TurnEntityResult message) => SayOrientation();
 
-
+        protected override void OnCutsceneBegan(CutsceneBegan message)
+         {
+            base.OnCutsceneBegan(message);
+            switch (message.CutsceneName)
+            {
+                case "cs7": case "cs8": case "cs10": _sound.ApplyEaxReverbPreset("carpettedhallway", 0); break;
+            }
+        }
 
         public override void Start()
         {
@@ -94,6 +101,7 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
                 [typeof(TurnEntityResult)] = (m) => OnTurnoverDone((TurnEntityResult)m),

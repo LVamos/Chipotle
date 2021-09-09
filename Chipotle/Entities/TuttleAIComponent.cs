@@ -86,7 +86,9 @@ _carMovement = message;
             if (_hidden || _carMovement == null)
                 return;
 
-            Vector2? target = _carMovement.TargetLocation.FindRandomWalkableTile(1);
+            Plane perimeter = new Plane(_carMovement.TargetLocation);
+            perimeter.Extend();
+            Vector2? target = perimeter.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");
             Owner.ReceiveMessage(new SetPosition(this, new Plane((Vector2)target), true));
             _carMovement = null;
@@ -127,7 +129,7 @@ _carMovement = message;
         /// </summary>
         private void GoToCorpse()
         {
-            Queue<Vector2> path =
+                Queue<Vector2> path =
                 _finder.FindPath(_area.Center, new Vector2(936, 1059))
                 ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
             Owner.ReceiveMessage(new StopFollowing(this));

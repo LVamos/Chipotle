@@ -60,7 +60,7 @@ namespace Game.Entities
 
 
         private void OnHide(Hide message)
-        {
+                {
             StopFollowing();
             DisAppear();
             _hidden = true;
