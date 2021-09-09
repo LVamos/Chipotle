@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using DavyKager;
 
 using Game.Messaging.Commands;
+using Game.Messaging.Events;
 using Game.Terrain;
 using Game.UI;
 
@@ -19,6 +20,16 @@ namespace Game.Entities
 
         public ChipotleInputComponent() : base()
         {
+        }
+
+        protected override void OnCutsceneBegan(CutsceneBegan message)
+        {
+             base.OnCutsceneBegan(message);
+
+            switch (message.CutsceneName)
+            {
+                case "cs7": case "cs10": _messagingEnabled = false; break;
+            }
         }
 
         public override void Start()
