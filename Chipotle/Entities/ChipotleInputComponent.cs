@@ -16,6 +16,7 @@ namespace Game.Entities
 {
     public class ChipotleInputComponent : InputComponent
     {
+
         public ChipotleInputComponent() : base()
         {
         }
@@ -24,11 +25,28 @@ namespace Game.Entities
         {
             base.Start();
 
+            Clipboard.Clear();
+            Timer t = new Timer();
+            t.Interval = 30;
+            t.Tick += (s, e) =>
+            {
+                try
+                {
+                    Vector2 p = new Vector2(Clipboard.GetText());
+                }
+                catch (Exception ex)
+                {
+                    return;
+                }
+                Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(Clipboard.GetText()))));
+                Clipboard.Clear();
+            };
+            t.Start();
+
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
                 // Shortcuts for testing purposes
-                [new KeyShortcut(KeyShortcut.Modifiers.Alt, Keys.J)] = JumpToCoordsFromClipBoard,
                 [new KeyShortcut(Keys.J)] = JumpToCoords,
 
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
@@ -62,9 +80,6 @@ namespace Game.Entities
             Owner.ReceiveMessage(new SetPosition(this, new Plane(coords)));
         }
 
-        // For testing only
-        private void JumpToCoordsFromClipBoard()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(Clipboard.GetText()))));
 
         private void MoveBack()
             => Owner.ReceiveMessage(new MakeStep(this, TurnType.Around));
