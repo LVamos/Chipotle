@@ -76,7 +76,7 @@ namespace Game.Entities
         {
             List<EntityComponent> targetComponents = new List<EntityComponent>();
             targetComponents = _components.Where(c => c != message.Sender).ToList<EntityComponent>();
-            if (!IsInternal(message))
+            if (!IsInternal(message) && !(message is CutsceneBegan) && !(message is CutsceneEnded))
             {
                 targetComponents.Remove(_sound);
             }
