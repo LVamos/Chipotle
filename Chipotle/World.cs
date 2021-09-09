@@ -110,7 +110,7 @@ namespace Game
         private static Dictionary<string, DumpObject> _objects;
         private static Dictionary<string, Entity> _entities;
         private static Dictionary<string, Passage> _passages;
-        public static Entity Player;
+        public static Entity Player { get; private set; }
 
         public static void StopCutscene(object sender)
         {
@@ -267,6 +267,7 @@ namespace Game
             _objects = new Dictionary<string, DumpObject>();
             _localities = new Dictionary<string, Locality>();
             _entities = new Dictionary<string, Entity>();
+            Player = null;
             _passages = new Dictionary<string, Passage>();
         }
 
@@ -276,6 +277,7 @@ namespace Game
         public static void QuitGame()
         {
             Program.MainWindow.GameLoopEnabled = false;
+            _cutsceneBegan = null;
             Sound.StopAll();
             WindowHandler.MainMenu();
         }
