@@ -126,6 +126,7 @@ namespace Luky
             }
         }
 
+
         public void EnableReverb()
         {
             _effectExtension = new EffectsExtension();
@@ -241,7 +242,7 @@ namespace Luky
                 ALAnnounceError("set reference distance");
                 AL.Source(info.SourceID, ALSourcef.RolloffFactor, 1);
                 ALAnnounceError("set rolloff factor");
-                AL.Source(info.SourceID, ALSourcef.MaxDistance, 20);
+                AL.Source(info.SourceID, ALSourcef.MaxDistance, 50);
                 ALAnnounceError("set max distancefactor");
             }
 
