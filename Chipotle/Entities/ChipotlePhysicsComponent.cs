@@ -35,7 +35,7 @@ namespace Game.Entities
             if (_plannedRotations > 0)
             {
                 _orientation.Rotate(_rotationStep);
-                _plannedRotations--;
+                _plannedRotations -=5;
 
                 if (_plannedRotations == 0)
                 {
@@ -162,7 +162,7 @@ namespace Game.Entities
 
         private void OnTurnEntity(TurnEntity message)
         {
-            _rotationStep = message.Degrees >= 0 ? 1 : -1;
+            _rotationStep = message.Degrees >= 0 ? 5 : -5;
             _plannedRotations = Math.Abs(message.Degrees);
         }
 
