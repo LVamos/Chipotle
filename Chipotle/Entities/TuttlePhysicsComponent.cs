@@ -106,7 +106,7 @@ namespace Game.Entities
                 return;
             }
 
-            if (_followPlayer)
+            if (_followPlayer && !_approachToPlayer)
                 CheckDistanceFromPlayer();
         }
 
@@ -144,7 +144,6 @@ namespace Game.Entities
             {
                 return;
             }
-
             _path = _finder.FindPath(_area.Center, (Vector2)target);
 
             if (_path == null)
