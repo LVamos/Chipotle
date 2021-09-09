@@ -243,6 +243,7 @@ namespace Luky
             RunCommand(() => _openALSystem.SetEaxReverbProperties(_reverbSetting));
         }
 
+
         public void SetReverbParameterToDefault()
         {
             if (!DebugSO.TestModeEnabled)
@@ -421,7 +422,7 @@ namespace Luky
 
         private const int _bufferSize = 1920;
 
-        private const int _millisecondsPerTick = 1;
+        private const int _millisecondsPerTick = 10;
 
 
         private readonly ShortBuffer _buffer = new ShortBuffer(_bufferSize);
