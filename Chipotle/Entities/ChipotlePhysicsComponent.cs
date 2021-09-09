@@ -234,8 +234,8 @@ namespace Game.Entities
             SetPosition(1805, 1121, true);
         }
 
-        private void QuitGame() =>
-            Environment.Exit(0);
+        private void QuitGame() => World.QuitGame();
+
 
 
         private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
@@ -272,7 +272,7 @@ namespace Game.Entities
                 finalOrientation.Rotate(message.Direction);
             }
 
-            // Is the terrain occupable?
+                    // Is the terrain occupable?
             Tile targetTile = GetNextTile(finalOrientation) ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
             if (!targetTile.Permeable)
@@ -306,6 +306,10 @@ namespace Game.Entities
             SetPosition(targetTile.Position);
             RecordLocality(targetTile.Locality);
 
+            // Inform Tuttle
+            if (!IsTuttleNearBy())
+                Tuttle.ReceiveMessage(new EntityMoved(Owner, targetTile));
+
             WatchPuddle(targetTile.Position); // Check if player walked in a puddle
             WatchPhone();
         }
@@ -338,6 +342,8 @@ namespace Game.Entities
 
             return false;
         }
+
+        private Entity Tuttle => World.GetEntity("tuttle");
 
         private bool IsTuttleNearBy()
 => _area.GetLocality().IsItHere(World.GetEntity("tuttle"));
