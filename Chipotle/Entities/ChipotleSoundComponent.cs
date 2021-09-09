@@ -16,6 +16,7 @@ namespace Game.Entities
     {
         private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
         {
+            ["obývák s1"] = ("livingroom", .9f),
             ["asfaltka c1"] = ("plain", .1f),
             ["cesta c1"] = ("pipesmall", .08f),
             ["zahrada c1"] = ("outdoorsbackyard", .1f),
