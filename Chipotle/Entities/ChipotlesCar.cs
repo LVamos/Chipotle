@@ -126,8 +126,8 @@ namespace Game.Entities
         }
 
         private bool WalshAreaExplored()
-            => true;// Player.VisitedLocalities.Count == 14
-                    //&& Player.VisitedLocalities.All(l => l.Name.Indexed.ToLower().Contains("w1"));
+            => Player.VisitedLocalities.Count == 14
+                    && Player.VisitedLocalities.All(l => l.Name.Indexed.ToLower().Contains("w1"));
 
         private IEnumerable<DumpObject> WalshAreaObjects =>
             (new string[]
@@ -135,7 +135,7 @@ namespace Game.Entities
             .Select(o => World.GetObject(o) as DumpObject);
 
         private bool WalshAreaObjectsUsed()
-            => true;// WalshAreaObjects.All(o => o.Used);
+            => WalshAreaObjects.All(o => o.Used);
 
         private void Move(Locality locality) => Move(new Plane(_destinations[locality.Name.Indexed]));
 
