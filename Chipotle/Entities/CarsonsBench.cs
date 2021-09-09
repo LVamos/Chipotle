@@ -1,5 +1,7 @@
-﻿using Game.Messaging.Commands;
+﻿using Game.Messaging;
+using Game.Messaging.Commands;
 using Game.Terrain;
+using Game.Entities;
 
 using Luky;
 
@@ -12,6 +14,8 @@ namespace Game.Entities
         public CarsonsBench(Name name, Plane area) : base(name, area, "lavice u Carsona", null, null, null, "cs32", true)
         { }
 
+        private ChipotlesCar Car  => World.GetObject("detektivovo auto") as ChipotlesCar;
+
         protected override void OnUseObject(UseObject message)
         {
             if (
@@ -20,6 +24,7 @@ namespace Game.Entities
                 )
             {
                 base.OnUseObject(message);
+                Car.ReceiveMessage(new UnblockLocality(this, World.GetLocality("ulice v1")));
             }
         }
     }
