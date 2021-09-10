@@ -111,8 +111,6 @@ namespace Luky
         /// <summary>
         /// Gets the length (magnitude) of the vector.
         /// </summary>
-        /// <see cref="LengthFast"/>
-        /// <seealso cref="LengthSquared"/>
         public float Length => (float)System.Math.Sqrt(X * X + Y * Y);
 
         /// <summary>
@@ -124,7 +122,6 @@ namespace Luky
         /// </remarks>
         /// <see cref="Length"/>
         /// <seealso cref="LengthSquared"/>
-        public float LengthFast => 1.0f / MathHelper.InverseSqrtFast(X * X + Y * Y);
 
         /// <summary>
         /// Gets the square of the vector length (magnitude).
@@ -134,7 +131,6 @@ namespace Luky
         /// for comparisons.
         /// </remarks>
         /// <see cref="Length"/>
-        /// <seealso cref="LengthFast"/>
         public float LengthSquared => X * X + Y * Y;
 
         /// <summary>
@@ -526,11 +522,6 @@ namespace Luky
         /// <param name="b">Second input vector</param>
         /// <param name="blend">The blend factor. a when blend=0, b when blend=1.</param>
         /// <param name="result">a when blend=0, b when blend=1, and a linear combination otherwise</param>
-        public static void Lerp(ref Vector2 a, ref Vector2 b, float blend, out Vector2 result)
-        {
-            result.X = blend * (b.X - a.X) + a.X;
-            result.Y = blend * (b.Y - a.Y) + a.Y;
-        }
 
         /// <summary>
         /// Interpolate 3 Vectors using Barycentric coordinates
@@ -541,8 +532,6 @@ namespace Luky
         /// <param name="u">First Barycentric Coordinate</param>
         /// <param name="v">Second Barycentric Coordinate</param>
         /// <returns>a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of a,b,c otherwise</returns>
-        public static Vector2 BaryCentric(Vector2 a, Vector2 b, Vector2 c, float u, float v)
-            => a + u * (b - a) + v * (c - a);
 
         /// <summary>Interpolate 3 Vectors using Barycentric coordinates</summary>
         /// <param name="a">First input Vector.</param>
@@ -551,25 +540,10 @@ namespace Luky
         /// <param name="u">First Barycentric Coordinate.</param>
         /// <param name="v">Second Barycentric Coordinate.</param>
         /// <param name="result">Output Vector. a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of a,b,c otherwise</param>
-        public static void BaryCentric(ref Vector2 a, ref Vector2 b, ref Vector2 c, float u, float v, out Vector2 result)
-        {
-            result = a; // copy
-
-            Vector2 temp = b; // copy
-            Subtract(ref temp, ref a, out temp);
-            Multiply(ref temp, u, out temp);
-            Add(ref result, ref temp, out result);
-
-            temp = c; // copy
-            Subtract(ref temp, ref a, out temp);
-            Multiply(ref temp, v, out temp);
-            Add(ref result, ref temp, out result);
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Y and X components of this instance.
         /// </summary>
-        public Vector2 Yx { get => new Vector2(Y, X); set { Y = value.X; X = value.Y; } }
 
         /// <summary>
         /// Adds the specified instances.
