@@ -122,7 +122,6 @@ namespace Luky
         /// <summary>
         /// Gets the length (magnitude) of the vector.
         /// </summary>
-        /// <see cref="LengthFast"/>
         /// <seealso cref="LengthSquared"/>
         public float Length => (float)System.Math.Sqrt(X * X + Y * Y + Z * Z);
 
@@ -135,7 +134,6 @@ namespace Luky
         /// </remarks>
         /// <see cref="Length"/>
         /// <seealso cref="LengthSquared"/>
-        public float LengthFast => 1.0f / MathHelper.InverseSqrtFast(X * X + Y * Y + Z * Z);
 
         /// <summary>
         /// Gets the square of the vector length (magnitude).
@@ -145,18 +143,11 @@ namespace Luky
         /// for comparisons.
         /// </remarks>
         /// <see cref="Length"/>
-        /// <seealso cref="LengthFast"/>
         public float LengthSquared => X * X + Y * Y + Z * Z;
 
         /// <summary>
         /// Returns a copy of the V3 scaled to unit length.
         /// </summary>
-        public Vector3 Normalized()
-        {
-            Vector3 v = this;
-            v.Normalize();
-            return v;
-        }
 
         /// <summary>
         /// Scales the Vector3 to unit length.
@@ -172,28 +163,18 @@ namespace Luky
         /// <summary>
         /// Scales the V3 to approximately unit length.
         /// </summary>
-        public void NormalizeFast()
-        {
-            float scale = MathHelper.InverseSqrtFast(X * X + Y * Y + Z * Z);
-            X *= scale;
-            Y *= scale;
-            Z *= scale;
-        }
 
         /// <summary>
         /// Defines a unit-length V3 that points towards the X-axis.
         /// </summary>
-        public static readonly Vector3 UnitX = new Vector3(1, 0, 0);
 
         /// <summary>
         /// Defines a unit-length V3 that points towards the Y-axis.
         /// </summary>
-        public static readonly Vector3 UnitY = new Vector3(0, 1, 0);
 
         /// <summary>
         /// /// Defines a unit-length V3 that points towards the Z-axis.
         /// </summary>
-        public static readonly Vector3 UnitZ = new Vector3(0, 0, 1);
 
         /// <summary>
         /// Defines a zero-length V3.
@@ -203,7 +184,6 @@ namespace Luky
         /// <summary>
         /// Defines an instance with all components set to 1.
         /// </summary>
-        public static readonly Vector3 One = new Vector3(1, 1, 1);
 
         public bool IsNegative()
 => X < 0 || Y < 0 || Z < 0;
@@ -345,13 +325,6 @@ namespace Luky
         /// <param name="a">First operand</param>
         /// <param name="b">Second operand</param>
         /// <returns>The component-wise minimum</returns>
-        public static Vector3 ComponentMin(Vector3 a, Vector3 b)
-        {
-            a.X = a.X < b.X ? a.X : b.X;
-            a.Y = a.Y < b.Y ? a.Y : b.Y;
-            a.Z = a.Z < b.Z ? a.Z : b.Z;
-            return a;
-        }
 
         /// <summary>
         /// Calculate the component-wise minimum of two vectors
@@ -359,12 +332,6 @@ namespace Luky
         /// <param name="a">First operand</param>
         /// <param name="b">Second operand</param>
         /// <param name="result">The component-wise minimum</param>
-        public static void ComponentMin(ref Vector3 a, ref Vector3 b, out Vector3 result)
-        {
-            result.X = a.X < b.X ? a.X : b.X;
-            result.Y = a.Y < b.Y ? a.Y : b.Y;
-            result.Z = a.Z < b.Z ? a.Z : b.Z;
-        }
 
         /// <summary>
         /// Calculate the component-wise maximum of two vectors
@@ -372,13 +339,6 @@ namespace Luky
         /// <param name="a">First operand</param>
         /// <param name="b">Second operand</param>
         /// <returns>The component-wise maximum</returns>
-        public static Vector3 ComponentMax(Vector3 a, Vector3 b)
-        {
-            a.X = a.X > b.X ? a.X : b.X;
-            a.Y = a.Y > b.Y ? a.Y : b.Y;
-            a.Z = a.Z > b.Z ? a.Z : b.Z;
-            return a;
-        }
 
         /// <summary>
         /// Calculate the component-wise maximum of two vectors
@@ -386,12 +346,6 @@ namespace Luky
         /// <param name="a">First operand</param>
         /// <param name="b">Second operand</param>
         /// <param name="result">The component-wise maximum</param>
-        public static void ComponentMax(ref Vector3 a, ref Vector3 b, out Vector3 result)
-        {
-            result.X = a.X > b.X ? a.X : b.X;
-            result.Y = a.Y > b.Y ? a.Y : b.Y;
-            result.Z = a.Z > b.Z ? a.Z : b.Z;
-        }
 
         /// <summary>
         /// Returns the V3 with the minimum magnitude
@@ -399,8 +353,6 @@ namespace Luky
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
         /// <returns>The minimum V3</returns>
-        public static Vector3 Min(Vector3 left, Vector3 right)
-            => left.LengthSquared < right.LengthSquared ? left : right;
 
         /// <summary>
         /// Returns the V3 with the minimum magnitude
@@ -408,8 +360,6 @@ namespace Luky
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
         /// <returns>The minimum V3</returns>
-        public static Vector3 Max(Vector3 left, Vector3 right)
-            => left.LengthSquared >= right.LengthSquared ? left : right;
 
         /// <summary>
         /// Clamp a vector to the given minimum and maximum vectors
@@ -418,13 +368,6 @@ namespace Luky
         /// <param name="min">Minimum vector</param>
         /// <param name="max">Maximum vector</param>
         /// <returns>The clamped vector</returns>
-        public static Vector3 Clamp(Vector3 vec, Vector3 min, Vector3 max)
-        {
-            vec.X = vec.X < min.X ? min.X : vec.X > max.X ? max.X : vec.X;
-            vec.Y = vec.Y < min.Y ? min.Y : vec.Y > max.Y ? max.Y : vec.Y;
-            vec.Z = vec.Z < min.Z ? min.Z : vec.Z > max.Z ? max.Z : vec.Z;
-            return vec;
-        }
 
         /// <summary>
         /// Clamp a vector to the given minimum and maximum vectors
@@ -433,66 +376,30 @@ namespace Luky
         /// <param name="min">Minimum vector</param>
         /// <param name="max">Maximum vector</param>
         /// <param name="result">The clamped vector</param>
-        public static void Clamp(ref Vector3 vec, ref Vector3 min, ref Vector3 max, out Vector3 result)
-        {
-            result.X = vec.X < min.X ? min.X : vec.X > max.X ? max.X : vec.X;
-            result.Y = vec.Y < min.Y ? min.Y : vec.Y > max.Y ? max.Y : vec.Y;
-            result.Z = vec.Z < min.Z ? min.Z : vec.Z > max.Z ? max.Z : vec.Z;
-        }
 
         /// <summary>
         /// Scale a vector to unit length
         /// </summary>
         /// <param name="vec">The input vector</param>
         /// <returns>The normalized vector</returns>
-        public static Vector3 Normalize(Vector3 vec)
-        {
-            float scale = 1.0f / vec.Length;
-            vec.X *= scale;
-            vec.Y *= scale;
-            vec.Z *= scale;
-            return vec;
-        }
 
         /// <summary>
         /// Scale a vector to unit length
         /// </summary>
         /// <param name="vec">The input vector</param>
         /// <param name="result">The normalized vector</param>
-        public static void Normalize(ref Vector3 vec, out Vector3 result)
-        {
-            float scale = 1.0f / vec.Length;
-            result.X = vec.X * scale;
-            result.Y = vec.Y * scale;
-            result.Z = vec.Z * scale;
-        }
 
         /// <summary>
         /// Scale a vector to approximately unit length
         /// </summary>
         /// <param name="vec">The input vector</param>
         /// <returns>The normalized vector</returns>
-        public static Vector3 NormalizeFast(Vector3 vec)
-        {
-            float scale = MathHelper.InverseSqrtFast(vec.X * vec.X + vec.Y * vec.Y + vec.Z * vec.Z);
-            vec.X *= scale;
-            vec.Y *= scale;
-            vec.Z *= scale;
-            return vec;
-        }
 
         /// <summary>
         /// Scale a vector to approximately unit length
         /// </summary>
         /// <param name="vec">The input vector</param>
         /// <param name="result">The normalized vector</param>
-        public static void NormalizeFast(ref Vector3 vec, out Vector3 result)
-        {
-            float scale = MathHelper.InverseSqrtFast(vec.X * vec.X + vec.Y * vec.Y + vec.Z * vec.Z);
-            result.X = vec.X * scale;
-            result.Y = vec.Y * scale;
-            result.Z = vec.Z * scale;
-        }
 
         /// <summary>
         /// Calculate the dot (scalar) product of two vectors
@@ -509,8 +416,6 @@ namespace Luky
         /// <param name="left">First operand</param>
         /// <param name="right">Second operand</param>
         /// <param name="result">The dot product of the two inputs</param>
-        public static void Dot(ref Vector3 left, ref Vector3 right, out float result)
-            => result = left.X * right.X + left.Y * right.Y + left.Z * right.Z;
 
         /// <summary>
         /// Caclulate the cross (vector) product of two vectors
@@ -518,12 +423,6 @@ namespace Luky
         /// <param name="left">First operand</param>
         /// <param name="right">Second operand</param>
         /// <returns>The cross product of the two inputs</returns>
-        public static Vector3 Cross(Vector3 left, Vector3 right)
-        {
-            Vector3 result;
-            Cross(ref left, ref right, out result);
-            return result;
-        }
 
         /// <summary>
         /// Caclulate the cross (vector) product of two vectors
@@ -532,9 +431,6 @@ namespace Luky
         /// <param name="right">Second operand</param>
         /// <returns>The cross product of the two inputs</returns>
         /// <param name="result">The cross product of the two inputs</param>
-        public static void Cross(ref Vector3 left, ref Vector3 right, out Vector3 result) => result = new Vector3(left.Y * right.Z - left.Z * right.Y,
-                left.Z * right.X - left.X * right.Z,
-                left.X * right.Y - left.Y * right.X);
 
         /// <summary>
         /// Returns a new Vector that is the linear blend of the 2 given Vectors
@@ -543,13 +439,6 @@ namespace Luky
         /// <param name="b">Second input vector</param>
         /// <param name="blend">The blend factor. a when blend=0, b when blend=1.</param>
         /// <returns>a when blend=0, b when blend=1, and a linear combination otherwise</returns>
-        public static Vector3 Lerp(Vector3 a, Vector3 b, float blend)
-        {
-            a.X = blend * (b.X - a.X) + a.X;
-            a.Y = blend * (b.Y - a.Y) + a.Y;
-            a.Z = blend * (b.Z - a.Z) + a.Z;
-            return a;
-        }
 
         /// <summary>
         /// Returns a new Vector that is the linear blend of the 2 given Vectors
@@ -558,12 +447,6 @@ namespace Luky
         /// <param name="b">Second input vector</param>
         /// <param name="blend">The blend factor. a when blend=0, b when blend=1.</param>
         /// <param name="result">a when blend=0, b when blend=1, and a linear combination otherwise</param>
-        public static void Lerp(ref Vector3 a, ref Vector3 b, float blend, out Vector3 result)
-        {
-            result.X = blend * (b.X - a.X) + a.X;
-            result.Y = blend * (b.Y - a.Y) + a.Y;
-            result.Z = blend * (b.Z - a.Z) + a.Z;
-        }
 
         /// <summary>
         /// Interpolate 3 Vectors using Barycentric coordinates
@@ -574,8 +457,6 @@ namespace Luky
         /// <param name="u">First Barycentric Coordinate</param>
         /// <param name="v">Second Barycentric Coordinate</param>
         /// <returns>a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of a,b,c otherwise</returns>
-        public static Vector3 BaryCentric(Vector3 a, Vector3 b, Vector3 c, float u, float v)
-            => a + u * (b - a) + v * (c - a);
 
         /// <summary>Interpolate 3 Vectors using Barycentric coordinates</summary>
         /// <param name="a">First input Vector.</param>
@@ -584,20 +465,6 @@ namespace Luky
         /// <param name="u">First Barycentric Coordinate.</param>
         /// <param name="v">Second Barycentric Coordinate.</param>
         /// <param name="result">Output Vector. a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of a,b,c otherwise</param>
-        public static void BaryCentric(ref Vector3 a, ref Vector3 b, ref Vector3 c, float u, float v, out Vector3 result)
-        {
-            result = a; // copy
-
-            Vector3 temp = b; // copy
-            Subtract(ref temp, ref a, out temp);
-            Multiply(ref temp, u, out temp);
-            Add(ref result, ref temp, out result);
-
-            temp = c; // copy
-            Subtract(ref temp, ref a, out temp);
-            Multiply(ref temp, v, out temp);
-            Add(ref result, ref temp, out result);
-        }
 
         /// <summary>
         /// Calculates the angle (in radians) between two vectors.
@@ -606,119 +473,56 @@ namespace Luky
         /// <param name="second">The second vector.</param>
         /// <returns>Angle (in radians) between the vectors.</returns>
         /// <remarks>Note that the returned angle is never bigger than the constant Pi.</remarks>
-        public static float CalculateAngle(Vector3 first, Vector3 second)
-            => (float)System.Math.Acos((Vector3.Dot(first, second)) / (first.Length * second.Length));
 
         /// <summary>Calculates the angle (in radians) between two vectors.</summary>
         /// <param name="first">The first vector.</param>
         /// <param name="second">The second vector.</param>
         /// <param name="result">Angle (in radians) between the vectors.</param>
         /// <remarks>Note that the returned angle is never bigger than the constant Pi.</remarks>
-        public static void CalculateAngle(ref Vector3 first, ref Vector3 second, out float result)
-        {
-            float temp;
-            Vector3.Dot(ref first, ref second, out temp);
-            result = (float)System.Math.Acos(temp / (first.Length * second.Length));
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the X and Y components of this instance.
         /// </summary>
-        public Vector2 Xy
-        {
-            get => new Vector2(X, Y);
-            set { X = value.X; Y = value.Y; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the X and Z components of this instance.
         /// </summary>
-        public Vector2 Xz
-        {
-            get => new Vector2(X, Z);
-            set { X = value.X; Z = value.Y; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Y and X components of this instance.
         /// </summary>
-        public Vector2 Yx
-        {
-            get => new Vector2(Y, X);
-            set { Y = value.X; X = value.Y; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Y and Z components of this instance.
         /// </summary>
-        public Vector2 Yz
-        {
-            get => new Vector2(Y, Z);
-            set { Y = value.X; Z = value.Y; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Z and X components of this instance.
         /// </summary>
-        public Vector2 Zx
-        {
-            get => new Vector2(Z, X);
-            set { Z = value.X; X = value.Y; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Z and Y components of this instance.
         /// </summary>
-        public Vector2 Zy
-        {
-            get => new Vector2(Z, Y);
-            set { Z = value.X; Y = value.Y; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the X, Z, and Y components of this instance.
         /// </summary>
-        public Vector3 Xzy
-        {
-            get => new Vector3(X, Z, Y);
-            set { X = value.X; Z = value.Y; Y = value.Z; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Y, X, and Z components of this instance.
         /// </summary>
-        public Vector3 Yxz
-        {
-            get => new Vector3(Y, X, Z);
-            set { Y = value.X; X = value.Y; Z = value.Z; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Y, Z, and X components of this instance.
         /// </summary>
-        public Vector3 Yzx
-        {
-            get => new Vector3(Y, Z, X);
-            set { Y = value.X; Z = value.Y; X = value.Z; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Z, X, and Y components of this instance.
         /// </summary>
-        public Vector3 Zxy
-        {
-            get => new Vector3(Z, X, Y);
-            set { Z = value.X; X = value.Y; Y = value.Z; }
-        }
 
         /// <summary>
         /// Gets or sets an OpenTK.V3 with the Z, Y, and X components of this instance.
         /// </summary>
-        public Vector3 Zyx
-        {
-            get => new Vector3(Z, Y, X);
-            set { Z = value.X; Y = value.Y; X = value.Z; }
-        }
 
         /// <summary>
         /// Adds two instances.
