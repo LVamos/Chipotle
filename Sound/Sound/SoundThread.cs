@@ -964,14 +964,17 @@ namespace Luky
         /// <returns></returns>
         private IDecoder GetDecoder(Sound sound)
         {
-            if (sound.Decoder == Decoder.Opusfile)
-                return _opusFileDecoder;
-            else if (sound.Decoder == Decoder.Libsndfile)
-                return _lSFDecoder;
-            else if (sound.Decoder == Decoder.NAudio)
-                return _nAudioDecoder;
-            else
-                throw Exception("Unrecognized decoder system: {0}", sound.Decoder);
+            switch (sound.Decoder)
+            {
+                case Decoder.Opusfile:
+                    return _opusFileDecoder;
+                case Decoder.Libsndfile:
+                    return _lSFDecoder;
+                case Decoder.NAudio:
+                    return _nAudioDecoder;
+                default:
+                    throw Exception("Unrecognized decoder system: {0}", sound.Decoder);
+            }
         }
 
         /// <summary>
