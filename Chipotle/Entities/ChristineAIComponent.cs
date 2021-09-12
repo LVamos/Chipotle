@@ -8,14 +8,6 @@ using System.Collections.Generic;
 
 
 
-namespace Game.Messaging.Commands
-{
-    public class Appear : GameMessage
-    {
-        public Appear(object sender) : base(sender) { }
-    }
-}
-
 
 namespace Game.Entities
 {
