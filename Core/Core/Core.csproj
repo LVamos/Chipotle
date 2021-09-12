@@ -49,7 +49,8 @@
     <Compile Include="BaseThread.cs" />
     <Compile Include="CoreExtensionMethods.cs" />
     <Compile Include="DebugSO.cs" />
-    <Compile Include="IOTypes.cs" />
+    <Compile Include="FilePath.cs" />
+    <Compile Include="ReadStream.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="Name.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

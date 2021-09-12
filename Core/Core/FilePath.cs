@@ -1,13 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace Luky
+﻿namespace Luky
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public struct FilePath
     {
-
         // just to make things more type safe I'd rather pass around a type of FilePath than a type of string.
         public readonly string Path;
         public readonly string Extension;
@@ -42,10 +36,6 @@ namespace Luky
         /// <returns></returns>
         public override string ToString()
         => Path;
-
-        public override bool Equals(object obj) => obj is FilePath path && Path == path.Path;
-
-        public override int GetHashCode() => 467214278 + EqualityComparer<string>.Default.GetHashCode(Path);
     }
 
 }
