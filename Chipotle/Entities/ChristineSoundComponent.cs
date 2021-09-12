@@ -1,6 +1,6 @@
 ﻿namespace Game.Entities
 {
-    internal class ChristineSoundComponent : SoundComponent
+    public class ChristineSoundComponent : SoundComponent
     {
     }
 }

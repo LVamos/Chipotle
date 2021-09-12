@@ -1,6 +1,6 @@
 ﻿namespace Game.Entities
 {
-    internal class MariottiSoundComponent : SoundComponent
+    public class MariottiSoundComponent : SoundComponent
     {
     }
 }

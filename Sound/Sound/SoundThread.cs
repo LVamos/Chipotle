@@ -51,9 +51,7 @@ namespace Luky
         public void DecreaseReverbParameter()
         {
             if (DebugSO.TestModeEnabled)
-            {
                 AdjustReverbParameter(-1);
-            }
         }
 
 
@@ -64,9 +62,7 @@ namespace Luky
                 float temp = parameter + sign * delta;
 
                 if (temp >= minValue && temp <= maxValue)
-                {
                     parameter = temp;
-                }
             }
 
 
@@ -102,13 +98,9 @@ namespace Luky
                     OpenTK.Vector3 forward = new OpenTK.Vector3(0, 0, 1);
 
                     if (_reverbParameterIndex == 21)
-                    {
                         _reverbSetting.ReflectionsPan = _reverbSetting.ReflectionsPan == zero ? forward : new OpenTK.Vector3(cos * _reverbSetting.ReflectionsPan.X - sin * _reverbSetting.ReflectionsPan.Z, 0, sin * _reverbSetting.ReflectionsPan.X + cos * _reverbSetting.ReflectionsPan.Z);
-                    }
                     else
-                    {
                         _reverbSetting.LateReverbPan = _reverbSetting.LateReverbPan == zero ? forward : new OpenTK.Vector3(cos * _reverbSetting.LateReverbPan.X - sin * _reverbSetting.LateReverbPan.Z, 0, sin * _reverbSetting.LateReverbPan.X + cos * _reverbSetting.LateReverbPan.Z);
-                    }
 
                     break;
             }
@@ -119,9 +111,7 @@ namespace Luky
         public void SayReverbParameterValue()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             void Say(float parameter)
                 =>                      DebugSO.SayDelegate(parameter.ToString("0.0000"));
@@ -161,18 +151,14 @@ namespace Luky
         public void IncreaseReverbParameter()
         {
             if (DebugSO.TestModeEnabled)
-            {
                 AdjustReverbParameter(1);
-            }
         }
 
 
         public void SetReverbParameterToMinimum()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             DebugSO.SayDelegate("Minimum");
 
@@ -247,9 +233,7 @@ namespace Luky
         public void SetReverbParameterToDefault()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             DebugSO.SayDelegate("Výchozí.");
 
@@ -286,9 +270,7 @@ namespace Luky
         public void PreviousReverbParameter()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             if (_reverbParameterIndex > 0)
             {
@@ -301,9 +283,7 @@ namespace Luky
         public void NextReverbParameter()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             if (_reverbParameterIndex < _reverbParameters.Length - 1)
             {
@@ -316,9 +296,7 @@ namespace Luky
         private void LoadReverbPresets()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             _reverbPresets = EaxReverbDefaults.GetEaxPresets().ToList();
         }
@@ -408,9 +386,7 @@ namespace Luky
                     _soundFiles[shortName] = new SoundFileInfo(shortName, path, variant);
                 }
                 else if (info.Variants < variant)
-                {
                     info.Variants = variant;
-                }
             }
         }
 
@@ -458,9 +434,7 @@ namespace Luky
 
             _buffers = new List<ShortBuffer>(OpenALSystem.MaxQueuedBuffers);
             for (int i = 0; i < OpenALSystem.MaxQueuedBuffers; i++)
-            {
                 _buffers.Add(new ShortBuffer(_bufferSize));
-            }
         }
 
         /// <summary>
@@ -487,9 +461,7 @@ namespace Luky
             RunCommand(() =>
             { // the collection of blending snapshots is more like a set than a list, hence why we only add it if it is not already present.
                 if (!_blendingSnapshots.Contains(ss))
-                {
                     _blendingSnapshots.Add(ss);
-                }
 
                 RecalculateAllSoundVolumes();
             });
@@ -507,24 +479,16 @@ namespace Luky
             {
                 Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                 if (sound == null)
-                {
                     return new object[] { SoundState.Disposed, -1 };
-                }
 
                 IPlayback playback = GetPlayback(sound);
                 SoundState ss;
                 if (playback.IsPlaying(soundID))
-                {
                     ss = SoundState.Playing;
-                }
                 else if (playback.IsStopped(soundID))
-                {
                     ss = SoundState.Disposed; // stopped is the same as disposed for our purposes
-                }
                 else
-                {
                     ss = SoundState.Paused;
-                }
 
                 // we subtract the buffered samples because when they are full, playback is actually that far behind the decoder, and the caller wants to know where playback is.
                 // we divide by 50 because OpenAL buffers always hold 20ms of PCM data, so sampleRate / 50 is 20ms worth of samples.
@@ -534,9 +498,7 @@ namespace Luky
                 int tempCurrent;
                 decoder.GetDynamicInfo(soundID, out tempCurrent);
                 if (tempCurrent != -1)
-                {
                     tempCurrent = Math.Max(0, tempCurrent - bufferedSamples);
-                }
 
                 return new object[] { ss, tempCurrent };
             });
@@ -557,9 +519,7 @@ namespace Luky
             {
                 Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                 if (sound == null)
-                {
                     return new object[] { -1, -1, -1 };
-                }
 
                 IDecoder decoder = GetDecoder(sound);
                 int tempSampleRate, tempTotal, tempChannels;
@@ -580,9 +540,7 @@ namespace Luky
                                                                   {
                                                                       Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                                                                       if (sound == null)
-                                                                      {
                                                                           return;
-                                                                      }
 
                                                                       if (sound.Decoder == Decoder.Opusfile && sound.Playback == Playback.OpenAL)
                                                                       {
@@ -602,9 +560,7 @@ namespace Luky
                                                               {
                                                                   Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                                                                   if (sound == null)
-                                                                  {
                                                                       return;
-                                                                  }
 
                                                                   IDecoder decoder = GetDecoder(sound);
                                                                   decoder.ChangeLooping(soundID, looping);
@@ -683,9 +639,7 @@ namespace Luky
                         Sound sound = _sounds.FirstOrDefault(s => s.ID == id);
 
                         if (sound != null)
-                        {
                             _openALSystem.SetPosition(id, position);
-                        }
                     }
                 });
         }
@@ -757,14 +711,10 @@ namespace Luky
         {
 
             if (pt != PositionType.None && panning.HasValue)
-            {
                 throw new InvalidOperationException("PositionType must be set to None if panning has a value");
-            }
 
             if (stream == null)
-            {
                 return -1; // missing the sound file, but don't crash. The owner should report this error on their own.
-            }
 
             int soundID = Interlocked.Increment(ref _incrementingSoundID);
 
@@ -773,15 +723,11 @@ namespace Luky
                     // separating init and play is helpful if we want to start a sound playing at a location other than the beginning, because we can call init then seek instead.
                     Sound sound = InnerInitSound(stream, role, looping, pb, soundID, pt, position, forceMono, volumeAdjustment, panning, pitch);
                     if (sound == null)
-                    {
                         return;
-                    }
 
                     IDecoder decoder = GetDecoder(sound);
                     if (seekSample != 0)
-                    {
                         decoder.SeekToSample(soundID, seekSample);
-                    }
 
                     InnerPlay(sound);
                 };
@@ -795,9 +741,7 @@ namespace Luky
                 _delayedSounds.Add(ds);
             }
             else // it was either a normal stream, or an AssetStream that is primed
-            {
                 RunCommand(callback);
-            }
 
             return soundID;
         }
@@ -821,9 +765,7 @@ namespace Luky
                                                          {
                                                              Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                                                              if (sound == null)
-                                                             {
                                                                  return;
-                                                             }
 
                                                              IDecoder decoder = GetDecoder(sound);
                                                              decoder.SeekToSample(soundID, sampleOffset);
@@ -852,19 +794,13 @@ namespace Luky
                                                                         {
                                                                             Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                                                                             if (sound == null)
-                                                                            {
                                                                                 return;
-                                                                            }
 
                                                                             IPlayback playback = GetPlayback(sound);
                                                                             if (desiredPauseState)
-                                                                            {
                                                                                 playback.Pause(soundID);
-                                                                            }
                                                                             else
-                                                                            {
                                                                                 playback.Unpause(soundID);
-                                                                            }
                                                                         });
 
         /// <summary>
@@ -905,16 +841,11 @@ namespace Luky
                                            // check for a sound that hadn't started playing yet.
                                            DelayedSound ds = _delayedSounds.RemoveFirstOrDefault(p => p.SoundID == soundID);
                                            if (ds != null)
-                                           {
                                                ds.ReadStream.Stream.Dispose();
-                                           }
                                            // otherwise we check for a normal playing sound.
                                            Sound sound = _sounds.RemoveFirstOrDefault(p => p.ID == soundID);
                                            if (sound == null)
-                                           {
                                                return;
-                                           }
-
                                            IPlayback playback = GetPlayback(sound);
                                            playback.Stop(sound.ID);
                                            DisposeSound(sound);
@@ -928,19 +859,13 @@ namespace Luky
                                               {
                                                   Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                                                   if (sound == null)
-                                                  {
                                                       return;
-                                                  }
 
                                                   IPlayback playback = GetPlayback(sound);
                                                   if (playback.IsPlaying(soundID))
-                                                  {
                                                       playback.Pause(soundID);
-                                                  }
                                                   else
-                                                  {
                                                       playback.Unpause(soundID);
-                                                  }
                                               });
 
         /// <summary>
@@ -976,9 +901,7 @@ namespace Luky
                     //if (length != 1920)
                     //    Say(length);
                     if (sound.Panning.HasValue)
-                    {
                         SoundHM.Pan(_buffer, sound.Panning.Value);
-                    }
 
                     playback.QueueBuffer(sound.ID, _buffer);
                 }
@@ -1011,16 +934,12 @@ namespace Luky
                 float modifier;
                 // mGroupVolumes contains the volume adjustments the user can change in settings
                 if (_groupVolumes.TryGetValue(gn, out modifier))
-                {
                     product *= modifier;
-                }
                 // apply blending snapshots, such as the mod snapshot file, or the built in overlay and grid snapshots.
                 foreach (Snapshot blend in _blendingSnapshots)
                 {
                     if (blend.GroupVolumes.TryGetValue(gn, out modifier))
-                    {
                         product *= modifier;
-                    }
                 } // end foreach blending snapshot
             } // end foreach group name
             return product;
@@ -1046,21 +965,13 @@ namespace Luky
         private IDecoder GetDecoder(Sound sound)
         {
             if (sound.Decoder == Decoder.Opusfile)
-            {
                 return _opusFileDecoder;
-            }
             else if (sound.Decoder == Decoder.Libsndfile)
-            {
                 return _lSFDecoder;
-            }
             else if (sound.Decoder == Decoder.NAudio)
-            {
                 return _nAudioDecoder;
-            }
             else
-            {
                 throw Exception("Unrecognized decoder system: {0}", sound.Decoder);
-            }
         }
 
         /// <summary>
@@ -1071,13 +982,9 @@ namespace Luky
         private IPlayback GetPlayback(Sound sound)
         {
             if (sound.Playback == Playback.OpenAL)
-            {
                 return _openALSystem;
-            }
             else
-            {
                 throw Exception("Unrecognized playback system: {0}", sound.Playback);
-            }
         }
 
         /// <summary>
@@ -1108,37 +1015,25 @@ namespace Luky
 
             sound.GroupNames.Add(Names.NonSpatialized);
             if (role != null)
-            {
                 sound.GroupNames.Add(role);
-            }
 
             string extension = Path.GetExtension(rs.Path).ToLower();
             if (extension == ".opus")
-            {
                 sound.Decoder = Decoder.Opusfile;
-            }
             else if (extension == ".mp3")
-            {
                 sound.Decoder = Decoder.NAudio;
-            }
             else
-            {
                 sound.Decoder = Decoder.Libsndfile;
-            }
 
             Stream stream = rs.Stream;
             IDecoder decoder = GetDecoder(sound);
             int channels, sampleRate;
             if (panning.HasValue)
-            {
                 forceMono = true; // if a sound is going to be panned, we force it to mono so we can later split it to stereo based on the panning.
-            }
 
             decoder.InitStream(soundID, stream, looping, forceMono, out channels, out sampleRate);
             if (panning.HasValue)
-            {
                 channels = 2; // if a sound is going to be panned, we will always split it to stereo for playback
-            }
 
             sound.SampleRate = sampleRate;
             IPlayback playback = GetPlayback(sound);
@@ -1161,9 +1056,7 @@ namespace Luky
                 //if (buffer.Filled != 1920)
                 //    Say(buffer.Filled);
                 if (sound.Panning.HasValue)
-                {
                     SoundHM.Pan(buffer, sound.Panning.Value);
-                }
             }
             IPlayback playback = GetPlayback(sound);
             playback.Play(sound.ID, _buffers);

@@ -55,9 +55,7 @@ namespace Sound
                 void Save(bool expression, string parameterName, object value) //local function
                 {
                     if (expression)
-                    {
                         sw.WriteLine($"{parameterName} {value.ToString()}");
-                    }
                 }
 
                 // Here are the 13 standard reverb settings

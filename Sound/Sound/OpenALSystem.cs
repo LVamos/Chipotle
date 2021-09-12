@@ -121,9 +121,7 @@ namespace Luky
 
 
             if (!string.IsNullOrEmpty(name))
-            {
                 DebugSO.SayDelegate(name);
-            }
         }
 
 
@@ -312,9 +310,7 @@ namespace Luky
         public void Play(int soundID, List<ShortBuffer> initialBuffers)
         {
             if (initialBuffers.Count != MaxQueuedBuffers)
-            {
                 throw ArgumentException("initialBuffers should have length {0} but have length {1}", MaxQueuedBuffers, initialBuffers.Count);
-            }
 
             Info info = _table[soundID];
             if (info.QueuedBufferIDs == null)
@@ -347,9 +343,7 @@ namespace Luky
             }
 
             if (_effectSlot != 0)
-            {
                 BindSourceToAuxiliarysend(soundID);
-            }
 
             ALPlay(info.SourceID);
             info.ShouldBePlaying = true;
@@ -363,9 +357,7 @@ namespace Luky
         public void QueueBuffer(int soundID, ShortBuffer buffer)
         {
             if (buffer == null)
-            {
                 throw new ArgumentException("buffer cannot be null");
-            }
 
             Info info = _table[soundID];
             // we assume that our caller ran the IsReadyForBuffer method to ensure we are ready for a new buffer.
@@ -481,9 +473,7 @@ namespace Luky
             Info info = _table[soundID];
             // we could alternatively just do nothing if the sound has never been played before this.
             if (info.QueuedBufferIDs == null)
-            {
                 return;
-            }
             //if (info.QueuedBufferIDs == null)
             //    throw Exception("Called Unpause on a sound that had never been played");
             ALPlay(info.SourceID);
@@ -502,13 +492,9 @@ namespace Luky
             {
                 string text = error + ", " + AL.GetErrorString(error);
                 if (args.Length > 0)
-                {
                     text = String.Format(prefix, args) + " " + text;
-                }
                 else
-                {
                     text = prefix + " " + text;
-                }
 
                 SayDelegate(text);
                         System.Diagnostics.Debugger.Break();

@@ -27,13 +27,9 @@ namespace Game.Entities
                 && tuttle.VisitedLocalities.Contains(garage)
                 && World.Player.VisitedLocalities.Contains(garage)
                 )
-            {
                 _cutscene = "cs10";
-            }
             else
-            {
                 _cutscene = "cs9";
-            }
 
             base.OnUseObject(message);
         }

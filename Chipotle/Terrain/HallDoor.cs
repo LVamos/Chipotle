@@ -15,9 +15,7 @@ namespace Game.Terrain
         protected override void Open(Vector2 coords)
         {
             if (!World.GetObject("lavička w1").Used)
-            {
                 return;
-            }
 
             base.Open(coords);
         }

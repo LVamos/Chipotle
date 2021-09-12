@@ -1,7 +1,7 @@
 ﻿using Game.Terrain;
 namespace Game.Messaging.Commands
 {
-    internal class TurnEntity : GameMessage
+    public class TurnEntity : GameMessage
     {
         public readonly TurnType Direction;
         public readonly int Degrees;

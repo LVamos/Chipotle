@@ -1,6 +1,6 @@
 ﻿namespace Game.Messaging.Commands
 {
-    internal class SayTerrain : GameMessage
+    public class SayTerrain : GameMessage
     {
         /// <summary>
         /// Constructs new instance of the message.

@@ -33,27 +33,19 @@ namespace Game.Terrain
         protected override void Appear()
         {
             foreach (Vector2 point in Area.GetPoints())
-            {
                 World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain, point, this) : throw new InvalidOperationException("Tile must be empty");
-            }
         }
 
         protected override void Disappear()
         {
             if (_objects.IsNotEmpty())
-            {
                 new List<GameObject>(_objects).ForEach(o => World.Remove(o));
-            }
 
             if (_passages.IsNotEmpty())
-            {
                 new List<Passage>(_passages).ForEach(p => World.Remove(p));
-            }
 
             if (_entities.IsNotEmpty())
-            {
                 new List<Entity>(_entities).ForEach(e => World.Remove(e));
-            }
 
             Area.GetPoints().Foreach(p => World.Map[p] = null);
         }
@@ -96,9 +88,7 @@ namespace Game.Terrain
             _passages.Add(p);
 
             if (_messagingEnabled)
-            {
                 ReceiveMessage(new PassageShown(this, p));
-            }
         }
 
         /// <summary>
@@ -226,9 +216,7 @@ namespace Game.Terrain
             IEnumerable<Vector2> wallCoordinates;
 
             if (walls == "All")
-            {
                 wallCoordinates = Area.GetPerimeterPoints();
-            }
             else
             {
                 List<Direction> directions = new List<Direction>();
@@ -267,9 +255,7 @@ namespace Game.Terrain
         {
             Unregister(message.Sender as Entity);
             if (message.Sender== World.Player && _backgroundSoundId > 0)
-            {
                 World.Sound.Stop(_backgroundSoundId);
-            }
         }
 
         private void OnLocalityEntered(LocalityEntered message)
@@ -277,9 +263,7 @@ namespace Game.Terrain
             Register(message.Sender as Entity);
 
             if (message.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
-            {
                 _backgroundSoundId = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
-            }
 
             _entities.ForEach(e => e.ReceiveMessage(message));
             _objects.ForEach(o => o.ReceiveMessage(message));

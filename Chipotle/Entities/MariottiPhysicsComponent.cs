@@ -1,6 +1,6 @@
 ﻿namespace Game.Entities
 {
-    internal class MariottiPhysicsComponent : PhysicsComponent
+    public class MariottiPhysicsComponent : PhysicsComponent
     {
     }
 }

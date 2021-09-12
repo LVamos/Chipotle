@@ -38,9 +38,7 @@ namespace Game.Entities
                 _plannedRotations -=5;
 
                 if (_plannedRotations == 0)
-                {
                     Owner.ReceiveMessage(new TurnEntityResult(this, _orientation));
-                }
             }
         }
 
@@ -97,23 +95,14 @@ namespace Game.Entities
             string msg = o.Name.Friendly;
 
             if (o.Area.LowerRightCorner.Y > _area.Center.Y)
-            {
                 msg += " před tebou";
-            }
             else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
-            {
                 msg += " za tebou";
-            }
-            else if (o.Area.LowerRightCorner.Y <= _area.Center.Y && o.Area.UpperRightCorner.Y >= _area.Center.Y)
             {
                 if (o.Area.UpperRightCorner.X < _area.Center.X)
-                {
                     msg += " vlevo";
-                }
                 else
-                {
                     msg += " vpravo";
-                }
             }
 
             Say(msg);
@@ -268,9 +257,7 @@ namespace Game.Entities
             Orientation2D finalOrientation = _orientation;
 
             if (message.Direction != TurnType.None)
-            {
                 finalOrientation.Rotate(message.Direction);
-            }
 
                     // Is the terrain occupable?
             Tile targetTile = GetNextTile(finalOrientation) ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test

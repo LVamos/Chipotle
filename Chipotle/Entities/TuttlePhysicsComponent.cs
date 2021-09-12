@@ -9,7 +9,7 @@ using Luky;
 
 namespace Game.Entities
 {
-    internal class TuttlePhysicsComponent : PhysicsComponent
+    public class TuttlePhysicsComponent : PhysicsComponent
     {
 
         private Random _random = new Random();
@@ -86,9 +86,7 @@ namespace Game.Entities
         private void OnLocalityLeft(LocalityLeft message)
         {
             if (message.Sender != _player)
-            {
                 return;
-            }
 
             StopApproachingToPlayer();
             GoToPlayer();
@@ -102,9 +100,7 @@ namespace Game.Entities
         private void OnEntityMoved(EntityMoved message)
         {
             if (message.Sender != _player)
-            {
                 return;
-            }
 
             if (_followPlayer && !_approachToPlayer)
                 CheckDistanceFromPlayer();
@@ -114,13 +110,9 @@ namespace Game.Entities
         {
             int distance = GetDistanceFromPlayer();
             if (distance > _maxDistanceFromPlayer && !_approachToPlayer)
-            {
                 GoToPlayer();
-            }
             else if (_approachToPlayer && (distance <= _desiredDistanceFromPlayer || _path.IsNullOrEmpty()))
-            {
                 StopApproachingToPlayer();
-            }
         }
 
         private void StopApproachingToPlayer()
@@ -141,9 +133,7 @@ namespace Game.Entities
             Vector2? target = FindPlaceNearPlayer();
 
             if (!target.HasValue)
-            {
                 return;
-            }
             _path = _finder.FindPath(_area.Center, (Vector2)target);
 
             if (_path == null)
@@ -157,29 +147,19 @@ namespace Game.Entities
         private int ComputeWalkSpeed(int distance)
         {
             if (distance < 5)
-            {
                 return 1200;
-            }
 
             if (distance < 7)
-            {
                 return 1000;
-            }
 
             if (distance < 10)
-            {
                 return 900;
-            }
 
             if (distance < 15)
-            {
                 return 500;
-            }
 
             if (distance < 20)
-            {
                 return 300;
-            }
 
             return 150;
         }
@@ -192,9 +172,7 @@ namespace Game.Entities
             base.Update();
 
             if (_walk)
-            {
                 PerformWalk();
-            }
         }
 
         private void PerformWalk()
@@ -208,9 +186,7 @@ namespace Game.Entities
                 Step();
             }
             else
-            {
                 _stepInterval += World.DeltaTime;
-            }
 
             if (_path.IsNullOrEmpty())
                 StopWalk();

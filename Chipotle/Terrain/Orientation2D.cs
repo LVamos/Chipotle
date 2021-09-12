@@ -42,21 +42,13 @@ namespace Game.Terrain
             float sin = (float)Sin(radians);
 
             if (compassDegrees == -90)
-            {
                 _unitVector = _unitVector.PerpendicularLeft;
-            }
             else if (compassDegrees == 90)
-            {
                 _unitVector = _unitVector.PerpendicularRight;
-            }
             else if (Abs(compassDegrees) == 180)
-            {
                 _unitVector = _unitVector.PerpendicularRight.PerpendicularRight;
-            }
             else
-            {
                 _unitVector = new Vector2(cos * _unitVector.X - sin * _unitVector.Y, sin * _unitVector.X + cos * _unitVector.Y);
-            }
         }
 
         public Orientation2D(float x, float y) : this(new Vector2(x, y))

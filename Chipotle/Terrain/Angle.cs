@@ -14,39 +14,25 @@ namespace Game.Terrain
         {
             float d = CompassDegrees;
             if (d >= 0 && d < 45)
-            {
                 return CardinalDirection.North;
-            }
 
             if (d >= 45 && d < 90)
-            {
                 return CardinalDirection.NorthEast;
-            }
 
             if (d >= 90 && d < 135)
-            {
                 return CardinalDirection.East;
-            }
 
             if (d >= 135 && d < 180)
-            {
                 return CardinalDirection.SouthEast;
-            }
 
             if (d >= 180 && d < 225)
-            {
                 return CardinalDirection.South;
-            }
 
             if (d >= 225 && d < 270)
-            {
                 return CardinalDirection.SouthWest;
-            }
 
             if (d >= 270 && d < 315)
-            {
                 return CardinalDirection.West;
-            }
 
             return CardinalDirection.NorthWest;
         }
@@ -79,9 +65,7 @@ namespace Game.Terrain
         public static Angle operator /(Angle a, Angle b)
         {
             if (b.Radians == 0)
-            {
                 throw new DivideByZeroException(nameof(b.Radians));
-            }
 
             return new Angle(a.Radians / b.Radians);
         }

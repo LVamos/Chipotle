@@ -150,14 +150,10 @@ namespace Game
         {
             // Do a null check and look if entity isn't already registered.
             if (e == null)
-            {
                 throw new ArgumentNullException(nameof(e));
-            }
 
             if (_entities.ContainsKey(e.Name.Indexed))
-            {
                 throw new ArgumentException("entity already registered");
-            }
 
             _entities.Add(e.Name.Indexed, e);
         }
@@ -203,14 +199,10 @@ namespace Game
         {
             // Do a null check and look if object isn't already registered.
             if (o == null)
-            {
                 throw new ArgumentNullException(nameof(o));
-            }
 
             if (_objects.ContainsKey(o.Name.Indexed))
-            {
                 throw new ArgumentException("Object already registered");
-            }
 
             _objects.Add(o.Name.Indexed, o); // Added to dictionary
         }
@@ -225,15 +217,11 @@ namespace Game
         {
             // null check
             if (l == null)
-            {
                 throw new ArgumentNullException(nameof(l));
-            }
 
             // Isn't the locality already registered?
             if (_localities.ContainsKey(l.Name.Indexed))
-            {
                 throw new ArgumentException("Locality already registered");
-            }
 
             _localities.Add(l.Name.Indexed, l);
         }
@@ -246,14 +234,10 @@ namespace Game
         public static void Add(Passage p)
         {
             if (p == null)
-            {
                 throw new ArgumentNullException(nameof(p));
-            }
 
             if (_passages.ContainsKey(p.Name.Indexed))
-            {
                 throw new ArgumentException("Passage already registered");
-            }
 
             _passages.Add(p.Name.Indexed, p);
         }

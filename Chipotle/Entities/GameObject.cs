@@ -33,9 +33,7 @@ namespace Game.Entities
         public static DumpObject CreateObject(Name name, Plane area, string type)
         {
             if (string.IsNullOrEmpty(name.Indexed))
-            {
                 throw new ArgumentException(nameof(name));
-            }
 
             switch (type)
             {
@@ -231,9 +229,7 @@ namespace Game.Entities
             Type = type.PrepareForIndexing();
 
             if (area != null)
-            {
                 Appear();
-            }
 
             Locality?.Register(this);
         }
@@ -241,9 +237,7 @@ namespace Game.Entities
         protected virtual void Move    (Plane targetArea)
         {
             if (targetArea == null)
-            {
                 throw new ArgumentNullException(nameof(targetArea));
-            }
 
             Locality sourceLocality = Locality;
             Locality targetLocality = targetArea.GetLocality();

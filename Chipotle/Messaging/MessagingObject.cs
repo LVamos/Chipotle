@@ -20,9 +20,7 @@ namespace Game.Messaging
         public virtual void Update()
         {
             if (_messagingEnabled && !_messages.IsNullOrEmpty())
-            {
                 HandleMessage(DequeueMessage());
-            }
         }
 
 
@@ -58,9 +56,7 @@ namespace Game.Messaging
         protected virtual void HandleMessage(GameMessage message)
         {
             if (_messageHandlers.TryGetValue(message.GetType(), out Action<GameMessage> handler))
-            {
                 handler(message);
-            }
         }
 
 

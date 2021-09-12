@@ -3,7 +3,7 @@ using Game.Terrain;
 
 namespace Game.Messaging.Commands
 {
-    internal class MakeStep : TurnEntity
+    public class MakeStep : TurnEntity
     {
         /// <summary>
         /// Constructs new instance of the message.

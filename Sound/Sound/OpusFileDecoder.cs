@@ -27,9 +27,7 @@ namespace Luky
         public static int ConvertStereoToMono(short[] buffer, int shortsRead)
         {
             if (shortsRead % 2 != 0)
-            {
                 throw new Exception("read an odd number of bytes");
-            }
 
             int writeIndex = 0;
             for (int i = 0; i < shortsRead; i += 2)
@@ -48,9 +46,7 @@ namespace Luky
         {
             // dispose each sound
             foreach (int soundID in mTable.Keys.ToArray())
-            {
                 DisposeStream(soundID);
-            }
         }
 
         /// <summary>
@@ -78,9 +74,7 @@ namespace Luky
             if (samplesRead == 0)
             { // if we are not looping, we are done, otherwise we seek to the beginning of the stream.
                 if (!info.Looping)
-                {
                     return 0; // nothing to read.
-                }
                 else // we seek to the beginning of the stream and try reading again.
                 { // I tried just seeking without disposing the OggOpusFile object, but it didn't work.
                     info.OpusFile.Dispose();
@@ -92,9 +86,7 @@ namespace Luky
             // I'm used to knowing how many shorts were read, rather than how many samples.
             int shortsRead = samplesRead * info.Channels;
             if (info.ForceMono && info.Channels == 2)
-            {
                 shortsRead = ConvertStereoToMono(buffer, shortsRead);
-            }
 
             return shortsRead;
         }
@@ -111,9 +103,7 @@ namespace Luky
             short[] buffer = new short[1920];
             int shortsRead = FillBuffer(soundID, buffer);
             if (shortsRead == buffer.Length)
-            {
                 return buffer;
-            }
             // otherwise we need to copy to a new buffer of the right length, so all of it is usable.
             short[] buffer2 = new short[shortsRead];
             System.Buffer.BlockCopy(buffer, 0, buffer2, 0, shortsRead * 2);
@@ -159,9 +149,7 @@ namespace Luky
             info.ForceMono = forceMono;
             channels = info.Channels;
             if (forceMono && channels == 2)
-            {
                 channels = 1;
-            }
 
             sampleRate = _sampleRate;
         }
@@ -200,9 +188,7 @@ namespace Luky
             channels = info.Channels;
             //Say("{0} {1}", forceMono, channels);
             if (forceMono && channels == 2)
-            {
                 channels = 1;
-            }
 
             mTable[soundID] = info;
         }

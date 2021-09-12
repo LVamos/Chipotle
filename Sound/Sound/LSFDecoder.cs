@@ -45,9 +45,7 @@ namespace Luky
         public void Dispose()
         { // dispose each sound
             foreach (int soundID in _table.Keys.ToArray())
-            {
                 DisposeStream(soundID);
-            }
         }
 
         /// <summary>
@@ -77,9 +75,7 @@ namespace Luky
             long totalWrote = 0; // when doing stereo to mono conversion the totalWrote is not the same as the totalRead
             long lengthToRead = buffer.Length;
             if (info.ForceMono && info.LSFInfo.Channels == 2)
-            {
                 lengthToRead *= 2; // read twice as much
-            }
 
             while (totalRead != lengthToRead)
             {
@@ -88,17 +84,13 @@ namespace Luky
                     info.Position = 0;
                     _api.Seek(info.SFHandle, 0, (int)SeekOrigin.Begin);
                 }
-                if (!info.Looping && info.Position == info.TotalLength)
-                { // we reached the end of the stream but we aren't looping, so we're done.
+                if (!info.Looping && info.Position == info.TotalLength) // we reached the end of the stream but we aren't looping, so we're done.
                     break;
-                }
                 long lesser = Math.Min(_tempBuffer.Length, info.TotalLength - info.Position);
                 lesser = Math.Min(lesser, lengthToRead - totalRead);
                 long read = _api.ReadItems(info.SFHandle, _tempBuffer, lesser);
                 if (info.ForceMono && info.LSFInfo.Channels == 2)
-                {
                     ConvertToMono(_tempBuffer, buffer, read, ref totalWrote);
-                }
                 else
                 {
                     Array.Copy(_tempBuffer, 0, buffer, totalWrote, read);
@@ -172,9 +164,7 @@ namespace Luky
             }
             channels = info.LSFInfo.Channels;
             if (channels == 2 && forceMono)
-            {
                 channels = 1;
-            }
 
             info.Channels = channels;
             sampleRate = info.LSFInfo.SampleRate;
@@ -203,9 +193,7 @@ namespace Luky
         private void ConvertToMono(short[] input, short[] output, long read, ref long totalWrote)
         {
             if (read % 2 != 0)
-            {
                 throw new Exception("read an odd number of bytes");
-            }
 
             for (int i = 0; i < read; i += 2)
             {

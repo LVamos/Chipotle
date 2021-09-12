@@ -1,6 +1,6 @@
 ﻿namespace Game.Entities
 {
-    internal class SweeneySoundComponent : SoundComponent
+    public class SweeneySoundComponent : SoundComponent
     {
     }
 }

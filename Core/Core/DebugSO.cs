@@ -23,13 +23,9 @@ namespace Luky
         public static void Say(bool and, params object[] args)
         {
             if (and)
-            {
                 SayDelegate(FormatList(args));
-            }
             else
-            {
                 SayDelegate(FormatListNoAnd(args));
-            }
         }
 
 
@@ -49,9 +45,7 @@ namespace Luky
                     StringBuilder message = new StringBuilder();
 
                     for (int i = 0; i < strings.Length - 2; i++)
-                    {
                         message.Append(strings[i] + ", ");
-                    }
 
                     message.Append(strings[args.Length - 2] + " a " + args.Last());
                     return message.ToString();
@@ -81,9 +75,7 @@ namespace Luky
         protected static void Assert(bool condition)
         {
             if (!condition)
-            {
                 throw new Exception("Assert failed");
-            }
         }
 
         /// <summary>
@@ -94,9 +86,7 @@ namespace Luky
         protected static void Assert(bool condition, string message)
         {
             if (!condition)
-            {
                     throw new Exception(message);
-            }
         }
 
 

@@ -90,15 +90,11 @@ namespace Luky
         {
             // If both are null, or both are same instance, return true.
             if (Object.ReferenceEquals(a, b))
-            {
                 return true;
-            }
 
             // If one is null, but not both, return false.
             if ((object)a == null || (object)b == null)
-            {
                 return false;
-            }
 
             // Return true if the fields match:
             return a.ID == b.ID;
@@ -129,16 +125,12 @@ namespace Luky
         {
             // If parameter is null return false.
             if (obj == null)
-            {
                 return false;
-            }
 
             // If parameter cannot be cast to Name return false.
             Name n = obj as Name;
             if ((System.Object)n == null)
-            {
                 return false;
-            }
 
             // Return true if the fields match:
             return ID == n.ID;
@@ -153,9 +145,7 @@ namespace Luky
         {
             // If parameter is null return false:
             if ((object)n == null)
-            {
                 return false;
-            }
 
             // Return true if the fields match:
             return ID == n.ID;

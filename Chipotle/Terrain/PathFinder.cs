@@ -58,9 +58,7 @@ namespace Game.Terrain
                 Queue<Vector2> coords = new Queue<Vector2>();
 
                 for (Node step = lastStep.Parent; step != null; step = step.Parent)
-                {
                     coords.Enqueue(step.Coords);
-                }
 
                 return new Queue<Vector2>(coords.Reverse());
             }
@@ -79,9 +77,7 @@ namespace Game.Terrain
                 Node node = open.OrderByDescending(n => n.Priority).Last();
 
                 if (node.Coords == last.Coords)
-                {
                     return GetPath(node);
-                }
 
                 closed.Add(node);
                 open.Remove(node);
@@ -91,9 +87,7 @@ namespace Game.Terrain
                 foreach (Node neighbour in neighbours)
                 {
                     if (closed.Any(n => n.Coords == neighbour.Coords))
-                    {
                         continue;
-                    }
 
                     if (open.Any(n => n.Coords == neighbour.Coords))
                     {
@@ -106,9 +100,7 @@ namespace Game.Terrain
                         }
                     }
                     else
-                    {
                         open.Add(neighbour);
-                    }
                 }
             }
 

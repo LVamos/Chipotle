@@ -37,9 +37,7 @@ namespace Game.Entities
         protected virtual void OnKeyDown(KeyPressed message)
         {
             if (_shortcuts != null && _shortcuts.TryGetValue(message.Shortcut, out Action action))
-            {
                 action();
-            }
         }
 
 

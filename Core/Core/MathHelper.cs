@@ -31,9 +31,7 @@ namespace Luky
         public static float Modulo(float a, float n)
         {
             if (n == 0)
-            {
                 throw new DivideByZeroException(nameof(n));
-            }
 
             float remainder = a % n; // puts a in the [-n+1, n-1] range using the remainder operator.
 
@@ -42,9 +40,7 @@ namespace Luky
             if the remainder is greater than zero, add n to put it in the [n-1, 0] range if n is negative
             */
             if ((n > 0 && remainder < 0) || (n < 0 && remainder > 0))
-            {
                 return remainder + n;
-            }
 
             return remainder;
         }

@@ -26,9 +26,7 @@ namespace Luky
         public void Dispose()
         { // dispose each sound
             foreach (int soundID in _table.Keys.ToArray())
-            {
                 DisposeStream(soundID);
-            }
         }
 
         /// <summary>
@@ -56,9 +54,7 @@ namespace Luky
             if (bytesRead == 0)
             { // if we are not looping, we are done, otherwise we seek to the beginning of the stream.
                 if (!info.Looping)
-                {
                     return 0; // nothing to read.
-                }
                 else // we seek to the beginning of the stream and try reading again.
                 {
                     info.Reader.Dispose();
@@ -69,15 +65,11 @@ namespace Luky
             }
             int shortsRead = bytesRead / 2;
             if (buffer.Length < shortsRead)
-            {
                 throw Exception("buffer is too small, has length {0} but needs length {1}", buffer.Length, shortsRead);
-            }
 
             System.Buffer.BlockCopy(mBuffer, 0, buffer, 0, bytesRead);
             if (info.ForceMono && info.Channels == 2)
-            {
                 shortsRead = OpusFileDecoder.ConvertStereoToMono(buffer, shortsRead);
-            }
 
             return shortsRead;
         }
@@ -140,9 +132,7 @@ namespace Luky
             // note that we leave info.Channels as the number of channels we are reading, but we may change the channels variable we return for playback if we are forcing mono.
             channels = info.Channels;
             if (forceMono && channels == 2)
-            {
                 channels = 1;
-            }
 
             _table[soundID] = info;
         }

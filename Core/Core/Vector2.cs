@@ -57,15 +57,11 @@ namespace Luky
         public Vector2(string coordinates)
         {
             if (string.IsNullOrEmpty(coordinates))
-            {
                 throw new ArgumentException(nameof(coordinates));
-            }
 
             string[] numbers = Regex.Split(coordinates, @", +");
             if (numbers == null || numbers.Count() != 2)
-            {
                 throw new FormatException(nameof(coordinates));
-            }
 
             X = float.Parse(numbers[0]);
             Y = float.Parse(numbers[1]);
@@ -94,17 +90,11 @@ namespace Luky
             set
             {
                 if (index == 0)
-                {
                     X = value;
-                }
                 else if (index == 1)
-                {
                     Y = value;
-                }
                 else
-                {
                     throw new IndexOutOfRangeException("You tried to set this vector at index: " + index);
-                }
             }
         }
 
@@ -661,9 +651,7 @@ namespace Luky
         public override bool Equals(object obj)
         {
             if (!(obj is Vector2))
-            {
                 return false;
-            }
 
             return Equals((Vector2)obj);
         }

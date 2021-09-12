@@ -39,9 +39,7 @@ namespace Game.Terrain
             }
 
             while (World.Map[point] == null)
-            {
                 point += direction.GetOpposite().AsVector2();
-            }
 
             return point;
         }
@@ -72,9 +70,7 @@ namespace Game.Terrain
             Vector2 step = direction.AsVector2();
 
             for (Vector2 point = start; IsInBoundaries(point); point += step)
-            {
                 yield return point;
-            }
         }
 
         public bool IsInBoundaries(Vector2 point)
@@ -140,24 +136,16 @@ namespace Game.Terrain
         private void UpdateBorders(Vector2 point)
         {
             if (LeftBorder > point.X)
-            {
                 LeftBorder = point.X;
-            }
 
             if (RightBorder < point.X)
-            {
                 RightBorder = point.X;
-            }
 
             if (TopBorder < point.Y)
-            {
                 TopBorder = point.Y;
-            }
 
             if (BottomBorder > point.Y)
-            {
                 BottomBorder = point.Y;
-            }
         }
 
         /// <summary>
@@ -197,9 +185,7 @@ namespace Game.Terrain
                 Tile tile = this[point];
 
                 if (tile == null)
-                {
                     this[point] = new Tile(terrain, point, locality, permeable);
-                }
                 else
                 {
                     tile.Register(terrain);

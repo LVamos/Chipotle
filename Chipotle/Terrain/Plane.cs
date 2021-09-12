@@ -48,9 +48,7 @@ namespace Game.Terrain
                 Tile walkable = around.GetPerimeterTiles().FirstOrDefault(t => t.Walkable);
 
                 if (walkable != null)
-                {
                     return (Vector2?)walkable.Position;
-                }
             }
             return (Vector2?)null;
         }
@@ -140,9 +138,7 @@ namespace Game.Terrain
             for (point.X = largerUpperLeft.X; point.X <= largerLowerRight.X; point.X++)
             {
                 for (point.Y = largerLowerRight.Y; point.Y < largerUpperLeft.Y; point.Y++)
-                {
                     yield return point;
-                }
             }
         }
 
@@ -163,13 +159,9 @@ namespace Game.Terrain
         {
             Vector2 step = direction.AsVector2();
             if (direction == Direction.Left || direction == Direction.Up)
-            {
                 UpperLeftCorner += step;
-            }
             else if (direction == Direction.Right || direction == Direction.Down)
-            {
                 LowerRightCorner += step;
-            }
         }
 
 
@@ -184,19 +176,13 @@ namespace Game.Terrain
             Assert((direction.IsVertical() && Height >= MinimumHeight) || (direction.IsHorizontal() && Width >= MinimumWidth), "Minimum size exceeded.");
 
             if (((direction == Direction.Left || direction == Direction.Right) && Width == 1) || ((direction == Direction.Up || direction == Direction.Down) && Height == 1))
-            {
                 return;
-            }
 
             Vector2 step = direction.GetOpposite().AsVector2();
             if (direction == Direction.Left || direction == Direction.Up)
-            {
                 UpperLeftCorner += step;
-            }
             else if (direction == Direction.Right || direction == Direction.Down)
-            {
                 LowerRightCorner += step;
-            }
         }
 
         /// <summary>
@@ -256,9 +242,7 @@ namespace Game.Terrain
         public bool LaysOnPlane(Vector2 point)
         {
             if (point.X == 2 && point.Y == 7)
-            {
                 throw new Exception();
-            }
 
             return point.X >= UpperLeftCorner.X && point.X <= LowerRightCorner.X && point.Y >= LowerRightCorner.Y && point.Y <= UpperLeftCorner.Y;
         }
@@ -357,9 +341,7 @@ namespace Game.Terrain
             foreach (Vector2 c in area.GetPoints())
             {
                 if (!IsOnPerimeter(c))
-                {
                     return false;
-                }
             }
 
             return true;
@@ -375,9 +357,7 @@ namespace Game.Terrain
         public IEnumerable<Tile> GetPerimeter()
         {
             foreach (Vector2 c in GetPerimeterPoints())
-            {
                 yield return World.Map[c];
-            }
         }
 
         public IEnumerable<Vector2> GetPerimeterPoints()
@@ -410,26 +390,20 @@ namespace Game.Terrain
             {
                 case Direction.Left:
                     for (y = bottom; y <= top; y++)
-                    {
                         yield return new Vector2(left, y);
-                    }
 
                     break;
 
                 case Direction.Right:
                     for (y = bottom; y <= top; y++)
-                    {
                         yield return new Vector2(right, y);
-                    }
 
                     break;
 
 
                 case Direction.Up:
                     for (x = left; x <= right; x++)
-                    {
                         yield return new Vector2(x, top);
-                    }
 
                     break;
 
@@ -437,9 +411,7 @@ namespace Game.Terrain
 
                 case Direction.Down:
                     for (x = left; x <= right; x++)
-                    {
                         yield return new Vector2(x, bottom);
-                    }
 
                     break;
 
@@ -598,9 +570,7 @@ namespace Game.Terrain
             List<int> coordinateList = new List<int>();
             coordinates = coordinates.Trim();
             foreach (string coordinate in Regex.Split(coordinates, @"\D+"))
-            {
                 coordinateList.Add(int.Parse(coordinate));
-            }
 
             // Check format
             Assert(coordinateList.Count == 4 || coordinateList.Count == 2, $"{nameof(coordinates)} in invalid format");

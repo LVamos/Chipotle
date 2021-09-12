@@ -19,13 +19,9 @@ namespace Game.Entities
                 !World.GetLocality("ulice h1").IsItHere(tuttle)
                 && !Locality.IsItHere(tuttle)
                 )
-            {
                 _cutscene = "cs24";
-            }
             else
-            {
                 _cutscene = "cs25";
-            }
 
             base.OnUseObject(message);
         }

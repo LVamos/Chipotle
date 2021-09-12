@@ -58,13 +58,9 @@ namespace Game
             Action action = () => MessageBox.Show(MainWindow, error, AppDomain.CurrentDomain.FriendlyName + ": závažná chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             if (MainWindow != null)
-            {
                 MainWindow.Invoke(action);
-            }
             else
-            {
                 action();
-            }
 
             Environment.Exit(0);
         }

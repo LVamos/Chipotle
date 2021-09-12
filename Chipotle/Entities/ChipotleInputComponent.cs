@@ -113,9 +113,7 @@ namespace Game.Entities
         private void SayOrientation()
         {
             if (!DebugSO.TestModeEnabled)
-            {
                 return;
-            }
 
             Tolk.Speak($"Columbo orientation: {Owner.Orientation.UnitVector.ToString()}, listener facing: {World.Sound.ListenerOrientationFacing.ToString()}, listener up: {World.Sound.ListenerOrientationUp.ToString()}, listener position: {World.Sound.ListenerPosition.ToString()}.");
         }

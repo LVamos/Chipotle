@@ -47,13 +47,9 @@ namespace Game.Terrain
                 return;
 
             if (Closed)
-            {
                 Open(m.Tile.Position);
-            }
             else
-            {
                 Close(m.Tile.Position);
-            }
         }
 
 

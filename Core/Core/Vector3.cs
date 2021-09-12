@@ -84,38 +84,24 @@ namespace Luky
             get
             {
                 if (index == 0)
-                {
                     return X;
-                }
                 else if (index == 1)
-                {
                     return Y;
-                }
                 else if (index == 2)
-                {
                     return Z;
-                }
 
                 throw new IndexOutOfRangeException("You tried to access this vector at index: " + index);
             }
             set
             {
                 if (index == 0)
-                {
                     X = value;
-                }
                 else if (index == 1)
-                {
                     Y = value;
-                }
                 else if (index == 2)
-                {
                     Z = value;
-                }
                 else
-                {
                     throw new IndexOutOfRangeException("You tried to set this vector at index: " + index);
-                }
             }
         }
 
@@ -650,9 +636,7 @@ namespace Luky
         public override bool Equals(object obj)
         {
             if (!(obj is Vector3))
-            {
                 return false;
-            }
 
             return Equals((Vector3)obj);
         }

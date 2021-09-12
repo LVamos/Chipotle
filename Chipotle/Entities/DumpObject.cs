@@ -20,9 +20,7 @@ namespace Game.Entities
             base.Destroy();
 
             if (_loopSoundId != 0)
-            {
                 World.Sound.Stop(_loopSoundId);
-            }
         }
 
         /// <summary>
@@ -54,24 +52,16 @@ namespace Game.Entities
         protected virtual void OnUseObject(UseObject message)
         {
             if ((_usableOnce && Used) || (string.IsNullOrEmpty(_sounds.action) && string.IsNullOrEmpty(_cutscene)))
-            {
                 return;
-            }
 
             World.Sound.GetDynamicInfo(_actionSoundID, out SoundState state, out int _);
             if (state == SoundState.Playing)
-            {
                 return;
-            }
 
             if (!string.IsNullOrEmpty(_sounds.action))
-            {
                 _actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
-            }
             else
-            {
                 World.PlayCutscene(this, _cutscene);
-            }
 
             if (!Used)
             {
@@ -79,9 +69,7 @@ namespace Game.Entities
                 UsedOnce = true;
             }
             else
-            {
                 UsedOnce = false;
-            }
         }
 
 
@@ -97,18 +85,14 @@ namespace Game.Entities
     });
 
             if (!string.IsNullOrEmpty(_sounds.loop))
-            {
                 _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true);
-            }
         }
 
 
         protected void OnCollision(GameMessage message)
         {
             if (!string.IsNullOrEmpty(_sounds.collision))
-            {
                 World.Sound.Play(_sounds.collision, null, false, PositionType.Absolute, Area.Center);
-            }
         }
 
     }

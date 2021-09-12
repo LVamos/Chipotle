@@ -27,13 +27,9 @@ namespace Game.Terrain
         public void UnregisterPassage()
         {
             if (Passage != null)
-            {
                 Passage = null;
-            }
             else
-            {
                 throw new InvalidOperationException("No passage");
-            }
         }
 
 
@@ -69,9 +65,7 @@ namespace Game.Terrain
             Passage = !IsOnPassage ? p ?? throw new ArgumentNullException(nameof(p)) : throw new InvalidOperationException(nameof(p));
 
             if (Terrain == TerrainType.Wall)
-            {
                 Terrain = Locality.DefaultTerrain;
-            }
         }
 
         public void Register(Locality l)

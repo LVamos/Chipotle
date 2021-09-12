@@ -194,12 +194,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Input\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Dokumenty\todo.txt" />
-    <Content Include="Terrain\Map.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core\Core.csproj">

@@ -123,9 +123,7 @@ new  Vector2(1, -1),
             foreach (Direction direction in _directionList)
             {
                 if (directions.Includes(direction))
-                {
                     yield return direction;
-                }
             }
         }
 

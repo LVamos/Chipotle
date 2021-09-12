@@ -1,6 +1,6 @@
 ﻿namespace Game.Entities
 {
-    internal class SweeneyPhysicsComponent : PhysicsComponent
+    public class SweeneyPhysicsComponent : PhysicsComponent
     {
     }
 }

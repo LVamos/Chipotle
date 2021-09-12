@@ -44,9 +44,7 @@ namespace Game.UI
 
             // Try to switch to parent window.
             if (_parentWindow != null)
-            {
                 WindowHandler.Switch(_parentWindow);
-            }
         }
 
 
@@ -61,9 +59,7 @@ namespace Game.UI
             Action action = null;
             KeyShortcut tmpShortcut = new KeyShortcut(e);
             if (_shortcuts != null && _shortcuts.TryGetValue(tmpShortcut, out action))
-            {
                 action();
-            }
         }
 
         /// <summary>

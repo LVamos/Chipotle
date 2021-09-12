@@ -143,14 +143,10 @@ namespace Game.Entities
             Vector2 orientation = Owner.Orientation.UnitVector;
 
             if (_sound.ListenerPosition.X != position.X || _sound.ListenerPosition.Z != position.Y)
-            {
                 _sound.ListenerPosition = position.AsOpenALVector();
-            }
 
             if (_sound.ListenerOrientationFacing.X != orientation.X || _sound.ListenerOrientationFacing.Z != orientation.Y)
-            {
                 _sound.ListenerOrientationFacing = orientation.AsOpenALVector();
-            }
         }
 
         private void OnMovementDone(EntityMoved message) => PlayTerrain(message.Target);
