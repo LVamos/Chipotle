@@ -69,7 +69,7 @@
     <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
     <Compile Include="Messaging\Events\LocalityChanged.cs" />
-    <Compile Include="Messaging\Events\Reveal.cs" />
+    <Compile Include="Messaging\Commands\Reveal.cs" />
     <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
     <Compile Include="Entities\PubTable.cs" />
