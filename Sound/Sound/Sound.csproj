@@ -44,9 +44,8 @@
       <HintPath>bin\lib\NLibsndfile\NLibsndfile.Native.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="OpenTKSubset, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\TheCrucialGame\bin\Debug\lib\OpenTK\OpenTKSubset.dll</HintPath>
+    <Reference Include="OpenTK, Version=3.3.2.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\OpenTK.3.3.2\lib\net20\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="OpusfileSharp">
       <HintPath>bin\lib\OpusFileSharp\OpusfileSharp.dll</HintPath>
@@ -77,6 +76,10 @@
       <Project>{E4525846-A882-43D8-A581-5C39F0978855}</Project>
       <Name>Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
