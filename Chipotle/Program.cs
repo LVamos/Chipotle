@@ -1,13 +1,12 @@
-﻿using System.Reflection;
+﻿using System;
+using System.IO;
+using System.Windows.Forms;
+
 using DavyKager;
 
 using Game.UI;
 
 using Luky;
-
-using System;
-using System.IO;
-using System.Windows.Forms;
 
 namespace Game
 {
@@ -17,13 +16,18 @@ namespace Game
 
         public static MainWindow MainWindow { get; private set; }
 
+        public static void OnError(Exception ex)
+        => OnError(ex.ToString());
+
+        private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+   => OnError(e.Exception);
+
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+  => OnError(e.ExceptionObject.ToString());
+
         [STAThread]
         private static void Main()
         {
-
-
-
-
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             DataPath = @"Data\";
@@ -34,7 +38,7 @@ namespace Game
                 Tolk.Load();
                 Tolk.TrySAPI(true);
                 SayDelegate = (message) => Tolk.Speak(message);
-            World.SoundInit();
+                World.SoundInit();
                 MainWindow = new MainWindow();
                 Application.Run(MainWindow);
             }
@@ -43,15 +47,6 @@ namespace Game
                 OnError(ex);
             }
         }
-
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-  => OnError(e.ExceptionObject.ToString());
-
-        private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
-   => OnError(e.Exception);
-
-        public static void OnError(Exception ex)
-        => OnError(ex.ToString());
 
         private static void OnError(string error)
         {
