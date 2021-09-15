@@ -1,15 +1,17 @@
 ﻿namespace Luky
 {
+    /// <summary>
+    /// Stores a path to a file or directory.
+    /// </summary>
     public struct FilePath
     {
-        // just to make things more type safe I'd rather pass around a type of FilePath than a type of string.
-        public readonly string Path;
         public readonly string Extension;
+        public readonly string Path;
 
         /// <summary>
-        /// constructor
+        /// Constructor
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to a file or directory</param>
         public FilePath(string path)
         {
             Path = path;
@@ -17,25 +19,24 @@
         }
 
         /// <summary>
-        /// 
+        /// Automatically converts a string to FilePath
         /// </summary>
         /// <param name="s"></param>
         public static implicit operator FilePath(string s)
         => new FilePath(s);
 
         /// <summary>
-        /// 
+        /// Automatically converts a FilePath to string
         /// </summary>
-        /// <param name="fp"></param>
+        /// <param name="fp">A filepath to convert</param>
         public static implicit operator string(FilePath fp)
          => fp.Path;
 
         /// <summary>
-        /// 
+        /// Returns a string that represents the current object.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string that represents the current object.</returns>
         public override string ToString()
         => Path;
     }
-
 }

@@ -19,6 +19,8 @@ namespace Luky
         public string ReverbPresetName;
         private const int _bufferSize = 1920;
         private const int _millisecondsPerTick = 10;
+        private static string _soundPath;
+        private static Action<string> Say;
         private readonly ShortBuffer _buffer = new ShortBuffer(_bufferSize);
         private readonly List<ShortBuffer> _buffers;
         private List<Snapshot> _blendingSnapshots = new List<Snapshot>();
@@ -74,8 +76,10 @@ namespace Luky
         /// private constructor
         /// </summary>
         /// <param name="onError"></param>
-        private SoundThread(Action<Exception> onError)
+        private SoundThread(string soundPath, Action<Exception> onError, Action<string> say)
         {
+            _soundPath = soundPath;
+            Say = say;
             _onError = onError;
 
             _buffers = new List<ShortBuffer>(OpenALSystem.MaxQueuedBuffers);
@@ -128,9 +132,9 @@ namespace Luky
         /// </summary>
         /// <param name="onError"></param>
         /// <returns></returns>
-        public static SoundThread CreateAndStartThread(Action<Exception> onError)
+        public static SoundThread CreateAndStartThread(string soundPath, Action<Exception> onError, Action<string> say)
         {
-            SoundThread soundThread = new SoundThread(onError);
+            SoundThread soundThread = new SoundThread(soundPath, onError, say);
             soundThread.StartThread();
             return soundThread;
         }
@@ -290,7 +294,7 @@ namespace Luky
         public void LoadSounds()
         {
             _soundFiles = new Dictionary<string, SoundFileInfo>();
-            IEnumerable<string> files = Directory.EnumerateFiles(DebugSO.SoundAssetsPath, "*.*", SearchOption.AllDirectories).Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") || f.EndsWith(".flac") || f.EndsWith(".ogg"));
+            IEnumerable<string> files = Directory.EnumerateFiles(_soundPath, "*.*", SearchOption.AllDirectories).Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") || f.EndsWith(".flac") || f.EndsWith(".ogg"));
             HashSet<string> usedNames = new HashSet<string>();
             foreach (string path in files)
             {
@@ -445,38 +449,38 @@ namespace Luky
             if (!DebugSO.TestModeEnabled)
                 return;
 
-            void Say(float parameter)
-                => DebugSO.SayDelegate(parameter.ToString("0.0000"));
+            void SayParameter(float parameter)
+                => Say(parameter.ToString("0.0000"));
 
             switch (_reverbParameterIndex)
             {
-                case 0: Say(_reverbSetting.Density); break;
-                case 1: Say(_reverbSetting.Diffusion); break;
-                case 2: Say(_reverbSetting.Gain); break;
-                case 3: Say(_reverbSetting.GainHF); break;
-                case 4: Say(_reverbSetting.DecayTime); break;
-                case 5: Say(_reverbSetting.DecayHFRatio); break;
-                case 6: Say(_reverbSetting.ReflectionsGain); break;
-                case 7: Say(_reverbSetting.ReflectionsDelay); break;
-                case 8: Say(_reverbSetting.LateReverbGain); break;
-                case 9: Say(_reverbSetting.LateReverbDelay); break;
-                case 10: Say(_reverbSetting.AirAbsorptionGainHF); break;
-                case 11: Say(_reverbSetting.RoomRolloffFactor); break;
-                case 12: DebugSO.SayDelegate(_reverbSetting.DecayHFLimit.ToString()); break;
-                case 13: Say(_reverbSetting.DecayLFRatio); break;
-                case 14: Say(_reverbSetting.EchoDepth); break;
-                case 15: Say(_reverbSetting.EchoTime); break;
-                case 16: Say(_reverbSetting.GainLF); break;
-                case 17: Say(_reverbSetting.HFReference); break;
-                case 18: Say(_reverbSetting.LFReference); break;
-                case 19: Say(_reverbSetting.ModulationDepth); break;
-                case 20: Say(_reverbSetting.ModulationTime); break;
-                case 21: DebugSO.SayDelegate(_reverbSetting.ReflectionsPan.ToString()); break;
-                case 22: DebugSO.SayDelegate(_reverbSetting.LateReverbPan.ToString()); break;
+                case 0: SayParameter(_reverbSetting.Density); break;
+                case 1: SayParameter(_reverbSetting.Diffusion); break;
+                case 2: SayParameter(_reverbSetting.Gain); break;
+                case 3: SayParameter(_reverbSetting.GainHF); break;
+                case 4: SayParameter(_reverbSetting.DecayTime); break;
+                case 5: SayParameter(_reverbSetting.DecayHFRatio); break;
+                case 6: SayParameter(_reverbSetting.ReflectionsGain); break;
+                case 7: SayParameter(_reverbSetting.ReflectionsDelay); break;
+                case 8: SayParameter(_reverbSetting.LateReverbGain); break;
+                case 9: SayParameter(_reverbSetting.LateReverbDelay); break;
+                case 10: SayParameter(_reverbSetting.AirAbsorptionGainHF); break;
+                case 11: SayParameter(_reverbSetting.RoomRolloffFactor); break;
+                case 12: Say(_reverbSetting.DecayHFLimit.ToString()); break;
+                case 13: SayParameter(_reverbSetting.DecayLFRatio); break;
+                case 14: SayParameter(_reverbSetting.EchoDepth); break;
+                case 15: SayParameter(_reverbSetting.EchoTime); break;
+                case 16: SayParameter(_reverbSetting.GainLF); break;
+                case 17: SayParameter(_reverbSetting.HFReference); break;
+                case 18: SayParameter(_reverbSetting.LFReference); break;
+                case 19: SayParameter(_reverbSetting.ModulationDepth); break;
+                case 20: SayParameter(_reverbSetting.ModulationTime); break;
+                case 21: Say(_reverbSetting.ReflectionsPan.ToString()); break;
+                case 22: Say(_reverbSetting.LateReverbPan.ToString()); break;
             }
         }
 
-        public void SayReverbPresetName() => DebugSO.SayDelegate(string.IsNullOrEmpty(ReverbPresetName) ? "nic" : ReverbPresetName);
+        public void SayReverbPresetName() => Say(string.IsNullOrEmpty(ReverbPresetName) ? "nic" : ReverbPresetName);
 
         /// <summary>
         /// </summary>
@@ -554,7 +558,7 @@ namespace Luky
             if (!DebugSO.TestModeEnabled)
                 return;
 
-            DebugSO.SayDelegate("Výchozí.");
+            Say("Výchozí.");
 
             switch (_reverbParameterIndex)
             {
@@ -591,7 +595,7 @@ namespace Luky
             if (!DebugSO.TestModeEnabled)
                 return;
 
-            DebugSO.SayDelegate("Maximum");
+            Say("Maximum");
 
             switch (_reverbParameterIndex)
             {
@@ -616,8 +620,8 @@ namespace Luky
                 case 18: _reverbSetting.LFReference = EaxReverbDefaults.MaxLFReference; break;
                 case 19: _reverbSetting.ModulationDepth = EaxReverbDefaults.MaxModulationDepth; break;
                 case 20: _reverbSetting.ModulationTime = EaxReverbDefaults.MaxModulationTime; break;
-                case 21: _reverbSetting.ReflectionsPan = MathHelper.GetUnitVectorFromCompassDegrees(359).AsOpenALVector().AsOpenTKV3(); break;
-                case 22: _reverbSetting.LateReverbPan = MathHelper.GetUnitVectorFromCompassDegrees(359).AsOpenALVector().AsOpenTKV3(); break;
+                case 21: _reverbSetting.ReflectionsPan = MathHelper.CompassDegreesToUnitVector(359).AsOpenALVector().AsOpenTKV3(); break;
+                case 22: _reverbSetting.LateReverbPan = MathHelper.CompassDegreesToUnitVector(359).AsOpenALVector().AsOpenTKV3(); break;
             }
 
             RunCommand(() => _openALSystem.SetEaxReverbProperties(_reverbSetting));
@@ -628,7 +632,7 @@ namespace Luky
             if (!DebugSO.TestModeEnabled)
                 return;
 
-            DebugSO.SayDelegate("Minimum");
+            Say("Minimum");
 
             switch (_reverbParameterIndex)
             {
@@ -911,7 +915,7 @@ namespace Luky
                     return _nAudioDecoder;
 
                 default:
-                    throw Exception("Unrecognized decoder system: {0}", sound.Decoder);
+                    throw new InvalidOperationException($"Unrecognized decoder system:" + sound.Decoder.ToString());
             }
         }
 
@@ -924,7 +928,7 @@ namespace Luky
             if (sound.Playback == Playback.OpenAL)
                 return _openALSystem;
             else
-                throw Exception("Unrecognized playback system: {0}", sound.Playback);
+                throw new InvalidOperationException($"Unrecognized playback system: {sound.Playback.ToString()}");
         }
 
         private SoundFileInfo GetSoundFileInfo(string name)
@@ -1008,9 +1012,6 @@ namespace Luky
 
         private void LoadReverbPresets()
         {
-            if (!DebugSO.TestModeEnabled)
-                return;
-
             _reverbPresets = EaxReverbDefaults.GetEaxPresets().ToList();
         }
 
@@ -1026,7 +1027,7 @@ namespace Luky
         }
 
         private void SpeakReverbParameter()
-                                                                                  => DebugSO.SayDelegate(_reverbParameters[_reverbParameterIndex]);
+                                                                                  => Say(_reverbParameters[_reverbParameterIndex]);
 
         /// <summary>
         /// </summary>
@@ -1037,7 +1038,7 @@ namespace Luky
                 try
                 {
                     // init logic
-                    _openALSystem = OpenALSystem.CreateAndBindToThisThread(true);
+                    _openALSystem = OpenALSystem.CreateAndBindToThisThread(Say);
                     _lSFDecoder = new LSFDecoder();
                     _opusFileDecoder = new OpusFileDecoder();
                     _nAudioDecoder = new NAudioDecoder();

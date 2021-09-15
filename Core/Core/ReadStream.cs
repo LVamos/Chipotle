@@ -2,16 +2,26 @@
 
 namespace Luky
 {
-
+    /// <summary>
+    /// Encapsulates a read stream
+    /// </summary>
     public sealed class ReadStream
     {
-        public readonly string Path;
-        public readonly Stream Stream; // I had hoped to expose only read methods on this class and pass them through to the stream object. But it looks like I have to expose this stream since libraries I depend on use it, such as OpusFileSharp.
         /// <summary>
-        /// constructor
+        /// Path to a file that is streamed
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="stream"></param>
+        public readonly string Path;
+
+        /// <summary>
+        /// The stream
+        /// </summary>
+        public readonly Stream Stream;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="path">Path to the source</param>
+        /// <param name="stream">Instance of a stream</param>
         public ReadStream(string path, Stream stream)
         {
             Path = path;
@@ -19,12 +29,11 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Opens a file as a stream.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">Path to the file</param>
+        /// <returns>Instance of ReadStream</returns>
         public static ReadStream FromFileSystem(string path)
        => new ReadStream(path, File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read));
     }
-
 }

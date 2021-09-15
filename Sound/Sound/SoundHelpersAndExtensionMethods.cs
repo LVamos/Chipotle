@@ -19,6 +19,11 @@ namespace Luky
     /// </summary>
     internal static class SoundExtensionMethods
     {
+        public Vector3 AsOpenALVector(this Vector2 v)
+=> new Vector3(v.X, 0, v.Y);
+
+
+
         /// <summary>
         /// 
         /// </summary>

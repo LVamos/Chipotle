@@ -40,11 +40,16 @@ namespace Luky
         // this maps soundIDs to their associated info.
         private Dictionary<int, Info> _table = new Dictionary<int, Info>();
 
+        private Action<string> Say;
+
         /// <summary>
         /// private constructor
         /// </summary>
-        private OpenALSystem(AudioContext context)
-            => _alContext = context;
+        private OpenALSystem(AudioContext context, Action<string> say)
+        {
+            Say = say;
+            _alContext = context;
+        }
 
         /// <summary>
         /// Initializes OpenAL and starts thread. OpenAL is binded to current thread. Should be used
@@ -52,8 +57,8 @@ namespace Luky
         /// </summary>
         /// <param name="useHRTF"></param>
         /// <returns>instance of OpenALSystem</returns>
-        public static OpenALSystem CreateAndBindToThisThread(bool? useHRTF)
-            => new OpenALSystem(new AudioContext(null, 0, 0, false, true, AudioContext.MaxAuxiliarySends.UseDriverDefault));
+        public static OpenALSystem CreateAndBindToThisThread(Action<string> say)
+            => new OpenALSystem(new AudioContext(null, 0, 0, false, true, AudioContext.MaxAuxiliarySends.UseDriverDefault), say);
 
         public void ApplyEaxReverbPreset(EaxReverb preset, string name = null, float gain = 0)
         {
@@ -215,7 +220,7 @@ namespace Luky
         public void Play(int soundID, List<ShortBuffer> initialBuffers)
         {
             if (initialBuffers.Count != MaxQueuedBuffers)
-                throw ArgumentException("initialBuffers should have length {0} but have length {1}", MaxQueuedBuffers, initialBuffers.Count);
+                throw new ArgumentException($"initialBuffers should have length {MaxQueuedBuffers.ToString()} but have length {initialBuffers.Count.ToString()}");
 
             Info info = _table[soundID];
             if (info.QueuedBufferIDs == null)
@@ -346,7 +351,7 @@ namespace Luky
             ALAnnounceError($"Apply changes to effect slot.");
 
             if (!string.IsNullOrEmpty(name))
-                DebugSO.SayDelegate(name);
+                Say(name);
         }
 
         /// <summary>
@@ -436,7 +441,7 @@ namespace Luky
                 else
                     text = prefix + " " + text;
 
-                SayDelegate(text);
+                Say(text);
                 System.Diagnostics.Debugger.Break();
             }
         }

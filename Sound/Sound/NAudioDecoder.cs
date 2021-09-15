@@ -1,27 +1,26 @@
-﻿using NAudio.Wave;
-
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using NAudio.Wave;
+
 namespace Luky
 {
     /// <summary>
-    /// 
     /// </summary>
     internal sealed class NAudioDecoder : DebugSO, IDecoder
     {
         private const int _bytesPerSample = 2;
-
-        private byte[] mBuffer = new byte[3840];
 
         /// <summary>
         /// this maps soundIDs to their associated info.
         /// </summary>
         private Dictionary<int, Info> _table = new Dictionary<int, Info>();
 
+        private byte[] mBuffer = new byte[3840];
+
         /// <summary>
-        /// 
         /// </summary>
         public void Dispose()
         { // dispose each sound
@@ -30,7 +29,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="soundID"></param>
         public void DisposeStream(int soundID)
@@ -42,7 +40,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="soundID"></param>
         /// <param name="buffer"></param>
@@ -65,7 +62,7 @@ namespace Luky
             }
             int shortsRead = bytesRead / 2;
             if (buffer.Length < shortsRead)
-                throw Exception("buffer is too small, has length {0} but needs length {1}", buffer.Length, shortsRead);
+                throw new InvalidOperationException($"buffer is too small, has length {buffer.Length} but needs length {shortsRead}");
 
             System.Buffer.BlockCopy(mBuffer, 0, buffer, 0, bytesRead);
             if (info.ForceMono && info.Channels == 2)
@@ -75,7 +72,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="soundID"></param>
         /// <param name="currentSample"></param>
@@ -84,8 +80,8 @@ namespace Luky
             Info info = _table[soundID];
             currentSample = (int)info.Reader.Position / _bytesPerSample / info.Channels;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="soundID"></param>
         /// <param name="sampleRate"></param>
@@ -101,7 +97,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="soundID"></param>
         /// <param name="looping"></param>
@@ -112,7 +107,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="soundID"></param>
         /// <param name="stream"></param>
@@ -129,7 +123,8 @@ namespace Luky
             info.Reader = new StreamMediaFoundationReader(stream);
             sampleRate = info.Reader.WaveFormat.SampleRate;
             info.Channels = info.Reader.WaveFormat.Channels;
-            // note that we leave info.Channels as the number of channels we are reading, but we may change the channels variable we return for playback if we are forcing mono.
+            // note that we leave info.Channels as the number of channels we are reading, but we may
+            // change the channels variable we return for playback if we are forcing mono.
             channels = info.Channels;
             if (forceMono && channels == 2)
                 channels = 1;
@@ -138,7 +133,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="soundID"></param>
         /// <param name="seekSample"></param>
@@ -149,7 +143,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         private sealed class Info
         {
