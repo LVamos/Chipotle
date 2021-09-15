@@ -4,41 +4,48 @@ using System.Collections.Generic;
 namespace Luky
 {
     /// <summary>
-    /// 
+    /// An immutable class to store unique names
     /// </summary>
     [Serializable]
     public sealed class Name : DebugSO
     {
-        // immutable class
+        /// <summary>
+        /// A public display name
+        /// </summary>
         public readonly string Friendly;
 
+        /// <summary>
+        /// Unique identificator
+        /// </summary>
         public readonly UInt16 ID;
 
+        /// <summary>
+        /// Inner name for indexing purposes
+        /// </summary>
         public readonly string Indexed;
 
         private static UInt16 _stringCount = 0;
 
         private static Dictionary<string, UInt16> _stringsToIDs = new Dictionary<string, ushort>();
 
-
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="indexedName"></param>
+        /// <param name="indexedName">Inner name</param>
         public Name(string indexedName) : this(indexedName, indexedName)
         { }
 
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="indexedName"></param>
-        /// <param name="friendlyName"></param>
+        /// <param name="indexedName">Inner name</param>
+        /// <param name="friendlyName">Public name</param>
         public Name(string indexedName, string friendlyName)
         {
             Indexed = indexedName.PrepareForIndexing();
             Friendly = friendlyName;
 
-            // Optain ID from dictionary or add new record.
+            // Assign an unique ID
             if (!_stringsToIDs.TryGetValue(Indexed, out ID))
             {
                 ID = ++_stringCount;
@@ -46,24 +53,21 @@ namespace Luky
             }
         }
 
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="name">An instance of Name</param>
         public Name(Name name) : this(name.Indexed, name.Friendly) { }
-
-
-
 
         // operator overloads
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="s"></param>
         public static implicit operator Name(string s)
                 => s == null ? null : new Name(s);
 
-
-
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -72,7 +76,6 @@ namespace Luky
         => (object.ReferenceEquals((object)a, (object)b) || a.Indexed != b.Indexed || a.Friendly != b.Friendly);
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -81,7 +84,6 @@ namespace Luky
             => !(a == b);
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -100,24 +102,21 @@ namespace Luky
             return a.ID == b.ID;
         }
 
-
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
         public static bool operator ==(Name a, string b)
             => (b == null) ? a == (Name)null : a == new Name(b);
-        //{
 
+        //{
         //    if (b == null)
         //        return a == (Name)null;
         //    return a == new Name(b, b);
 
         //}
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -137,7 +136,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="n"></param>
         /// <returns></returns>
@@ -154,25 +152,21 @@ namespace Luky
         // overrides related to comparison operators
 
         /// <summary>
-        /// 
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()
         => ID.GetHashCode();
 
         /// <summary>
-        /// 
         /// </summary>
         /// <returns></returns>
         public string ToDebugString()
         => String.Format("{0} {1} {2}", ToString(), ID, Indexed);
 
         /// <summary>
-        /// 
         /// </summary>
         /// <returns></returns>
         public override string ToString()
         => Indexed;
-
     } // cls
 }

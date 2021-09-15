@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using DavyKager;
+
 using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
@@ -13,42 +15,25 @@ namespace Game.Entities
 {
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
-        private bool _sittingAtPubTable;
-
-        private HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
-
-        public override void Update()
-        {
-            base.Update();
-            UpdateRotation();
-            CountPhone();
-        }
-
-        private void CountPhone()
-        {
-            if (_phoneCountdown)
-                _phoneDeltaTime += World.DeltaTime;
-        }
-
-        private void UpdateRotation()
-        {
-            if (_plannedRotations > 0)
-            {
-                _orientation.Rotate(_rotationStep);
-                _plannedRotations -=5;
-
-                if (_plannedRotations == 0)
-                    Owner.ReceiveMessage(new TurnEntityResult(this, _orientation));
-            }
-        }
-
-        private int _rotationStep;
-        private int _plannedRotations;
-        private bool _steppedIntoPuddle;
-        private bool _sittingOnChair;
+        private ChipotlesCarMoved _carMovement;
         private bool _phoneCountdown;
         private int _phoneDeltaTime;
         private int _phoneInterval;
+        private int _plannedRotations;
+        private int _rotationStep;
+        private bool _sittingAtPubTable;
+
+        private bool _sittingOnChair;
+        private bool _steppedIntoPuddle;
+        private HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
+
+        private Locality AsphaltRoad => World.GetLocality("asfaltka c1");
+
+        private ChipotlesCar Car => World.GetObject("detektivovo auto") as ChipotlesCar;
+
+        private Tile CuurrentTile => World.Map[_area.Center];
+
+        private Entity Tuttle => World.GetEntity("tuttle");
 
         public override void Start()
         {
@@ -78,81 +63,13 @@ namespace Game.Entities
 
             // Play intro cutscene
             World.PlayCutscene(Owner, "cs6");
-
         }
 
-        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
-=> _carMovement = message;
-
-        private void OnSayNearestObject(SayNearestObject m)
+        public override void Update()
         {
-            GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
-            if (o == null)
-            {
-                Say("Nic tu není");
-                return;
-            }
-            string msg = o.Name.Friendly;
-
-            if (o.Area.LowerRightCorner.Y > _area.Center.Y)
-                msg += " před tebou";
-            else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
-                msg += " za tebou";
-            {
-                if (o.Area.UpperRightCorner.X < _area.Center.X)
-                    msg += " vlevo";
-                else
-                    msg += " vpravo";
-            }
-
-            Say(msg);
-        }
-
-        private void OnSayLocality(SayLocality m)
-=> SayDelegate(_area.GetLocality().Name.Friendly);
-
-        private void OnSayTerrain(SayTerrain message)
-            => SayDelegate(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
-
-        private Tile CuurrentTile => World.Map[_area.Center];
-
-        private void OnUseObject(UseObject message)
-        {
-            // Detect door and use it if possible.
-            IEnumerable<Tile> adjectingTiles = CuurrentTile.GetNeighbours8();
-            Tile tileWithDoor = adjectingTiles.Where(t => t.Passage != null && t.Passage is Door).FirstOrDefault();
-            if (tileWithDoor != null)
-                tileWithDoor.Passage.ReceiveMessage(new UseObject(Owner, tileWithDoor));
-
-
-            // Detect object in front of Chipotle.
-            Tile tileInFront = GetNextTile();
-
-            if (tileInFront.Object != null)
-                tileInFront.Object.ReceiveMessage(new UseObject(Owner, tileInFront));
-        }
-
-        private void WatchSweeneysRoom()
-        {
-            if (
-                 World.GetObject("trezor s1").Used
-                && (World.GetObject("stůl s1").Used || World.GetObject("stůl s5").Used)
-                && World.GetObject("počítač s1").Used
-                && World.GetObject("mobil s1").Used
-                )
-            {
-                Car.ReceiveMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
-                World.PlayCutscene(Owner, "cs19");
-            }
-        }
-        private Locality AsphaltRoad => World.GetLocality("asfaltka c1");
-        private ChipotlesCar Car => World.GetObject("detektivovo auto") as ChipotlesCar;
-
-
-        private void OnTurnEntity(TurnEntity message)
-        {
-            _rotationStep = message.Degrees >= 0 ? 5 : -5;
-            _plannedRotations = Math.Abs(message.Degrees);
+            base.Update();
+            UpdateRotation();
+            CountPhone();
         }
 
         protected override void OnCutsceneBegan(CutsceneBegan message) => CatchSitting(message);
@@ -178,38 +95,33 @@ namespace Game.Entities
             }
         }
 
-        private ChipotlesCarMoved _carMovement;
-
-        private void WatchCar()
+        private void CatchSitting(CutsceneBegan message)
         {
-            if (_carMovement == null)
-                return;
-
-            Vector2? target = _carMovement.TargetLocation.FindRandomWalkableTile(1);
-            Assert(target.HasValue, "No walkable tile found.");
-            SetPosition((Vector2)target, true);
-            _carMovement = null;
+            switch (message.CutsceneName)
+            {
+                case "cs24": case "cs25": _sittingAtPubTable = true; break;
+                case "snd12": _sittingOnChair = true; break;
+            }
         }
 
-
-        private void JumpToMariottisOffice()
-            => SetPosition(2018, 1123, true);
-
-        private void WatchIcecreamMachine()
+        private void CountPhone()
         {
-            if (World.GetObject("automat v1").Used)
-                World.PlayCutscene(this, "cs13");
+            if (_phoneCountdown)
+                _phoneDeltaTime += World.DeltaTime;
         }
 
-        private void JumpToVanillaCrunchGarage()
-            => SetPosition(2006, 1166, true);
+        private Tile GetNextTile(Orientation2D orientation, int step = 1)
+        {
+            Plane target = new Plane(_area);
+            target.Move(orientation, step);
+            return World.Map[target.Center];
+        }
 
-        private void JumpToSweeneysHall()
-            => SetPosition(1405, 965, true);
+        private Tile GetNextTile(int step = 1)
+            => GetNextTile(Orientation, step);
 
-        private void JumpToChristinesHall()
-            => SetPosition(1797, 1125, true);
-
+        private bool IsTuttleNearBy()
+=> _area.GetLocality().IsItHere(World.GetEntity("tuttle"));
 
         /// <summary>
         /// Chipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
@@ -223,30 +135,20 @@ namespace Game.Entities
             SetPosition(1805, 1121, true);
         }
 
-        private void QuitGame() => World.QuitGame();
+        private void JumpToChristinesHall()
+            => SetPosition(1797, 1125, true);
 
+        private void JumpToMariottisOffice()
+            => SetPosition(2018, 1123, true);
 
+        private void JumpToSweeneysHall()
+            => SetPosition(1405, 965, true);
 
-        private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
+        private void JumpToVanillaCrunchGarage()
+            => SetPosition(2006, 1166, true);
 
-        private void CatchSitting(CutsceneBegan message)
-        {
-            switch (message.CutsceneName)
-            {
-                case "cs24": case "cs25": _sittingAtPubTable = true; break;
-                case "snd12": _sittingOnChair = true; break;
-            }
-        }
-
-        private Tile GetNextTile(Orientation2D orientation, int step = 1)
-        {
-            Plane target = new Plane(_area);
-            target.Move(orientation, step);
-            return World.Map[target.Center];
-        }
-
-        private Tile GetNextTile(int step = 1)
-            => GetNextTile(Orientation, step);
+        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
+=> _carMovement = message;
 
         private void OnMakeStep(MakeStep message)
         {
@@ -259,7 +161,7 @@ namespace Game.Entities
             if (message.Direction != TurnType.None)
                 finalOrientation.Rotate(message.Direction);
 
-                    // Is the terrain occupable?
+            // Is the terrain occupable?
             Tile targetTile = GetNextTile(finalOrientation) ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
 
             if (!targetTile.Permeable)
@@ -286,9 +188,6 @@ namespace Game.Entities
                 }
             }
 
-
-
-
             // The road is clear! Move!
             SetPosition(targetTile.Position);
             RecordLocality(targetTile.Locality);
@@ -301,14 +200,65 @@ namespace Game.Entities
             WatchPhone();
         }
 
-        private void WatchPhone()
+        private void OnSayLocality(SayLocality m)
+=> Tolk.Speak(_area.GetLocality().Name.Friendly);
+
+        private void OnSayNearestObject(SayNearestObject m)
         {
-            if (_phoneCountdown && _phoneDeltaTime >= _phoneInterval)
+            GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
+            if (o == null)
             {
-                _phoneCountdown = false;
-                World.GetObject("detektivovo auto").ReceiveMessage(new UnblockLocality(Owner, World.GetLocality("ulice s1")));
-                World.PlayCutscene(Owner, "cs22");
+                Tolk.Speak("Nic tu není");
+                return;
             }
+            string msg = o.Name.Friendly;
+
+            if (o.Area.LowerRightCorner.Y > _area.Center.Y)
+                msg += " před tebou";
+            else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
+                msg += " za tebou";
+            {
+                if (o.Area.UpperRightCorner.X < _area.Center.X)
+                    msg += " vlevo";
+                else
+                    msg += " vpravo";
+            }
+
+            Tolk.Speak(msg);
+        }
+
+        private void OnSayTerrain(SayTerrain message)
+            => Tolk.Speak(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
+
+        private void OnTurnEntity(TurnEntity message)
+        {
+            _rotationStep = message.Degrees >= 0 ? 5 : -5;
+            _plannedRotations = Math.Abs(message.Degrees);
+        }
+
+        private void OnUseObject(UseObject message)
+        {
+            // Detect door and use it if possible.
+            IEnumerable<Tile> adjectingTiles = CuurrentTile.GetNeighbours8();
+            Tile tileWithDoor = adjectingTiles.Where(t => t.Passage != null && t.Passage is Door).FirstOrDefault();
+            if (tileWithDoor != null)
+                tileWithDoor.Passage.ReceiveMessage(new UseObject(Owner, tileWithDoor));
+
+            // Detect object in front of Chipotle.
+            Tile tileInFront = GetNextTile();
+
+            if (tileInFront.Object != null)
+                tileInFront.Object.ReceiveMessage(new UseObject(Owner, tileInFront));
+        }
+
+        private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
+
+        private void QuitGame() => World.QuitGame();
+
+        private void RecordLocality(Locality locality)
+        {
+            if (!_visitedLocalities.Contains(locality))
+                _visitedLocalities.Add(locality);
         }
 
         private bool StandUp()
@@ -330,15 +280,43 @@ namespace Game.Entities
             return false;
         }
 
-        private Entity Tuttle => World.GetEntity("tuttle");
-
-        private bool IsTuttleNearBy()
-=> _area.GetLocality().IsItHere(World.GetEntity("tuttle"));
-
-        private void RecordLocality(Locality locality)
+        private void UpdateRotation()
         {
-            if (!_visitedLocalities.Contains(locality))
-                _visitedLocalities.Add(locality);
+            if (_plannedRotations > 0)
+            {
+                _orientation.Rotate(_rotationStep);
+                _plannedRotations -= 5;
+
+                if (_plannedRotations == 0)
+                    Owner.ReceiveMessage(new TurnEntityResult(this, _orientation));
+            }
+        }
+
+        private void WatchCar()
+        {
+            if (_carMovement == null)
+                return;
+
+            Vector2? target = _carMovement.TargetLocation.FindRandomWalkableTile(1);
+            Assert(target.HasValue, "No walkable tile found.");
+            SetPosition((Vector2)target, true);
+            _carMovement = null;
+        }
+
+        private void WatchIcecreamMachine()
+        {
+            if (World.GetObject("automat v1").Used)
+                World.PlayCutscene(this, "cs13");
+        }
+
+        private void WatchPhone()
+        {
+            if (_phoneCountdown && _phoneDeltaTime >= _phoneInterval)
+            {
+                _phoneCountdown = false;
+                World.GetObject("detektivovo auto").ReceiveMessage(new UnblockLocality(Owner, World.GetLocality("ulice s1")));
+                World.PlayCutscene(Owner, "cs22");
+            }
         }
 
         private void WatchPuddle(Vector2 point)
@@ -353,7 +331,19 @@ namespace Game.Entities
                 World.PlayCutscene(Owner, "cs2");
             }
         }
+
+        private void WatchSweeneysRoom()
+        {
+            if (
+                 World.GetObject("trezor s1").Used
+                && (World.GetObject("stůl s1").Used || World.GetObject("stůl s5").Used)
+                && World.GetObject("počítač s1").Used
+                && World.GetObject("mobil s1").Used
+                )
+            {
+                Car.ReceiveMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
+                World.PlayCutscene(Owner, "cs19");
+            }
+        }
     }
-
-
 }

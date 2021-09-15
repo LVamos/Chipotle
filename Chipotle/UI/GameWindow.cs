@@ -1,20 +1,17 @@
-﻿using DavyKager;
-
-using Game.Messaging.Events;
-using Game.Terrain;
-
-using Luky;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+
+using DavyKager;
+
+using Game.Messaging.Events;
+
+using Luky;
 
 namespace Game.UI
 {
     public class GameWindow : VirtualWindow
     {
-
-
         public GameWindow()
         {
             Dictionary<KeyShortcut, Action> shortcuts = new Dictionary<KeyShortcut, Action>()
@@ -23,7 +20,6 @@ namespace Game.UI
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.T)] = SayTuttlesPosition,
 
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.J)] = MoveTuttleFromClipboard,
-
 
                 // Test shortcuts for reverb settings
                 [new KeyShortcut(Keys.PageDown)] = () => World.Sound.SwitchToNextReverbPreset(),
@@ -43,34 +39,7 @@ namespace Game.UI
             };
 
             RegisterShortcuts(shortcuts);
-
-
         }
-
-        private void SayTuttlesPosition() => SayDelegate(World.GetEntity("tuttle").Area.Center.ToString());
-
-
-        private void MoveTuttleFromClipboard()
-            => World.GetEntity("tuttle").ReceiveMessage(new Game.Messaging.Commands.SetPosition(this, new Terrain.Plane(new Vector2(Clipboard.GetText()))));
-
-        private void SayCoordinates() => Tolk.Speak(World.Player.Area.Center.ToString());
-
-        private void CopyCoordinates()
-        {
-            Clipboard.SetText(World.Player.Area.UpperLeftCorner.ToString());
-            SayDelegate("Soiuřadnice zkopírovány.");
-
-        }
-
-        private void QuitGame() => World.QuitGame();
-
-
-
-
-
-
-
-
 
         public override void OnActivate() =>
             //todo GameWindow.OnActivate
@@ -86,5 +55,20 @@ namespace Game.UI
             base.OnKeyDown(e);
             World.Player.ReceiveMessage(new KeyPressed(this, new KeyShortcut(e)));
         }
+
+        private void CopyCoordinates()
+        {
+            Clipboard.SetText(World.Player.Area.UpperLeftCorner.ToString());
+            Tolk.Speak("Soiuřadnice zkopírovány.");
+        }
+
+        private void MoveTuttleFromClipboard()
+            => World.GetEntity("tuttle").ReceiveMessage(new Game.Messaging.Commands.SetPosition(this, new Terrain.Plane(new Vector2(Clipboard.GetText()))));
+
+        private void QuitGame() => World.QuitGame();
+
+        private void SayCoordinates() => Tolk.Speak(World.Player.Area.Center.ToString());
+
+        private void SayTuttlesPosition() => Tolk.Speak(World.GetEntity("tuttle").Area.Center.ToString());
     }
 }

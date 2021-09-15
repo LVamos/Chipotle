@@ -1,14 +1,14 @@
-﻿using DavyKager;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+using DavyKager;
 
 using Game.Messaging;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
-
-using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
 
 namespace Game.Entities
 {
@@ -65,32 +65,8 @@ namespace Game.Entities
             ["ulice v1"] = ("prefabouthouse", .3f)
         };
 
-        public override void Update()
-        {
-            base.Update();
-            UpdateListener();
-        }
-
-
-
         public ChipotleSoundComponent() : base()
         {
-
-
-        }
-
-        protected void SayOrientation()
-            => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription());
-
-        private void OnTurnoverDone(TurnEntityResult message) => SayOrientation();
-
-        protected override void OnCutsceneBegan(CutsceneBegan message)
-         {
-            base.OnCutsceneBegan(message);
-            switch (message.CutsceneName)
-            {
-                case "cs7": case "cs8": case "cs10": _sound.ApplyEaxReverbPreset("carpettedhallway", 0); break;
-            }
         }
 
         public override void Start()
@@ -110,32 +86,25 @@ namespace Game.Entities
                 [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
             }
             );
-
         }
 
-
-        private void OnLocalityChanged(LocalityChanged message)
+        public override void Update()
         {
-            (string name, float gain) record = _reverbPresets[message.Target.Name.Indexed.ToLower()];
-            _sound.ApplyEaxReverbPreset(record.name, record.gain);
+            base.Update();
+            UpdateListener();
         }
 
-        private void OnEntityHitDoor(DoorHit m)
-=> SayDelegate("dveře");
-
-        private void OnInpermeableTerrainCollision(TerrainCollided message) => PlayTerrain(message.Tile);
-
-        private void OnObjectsCollided(ObjectsCollided message)
+        protected override void OnCutsceneBegan(CutsceneBegan message)
         {
-            GameObject collidingObject = message.Tile.Object;
-
-            // Announce
-            Timer t = new Timer();
-            t.Interval = 500;
-            t.Tick += (object s, EventArgs e) => { Say(collidingObject.Name.Friendly); t.Stop(); };
-            t.Start();
-            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true);
+            base.OnCutsceneBegan(message);
+            switch (message.CutsceneName)
+            {
+                case "cs7": case "cs8": case "cs10": _sound.ApplyEaxReverbPreset("carpettedhallway", 0); break;
+            }
         }
+
+        protected void SayOrientation()
+                    => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription());
 
         protected void UpdateListener()
         {
@@ -149,7 +118,32 @@ namespace Game.Entities
                 _sound.ListenerOrientationFacing = orientation.AsOpenALVector();
         }
 
+        private void OnEntityHitDoor(DoorHit m)
+=> Tolk.Speak("dveře");
+
+        private void OnInpermeableTerrainCollision(TerrainCollided message) => PlayTerrain(message.Tile);
+
+        private void OnLocalityChanged(LocalityChanged message)
+        {
+            (string name, float gain) record = _reverbPresets[message.Target.Name.Indexed.ToLower()];
+            _sound.ApplyEaxReverbPreset(record.name, record.gain);
+        }
+
         private void OnMovementDone(EntityMoved message) => PlayTerrain(message.Target);
+
+        private void OnObjectsCollided(ObjectsCollided message)
+        {
+            GameObject collidingObject = message.Tile.Object;
+
+            // Announce
+            Timer t = new Timer();
+            t.Interval = 500;
+            t.Tick += (object s, EventArgs e) => { Tolk.Speak(collidingObject.Name.Friendly); t.Stop(); };
+            t.Start();
+            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true);
+        }
+
+        private void OnTurnoverDone(TurnEntityResult message) => SayOrientation();
 
         private void PlayTerrain(Tile tile)
         {

@@ -1,6 +1,6 @@
-﻿using Game.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -8,294 +8,27 @@ using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Events;
 using Game.Terrain;
+using Game.UI;
 
 using Luky;
 
 namespace Game
 {
     /// <summary>
-    /// 
     /// </summary>
     public static class World
     {
-        public const int FramesPerSecond = 100;
         public const int DeltaTime = 1000 / FramesPerSecond;
-
-        /// <summary>
-        /// Enumerates all game objects around a point sorted by distance.
-        /// </summary>
-        /// <param name="point">A point on the map whose surroundings are to be explored</param>
-        /// <returns>Enumeration of game objects</returns>
-        public static IEnumerable<GameObject> GetNearestObjects(Vector2 point)
-            => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point)).Where(o => o.Value != Map[point]?.Object).Select(o => o.Value);
-
-        /// <summary>
-        /// Enumerates all localities sroted by distance from default point.
-        /// </summary>
-        /// <param name="point">Coordinates of the point whose surroundings should be explored</param>
-        /// <returns>Enumeration of localities</returns>
-        public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
-           => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Locality).Select(p => p.Value);
-
-
-        public static Locality GetNearestLocality(Vector2 point)
-            => GetNearestLocalities(point).First();
-
-        /// <summary>
-        /// Returns one game object closest to given point.
-        /// </summary>
-        /// <param name="defaultPoint">Coordinates of the defualt point</param>
-        /// <returns>Game object</returns>
-        public static GameObject GetNearestObject(Vector2 defaultPoint)
-            => GetNearestObjects(defaultPoint).FirstOrDefault();
-
-        /// <summary>
-        /// Enumerates all game objects around a point sorted by distance.
-        /// </summary>
-        /// <param name="point">A point on the map whose surroundings are to be explored</param>
-        /// <returns>Enumeration of game objects</returns>
-        public static IEnumerable<GameObject> GetNearestObjects(Tile point)
-            => GetNearestObjects(point.Position);
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static void Update()
-        {
-            PerformDelayedActions();
-            _localities.Foreach(v => v.Value.Update());
-            _passages.Foreach(v => v.Value.Update());
-            _objects.Foreach(v => v.Value.Update());
-            _entities.Foreach(v => v.Value.Update());
-            HandleCutscene();
-        }
-
-        private static void HandleCutscene()
-        {
-            if (_cutsceneBegan != null)
-            {
-                Sound.GetDynamicInfo(_cutsceneBegan.SoundID, out SoundState state, out int sample);
-
-                if (state != SoundState.Playing)
-                {
-                    Sound.GetStaticInfo(_cutsceneBegan.SoundID, out int _, out int totalSamples, out int __);
-                    if (sample == totalSamples)
-                    {
-                        ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
-                        _cutsceneBegan = null;
-                    }
-                }
-            }
-        }
-
-        public static void ReceiveMessage(GameMessage message)
-            => _entities.Values.Foreach(e => e.ReceiveMessage(message));
-
-        public static void PlayCutscene(object sender, string cutscene)
-        {
-            if (string.IsNullOrEmpty(cutscene))
-                throw new ArgumentNullException(nameof(cutscene));
-
-            if(_cutsceneBegan!=null)
-            StopCutscene(null);
-
-            int id = Sound.Play(cutscene);
-            _cutsceneBegan = new CutsceneBegan(sender, cutscene, id);
-            ReceiveMessage(_cutsceneBegan);
-        }
-
-        public static TileMap Map { get; set; }
-
-        private static Dictionary<string, DumpObject> _objects;
-        private static Dictionary<string, Entity> _entities;
-        private static Dictionary<string, Passage> _passages;
-        public static Entity Player { get; private set; }
-
-        public static void StopCutscene(object sender)
-        {
-            Sound.Stop(_cutsceneBegan.SoundID);
-            ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
-            _cutsceneBegan = null;
-        }
-
-        public static void RenameLocality(string indexedName, string newName)
-        {
-            Locality value = _localities[indexedName];
-            _localities.Remove(indexedName);
-            _localities[newName] = value;
-        }
-
-        public static Locality GetLocality(string name)
-        {
-            _localities.TryGetValue(name.PrepareForIndexing(), out Locality locality);
-            return locality;
-        }
-
-        public static Passage GetPassage(string name)
-        {
-            _passages.TryGetValue(name, out Passage passage);
-            return passage;
-        }
-
-        public static bool Passageexists(string name)
-            => _passages.ContainsKey(name);
-
-
-        /// <summary>
-        /// Registers an entity.
-        /// </summary>
-        /// <param name="e">The entity to be registered</param>
-        public static void Add(Entity e)
-        {
-            // Do a null check and look if entity isn't already registered.
-            if (e == null)
-                throw new ArgumentNullException(nameof(e));
-
-            if (_entities.ContainsKey(e.Name.Indexed))
-                throw new ArgumentException("entity already registered");
-
-            _entities.Add(e.Name.Indexed, e);
-        }
-
-        /// <summary>
-        /// Returns first entity of given name. It's suitable in case there's just one entity of given name.
-        /// </summary>
-        /// <param name="name">Name of desired entity</param>
-        /// <returns>The entity or null</returns>
-        public static Entity GetEntity(string name)
-=> _entities.TryGetValue(name, out Entity e) ? e : null;
-
-        /// <summary>
-        /// Finds all game objects of required type
-        /// </summary>
-        /// <param name="type">Type of requested game objects</param>
-        /// <returns>Collection with objects of same type</returns>
-        public static IEnumerable<DumpObject> GetObjectsByType(string type)
-            => _objects.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower() == type.ToLower());
-
-
-        /// <summary>
-        /// Returns first game object of given name. It's suitable in case there's just one entity of given name.
-        /// </summary>
-        /// <param name="name">Name of desired object</param>
-        /// <returns>The game object or null</returns>
-        public static DumpObject GetObject(string name)
-=> _objects.TryGetValue(name, out DumpObject o) ? o : null;
-
-
-
-
-
-
-        private static Dictionary<string, Locality> _localities;
-        private static XDocument _map;
-
-        /// <summary>
-        /// Registers a game object.
-        /// </summary>
-        /// <param name="o">The game object to be added</param>
-        public static void Add(DumpObject o)
-        {
-            // Do a null check and look if object isn't already registered.
-            if (o == null)
-                throw new ArgumentNullException(nameof(o));
-
-            if (_objects.ContainsKey(o.Name.Indexed))
-                throw new ArgumentException("Object already registered");
-
-            _objects.Add(o.Name.Indexed, o); // Added to dictionary
-        }
-
-
-
-        /// <summary>
-        /// Adds a locality into list and dictionary.
-        /// </summary>
-        /// <param name="l">Locality instance</param>
-        public static void Add(Locality l)
-        {
-            // null check
-            if (l == null)
-                throw new ArgumentNullException(nameof(l));
-
-            // Isn't the locality already registered?
-            if (_localities.ContainsKey(l.Name.Indexed))
-                throw new ArgumentException("Locality already registered");
-
-            _localities.Add(l.Name.Indexed, l);
-        }
-
-
-        /// <summary>
-        /// Adds a passage into list
-        /// </summary>
-        /// <param name="p">Passage instance</param>
-        public static void Add(Passage p)
-        {
-            if (p == null)
-                throw new ArgumentNullException(nameof(p));
-
-            if (_passages.ContainsKey(p.Name.Indexed))
-                throw new ArgumentException("Passage already registered");
-
-            _passages.Add(p.Name.Indexed, p);
-        }
-
-
-        /// <summary>
-        /// Prepares the game world for game start.
-        /// </summary>
-        public static void Initialize()
-        {
-            _objects = new Dictionary<string, DumpObject>();
-            _localities = new Dictionary<string, Locality>();
-            _entities = new Dictionary<string, Entity>();
-            Player = null;
-            _passages = new Dictionary<string, Passage>();
-        }
-
+        public const int FramesPerSecond = 100;
         public static SoundThread Sound;
+        private static readonly string MapPath = Path.Combine(Program.DataPath, @"Map\chipotle.xml");
         private static CutsceneBegan _cutsceneBegan;
 
-        public static void QuitGame()
-        {
-            Program.MainWindow.GameLoopEnabled = false;
-            _cutsceneBegan = null;
-            Sound.StopAll();
-            WindowHandler.MainMenu();
-        }
+        private static Queue<Action> _delayedActions = new Queue<Action>();
 
-        public static void SoundInit()
-        {
-            Sound = SoundThread.CreateAndStartThread(Program.OnError);
-            Sound.LoadSounds();
-            Sound.SetGroupVolume("master", 1);
-        }
+        private static Dictionary<string, Entity> _entities;
 
-        /// <summary>
-        /// Starts game from begining.
-        /// </summary>
-        public static void StartGame()
-        {
-            _map = LoadMap();
-            _localities.Foreach(p => p.Value.Start());
-            _passages.Foreach(p => p.Value.Start());
-            _objects.Foreach(p => p.Value.Start());
-            Player = Entity.CreateChipotle();
-            Add(Player);
-            Add(Entity.CreateTuttle());
-            Add(Entity.CreateCarson());
-            Add(Entity.CreateBartender());
-            Add(Entity.CreateChristine());
-            Add(Entity.CreateSweeney());
-            Add(Entity.CreateMariotti());
-            _entities.Foreach(p => p.Value.Start());
-            Program.MainWindow.GameLoopEnabled = true;
-        }
-
-        public static bool LocalityExists(string name)
-            => _localities.ContainsKey(name.PrepareForIndexing());
+        private static Dictionary<string, Locality> _localities;
 
         private static Dictionary<string, string> _localityLoops = new Dictionary<string, string>()
         {
@@ -317,12 +50,178 @@ namespace Game
             ["garáž p1"] = "GarageLoop",
             ["ulice s1"] = "BonitaStreetLoop",
             ["dvorek s1"] = "DriveWayLoop",
-
         };
 
+        private static XDocument _map;
+
+        private static Dictionary<string, DumpObject> _objects;
+
+        private static Dictionary<string, Passage> _passages;
+
+        public static TileMap Map { get; set; }
+
+        public static Entity Player { get; private set; }
+
+        /// <summary>
+        /// Registers an entity.
+        /// </summary>
+        /// <param name="e">The entity to be registered</param>
+        public static void Add(Entity e)
+        {
+            // Do a null check and look if entity isn't already registered.
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+
+            if (_entities.ContainsKey(e.Name.Indexed))
+                throw new ArgumentException("entity already registered");
+
+            _entities.Add(e.Name.Indexed, e);
+        }
+
+        /// <summary>
+        /// Registers a game object.
+        /// </summary>
+        /// <param name="o">The game object to be added</param>
+        public static void Add(DumpObject o)
+        {
+            // Do a null check and look if object isn't already registered.
+            if (o == null)
+                throw new ArgumentNullException(nameof(o));
+
+            if (_objects.ContainsKey(o.Name.Indexed))
+                throw new ArgumentException("Object already registered");
+
+            _objects.Add(o.Name.Indexed, o); // Added to dictionary
+        }
+
+        /// <summary>
+        /// Adds a locality into list and dictionary.
+        /// </summary>
+        /// <param name="l">Locality instance</param>
+        public static void Add(Locality l)
+        {
+            // null check
+            if (l == null)
+                throw new ArgumentNullException(nameof(l));
+
+            // Isn't the locality already registered?
+            if (_localities.ContainsKey(l.Name.Indexed))
+                throw new ArgumentException("Locality already registered");
+
+            _localities.Add(l.Name.Indexed, l);
+        }
+
+        /// <summary>
+        /// Adds a passage into list
+        /// </summary>
+        /// <param name="p">Passage instance</param>
+        public static void Add(Passage p)
+        {
+            if (p == null)
+                throw new ArgumentNullException(nameof(p));
+
+            if (_passages.ContainsKey(p.Name.Indexed))
+                throw new ArgumentException("Passage already registered");
+
+            _passages.Add(p.Name.Indexed, p);
+        }
+
+        /// <summary>
+        /// Returns first entity of given name. It's suitable in case there's just one entity of
+        /// given name.
+        /// </summary>
+        /// <param name="name">Name of desired entity</param>
+        /// <returns>The entity or null</returns>
+        public static Entity GetEntity(string name)
+=> _entities.TryGetValue(name, out Entity e) ? e : null;
+
+        public static Locality GetLocality(string name)
+        {
+            _localities.TryGetValue(name.PrepareForIndexing(), out Locality locality);
+            return locality;
+        }
+
+        /// <summary>
+        /// Enumerates all localities sroted by distance from default point.
+        /// </summary>
+        /// <param name="point">Coordinates of the point whose surroundings should be explored</param>
+        /// <returns>Enumeration of localities</returns>
+        public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
+           => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Locality).Select(p => p.Value);
+
+        public static Locality GetNearestLocality(Vector2 point)
+                    => GetNearestLocalities(point).First();
+
+        /// <summary>
+        /// Returns one game object closest to given point.
+        /// </summary>
+        /// <param name="defaultPoint">Coordinates of the defualt point</param>
+        /// <returns>Game object</returns>
+        public static GameObject GetNearestObject(Vector2 defaultPoint)
+            => GetNearestObjects(defaultPoint).FirstOrDefault();
+
+        /// <summary>
+        /// Enumerates all game objects around a point sorted by distance.
+        /// </summary>
+        /// <param name="point">A point on the map whose surroundings are to be explored</param>
+        /// <returns>Enumeration of game objects</returns>
+        public static IEnumerable<GameObject> GetNearestObjects(Vector2 point)
+            => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point)).Where(o => o.Value != Map[point]?.Object).Select(o => o.Value);
+
+        /// <summary>
+        /// Enumerates all game objects around a point sorted by distance.
+        /// </summary>
+        /// <param name="point">A point on the map whose surroundings are to be explored</param>
+        /// <returns>Enumeration of game objects</returns>
+        public static IEnumerable<GameObject> GetNearestObjects(Tile point)
+            => GetNearestObjects(point.Position);
+
+        public static Passage GetNearestPassage(Vector2 point)
+        => GetNearestPassages(point).FirstOrDefault();
+
+        public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
+                   => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
+
+        /// <summary>
+        /// Returns first game object of given name. It's suitable in case there's just one entity
+        /// of given name.
+        /// </summary>
+        /// <param name="name">Name of desired object</param>
+        /// <returns>The game object or null</returns>
+        public static DumpObject GetObject(string name)
+=> _objects.TryGetValue(name, out DumpObject o) ? o : null;
+
+        /// <summary>
+        /// Finds all game objects of required type
+        /// </summary>
+        /// <param name="type">Type of requested game objects</param>
+        /// <returns>Collection with objects of same type</returns>
+        public static IEnumerable<DumpObject> GetObjectsByType(string type)
+            => _objects.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower() == type.ToLower());
+
+        public static IEnumerable<string> GetObjectTypes()
+        => _objects.Where(p => !string.IsNullOrEmpty(p.Value.Type)).Select(p => p.Value.Type);
+
+        public static Passage GetPassage(string name)
+        {
+            _passages.TryGetValue(name, out Passage passage);
+            return passage;
+        }
+
+        /// <summary>
+        /// Prepares the game world for game start.
+        /// </summary>
+        public static void Initialize()
+        {
+            _objects = new Dictionary<string, DumpObject>();
+            _localities = new Dictionary<string, Locality>();
+            _entities = new Dictionary<string, Entity>();
+            Player = null;
+            _passages = new Dictionary<string, Passage>();
+        }
 
         public static XDocument LoadMap()
-            => LoadMap(DebugSO.MapPath);
+                    => LoadMap(MapPath);
 
         /// <summary>
         /// Loads map from file
@@ -398,36 +297,54 @@ lLoop);
             return xDocument;
         }
 
-        public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
-           => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
-
-        public static void Remove(Locality l)
-            => _delayedActions.Enqueue(() => _localities.Remove(l.Name.Indexed));
-
-        private static Queue<Action> _delayedActions = new Queue<Action>();
-
-        private static void PerformDelayedActions()
-        {
-            while (!_delayedActions.IsNullOrEmpty())
-                _delayedActions.Dequeue()();
-        }
-
-        public static void Remove(Passage p)
-            => _delayedActions.Enqueue(() => _passages.Remove(p.Name.Indexed));
-
-        public static void Remove(GameObject o)
-            => _delayedActions.Enqueue(() => _objects.Remove(o.Name.Indexed));
-
-
+        public static bool LocalityExists(string name)
+                    => _localities.ContainsKey(name.PrepareForIndexing());
 
         public static bool ObjectExists(string indexedName)
-=> _objects.ContainsKey(indexedName);
+        => _objects.ContainsKey(indexedName);
 
-        public static IEnumerable<string> GetObjectTypes()
-=> _objects.Where(p => !string.IsNullOrEmpty(p.Value.Type)).Select(p => p.Value.Type);
+        public static bool Passageexists(string name)
+                    => _passages.ContainsKey(name);
 
-        public static Passage GetNearestPassage(Vector2 point)
-=> GetNearestPassages(point).FirstOrDefault();
+        public static void PlayCutscene(object sender, string cutscene)
+        {
+            if (string.IsNullOrEmpty(cutscene))
+                throw new ArgumentNullException(nameof(cutscene));
+
+            if (_cutsceneBegan != null)
+                StopCutscene(null);
+
+            int id = Sound.Play(cutscene);
+            _cutsceneBegan = new CutsceneBegan(sender, cutscene, id);
+            ReceiveMessage(_cutsceneBegan);
+        }
+
+        public static void QuitGame()
+        {
+            Program.MainWindow.GameLoopEnabled = false;
+            _cutsceneBegan = null;
+            Sound.StopAll();
+            WindowHandler.MainMenu();
+        }
+
+        public static void ReceiveMessage(GameMessage message)
+                    => _entities.Values.Foreach(e => e.ReceiveMessage(message));
+
+        public static void Remove(Locality l)
+                    => _delayedActions.Enqueue(() => _localities.Remove(l.Name.Indexed));
+
+        public static void Remove(Passage p)
+                    => _delayedActions.Enqueue(() => _passages.Remove(p.Name.Indexed));
+
+        public static void Remove(GameObject o)
+                    => _delayedActions.Enqueue(() => _objects.Remove(o.Name.Indexed));
+
+        public static void RenameLocality(string indexedName, string newName)
+        {
+            Locality value = _localities[indexedName];
+            _localities.Remove(indexedName);
+            _localities[newName] = value;
+        }
 
         public static void RenameObject(string indexedName, string newName)
         {
@@ -442,6 +359,76 @@ lLoop);
             _passages.Remove(indexedName);
             _passages[newName] = value;
         }
-    }
 
+        public static void SoundInit(Action<string> say)
+        {
+            Sound = SoundThread.CreateAndStartThread(Path.Combine(Program.DataPath, "Sounds"), Program.OnError, say);
+            Sound.LoadSounds();
+            Sound.SetGroupVolume("master", 1);
+        }
+
+        /// <summary>
+        /// Starts game from begining.
+        /// </summary>
+        public static void StartGame()
+        {
+            _map = LoadMap();
+            _localities.Foreach(p => p.Value.Start());
+            _passages.Foreach(p => p.Value.Start());
+            _objects.Foreach(p => p.Value.Start());
+            Player = Entity.CreateChipotle();
+            Add(Player);
+            Add(Entity.CreateTuttle());
+            Add(Entity.CreateCarson());
+            Add(Entity.CreateBartender());
+            Add(Entity.CreateChristine());
+            Add(Entity.CreateSweeney());
+            Add(Entity.CreateMariotti());
+            _entities.Foreach(p => p.Value.Start());
+            Program.MainWindow.GameLoopEnabled = true;
+        }
+
+        public static void StopCutscene(object sender)
+        {
+            Sound.Stop(_cutsceneBegan.SoundID);
+            ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
+            _cutsceneBegan = null;
+        }
+
+        /// <summary>
+        /// </summary>
+        public static void Update()
+        {
+            PerformDelayedActions();
+            _localities.Foreach(v => v.Value.Update());
+            _passages.Foreach(v => v.Value.Update());
+            _objects.Foreach(v => v.Value.Update());
+            _entities.Foreach(v => v.Value.Update());
+            HandleCutscene();
+        }
+
+        private static void HandleCutscene()
+        {
+            if (_cutsceneBegan != null)
+            {
+                Sound.GetDynamicInfo(_cutsceneBegan.SoundID, out SoundState state, out int sample);
+
+                if (state != SoundState.Playing)
+                {
+                    Sound.GetStaticInfo(_cutsceneBegan.SoundID, out int _, out int totalSamples, out int __);
+                    if (sample == totalSamples)
+                    {
+                        ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
+                        _cutsceneBegan = null;
+                    }
+                }
+            }
+        }
+
+        private static void PerformDelayedActions()
+        {
+            while (!_delayedActions.IsNullOrEmpty())
+                _delayedActions.Dequeue()();
+        }
+    }
 }

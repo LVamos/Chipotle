@@ -5,9 +5,12 @@ using System.Text.RegularExpressions;
 
 namespace Luky
 {
-    /// <summary>Represents a 2D vector using two single-precision floating-point numbers.</summary>
+    /// <summary>
+    /// Represents a 2D vector using two single-precision floating-point numbers.
+    /// </summary>
     /// <remarks>
-    /// The V2 structure is suitable for interoperation with unmanaged code requiring two consecutive floats.
+    /// The V2 structure is suitable for interoperation with unmanaged code requiring two
+    /// consecutive floats.
     /// </remarks>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
@@ -15,7 +18,6 @@ namespace Luky
     {
         public Vector3 AsOpenALVector()
     => new Vector3(X, 0, Y);
-
 
         /// <summary>
         /// The X component of the V2.
@@ -36,8 +38,6 @@ namespace Luky
             X = value;
             Y = value;
         }
-
-
 
         /// <summary>
         /// Constructs a new V2.
@@ -66,8 +66,6 @@ namespace Luky
             X = float.Parse(numbers[0]);
             Y = float.Parse(numbers[1]);
         }
-
-
 
         /// <summary>
         /// Gets or sets the value at the index of the Vector.
@@ -107,8 +105,8 @@ namespace Luky
         /// Gets an approximation of the vector length (magnitude).
         /// </summary>
         /// <remarks>
-        /// This property uses an approximation of the square root function to calculate vector magnitude, with
-        /// an upper error bound of 0.001.
+        /// This property uses an approximation of the square root function to calculate vector
+        /// magnitude, with an upper error bound of 0.001.
         /// </remarks>
         /// <see cref="Length"/>
         /// <seealso cref="LengthSquared"/>
@@ -117,8 +115,8 @@ namespace Luky
         /// Gets the square of the vector length (magnitude).
         /// </summary>
         /// <remarks>
-        /// This property avoids the costly square root operation required by the Length property. This makes it more suitable
-        /// for comparisons.
+        /// This property avoids the costly square root operation required by the Length property.
+        /// This makes it more suitable for comparisons.
         /// </remarks>
         /// <see cref="Length"/>
         public float LengthSquared => X * X + Y * Y;
@@ -157,12 +155,6 @@ namespace Luky
         /// <summary>
         /// Scales the V2 to approximately unit length.
         /// </summary>
-        public void NormalizeFast()
-        {
-            float scale = MathHelper.InverseSqrtFast(X * X + Y * Y);
-            X *= scale;
-            Y *= scale;
-        }
 
         /// <summary>
         /// Defines a unit-length V2 that points towards the X-axis.
@@ -176,6 +168,7 @@ namespace Luky
 
         public bool IsNegative()
 => X < 0 || Y < 0;
+
         /// <summary>
         /// Defines a zero-length V2.
         /// </summary>
@@ -437,25 +430,12 @@ namespace Luky
         /// </summary>
         /// <param name="vec">The input vector</param>
         /// <returns>The normalized vector</returns>
-        public static Vector2 NormalizeFast(Vector2 vec)
-        {
-            float scale = MathHelper.InverseSqrtFast(vec.X * vec.X + vec.Y * vec.Y);
-            vec.X *= scale;
-            vec.Y *= scale;
-            return vec;
-        }
 
         /// <summary>
         /// Scale a vector to approximately unit length
         /// </summary>
         /// <param name="vec">The input vector</param>
         /// <param name="result">The normalized vector</param>
-        public static void NormalizeFast(ref Vector2 vec, out Vector2 result)
-        {
-            float scale = MathHelper.InverseSqrtFast(vec.X * vec.X + vec.Y * vec.Y);
-            result.X = vec.X * scale;
-            result.Y = vec.Y * scale;
-        }
 
         /// <summary>
         /// Calculate the dot (scalar) product of two vectors
@@ -521,15 +501,22 @@ namespace Luky
         /// <param name="c">Third input Vector</param>
         /// <param name="u">First Barycentric Coordinate</param>
         /// <param name="v">Second Barycentric Coordinate</param>
-        /// <returns>a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of a,b,c otherwise</returns>
+        /// <returns>
+        /// a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of a,b,c otherwise
+        /// </returns>
 
-        /// <summary>Interpolate 3 Vectors using Barycentric coordinates</summary>
+        /// <summary>
+        /// Interpolate 3 Vectors using Barycentric coordinates
+        /// </summary>
         /// <param name="a">First input Vector.</param>
         /// <param name="b">Second input Vector.</param>
         /// <param name="c">Third input Vector.</param>
         /// <param name="u">First Barycentric Coordinate.</param>
         /// <param name="v">Second Barycentric Coordinate.</param>
-        /// <param name="result">Output Vector. a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of a,b,c otherwise</param>
+        /// <param name="result">
+        /// Output Vector. a when u=v=0, b when u=1,v=0, c when u=0,v=1, and a linear combination of
+        /// a,b,c otherwise
+        /// </param>
 
         /// <summary>
         /// Gets or sets an OpenTK.V2 with the Y and X components of this instance.
@@ -656,9 +643,13 @@ namespace Luky
             return Equals((Vector2)obj);
         }
 
-        /// <summary>Indicates whether the current vector is equal to another vector.</summary>
+        /// <summary>
+        /// Indicates whether the current vector is equal to another vector.
+        /// </summary>
         /// <param name="other">A vector to compare with this vector.</param>
-        /// <returns>true if the current vector is equal to the vector parameter; otherwise, false.</returns>
+        /// <returns>
+        /// true if the current vector is equal to the vector parameter; otherwise, false.
+        /// </returns>
         public bool Equals(Vector2 other)
                 => (X == other.X && Y == other.Y);
     } // struct

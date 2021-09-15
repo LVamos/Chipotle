@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Windows.Forms;
 
 using DavyKager;
@@ -12,6 +11,8 @@ namespace Game
 {
     internal class Program : DebugSO
     {
+        public static readonly string DataPath = @"Data\";
+
         private const bool _abort = false;
 
         public static MainWindow MainWindow { get; private set; }
@@ -30,15 +31,12 @@ namespace Game
         {
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            DataPath = @"Data\";
-            SoundAssetsPath = Path.Combine(DataPath, "Sounds");
 
             try
             {
                 Tolk.Load();
                 Tolk.TrySAPI(true);
-                SayDelegate = (message) => Tolk.Speak(message);
-                World.SoundInit();
+                World.SoundInit((message) => Tolk.Speak(message));
                 MainWindow = new MainWindow();
                 Application.Run(MainWindow);
             }

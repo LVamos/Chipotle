@@ -1,13 +1,13 @@
-﻿using Game.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
+
+using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Events;
 
 using Luky;
-
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
 
 namespace Game.Terrain
 {
@@ -16,54 +16,99 @@ namespace Game.Terrain
     /// </summary>
     public class Locality : MapElement
     {
-
-
-        private int _ceiling;
-
         /// <summary>
         /// Height of ceiling (is 0 in case of outdoor localities)
         /// </summary>
         public readonly int Ceiling;
 
+        /// <summary>
+        /// All exits from the locality
+        /// </summary>
+        public readonly IReadOnlyList<Passage> Passages;
 
+        /// <summary>
+        /// Specifies if the locality is a room or an outdoor place
+        /// </summary>
+        public readonly LocalityType Type;
+
+        protected readonly string _backgroundSound;
+        protected int _backgroundSoundId;
         private const int MinimumHeight = 3;
         private const int MinimumWidth = 3;
+        private int _ceiling;
+        private List<Entity> _entities;
 
+        private List<GameObject> _objects;
 
-        protected override void Appear()
+        private List<Passage> _passages;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name of the locality</param>
+        /// <param name="type">Is it a rom or an outdoor locality?</param>
+        /// <param name="defaultTerrain">Lowest layer of the terrain</param>
+        /// <param name="ceiling">Ceiling height (should be 0 for outdoor localities)</param>
+        /// <param name="area">Area occupied with the locality</param>
+        public Locality(Name name, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string backgroundSound = null) : base(name, area)
         {
-            foreach (Vector2 point in Area.GetPoints())
-                World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain, point, this) : throw new InvalidOperationException("Tile must be empty");
+            Type = type;
+            _ceiling = Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
+            _ceiling = type == LocalityType.Outdoor ? 0 : ceiling;
+            _passages = new List<Passage>();
+            Passages = _passages.AsReadOnly();
+            _entities = new List<Entity>();
+            Entities = _entities.AsReadOnly();
+            _objects = new List<GameObject>();
+            Objects = _objects.AsReadOnly();
+            DefaultTerrain = defaultTerrain;
+            Area.MinimumHeight = MinimumHeight;
+            Area.MinimumWidth = MinimumWidth;
+            _backgroundSound = backgroundSound;
+
+            Appear();
         }
 
-        protected override void Disappear()
+        /// <summary>
+        /// Defines the lowest layer of terrain
+        /// </summary>
+        public TerrainType DefaultTerrain { get; }
+
+        public ReadOnlyCollection<Entity> Entities { get; }
+
+        public ReadOnlyCollection<GameObject> Objects { get; }
+
+        /// <summary>
+        /// Draws walls around the locality
+        /// </summary>
+        /// <param name="walls">Specifies which walls should be drawn</param>
+        public void DrawWalls(string walls)
         {
-            if (_objects.IsNotEmpty())
-                new List<GameObject>(_objects).ForEach(o => World.Remove(o));
+            IEnumerable<Vector2> wallCoordinates;
 
-            if (_passages.IsNotEmpty())
-                new List<Passage>(_passages).ForEach(p => World.Remove(p));
+            if (walls == "All")
+                wallCoordinates = Area.GetPerimeterPoints();
+            else
+            {
+                List<Direction> directions = new List<Direction>();
 
-            if (_entities.IsNotEmpty())
-                new List<Entity>(_entities).ForEach(e => World.Remove(e));
+                foreach (string word in Regex.Split(walls, @", +"))
+                {
+                    switch (word.ToLower())
+                    {
+                        case "left": directions.Add(Direction.Left); break;
+                        case "front": directions.Add(Direction.Up); break;
+                        case "right": directions.Add(Direction.Right); break;
+                        case "back": directions.Add(Direction.Down); break;
+                        default: throw new ArgumentException(nameof(word)); break;
+                    }
+                }
 
-            Area.GetPoints().Foreach(p => World.Map[p] = null);
+                wallCoordinates = Area.GetPerimeterPoints(directions);
+            }
+
+            wallCoordinates.Foreach(c => World.Map[c].Register(TerrainType.Wall, false));
         }
-
-        public override void ReceiveMessage(GameMessage message)
-        {
-            base.ReceiveMessage(message);
-
-            MessageObjects(message);
-            MessageEntities(message);
-
-        }
-
-        private void MessageEntities(GameMessage message)
-=> _entities.ForEach(e => e.ReceiveMessage(message));
-
-        protected void MessageObjects(GameMessage message)
-=> _objects.ForEach(o => o.ReceiveMessage(message));
 
         /// <summary>
         /// Checks if a game object is present in this locality in the moment.
@@ -80,6 +125,23 @@ namespace Game.Terrain
         public bool IsItHere(Entity e) => _entities.Contains(e);
 
         public bool IsItHere(Passage p) => _passages.Contains(p);
+
+        /// <summary>
+        /// All neighbour localities in given direction set.
+        /// </summary>
+        /// <param name="directions">wanted directions</param>
+        /// <returns>locality list</returns>
+        public IEnumerable<Locality> NeighbourLocalities(Directions directions) =>
+            //todo Location.Neighbours
+            throw new NotImplementedException();
+
+        public override void ReceiveMessage(GameMessage message)
+        {
+            base.ReceiveMessage(message);
+
+            MessageObjects(message);
+            MessageEntities(message);
+        }
 
         public void Register(Passage p)
         {
@@ -119,6 +181,17 @@ namespace Game.Terrain
             _entities.Add(e);
         }
 
+        public override void Start()
+        {
+            base.Start();
+
+            RegisterMessages(new Dictionary<Type, Action<GameMessage>>()
+            {
+                [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
+                [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
+            });
+        }
+
         /// <summary>
         /// Immediately removes a game object from list of present objects.
         /// </summary>
@@ -145,51 +218,31 @@ namespace Game.Terrain
             ReceiveMessage(new PassageDisappearedMessage(this, p));
         }
 
+        protected override void Appear()
+        {
+            foreach (Vector2 point in Area.GetPoints())
+                World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain, point, this) : throw new InvalidOperationException("Tile must be empty");
+        }
 
-        private List<GameObject> _objects;
+        protected override void Disappear()
+        {
+            if (!_objects.IsNullOrEmpty())
+                new List<GameObject>(_objects).ForEach(o => World.Remove(o));
 
-        public ReadOnlyCollection<GameObject> Objects { get; }
+            if (!_passages.IsNullOrEmpty())
+                new List<Passage>(_passages).ForEach(p => World.Remove(p));
 
-        private List<Entity> _entities;
+            if (!_entities.IsNullOrEmpty())
+                new List<Entity>(_entities).ForEach(e => World.Remove(e));
 
-        public ReadOnlyCollection<Entity> Entities { get; }
+            Area.GetPoints().Foreach(p => World.Map[p] = null);
+        }
 
-
-
-
-
-
-
-
-
-        /// <summary>
-        /// All exits from the locality
-        /// </summary>
-        public readonly IReadOnlyList<Passage> Passages;
-        protected readonly string _backgroundSound;
-
-        /// <summary>
-        ///  Defines the lowest layer of terrain
-        /// </summary>
-        public TerrainType DefaultTerrain { get; }
-
-
-
-
+        protected void MessageObjects(GameMessage message)
+=> _objects.ForEach(o => o.ReceiveMessage(message));
 
         /// <summary>
-        /// All neighbour localities in given direction set.
-        /// </summary>
-        /// <param name="directions">wanted directions</param>
-        /// <returns>locality list</returns>
-        public IEnumerable<Locality> NeighbourLocalities(Directions directions) =>
-            //todo Location.Neighbours
-            throw new NotImplementedException();
-
-
-
-        /// <summary>
-        /// Checks if 
+        /// Checks if
         /// </summary>
         /// <param name="direction"></param>
         /// <returns></returns>
@@ -197,66 +250,8 @@ namespace Game.Terrain
             //todo NeighbourLocality
             throw new NotImplementedException();
 
-
-        /// <summary>
-        ///  Specifies if the locality is a room or an outdoor place
-        /// </summary>
-        public readonly LocalityType Type;
-
-
-        private List<Passage> _passages;
-        protected int _backgroundSoundId;
-
-        /// <summary>
-        ///  Draws walls around the locality
-        /// </summary>
-        /// <param name="walls">Specifies which walls should be drawn</param>
-        public void DrawWalls(string walls)
-        {
-            IEnumerable<Vector2> wallCoordinates;
-
-            if (walls == "All")
-                wallCoordinates = Area.GetPerimeterPoints();
-            else
-            {
-                List<Direction> directions = new List<Direction>();
-
-                foreach (string word in Regex.Split(walls, @", +"))
-                {
-                    switch (word.ToLower())
-                    {
-                        case "left": directions.Add(Direction.Left); break;
-                        case "front": directions.Add(Direction.Up); break;
-                        case "right": directions.Add(Direction.Right); break;
-                        case "back": directions.Add(Direction.Down); break;
-                        default: throw new ArgumentException(nameof(word)); break;
-                    }
-                }
-
-                wallCoordinates = Area.GetPerimeterPoints(directions);
-            }
-
-            wallCoordinates.Foreach(c => World.Map[c].Register(TerrainType.Wall, false));
-        }
-
-        public override void Start()
-        {
-            base.Start();
-
-            RegisterMessages(new Dictionary<Type, Action<GameMessage>>()
-            {
-
-                [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
-                [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
-            });
-        }
-
-        private void OnLocalityLeft(LocalityLeft message)
-        {
-            Unregister(message.Sender as Entity);
-            if (message.Sender== World.Player && _backgroundSoundId > 0)
-                World.Sound.Stop(_backgroundSoundId);
-        }
+        private void MessageEntities(GameMessage message)
+                => _entities.ForEach(e => e.ReceiveMessage(message));
 
         private void OnLocalityEntered(LocalityEntered message)
         {
@@ -270,33 +265,11 @@ namespace Game.Terrain
             _passages.ForEach(p => p.ReceiveMessage(message));
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Name of the locality</param>
-        /// <param name="type">Is it a rom or an outdoor locality?</param>
-        /// <param name="defaultTerrain">Lowest layer of the terrain</param>
-        /// <param name="ceiling">Ceiling height (should be 0 for outdoor localities)</param>
-        /// <param name="area">Area occupied with the locality</param>
-        public Locality(Name name, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string backgroundSound = null) : base(name, area)
+        private void OnLocalityLeft(LocalityLeft message)
         {
-            Type = type;
-            _ceiling = Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
-            _ceiling = type == LocalityType.Outdoor ? 0 : ceiling;
-            _passages = new List<Passage>();
-            Passages = _passages.AsReadOnly();
-            _entities = new List<Entity>();
-            Entities = _entities.AsReadOnly();
-            _objects = new List<GameObject>();
-            Objects = _objects.AsReadOnly();
-            DefaultTerrain = defaultTerrain;
-            Area.MinimumHeight = MinimumHeight;
-            Area.MinimumWidth = MinimumWidth;
-            _backgroundSound = backgroundSound;
-
-            Appear();
+            Unregister(message.Sender as Entity);
+            if (message.Sender == World.Player && _backgroundSoundId > 0)
+                World.Sound.Stop(_backgroundSoundId);
         }
-
-
     }
 }

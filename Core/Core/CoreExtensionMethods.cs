@@ -1,33 +1,46 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Luky
 {
     /// <summary>
-    /// 
+    /// Few useful extension methods
     /// </summary>
     public static class CoreExtensionMethods
     {
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
-    => collection == null || !collection.Any();
-
-
-        public static string PrepareForIndexing(this string name)
-    => name?.Trim(new char[] { ' ' }).ToLower();
-
+        /// <summary>
+        /// Adds Foreach to IEnumerable.
+        /// </summary>
+        /// <param name="action">The delegate to perform on each element of the IEnumerable</param>
         public static void Foreach<TSource>(this IEnumerable<TSource> source, Action<TSource> action)
         {
             foreach (TSource item in source)
                 action(item);
         }
 
-        public static bool IsNotEmpty<T>(this List<T> list)
-        => list != null && list.Count > 0;
+        /// <summary>
+        /// Indicates whether the specified IEnumerable is null or empty.
+        /// </summary>
+        /// <param name="collection">The IEnumerable to check</param>
+        /// <returns>True if given IEnumerable is null or empty</returns>
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
+            => collection == null || !collection.Any();
 
+        /// <summary>
+        /// Converts a string to lowercase and trims spaces from edges.
+        /// </summary>
+        /// <param name="s">The string to modify</param>
+        /// <returns>The string converted to lowercase without leading and trailing spaces</returns>
+        public static string PrepareForIndexing(this string s)
+    => s?.Trim(new char[] { ' ' }).ToLower();
+
+        /// <summary>
+        /// Calls predicate on each element in list and removes first matching one.
+        /// </summary>
+        /// <param name="list">The list to search</param>
+        /// <param name="predicate">The action to perform on each element</param>
+        /// <returns>Deleted element or default value</returns>
         public static T RemoveFirstOrDefault<T>(this List<T> list, Func<T, bool> predicate)
         {
             for (int i = 0; i < list.Count; i++)
@@ -38,11 +51,16 @@ namespace Luky
                     list.RemoveAt(i);
                     return item;
                 }
-            } // end for loop
+            }
 
             return default(T);
         }
 
+        /// <summary>
+        /// Converts a string to boolean
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns></returns>
         public static bool ToBool(this string s)
             => bool.Parse(s);
     }

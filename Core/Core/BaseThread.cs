@@ -27,8 +27,6 @@ namespace Luky
         public virtual void Dispose()
         => RunCommand(() => _disposed = true);
 
-
-
         /// <summary>
         /// Code performed in thread's loop
         /// </summary>
@@ -56,7 +54,7 @@ namespace Luky
                     if (!message.ResetEvent.Set())
                         throw new Exception("The ManualResetEvent.Set method returned false.");
                 }
-            } 
+            }
         }
 
         /// <summary>
@@ -73,9 +71,11 @@ namespace Luky
                 int millisecondsAlreadyElapsedThisTick = (int)Math.Floor(_realTime.Elapsed.TotalMilliseconds) - millisecondsAlreadyProcessed;
                 int sleepTime = millisecondsPerTick - millisecondsAlreadyElapsedThisTick;
 
-                // We ensure sleepTime is at least 0, so we can always run _messages.TryTake, ensuring we check for messages every loop instead of running multiple ticks without checking messages.
-                if (sleepTime < 0)
-                    sleepTime = 0;
+                //I ensure sleepTime is at least 0, so I can always run _messages.TryTake,
+                // ensuring I check for messages every loop instead of running multiple ticks
+                // without checking messages.
+                //if (sleepTime < 0)
+                sleepTime = 0;
 
                 Message message;
 
@@ -89,8 +89,8 @@ namespace Luky
 
                         if (!message.ResetEvent.Set())
                             throw new Exception("The ManualResetEvent.Set method returned false.");
-                    }//ls
-                }//if
+                    }
+                }
                 else
                 {
                     OnTick();
@@ -139,6 +139,5 @@ namespace Luky
             public object[] Results;
             public MessageType Type;
         }
-
     }
 }
