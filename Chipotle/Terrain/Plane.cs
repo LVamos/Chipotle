@@ -7,6 +7,8 @@ using Game.Entities;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Terrain
 {
     /// <summary>

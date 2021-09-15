@@ -10,6 +10,8 @@ using Game.Terrain;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Entities
 {
     public class ChipotleSoundComponent : SoundComponent

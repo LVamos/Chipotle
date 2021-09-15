@@ -4,9 +4,14 @@ using System.Windows.Forms;
 
 using DavyKager;
 
+using Game.Entities;
+using Game.Messaging.Commands;
 using Game.Messaging.Events;
+using Game.Terrain;
 
 using Luky;
+
+using OpenTK;
 
 namespace Game.UI
 {
@@ -63,7 +68,15 @@ namespace Game.UI
         }
 
         private void MoveTuttleFromClipboard()
-            => World.GetEntity("tuttle").ReceiveMessage(new Game.Messaging.Commands.SetPosition(this, new Terrain.Plane(new Vector2(Clipboard.GetText()))));
+        {
+            if (!_testModeEnabled)
+                return;
+
+            Entity tuttle = World.GetEntity("tuttle");
+            Vector2 position = Clipboard.GetText().ToVector2();
+            SetPosition message = new SetPosition(this, new Plane(position));
+            tuttle.ReceiveMessage(message);
+        }
 
         private void QuitGame() => World.QuitGame();
 

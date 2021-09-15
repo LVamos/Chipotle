@@ -8,7 +8,7 @@ namespace Luky
     [Serializable]
     public abstract class DebugSO
     {
-        protected const bool TestModeEnabled = false; // Enables some test methods
+        protected const bool _testModeEnabled = false; // Enables some test methods
 
         /// <summary>
         /// Checks for a condition; if the condition is false, throws an Exception.

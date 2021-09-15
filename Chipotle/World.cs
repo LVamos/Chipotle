@@ -12,6 +12,8 @@ using Game.UI;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game
 {
     /// <summary>

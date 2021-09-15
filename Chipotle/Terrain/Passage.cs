@@ -1,8 +1,9 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using Luky;
+
+using OpenTK;
 
 namespace Game.Terrain
 {
@@ -11,38 +12,11 @@ namespace Game.Terrain
     /// </summary>
     public class Passage : MapElement
     {
-        protected override void Disappear()
-        {
-            _localities.ForEach(l => l.Unregister(this));
-            Area.GetTiles().Foreach(t => t.UnregisterPassage());
-        }
-
-
-
-
+        public readonly Locality ContainingLocality;
 
         public readonly IReadOnlyList<Locality> Localities;
 
-
-        public readonly Locality ContainingLocality;
-
-
-
-
-
-
-
-
         private List<Locality> _localities;
-
-
-        /// <summary>
-        /// Returns another side of this passage.
-        /// </summary>
-        /// <param name="comparedLocality">source locality</param>
-        /// <returns>remaining Locality</returns>
-        public Locality AnotherLocality(Locality comparedLocality)
-                    => _localities.First(l => l != comparedLocality);
 
         /// <summary>
         /// Constructor
@@ -53,7 +27,6 @@ namespace Game.Terrain
         /// <param name="localities">Two localities connected with the passage</param>
         public Passage(Name name, Plane area, IEnumerable<Locality> localities) : base(name, area)
         {
-
             // Check if passage isn't on map edge and if it occupies just one row.
             Assert(area.Height == 1 || area.Height == 2 || area.Width == 1 || area.Width == 2, "Passage must consist of two rows or two points.");
             Vector2 coordinates = area.GetPoints().First();
@@ -68,11 +41,11 @@ namespace Game.Terrain
             Appear();
         }
 
-        protected override void Appear()
-        {
-            Area.GetTiles().Foreach(t => t.Register(this));
-            _localities.Foreach(l => l.Register(this));
-        }
+        public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<Locality> localities)
+=> new HallDoor(name, area, localities);
+
+        public static MariottisDoor CreateMariottisDoor(Name name, Plane area, IEnumerable<Locality> localities)
+=> new MariottisDoor(name, area, localities);
 
         public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, bool closed, bool openable)
         {
@@ -85,13 +58,27 @@ namespace Game.Terrain
             }
         }
 
+        /// <summary>
+        /// Returns another side of this passage.
+        /// </summary>
+        /// <param name="comparedLocality">source locality</param>
+        /// <returns>remaining Locality</returns>
+        public Locality AnotherLocality(Locality comparedLocality)
+                    => _localities.First(l => l != comparedLocality);
+
+        protected override void Appear()
+        {
+            Area.GetTiles().Foreach(t => t.Register(this));
+            _localities.Foreach(l => l.Register(this));
+        }
+
+        protected override void Disappear()
+        {
+            _localities.ForEach(l => l.Unregister(this));
+            Area.GetTiles().Foreach(t => t.UnregisterPassage());
+        }
+
         private static Passage CreateVanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities)
             => new VanillaCrunchGarageDoor(name, area, localities);
-        public static MariottisDoor CreateMariottisDoor(Name name, Plane area, IEnumerable<Locality> localities)
-=> new MariottisDoor(name, area, localities);
-
-
-        public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<Locality> localities)
-=> new HallDoor(name, area, localities);
     }
 }

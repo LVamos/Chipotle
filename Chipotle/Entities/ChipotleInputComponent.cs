@@ -17,42 +17,13 @@ namespace Game.Entities
 {
     public class ChipotleInputComponent : InputComponent
     {
-
         public ChipotleInputComponent() : base()
         {
-        }
-
-        protected override void OnCutsceneBegan(CutsceneBegan message)
-        {
-             base.OnCutsceneBegan(message);
-
-            switch (message.CutsceneName)
-            {
-                case "cs7": case "cs10": _messagingEnabled = false; break;
-            }
         }
 
         public override void Start()
         {
             base.Start();
-
-            Clipboard.Clear();
-            Timer t = new Timer();
-            t.Interval = 30;
-            t.Tick += (s, e) =>
-            {
-                try
-                {
-                    Vector2 p = new Vector2(Clipboard.GetText());
-                }
-                catch (Exception ex)
-                {
-                    return;
-                }
-                Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(Clipboard.GetText()))));
-                Clipboard.Clear();
-            };
-            t.Start();
 
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
@@ -79,6 +50,39 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
+
+            if (!_testModeEnabled)
+                return;
+
+            Clipboard.Clear();
+            Timer t = new Timer();
+            t.Interval = 30;
+            t.Tick += (s, e) =>
+            {
+                Plane p;
+
+                try
+                {
+                    p = new Plane(Clipboard.GetText().ToVector2());
+                }
+                catch (Exception ex)
+                {
+                    return;
+                }
+                Owner.ReceiveMessage(new SetPosition(this, p));
+                Clipboard.Clear();
+            };
+            t.Start();
+        }
+
+        protected override void OnCutsceneBegan(CutsceneBegan message)
+        {
+            base.OnCutsceneBegan(message);
+
+            switch (message.CutsceneName)
+            {
+                case "cs7": case "cs10": _messagingEnabled = false; break;
+            }
         }
 
         private void Interact()
@@ -87,10 +91,13 @@ namespace Game.Entities
         // Just for testing purpose
         private void JumpToCoords()
         {
-            Vector2 coords = new Vector2(Interaction.InputBox("Zadej souřadnice", "Skok na souřadnice", ""));
-            Owner.ReceiveMessage(new SetPosition(this, new Plane(coords)));
-        }
+            if (!_testModeEnabled)
+                return;
 
+            string text = Interaction.InputBox("Zadej souřadnice", "Skok na souřadnice", "");
+            Plane target = new Plane(text.ToVector2());
+            Owner.ReceiveMessage(new SetPosition(this, target));
+        }
 
         private void MoveBack()
             => Owner.ReceiveMessage(new MakeStep(this, TurnType.Around));
@@ -112,7 +119,7 @@ namespace Game.Entities
 
         private void SayOrientation()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             Tolk.Speak($"Columbo orientation: {Owner.Orientation.UnitVector.ToString()}, listener facing: {World.Sound.ListenerOrientationFacing.ToString()}, listener up: {World.Sound.ListenerOrientationUp.ToString()}, listener position: {World.Sound.ListenerPosition.ToString()}.");

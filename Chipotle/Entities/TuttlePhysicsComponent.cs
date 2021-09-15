@@ -7,23 +7,24 @@ using Game.Terrain;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Entities
 {
     public class TuttlePhysicsComponent : PhysicsComponent
     {
-
-        private Random _random = new Random();
-        private PathFinder _finder = new PathFinder();
-
-        private Entity _player;
-        private bool _approachToPlayer;
-        private bool _walk;
-        private float _stepInterval;
         private const int _maxDistanceFromPlayer = 10;
         private const int _minDistanceFromPlayer = 2;
+        private bool _approachToPlayer;
         private int _desiredDistanceFromPlayer;
-        private Queue<Vector2> _path;
+        private PathFinder _finder = new PathFinder();
         private bool _followPlayer;
+        private bool _hidden;
+        private Queue<Vector2> _path;
+        private Entity _player;
+        private Random _random = new Random();
+        private float _stepInterval;
+        private bool _walk;
 
         public override void Start()
         {
@@ -45,103 +46,12 @@ namespace Game.Entities
             base.Start();
         }
 
-
-        private bool _hidden;
-
-        private void OnReveal(Reveal message)
+        public override void Update()
         {
-            _area = message.Location;
-            Appear(message.Location);
-            _hidden = false;
-            StartFollowing();
-        }
+            base.Update();
 
-        private void StartFollowing() => _followPlayer = true;
-
-
-        private void OnHide(Hide message)
-                {
-            StopFollowing();
-            DisAppear();
-            _hidden = true;
-        }
-
-
-        private void OnGotoPoint(GotoPoint m)
-        {
-            _path = m.Path;
-            _walkSpeed = m.StepLength;
-            _walk = true;
-        }
-
-        private void OnStartFollowing(StartFollowing m)
-        {
-            _path = null;
-            _followPlayer = true;
-        }
-
-        private void OnStopFollowing(StopFollowing m)
-            => StopFollowing();
-
-        private void OnLocalityLeft(LocalityLeft message)
-        {
-            if (message.Sender != _player)
-                return;
-
-            StopApproachingToPlayer();
-            GoToPlayer();
-        }
-
-        private void StopFollowing()
-        {
-            _followPlayer = false;
-            StopWalk();
-        }
-        private void OnEntityMoved(EntityMoved message)
-        {
-            if (message.Sender != _player)
-                return;
-
-            if (_followPlayer && !_approachToPlayer)
-                CheckDistanceFromPlayer();
-        }
-
-        private void CheckDistanceFromPlayer()
-        {
-            int distance = GetDistanceFromPlayer();
-            if (distance > _maxDistanceFromPlayer && !_approachToPlayer)
-                GoToPlayer();
-            else if (_approachToPlayer && (distance <= _desiredDistanceFromPlayer || _path.IsNullOrEmpty()))
-                StopApproachingToPlayer();
-        }
-
-        private void StopApproachingToPlayer()
-        {
-            _walk = _approachToPlayer = false;
-            _path = null;
-        }
-
-        private int GetDistanceFromPlayer()
-=> GetDistance(_area.Center, _player.Area.Center);
-
-        private int GetDistance(Vector2 a, Vector2 b)
-=> (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
-
-        private void GoToPlayer()
-        {
-            _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
-            Vector2? target = FindPlaceNearPlayer();
-
-            if (!target.HasValue)
-                return;
-            _path = _finder.FindPath(_area.Center, (Vector2)target);
-
-            if (_path == null)
-                return;
-
-            _approachToPlayer = _walk = true;
-            _walkSpeed = ComputeWalkSpeed(GetDistanceFromPlayer());
-            _stepInterval = 0;
+            if (_walk)
+                PerformWalk();
         }
 
         private int ComputeWalkSpeed(int distance)
@@ -167,13 +77,86 @@ namespace Game.Entities
         private Vector2? FindPlaceNearPlayer()
 => _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
 
-        public override void Update()
-        {
-            base.Update();
+        private int GetDistance(Vector2 a, Vector2 b)
+=> (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
 
-            if (_walk)
-                PerformWalk();
+        private int GetDistanceFromPlayer()
+=> GetDistance(_area.Center, _player.Area.Center);
+
+        private void GoToPlayer()
+        {
+            _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
+            Vector2? target = FindPlaceNearPlayer();
+
+            if (!target.HasValue)
+                return;
+            _path = _finder.FindPath(_area.Center, (Vector2)target);
+
+            if (_path == null)
+                return;
+
+            _approachToPlayer = _walk = true;
+            _walkSpeed = ComputeWalkSpeed(GetDistanceFromPlayer());
+            _stepInterval = 0;
         }
+
+        private void CheckDistanceFromPlayer()
+        {
+            int distance = GetDistanceFromPlayer();
+            if (distance > _maxDistanceFromPlayer && !_approachToPlayer)
+                GoToPlayer();
+            else if (_approachToPlayer && (distance <= _desiredDistanceFromPlayer || _path.IsNullOrEmpty()))
+                StopApproachingToPlayer();
+        }
+
+        private void OnEntityMoved(EntityMoved message)
+        {
+            if (message.Sender != _player)
+                return;
+
+            if (_followPlayer && !_approachToPlayer)
+                CheckDistanceFromPlayer();
+        }
+
+        private void OnGotoPoint(GotoPoint m)
+        {
+            _path = m.Path;
+            _walkSpeed = m.StepLength;
+            _walk = true;
+        }
+
+        private void OnHide(Hide message)
+        {
+            StopFollowing();
+            DisAppear();
+            _hidden = true;
+        }
+
+        private void OnLocalityLeft(LocalityLeft message)
+        {
+            if (message.Sender != _player)
+                return;
+
+            StopApproachingToPlayer();
+            GoToPlayer();
+        }
+
+        private void OnReveal(Reveal message)
+        {
+            _area = message.Location;
+            Appear(message.Location);
+            _hidden = false;
+            StartFollowing();
+        }
+
+        private void OnStartFollowing(StartFollowing m)
+        {
+            _path = null;
+            _followPlayer = true;
+        }
+
+        private void OnStopFollowing(StopFollowing m)
+            => StopFollowing();
 
         private void PerformWalk()
         {
@@ -192,12 +175,7 @@ namespace Game.Entities
                 StopWalk();
         }
 
-        private void StopWalk()
-        {
-            _walk = false;
-            _path = null;
-            _stepInterval = 0;
-        }
+        private void StartFollowing() => _followPlayer = true;
 
         private void Step()
         {
@@ -214,6 +192,25 @@ namespace Game.Entities
 
             // The road is clear! Move!
             SetPosition(target);
+        }
+
+        private void StopApproachingToPlayer()
+        {
+            _walk = _approachToPlayer = false;
+            _path = null;
+        }
+
+        private void StopFollowing()
+        {
+            _followPlayer = false;
+            StopWalk();
+        }
+
+        private void StopWalk()
+        {
+            _walk = false;
+            _path = null;
+            _stepInterval = 0;
         }
     }
 }

@@ -1,13 +1,13 @@
-﻿using Luky;
+﻿using System.Collections.Generic;
 
-using System.Collections.Generic;
+using Luky;
+
+using OpenTK;
 
 namespace Game.Terrain
 {
     public class HallDoor : Door
     {
-
-
         public HallDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, true, area, localities)
         {
         }

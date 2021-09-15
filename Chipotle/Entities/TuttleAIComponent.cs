@@ -6,37 +6,16 @@ using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
-using Luky;
+using OpenTK;
 
 namespace Game.Entities
 {
     public class TuttleAIComponent : AIComponent
     {
+        private readonly Entity _player = World.Player;
+        private ChipotlesCarMoved _carMovement;
         private bool _hidden;
         private bool _playerWasByPool;
-        private ChipotlesCarMoved _carMovement;
-
-
-        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
-        {
-            if(message.TargetLocation.GetLocality().Name.Indexed!= "asfaltka c1")
-_carMovement = message;
-
-        }
-
-        protected override void OnCutsceneBegan(CutsceneBegan message)
-        {
-            base.OnCutsceneBegan(message);
-
-            switch (message.CutsceneName)
-            {
-                case "cs7": case "cs8": Reveal(); break;
-                case "cs19": Hide(); break;
-            }
-
-        }
-
-
 
         public override void Start()
         {
@@ -56,13 +35,14 @@ _carMovement = message;
             Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(1030, 1036)), true));
         }
 
-        private readonly Entity _player = World.Player;
-        private void OnLocalityEntered(LocalityEntered m)
+        protected override void OnCutsceneBegan(CutsceneBegan message)
         {
-            if (m.Sender == _player && _area.GetLocality().Name.Indexed == "bazén w1" && !_playerWasByPool)
+            base.OnCutsceneBegan(message);
+
+            switch (message.CutsceneName)
             {
-                _playerWasByPool = true;
-                Owner.ReceiveMessage(new StartFollowing(this));
+                case "cs7": case "cs8": Reveal(); break;
+                case "cs19": Hide(); break;
             }
         }
 
@@ -70,7 +50,6 @@ _carMovement = message;
         {
             base.OnCutsceneEnded(message);
             WatchCar();
-
 
             switch (message.CutsceneName)
             {
@@ -81,32 +60,16 @@ _carMovement = message;
             }
         }
 
-        private void WatchCar()
+        /// <summary>
+        /// Instructs Tuttle to get to corpse and wait there for Chipotle
+        /// </summary>
+        private void GoToCorpse()
         {
-            if (_hidden || _carMovement == null)
-                return;
-
-            Plane perimeter = new Plane(_carMovement.TargetLocation);
-            perimeter.Extend();
-            Vector2? target = perimeter.FindRandomWalkableTile(1);
-            Assert(target.HasValue, "No walkable tile found.");
-            Owner.ReceiveMessage(new SetPosition(this, new Plane((Vector2)target), true));
-            _carMovement = null;
-        }
-        private void JumpToSweeneysRoom()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1411, 974"), true));
-
-
-        private void JumpToChristinesHall()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));
-
-        private void Reveal()
-        {
-            Vector2? target = _player.Area.FindNearestWalkableTile(10);
-            Assert(target.HasValue, "No walkable tile near player");
-
-            _hidden = false;
-            Owner.ReceiveMessage(new Reveal(this, new Plane((Vector2)target)));
+            Queue<Vector2> path =
+            _finder.FindPath(_area.Center, new Vector2(936, 1059))
+            ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
+            Owner.ReceiveMessage(new StopFollowing(this));
+            Owner.ReceiveMessage(new GotoPoint(this, path, 400));
         }
 
         private void Hide()
@@ -124,16 +87,47 @@ _carMovement = message;
             Owner.ReceiveMessage(message);
         }
 
-        /// <summary>
-        /// Instructs Tuttle to get to corpse and wait there for Chipotle
-        /// </summary>
-        private void GoToCorpse()
+        private void JumpToChristinesHall()
+            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));
+
+        private void JumpToSweeneysRoom()
+            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1411, 974"), true));
+
+        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
         {
-                Queue<Vector2> path =
-                _finder.FindPath(_area.Center, new Vector2(936, 1059))
-                ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
-            Owner.ReceiveMessage(new StopFollowing(this));
-            Owner.ReceiveMessage(new GotoPoint(this, path, 400));
+            if (message.TargetLocation.GetLocality().Name.Indexed != "asfaltka c1")
+                _carMovement = message;
+        }
+
+        private void OnLocalityEntered(LocalityEntered m)
+        {
+            if (m.Sender == _player && _area.GetLocality().Name.Indexed == "bazén w1" && !_playerWasByPool)
+            {
+                _playerWasByPool = true;
+                Owner.ReceiveMessage(new StartFollowing(this));
+            }
+        }
+
+        private void Reveal()
+        {
+            Vector2? target = _player.Area.FindNearestWalkableTile(10);
+            Assert(target.HasValue, "No walkable tile near player");
+
+            _hidden = false;
+            Owner.ReceiveMessage(new Reveal(this, new Plane((Vector2)target)));
+        }
+
+        private void WatchCar()
+        {
+            if (_hidden || _carMovement == null)
+                return;
+
+            Plane perimeter = new Plane(_carMovement.TargetLocation);
+            perimeter.Extend();
+            Vector2? target = perimeter.FindRandomWalkableTile(1);
+            Assert(target.HasValue, "No walkable tile found.");
+            Owner.ReceiveMessage(new SetPosition(this, new Plane((Vector2)target), true));
+            _carMovement = null;
         }
     }
 }

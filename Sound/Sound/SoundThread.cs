@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
+using OpenTK;
+
 using Sound;
 
 using EaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb;
@@ -162,7 +164,7 @@ namespace Luky
 
         public void DecreaseReverbParameter()
         {
-            if (DebugSO.TestModeEnabled)
+            if (DebugSO._testModeEnabled)
                 AdjustReverbParameter(-1);
         }
 
@@ -284,7 +286,7 @@ namespace Luky
 
         public void IncreaseReverbParameter()
         {
-            if (DebugSO.TestModeEnabled)
+            if (DebugSO._testModeEnabled)
                 AdjustReverbParameter(1);
         }
 
@@ -320,7 +322,7 @@ namespace Luky
 
         public void NextReverbParameter()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             if (_reverbParameterIndex < _reverbParameters.Length - 1)
@@ -425,7 +427,7 @@ namespace Luky
 
         public void PreviousReverbParameter()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             if (_reverbParameterIndex > 0)
@@ -446,7 +448,7 @@ namespace Luky
 
         public void SayReverbParameterValue()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             void SayParameter(float parameter)
@@ -555,7 +557,7 @@ namespace Luky
 
         public void SetReverbParameterToDefault()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             Say("Výchozí.");
@@ -592,7 +594,7 @@ namespace Luky
 
         public void SetReverbParameterToMaximum()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             Say("Maximum");
@@ -629,7 +631,7 @@ namespace Luky
 
         public void SetReverbParameterToMinimum()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             Say("Minimum");
@@ -710,7 +712,7 @@ namespace Luky
 
         public void SwitchToNextReverbPreset()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             if (_reverbPresets == null)
@@ -727,7 +729,7 @@ namespace Luky
 
         public void SwitchToPreviousReverbPreset()
         {
-            if (!DebugSO.TestModeEnabled)
+            if (!DebugSO._testModeEnabled)
                 return;
 
             if (_reverbPresets == null)

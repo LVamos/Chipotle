@@ -3,6 +3,8 @@ using Game.Terrain;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Entities
 {
     public class PoolsideBin : DumpObject

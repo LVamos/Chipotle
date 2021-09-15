@@ -1,8 +1,8 @@
-﻿
+﻿using System.Collections.Generic;
+
 using Luky;
 
-using System.Collections.Generic;
-
+using OpenTK;
 
 namespace Game.Terrain
 {

@@ -9,6 +9,8 @@ using Game.Messaging.Events;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Terrain
 {
     /// <summary>

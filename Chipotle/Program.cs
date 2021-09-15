@@ -37,13 +37,14 @@ namespace Game
                 Tolk.Load();
                 Tolk.TrySAPI(true);
                 World.SoundInit((message) => Tolk.Speak(message));
-                MainWindow = new MainWindow();
-                Application.Run(MainWindow);
             }
             catch (Exception ex)
             {
                 OnError(ex);
             }
+
+            MainWindow = new MainWindow();
+            Application.Run(MainWindow);
         }
 
         private static void OnError(string error)

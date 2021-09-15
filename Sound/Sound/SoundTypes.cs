@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 
+using OpenTK;
+
 namespace Luky
 {
     /// <summary>
-    /// 
     /// </summary>
     public enum Playback
     {
@@ -15,7 +16,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     public enum PositionType
     {
@@ -25,7 +25,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     public enum SoundState
     {
@@ -35,7 +34,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     internal enum Decoder
     {
@@ -46,7 +44,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     internal interface IAssetStream
     {
@@ -54,7 +51,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     internal interface IDecoder
     {
@@ -74,7 +70,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     internal interface IPlayback
     {
@@ -102,7 +97,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     public sealed class Snapshot
     {
@@ -110,7 +104,6 @@ namespace Luky
         internal bool Immutable;
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="name"></param>
         /// <param name="value"></param>
@@ -124,7 +117,6 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
     /// </summary>
     internal sealed class ShortBuffer
     {

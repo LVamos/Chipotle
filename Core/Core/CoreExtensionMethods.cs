@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+
+using OpenTK;
 
 namespace Luky
 {
@@ -18,6 +21,14 @@ namespace Luky
             foreach (TSource item in source)
                 action(item);
         }
+
+        /// <summary>
+        /// Checks if any component of Vector2 is negative.
+        /// </summary>
+        /// <param name="v">The vector to check</param>
+        /// <returns>True if any component of the vector is negative</returns>
+        public static bool IsNegative(this Vector2 v)
+            => v.X < 0 || v.Y < 0;
 
         /// <summary>
         /// Indicates whether the specified IEnumerable is null or empty.
@@ -63,5 +74,21 @@ namespace Luky
         /// <returns></returns>
         public static bool ToBool(this string s)
             => bool.Parse(s);
+
+        /// <summary>
+        /// Converts a string to Vector2
+        /// </summary>
+        /// <param name="coordinates">A string with two numbers separated by comma</param>
+        public static Vector2 ToVector2(this string coordinates)
+        {
+            if (string.IsNullOrEmpty(coordinates))
+                throw new ArgumentException(nameof(coordinates));
+
+            string[] numbers = Regex.Split(coordinates, @", +");
+            if (numbers == null || numbers.Count() != 2)
+                throw new FormatException(nameof(coordinates));
+
+            return new Vector2(float.Parse(numbers[0]), float.Parse(numbers[1]));
+        }
     }
 }

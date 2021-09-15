@@ -1,7 +1,7 @@
-﻿using Luky;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+
+using OpenTK;
 
 namespace Game.Terrain
 {
@@ -45,15 +45,13 @@ namespace Game.Terrain
         All = Right | UpRight | Up | UpLeft | Left | DownLeft | Down | DownRight
     }
 
-
-
-
-
     public static class DirectionExtension
 
     {
+        public static Direction[] BasicDirections = new Direction[] { Direction.Left, Direction.Up, Direction.Right, Direction.Down };
+
         internal static readonly Vector2[] DirectionDeltas =
-        {
+                {
 new  Vector2(0, 0),
 new  Vector2(1, 0),
 new  Vector2(1, 1),
@@ -68,16 +66,6 @@ new  Vector2(1, -1),
 
         public static Vector2 AsVector2(this Direction direction)
             => DirectionDeltas[(int)direction];
-
-        public static bool IsVertical(this Direction d) => d == Direction.Up || d == Direction.Down;
-
-        public static bool IsHorizontal(this Direction d) => d == Direction.Left || d == Direction.Right;
-
-        public static Direction[] BasicDirections = new Direction[] { Direction.Left, Direction.Up, Direction.Right, Direction.Down };
-
-        public static bool IsBasic(this Direction direction)
-            => Array.IndexOf(BasicDirections, direction) != -1;
-
 
         public static Direction GetOpposite(this Direction direction)
         {
@@ -94,18 +82,17 @@ new  Vector2(1, -1),
                 default: return Direction.None;
             }
         }
+
+        public static bool IsBasic(this Direction direction)
+            => Array.IndexOf(BasicDirections, direction) != -1;
+
+        public static bool IsHorizontal(this Direction d) => d == Direction.Left || d == Direction.Right;
+
+        public static bool IsVertical(this Direction d) => d == Direction.Up || d == Direction.Down;
     }
 
     internal static class DirectionsExtensions
     {
-        public static bool Includes(this Directions directions, Direction direction) => directions.HasFlag(direction.toDirections());
-
-        private static Directions toDirections(this Direction direction) => (Directions)(1 << ((int)direction - 1));
-
-        public static Directions And(this Directions directions, Direction direction) => directions | direction.toDirections();
-
-        public static Directions Except(this Directions directions, Direction direction) => directions & ~direction.toDirections();
-
         private static readonly Direction[] _directionList =
 {
     Direction.Right,
@@ -118,6 +105,8 @@ new  Vector2(1, -1),
     Direction.DownRight,
 };
 
+        public static Directions And(this Directions directions, Direction direction) => directions | direction.toDirections();
+
         public static IEnumerable<Direction> Enumerate(this Directions directions)
         {
             foreach (Direction direction in _directionList)
@@ -127,8 +116,10 @@ new  Vector2(1, -1),
             }
         }
 
+        public static Directions Except(this Directions directions, Direction direction) => directions & ~direction.toDirections();
 
+        public static bool Includes(this Directions directions, Direction direction) => directions.HasFlag(direction.toDirections());
+
+        private static Directions toDirections(this Direction direction) => (Directions)(1 << ((int)direction - 1));
     }
-
-
 }

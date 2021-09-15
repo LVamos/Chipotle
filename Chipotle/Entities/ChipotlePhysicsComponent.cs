@@ -9,7 +9,7 @@ using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
-using Luky;
+using OpenTK;
 
 namespace Game.Entities
 {

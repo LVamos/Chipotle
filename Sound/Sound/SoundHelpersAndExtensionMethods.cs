@@ -1,9 +1,25 @@
 ﻿using System;
 
+using OpenTK;
+
 namespace Luky
 {
     /// <summary>
-    /// 
+    /// </summary>
+    public static class SoundExtensionMethods
+    {
+        public static Vector3 AsOpenALVector(this OpenTK.Vector2 v)
+=> new Vector3(v.X, 0, v.Y);
+
+        /// <summary>
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static OpenTK.Vector3 AsOpenTKV3(this Vector3 v)
+        => new OpenTK.Vector3(v.X, v.Y, v.Z);
+    }
+
+    /// <summary>
     /// </summary>
     internal static class Names
     {
@@ -15,33 +31,12 @@ namespace Luky
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    internal static class SoundExtensionMethods
-    {
-        public Vector3 AsOpenALVector(this Vector2 v)
-=> new Vector3(v.X, 0, v.Y);
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static OpenTK.Vector3 AsOpenTKV3(this Vector3 v)
-        => new OpenTK.Vector3(v.X, v.Y, v.Z);
-
-
-    }
-
-    /// <summary>
-    /// 
     /// </summary>
     internal static class SoundHM
     {
         /// <summary>
-        /// this method will pan a mono sound into interleaved stereo, outputting into the same buffer it was given
+        /// this method will pan a mono sound into interleaved stereo, outputting into the same
+        /// buffer it was given
         /// </summary>
         /// <param name="sBuffer"></param>
         /// <param name="panning"></param>

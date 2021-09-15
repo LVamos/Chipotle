@@ -1,5 +1,7 @@
 ﻿using System;
 
+using OpenTK;
+
 using static System.Math;
 
 namespace Luky
