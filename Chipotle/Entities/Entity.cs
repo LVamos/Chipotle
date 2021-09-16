@@ -10,18 +10,50 @@ using Luky;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Represents an NPC.
+    /// </summary>
     public class Entity : GameObject
     {
+        /// <summary>
+        /// Reference to a component that controls behavior of the NPC
+        /// </summary>
         protected AIComponent _ai;
+
+        /// <summary>
+        /// List of all entity components
+        /// </summary>
         protected List<EntityComponent> _components;
+
+        /// <summary>
+        /// Reference to a component that processes input from the player
+        /// </summary>
         protected InputComponent _input;
+
+        /// <summary>
+        /// Reference to a component that controls movement of the NPC
+        /// </summary>
         protected PhysicsComponent _physics;
+
+        /// <summary>
+        /// Reference to a component that controls sound output of the NPC
+        /// </summary>
         protected SoundComponent _sound;
+
+        /// <summary>
+        /// List of all localities visited by the NPC
+        /// </summary>
         protected HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
 
         /// <summary>
-        /// Constructor
+        /// constructor
         /// </summary>
+        /// <param name="name">Inner and public anme of the NPC</param>
+        /// <param name="type">Type of the NPC</param>
+        /// <param name="ai">Reference to an AI component</param>
+        /// <param name="input">Reference to an input component</param>
+        /// <param name="physics">Reference to an physics component</param>
+        /// <param name="sound">Reference to an sound component</param>
         public Entity(Name name, string type, AIComponent ai, InputComponent input, PhysicsComponent physics, SoundComponent sound) : base(name, type, null)
         {
             _physics = physics;
@@ -33,34 +65,55 @@ namespace Game.Entities
             _components.ForEach(c => c.Owner = this);
         }
 
+        /// <summary>
+        /// Returns the current orientation of the NPC in the game world.
+        /// </summary>
         public Orientation2D Orientation => _physics.Orientation;
+
+        /// <summary>
+        /// List of all localities visited by the NPC
+        /// </summary>
         public IReadOnlyCollection<Locality> VisitedLocalities => _visitedLocalities;
 
+        /// <summary> Creates new instance of the Bartender NPC. </summary> <returns><New instance
+        /// of the NPC/returns>
         public static Entity CreateBartender()
             => new Entity(new Name("Bartender", "pingl"), "Bartender", new BartenderAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
+        /// <summary> Creates new instance of the Carson NPC. </summary> <returns><New instance of
+        /// the NPC/returns>
         public static Entity CreateCarson()
             => new Entity(new Name("Carson", "David Carson"), "Carson", new CarsonAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
-        /// <summary>
-        /// Creates the Columbo entity
-        /// </summary>
-        /// <returns>Instance of Columbo</returns>
+        /// <summary> Creates new instance of the Detective Chipotle NPC. </summary> <returns><New
+        /// instance of the NPC/returns>
         public static Entity CreateChipotle()
             => new Entity(new Name("Chipotle", "detektiv Chipotle"), "Chipotle", null, new ChipotleInputComponent(), new ChipotlePhysicsComponent(), new ChipotleSoundComponent());
 
+        /// <summary> Creates new instance of the Christine NPC. </summary> <returns><New instance
+        /// of the NPC/returns>
         public static Entity CreateChristine()
             => new Entity(new Name("Christine", "Christine Piercová"), "Christine", new ChristineAIComponent(), null, new ChristinePhysicsComponent(), new SoundComponent());
 
+        /// <summary> Creates new instance of the Mariotti NPC. </summary> <returns><New instance of
+        /// the NPC/returns>
         public static Entity CreateMariotti()
             => new Entity(new Name("Mariotti", "Paolo Mariotti"), "Mariotti", new MariottiAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
+        /// <summary> Creates new instance of the Sweeney NPC. </summary> <returns><New instance of
+        /// the NPC/returns>
         public static Entity CreateSweeney()
             => new Entity(new Name("Sweeney", "Derreck Sweeney"), "Sweeney", new SweeneyAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
+        /// <summary> Creates new instance of the Tuttle NPC. </summary> <returns><New instance of
+        /// the NPC/returns>
         public static Entity CreateTuttle()
             => new Entity(new Name("Tuttle", "parťák"), "Tuttle", new TuttleAIComponent(), null, new TuttlePhysicsComponent(), new TuttleSoundComponent());
 
+        /// <summary>
+        /// Takes an incoming message and saves it into the message queue.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         public override void ReceiveMessage(GameMessage message)
         {
             base.ReceiveMessage(message);
@@ -69,6 +122,9 @@ namespace Game.Entities
                 SendInnerMessage(message);
         }
 
+        /// <summary>
+        /// Initializes the NPC and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -86,7 +142,7 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Updates state of all components and lets them react on other game objects.
+        /// Processes incoming messages.
         /// </summary>
         public override void Update()
         {
@@ -94,6 +150,9 @@ namespace Game.Entities
             _components.ForEach(c => c.Update());
         }
 
+        /// <summary>
+        /// Destroys the NPC.
+        /// </summary>
         protected override void Destroy()
         {
             Locality?.Unregister(this);
@@ -101,13 +160,20 @@ namespace Game.Entities
             _area.GetTiles().Foreach(t => t.UnregisterObject());
         }
 
-        protected void OnPositionChanged(PositionChanged m)
+        /// <summary>
+        /// Processes the PositionChanged message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnPositionChanged(PositionChanged message)
         {
-            _area = m.Area;
+            _area = message.Area;
             RecordLocality();
-            _ai?.ReceiveMessage(m);
+            _ai?.ReceiveMessage(message);
         }
 
+        /// <summary>
+        /// Records the current locality as visited.
+        /// </summary>
         protected void RecordLocality()
         {
             Locality locality = _area.GetLocality();
@@ -116,7 +182,7 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Sends message to al components.
+        /// Sends a message to al components.
         /// </summary>
         /// <param name="message">Message to redistribute</param>
         protected virtual void SendInnerMessage(GameMessage message)
@@ -129,9 +195,18 @@ namespace Game.Entities
             targetComponents.Foreach(c => c.ReceiveMessage(message));
         }
 
+        /// <summary>
+        /// Checks if a message came from inside the NPC.
+        /// </summary>
+        /// <param name="message">The message to check</param>
+        /// <returns>True if the message came from inside the NPC</returns>
         private bool IsInternal(GameMessage message)
             => message.Sender is EntityComponent c && c.Owner == this;
 
+        /// <summary>
+        /// Processes the Destroy message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnDestroy(Destroy message)
         {
             Assert(IsInternal(message), "This message can be sent only from an inner component.");
