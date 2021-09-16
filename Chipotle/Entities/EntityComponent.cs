@@ -8,11 +8,24 @@ using Luky;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Base class for all NPC components
+    /// </summary>
     public abstract class EntityComponent : MessagingObject
     {
+        /// <summary>
+        /// A reference to the parent NPC
+        /// </summary>
         public Entity Owner;
+
+        /// <summary>
+        /// Indicates if a cutscene is played in the moment.
+        /// </summary>
         protected bool _cutsceneInProgress;
 
+        /// <summary>
+        /// Name of the parent NPC
+        /// </summary>
         public Name Name => Owner?.Name;
 
         /// <summary>
@@ -31,10 +44,18 @@ namespace Game.Entities
                 );
         }
 
-        protected virtual void OnCutsceneBegan(CutsceneBegan m)
+        /// <summary>
+        /// Processes the CutsceneBegan message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected virtual void OnCutsceneBegan(CutsceneBegan message)
             => _cutsceneInProgress = true;
 
-        protected virtual void OnCutsceneEnded(CutsceneEnded m)
+        /// <summary>
+        /// Processes the CutsceneEnded message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected virtual void OnCutsceneEnded(CutsceneEnded message)
 => _cutsceneInProgress = false;
     }
 }

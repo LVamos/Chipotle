@@ -1,22 +1,34 @@
-﻿using Game.Messaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-
 namespace Game.Entities
 {
+    /// <summary>
+    /// Controls the behavior of the Carson NPC.
+    /// </summary>
     public class CarsonAIComponent : AIComponent
     {
-
-
-        private bool _yelledAtChipotle;
+        /// <summary>
+        /// Indicates if the Carson NPC said goodbye to the Detective Chipotle NPC when Chipotle
+        /// left the zahrada c1 locality.
+        /// </summary>
         private bool _saidGoodbyeToChipotle;
 
+        /// <summary>
+        /// Indicates if the Carson NPC scolded the Detective Chipotle NPC the first time Chipotle
+        /// came to the zahrada c1 locality.
+        /// </summary>
+        private bool _yelledAtChipotle;
+
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -26,28 +38,29 @@ namespace Game.Entities
                 {
                     [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                     [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
-
                 }
                 );
             SetPosition message = new SetPosition(this, new Plane("1229, 1017"), true); // Sitting on a bench at a table
             Owner.ReceiveMessage(message);
         }
 
-        private void OnLocalityLeft(LocalityLeft message)
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
         {
-            if (message.Sender != World.Player)
+            base.Update();
+
+            if (!_messagingEnabled)
                 return;
 
-            bool benchUsed = World.GetObjectsByType("lavice u carsona").Any(o => o.Used);
-            if (benchUsed && !_saidGoodbyeToChipotle)
-            {
-                _saidGoodbyeToChipotle = true;
-                World.PlayCutscene(Owner, "cs33");
-            }
+            WatchChipotlesCar();
         }
 
-
-
+        /// <summary>
+        /// Processes the LocalityEntered message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(LocalityEntered message)
         {
             if (message.Sender != World.Player)
@@ -61,16 +74,28 @@ namespace Game.Entities
             }
         }
 
-        public override void Update()
+        /// <summary>
+        /// Processes the LocalityLeft message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnLocalityLeft(LocalityLeft message)
         {
-            base.Update();
-
-            if (!_messagingEnabled)
+            if (message.Sender != World.Player)
                 return;
 
-            WatchChipotlesCar();
+            bool benchUsed = World.GetObjectsByType("lavice u carsona").Any(o => o.Used);
+            if (benchUsed && !_saidGoodbyeToChipotle)
+            {
+                _saidGoodbyeToChipotle = true;
+                World.PlayCutscene(Owner, "cs33");
+            }
         }
 
+        /// <summary>
+        /// checks if the Detective's car object went away from the asfaltka c1 locality after
+        /// saying goodbye.
+        /// </summary>
+        /// <remarks>The method is called from the Update method.</remarks>
         private void WatchChipotlesCar()
         {
             Locality road = World.GetLocality("asfaltka c1");
@@ -81,7 +106,5 @@ namespace Game.Entities
                 Owner.ReceiveMessage(new Destroy(this));
             }
         }
-
-
     }
 }

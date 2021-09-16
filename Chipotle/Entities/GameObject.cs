@@ -1,35 +1,72 @@
-﻿using Game.Terrain;
+﻿using System;
+
+using Game.Terrain;
 
 using Luky;
 
-using System;
-
 namespace Game.Entities
 {
-
-
     /// <summary>
-    /// Defines a simple subject in game world e.g. a table, chair or bed.
+    /// A base class for all simple objects and NPCS
     /// </summary>
     public class GameObject : MapElement
     {
-        protected override void Destroy()
+        public readonly string Type;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name of new object</param>
+        /// <param name="area">Area to be occupied with new object</param>
+        public GameObject(Name name, string type, Plane area) : base(name, area)
         {
-            Locality?.Unregister(this);
-            World.Remove(this);
-            Disappear();
+            Type = type.PrepareForIndexing();
+
+            if (area != null)
+                Appear();
+
+            Locality?.Register(this);
         }
 
-        private static DumpObject CreateFishTank(Name name, Plane area)
-=> new DumpObject(name, area, "akvárko", null, null, "FishTankLoop");
+        /// <summary>
+        /// Locality which contains this object
+        /// </summary>
+        public Locality Locality { get; private set; }
 
+        public static DumpObject CreateCorpse(Name name, Plane area)
+            => new Corpse(name, area);
 
-        private static DumpObject CreateElectricalBox(Name name, Plane area)
+        /// <summary> Creates new instance of the electrical box (rozvodná skříň w1) object in the
+        /// sklep w1 locality. </summary> <returns><New instance of the object/returns>
+        public static DumpObject CreateElectricalBox(Name name, Plane area)
 => new DumpObject(name, area, "rozvodna", null, null, "ElectricalBoxLoop");
 
-        private static DumpObject CreateHighway(Name name, Plane area)
+        /// <summary> Creates new instance of the fish tank (akvárko w1) object in the ložnice w1
+        /// locality. </summary> <returns><New instance of the object/returns>
+        public static DumpObject CreateFishTank(Name name, Plane area)
+=> new DumpObject(name, area, "akvárko", null, null, "FishTankLoop");
+
+        public static DumpObject CreateGardenGril(Name name, Plane area)
+        => new CarsonsGrill(name, area);
+
+        public static DumpObject CreateGardenHose(Name name, Plane area)
+        => new DumpObject(name, area, "zahradní hadice", null, "snd1", null);
+
+        /// <summary> Creates new instance of a highway (dálnice) object. </summary> <returns><New
+        /// instance of the object/returns>
+        public static DumpObject CreateHighway(Name name, Plane area)
 => new DumpObject(name, area, "dálnice", null, null, "HighwayLoop");
 
+        public static ChipotlesCar CreateChipotlesCar(Name name, Plane area)
+            => new ChipotlesCar(name, area);
+
+        /// <summary>
+        /// Creates new instance of an object according to the specified type.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <param name="type">Type of the object</param>
+        /// <returns>New instance of the object</returns>
         public static DumpObject CreateObject(Name name, Plane area, string type)
         {
             if (string.IsNullOrEmpty(name.Indexed))
@@ -38,7 +75,7 @@ namespace Game.Entities
             switch (type)
             {
                 case "dálnice": return CreateHighway(name, area);
-                            case "rozvodna": return CreateElectricalBox(name, area);
+                case "rozvodna": return CreateElectricalBox(name, area);
                 case "větrák": return CreateFan(name, area);
                 case "krb": return CreateFireplace(name, area);
                 case "mrazák": return CreateFreezer(name, area);
@@ -79,183 +116,23 @@ namespace Game.Entities
             }
         }
 
-        private static DumpObject CreateMariottisChair(Name name, Plane area)
-            => new DumpObject(name, area, "křeslo u Mariottiho", null, null, null, "cs12", true);
-
-        private static DumpObject CreateSweeneysBell(Name name, Plane area)
-            => new SweeneysBell(name, area);
-        private static DumpObject CreateChristinesBell(Name name, Plane area)
-            => new ChristinesBell(name, area);
-
-        private static DumpObject CreateChristinesMirror(Name name, Plane area)
-            => new DumpObject(name, area, "zrcadlo u Kristýny", null, null, null, "cs14", true);
-        private static KillersCar CreateKillersCar(Name name, Plane area) => new KillersCar(name, area);
-        private static DumpObject CreateKeyHanger(Name name, Plane area) => new KeyHanger(name, area);
-
-        private static PubTable CreatePubTable(Name name, Plane area)
-                => new PubTable(name, area);
-
-        private static DumpObject CreateCarsonsBench(Name name, Plane area)
-            => new CarsonsBench(name, area);
-        private static DumpObject CreateSafe(Name name, Plane area)
-                => new DumpObject(name, area, "trezor", null, null, null, "cs18", true);
-
-        private static DumpObject CreateSweeneysTable(Name name, Plane area)
-                => new DumpObject(name, area, "stůl u sweeneyho", null, null, null, "cs17", true);
-
-
-        private static DumpObject CreateFan(Name name, Plane area)
-=> new DumpObject(name, area, "větrák", null, null, "FanLoop");
-
-
-        private static DumpObject CreateSweeneysComputer(Name name, Plane area)
-                => new DumpObject(name, area, "počítač u sweeneyho", null, null, "ComputerLoop", "cs16", true);
-
-        private static DumpObject CreateSweeneysPhone(Name name, Plane area)
-                => new DumpObject(name, area, "mobil u Sweeneyho", null, null, null, "cs15");
-
-
-        private static DumpObject CreateWallClock(Name name, Plane area)
-=> new DumpObject(name, area, "hodiny", null, null, "WallClockLoop");
-
-        private static DumpObject CreateFreezer(Name name, Plane area)
-=> new DumpObject(name, area, "mrazák", null, null, "FreezerLoop");
-
-        private static DumpObject CreateCuckooClock(Name name, Plane area)
-=> new DumpObject(name, area, "kukačkové hodiny", null, null, "CuckooClockLoop");
-
-
-
-
-
-
-        private static DumpObject CreateVanillaCrunchCar(Name name, Plane area)
-=> new VanillaCrunchCar(name, area);
-
-
-        private static DumpObject CreatePinball(Name name, Plane area)
-    => new DumpObject(name, area, "pinball", null, "snd15");
-
-
-        private static DumpObject CreateIcecreamMachine(Name name, Plane area)
-            => new IcecreamMachine(name, area);
-
-        private static DumpObject CreateBathroomSink(Name name, Plane area)
-                => new DumpObject(name, area, "umyvadlo", null, "snd8");
-
-        private static DumpObject CreateFridge(Name name, Plane area)
-=> new DumpObject(name, area, "lednice", null, "snd10", "FridgeLoop");
-
-        private static DumpObject CreateFireplace(Name name, Plane area)
-=> new DumpObject(name, area, "krb", null, null, "FirePlaceLoop");
-
-
-        private static DumpObject CreateChair(Name name, Plane area)
-=> new DumpObject(name, area, "židle", null, null, null, "snd12");
-
-
-
-        private static DumpObject CreateDishwasher(Name name, Plane area)
-=> new DumpObject(name, area, "", null, "snd11");
-
-
-        private static DumpObject CreateCoffeemaker(Name name, Plane area)
-    => new DumpObject(name, area, "kávovar", null, "snd9");
-
-        private static DumpObject CreateBathroomPool(Name name, Plane area)
-    => new DumpObject(name, area, "bazének", null, "snd7");
-
-
-        public static DumpObject CreateCorpse(Name name, Plane area)
-    => new Corpse(name, area);
-
-
-        public static DumpObject CreatePoolsidePlank(Name name, Plane area)
-            => new DumpObject(name, area, "prkno u bazénu", null, null, null, "cs4", true);
-
+        public static DumpObject CreatePoolsideBench(Name name, Plane area)
+                    => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
 
         public static DumpObject CreatePoolsideBin(Name name, Plane area)
-=> new PoolsideBin(name, area);
+        => new PoolsideBin(name, area);
 
-        public static DumpObject CreatePoolsideBench(Name name, Plane area)
-            => new DumpObject(name, area, "lavička u bazénu", null, null, null, "cs1", true);
-
-        public static ChipotlesCar CreateChipotlesCar(Name name, Plane area)
-    => new ChipotlesCar(name, area);
-
+        public static DumpObject CreatePoolsidePlank(Name name, Plane area)
+                    => new DumpObject(name, area, "prkno u bazénu", null, null, null, "cs4", true);
 
         public static DumpObject CreatePoolStairs(Name name, Plane area)
-=> new DumpObject(name, area, "schůdky u bazénu", null, "snd3");
-        public static DumpObject CreateGardenHose(Name name, Plane area)
-=> new DumpObject(name, area, "zahradní hadice", null, "snd1", null);
+        => new DumpObject(name, area, "schůdky u bazénu", null, "snd3");
 
-        public static DumpObject CreateGardenGril(Name name, Plane area)
-=> new CarsonsGrill(name, area);
+        public override int GetHashCode()
+                    => unchecked(3000 * (2000 + Area.GetHashCode()) * (3000 + Type.GetHashCode()) * (4000 + Locality.GetHashCode()));
 
-
-
-
-
-
-
-        protected override void Disappear()
-        {
-            base.Disappear();
-            _area.GetTiles().Foreach(t => t.UnregisterObject());
-        }
-
-        //todo GameObject
-
-
-
-
-
-
-        /// <summary>
-        /// Locality which contains this object
-        /// </summary>
-        public Locality Locality { get; private set; }
-
-
-
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Name of new object</param>
-        /// <param name="area">Area to be occupied with new object</param>
-        public GameObject(Name name, string type, Plane area) : base(name, area)
-        {
-            Type = type.PrepareForIndexing();
-
-            if (area != null)
-                Appear();
-
-            Locality?.Register(this);
-        }
-
-        protected virtual void Move    (Plane targetArea)
-        {
-            if (targetArea == null)
-                throw new ArgumentNullException(nameof(targetArea));
-
-            Locality sourceLocality = Locality;
-            Locality targetLocality = targetArea.GetLocality();
-
-            Disappear();
-            _area = targetArea;
-            Appear();
-
-
-            if (sourceLocality != targetLocality)
-            {
-                sourceLocality.Unregister(this);
-                targetLocality.Register(this);
-                Locality = targetLocality;
-            }
-        }
-
-
+        public override string ToString()
+                    => Name.Friendly;
 
         /// <summary>
         /// draws this object to map and pairs it with locality.
@@ -271,14 +148,123 @@ namespace Game.Entities
             Area.GetTiles().Foreach(t => t.Register(this));
         }
 
-        public override string ToString()
-            => Name.Friendly;
+        /// <summary>
+        /// Destroys the object or NPC.
+        /// </summary>
+        protected override void Destroy()
+        {
+            Locality?.Unregister(this);
+            World.Remove(this);
+            Disappear();
+        }
 
-        public readonly string Type;
+        protected override void Disappear()
+        {
+            base.Disappear();
+            _area.GetTiles().Foreach(t => t.UnregisterObject());
+        }
 
-        public override int GetHashCode()
-            => unchecked(3000 * (2000 + Area.GetHashCode()) * (3000 + Type.GetHashCode()) * (4000 + Locality.GetHashCode()));
+        //todo GameObject
+        protected virtual void Move(Plane targetArea)
+        {
+            if (targetArea == null)
+                throw new ArgumentNullException(nameof(targetArea));
 
+            Locality sourceLocality = Locality;
+            Locality targetLocality = targetArea.GetLocality();
+
+            Disappear();
+            _area = targetArea;
+            Appear();
+
+            if (sourceLocality != targetLocality)
+            {
+                sourceLocality.Unregister(this);
+                targetLocality.Register(this);
+                Locality = targetLocality;
+            }
+        }
+
+        private static DumpObject CreateBathroomPool(Name name, Plane area)
+            => new DumpObject(name, area, "bazének", null, "snd7");
+
+        private static DumpObject CreateBathroomSink(Name name, Plane area)
+                        => new DumpObject(name, area, "umyvadlo", null, "snd8");
+
+        private static DumpObject CreateCarsonsBench(Name name, Plane area)
+                    => new CarsonsBench(name, area);
+
+        private static DumpObject CreateCoffeemaker(Name name, Plane area)
+            => new DumpObject(name, area, "kávovar", null, "snd9");
+
+        private static DumpObject CreateCuckooClock(Name name, Plane area)
+        => new DumpObject(name, area, "kukačkové hodiny", null, null, "CuckooClockLoop");
+
+        private static DumpObject CreateDishwasher(Name name, Plane area)
+        => new DumpObject(name, area, "", null, "snd11");
+
+        private static DumpObject CreateFan(Name name, Plane area)
+        => new DumpObject(name, area, "větrák", null, null, "FanLoop");
+
+        private static DumpObject CreateFireplace(Name name, Plane area)
+        => new DumpObject(name, area, "krb", null, null, "FirePlaceLoop");
+
+        private static DumpObject CreateFreezer(Name name, Plane area)
+        => new DumpObject(name, area, "mrazák", null, null, "FreezerLoop");
+
+        private static DumpObject CreateFridge(Name name, Plane area)
+        => new DumpObject(name, area, "lednice", null, "snd10", "FridgeLoop");
+
+        private static DumpObject CreateChair(Name name, Plane area)
+        => new DumpObject(name, area, "židle", null, null, null, "snd12");
+
+        /// <summary> Creates new instance of the Christine's door bell object in the Belvedere
+        /// street (ulice p1) locality. </summary> <returns><New instance of the object/returns>
+        private static DumpObject CreateChristinesBell(Name name, Plane area)
+            => new ChristinesBell(name, area);
+
+        private static DumpObject CreateChristinesMirror(Name name, Plane area)
+                    => new DumpObject(name, area, "zrcadlo u Kristýny", null, null, null, "cs14", true);
+
+        private static DumpObject CreateIcecreamMachine(Name name, Plane area)
+                    => new IcecreamMachine(name, area);
+
+        private static DumpObject CreateKeyHanger(Name name, Plane area) => new KeyHanger(name, area);
+
+        private static KillersCar CreateKillersCar(Name name, Plane area) => new KillersCar(name, area);
+
+        /// <summary> Creates new instance of the Mariotti's chair (křeslo v1) object in the
+        /// kancelář v1 locality. </summary> <returns><New instance of the object/returns>
+        private static DumpObject CreateMariottisChair(Name name, Plane area)
+            => new DumpObject(name, area, "křeslo u Mariottiho", null, null, null, "cs12", true);
+
+        private static DumpObject CreatePinball(Name name, Plane area)
+            => new DumpObject(name, area, "pinball", null, "snd15");
+
+        private static PubTable CreatePubTable(Name name, Plane area)
+                        => new PubTable(name, area);
+
+        private static DumpObject CreateSafe(Name name, Plane area)
+                        => new DumpObject(name, area, "trezor", null, null, null, "cs18", true);
+
+        /// <summary> Creates new instance of the Sweeney's door bell object in the Easterby street
+        /// (ulice s1) locality. </summary> <returns><New instance of the object/returns>
+        private static DumpObject CreateSweeneysBell(Name name, Plane area)
+            => new SweeneysBell(name, area);
+
+        private static DumpObject CreateSweeneysComputer(Name name, Plane area)
+                => new DumpObject(name, area, "počítač u sweeneyho", null, null, "ComputerLoop", "cs16", true);
+
+        private static DumpObject CreateSweeneysPhone(Name name, Plane area)
+                => new DumpObject(name, area, "mobil u Sweeneyho", null, null, null, "cs15");
+
+        private static DumpObject CreateSweeneysTable(Name name, Plane area)
+                                => new DumpObject(name, area, "stůl u sweeneyho", null, null, null, "cs17", true);
+
+        private static DumpObject CreateVanillaCrunchCar(Name name, Plane area)
+=> new VanillaCrunchCar(name, area);
+
+        private static DumpObject CreateWallClock(Name name, Plane area)
+        => new DumpObject(name, area, "hodiny", null, null, "WallClockLoop");
     }
-
 }
