@@ -11,7 +11,7 @@ using OpenTK;
 
 namespace Game.Entities
 {
-    public abstract class PhysicsComponent : EntityComponent
+    public class PhysicsComponent : EntityComponent
     {
         protected Plane _area;
         protected Orientation2D _orientation;
