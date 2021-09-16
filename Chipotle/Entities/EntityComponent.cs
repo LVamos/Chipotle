@@ -1,27 +1,23 @@
-﻿using Game.Messaging;
+﻿using System;
+using System.Collections.Generic;
+
+using Game.Messaging;
 using Game.Messaging.Events;
 
 using Luky;
-
-using System;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
     public abstract class EntityComponent : MessagingObject
     {
-
-
-
-
-
-
-
         public Entity Owner;
         protected bool _cutsceneInProgress;
 
         public Name Name => Owner?.Name;
 
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -31,7 +27,6 @@ namespace Game.Entities
                 {
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
-
                 }
                 );
         }
