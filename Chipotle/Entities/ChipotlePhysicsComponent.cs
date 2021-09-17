@@ -13,28 +13,89 @@ using OpenTK;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Controls movement of the Detective Chipotle NPC.
+    /// </summary>
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
+        /// <summary>
+        /// A delayed message of ChipotlesCarMoved type
+        /// </summary>
         private ChipotlesCarMoved _carMovement;
+
+        /// <summary>
+        /// Indicates the ongoing countdown of the phone call cutscene that should be played after
+        /// the Detective Chipotle and Tuttle NPCs leave the Christine's bed room (ložnice p1) locality.
+        /// </summary>
         private bool _phoneCountdown;
+
+        /// <summary>
+        /// The time that has elapsed since the phone call cutscene countdown started.
+        /// </summary>
         private int _phoneDeltaTime;
+
+        /// <summary>
+        /// Specifies how long the phone call cutscene countdown should last.
+        /// </summary>
         private int _phoneInterval;
+
+        /// <summary>
+        /// Specifies how many degrees remain to finish an ongoing rotation.
+        /// </summary>
         private int _plannedRotations;
+
+        /// <summary>
+        /// specifies how quickly the NPC rotates.
+        /// </summary>
         private int _rotationStep;
+
+        /// <summary>
+        /// Indicates if the NPC is sitting at a table in the pub (výčep h1) locality.
+        /// </summary>
         private bool _sittingAtPubTable;
 
+        /// <summary>
+        /// Indicates if the NPC is sitting on a chair.
+        /// </summary>
         private bool _sittingOnChair;
+
+        /// <summary>
+        /// Indicates if the NPC stepped into the puddle in the pool (bazén w1) locality.
+        /// </summary>
         private bool _steppedIntoPuddle;
+
+        /// <summary>
+        /// Stores references to all the localities the NPC has visited.
+        /// </summary>
         private HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
 
-        private Locality AsphaltRoad => World.GetLocality("asfaltka c1");
+        /// <summary>
+        /// Returns reference to the asphalt road (asfaltka c1) locality.
+        /// </summary>
+        private Locality AsphaltRoad
+            => World.GetLocality("asfaltka c1");
 
-        private ChipotlesCar Car => World.GetObject("detektivovo auto") as ChipotlesCar;
+        /// <summary>
+        /// Returns a reference to the Chipotle's car object.
+        /// </summary>
+        private ChipotlesCar Car
+            => World.GetObject("detektivovo auto") as ChipotlesCar;
 
-        private Tile CuurrentTile => World.Map[_area.Center];
+        /// <summary>
+        /// Returns reference to the tile the NPC currently stands on.
+        /// </summary>
+        private Tile CuurrentTile
+            => World.Map[_area.Center];
 
-        private Entity Tuttle => World.GetEntity("tuttle");
+        /// <summary>
+        /// Returns reference to the Tuttle NPC.
+        /// </summary>
+        private Entity Tuttle
+            => World.GetEntity("tuttle");
 
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             // set initial position.
@@ -65,6 +126,9 @@ namespace Game.Entities
             World.PlayCutscene(Owner, "cs6");
         }
 
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
         public override void Update()
         {
             base.Update();
@@ -72,8 +136,17 @@ namespace Game.Entities
             CountPhone();
         }
 
-        protected override void OnCutsceneBegan(CutsceneBegan message) => CatchSitting(message);
+        /// <summary>
+        /// Processes the CutsceneBegan message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected override void OnCutsceneBegan(CutsceneBegan message)
+            => CatchSitting(message);
 
+        /// <summary>
+        /// Processes the CutsceneEnded message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneEnded(CutsceneEnded message)
         {
             base.OnCutsceneEnded(message);
@@ -95,6 +168,10 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Checks if the NPC sits and sets appropriate fields.
+        /// </summary>
+        /// <param name="message"></param>
         private void CatchSitting(CutsceneBegan message)
         {
             switch (message.CutsceneName)
@@ -104,27 +181,47 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Measures time for the phone call countdown.
+        /// </summary>
         private void CountPhone()
         {
             if (_phoneCountdown)
                 _phoneDeltaTime += World.DeltaTime;
         }
 
-        private Tile GetNextTile(Orientation2D orientation, int step = 1)
+        /// <summary>
+        /// Returns a tile at the specified distance and direction.
+        /// </summary>
+        /// <param name="direction">The direction of the tile to be found</param>
+        /// <param name="step">The distance between the NPC and the tile to be found</param>
+        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+        private Tile GetNextTile(Orientation2D direction, int step = 1)
         {
             Plane target = new Plane(_area);
-            target.Move(orientation, step);
+            target.Move(direction, step);
             return World.Map[target.Center];
         }
 
+        /// <summary>
+        /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
+        /// </summary>
+        /// <param name="step">The distance between the NPC and the required tile</param>
+        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+        /// <completionlist cref="PhysicsComponent.Orientation"/>
         private Tile GetNextTile(int step = 1)
             => GetNextTile(Orientation, step);
 
+        /// <summary>
+        /// Checks if Tuttle and Chipotle NPCs are in the same locality.
+        /// </summary>
+        /// <returns>True if Tuttle and Chipotle NPCs are in the same locality</returns>
         private bool IsTuttleNearBy()
 => _area.GetLocality().IsItHere(World.GetEntity("tuttle"));
 
         /// <summary>
-        /// Chipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
+        /// Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdoivá cesta w1)
+        /// locality right outside the Christine's door.Christine's front door.
         /// </summary>
         private void JumpToBelvedereStreet2()
         {
@@ -135,21 +232,45 @@ namespace Game.Entities
             SetPosition(1805, 1121, true);
         }
 
+        /// <summary>
+        /// The Detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1) locality to the
+        /// Christine's hall (hala p1) locality.
+        /// </summary>
         private void JumpToChristinesHall()
             => SetPosition(1797, 1125, true);
 
+        /// <summary>
+        /// Relocates the NPC from the hall in Vanilla crunch company (hala v1) into the Mariotti's
+        /// office (kancelář v1) locality.
+        /// </summary>
         private void JumpToMariottisOffice()
             => SetPosition(2018, 1123, true);
 
+        /// <summary>
+        /// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) locality to the
+        /// Sweeney's hall (hala s1) locality.
+        /// </summary>
         private void JumpToSweeneysHall()
             => SetPosition(1405, 965, true);
 
+        /// <summary>
+        /// Relocates the NPC from the Mariotti's office (kancelář v1) into the garage of the
+        /// vanilla crunch company (garáž v1) locality.
+        /// </summary>
         private void JumpToVanillaCrunchGarage()
             => SetPosition(2006, 1166, true);
 
+        /// <summary>
+        /// Processes the ChipotlesCarMoved message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnChipotlesCarMoved(ChipotlesCarMoved message)
 => _carMovement = message;
 
+        /// <summary>
+        /// Processes the MakeStep message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnMakeStep(MakeStep message)
         {
             if (StandUp())
@@ -200,9 +321,17 @@ namespace Game.Entities
             WatchPhone();
         }
 
-        private void OnSayLocality(SayLocality m)
+        /// <summary>
+        /// Processes the SayLocality message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnSayLocality(SayLocality message)
 => Tolk.Speak(_area.GetLocality().Name.Friendly);
 
+        /// <summary>
+        /// Processes the SayNearestObject message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnSayNearestObject(SayNearestObject m)
         {
             GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
@@ -227,15 +356,27 @@ namespace Game.Entities
             Tolk.Speak(msg);
         }
 
+        /// <summary>
+        /// Processes the SayTerrain message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnSayTerrain(SayTerrain message)
             => Tolk.Speak(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
 
+        /// <summary>
+        /// Processes the TurnEntity message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnTurnEntity(TurnEntity message)
         {
             _rotationStep = message.Degrees >= 0 ? 5 : -5;
             _plannedRotations = Math.Abs(message.Degrees);
         }
 
+        /// <summary>
+        /// Processes the UseObject message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnUseObject(UseObject message)
         {
             // Detect door and use it if possible.
@@ -251,16 +392,31 @@ namespace Game.Entities
                 tileInFront.Object.ReceiveMessage(new UseObject(Owner, tileInFront));
         }
 
+        /// <summary>
+        /// Plays the game finals.
+        /// </summary>
         private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
 
-        private void QuitGame() => World.QuitGame();
+        /// <summary>
+        /// Terminates the game and runs the main menu.
+        /// </summary>
+        private void QuitGame()
+            => World.QuitGame();
 
+        /// <summary>
+        /// Records the specified locality as visited.
+        /// </summary>
+        /// <param name="locality">The locality to be recorded</param>
         private void RecordLocality(Locality locality)
         {
             if (!_visitedLocalities.Contains(locality))
                 _visitedLocalities.Add(locality);
         }
 
+        /// <summary>
+        /// He puts the NPC on its feet if it is sitting and plays the appropriate sound.
+        /// </summary>
+        /// <returns>True on success</returns>
         private bool StandUp()
         {
             if (_sittingAtPubTable)
@@ -280,6 +436,10 @@ namespace Game.Entities
             return false;
         }
 
+        /// <summary>
+        /// Performs the planned rotation movement of the NPC.
+        /// </summary>
+        /// <completionlist cref="_plannedRotations"/>
         private void UpdateRotation()
         {
             if (_plannedRotations > 0)
@@ -292,23 +452,33 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Relocates the NPC near the car of the Detective Chipotle NPC if the car has moved recently.
+        /// </summary>
         private void WatchCar()
         {
             if (_carMovement == null)
                 return;
 
-            Vector2? target = _carMovement.TargetLocation.FindRandomWalkableTile(1);
+            Vector2? target = _carMovement.Target.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");
             SetPosition((Vector2)target, true);
             _carMovement = null;
         }
 
+        /// <summary>
+        /// Plays an appropriate cutscene if the icecream machine (automat v1) has been used recently.
+        /// </summary>
         private void WatchIcecreamMachine()
         {
             if (World.GetObject("automat v1").Used)
                 World.PlayCutscene(this, "cs13");
         }
 
+        /// <summary>
+        /// Makes the Easterby street (ulice s1) accessible if the Detective Chipotle has answered a
+        /// phone call recently. and plays an appropriate cutscene
+        /// </summary>
         private void WatchPhone()
         {
             if (_phoneCountdown && _phoneDeltaTime >= _phoneInterval)
@@ -319,6 +489,13 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Plays an appropriate cutscene if the Detective Chipotle NPC stepped into the puddle next
+        /// to the Walsch's pool (bazén w1) object.
+        /// </summary>
+        /// <param name="point">
+        /// Coordintes of a tile the Detective Chipotle NPC is gonna step on to.
+        /// </param>
         private void WatchPuddle(Vector2 point)
         {
             if (_steppedIntoPuddle)
@@ -332,6 +509,12 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Relocates the Chipotle's car (detektivovo auto) object to the afphalt road (asfaltka c1)
+        /// locality and plays an appropriate cutscene if crutial objects in the sweeney's room
+        /// (pokoj s1) has been used.
+        /// </summary>
+        /// <remarks>The Detective Chiptole and Tuttle NPCs should move with the car afterwards.</remarks>
         private void WatchSweeneysRoom()
         {
             if (

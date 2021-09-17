@@ -3,8 +3,14 @@ using System.Windows.Forms;
 
 namespace Game.UI
 {
+    /// <summary>
+    /// Represents a keyboard shortcut.
+    /// </summary>
     public struct KeyShortcut
     {
+        /// <summary>
+        /// set of key modifiers
+        /// </summary>
         [Flags]
         public enum Modifiers
         {
@@ -39,6 +45,11 @@ namespace Game.UI
         /// </summary>
         public readonly Keys Key;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="modifiers">Key modifiers</param>
+        /// <param name="key">The pressed key</param>
         public KeyShortcut(Modifiers modifiers, Keys key)
         {
             Control = modifiers.HasFlag(Modifiers.Control);
@@ -48,11 +59,11 @@ namespace Game.UI
         }
 
         /// <summary>
-        /// Construktor
+        /// Constructor
         /// </summary>
-        /// <param name="control">Was control pressed?</param>
-        /// <param name="shift">Was shift pressed?</param>
-        /// <param name="alt">Was alt pressed?</param>
+        /// <param name="control">Specifies if the control key was pressed</param>
+        /// <param name="shift">Specifies if the shift key was pressed</param>
+        /// <param name="alt">Specifies if the alt key was pressed</param>
         /// <param name="key">Value of pressed keys</param>
         public KeyShortcut(bool control, bool shift, bool alt, Keys key)
         {
@@ -63,7 +74,7 @@ namespace Game.UI
         }
 
         /// <summary>
-        /// Construktor
+        /// Constructor
         /// </summary>
         /// <param name="key">Value of pressed key</param>
         public KeyShortcut(Keys key) : this(false, false, false, key)
@@ -79,16 +90,38 @@ namespace Game.UI
         {
         }
 
+        /// <summary>
+        /// Checks if two instances are equal.
+        /// </summary>
+        /// <param name="obj">Another object to be checked</param>
+        /// <returns>True if both instances are equal</returns>
         public override bool Equals(Object obj)
             => (obj is KeyShortcut && this == (KeyShortcut)obj);
 
+        /// <summary>
+        /// Returns a hash code for the instance.
+        /// </summary>
+        /// <returns>a hash code for the instance</returns>
         public override int GetHashCode()
             => Key.GetHashCode();
 
+        /// <summary>
+        /// Overloads the == operator.
+        /// </summary>
+        /// <param name="k1">First operand</param>
+        /// <param name="k2">second operand</param>
+        /// <returns>True if the operands are equal</returns>
         public static bool operator ==(KeyShortcut k1, KeyShortcut k2)
             => (k1.Control == k2.Control && k1.Shift == k2.Shift && k1.Alt == k2.Alt && k1.Key == k2.Key);
 
 
+
+        /// <summary>
+        /// Overloads the != operator.
+        /// </summary>
+        /// <param name="k1">First operand</param>
+        /// <param name="k2">second operand</param>
+        /// <returns>True if the operands are inequal</returns>
         public static bool operator !=(KeyShortcut k1, KeyShortcut k2)
             => !(k1 == k2);
     }

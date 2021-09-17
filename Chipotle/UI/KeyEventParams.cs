@@ -3,6 +3,9 @@ using System.Windows.Forms;
 
 namespace Game.UI
 {
+    /// <summary>
+    /// Parameters for the KeyDown event
+    /// </summary>
     public struct KeyEventParams
     {
         /// <summary>
@@ -48,7 +51,7 @@ namespace Game.UI
 
 
         /// <summary>
-        /// Construktor
+        /// Constructor
         /// </summary>
         /// <param name="e">Event parameters</param>
         public KeyEventParams(KeyEventArgs e)

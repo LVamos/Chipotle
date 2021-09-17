@@ -2,12 +2,21 @@
 
 namespace Game.Messaging
 {
-
+/// <summary>
+/// Represents a message.
+/// </summary>
     public abstract class GameMessage
     {
+        /// <summary>
+        /// Returns the hash code for this object.
+        /// </summary>
+        /// <returns>The hash code</returns>
         public override int GetHashCode()
             => unchecked(7984 * (1357 + Sender.GetHashCode()));
 
+        /// <summary>
+        /// Source of the message
+        /// </summary>
         public readonly object Sender;
 
         /// <summary>

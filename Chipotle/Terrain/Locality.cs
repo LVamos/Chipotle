@@ -14,12 +14,12 @@ using OpenTK;
 namespace Game.Terrain
 {
     /// <summary>
-    /// Defines a locality object e.g. a room or some place outside like meadow, park or yard.
+    /// Represents one region on the game map (e.g. a room).
     /// </summary>
     public class Locality : MapElement
     {
         /// <summary>
-        /// Height of ceiling (is 0 in case of outdoor localities)
+        /// Height of ceiling of the locality (0 in case of outdoor localities)
         /// </summary>
         public readonly int Ceiling;
 
@@ -29,29 +29,58 @@ namespace Game.Terrain
         public readonly IReadOnlyList<Passage> Passages;
 
         /// <summary>
-        /// Specifies if the locality is a room or an outdoor place
+        /// Specifies if the locality is outside or inside a building.
         /// </summary>
         public readonly LocalityType Type;
 
+        /// <summary>
+        /// Name of a background sound played in loop when the Detective Chipotle NPC is inside
+        /// </summary>
         protected readonly string _backgroundSound;
+
+        /// <summary>
+        /// Handle of a background sound played in loop when the Detective Chipotle NPC is inside
+        /// </summary>
         protected int _backgroundSoundId;
+
+        /// <summary>
+        /// The minimum permitted Y dimension of the floor in this locality
+        /// </summary>
         private const int MinimumHeight = 3;
+
+        /// <summary>
+        /// The minimum permitted X dimension of the floor in this locality
+        /// </summary>
         private const int MinimumWidth = 3;
+
+        /// <summary>
+        /// Height of ceiling of the locality (0 in case of outdoor localities)
+        /// </summary>
         private int _ceiling;
+
+        /// <summary>
+        /// List of NPCs present in this locality.
+        /// </summary>
         private List<Entity> _entities;
 
+        /// <summary>
+        /// List of objects present in this locality.
+        /// </summary>
         private List<GameObject> _objects;
 
+        /// <summary>
+        /// List of exits from this locality
+        /// </summary>
         private List<Passage> _passages;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name of the locality</param>
-        /// <param name="type">Is it a rom or an outdoor locality?</param>
-        /// <param name="defaultTerrain">Lowest layer of the terrain</param>
-        /// <param name="ceiling">Ceiling height (should be 0 for outdoor localities)</param>
-        /// <param name="area">Area occupied with the locality</param>
+        /// <param name="Inner and public name of the locality">Name of the locality</param>
+        /// <param name="type">Specifies if the locality is outside or inside a building.</param>
+        /// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
+        /// <param name="ceiling">Ceiling height of the locality (should be 0 for outdoor localities)</param>
+        /// <param name="area">Coordinates of the area occupied by the locality</param>
         public Locality(Name name, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string backgroundSound = null) : base(name, area)
         {
             Type = type;
@@ -72,18 +101,24 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Defines the lowest layer of terrain
+        /// Defines the lowest layer of terrain in the locality.
         /// </summary>
         public TerrainType DefaultTerrain { get; }
 
+        /// <summary>
+        /// List of NPCs present in this locality.
+        /// </summary>
         public ReadOnlyCollection<Entity> Entities { get; }
 
+        /// <summary>
+        /// List of objects present in this locality.
+        /// </summary>
         public ReadOnlyCollection<GameObject> Objects { get; }
 
         /// <summary>
-        /// Draws walls around the locality
+        /// Builds walls around the locality.
         /// </summary>
-        /// <param name="walls">Specifies which walls should be drawn</param>
+        /// <param name="walls">Specifies on which sides of the lokality the walls are to be built.</param>
         public void DrawWalls(string walls)
         {
             IEnumerable<Vector2> wallCoordinates;
@@ -113,10 +148,10 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Checks if a game object is present in this locality in the moment.
+        /// Checks if the specified game object is present in this locality in the moment.
         /// </summary>
         /// <param name="o">The object to be checked</param>
-        /// <returns>True if the object is here</returns>
+        /// <returns>True if the object is present in the locality</returns>
         public bool IsItHere(GameObject o) => _objects.Contains(o);
 
         /// <summary>
@@ -151,8 +186,6 @@ namespace Game.Terrain
             Assert(!IsItHere(p), "exit already registered");
             _passages.Add(p);
 
-            if (_messagingEnabled)
-                ReceiveMessage(new PassageShown(this, p));
         }
 
         /// <summary>
@@ -166,10 +199,6 @@ namespace Game.Terrain
             _objects.Add(o);
             if (_messagingEnabled)
             {
-                if (_messagingEnabled)
-                {
-                    ReceiveMessage(new ObjectShown(this, o));
-                }
             }
         }
 
@@ -199,25 +228,18 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="o"></param>
         public void Unregister(GameObject o)
-        {
-            _objects.Remove(o);
-            ReceiveMessage(new ObjectHidden(this, o));
-        }
+            => _objects.Remove(o);
 
         /// <summary>
         /// Immediately removes an entity from list of present entities.
         /// </summary>
         /// <param name="e">The entity to be removed</param>
         public void Unregister(Entity e)
-        {
-            _entities.Remove(e);
-            ReceiveMessage(new EntityHidden(this, e));
-        }
+            => _entities.Remove(e);
 
         public void Unregister(Passage p)
         {
             _passages.Remove(p);
-            ReceiveMessage(new PassageDisappearedMessage(this, p));
         }
 
         protected override void Appear()

@@ -15,12 +15,21 @@ using Microsoft.VisualBasic;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Allows the player to scroll the entity using the keyboard.
+    /// </summary>
     public class ChipotleInputComponent : InputComponent
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public ChipotleInputComponent() : base()
         {
         }
 
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -75,6 +84,10 @@ namespace Game.Entities
             t.Start();
         }
 
+        /// <summary>
+        /// Processes the CutsceneBegan message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneBegan(CutsceneBegan message)
         {
             base.OnCutsceneBegan(message);
@@ -85,10 +98,16 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Allows the player to use a nearby object or door.
+        /// </summary>
         private void Interact()
 => Owner.ReceiveMessage(new UseObject(this));
 
-        // Just for testing purpose
+        /// <summary>
+        /// A test method to move the Detective Chipotle NPC to the coordinates optained from clipboard.
+        /// </summary>
+        /// <remarks>For testing only</remarks>
         private void JumpToCoords()
         {
             if (!_testModeEnabled)
@@ -99,24 +118,46 @@ namespace Game.Entities
             Owner.ReceiveMessage(new SetPosition(this, target));
         }
 
+        /// <summary>
+        /// Moves the NPC one step back.
+        /// </summary>
         private void MoveBack()
             => Owner.ReceiveMessage(new MakeStep(this, TurnType.Around));
 
+        /// <summary>
+        /// Moves the NPC one step forth.
+        /// </summary>
         private void MoveForward()
             => Owner.ReceiveMessage(new MakeStep(this, TurnType.None));
 
+        /// <summary>
+        /// Moves the NPC one step to the left perpendicullar to current orientation.
+        /// </summary>
         private void MoveLeft()
              => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyLeft));
 
+        /// <summary>
+        /// Moves the NPC one step to the right perpendicullar to current orientation.
+        /// </summary>
         private void MoveRight()
             => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyRight));
 
+        /// <summary>
+        /// Announces the public name of the locality where the NPC is currently located using a
+        /// screen reader or a voice synthesizer.
+        /// </summary>
         private void SayLocality()
             => Owner.ReceiveMessage(new SayLocality(this));
 
+        /// <summary>
+        /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
+        /// </summary>
         private void SayNearestObject()
 => Owner.ReceiveMessage(new SayNearestObject(this));
 
+        /// <summary>
+        /// Reports the current orientation of the NPC using a screen reader or voice synthesizer.
+        /// </summary>
         private void SayOrientation()
         {
             if (!DebugSO._testModeEnabled)
@@ -125,6 +166,9 @@ namespace Game.Entities
             Tolk.Speak($"Columbo orientation: {Owner.Orientation.UnitVector.ToString()}, listener facing: {World.Sound.ListenerOrientationFacing.ToString()}, listener up: {World.Sound.ListenerOrientationUp.ToString()}, listener position: {World.Sound.ListenerPosition.ToString()}.");
         }
 
+        /// <summary>
+        /// Stops the currently playing cutscene.
+        /// </summary>
         private void StopCutscene()
         {
             if (_cutsceneInProgress)
@@ -134,21 +178,39 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Reports the terrain on which the NPC is standing.
+        /// </summary>
         private void TerrainInfo()
             => Owner.ReceiveMessage(new SayTerrain(this));
 
+        /// <summary>
+        /// Rotates the NPC around Z axis.
+        /// </summary>
         private void TurnAround()
             => Owner.ReceiveMessage(new TurnEntity(this, TurnType.Around));
 
+        /// <summary>
+        /// Rotates the NPC around Z axis 45 degrees to the left.
+        /// </summary>
         private void TurnLeft()
 => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyLeft));
 
+        /// <summary>
+        /// Rotates the NPC around Z axis 45 degrees to the right.
+        /// </summary>
         private void TurnRight()
 => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyRight));
 
+        /// <summary>
+        /// Rotates the NPC around Z axis 90 degrees to the left.
+        /// </summary>
         private void TurnSharplyLeft()
                         => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyLeft));
 
+        /// <summary>
+        /// Rotates the NPC around Z axis 90 degrees to the right.
+        /// </summary>
         private void TurnSharplyRight()
 => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyRight));
     }

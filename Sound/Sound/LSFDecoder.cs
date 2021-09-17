@@ -9,20 +9,38 @@ using System.Runtime.InteropServices;
 namespace Luky
 {
     /// <summary>
-    /// LSF stands for libsndfile
+    /// Decodes sound files using the libsndfile library.
     /// </summary>
     internal sealed class LSFDecoder : DebugSO, IDecoder
     {
-        private const int _bufferSize = 24000; // at 48000Hz that is 500ms mono, or 250ms stereo.
+        /// <summary>
+        /// Size of the buffer used for sound file streaming
+        /// </summary>
+        private const int _bufferSize = 24000;
 
+        /// <summary>
+        /// A buffer used for sound file reading and writing to sound streams
+        /// </summary>
         private readonly short[] _tempBuffer = new short[_bufferSize];
 
+        /// <summary>
+        /// A buffer used for sound file reading and writing to sound streams
+        /// </summary>
         private readonly byte[] _vioBuffer = new byte[_bufferSize * 2];
+
+        /// <summary>
+        /// The libsndfile library interface
+        /// </summary>
         private LibsndfileApi _api = new LibsndfileApi();
 
-        // this maps soundIDs to their associated info.
+        /// <summary>
+        /// Maps sound IDs to their associated info.
+        /// </summary>
         private Dictionary<int, Info> _table = new Dictionary<int, Info>();
 
+        /// <summary>
+        /// Manipulates with a sound stream.
+        /// </summary>
         private SF_VIRTUAL_IO _virtualIO;
 
         /// <summary>
@@ -31,16 +49,16 @@ namespace Luky
         public LSFDecoder()
         {
             SF_VIRTUAL_IO vio = new SF_VIRTUAL_IO();
-            vio.get_filelen = get_filelen;
+            vio.get_filelen = GetFileLength;
             vio.seek = seek;
             vio.read = read;
-            vio.write = write;
-            vio.tell = tell;
+            vio.write = Write;
+            vio.tell = GetPosition;
             _virtualIO = vio;
         }
 
         /// <summary>
-        /// 
+        /// Disposes the decoder.
         /// </summary>
         public void Dispose()
         { // dispose each sound
@@ -49,9 +67,9 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Disposes the specified sound stream.
         /// </summary>
-        /// <param name="soundID"></param>
+        /// <param name="soundID">ID of the sound stream to be disposed</param>
         public void DisposeStream(int soundID)
         {
             Info info = _table[soundID];
@@ -65,22 +83,22 @@ namespace Luky
         /// </summary>
         /// <param name="soundID"></param>
         /// <param name="buffer"></param>
-        /// <returns></returns>
+        /// <returns>the number of shorts written to the buffer</returns>
         public int FillBuffer(int soundID, short[] buffer)
         {
-            // returns the number of shorts written to the buffer
             Info info = _table[soundID];
 
             long totalRead = 0;
-            long totalWrote = 0; // when doing stereo to mono conversion the totalWrote is not the same as the totalRead
+            long totalWrote = 0; // when doing stereo to mono conversion the totalWrote is not the same as the totalRead.
             long lengthToRead = buffer.Length;
             if (info.ForceMono && info.LSFInfo.Channels == 2)
-                lengthToRead *= 2; // read twice as much
+                lengthToRead *= 2; // Read twice more.
 
             while (totalRead != lengthToRead)
             {
                 if (info.Looping && info.Position == info.TotalLength)
-                { // we reached the end of the stream but we're looping so we need to start back at the beginning
+                {
+                    // It reached the end of the stream but looping is enabled so we need to start back at the beginning
                     info.Position = 0;
                     _api.Seek(info.SFHandle, 0, (int)SeekOrigin.Begin);
                 }
@@ -103,9 +121,9 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Optains current position of the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
+        /// <param name="soundID">ID of the sound</param>
         /// <param name="currentSample"></param>
         public void GetDynamicInfo(int soundID, out int currentSample)
         {
@@ -114,12 +132,12 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Optains static information about the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="sampleRate"></param>
-        /// <param name="totalSamples"></param>
-        /// <param name="channels"></param>
+        /// <param name="soundID">ID of the sound</param>
+        /// <param name="sampleRate">Reference to a variable to store sample rate of the sound</param>
+        /// <param name="totalSamples">Reference to a variable to store length of the sound</param>
+        /// <param name="channels">Reference to a variable to store number of channels of the sound</param>
         public void GetStaticInfo(int soundID, out int sampleRate, out int totalSamples, out int channels)
         {
             Info info = _table[soundID];
@@ -129,10 +147,10 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Enables or disables looping.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="looping"></param>
+        /// <param name="soundID">ID of the sound to be modified</param>
+        /// <param name="looping">Specifies if looping is enabled or disabled</param>
         public void ChangeLooping(int soundID, bool looping)
         {
             Info info = _table[soundID];
@@ -140,14 +158,14 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Initializes a sound stream.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="stream"></param>
-        /// <param name="looping"></param>
-        /// <param name="forceMono"></param>
-        /// <param name="channels"></param>
-        /// <param name="sampleRate"></param>
+        /// <param name="soundID">ID of the sound</param>
+        /// <param name="stream">The stream to be read</param>
+        /// <param name="looping">Specifies if looping is enabled or disabled</param>
+        /// <param name="forceMono">Specifies if the sound should be converted to mono</param>
+        /// <param name="channels">Reference to a variable to store number of channels of the sound</param>
+        /// <param name="sampleRate">Reference to a variable to store sample rate of the sound</param>
         public void InitStream(int soundID, Stream stream, bool looping, bool forceMono, out int channels, out int sampleRate)
         {
             Info info = new Info();
@@ -172,10 +190,10 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Jumps to a sample of the sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="seekSample"></param>
+        /// <param name="soundID">ID of the sound</param>
+        /// <param name="seekSample">Number of the sample to jump to</param>
         public void SeekToSample(int soundID, int seekSample)
         {
             Info info = _table[soundID];
@@ -184,12 +202,12 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Converts a sample to mono.
         /// </summary>
-        /// <param name="input"></param>
-        /// <param name="output"></param>
-        /// <param name="read"></param>
-        /// <param name="totalWrote"></param>
+        /// <param name="input">The sample to be converted</param>
+        /// <param name="output">A buffer to store the result of the conversion</param>
+        /// <param name="read">Specifies amount of data to be read from the buffer</param>
+        /// <param name="totalWrote">Amount of data written to the output</param>
         private void ConvertToMono(short[] input, short[] output, long read, ref long totalWrote)
         {
             if (read % 2 != 0)
@@ -205,85 +223,114 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Returns length of the specified stream in bytes.
         /// </summary>
-        /// <param name="user_data"></param>
-        /// <returns></returns>
-        private Int64 get_filelen(int user_data)
-        => GetStream(user_data).Length;
+        /// <param name="soundID">ID of the source sound stream</param>
+        /// <returns>Total count of bytes</returns>
+        private Int64 GetFileLength(int soundID)
+        => GetStream(soundID).Length;
 
         /// <summary>
-        /// 
+        /// Returns a stream assigned to the <paramref name="soundID"/>.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <returns></returns>
+        /// <param name="soundID">ID of the sound</param>
+        /// <returns>The stream</returns>
         private Stream GetStream(int soundID)
         => _table[soundID].Stream;
 
         /// <summary>
-        /// 
+        /// Copies a chunk of data from the specified sound stream to memory.
         /// </summary>
-        /// <param name="pBuffer"></param>
-        /// <param name="count"></param>
-        /// <param name="user_data"></param>
-        /// <returns></returns>
-        private Int64 read(IntPtr pBuffer, Int64 count, int user_data)
+        /// <param name="pBuffer">Unmanaged pointer to the target buffer</param>
+        /// <param name="count">Count of samples to be read</param>
+        /// <param name="soundID">ID of the source sound</param>
+        /// <returns>Count of read bytes</returns>
+        private Int64 read(IntPtr pBuffer, Int64 count, int soundID)
         {
-            //Say(count); // so I can learn the buffer size that libsndfile actually uses, though maybe it is based on what I ask it for when calling ReadItems.
             int lesser = Math.Min(_vioBuffer.Length, (int)count);
-            int actual = GetStream(user_data).Read(_vioBuffer, 0, lesser);
+            int actual = GetStream(soundID).Read(_vioBuffer, 0, lesser);
             // copy it to the pointer.
             Marshal.Copy(_vioBuffer, 0, pBuffer, actual);
             return actual;
         }
 
         /// <summary>
-        /// 
+        /// Jumps to the specified position of the stream.
         /// </summary>
-        /// <param name="offset"></param>
-        /// <param name="whence"></param>
-        /// <param name="user_data"></param>
-        /// <returns></returns>
-        private Int64 seek(Int64 offset, SeekOrigin whence, int user_data)
-        => GetStream(user_data).Seek(offset, whence);
+        /// <param name="offset">The posisiton in the sound stream</param>
+        /// <param name="whence">Specifies if the position is counted from the beginning or the end of the stream.</param>
+        /// <param name="soundID">ID of the sound</param>
+        /// <returns>New position in the stream</returns>
+        private Int64 seek(Int64 offset, SeekOrigin whence, int soundID)
+        => GetStream(soundID).Seek(offset, whence);
 
         /// <summary>
-        /// 
+        /// Returns current position of the specified sound stream.
         /// </summary>
-        /// <param name="user_data"></param>
+        /// <param name="soundID">ID of the sound stream</param>
         /// <returns></returns>
-        private Int64 tell(int user_data)
-        => GetStream(user_data).Position;
+        private Int64 GetPosition(int soundID)
+        => GetStream(soundID).Position;
 
         /// <summary>
-        /// 
+        /// Writes data from memory to the specified stream.
         /// </summary>
-        /// <param name="pBuffer"></param>
-        /// <param name="count"></param>
-        /// <param name="user_data"></param>
-        /// <returns></returns>
-        private Int64 write(IntPtr pBuffer, Int64 count, int user_data)
+        /// <param name="pBuffer">An unmanaged pointer to a buffer</param>
+        /// <param name="count">Count of bytes to be written</param>
+        /// <param name="soundID"></param>
+        /// <returns>The count of written data</returns>
+        private Int64 Write(IntPtr pBuffer, Int64 count, int soundID)
         {
-            // we have to bring the bytes into a managed byte array.
             byte[] buffer = new byte[count];
             Marshal.Copy(pBuffer, buffer, 0, (int)count);
-            GetStream(user_data).Write(buffer, 0, buffer.Length);
+            GetStream(soundID).Write(buffer, 0, buffer.Length);
             return count;
         }
 
         /// <summary>
-        /// 
+        /// Stores information about a stream.
         /// </summary>
         private sealed class Info
         {
+            /// <summary>
+            /// Specifies if the sound should be converted to mono
+            /// </summary>
             public bool ForceMono;
+
+            /// <summary>
+            /// Number of channels
+            /// </summary>
             public int Channels;
+
+            /// <summary>
+            /// Specifies if looping is enabled or disabled
+            /// </summary>
             public bool Looping;
+
+            /// <summary>
+            /// stores some information about the stream.
+            /// </summary>
             public LibsndfileInfo LSFInfo = new LibsndfileInfo();
+
+            /// <summary>
+            /// Current position in the stream
+            /// </summary>
             public long Position = 0;
+
+/// <summary>
+/// Handle used for communication with the libsndfile library
+/// </summary>
             public IntPtr SFHandle;
+
+            /// <summary>
+            /// The sound stream
+            /// </summary>
             public Stream Stream;
+
+            /// <summary>
+            /// Length of the sound stream
+            /// </summary>
             public long TotalLength;
-        } // cls
-    } // cls
+        }
+    }
 }

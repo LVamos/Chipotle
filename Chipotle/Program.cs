@@ -9,23 +9,47 @@ using Luky;
 
 namespace Game
 {
+    /// <summary>
+    /// Entry point of the application
+    /// </summary>
     internal class Program : DebugSO
     {
+        /// <summary>
+        /// Path to data folder
+        /// </summary>
         public static readonly string DataPath = @"Data\";
 
-        private const bool _abort = false;
-
+        /// <summary>
+        /// Reference to the main window
+        /// </summary>
         public static MainWindow MainWindow { get; private set; }
 
+        /// <summary>
+        /// An error handler
+        /// </summary>
+        /// <param name="ex">The exception</param>
         public static void OnError(Exception ex)
         => OnError(ex.ToString());
 
+        /// <summary>
+        /// An error handler
+        /// </summary>
+        /// <param name="sender">Source of the exception</param>
+        /// <param name="e">The exception</param>
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
    => OnError(e.Exception);
 
+        /// <summary>
+        /// An error handler
+        /// </summary>
+        /// <param name="sender">Source of the exception</param>
+        /// <param name="e">The exception</param>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
   => OnError(e.ExceptionObject.ToString());
 
+        /// <summary>
+        /// entry point of the application
+        /// </summary>
         [STAThread]
         private static void Main()
         {
@@ -47,6 +71,10 @@ namespace Game
             Application.Run(MainWindow);
         }
 
+        /// <summary>
+        /// An error handler
+        /// </summary>
+        /// <param name="error">The error message</param>
         private static void OnError(string error)
         {
             Action action = () => MessageBox.Show(MainWindow, error, AppDomain.CurrentDomain.FriendlyName + ": závažná chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);

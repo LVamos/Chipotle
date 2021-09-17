@@ -12,6 +12,9 @@ namespace Game.Entities
     /// </summary>
     public class AIComponent : EntityComponent
     {
+        /// <summary>
+        /// Area occupied by the NPC
+        /// </summary>
         protected Plane _area;
         protected PathFinder _finder = new PathFinder();
 

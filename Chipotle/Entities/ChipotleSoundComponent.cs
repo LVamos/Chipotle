@@ -14,8 +14,14 @@ using OpenTK;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Controls the sound output of the detective Chipotle NPC
+    /// </summary>
     public class ChipotleSoundComponent : SoundComponent
     {
+        /// <summary>
+        /// Reverb presets for individual localities
+        /// </summary>
         private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
         {
             ["obývák s1"] = ("livingroom", .9f),
@@ -67,10 +73,9 @@ namespace Game.Entities
             ["ulice v1"] = ("prefabouthouse", .3f)
         };
 
-        public ChipotleSoundComponent() : base()
-        {
-        }
-
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
@@ -90,12 +95,19 @@ namespace Game.Entities
             );
         }
 
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
         public override void Update()
         {
             base.Update();
             UpdateListener();
         }
 
+        /// <summary>
+        /// Processes the CutsceneBegan message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneBegan(CutsceneBegan message)
         {
             base.OnCutsceneBegan(message);
@@ -105,9 +117,17 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Reports the current orientation of the Detective Chipotle NPC using a screen reader or
+        /// voice synthesizer..
+        /// </summary>
         protected void SayOrientation()
                     => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription());
 
+        /// <summary>
+        /// sets listener's orientation according to the current orientation of the Detective
+        /// Chipotle NPC.
+        /// </summary>
         protected void UpdateListener()
         {
             Vector2 position = Owner.Area.Center;
@@ -120,19 +140,39 @@ namespace Game.Entities
                 _sound.ListenerOrientationFacing = orientation.AsOpenALVector();
         }
 
+        /// <summary>
+        /// Processes the EntityHitDoor message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnEntityHitDoor(DoorHit m)
 => Tolk.Speak("dveře");
 
+        /// <summary>
+        /// Processes the TerrainCollided message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnInpermeableTerrainCollision(TerrainCollided message) => PlayTerrain(message.Tile);
 
+        /// <summary>
+        /// Processes the LocalityChanged message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnLocalityChanged(LocalityChanged message)
         {
             (string name, float gain) record = _reverbPresets[message.Target.Name.Indexed.ToLower()];
             _sound.ApplyEaxReverbPreset(record.name, record.gain);
         }
 
+        /// <summary>
+        /// Processes the MovementDone message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnMovementDone(EntityMoved message) => PlayTerrain(message.Target);
 
+        /// <summary>
+        /// Processes the ObjectsCollided message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnObjectsCollided(ObjectsCollided message)
         {
             GameObject collidingObject = message.Tile.Object;
@@ -145,8 +185,16 @@ namespace Game.Entities
             _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true);
         }
 
+        /// <summary>
+        /// Processes the TurnoverDone message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnTurnoverDone(TurnEntityResult message) => SayOrientation();
 
+        /// <summary>
+        /// Plays a sound representation of a tile.
+        /// </summary>
+        /// <param name="tile">A tile to be announced</param>
         private void PlayTerrain(Tile tile)
         {
             string soundName = "movstep" + Enum.GetName(tile.Terrain.GetType(), tile.Terrain);

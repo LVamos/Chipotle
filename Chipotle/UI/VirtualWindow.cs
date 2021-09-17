@@ -7,7 +7,7 @@ using System.Linq;
 namespace Game.UI
 {
     /// <summary>
-    /// Base class for all windows
+    /// Base class for all virtual windows
     /// </summary>
     public abstract class VirtualWindow : DebugSO
     {
@@ -16,10 +16,10 @@ namespace Game.UI
         /// </summary>
         protected VirtualWindow() : this(null)
         {
-        }//mtd
+        }
 
         /// <summary>
-        /// Adds set of keyboard shortcuts and coresponding actions into _shortcuts dictionary.
+        /// Registers shotcuts and corresponding actions.
         /// </summary>
         /// <param name="shortcuts">Set of shortcuts to be registered</param>
         protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
@@ -28,7 +28,7 @@ namespace Game.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="parentWindow">Reference to containing window</param>
+        /// <param name="parentWindow">Reference to parent window</param>
         protected VirtualWindow(VirtualWindow parentWindow)
         {
             _parentWindow = parentWindow;
@@ -78,7 +78,7 @@ namespace Game.UI
         protected Dictionary<KeyShortcut, Action> _shortcuts;
 
         /// <summary>
-        /// Reference to containing window
+        /// Reference to parent window
         /// </summary>
         protected VirtualWindow _parentWindow;
 

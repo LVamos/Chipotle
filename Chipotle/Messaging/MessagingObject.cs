@@ -8,16 +8,30 @@ using Luky;
 
 namespace Game.Messaging
 {
+    /// <summary>
+    /// Delegate for all message handlers
+    /// </summary>
+    /// <param name="message"></param>
     public delegate void MessageHandler(GameMessage message);
 
+    /// <summary>
+    /// Base class for all objects used in the game; receives, sends and processes messages.
+    /// </summary>
     public abstract class MessagingObject : DebugSO
     {
+        /// <summary>
+        /// Maps messages to message handlers
+        /// </summary>
         protected Dictionary<Type, Action<GameMessage>> _messageHandlers;
 
         /// <summary>
+        /// Stores the messages before they are processed.
         /// </summary>
         protected Queue<GameMessage> _messages;
 
+        /// <summary>
+        /// Starts or stops the messaging.
+        /// </summary>
         protected bool _messagingEnabled;
 
         /// <summary>
@@ -29,9 +43,9 @@ namespace Game.Messaging
                                             => unchecked(4565 * (566 + _messagingEnabled.GetHashCode()) * (7193 + (_messages == null ? 0 : _messages.GetHashCode())));
 
         /// <summary>
-        /// Gets a message from another game object and handles it in appropriate way.
+        /// Gets a message from another messaging object and stores it for processing.
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">The message to be received</param>
         public virtual void ReceiveMessage(GameMessage message)
         {
             if (_messagingEnabled)
@@ -40,7 +54,7 @@ namespace Game.Messaging
         }
 
         /// <summary>
-        /// Initializes the messaging object and starts its message loop.
+        /// Initializes the object and starts the messaging.
         /// </summary>
         public virtual void Start()
         {
@@ -48,6 +62,9 @@ namespace Game.Messaging
             _messagingEnabled = true;
         }
 
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
         public virtual void Update()
         {
             if (_messagingEnabled && !_messages.IsNullOrEmpty())
@@ -55,37 +72,41 @@ namespace Game.Messaging
         }
 
         /// <summary>
-        /// Takes first message from message queue.
+        /// Takes a message from the message queue.
         /// </summary>
-        /// <returns>First message from queue</returns>
+        /// <returns>First message from the queue</returns>
         protected virtual GameMessage DequeueMessage()
 => _messages.Count > 0 ? _messages.Dequeue() : null;
 
         /// <summary>
-        /// Adds incoming message to queue.
+        /// Adds a message to the queue.
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">The message to be stored</param>
         protected virtual void EnqueueMessage(GameMessage message)
             => _messages.Enqueue(message);
 
         /// <summary>
-        /// Handles concrete message
+        /// Runs a message handler for the specified message.
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">The message to be handled</param>
         protected virtual void HandleMessage(GameMessage message)
         {
             if (_messageHandlers.TryGetValue(message.GetType(), out Action<GameMessage> handler))
                 handler(message);
         }
 
+        /// <summary>
+        /// Registers messages and their handlers.
+        /// </summary>
+        /// <param name="handlers">Dictionary of the messages and their handlers to be registered</param>
         protected void RegisterMessages(Dictionary<Type, Action<GameMessage>> handlers)
                                 => _messageHandlers = _messageHandlers.Concat(handlers).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
 
         /// <summary>
         /// Sends a message to another game object.
         /// </summary>
-        /// <param name="target"></param>
-        /// <param name="message"></param>
+        /// <param name="target">The receiving messaging object</param>
+        /// <param name="message">The message to be distributed</param>
         protected virtual void SendMessage(MessagingObject target, GameMessage message)
             => target.ReceiveMessage(message);
     }

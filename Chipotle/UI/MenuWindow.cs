@@ -6,28 +6,65 @@ using DavyKager;
 
 namespace Game.UI
 {
+    /// <summary>
+    /// a virtual window for voice menus
+    /// </summary>
     public class MenuWindow : VirtualWindow
     {
+        /// <summary>
+        /// Index of the first item of the menu
+        /// </summary>
         private const int _firstItem = 0;
 
+        /// <summary>
+        /// Name of a sound played after the menu is opened
+        /// </summary>
         private string _introSound;
 
+        /// <summary>
+        /// A text uttered by a screen reader or voice synthesizer after the menu is opened
+        /// </summary>
         private string _introText;
 
+        /// <summary>
+        /// List of the menu items
+        /// </summary>
         private string[] _items;
 
+
+        /// <summary>
+        /// Name of a sound played when cursor reaches last item of the menu
+        /// </summary>
         private string _lowerEdgeSound;
 
+        /// <summary>
+        /// Name of a sound played when the menu is closed
+        /// </summary>
         private string _outroSound;
 
+        /// <summary>
+        /// Name of a sound played when an item is selected
+        /// </summary>
         private string _selectionSound;
 
+        /// <summary>
+        /// Name of a sound played when cursor reaches first item of the menu
+        /// </summary>
         private string _upperEdgeSound;
 
+        /// <summary>
+        /// Name of a sound played when the menu wraps down
+        /// </summary>
         private string _wrapDownSound;
 
+        /// <summary>
+        /// Indicates if wrapping is allowed.
+        /// </summary>
         private bool _wrappingAllowed;
 
+        /// <summary>
+        /// Name of a sound played when the menu wraps up
+        /// </summary>
         private string _wrapUpSound;
 
         /// <summary>
@@ -39,18 +76,10 @@ namespace Game.UI
         /// <param name="introSound">Name of a sound to be played when the menu is activated</param>
         /// <param name="outroSound">Name of a sound to be played when menu is closed</param>
         /// <param name="selectionSound">Name of a sound to be played when user selects an item</param>
-        /// <param name="wrapDownSound">
-        /// Name of a sound to be played when the menu wraps to lower edge
-        /// </param>
-        /// <param name="wrapUpSound">
-        /// Name of a sound to be played when the menu wraps to upper edge
-        /// </param>
-        /// <param name="upperEdgeSound">
-        /// Name of a sound to be palyed when cursor gets to upper edge fo the menu
-        /// </param>
-        /// <param name="lowerEdgeSound">
-        /// Name of a sound to be played when cursor gets to lower edge of the menu
-        /// </param>
+        /// <param name="wrapDownSound">Name of a sound to be played when the menu wraps to lower edge</param>
+        /// <param name="wrapUpSound">Name of a sound to be played when the menu wraps to upper edge</param>
+        /// <param name="upperEdgeSound">Name of a sound to be palyed when cursor gets to upper edge fo the menu</param>
+        /// <param name="lowerEdgeSound">Name of a sound to be played when cursor gets to lower edge of the menu</param>
         public MenuWindow(string[] items, string introText, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
         {
             _items = items;
@@ -79,10 +108,20 @@ namespace Game.UI
     );
         }
 
+        /// <summary>
+        /// Index of currently selected item
+        /// </summary>
         public int Cursor { get; private set; } = -1;
 
-        private int _lastItem => _items.Length - 1;
+        /// <summary>
+        /// Index of last item
+        /// </summary>
+        private int _lastItem 
+            => _items.Length - 1;
 
+        /// <summary>
+        /// Action performed when the menu is activated
+        /// </summary>
         public override void OnActivate()
         {
             base.OnActivate();
@@ -104,6 +143,9 @@ namespace Game.UI
             t.Start();
         }
 
+        /// <summary>
+        /// Action performed when the menu is deactivated
+        /// </summary>
         public override void OnDeactivate()
         {
             base.OnDeactivate();
@@ -119,6 +161,9 @@ namespace Game.UI
             Play(_wrapUpSound);
         }
 
+        /// <summary>
+        /// Performs an action assigned to the selected item.
+        /// </summary>
         private void ActivateItem()
         {
             if (!CursorOffEdge())
@@ -132,7 +177,7 @@ namespace Game.UI
             => (Cursor < 0 || Cursor > _lastItem);
 
         /// <summary>
-        /// Jumps to last item
+        /// Jumps to last item.
         /// </summary>
         private void JumpToLowerEdge()
         {
@@ -165,6 +210,10 @@ namespace Game.UI
             SayItem();
         }
 
+        /// <summary>
+        /// Plays a sound.
+        /// </summary>
+        /// <param name="name">Name of the sound to be played</param>
         private void Play(string name)
         {
             if (!string.IsNullOrEmpty(name))
@@ -199,9 +248,8 @@ namespace Game.UI
             Close();
         }
 
-        //mtd
         /// <summary>
-        /// Announces selected item
+        /// Announces selected item using a screen reader or voice synthesizer
         /// </summary>
         private void SayItem()
         {

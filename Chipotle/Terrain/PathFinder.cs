@@ -12,13 +12,11 @@ namespace Game.Terrain
     public class PathFinder
     {
         /// <summary>
-        /// Constructs the shortest possible path between two points
+        /// Constructs the shortest possible path between two points.
         /// </summary>
         /// <param name="start">First point</param>
         /// <param name="end">Second point</param>
-        /// <returns>
-        /// The shortest path from start to end stored in List <Vector2>. If no possible path exists
-        /// then it returns null.</Vector2>
+        /// <returns>A list of points leading from start to the end or null if no possible path exists</Vector2>
         /// </returns>
         public Queue<Vector2> FindPath(Vector2 start, Vector2 end)
         {
@@ -75,13 +73,19 @@ namespace Game.Terrain
             return null;
         }
 
+        /// <summary>
+        /// Returns all adjacent tiles around the <paramref name="parent"/>.
+        /// </summary>
+        /// <param name="parent">The default tile</param>
+        /// <param name="goal">The target tile</param>
+        /// <returns>Enumeration of all adjacent neighbours</returns>
         private IEnumerable<Node> GetNeighbours(Node parent, Node goal)
                     => World.Map[parent.Coords].GetNeighbours4()
                     .Where(t => t.Permeable && !t.IsOccupied)
                     .Select(t => { Node n = new Node(t.Position, parent.Cost + 1, parent); n.ComputeDistance(goal.Coords); return n; });
 
         /// <summary>
-        /// Reprezents one node in a graph
+        /// Reprezents one node in a graph corresponding to a tile on a tile map.
         /// </summary>
         private class Node
         {
@@ -90,7 +94,7 @@ namespace Game.Terrain
             /// </summary>
             /// <param name="coords">Coordinates of the node</param>
             /// <param name="cost">Distance from current node</param>
-            /// <param name="parent">Parent node</param>
+            /// <param name="parent">The parent node</param>
             public Node(Vector2 coords, int cost = 0, Node parent = null)
             {
                 Coords = coords;
@@ -98,10 +102,29 @@ namespace Game.Terrain
                 Parent = parent;
             }
 
+            /// <summary>
+            /// Coordinates of the node
+            /// </summary>
             public Vector2 Coords { get; private set; }
+
+            /// <summary>
+            /// Distance from current node
+            /// </summary>
             public int Cost { get; private set; }
+
+            /// <summary>
+            /// Distance between this node and the goal node
+            /// </summary>
             public int Distance { get; private set; }
+
+            /// <summary>
+            /// The parrent of this node
+            /// </summary>
             public Node Parent { get; private set; }
+
+            /// <summary>
+            /// A heuristic parameter
+            /// </summary>
             public int Priority => Cost + Distance;
 
             /// <summary>

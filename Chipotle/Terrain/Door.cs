@@ -11,8 +11,14 @@ using OpenTK;
 
 namespace Game.Terrain
 {
+    /// <summary>
+    /// Represents a door between two localities.
+    /// </summary>
     public class Door : Passage
     {
+        /// <summary>
+        /// specifies if the door can be opened by an NPC.
+        /// </summary>
         protected readonly bool _openable;
 
         /// <summary>
@@ -21,16 +27,22 @@ namespace Game.Terrain
         /// <param name="name">Inner name for the door</param>
         /// <param name="closed">Specifies whether the door should be implicitly closed or open</param>
         /// <param name="area">Location of the door</param>
-        /// <param name="localities">Two localities, between which the door is.</param>
-        /// <param name="openable">Specifies whether the door should be openable</param>
+        /// <param name="localities">Two localities connected by the door</param>
+        /// <param name="openable">Specifies whether the door can be opened by an NPC.</param>
         public Door(Name name, bool closed, Plane area, IEnumerable<Locality> localities, bool openable = true) : base(name, area, localities)
         {
             Closed = closed;
             _openable = openable;
         }
 
+        /// <summary>
+        /// Specifies if the door is closed or open.
+        /// </summary>
         public bool Closed { get; protected set; }
 
+        /// <summary>
+        /// Initializes the door and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -54,20 +66,25 @@ namespace Game.Terrain
             }
         }
 
-        protected virtual void OnUseObject(UseObject m)
+        /// <summary>
+        /// Processes the UseObject message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected virtual void OnUseObject(UseObject message)
         {
             if (!_openable)
                 return;
 
             if (Closed)
-                Open(m.Tile.Position);
+                Open(message.Tile.Position);
             else
-                Close(m.Tile.Position);
+                Close(message.Tile.Position);
         }
 
         /// <summary>
-        /// Closes the door if possible.
+        /// Opens the door if possible.
         /// </summary>
+        /// <param name="coords">The coordinates of the place on the door that an NPC is pushing on</param>
         protected virtual void Open(Vector2 coords)
         {
             Closed = false;

@@ -3,13 +3,18 @@ using Game.Terrain;
 
 namespace Game.Messaging.Commands
 {
+    /// <summary>
+    /// Tells an NPC to make one step in the specified direction.
+    /// </summary>
+    /// <remarks>Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
     public class MakeStep : TurnEntity
     {
         /// <summary>
-        /// Constructs new instance of the message.
+        /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="direction">Specifies if the moved entity should go forth, left or right. TurnType.None means forth.</param>
+        /// <param name="direction">The direction in which the entity should move</param>
+        /// <remarks><see cref="TurnType.None"/> will cause the NPC to move forward.</remarks>
         public MakeStep(object sender, TurnType direction) : base(sender, direction) { }
     }
 }

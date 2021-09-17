@@ -11,25 +11,23 @@ using OpenTK;
 namespace Game.Terrain
 {
     /// <summary>
-    /// Stores reference to a tile and its position
+    /// Represents one square tile on the game map.
     /// </summary>
     public class Tile : DebugSO
     {
         /// <summary>
-        /// Position on the tile map
+        /// Position of the tile on the game map
         /// </summary>
         public readonly Vector2 Position;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="terrain">Terrain type for this tile</param>
-        /// <param name="position">Coordinates of the tile</param>
-        /// <param name="locality">Associatet locality</param>
-        /// <param name="permeable">
-        /// Specifies if an entity or another game object can be placed on this tile
-        /// </param>
-        /// <param name="passage">Associatet passage</param>
+        /// <param name="terrain">Terrain type on this tile</param>
+        /// <param name="position">Position of the tile on the tile map</param>
+        /// <param name="locality">A locality intersecting the tile</param>
+        /// <param name="permeable">Specifies if an entity or another game object can be placed on this tile</param>
+        /// <param name="passage">A passage intersecting the tile</param>
         public Tile(TerrainType terrain, Vector2 position, Locality locality, bool permeable = true, Passage passage = null)
         {
             Terrain = terrain;
@@ -41,48 +39,91 @@ namespace Game.Terrain
             Passage = passage;
         }
 
-        public bool IsOccupied => Object != null;
-        public bool IsOnPassage => Passage != null;
+        /// <summary>
+        /// Indicates if the tile is occupied by an NPC or game object.
+        /// </summary>
+        public bool IsOccupied 
+            => Object != null;
+
+        /// <summary>
+        /// Indicates if the tile intersects a passage.
+        /// </summary>
+        public bool IsOnPassage 
+            => Passage != null;
+
+        /// <summary>
+        /// Returns a locality the tile intersects.
+        /// </summary>
         public Locality Locality { get; private set; }
+
+        /// <summary>
+        /// Returns an NPC or game object the tile intersects.
+        /// </summary>
         public GameObject Object { get; private set; }
+
+
+        /// <summary>
+        /// Returns an passage the tile intersects.
+        /// </summary>
         public Passage Passage { get; private set; }
         public bool Permeable { get; set; }
 
+        /// <summary>
+        /// type of the terrain laying on this tile
+        /// </summary>
         public TerrainType Terrain { get; private set; }
 
-        public bool Walkable => Permeable && !IsOccupied;
+        /// <summary>
+        /// Checks if the tile is walkable for NPCs.
+        /// </summary>
+        public bool Walkable 
+            => Permeable && !IsOccupied;
 
         /// <summary>
-        /// Returns nearest neighbour tile in given direction.
+        /// Returns an adjacent tile in the specified direction.
         /// </summary>
         /// <param name="direction">Direction of wanted neighbour</param>
-        /// <returns>Neighbour tile</returns>
+        /// <returns>An adjacent tile</returns>
         public Tile GetNeighbour(Direction direction)
                     => GetNeighbour(direction.AsVector2());
 
         /// <summary>
-        /// Returns nearest neighbour tile in given direction.
+        /// Returns adjacent tile in the specified direction.
         /// </summary>
-        /// <param name="step">Directional vector</param>
-        /// <returns>Neighbour tile</returns>
-        public Tile GetNeighbour(Vector2 step)
-            => World.Map[Position + step];
-
-        public IEnumerable<Tile> GetNeighbours4()
-            => DirectionExtension.BasicDirections.Select(d => GetNeighbour(d)).Where(t => t != null);
+        /// <param name="direction">A directional unit vector</param>
+        /// <returns>An adjacent tile</returns>
+        public Tile GetNeighbour(Vector2 direction)
+            => World.Map[Position + direction];
 
         /// <summary>
-        /// Lists all nearest valid neighbours of the tile
+        /// Enumerates adjacent tiles in four basic directions.
+        /// </summary>
+        /// <returns>The adjacent tiles in four basic directions</returns>
+        public IEnumerable<Tile> GetNeighbours4()
+            => DirectionExtension.BasicDirections.Select(d => GetNeighbour(d))
+            .Where(t => t != null);
+
+        /// <summary>
+        /// Lists all adjacent tiles
         /// </summary>
         public IEnumerable<Tile> GetNeighbours8()
             => DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(d)).Where(t => t != null && t != this);
 
+        /// <summary>
+        /// Puts terrain on this tile.
+        /// </summary>
+        /// <param name="terrain">Type of the terrain</param>
+        /// <param name="permeable">Specifies if the tile is accessible for NPCs</param>
         public void Register(TerrainType terrain, bool permeable = true)
         {
             Terrain = terrain;
             Permeable = permeable;
         }
 
+        /// <summary>
+        /// Puts a passage on the tile.
+        /// </summary>
+        /// <param name="p">The passage to be registered</param>
         public void Register(Passage p)
         {
             Passage = !IsOnPassage ? p ?? throw new ArgumentNullException(nameof(p)) : throw new InvalidOperationException(nameof(p));
@@ -91,31 +132,45 @@ namespace Game.Terrain
                 Terrain = Locality.DefaultTerrain;
         }
 
+        /// <summary>
+        /// Puts a locality on this tile.
+        /// </summary>
+        /// <param name="l">The locality to be registered</param>
         public void Register(Locality l)
             => Locality = l ?? throw new ArgumentNullException(nameof(l));
 
+        /// <summary>
+        /// Puts an NPC on this tile.
+        /// </summary>
+        /// <param name="e">The entity to be registered</param>
         public void Register(Entity e)
             => Object = Permeable && !IsOccupied ? e ?? throw new ArgumentNullException(nameof(e)) : throw new InvalidOperationException(nameof(e));
 
         /// <summary>
-        /// Puts given game object or entity on the tile.
+        /// Puts a game object on the tile.
         /// </summary>
-        /// <param name="o">The object or entity to be stored</param>
+        /// <param name="o">The object to be registered</param>
         public void Register(GameObject o)
             => Object = (Permeable || Terrain == TerrainType.Wall) && !IsOccupied ? (o ?? throw new ArgumentNullException(nameof(o))) : throw new InvalidOperationException(nameof(o));
 
+        /// <summary>
+        /// Removes a game object from the tile if there's any.
+        /// </summary>
+        /// <exception cref="Exception"
         public void UnregisterObject()
         {
             Assert(Object != null, "No object here.");
             Object = null;
         }
 
+        /// <summary>
+        /// Removes a passage from the tile if there's any.
+        /// </summary>
+        /// <exception cref="Exception"
         public void UnregisterPassage()
         {
-            if (Passage != null)
+            Assert(Passage != null, "No passage");
                 Passage = null;
-            else
-                throw new InvalidOperationException("No passage");
         }
     }
 }

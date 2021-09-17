@@ -6,7 +6,7 @@ using OpenTK;
 namespace Game.Terrain
 {
     /// <summary>
-    /// Possible directions for movement across the tile map.
+    /// All directions in which game objects and NPCs can move.
     /// </summary>
     public enum Direction
     {
@@ -29,6 +29,9 @@ namespace Game.Terrain
         DownRight = 8,
     }
 
+    /// <summary>
+    /// All possible direction combinations
+    /// </summary>
     [Flags]
     public enum Directions : byte
     {
@@ -45,11 +48,19 @@ namespace Game.Terrain
         All = Right | UpRight | Up | UpLeft | Left | DownLeft | Down | DownRight
     }
 
+    /// <summary>
+    /// Useful extension methods for manipulation with directions
+    /// </summary>
     public static class DirectionExtension
-
     {
+        /// <summary>
+        /// All basic directions
+        /// </summary>
         public static Direction[] BasicDirections = new Direction[] { Direction.Left, Direction.Up, Direction.Right, Direction.Down };
 
+        /// <summary>
+        /// Directions as unit vectors
+        /// </summary>
         internal static readonly Vector2[] DirectionDeltas =
                 {
 new  Vector2(0, 0),
@@ -64,9 +75,19 @@ new  Vector2(0, -1),
 new  Vector2(1, -1),
     };
 
+        /// <summary>
+        /// Converts a direction to an unit vector.
+        /// </summary>
+        /// <param name="direction">A direction to be converted</param>
+        /// <returns>An unit vector</returns>
         public static Vector2 AsVector2(this Direction direction)
             => DirectionDeltas[(int)direction];
 
+        /// <summary>
+        /// Returns a direction which is opposite to the specified direction.
+        /// </summary>
+        /// <param name="direction">The default direction</param>
+        /// <returns>The opposite direction</returns>
         public static Direction GetOpposite(this Direction direction)
         {
             switch (direction)
@@ -83,16 +104,39 @@ new  Vector2(1, -1),
             }
         }
 
+        /// <summary>
+        /// Checks if the specified <paramref name="direction"/> is basic.
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns>True if the specified <paramref name="direction"/> is basic</returns>
         public static bool IsBasic(this Direction direction)
             => Array.IndexOf(BasicDirections, direction) != -1;
 
-        public static bool IsHorizontal(this Direction d) => d == Direction.Left || d == Direction.Right;
+        /// <summary>
+        /// Checks if the specified <paramref name="direction"/> is horizontal.
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns>True if the specified <paramref name="direction"/> is horizontal</returns>
+        public static bool IsHorizontal(this Direction d) 
+            => d == Direction.Left || d == Direction.Right;
 
-        public static bool IsVertical(this Direction d) => d == Direction.Up || d == Direction.Down;
+        /// <summary>
+        /// Checks if the specified <paramref name="direction"/> is vertical.
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns>True if the specified <paramref name="direction"/> is vertical</returns>
+        public static bool IsVertical(this Direction d) 
+            => d == Direction.Up || d == Direction.Down;
     }
 
+    /// <summary>
+    /// few methods for manipulation with direction combinations
+    /// </summary>
     internal static class DirectionsExtensions
     {
+        /// <summary>
+        /// List of all directions
+        /// </summary>
         private static readonly Direction[] _directionList =
 {
     Direction.Right,
@@ -105,8 +149,20 @@ new  Vector2(1, -1),
     Direction.DownRight,
 };
 
-        public static Directions And(this Directions directions, Direction direction) => directions | direction.toDirections();
+        /// <summary>
+        /// Adds a direction to a set of directions.
+        /// </summary>
+        /// <param name="directions">A set of directions to extend</param>
+        /// <param name="direction">A direction to be conbined with the set of directions</param>
+        /// <returns>The extended set of direction</returns>
+        public static Directions And(this Directions directions, Direction direction) 
+            => directions | direction.toDirections();
 
+        /// <summary>
+        /// Lists all directions from a set of directions
+        /// </summary>
+        /// <param name="directions">A set of directions to be listed</param>
+        /// <returns></returns>
         public static IEnumerable<Direction> Enumerate(this Directions directions)
         {
             foreach (Direction direction in _directionList)
@@ -116,8 +172,21 @@ new  Vector2(1, -1),
             }
         }
 
-        public static Directions Except(this Directions directions, Direction direction) => directions & ~direction.toDirections();
+        /// <summary>
+        /// Removes the <paramref name="direction"/> from the <paramref name="directions"/> set.
+        /// </summary>
+        /// <param name="directions">The set of directions to reduce</param>
+        /// <param name="direction">The direction to be removed from the <paramref name="directions"/> set</param>
+        /// <returns>The reduced set of directions</returns>
+        public static Directions Except(this Directions directions, Direction direction) 
+            => directions & ~direction.toDirections();
 
+        /// <summary>
+        /// Checks if the specified <paramref name="direction"/> is included in the <paramref name="directions"/> set.
+        /// </summary>
+        /// <param name="directions">The set of directions to be checked</param>
+        /// <param name="direction">The direction to be compared with the set of directions</param>
+        /// <returns>If if the specified <paramref name="direction"/> is included in the <paramref name="directions"/> set</returns>
         public static bool Includes(this Directions directions, Direction direction) => directions.HasFlag(direction.toDirections());
 
         private static Directions toDirections(this Direction direction) => (Directions)(1 << ((int)direction - 1));

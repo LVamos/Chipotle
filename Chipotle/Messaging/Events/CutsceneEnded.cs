@@ -1,20 +1,16 @@
 ﻿namespace Game.Messaging.Events
 {
-    public class CutsceneEnded : GameMessage
+    /// <summary>
+    /// Indicates that an audio cutscene has just finished.
+    /// </summary>
+    public class CutsceneEnded : CutsceneBegan
     {
-        public readonly string CutsceneName;
-        public readonly int SoundID;
-
         /// <summary>
-        /// Constructs instance of the message.
+        /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="soundName">Identifier of the audio cut scene file</param>
-        public CutsceneEnded(object sender, string cutsceneName, int soundID) : base(sender)
-        {
-            CutsceneName = cutsceneName;
-            SoundID = soundID;
-        }
-
+        /// <param name="cutsceneName">Name of the played cutscene</param>
+        /// <param name="soundID">Handle of the sound object for the played cutscene</param>
+        public CutsceneEnded(object sender, string cutsceneName, int soundID) : base(sender, cutsceneName, soundID) { }
     }
 }

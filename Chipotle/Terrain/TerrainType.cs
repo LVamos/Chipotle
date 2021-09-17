@@ -6,7 +6,7 @@ using System.Linq;
 namespace Game.Terrain
 {
     /// <summary>
-    /// Defines types of 
+    /// Defines types of terrain on the game map.
     /// </summary>
     public enum TerrainType : byte
     {
@@ -28,6 +28,9 @@ namespace Game.Terrain
 
     public static class TerrainTypeExtension
     {
+        /// <summary>
+        /// Text descriptions of the terrain in fourth declension case
+        /// </summary>
         private static readonly string[] _descriptions4Case =
         {
             "trávu",
@@ -47,7 +50,9 @@ namespace Game.Terrain
         };
 
 
-
+        /// <summary>
+        /// Text descripitons of the terrain types
+        /// </summary>
         private static readonly string[] _descriptions =
         {
             "tráva",
@@ -66,25 +71,30 @@ namespace Game.Terrain
 "Křoví"
         };
 
+        /// <summary>
+        /// Returns text description of the specified terrain type.
+        /// </summary>
+        /// <param name="terrain">The terrain to be described</param>
+        /// <returns>text description of the specified terrain type</returns>
         public static string GetDescription(this TerrainType terrain)
             => _descriptions[(int)terrain];
 
+        /// <summary>
+        /// Returns text description of the specified terrain type in fourth declension case.
+        /// </summary>
+        /// <param name="terrain">The terrain to be described</param>
+        /// <returns>text description of the specified terrain type in fourth declension case</returns>
         public static string GetDescriptionInFourthCase(this TerrainType terrain)
     => _descriptions4Case[(int)terrain];
 
-
-
-        public static string[] GetDescriptions()
-            => _descriptions.ToArray<string>();
-
         /// <summary>
-        /// Converts a string to TerrainType enumeration value. Accepts also czech descriptions.
+        /// Parses the terrain type from the specified string.
         /// </summary>
-        /// <param name="value">The string to parse</param>
-        /// <returns></returns>
-        public static TerrainType ToTerrainType(this string value)
+        /// <param name="s">The string to be parsed</param>
+        /// <returns>The terrain type enum</returns>
+        public static TerrainType ToTerrainType(this string s)
         {
-            string terrainDescription = value.PrepareForIndexing();
+            string terrainDescription = s.PrepareForIndexing();
             int index = Array.IndexOf(_descriptions, terrainDescription);
             int index2 = Array.IndexOf(_descriptions4Case, terrainDescription);
 
@@ -98,7 +108,7 @@ namespace Game.Terrain
                 return (TerrainType)index2;
             }
 
-            return (TerrainType)Enum.Parse(typeof(TerrainType), value);
+            return (TerrainType)Enum.Parse(typeof(TerrainType), s);
         }
     }
 

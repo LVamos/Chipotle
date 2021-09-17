@@ -24,8 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>bin\Debug\Chipotle.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,6 +37,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
@@ -97,7 +99,6 @@
     <Compile Include="Entities\ChipotlePhysicsComponent.cs" />
     <Compile Include="Entities\ChipotleSoundComponent.cs" />
     <Compile Include="Entities\ChristineAIComponent.cs" />
-    <Compile Include="Entities\ChristinePhysicsComponent.cs" />
     <Compile Include="Entities\DumpObject.cs" />
     <Compile Include="Entities\EntityComponent.cs" />
     <Compile Include="Entities\Entity.cs" />
@@ -112,8 +113,6 @@
     <Compile Include="Messaging\Events\LocalityEntered.cs" />
     <Compile Include="Messaging\Commands\SayNearestObject.cs" />
     <Compile Include="Messaging\Commands\SayLocality.cs" />
-    <Compile Include="Messaging\Events\EntityShown.cs" />
-    <Compile Include="Messaging\Events\EntityHidden.cs" />
     <Compile Include="Messaging\Events\PositionChanged.cs" />
     <Compile Include="Messaging\Events\TerrainCollided.cs" />
     <Compile Include="Messaging\Commands\UseObject.cs" />
@@ -121,15 +120,10 @@
     <Compile Include="Messaging\MessagingObject.cs" />
     <Compile Include="Messaging\Commands\MakeStep.cs" />
     <Compile Include="Messaging\Events\EntityMoved.cs" />
-    <Compile Include="Messaging\Events\ObjectShown.cs" />
-    <Compile Include="Messaging\Events\ObjectHidden.cs" />
-    <Compile Include="Messaging\Events\PassageShown.cs" />
-    <Compile Include="Messaging\Events\PassageDisappearedMessage.cs" />
     <Compile Include="Messaging\Commands\SayTerrain.cs" />
     <Compile Include="Terrain\Angle.cs" />
     <Compile Include="Terrain\CardinalDirection.cs" />
     <Compile Include="Terrain\Door.cs" />
-    <Compile Include="Terrain\EntityAppeared.cs" />
     <Compile Include="Terrain\HallDoor.cs" />
     <Compile Include="Terrain\LocalityType.cs" />
     <Compile Include="Terrain\MapElement.cs" />

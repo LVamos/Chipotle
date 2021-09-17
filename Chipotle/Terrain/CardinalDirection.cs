@@ -2,6 +2,9 @@
 
 namespace Game.Terrain
 {
+    /// <summary>
+    /// Enumerates cardinal directions.
+    /// </summary>
     public enum CardinalDirection
     {
         North = 0,
@@ -15,8 +18,14 @@ namespace Game.Terrain
     }
 
 
+    /// <summary>
+    /// Provides methods for conversion.
+    /// </summary>
     public static class CardinalDirectionExtension
     {
+        /// <summary>
+        /// Text descriptions for cardianl directions
+        /// </summary>
         private static Dictionary<CardinalDirection, string> CardinalDirectionDescriptions = new Dictionary<CardinalDirection, string>()
         {
             [CardinalDirection.North] = "sever",
@@ -29,6 +38,11 @@ namespace Game.Terrain
             [CardinalDirection.NorthWest] = "severozápad"
         };
 
+        /// <summary>
+        /// An extension method to convert a cardianl direction to text description
+        /// </summary>
+        /// <param name="direction">The cardinal direction to be converted</param>
+        /// <returns>Text description of the cardinal direction</returns>
         public static string GetDescription(this CardinalDirection direction)
 => CardinalDirectionDescriptions[direction];
     }

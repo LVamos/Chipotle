@@ -11,21 +11,72 @@ using OpenTK;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Controls movement of the Tuttle NPC.
+    /// </summary>
     public class TuttlePhysicsComponent : PhysicsComponent
     {
+        /// <summary>
+        /// Specifies the maximum allowed distance from the Detective Chipotle NPC.
+        /// </summary>
+        /// <remarks>Used when following the Detective Chipotle NPC</remarks>
         private const int _maxDistanceFromPlayer = 10;
+
+
+        /// <summary>
+        /// Specifies the minimum allowed distance from the Detective Chipotle NPC.
+        /// </summary>
+        /// <remarks>Used when following the Detective Chipotle NPC</remarks>
         private const int _minDistanceFromPlayer = 2;
+
+        /// <summary>
+        /// Indicates if the NPC walks to the Detective Chipotle NPC.
+        /// </summary>
         private bool _approachToPlayer;
+
+        /// <summary>
+        /// Specifies final distance from the Detective Chipotle when in process of approaching to it.
+        /// </summary>
         private int _desiredDistanceFromPlayer;
+
+        /// <summary>
+        /// Reference to a path finder instance
+        /// </summary>
         private PathFinder _finder = new PathFinder();
+
+        /// <summary>
+        /// Indicates if the NPC keeps following the Detective Chipotle NPC.
+        /// </summary>
         private bool _followPlayer;
-        private bool _hidden;
+
+        /// <summary>
+        /// Stores the current shortest track towards the Detective Chipotle NPC.
+        /// </summary>
         private Queue<Vector2> _path;
+
+        /// <summary>
+        /// Reference to the Detective Chipotle NPC
+        /// </summary>
         private Entity _player;
+
+        /// <summary>
+        /// An instance of the Random number generator
+        /// </summary>
         private Random _random = new Random();
+
+        /// <summary>
+        /// Specifies the length of one step in milliseconds.
+        /// </summary>
         private float _stepInterval;
+
+        /// <summary>
+        /// Specifies if the NPC is currently walking.
+        /// </summary>
         private bool _walk;
 
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             _orientation = new Orientation2D(0, 1);
@@ -46,6 +97,9 @@ namespace Game.Entities
             base.Start();
         }
 
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
         public override void Update()
         {
             base.Update();
@@ -54,6 +108,11 @@ namespace Game.Entities
                 PerformWalk();
         }
 
+        /// <summary>
+        /// Computes speed of walk according to the distance from the Detective Chipotle NPC.
+        /// </summary>
+        /// <param name="distance">Distance from the Detective Chipotle NPC</param>
+        /// <returns>The walk speed</returns>
         private int ComputeWalkSpeed(int distance)
         {
             if (distance < 5)
@@ -74,15 +133,32 @@ namespace Game.Entities
             return 150;
         }
 
+        /// <summary>
+        /// finds a walkable tile near the Detective Chipotle NPC.
+        /// </summary>
+        /// <returns>Coordinates of tthe target tile</returns>
         private Vector2? FindPlaceNearPlayer()
 => _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
 
+        /// <summary>
+        /// Computes distance between two points.
+        /// </summary>
+        /// <param name="a">The first point</param>
+        /// <param name="b">The second point</param>
+        /// <returns>The distance between the points</returns>
         private int GetDistance(Vector2 a, Vector2 b)
 => (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
 
+        /// <summary>
+        /// Computes distance between the NPC and the Detective Chipotle NPC.
+        /// </summary>
+        /// <returns>Distance between the NPC and the Detective Chipotle NPC</returns>
         private int GetDistanceFromPlayer()
 => GetDistance(_area.Center, _player.Area.Center);
 
+        /// <summary>
+        /// start walking the shortest path to the Detective Chipotle NPC.
+        /// </summary>
         private void GoToPlayer()
         {
             _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
@@ -100,6 +176,9 @@ namespace Game.Entities
             _stepInterval = 0;
         }
 
+        /// <summary>
+        /// Checks if the NPC isn't too far away from the Detective Chipotle NPC.
+        /// </summary>
         private void CheckDistanceFromPlayer()
         {
             int distance = GetDistanceFromPlayer();
@@ -109,6 +188,10 @@ namespace Game.Entities
                 StopApproachingToPlayer();
         }
 
+        /// <summary>
+        /// Processes the EntityMoved message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnEntityMoved(EntityMoved message)
         {
             if (message.Sender != _player)
@@ -118,20 +201,31 @@ namespace Game.Entities
                 CheckDistanceFromPlayer();
         }
 
-        private void OnGotoPoint(GotoPoint m)
+        /// <summary>
+        /// Processes the GotoPoint message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnGotoPoint(GotoPoint message)
         {
-            _path = m.Path;
-            _walkSpeed = m.StepLength;
+            _path = message.Path;
+            _walkSpeed = message.StepLength;
             _walk = true;
         }
 
+        /// <summary>
+        /// Processes the Hide message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnHide(Hide message)
         {
             StopFollowing();
             DisAppear();
-            _hidden = true;
         }
 
+        /// <summary>
+        /// Processes the LocalityLeft message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnLocalityLeft(LocalityLeft message)
         {
             if (message.Sender != _player)
@@ -141,23 +235,37 @@ namespace Game.Entities
             GoToPlayer();
         }
 
+        /// <summary>
+        /// Processes the Reveal message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnReveal(Reveal message)
         {
             _area = message.Location;
             Appear(message.Location);
-            _hidden = false;
             StartFollowing();
         }
 
-        private void OnStartFollowing(StartFollowing m)
+        /// <summary>
+        /// Processes the StartFollowing message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnStartFollowing(StartFollowing message)
         {
             _path = null;
             _followPlayer = true;
         }
 
-        private void OnStopFollowing(StopFollowing m)
+        /// <summary>
+        /// Processes the StopFollowing message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnStopFollowing(StopFollowing message)
             => StopFollowing();
 
+        /// <summary>
+        /// Performs walk on a preplanned route.
+        /// </summary>
         private void PerformWalk()
         {
             if (_approachToPlayer)
@@ -175,8 +283,15 @@ namespace Game.Entities
                 StopWalk();
         }
 
-        private void StartFollowing() => _followPlayer = true;
+        /// <summary>
+        /// starts walking after the Detective Chipotle NPC.
+        /// </summary>
+        private void StartFollowing() 
+            => _followPlayer = true;
 
+        /// <summary>
+        /// Performs one step in the direction given by the current orientation of the entity.
+        /// </summary>
         private void Step()
         {
             // Get target tile
@@ -194,18 +309,27 @@ namespace Game.Entities
             SetPosition(target);
         }
 
+        /// <summary>
+        /// Stops coming to the Detective Chipotle NPC.
+        /// </summary>
         private void StopApproachingToPlayer()
         {
             _walk = _approachToPlayer = false;
             _path = null;
         }
 
+        /// <summary>
+        /// Stops following the Detective Chipotle NPC.
+        /// </summary>
         private void StopFollowing()
         {
             _followPlayer = false;
             StopWalk();
         }
 
+        /// <summary>
+        /// Stops ongoing walk and deletes current preplanned route.
+        /// </summary>
         private void StopWalk()
         {
             _walk = false;

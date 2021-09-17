@@ -3,15 +3,22 @@ using Game.Terrain;
 
 namespace Game.Messaging.Events
 {
-    internal class TurnEntityResult : GameMessage
+    /// <summary>
+    /// Indicates that an NPC has completed a rotation.
+    /// </summary>
+    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    public class TurnEntityResult : GameMessage
     {
+        /// <summary>
+        /// New orientation of the NPC
+        /// </summary>
         private Orientation2D NewOrientation;
 
         /// <summary>
-        /// Constructs new instance of TurnoverDone.
+        /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="newOrientation">Final orientation vector</param>
-        public TurnEntityResult(object sender, Orientation2D newOrientation) : base(sender) => NewOrientation = newOrientation;
+        /// <param name="orientation">New orientation of the NPC</param>
+        public TurnEntityResult(object sender, Orientation2D orientation) : base(sender) => NewOrientation = orientation;
     }
 }

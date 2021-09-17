@@ -3,22 +3,43 @@ using Game.Terrain;
 
 using Luky;
 
-
-
 namespace Game.Entities
 {
+    /// <summary>
+    /// Represents the killer's car object in the garage of Vanilla crunch (garáž v1) locality.
+    /// </summary>
     public class KillersCar : DumpObject
     {
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
         public KillersCar(Name name, Plane area) : base(name, area, "vražedné auto v1") { }
 
-        private bool KeysOnHanger
-            => (World.GetObject("věšák v1") as KeyHanger).KeysHanging;
-
+        /// <summary>
+        /// Indicates if the Detective Chipotle NPC had icecream from the icecream machine (automat
+        /// v1) object.
+        /// </summary>
         private bool ChipotleHadIcecream
             => (World.GetObject("automat v1") as IcecreamMachine).Used;
 
-        private ChipotlesCar ChipotlesCar => World.GetObject("detektivovo auto") as ChipotlesCar;
+        /// <summary>
+        /// Reference to the Detective's car (detektivovo auto) object.
+        /// </summary>
+        private ChipotlesCar ChipotlesCar
+            => World.GetObject("detektivovo auto") as ChipotlesCar;
 
+        /// <summary>
+        /// Indicates if the keys are on the hanger.
+        /// </summary>
+        private bool KeysOnHanger
+            => (World.GetObject("věšák v1") as KeyHanger).KeysHanging;
+
+        /// <summary>
+        /// Processes the UseObject message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         protected override void OnUseObject(UseObject message)
         {
             if (KeysOnHanger)
@@ -33,6 +54,5 @@ namespace Game.Entities
 
             base.OnUseObject(message);
         }
-
     }
 }

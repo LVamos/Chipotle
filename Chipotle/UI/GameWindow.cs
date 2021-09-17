@@ -15,8 +15,14 @@ using OpenTK;
 
 namespace Game.UI
 {
+    /// <summary>
+    /// A virtual window opened during the game
+    /// </summary>
     public class GameWindow : VirtualWindow
     {
+        /// <summary>
+        /// constructor
+        /// </summary>
         public GameWindow()
         {
             Dictionary<KeyShortcut, Action> shortcuts = new Dictionary<KeyShortcut, Action>()
@@ -39,34 +45,28 @@ namespace Game.UI
 
                 // Other shortcuts
                 [new KeyShortcut(Keys.C)] = SayCoordinates,
-                [new KeyShortcut(true, false, false, Keys.C)] = CopyCoordinates,
                 [new KeyShortcut(Keys.Escape)] = QuitGame,
             };
 
             RegisterShortcuts(shortcuts);
         }
 
-        public override void OnActivate() =>
-            //todo GameWindow.OnActivate
-            base.OnActivate();
 
-        public override void OnDeactivate() =>
-            //todo GameWindow.OnDeActivate
 
-            base.OnDeactivate();
-
+        /// <summary>
+        /// Processes the KeyDown message.
+        /// </summary>
+        /// <param name="e">The message to be handled</param>
         public override void OnKeyDown(KeyEventParams e)
         {
             base.OnKeyDown(e);
             World.Player.ReceiveMessage(new KeyPressed(this, new KeyShortcut(e)));
         }
 
-        private void CopyCoordinates()
-        {
-            Clipboard.SetText(World.Player.Area.UpperLeftCorner.ToString());
-            Tolk.Speak("Soiuřadnice zkopírovány.");
-        }
 
+        /// <summary>
+        /// A test method to move the Detective Chipotle NPC to coordinates optained from clipboard.
+        /// </summary>
         private void MoveTuttleFromClipboard()
         {
             if (!_testModeEnabled)
@@ -78,10 +78,23 @@ namespace Game.UI
             tuttle.ReceiveMessage(message);
         }
 
-        private void QuitGame() => World.QuitGame();
+        /// <summary>
+        /// Quits the game.
+        /// </summary>
+        private void QuitGame() 
+            => World.QuitGame();
 
-        private void SayCoordinates() => Tolk.Speak(World.Player.Area.Center.ToString());
+        /// <summary>
+        /// Reports relative coordiantes of the Detective Chipotle NPC.
+        /// </summary>
+        private void SayCoordinates()
+            => Tolk.Speak(World.Player.Area.ToRelative().Center.ToString());
 
-        private void SayTuttlesPosition() => Tolk.Speak(World.GetEntity("tuttle").Area.Center.ToString());
+
+        private void SayTuttlesPosition()
+        {
+            if(_testModeEnabled)
+                 Tolk.Speak(World.GetEntity("tuttle").Area.Center.ToString());
+        }
     }
 }

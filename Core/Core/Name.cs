@@ -26,7 +26,7 @@ namespace Luky
 
         private static UInt16 _stringCount = 0;
 
-        private static Dictionary<string, UInt16> _stringsToIDs = new Dictionary<string, ushort>();
+        private static readonly Dictionary<string, UInt16> _stringsToIDs = new Dictionary<string, ushort>();
 
         /// <summary>
         /// Constructor

@@ -10,13 +10,35 @@ using OpenTK;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Controls behavior of the Tuttle NPC
+    /// </summary>
     public class TuttleAIComponent : AIComponent
     {
+        /// <summary>
+        /// Reference to the Detective Chipotle NPC
+        /// </summary>
         private readonly Entity _player = World.Player;
+
+
+        /// <summary>
+        /// A delayed message of ChipotlesCarMoved type
+        /// </summary>
         private ChipotlesCarMoved _carMovement;
+
+        /// <summary>
+        /// Indicates if the NPC is invisible for other NPCs and objects.
+        /// </summary>
         private bool _hidden;
+
+        /// <summary>
+        /// Indicates if the Detective Chipotle NPC visited the Walsch's pool (bazén w1) locality.
+        /// </summary>
         private bool _playerWasByPool;
 
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -35,6 +57,10 @@ namespace Game.Entities
             Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(1030, 1036)), true));
         }
 
+        /// <summary>
+        /// Processes the CutsceneBegan message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneBegan(CutsceneBegan message)
         {
             base.OnCutsceneBegan(message);
@@ -46,6 +72,10 @@ namespace Game.Entities
             }
         }
 
+        /// <summary>
+        /// Processes the CutsceneEnded message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneEnded(CutsceneEnded message)
         {
             base.OnCutsceneEnded(message);
@@ -61,7 +91,7 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Instructs Tuttle to get to corpse and wait there for Chipotle
+        /// Instructs the NPC to walk towards the corpse (tělo w1) object and wait there for the Detective Chipotle NPC.
         /// </summary>
         private void GoToCorpse()
         {
@@ -72,6 +102,9 @@ namespace Game.Entities
             Owner.ReceiveMessage(new GotoPoint(this, path, 400));
         }
 
+        /// <summary>
+        /// Makes the NPC invisible for the other NPCs and objects.
+        /// </summary>
         private void Hide()
         {
             _hidden = true;
@@ -79,7 +112,7 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Chiipotle and Tuttle get out to Belvedere street right in front of Christine's front door.
+        /// The Detective Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdová cesta w1) locality to the Belvedere street (ulice p1)  locality right outside the Christine's door.
         /// </summary>
         private void JumpToBelvedereStreet2()
         {
@@ -87,27 +120,45 @@ namespace Game.Entities
             Owner.ReceiveMessage(message);
         }
 
+        /// <summary>
+        /// The detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1) locality to the
+        /// Christine's hall (hala p1) locality.
+        /// </summary>
         private void JumpToChristinesHall()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));
 
+        /// <summary>
+        /// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his room (pokoj s1) locality.
+        /// </summary>
         private void JumpToSweeneysRoom()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1411, 974"), true));
 
+        /// <summary>
+        /// Processes the ChipotlesCarMoved message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
         private void OnChipotlesCarMoved(ChipotlesCarMoved message)
         {
-            if (message.TargetLocation.GetLocality().Name.Indexed != "asfaltka c1")
+            if (message.Target.GetLocality().Name.Indexed != "asfaltka c1")
                 _carMovement = message;
         }
 
-        private void OnLocalityEntered(LocalityEntered m)
+        /// <summary>
+        /// Processes the LocalityEntered message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnLocalityEntered(LocalityEntered message)
         {
-            if (m.Sender == _player && _area.GetLocality().Name.Indexed == "bazén w1" && !_playerWasByPool)
+            if (message.Sender == _player && _area.GetLocality().Name.Indexed == "bazén w1" && !_playerWasByPool)
             {
                 _playerWasByPool = true;
                 Owner.ReceiveMessage(new StartFollowing(this));
             }
         }
 
+        /// <summary>
+        /// Makes the NPC visible to the other NPCs and objects.
+        /// </summary>
         private void Reveal()
         {
             Vector2? target = _player.Area.FindNearestWalkableTile(10);
@@ -117,12 +168,15 @@ namespace Game.Entities
             Owner.ReceiveMessage(new Reveal(this, new Plane((Vector2)target)));
         }
 
+        /// <summary>
+        /// Relocates the NPC near the car of the Detective Chipotle NPC if the car has moved recently.
+        /// </summary>
         private void WatchCar()
         {
             if (_hidden || _carMovement == null)
                 return;
 
-            Plane perimeter = new Plane(_carMovement.TargetLocation);
+            Plane perimeter = new Plane(_carMovement.Target);
             perimeter.Extend();
             Vector2? target = perimeter.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");

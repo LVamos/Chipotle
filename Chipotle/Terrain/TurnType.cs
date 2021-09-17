@@ -1,5 +1,8 @@
 ﻿namespace Game.Terrain
 {
+    /// <summary>
+    /// Defines all possible rotation moves.
+    /// </summary>
     public enum TurnType : int
     {
         None = 0,

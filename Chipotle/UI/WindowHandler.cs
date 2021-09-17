@@ -4,16 +4,22 @@ using System.Windows.Forms;
 namespace Game.UI
 {
     /// <summary>
-    /// Manages user interface, redistributes keyboard input to windows
+    /// Manages user interface, redistributes keyboard input to virtual windows
     /// </summary>
     public static class WindowHandler
     {
+        /// <summary>
+        /// Begins the game.
+        /// </summary>
         public static void StartGame()
         {
             Switch(new GameWindow());
             World.StartGame();
         }
 
+        /// <summary>
+        /// Runs the main menu.
+        /// </summary>
         public static void MainMenu() => Switch(new MainMenuWindow());
 
         /// <summary>

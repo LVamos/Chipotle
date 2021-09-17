@@ -1,18 +1,26 @@
-﻿using Game.Messaging;
-using Game.Messaging.Events;
-using Game.UI;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Game.Messaging;
+using Game.Messaging.Events;
+using Game.UI;
+
 namespace Game.Entities
 {
+    /// <summary>
+    /// Allows the player to control an NPC.
+    /// </summary>
     public abstract class InputComponent : EntityComponent
     {
+        /// <summary>
+        /// Registered keyboard shortcuts and corresponding actions
+        /// </summary>
+        protected Dictionary<KeyShortcut, Action> _shortcuts;
 
-
-
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public InputComponent() : base()
         {
             // Assign an KeyDown handler
@@ -26,28 +34,20 @@ namespace Game.Entities
             _shortcuts = new Dictionary<KeyShortcut, Action>();
         }
 
-
-
-
-
         /// <summary>
-        /// Responds on a keypress.
+        /// Processes the KeyDown message.
         /// </summary>
-        /// <param name="shortcut"></param>
+        /// <param name="message">The message to be processed</param>
         protected virtual void OnKeyDown(KeyPressed message)
         {
             if (_shortcuts != null && _shortcuts.TryGetValue(message.Shortcut, out Action action))
                 action();
         }
 
-
         /// <summary>
-        /// Adds set of keyboard shortcuts and coresponding actions into _shortcuts dictionary.
+        /// Registers keyboard shortcuts and corresponding actions.
         /// </summary>
         /// <param name="shortcuts">Set of shortcuts to be registered</param>
         protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
-
-
-        protected Dictionary<KeyShortcut, Action> _shortcuts;
     }
 }

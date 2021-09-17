@@ -1,31 +1,21 @@
-﻿using Game.Messaging;
+﻿using System;
+using System.Collections.Generic;
+
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
-using System;
-using System.Collections.Generic;
-
-
-
-
 namespace Game.Entities
 {
+    /// <summary>
+    /// Controls behavior of the Christine Pierce NPC
+    /// </summary>
     public class ChristineAIComponent : AIComponent
     {
-        protected override void OnCutsceneEnded(CutsceneEnded message)
-        {
-            base.OnCutsceneEnded(message);
-
-            switch (message.CutsceneName)
-            {
-                case "cs21": JumpToBedroom(); break;
-            }
-        }
-
-        private void JumpToBedroom()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1744, 1123"), true));
-
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -39,5 +29,25 @@ namespace Game.Entities
 
             Owner.ReceiveMessage(new SetPosition(this, new Plane("1792, 1127"), true));
         }
+
+        /// <summary>
+        /// Processes the CutsceneEnded message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected override void OnCutsceneEnded(CutsceneEnded message)
+        {
+            base.OnCutsceneEnded(message);
+
+            switch (message.CutsceneName)
+            {
+                case "cs21": JumpToBedroom(); break;
+            }
+        }
+
+        /// <summary>
+        /// Moves the NPC to the Christine's bed room (ložnice p1) locality.
+        /// </summary>
+        private void JumpToBedroom()
+            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1744, 1123"), true));
     }
 }

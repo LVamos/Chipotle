@@ -13,25 +13,58 @@ using Game.UI;
 using Luky;
 
 using OpenTK;
+using System.Globalization;
 
 namespace Game
 {
     /// <summary>
+    /// Represents the game world.
     /// </summary>
     public static class World
     {
+        /// <summary>
+        /// Interval between game loop ticks
+        /// </summary>
         public const int DeltaTime = 1000 / FramesPerSecond;
+
+        /// <summary>
+        /// sets speed of the game loop.
+        /// </summary>
         public const int FramesPerSecond = 100;
+
+        /// <summary>
+        /// Reference to a sound player
+        /// </summary>
         public static SoundThread Sound;
+
+        /// <summary>
+        /// Path to a map file
+        /// </summary>
         private static readonly string MapPath = Path.Combine(Program.DataPath, @"Map\chipotle.xml");
+
+        /// <summary>
+        /// Information about an ongoing cutscene
+        /// </summary>
         private static CutsceneBegan _cutsceneBegan;
 
+        /// <summary>
+        /// Queue of actions that should be performed at the beginning of the game loop tick
+        /// </summary>
         private static Queue<Action> _delayedActions = new Queue<Action>();
 
+        /// <summary>
+        /// List of all NPCs
+        /// </summary>
         private static Dictionary<string, Entity> _entities;
 
+        /// <summary>
+        /// List of all localities
+        /// </summary>
         private static Dictionary<string, Locality> _localities;
 
+        /// <summary>
+        /// Map of localities and corresponding background sounds
+        /// </summary>
         private static Dictionary<string, string> _localityLoops = new Dictionary<string, string>()
         {
             ["chodba h1"] = "CzechPubLoop",
@@ -54,14 +87,25 @@ namespace Game
             ["dvorek s1"] = "DriveWayLoop",
         };
 
-        private static XDocument _map;
 
+        /// <summary>
+        /// List of all simple game objects
+        /// </summary>
         private static Dictionary<string, DumpObject> _objects;
 
+        /// <summary>
+        /// List of all passages
+        /// </summary>
         private static Dictionary<string, Passage> _passages;
 
+        /// <summary>
+        /// The game map
+        /// </summary>
         public static TileMap Map { get; set; }
 
+        /// <summary>
+        /// Reference to the Detective Chipotle NPC (the main NPC)
+        /// </summary>
         public static Entity Player { get; private set; }
 
         /// <summary>
@@ -97,9 +141,9 @@ namespace Game
         }
 
         /// <summary>
-        /// Adds a locality into list and dictionary.
+        /// Registers a locality.
         /// </summary>
-        /// <param name="l">Locality instance</param>
+        /// <param name="l">The locality to be registered</param>
         public static void Add(Locality l)
         {
             // null check
@@ -114,9 +158,9 @@ namespace Game
         }
 
         /// <summary>
-        /// Adds a passage into list
+        /// Registers a passage.
         /// </summary>
-        /// <param name="p">Passage instance</param>
+        /// <param name="p">The passage to be registered</param>
         public static void Add(Passage p)
         {
             if (p == null)
@@ -129,14 +173,18 @@ namespace Game
         }
 
         /// <summary>
-        /// Returns first entity of given name. It's suitable in case there's just one entity of
-        /// given name.
+        /// Returns an NPC found by its name.
         /// </summary>
-        /// <param name="name">Name of desired entity</param>
-        /// <returns>The entity or null</returns>
+        /// <param name="name">Inner name of the required NPC</param>
+        /// <returns>The found NPC or null if nothing was found</returns>
         public static Entity GetEntity(string name)
 => _entities.TryGetValue(name, out Entity e) ? e : null;
 
+        /// <summary>
+        /// Returns a locality found by its name.
+        /// </summary>
+        /// <param name="name">Inner name of the required locality</param>
+        /// <returns>The found locality or null if nothing was found</returns>
         public static Locality GetLocality(string name)
         {
             _localities.TryGetValue(name.PrepareForIndexing(), out Locality locality);
@@ -144,66 +192,83 @@ namespace Game
         }
 
         /// <summary>
-        /// Enumerates all localities sroted by distance from default point.
+        /// Enumerates all localities sorted by distance from the specified point.
         /// </summary>
-        /// <param name="point">Coordinates of the point whose surroundings should be explored</param>
-        /// <returns>Enumeration of localities</returns>
+        /// <param name="point">The point whose surroundings should be explored</param>
+        /// <returns>Enumeration of the found localities</returns>
         public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
            => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Locality).Select(p => p.Value);
 
+
+        /// <summary>
+        /// Returns the locality nearest from the specified point.
+        /// </summary>
+        /// <param name="point">The point shose surroundings is to be searched</param>
+        /// <returns>The found locality</returns>
         public static Locality GetNearestLocality(Vector2 point)
                     => GetNearestLocalities(point).First();
 
         /// <summary>
-        /// Returns one game object closest to given point.
+        /// Returns a game object closest to the specified point.
         /// </summary>
-        /// <param name="defaultPoint">Coordinates of the defualt point</param>
-        /// <returns>Game object</returns>
-        public static GameObject GetNearestObject(Vector2 defaultPoint)
-            => GetNearestObjects(defaultPoint).FirstOrDefault();
+        /// <param name="point">The point whose surroundings is to be searched</param>
+        /// <returns>The found game object</returns>
+        public static GameObject GetNearestObject(Vector2 point)
+            => GetNearestObjects(point).FirstOrDefault();
 
         /// <summary>
         /// Enumerates all game objects around a point sorted by distance.
         /// </summary>
-        /// <param name="point">A point on the map whose surroundings are to be explored</param>
+        /// <param name="point">A point whose surroundings are to be searched</param>
         /// <returns>Enumeration of game objects</returns>
         public static IEnumerable<GameObject> GetNearestObjects(Vector2 point)
             => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point)).Where(o => o.Value != Map[point]?.Object).Select(o => o.Value);
 
         /// <summary>
-        /// Enumerates all game objects around a point sorted by distance.
+        /// Enumerates all game objects around a tile sorted by distance.
         /// </summary>
-        /// <param name="point">A point on the map whose surroundings are to be explored</param>
+        /// <param name="tile">A tile whose surrounding is to be explored</param>
         /// <returns>Enumeration of game objects</returns>
-        public static IEnumerable<GameObject> GetNearestObjects(Tile point)
-            => GetNearestObjects(point.Position);
+        public static IEnumerable<GameObject> GetNearestObjects(Tile tile)
+            => GetNearestObjects(tile.Position);
 
+        /// <summary>
+        /// Returns the passage closest to the specified point.
+        /// </summary>
+        /// <param name="point">The point whose surrounding is to be searched</param>
+        /// <returns>The found passage</returns>
         public static Passage GetNearestPassage(Vector2 point)
         => GetNearestPassages(point).FirstOrDefault();
 
+        /// <summary>
+        /// Enumerates all passages sorted by distance from the specified point.
+        /// </summary>
+        /// <param name="point">The point whose surrounding is to be searched</param>
+        /// <returns>Enumeration of all passages</returns>
         public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
                    => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
 
         /// <summary>
-        /// Returns first game object of given name. It's suitable in case there's just one entity
-        /// of given name.
+        /// searches for a simple game object by name.
         /// </summary>
-        /// <param name="name">Name of desired object</param>
-        /// <returns>The game object or null</returns>
+        /// <param name="name">Inner name of the required object</param>
+        /// <returns>The found game object or null if nothing was found</returns>
         public static DumpObject GetObject(string name)
 => _objects.TryGetValue(name, out DumpObject o) ? o : null;
 
         /// <summary>
-        /// Finds all game objects of required type
+        /// Enumerates all simple game objects of the specified type
         /// </summary>
         /// <param name="type">Type of requested game objects</param>
-        /// <returns>Collection with objects of same type</returns>
+        /// <returns>Enumeration of game objects</returns>
         public static IEnumerable<DumpObject> GetObjectsByType(string type)
-            => _objects.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower() == type.ToLower());
+            => _objects.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower(CultureInfo.CurrentCulture) == type.ToLower(CultureInfo.CurrentCulture));
 
-        public static IEnumerable<string> GetObjectTypes()
-        => _objects.Where(p => !string.IsNullOrEmpty(p.Value.Type)).Select(p => p.Value.Type);
-
+        /// <summary>
+        /// Searches for a passage by name.
+        /// </summary>
+        /// <param name="name">Inner name of the required passage</param>
+        /// <returns>The found passage or null if nothing was found</returns>
         public static Passage GetPassage(string name)
         {
             _passages.TryGetValue(name, out Passage passage);
@@ -211,7 +276,7 @@ namespace Game
         }
 
         /// <summary>
-        /// Prepares the game world for game start.
+        /// Prepares the game world.
         /// </summary>
         public static void Initialize()
         {
@@ -222,19 +287,16 @@ namespace Game
             _passages = new Dictionary<string, Passage>();
         }
 
-        public static XDocument LoadMap()
-                    => LoadMap(MapPath);
 
         /// <summary>
-        /// Loads map from file
+        /// Loads the map from file.
         /// </summary>
-        /// <param name="fileName">Name of the map file</param>
-        public static XDocument LoadMap(string fileName)
+        public static void LoadMap()
         {
             string Attribute(XElement element, string attribute, bool prepareForIndexing = true)
                 => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
-            XDocument xDocument = XDocument.Load(fileName);
+            XDocument xDocument = XDocument.Load(MapPath);
             XElement root = xDocument.Root;
             IEnumerable<XElement> xLocalities = root.Element("localities").Elements("locality");
             IEnumerable<XElement> xPassages = root.Element("passages").Elements("passage");
@@ -242,7 +304,7 @@ namespace Game
             Initialize(); // Prepare data structures for objects, entities, localities etc.
 
             // Create map
-            Map = new TileMap(fileName);
+            Map = new TileMap(MapPath);
 
             // Load localities
             foreach (XElement l in xLocalities)
@@ -295,19 +357,15 @@ lLoop);
                 // Create and register new passage
                 Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed, openable));
             }
-
-            return xDocument;
         }
 
-        public static bool LocalityExists(string name)
-                    => _localities.ContainsKey(name.PrepareForIndexing());
 
-        public static bool ObjectExists(string indexedName)
-        => _objects.ContainsKey(indexedName);
 
-        public static bool Passageexists(string name)
-                    => _passages.ContainsKey(name);
-
+        /// <summary>
+        /// Plays the specified audio cutscene.
+        /// </summary>
+        /// <param name="sender">An object or NPC which wants to play the cutscene</param>
+        /// <param name="cutscene">Name of the soudn file to be played</param>
         public static void PlayCutscene(object sender, string cutscene)
         {
             if (string.IsNullOrEmpty(cutscene))
@@ -321,6 +379,9 @@ lLoop);
             ReceiveMessage(_cutsceneBegan);
         }
 
+        /// <summary>
+        /// Terminates the application.
+        /// </summary>
         public static void QuitGame()
         {
             Program.MainWindow.GameLoopEnabled = false;
@@ -329,39 +390,40 @@ lLoop);
             WindowHandler.MainMenu();
         }
 
+        /// <summary>
+        /// Sends a message to all NPCs.
+        /// </summary>
+        /// <param name="message">The message to be sent</param>
         public static void ReceiveMessage(GameMessage message)
                     => _entities.Values.Foreach(e => e.ReceiveMessage(message));
 
+        /// <summary>
+        /// Unregisters the specified locality.
+        /// </summary>
+        /// <param name="l">The locality to be removed</param>
         public static void Remove(Locality l)
                     => _delayedActions.Enqueue(() => _localities.Remove(l.Name.Indexed));
 
+        /// <summary>
+        /// Unregisters the specified passage.
+        /// </summary>
+        /// <param name="p">The passage to be removed</param>
         public static void Remove(Passage p)
                     => _delayedActions.Enqueue(() => _passages.Remove(p.Name.Indexed));
 
+        /// <summary>
+        /// Unregisters the specified object.
+        /// </summary>
+        /// <param name="o">The object to be removed</param>
         public static void Remove(GameObject o)
                     => _delayedActions.Enqueue(() => _objects.Remove(o.Name.Indexed));
 
-        public static void RenameLocality(string indexedName, string newName)
-        {
-            Locality value = _localities[indexedName];
-            _localities.Remove(indexedName);
-            _localities[newName] = value;
-        }
 
-        public static void RenameObject(string indexedName, string newName)
-        {
-            DumpObject value = _objects[indexedName];
-            _objects.Remove(indexedName);
-            _objects[newName] = value;
-        }
 
-        public static void RenamePassage(string indexedName, string newName)
-        {
-            Passage value = _passages[indexedName];
-            _passages.Remove(indexedName);
-            _passages[newName] = value;
-        }
-
+        /// <summary>
+        /// Initializes the sound player.
+        /// </summary>
+        /// <param name="say">A delegate for text output</param>
         public static void SoundInit(Action<string> say)
         {
             Sound = SoundThread.CreateAndStartThread(Path.Combine(Program.DataPath, "Sounds"), Program.OnError, say);
@@ -370,11 +432,11 @@ lLoop);
         }
 
         /// <summary>
-        /// Starts game from begining.
+        /// Starts game from the begining.
         /// </summary>
         public static void StartGame()
         {
-            _map = LoadMap();
+            LoadMap();
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());
             _objects.Foreach(p => p.Value.Start());
@@ -390,6 +452,10 @@ lLoop);
             Program.MainWindow.GameLoopEnabled = true;
         }
 
+        /// <summary>
+        /// Stops an ongoing audio cutscene.
+        /// </summary>
+        /// <param name="sender">The object or NPC which wants to stop the cutscene</param>
         public static void StopCutscene(object sender)
         {
             Sound.Stop(_cutsceneBegan.SoundID);
@@ -398,6 +464,7 @@ lLoop);
         }
 
         /// <summary>
+        /// Updates whole game world.
         /// </summary>
         public static void Update()
         {
@@ -409,6 +476,9 @@ lLoop);
             HandleCutscene();
         }
 
+        /// <summary>
+        /// Watches an ongoing audio cutscene and informs the world when it's completed.
+        /// </summary>
         private static void HandleCutscene()
         {
             if (_cutsceneBegan != null)
@@ -427,6 +497,9 @@ lLoop);
             }
         }
 
+        /// <summary>
+        /// Performs all planned actions.
+        /// </summary>
         private static void PerformDelayedActions()
         {
             while (!_delayedActions.IsNullOrEmpty())

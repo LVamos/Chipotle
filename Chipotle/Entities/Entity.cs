@@ -75,8 +75,10 @@ namespace Game.Entities
         /// </summary>
         public IReadOnlyCollection<Locality> VisitedLocalities => _visitedLocalities;
 
-        /// <summary> Creates new instance of the Bartender NPC. </summary> <returns><New instance
-        /// of the NPC/returns>
+        /// <summary>
+        /// Creates new instance of the Bartender NPC.
+        /// </summary>
+        /// <returns>New instance of the NPC</returns>
         public static Entity CreateBartender()
             => new Entity(new Name("Bartender", "pingl"), "Bartender", new BartenderAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
@@ -93,7 +95,7 @@ namespace Game.Entities
         /// <summary> Creates new instance of the Christine NPC. </summary> <returns><New instance
         /// of the NPC/returns>
         public static Entity CreateChristine()
-            => new Entity(new Name("Christine", "Christine Piercová"), "Christine", new ChristineAIComponent(), null, new ChristinePhysicsComponent(), new SoundComponent());
+            => new Entity(new Name("Christine", "Christine Piercová"), "Christine", new ChristineAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
         /// <summary> Creates new instance of the Mariotti NPC. </summary> <returns><New instance of
         /// the NPC/returns>

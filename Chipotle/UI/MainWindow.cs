@@ -9,8 +9,20 @@ namespace Game.UI
     /// </summary>
     public class MainWindow : Form
     {
+        /// <summary>
+        /// Runs the game loop.
+        /// </summary>
         private Timer _tmrGameLoop;
+
+        /// <summary>
+        /// Indicates if the game loop runs.
+        /// </summary>
         private bool _gameLoopEnabled = false;
+
+
+        /// <summary>
+        /// starts or stops the game loop.
+        /// </summary>
         public bool GameLoopEnabled
         {
             get => _gameLoopEnabled;
@@ -49,14 +61,25 @@ namespace Game.UI
             Shown += MainWindow_Shown;
         }
 
-        private void GameLoop(object sender, EventArgs e) => World.Update();
+        /// <summary>
+        /// The game loop
+        /// </summary>
+        private void GameLoop(object sender, EventArgs e) 
+            => World.Update();
 
+        /// <summary>
+        /// Handler of the Shown event
+        /// </summary>
         private void MainWindow_Shown(object sender, EventArgs e)
         {
             Focus();
             WindowHandler.MainMenu();
         }
 
+
+        /// <summary>
+        /// Handler of the KeyDown event
+        /// </summary>
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
             => WindowHandler.OnKeyDown(new KeyEventParams(e));
 

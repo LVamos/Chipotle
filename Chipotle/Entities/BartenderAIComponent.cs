@@ -90,7 +90,7 @@ namespace Game.Entities
         /// <summary>
         /// Processes the EntityMoved message.
         /// </summary>
-        /// <param name="m">The message to be processed</param>
+        /// <param name="message">The message to be processed</param>
         private void OnEntityMoved(EntityMoved message)
         {
             if (message.Sender != World.Player)

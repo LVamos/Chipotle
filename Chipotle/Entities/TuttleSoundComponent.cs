@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace Game.Entities
 {
+    /// <summary>
+    /// Controls the sound output of the Tuttle NPC
+    /// </summary>
     public class TuttleSoundComponent : SoundComponent
     {
 
@@ -16,6 +19,9 @@ namespace Game.Entities
 
 
 
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -34,8 +40,17 @@ namespace Game.Entities
 
 
 
-        private void OnEntityMoved(EntityMoved message) => PlayTerrain(message.Target);
+        /// <summary>
+        /// Processes the  message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnEntityMoved(EntityMoved message) 
+            => PlayTerrain(message.Target);
 
+        /// <summary>
+        /// Plays a sound representation of a tile.
+        /// </summary>
+        /// <param name="tile">A tile to be announced</param>
         private void PlayTerrain(Tile tile)
         {
             string soundName = "movstep" + Enum.GetName(tile.Terrain.GetType(), tile.Terrain);

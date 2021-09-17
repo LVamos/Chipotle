@@ -3,16 +3,23 @@ using Game.Terrain;
 
 namespace Game.Messaging.Events
 {
-    internal class EntityMoved : GameMessage
+    /// <summary>
+    /// Indicates that an NPC changed its position.
+    /// </summary>
+    /// <remarks>sent from the <see cref="Game.Entities.Entity"/> class.</remarks>
+    public class EntityMoved : GameMessage
     {
+        /// <summary>
+        /// New position of the NPC
+        /// </summary>
         public readonly Tile Target;
 
 
         /// <summary>
-        /// Constructs new instance of the message.
+        /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="target">Final location</param>
+        /// <param name="target">New position of the NPC</param>
         public EntityMoved(object sender, Tile target) : base(sender) => Target = target;
 
     }

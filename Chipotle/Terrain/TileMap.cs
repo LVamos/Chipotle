@@ -12,63 +12,60 @@ using OpenTK;
 namespace Game.Terrain
 {
     /// <summary>
-    /// Generic base class for storing a tile map
+    /// Represents a dictionary-based tile map.
     /// </summary>
     public class TileMap : DebugSO
     {
+        /// <summary>
+        /// Name of an opened map file
+        /// </summary>
         public readonly string FileName;
 
-        private float _bottomBorder;
 
-        private float _leftBorder;
 
-        private float _rightBorder;
 
         /// <summary>
-        /// Backing array containing the tiles
+        /// Maps tiles to coordinates.
         /// </summary>
         private Dictionary<Vector2, Tile> _tiles = new Dictionary<Vector2, Tile>();
 
-        private float _topBorder;
-
-        public TileMap(string fileName = null)
-                                                    => FileName = fileName;
-
-        public float BottomBorder { get => _bottomBorder; private set => _bottomBorder = value; }
-
-        public float LeftBorder { get => _leftBorder; private set => _leftBorder = value; }
 
         /// <summary>
-        /// Count of all columns of the map
+        /// Constructor
         /// </summary>
-        public float RightBorder { get => _rightBorder; private set => _rightBorder = value; }
+        /// <param name="fileName">Name of the map file to be loaded</param>
+        public TileMap(string fileName)
+        {
+            Assert(!string.IsNullOrEmpty(fileName), "missing file name");
+            FileName = fileName;
+        }
+                                                    
+
+
+
+
 
         /// <summary>
-        /// Count of all rows in the map
+        /// An indexer for individual tiles
         /// </summary>
-        public float TopBorder { get => _topBorder; private set => _topBorder = value; }
-
-        /// <summary>
-        /// Indexer for easier acces to individual tiles
-        /// </summary>
-        /// <param name="point"></param>
-        /// <returns>Structure with information about one tile</returns>
+        /// <param name="point">Coordinates of the required tile</param>
+        /// <returns>The required tile</returns>
         public Tile this[Vector2 point]
         {
             get => GetTile(point); //_tiles[(int)position.X - LeftBorder, (int)position.Y - BottomBorder];
             set => PutTile(point, value); // _tiles[(int)position.X - LeftBorder, (int)position.Y - BottomBorder]=value;
         }
 
-        public Tile this[float x, float y] { get => GetTile(x, y); set => PutTile(x, y, value); }
 
-        /// <summary> Saves an area of terrain into the map. </summary> <param
-        /// name="area">Coordinates of drawn area</param> <param name="terrain">Type of the terrain
-        /// to draw</param> <param name="permeable">Specifies if the terrain should be accessible
-        /// for objects and entities/// <param name="locality"></param>
+        /// <summary>
+        /// Puts terrain on the specified area.
+        /// </summary> <param
+        /// name="area">Coordinates of the area to be occupied</param>
+        /// <param name="terrain">Type of the terrain to be put</param>
+        /// <param name="permeable">Specifies if the terrain should be accessible to NPCs and game objects.</param>
+        /// <param name="locality">A locality to be registered</param>
         public void DrawTerrain(Plane area, TerrainType terrain, bool permeable, Locality locality)
         {
-            Assert(!area.IsNegative(), "Invalid coordinates");
-
             foreach (Vector2 point in area.GetPoints())
             {
                 Tile tile = this[point];
@@ -84,120 +81,45 @@ namespace Game.Terrain
             }
         }
 
-        public void DrawTerrain(Plane area, GameObject gameObject)
-        {
-            Assert(!area.IsNegative(), "Invalid coordinates");
 
-            area.GetTiles().Foreach(t => t.Register(gameObject));
-        }
-
-        public void DrawTerrain(Plane area, TerrainType terrain, bool permeable)
-        {
-            Assert(area.IsInOneLocality(), "Terrain can be drawn only inside one locality at once.");
-            area.GetTiles().Foreach(t => t.Register(terrain, permeable));
-        }
-
+        /// <summary>
+        /// Puts a terrain panel on the map.
+        /// </summary>
+        /// <param name="xPanel">A terrain panel defined in an XML node</param>
+        /// <param name="locality">A loclaity the terrain panel intersects</param>
         public void DrawTerrain(XElement xPanel, Locality locality)
                     => DrawTerrain(new Plane(xPanel.Attribute("coordinates").Value).ToAbsolute(locality), xPanel.Attribute("terrain").Value.ToTerrainType(), xPanel.Attribute("canBeOccupied").Value.ToBool(), locality);
 
-        /// <summary>
-        /// Sets tiles in given area to null.
-        /// </summary>
-        /// <param name="area">Co-ordinates of the area to be erased</param>
-		public void Erase(Plane area)
-=> area.GetPoints().Foreach(p => this[p] = null);
+
+
 
         /// <summary>
-        /// Finds last tile in given direction.
+        /// Returns a tile on the specified position.
         /// </summary>
-        /// <param name="start">The default coordinates</param>
-        /// <param name="direction">Direction of map edge</param>
-        /// <returns>Coordinates of last tile in given direction</returns>
-        public Vector2 GetLastTile(Vector2 start, Direction direction)
-        {
-            Vector2 point;
-
-            switch (direction)
-            {
-                case Direction.Left: point = new Vector2(LeftBorder, start.Y); break;
-                case Direction.Up: point = new Vector2(start.X, TopBorder); break;
-                case Direction.Right: point = new Vector2(RightBorder, start.Y); break;
-                case Direction.Down: point = new Vector2(start.X, BottomBorder); break;
-                default: throw new ArgumentException(nameof(direction));
-            }
-
-            while (World.Map[point] == null)
-                point += direction.GetOpposite().AsVector2();
-
-            return point;
-        }
-
-        /// <summary>
-        /// Enumerates all coordinates from start to map edge in given direction.
-        /// </summary>
-        /// <param name="start">The beginning</param>
-        /// <param name="direction">Direction of map edge</param>
-        /// <returns>Collection of coordinates</returns>
-        public IEnumerable<Vector2> GetPointsToEdge(Vector2 start, Direction direction)
-        {
-            Vector2 step = direction.AsVector2();
-
-            for (Vector2 point = start; IsInBoundaries(point); point += step)
-                yield return point;
-        }
-
-        public Tile GetTile(float x, float y)
-                    => GetTile(new Vector2(x, y));
-
+        /// <param name="point">Position of the required tile</param>
+        /// <returns>a tile on the specified position</returns>
         public Tile GetTile(Vector2 point)
         => _tiles.TryGetValue(RoundCoordinates(point.X, point.Y), out Tile t) ? t : null;
 
-        /// <summary>
-        /// Enumerates all tiles from start to edge of the map in given direction.
-        /// </summary>
-        /// <param name="start">Start coordinates</param>
-        /// <param name="direction">Edge of the map</param>
-        /// <returns>Enumeratiion of tiles</returns>
-        public IEnumerable<Tile> GetTilesToEdge(Vector2 start, Direction direction)
-            => GetPointsToEdge(start, direction).Where(p => _tiles.ContainsKey(p)).Select(p => this[p]);
 
-        //todo TileMap<T>: zrevidovat
-        public bool IsInBoundaries(Vector2 point)
-=> point.X >= LeftBorder && point.X <= RightBorder && point.Y >= BottomBorder && point.Y <= TopBorder;
+
 
         /// <summary>
-        /// Checks if coordinates point on map edge.
+        /// Puts the specified tile on the map on the specified coordinates.
         /// </summary>
-        /// <param name="point">The coordinates to check</param>
-        /// <returns>True if coordinates point on edge</returns>
-        public bool IsOnEdge(Vector2 point)
-            => point.X == LeftBorder || point.X == RightBorder || point.Y == BottomBorder || point.Y == TopBorder;
-
-        public void PutTile(float x, float y, Tile tile)
-            => PutTile(new Vector2(x, y), tile);
-
+        /// <param name="point">Target posiiton of the tile</param>
+        /// <param name="tile">The tile to be put</param>
         public void PutTile(Vector2 point, Tile tile)
-        {
-            _tiles[RoundCoordinates(point.X, point.Y)] = tile;
-            UpdateBorders(point);
-        }
+            => _tiles[RoundCoordinates(point.X, point.Y)] = tile;
 
+        /// <summary>
+        /// Rounds the coordinates.
+        /// </summary>
+        /// <param name="x">The X coordinate</param>
+        /// <param name="y">The Y coordinate</param>
+        /// <returns>The rounded coordinates</returns>
         private Vector2 RoundCoordinates(float x, float y)
                             => new Vector2((float)Math.Round(x), (float)Math.Round(y));
 
-        private void UpdateBorders(Vector2 point)
-        {
-            if (LeftBorder > point.X)
-                LeftBorder = point.X;
-
-            if (RightBorder < point.X)
-                RightBorder = point.X;
-
-            if (TopBorder < point.Y)
-                TopBorder = point.Y;
-
-            if (BottomBorder > point.Y)
-                BottomBorder = point.Y;
-        }
     }
 }

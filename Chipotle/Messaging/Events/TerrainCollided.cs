@@ -2,15 +2,22 @@
 using Game.Terrain;
 namespace Game.Messaging.Events
 {
-    internal class TerrainCollided : GameMessage
+    /// <summary>
+    /// Indicates that an NPC has attempted to enter impenetrable terrain.
+    /// </summary>
+    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    public class TerrainCollided : GameMessage
     {
+        /// <summary>
+        /// Tile with the impermeable terrain
+        /// </summary>
         public readonly Tile Tile;
 
         /// <summary>
-        /// Constructs new instance of InpermeableTerrainCollision.
+        /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="collidingTile">The inpermeable tile</param>
+        /// <param name="tile">Tile with the impermeable terrain</param>
         public TerrainCollided(object sender, Tile tile) : base(sender) => Tile = tile;
     }
 }
