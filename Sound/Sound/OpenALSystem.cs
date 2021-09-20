@@ -13,39 +13,53 @@ using EfxEaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EfxEaxReverb;
 namespace Luky
 {
     /// <summary>
+    /// An OpenAL player
     /// </summary>
     internal sealed class OpenALSystem : DebugSO, IPlayback
     {
-        // each Opus buffer is 20ms of data, so we generally have between 70 and 100ms of unplayed
-        // buffer data, lagging up to 20ms for the buffer that is currently playing, and up to 10ms
-        // for the rate at which OnTick checks. we use buffers of type short, of length equal to a
-        // 20ms Opus packet. that is 960 shorts for mono, 1920 shorts for stereo, because 48000Hz
-        // per second is 960Hz per 20ms. buffering 100ms uses 9600 bytes for mono and 19200 bytes
-        // for stereo, or roughly 10K and 20K respectively. 10 buffers gives us 200ms of buffer, at
-        // 20K for mono and 40K for stereo.
+        /// <summary>
+        /// Maximum allowed number of buffers filled in the same time
+        /// </summary>
         public const int MaxQueuedBuffers = 15;
 
-        private static readonly OpenTK.Vector3 _up = new OpenTK.Vector3(0, 0, 1);
+        /// <summary>
+        /// The up vector of listener orientation
+        /// </summary>
+        private static readonly Vector3 _up = new Vector3(0, 0, 1);
 
-        // 2 consistently gets buffer underruns, 3 seems fine for 48000Hz sounds, but gets underruns
-        // for 96000Hz sounds. 5 works most of the time, but when my computer is busy doing
-        // something else it gets an underrun.
+        /// <summary>
+        /// slot used for effect binding
+        /// </summary>
         private static int _effectSlot;
 
+        /// <summary>
+        /// Audio context used for communication with the audio device
+        /// </summary>
         private AudioContext _alContext;
 
+        /// <summary>
+        /// Instance of the effect extension
+        /// </summary>
         private EffectsExtension _effectExtension;
 
+        /// <summary>
+        /// Handle of an reverb effect 
+        /// </summary>
         private int _effectHandle;
 
-        // this maps soundIDs to their associated info.
+        // Maps soundIDs to their associated info.
         private Dictionary<int, Info> _table = new Dictionary<int, Info>();
 
+        /// <summary>
+        /// A delegate used for text output
+        /// </summary>
         private Action<string> Say;
 
         /// <summary>
-        /// private constructor
+        /// Constructor
         /// </summary>
+        /// <param name="context">An audio context</param>
+        /// <param name="say">Delegate for text output</param>
         private OpenALSystem(AudioContext context, Action<string> say)
         {
             Say = say;
@@ -56,11 +70,16 @@ namespace Luky
         /// Initializes OpenAL and starts thread. OpenAL is binded to current thread. Should be used
         /// instead of constructor.
         /// </summary>
-        /// <param name="useHRTF"></param>
         /// <returns>instance of OpenALSystem</returns>
         public static OpenALSystem CreateAndBindToThisThread(Action<string> say)
             => new OpenALSystem(new AudioContext(null, 0, 0, false, true, AudioContext.MaxAuxiliarySends.UseDriverDefault), say);
 
+        /// <summary>
+        /// Sets reverb parameters to the specified preset
+        /// </summary>
+        /// <param name="preset">The reverb preset to be applied</param>
+        /// <param name="name">Name of the preset to be spoken (optional)</param>
+        /// <param name="gain">Reverb gain parameter</param>
         public void ApplyEaxReverbPreset(EaxReverb preset, string name = null, float gain = 0)
         {
             EaxReverb eaxReverb = preset;
@@ -71,6 +90,10 @@ namespace Luky
             SetEaxReverbProperties(efxReverb, name);
         }
 
+        /// <summary>
+        /// Binds the specified sound source to the auxiliary effect slot.
+        /// </summary>
+        /// <param name="soundId">ID of the source</param>
         public void BindSourceToAuxiliarysend(int soundId)
         {
             if (_effectSlot != 0)
@@ -78,26 +101,33 @@ namespace Luky
         }
 
         /// <summary>
+        /// Disposes the player.
         /// </summary>
         public void Dispose()
         => _alContext.Dispose();
 
         /// <summary>
+/// Disposes the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
+        /// <param name="soundID">ID of the sound</param>
         public void DisposeSound(int soundID)
         {
             Info info = _table[soundID];
             AlDeleteSource(info.SourceID);
             ALAnnounceError("AlDeleteSource");
+
             foreach (int bid in info.QueuedBufferIDs)
             {
                 AL.DeleteBuffer(bid);
                 ALAnnounceError("AL.DeleteBuffer");
             } // end foreach queued buffer ID
+
             _table.Remove(soundID);
         }
 
+        /// <summary>
+        /// Turns the reverb effect on.
+        /// </summary>
         public void EnableReverb()
         {
             _effectExtension = new EffectsExtension();
@@ -114,13 +144,14 @@ namespace Luky
         }
 
         /// <summary>
+        /// Initializes a sound stream.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="channels"></param>
-        /// <param name="sampleRate"></param>
-        /// <param name="pt"></param>
-        /// <param name="position"></param>
-        /// <param name="frequencyMultiplier"></param>
+        /// <param name="soundID">ID of the sound</param>
+        /// <param name="stream">The stream to be read</param>
+        /// <param name="looping">Specifies if looping is enabled or disabled</param>
+        /// <param name="forceMono">Specifies if the sound should be converted to mono</param>
+        /// <param name="channels">Reference to a variable to store number of channels of the sound</param>
+        /// <param name="sampleRate">Reference to a variable to store sample rate of the sound</param>
         public void InitSound(int soundID, int channels, int sampleRate, PositionType pt, Vector3 position, float frequencyMultiplier)
         {
             Info info = new Info();
@@ -133,29 +164,33 @@ namespace Luky
 
             if (pt == PositionType.None)
             {
-                // we set the source to have relative coordinates so it will always play in the
-                // center. this is apparently required even when we are using the direct channels extension.
+                // Set the source to have relative coordinates so it will always play in the
+                // center. this is apparently required even when using the direct channels extension.
                 AL.Source(info.SourceID, ALSourceb.SourceRelative, true);
                 ALAnnounceError("setting source relative to true");
-                // using the OpenAL Soft direct channels extension to get rid of sound coloring that
-                // occurs when HRTF is enabled.
-                AL.Source(info.SourceID, ALSourceb.EfxDirectFilterGainHighFrequencyAuto, true);
+
+                AL.Source(info.SourceID, ALSourceb.EfxDirectFilterGainHighFrequencyAuto, true); // using the OpenAL Soft direct channels extension to get rid of sound coloring that occurs when HRTF is enabled.
                 ALAnnounceError("setting direct channels to true");
             }
+
             else if (pt == PositionType.Relative)
             {
                 AL.Source(info.SourceID, ALSourceb.SourceRelative, true);
                 ALAnnounceError("setting source relative to true");
+
                 ALSetPosition(info.SourceID, position.AsOpenTKV3());
             }
+
             else if (pt == PositionType.Absolute)
             {
                 ALSetPosition(info.SourceID, position.AsOpenTKV3());
                 AL.DistanceModel(ALDistanceModel.LinearDistanceClamped);
                 AL.Source(info.SourceID, ALSourcef.ReferenceDistance, 1);
                 ALAnnounceError("set reference distance");
+
                 AL.Source(info.SourceID, ALSourcef.RolloffFactor, 1);
                 ALAnnounceError("set rolloff factor");
+
                 AL.Source(info.SourceID, ALSourcef.MaxDistance, 50);
                 ALAnnounceError("set max distancefactor");
             }
@@ -169,10 +204,11 @@ namespace Luky
             _table[soundID] = info;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="soundID"></param>
-        /// <returns></returns>
+/// <summary>
+/// Checks if the specified sound is playing.
+/// </summary>
+/// <param name="soundID">The sound</param>
+/// <returns>True if the sound is playing</returns>
         public bool IsPlaying(int soundID)
         {
             Info info = _table[soundID];
@@ -181,9 +217,10 @@ namespace Luky
         }
 
         /// <summary>
+        /// Checks if the specified buffer is processed.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <returns></returns>
+        /// <param name="soundID">The sound</param>
+        /// <returns>True if the sound is processed</returns>
         public bool IsReadyForBuffer(int soundID)
         {
             Info info = _table[soundID];
@@ -194,9 +231,10 @@ namespace Luky
         }
 
         /// <summary>
+        /// Checks if the specified buffer is stopped.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <returns></returns>
+        /// <param name="soundID">The sound</param>
+        /// <returns>True if the sound is stopped</returns>
         public bool IsStopped(int soundID)
         {
             Info info = _table[soundID];
@@ -205,8 +243,9 @@ namespace Luky
         }
 
         /// <summary>
+        /// Pauses the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
+        /// <param name="soundID">The sound</param>
         public void Pause(int soundID)
         {
             Info info = _table[soundID];
@@ -215,9 +254,10 @@ namespace Luky
         }
 
         /// <summary>
+        /// Plays the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="initialBuffers"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="initialBuffers">First chunk of sound data</param>
         public void Play(int soundID, List<ShortBuffer> initialBuffers)
         {
             if (initialBuffers.Count != MaxQueuedBuffers)
@@ -263,9 +303,10 @@ namespace Luky
         }
 
         /// <summary>
+        /// Prepares a buffer with sound data for playing.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="buffer"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="buffer">The buffer to be queued</param>
         public void QueueBuffer(int soundID, ShortBuffer buffer)
         {
             if (buffer == null)
@@ -285,10 +326,11 @@ namespace Luky
         }
 
         /// <summary>
+        /// Resets parameters of the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="channels"></param>
-        /// <param name="sampleRate"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="channels">Number of channels</param>
+        /// <param name="sampleRate">Sample rate of the sound</param>
         public void ReconfigureSound(int soundID, int channels, int sampleRate)
         {
             Info info = _table[soundID];
@@ -296,54 +338,81 @@ namespace Luky
             info.SampleRate = sampleRate;
         }
 
+        /// <summary>
+        /// Changes EAX reverb parameters.
+        /// </summary>
+        /// <param name="reverb">The reverb setting</param>
+        /// <param name="name">Name of a preset for text output (optional)</param>
         public void SetEaxReverbProperties(EfxEaxReverb reverb, string name = null)
         {
             // Load effect properties
             _alContext.Suspend();
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDensity, reverb.Density);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.Density)}: {reverb.Density.ToString("0.0000")}");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDiffusion, reverb.Diffusion);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.Diffusion)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbGain, reverb.Gain);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.Gain)}. ");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbGainHF, reverb.GainHF);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.GainHF)}. ");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbGainLF, reverb.GainLF);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.GainLF)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayTime, reverb.DecayTime);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayTime)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayHFRatio, reverb.DecayHFRatio);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayHFRatio)}: {reverb.DecayHFRatio.ToString("0.00")}");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayLFRatio, reverb.DecayLFRatio);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayLFRatio)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbReflectionsGain, reverb.ReflectionsGain);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ReflectionsGain)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbReflectionsDelay, reverb.ReflectionsDelay);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ReflectionsDelay)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffect3f.EaxReverbReflectionsPan, ref reverb.ReflectionsPan);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ReflectionsPan)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbLateReverbGain, reverb.LateReverbGain);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LateReverbGain)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbLateReverbDelay, reverb.LateReverbDelay);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LateReverbDelay)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffect3f.EaxReverbLateReverbPan, ref reverb.LateReverbPan);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LateReverbPan)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbEchoTime, reverb.EchoTime);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.EchoTime)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbEchoDepth, reverb.EchoDepth);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.EchoDepth)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbModulationTime, reverb.ModulationTime);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ModulationTime)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbModulationDepth, reverb.ModulationDepth);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ModulationDepth)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbAirAbsorptionGainHF, reverb.AirAbsorptionGainHF);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.AirAbsorptionGainHF)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbHFReference, reverb.HFReference);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.HFReference)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbLFReference, reverb.LFReference);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LFReference)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbRoomRolloffFactor, reverb.RoomRolloffFactor);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.RoomRolloffFactor)}.");
+
             _effectExtension.Effect(_effectHandle, EfxEffecti.EaxReverbDecayHFLimit, (int)reverb.DecayHFLimit);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayHFLimit)}.");
 
@@ -356,36 +425,42 @@ namespace Luky
         }
 
         /// <summary>
+///Changes the listener orientation.
         /// </summary>
-        /// <param name="at"></param>
-        /// <param name="up"></param>
+        /// <param name="at">The at vector</param>
+        /// <param name="up">The up vector</param>
         public void SetListenerOrientation(Vector3 at, Vector3 up)
         {
-            OpenTK.Vector3 oAt = at.AsOpenTKV3();
-            OpenTK.Vector3 oUp = up.AsOpenTKV3();
-            // the defaults for a fresh OpenAL context are: at is (0, 0, -1), up is (0, 1, 0) but I
-            // set them to this when we startup: at is (0, -1, 0), up is (0, 0, -1)
+            // the defaults for a fresh OpenAL context are: at(0, 0, -1), up(0, 1, 0)
+            Vector3 oAt = at.AsOpenTKV3();
+            Vector3 oUp = up.AsOpenTKV3();
             AL.Listener(ALListenerfv.Orientation, ref oAt, ref oUp);
             ALAnnounceError("set listener orientation");
         }
 
         /// <summary>
+        /// Changes the listener position.
         /// </summary>
-        /// <param name="position"></param>
+        /// <param name="position">New position</param>
         public void SetListenerPosition(Vector3 position)
         {
-            OpenTK.Vector3 otkPos = position.AsOpenTKV3();
+            Vector3 otkPos = position.AsOpenTKV3();
             AL.Listener(ALListener3f.Position, ref otkPos);
             ALAnnounceError("set listener position");
         }
 
+        /// <summary>
+        /// Sets the listener velocity.
+        /// </summary>
+        /// <param name="velocity">New velocity</param>
         public void SetListenerVelocity(Vector3 velocity)
           => AL.Listener(ALListener3f.Velocity, velocity.X, velocity.Y, velocity.Z);
 
         /// <summary>
+        /// Sets position of the specified sound source.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="position"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="position">New position of the sound</param>
         public void SetPosition(int soundID, Vector3 position)
         {
             Info info = _table[soundID];
@@ -393,18 +468,20 @@ namespace Luky
         }
 
         /// <summary>
+        /// Sets volume of the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="value"></param>
-        public void SetVolume(int soundID, float value)
+        /// <param name="soundID">The sound</param>
+        /// <param name="volume">The new volume</param>
+        public void SetVolume(int soundID, float volume)
         {
             Info info = _table[soundID];
-            ALSetVolume(info.SourceID, value);
+            ALSetVolume(info.SourceID, volume);
         }
 
         /// <summary>
-        /// </summary>
-        /// <param name="soundID"></param>
+Stops the specified sound.
+            /// </summary>
+        /// <param name="soundID">The sound</param>
         public void Stop(int soundID)
         {
             Info info = _table[soundID];
@@ -413,16 +490,19 @@ namespace Luky
         }
 
         /// <summary>
+        /// Resumes a previously paused sound.
         /// </summary>
-        /// <param name="soundID"></param>
+        /// <param name="soundID">The sound</param>
         public void Unpause(int soundID)
         {
             Info info = _table[soundID];
-            // we could alternatively just do nothing if the sound has never been played before this.
+
             if (info.QueuedBufferIDs == null)
                 return;
-            //if (info.QueuedBufferIDs == null)
-            //    throw Exception("Called Unpause on a sound that had never been played");
+
+            if (info.QueuedBufferIDs == null)
+                throw Exception("Called Unpause on a sound that had never been played");
+
             ALPlay(info.SourceID);
             info.ShouldBePlaying = true;
         }

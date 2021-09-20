@@ -79,18 +79,18 @@ namespace Luky
         }
 
         /// <summary>
-        /// 
+        /// Loads sound data from the specified stream to the specified buffer.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="buffer"></param>
+        /// <param name="soundID">ID of the sound to be read</param>
+        /// <param name="buffer">The buffer to be filled</param>
         /// <returns>the number of shorts written to the buffer</returns>
         public int FillBuffer(int soundID, short[] buffer)
         {
             Info info = _table[soundID];
-
             long totalRead = 0;
             long totalWrote = 0; // when doing stereo to mono conversion the totalWrote is not the same as the totalRead.
             long lengthToRead = buffer.Length;
+
             if (info.ForceMono && info.LSFInfo.Channels == 2)
                 lengthToRead *= 2; // Read twice more.
 
@@ -98,15 +98,18 @@ namespace Luky
             {
                 if (info.Looping && info.Position == info.TotalLength)
                 {
-                    // It reached the end of the stream but looping is enabled so we need to start back at the beginning
+                    // It reached the end of the stream but looping is enabled so it must start back at the  beginning.
                     info.Position = 0;
                     _api.Seek(info.SFHandle, 0, (int)SeekOrigin.Begin);
                 }
-                if (!info.Looping && info.Position == info.TotalLength) // we reached the end of the stream but we aren't looping, so we're done.
+
+                if (!info.Looping && info.Position == info.TotalLength) // It reached the end of the stream but looping is disabled, so it can be stopped.
                     break;
+
                 long lesser = Math.Min(_tempBuffer.Length, info.TotalLength - info.Position);
                 lesser = Math.Min(lesser, lengthToRead - totalRead);
                 long read = _api.ReadItems(info.SFHandle, _tempBuffer, lesser);
+
                 if (info.ForceMono && info.LSFInfo.Channels == 2)
                     ConvertToMono(_tempBuffer, buffer, read, ref totalWrote);
                 else
@@ -114,9 +117,11 @@ namespace Luky
                     Array.Copy(_tempBuffer, 0, buffer, totalWrote, read);
                     totalWrote += read;
                 }
+
                 info.Position += read;
                 totalRead += read;
-            } // end while not finished reading
+            }
+
             return (int)totalWrote;
         }
 
@@ -181,6 +186,7 @@ namespace Luky
                 throw new Exception(error);
             }
             channels = info.LSFInfo.Channels;
+
             if (channels == 2 && forceMono)
                 channels = 1;
 
@@ -249,8 +255,8 @@ namespace Luky
         {
             int lesser = Math.Min(_vioBuffer.Length, (int)count);
             int actual = GetStream(soundID).Read(_vioBuffer, 0, lesser);
-            // copy it to the pointer.
-            Marshal.Copy(_vioBuffer, 0, pBuffer, actual);
+            
+            Marshal.Copy(_vioBuffer, 0, pBuffer, actual); // copy it to the pointer.
             return actual;
         }
 
