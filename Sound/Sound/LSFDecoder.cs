@@ -98,7 +98,7 @@ namespace Luky
             {
                 if (info.Looping && info.Position == info.TotalLength)
                 {
-                    // It reached the end of the stream but looping is enabled so we need to start back at the beginning
+                    // It reached the end of the stream but looping is enabled so we need to start back at the  beginning
                     info.Position = 0;
                     _api.Seek(info.SFHandle, 0, (int)SeekOrigin.Begin);
                 }
