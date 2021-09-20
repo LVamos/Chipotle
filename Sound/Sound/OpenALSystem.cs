@@ -516,7 +516,7 @@ Stops the specified sound.
             ALError error = AL.GetError();
             if (error != ALError.NoError)
             {
-                string text = error + ", " + AL.GetErrorString(error);
+                    string text = error + ", " + AL.GetErrorString(error);
                 if (args.Length > 0)
                     text = String.Format(prefix, args) + " " + text;
                 else
