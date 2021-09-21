@@ -18,14 +18,14 @@ namespace Luky
         private const int _bytesPerSample = 2;
 
         /// <summary>
-        /// Maps soundIDs to their associated info.
-        /// </summary>
-        private Dictionary<int, Info> _table = new Dictionary<int, Info>();
-
-        /// <summary>
         /// A buffer used for sound stream reading
         /// </summary>
-        private byte[] _buffer = new byte[3840];
+        private readonly byte[] _buffer = new byte[3840];
+
+        /// <summary>
+        /// Maps soundIDs to their associated info.
+        /// </summary>
+        private readonly Dictionary<int, Info> _table = new Dictionary<int, Info>();
 
         /// <summary>
         /// Disposes the decoder.
@@ -61,7 +61,8 @@ namespace Luky
 
             if (bytesRead == 0)
             {
-                // If looping is disabled, it can be stopped, otherwise it seeks to the beginning of the stream.
+                // If looping is disabled, it can be stopped, otherwise it seeks to the beginning of
+                // the stream.
                 if (!info.Looping)
                     return 0; // nothing to read.
                 else
@@ -135,11 +136,13 @@ namespace Luky
         /// <param name="sampleRate">Reference to a variable to store sample rate of the sound</param>
         public void InitStream(int soundID, Stream stream, bool looping, bool forceMono, out int channels, out int sampleRate)
         {
-            Info info = new Info();
-            info.Stream = stream;
-            info.Looping = looping;
-            info.ForceMono = forceMono;
-            info.Reader = new StreamMediaFoundationReader(stream);
+            Info info = new Info
+            {
+                Stream = stream,
+                Looping = looping,
+                ForceMono = forceMono,
+                Reader = new StreamMediaFoundationReader(stream)
+            };
             sampleRate = info.Reader.WaveFormat.SampleRate;
             info.Channels = info.Reader.WaveFormat.Channels;
             channels = info.Channels;

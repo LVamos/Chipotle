@@ -33,7 +33,7 @@ namespace Game.Entities
         /// <summary>
         /// Maps all possible movements among localities.
         /// </summary>
-        private Dictionary<string, string> _destinations = new Dictionary<string, string>() // locality inner name/rectangle coordinates
+        private readonly Dictionary<string, string> _destinations = new Dictionary<string, string>() // locality inner name/rectangle coordinates
         {
             ["ulice p1"] = "1810, 1123, 1812, 1119", // at Christine's
             ["ulice h1"] = "1539, 1000, 1543, 998", // At the pub

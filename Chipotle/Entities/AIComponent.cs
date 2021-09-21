@@ -16,6 +16,10 @@ namespace Game.Entities
         /// Area occupied by the NPC
         /// </summary>
         protected Plane _area;
+
+        /// <summary>
+        /// Instance of a path finder
+        /// </summary>
         protected PathFinder _finder = new PathFinder();
 
         /// <summary>

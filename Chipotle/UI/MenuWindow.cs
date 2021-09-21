@@ -19,53 +19,52 @@ namespace Game.UI
         /// <summary>
         /// Name of a sound played after the menu is opened
         /// </summary>
-        private string _introSound;
+        private readonly string _introSound;
 
         /// <summary>
         /// A text uttered by a screen reader or voice synthesizer after the menu is opened
         /// </summary>
-        private string _introText;
+        private readonly string _introText;
 
         /// <summary>
         /// List of the menu items
         /// </summary>
-        private string[] _items;
-
+        private readonly string[] _items;
 
         /// <summary>
         /// Name of a sound played when cursor reaches last item of the menu
         /// </summary>
-        private string _lowerEdgeSound;
+        private readonly string _lowerEdgeSound;
 
         /// <summary>
         /// Name of a sound played when the menu is closed
         /// </summary>
-        private string _outroSound;
+        private readonly string _outroSound;
 
         /// <summary>
         /// Name of a sound played when an item is selected
         /// </summary>
-        private string _selectionSound;
+        private readonly string _selectionSound;
 
         /// <summary>
         /// Name of a sound played when cursor reaches first item of the menu
         /// </summary>
-        private string _upperEdgeSound;
+        private readonly string _upperEdgeSound;
 
         /// <summary>
         /// Name of a sound played when the menu wraps down
         /// </summary>
-        private string _wrapDownSound;
+        private readonly string _wrapDownSound;
 
         /// <summary>
         /// Indicates if wrapping is allowed.
         /// </summary>
-        private bool _wrappingAllowed;
+        private readonly bool _wrappingAllowed;
 
         /// <summary>
         /// Name of a sound played when the menu wraps up
         /// </summary>
-        private string _wrapUpSound;
+        private readonly string _wrapUpSound;
 
         /// <summary>
         /// Constructor
@@ -76,10 +75,18 @@ namespace Game.UI
         /// <param name="introSound">Name of a sound to be played when the menu is activated</param>
         /// <param name="outroSound">Name of a sound to be played when menu is closed</param>
         /// <param name="selectionSound">Name of a sound to be played when user selects an item</param>
-        /// <param name="wrapDownSound">Name of a sound to be played when the menu wraps to lower edge</param>
-        /// <param name="wrapUpSound">Name of a sound to be played when the menu wraps to upper edge</param>
-        /// <param name="upperEdgeSound">Name of a sound to be palyed when cursor gets to upper edge fo the menu</param>
-        /// <param name="lowerEdgeSound">Name of a sound to be played when cursor gets to lower edge of the menu</param>
+        /// <param name="wrapDownSound">
+        /// Name of a sound to be played when the menu wraps to lower edge
+        /// </param>
+        /// <param name="wrapUpSound">
+        /// Name of a sound to be played when the menu wraps to upper edge
+        /// </param>
+        /// <param name="upperEdgeSound">
+        /// Name of a sound to be palyed when cursor gets to upper edge fo the menu
+        /// </param>
+        /// <param name="lowerEdgeSound">
+        /// Name of a sound to be played when cursor gets to lower edge of the menu
+        /// </param>
         public MenuWindow(string[] items, string introText, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
         {
             _items = items;
@@ -116,7 +123,7 @@ namespace Game.UI
         /// <summary>
         /// Index of last item
         /// </summary>
-        private int _lastItem 
+        private int _lastItem
             => _items.Length - 1;
 
         /// <summary>
@@ -133,8 +140,10 @@ namespace Game.UI
                 return;
             }
 
-            Timer t = new Timer();
-            t.Interval = 1000;
+            Timer t = new Timer
+            {
+                Interval = 1000
+            };
             t.Tick += (s, e) =>
             {
                 Tolk.Speak(_introText);

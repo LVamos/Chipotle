@@ -3,8 +3,6 @@ using System.Linq;
 
 using Luky;
 
-using OpenTK;
-
 namespace Game.Terrain
 {
     /// <summary>
@@ -20,7 +18,7 @@ namespace Game.Terrain
         /// <summary>
         /// Localities connected by the passage
         /// </summary>
-        private List<Locality> _localities;
+        private readonly List<Locality> _localities;
 
         /// <summary>
         /// Constructor
@@ -30,9 +28,8 @@ namespace Game.Terrain
         /// <param name="localities">Localities connected by the passage</param>
         public Passage(Name name, Plane area, IEnumerable<Locality> localities) : base(name, area)
         {
-            // Check if passage isn't on map edge and if it occupies just one row.
+            // Check if the passage occupies just one row or column.
             Assert(area.Height == 1 || area.Height == 2 || area.Width == 1 || area.Width == 2, "Passage must consist of two rows or two points.");
-            Vector2 coordinates = area.GetPoints().First();
 
             Assert(localities != null && localities?.Count() == 2 && localities.First() != null && localities.Last() != null && localities.First() != localities.Last(), "Two different localities required");
             _localities = localities.ToList<Locality>();
@@ -54,9 +51,9 @@ namespace Game.Terrain
         public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<Locality> localities)
 => new HallDoor(name, area, localities);
 
-
         /// <summary>
-        /// Creates new instance of the door between the hall of the Vanilla crunch company (hala v1) locality and the office of the Paolo Mariotti NPC's office (kancelář v1) locality.
+        /// Creates new instance of the door between the hall of the Vanilla crunch company (hala
+        /// v1) locality and the office of the Paolo Mariotti NPC's office (kancelář v1) locality.
         /// </summary>
         /// <param name="name">Inner name of the door</param>
         /// <param name="area">Coordinates of the are occupied by the door</param>
@@ -113,7 +110,8 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Creates new instance of the garage door in the garage of the Vanilla crunch company (garáž v1) locality.
+        /// Creates new instance of the garage door in the garage of the Vanilla crunch company
+        /// (garáž v1) locality.
         /// </summary>
         /// <param name="name">Inner name of the door</param>
         /// <param name="area">Coordinates of the are occupied by the door</param>

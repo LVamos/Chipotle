@@ -64,7 +64,7 @@ namespace Luky
                 }
             }
 
-            return default(T);
+            return default;
         }
 
         /// <summary>

@@ -12,22 +12,12 @@ namespace Game.UI
         /// <summary>
         /// Runs the game loop.
         /// </summary>
-        private Timer _tmrGameLoop;
+        private readonly Timer _tmrGameLoop;
 
         /// <summary>
         /// Indicates if the game loop runs.
         /// </summary>
         private bool _gameLoopEnabled = false;
-
-
-        /// <summary>
-        /// starts or stops the game loop.
-        /// </summary>
-        public bool GameLoopEnabled
-        {
-            get => _gameLoopEnabled;
-            set => _gameLoopEnabled = _tmrGameLoop.Enabled = value;
-        }
 
         /// <summary>
         /// Constructor
@@ -51,9 +41,10 @@ namespace Game.UI
             ShowInTaskbar = false;
             KeyPreview = true;
 
-
-            _tmrGameLoop = new Timer();
-            _tmrGameLoop.Interval = 1000 / World.FramesPerSecond;
+            _tmrGameLoop = new Timer
+            {
+                Interval = 1000 / World.FramesPerSecond
+            };
             _tmrGameLoop.Tick += GameLoop;
             _tmrGameLoop.Enabled = false;
 
@@ -62,10 +53,25 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// starts or stops the game loop.
+        /// </summary>
+        public bool GameLoopEnabled
+        {
+            get => _gameLoopEnabled;
+            set => _gameLoopEnabled = _tmrGameLoop.Enabled = value;
+        }
+
+        /// <summary>
         /// The game loop
         /// </summary>
-        private void GameLoop(object sender, EventArgs e) 
+        private void GameLoop(object sender, EventArgs e)
             => World.Update();
+
+        /// <summary>
+        /// Handler of the KeyDown event
+        /// </summary>
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+            => WindowHandler.OnKeyDown(new KeyEventParams(e));
 
         /// <summary>
         /// Handler of the Shown event
@@ -75,16 +81,5 @@ namespace Game.UI
             Focus();
             WindowHandler.MainMenu();
         }
-
-
-        /// <summary>
-        /// Handler of the KeyDown event
-        /// </summary>
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
-            => WindowHandler.OnKeyDown(new KeyEventParams(e));
-
-
-
-
     }
 }

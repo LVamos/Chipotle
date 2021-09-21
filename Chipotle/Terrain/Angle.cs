@@ -1,9 +1,8 @@
-﻿using Luky;
+﻿using System;
 
-using System;
+using Luky;
 
 using static System.Math;
-
 
 namespace Game.Terrain
 {
@@ -12,6 +11,140 @@ namespace Game.Terrain
     /// </summary>
     public struct Angle
     {
+        /// <summary>
+        /// Value of the angle in radians
+        /// </summary>
+        private float _radians;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="radians">An angle in radians</param>
+        public Angle(float radians = 0)
+            => _radians = NormalizeRadians(radians);
+
+        /// <summary>
+        /// The angle in cartesian degrees
+        /// </summary>
+        public float CartesianDegrees => RadiansToCartesianDegrees(Radians);
+
+        /// <summary>
+        /// The angle in compass degrees
+        /// </summary>
+        public float CompassDegrees => CartesianToCompas(CartesianDegrees);
+
+        /// <summary>
+        /// Value of the angle in radians
+        /// </summary>
+        public float Radians
+        {
+            get => _radians;
+            set => _radians = NormalizeRadians(value);
+        }
+
+        /// <summary>
+        /// Converts degrees to radians.
+        /// </summary>
+        /// <param name="degrees">An angle in degrees</param>
+        /// <returns>The angle in radians</returns>
+        public static float DegreesToRadians(float degrees)
+            => degrees * (float)PI / 180;
+
+        /// <summary>
+        /// Creates new instance of the Angle struct from a angle value in cartesian degrees.
+        /// </summary>
+        /// <param name="degrees">An angle in compass degrees</param>
+        /// <returns>New instance of the Angle struct</returns>
+        public static Angle FromCartesianDegrees(float degrees)
+            => new Angle(DegreesToRadians(degrees));
+
+        /// <summary>
+        /// Creates new instance of the Angle struct from a angle value in compass degrees.
+        /// </summary>
+        /// <param name="degrees">An angle in compass degrees</param>
+        /// <returns>New instance of the Angle struct</returns>
+        public static Angle FromCompassDegrees(float degrees)
+            => FromCartesianDegrees(CompassToCartesian(degrees));
+
+        /// <summary>
+        /// Converts radians to degrees.
+        /// </summary>
+        /// <param name="radians">An angle in radians</param>
+        public static implicit operator Angle(float radians)
+            => new Angle(radians);
+
+        /// <summary>
+        /// Converts an angle struct to degrees.
+        /// </summary>
+        /// <param name="a">An angle</param>
+        public static implicit operator float(Angle a)
+            => a.Radians;
+
+        /// <summary>
+        /// Overloads the - operator.
+        /// </summary>
+        /// <param name="a1">First operand</param>
+        /// <returns>Negative value of the specified angle</returns>
+        public static Angle operator -(Angle a1)
+            => new Angle(-a1.Radians);
+
+        /// <summary>
+        /// Overloads the - operator.
+        /// </summary>
+        /// <param name="a">First operand</param>
+        /// <param name="b">Second operand</param>
+        /// <returns>The result of subtraction</returns>
+        public static Angle operator -(Angle a, Angle b)
+            => new Angle(a.Radians - b.Radians);
+
+        /// <summary>
+        /// Overloads the * operator.
+        /// </summary>
+        /// <param name="a">First operand</param>
+        /// <param name="b">Second operand</param>
+        /// <returns>The result of multiplication</returns>
+        public static Angle operator *(Angle a, Angle b)
+            => new Angle(a.Radians * b.Radians);
+
+        /// <summary>
+        /// Overloads the / operator.
+        /// </summary>
+        /// <param name="a">First operand</param>
+        /// <param name="b">Second operand</param>
+        /// <returns>The result of division</returns>
+        /// <exception cref="DivideByZeroException"></exception>
+        public static Angle operator /(Angle a, Angle b)
+        {
+            if (b.Radians == 0)
+                throw new DivideByZeroException(nameof(b.Radians));
+
+            return new Angle(a.Radians / b.Radians);
+        }
+
+        /// <summary>
+        /// Overloads the + operator.
+        /// </summary>
+        /// <param name="a">First operand</param>
+        /// <param name="b">Second operand</param>
+        /// <returns>Result of addition</returns>
+        public static Angle operator +(Angle a, Angle b)
+            => new Angle(a.Radians + b.Radians);
+
+        /// <summary>
+        /// Initializes an angle from east cardinal direction.
+        /// </summary>
+        /// <returns>New instance of Angle struct</returns>
+        public Angle East()
+            => FromCompassDegrees(90);
+
+        /// <summary>
+        /// Checks equality of two instances
+        /// </summary>
+        /// <param name="a">An object to compare</param>
+        /// <returns>True if both instances are equal</returns>
+        public override bool Equals(object a)
+=> a != null && a.GetType() == GetType() && ((Angle)a).Radians == Radians;
+
         /// <summary>
         /// Converts the angle to the cardinal direction.
         /// </summary>
@@ -44,135 +177,11 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Value of the angle in radians
-        /// </summary>
-        private float _radians;
-
-        /// <summary>
-        /// Value of the angle in radians
-        /// </summary>
-        public float Radians
-        {
-            get => _radians;
-            set => _radians = NormalizeRadians(value);
-        }
-
-        /// <summary>
-        /// Converts radians to degrees.
-        /// </summary>
-        /// <param name="radians">An angle in radians</param>
-        public static implicit operator Angle(float radians)
-            => new Angle(radians);
-
-        /// <summary>
-        /// Converts an angle struct to degrees.
-        /// </summary>
-        /// <param name="a">An angle</param>
-        public static implicit operator float(Angle a)
-            => a.Radians;
-
-        /// <summary>
-        /// Overloads the - operator.
-        /// </summary>
-        /// <param name="a1">First operand</param>
-        /// <returns>Negative value of the specified angle</returns>
-        public static Angle operator -(Angle a1)
-            => new Angle(-a1.Radians);
-
-        /// <summary>
-        /// Overloads the + operator.
-        /// </summary>
-        /// <param name="a">First operand</param>
-        /// <param name="b">Second operand</param>
-        /// <returns>Result of addition</returns>
-        public static Angle operator +(Angle a, Angle b)
-            => new Angle(a.Radians + b.Radians);
-
-        /// <summary>
-        /// Overloads the - operator.
-        /// </summary>
-        /// <param name="a">First operand</param>
-        /// <param name="b">Second operand</param>
-        /// <returns>The result of subtraction</returns>
-        public static Angle operator -(Angle a, Angle b)
-            => new Angle(a.Radians - b.Radians);
-
-        /// <summary>
-        /// Overloads the * operator.
-        /// </summary>
-        /// <param name="a">First operand</param>
-        /// <param name="b">Second operand</param>
-        /// <returns>The result of multiplication</returns>
-        public static Angle operator *(Angle a, Angle b)
-            => new Angle(a.Radians * b.Radians);
-
-        /// <summary>
-        /// Overloads the / operator.
-        /// </summary>
-        /// <param name="a">First operand</param>
-        /// <param name="b">Second operand</param>
-        /// <returns>The result of division</returns>
-        /// <exception cref="DivideByZeroException"
-        public static Angle operator /(Angle a, Angle b)
-        {
-            if (b.Radians == 0)
-                throw new DivideByZeroException(nameof(b.Radians));
-
-            return new Angle(a.Radians / b.Radians);
-        }
-
-        /// <summary>
-        /// Checks equality of two instances
-        /// </summary>
-        /// <param name="a">An object to compare</param>
-        /// <returns>True if both instances are equal</returns>
-        public override bool Equals(object a)
-=> a != null && a.GetType() == GetType() && ((Angle)a).Radians == Radians;
-
-
-        /// <summary>
-        ///     Returns the hash code for this instance.
+        /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>A 32-bit signed integer hash code</returns>
         public override int GetHashCode()
             => Radians.GetHashCode();
-
-
-        /// <summary>
-        /// A numeric format string.
-        /// </summary>
-        /// <returns>The numeric format string</returns>
-        public override string ToString()
-            => Radians.ToString("0.00");
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="radians">An angle in radians</param>
-        public Angle(float radians = 0)
-            => _radians = NormalizeRadians(radians);
-
-        /// <summary>
-        /// Converts compas degrees to cartesian degrees.
-        /// </summary>
-        /// <param name="compassDegrees">The value in compass degrees</param>
-        /// <returns>The angle in cartesian degrees</returns>
-        private static float CompassToCartesian(float compassDegrees)
-            => NormalizeDegrees(360 + 90 - compassDegrees);
-
-        /// <summary>
-        /// Converts cartesian degrees to compas degrees.
-        /// </summary>
-        /// <param name="cartesianDegrees">An angle in cartesian degrees</param>
-        /// <returns>The angle in compass degrees</returns>
-        private static float CartesianToCompas(float cartesianDegrees)
-            => NormalizeDegrees(450 - cartesianDegrees);
-
-        /// <summary>
-        /// The angle in cartesian degrees
-        /// </summary>
-        public float CartesianDegrees => RadiansToCartesianDegrees(Radians);
-
 
         /// <summary>
         /// Initializes an angle from north cardinal direction.
@@ -189,18 +198,11 @@ namespace Game.Terrain
             => FromCompassDegrees(45);
 
         /// <summary>
-        /// Initializes an angle from east cardinal direction.
+        /// Initializes an angle from north vest cardinal direction.
         /// </summary>
         /// <returns>New instance of Angle struct</returns>
-        public Angle East()
-            => FromCompassDegrees(90);
-
-        /// <summary>
-        /// Initializes an angle from south east cardinal direction.
-        /// </summary>
-        /// <returns>New instance of Angle struct</returns>
-        public Angle SouthEast()
-            => FromCompassDegrees(135);
+        public Angle NorthWest()
+            => FromCompassDegrees(315);
 
         /// <summary>
         /// Initializes an angle from south cardinal direction.
@@ -210,11 +212,25 @@ namespace Game.Terrain
             => FromCompassDegrees(180);
 
         /// <summary>
+        /// Initializes an angle from south east cardinal direction.
+        /// </summary>
+        /// <returns>New instance of Angle struct</returns>
+        public Angle SouthEast()
+            => FromCompassDegrees(135);
+
+        /// <summary>
         /// Initializes an angle from south vest cardinal direction.
         /// </summary>
         /// <returns>New instance of Angle struct</returns>
         public Angle SouthWest()
             => FromCompassDegrees(225);
+
+        /// <summary>
+        /// A numeric format string.
+        /// </summary>
+        /// <returns>The numeric format string</returns>
+        public override string ToString()
+            => Radians.ToString("0.00");
 
         /// <summary>
         /// Initializes an angle from vest cardinal direction.
@@ -224,26 +240,20 @@ namespace Game.Terrain
             => FromCompassDegrees(270);
 
         /// <summary>
-        /// Initializes an angle from north vest cardinal direction.
+        /// Converts cartesian degrees to compas degrees.
         /// </summary>
-        /// <returns>New instance of Angle struct</returns>
-        public Angle NorthWest()
-            => FromCompassDegrees(315);
-
-
-        /// <summary>
-        /// The angle in compass degrees
-        /// </summary>
-        public float CompassDegrees => CartesianToCompas(CartesianDegrees);
+        /// <param name="cartesianDegrees">An angle in cartesian degrees</param>
+        /// <returns>The angle in compass degrees</returns>
+        private static float CartesianToCompas(float cartesianDegrees)
+            => NormalizeDegrees(450 - cartesianDegrees);
 
         /// <summary>
-        /// Converts radians to cartesian degrees.
+        /// Converts compas degrees to cartesian degrees.
         /// </summary>
-        /// <param name="radians">An angle in radians</param>
+        /// <param name="compassDegrees">The value in compass degrees</param>
         /// <returns>The angle in cartesian degrees</returns>
-        private static float RadiansToCartesianDegrees(float radians)
-            => NormalizeDegrees((float)(radians * 180 / PI));
-
+        private static float CompassToCartesian(float compassDegrees)
+            => NormalizeDegrees(360 + 90 - compassDegrees);
 
         /// <summary>
         /// Clamps value of an angle in degrees to 0..159 range.
@@ -262,29 +272,11 @@ namespace Game.Terrain
             => MathHelper.Modulo(radians, 2 * (float)PI);
 
         /// <summary>
-        /// Creates new instance of the Angle struct from a angle value in compass degrees.
+        /// Converts radians to cartesian degrees.
         /// </summary>
-        /// <param name="degrees">An angle in compass degrees</param>
-        /// <returns>New instance of the Angle struct</returns>
-        public static Angle FromCompassDegrees(float degrees)
-            => FromCartesianDegrees(CompassToCartesian(degrees));
-
-        /// <summary>
-        /// Creates new instance of the Angle struct from a angle value in cartesian degrees.
-        /// </summary>
-        /// <param name="degrees">An angle in compass degrees</param>
-        /// <returns>New instance of the Angle struct</returns>
-        public static Angle FromCartesianDegrees(float degrees)
-            => new Angle(DegreesToRadians(degrees));
-
-        /// <summary>
-        /// Converts degrees to radians.
-        /// </summary>
-        /// <param name="degrees">An angle in degrees</param>
-        /// <returns>The angle in radians</returns>
-        public static float DegreesToRadians(float degrees)
-            => degrees * (float)PI / 180;
-
-
+        /// <param name="radians">An angle in radians</param>
+        /// <returns>The angle in cartesian degrees</returns>
+        private static float RadiansToCartesianDegrees(float radians)
+            => NormalizeDegrees((float)(radians * 180 / PI));
     }
 }

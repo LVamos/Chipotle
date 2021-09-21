@@ -22,7 +22,7 @@ namespace Game.Entities
         /// <summary>
         /// Reverb presets for individual localities
         /// </summary>
-        private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
+        private readonly Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
         {
             ["obývák s1"] = ("livingroom", .9f),
             ["asfaltka c1"] = ("plain", .1f),
@@ -144,7 +144,7 @@ namespace Game.Entities
         /// Processes the EntityHitDoor message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnEntityHitDoor(DoorHit m)
+        private void OnEntityHitDoor(DoorHit message)
 => Tolk.Speak("dveře");
 
         /// <summary>
@@ -159,8 +159,9 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityChanged(LocalityChanged message)
         {
-            (string name, float gain) record = _reverbPresets[message.Target.Name.Indexed.ToLower()];
-            _sound.ApplyEaxReverbPreset(record.name, record.gain);
+            string targetLocality = message.Target.Name.Indexed.ToLower();
+            (string name, float gain) = _reverbPresets[targetLocality];
+            _sound.ApplyEaxReverbPreset(name, gain);
         }
 
         /// <summary>
@@ -178,8 +179,10 @@ namespace Game.Entities
             GameObject collidingObject = message.Tile.Object;
 
             // Announce
-            Timer t = new Timer();
-            t.Interval = 500;
+            Timer t = new Timer
+            {
+                Interval = 500
+            };
             t.Tick += (object s, EventArgs e) => { Tolk.Speak(collidingObject.Name.Friendly); t.Stop(); };
             t.Start();
             _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true);

@@ -26,7 +26,9 @@ namespace Game.Terrain
         /// <param name="terrain">Terrain type on this tile</param>
         /// <param name="position">Position of the tile on the tile map</param>
         /// <param name="locality">A locality intersecting the tile</param>
-        /// <param name="permeable">Specifies if an entity or another game object can be placed on this tile</param>
+        /// <param name="permeable">
+        /// Specifies if an entity or another game object can be placed on this tile
+        /// </param>
         /// <param name="passage">A passage intersecting the tile</param>
         public Tile(TerrainType terrain, Vector2 position, Locality locality, bool permeable = true, Passage passage = null)
         {
@@ -42,13 +44,13 @@ namespace Game.Terrain
         /// <summary>
         /// Indicates if the tile is occupied by an NPC or game object.
         /// </summary>
-        public bool IsOccupied 
+        public bool IsOccupied
             => Object != null;
 
         /// <summary>
         /// Indicates if the tile intersects a passage.
         /// </summary>
-        public bool IsOnPassage 
+        public bool IsOnPassage
             => Passage != null;
 
         /// <summary>
@@ -61,11 +63,14 @@ namespace Game.Terrain
         /// </summary>
         public GameObject Object { get; private set; }
 
-
         /// <summary>
         /// Returns an passage the tile intersects.
         /// </summary>
         public Passage Passage { get; private set; }
+
+        /// <summary>
+        /// Specifies if the tile is walkable
+        /// </summary>
         public bool Permeable { get; set; }
 
         /// <summary>
@@ -76,7 +81,7 @@ namespace Game.Terrain
         /// <summary>
         /// Checks if the tile is walkable for NPCs.
         /// </summary>
-        public bool Walkable 
+        public bool Walkable
             => Permeable && !IsOccupied;
 
         /// <summary>
@@ -156,7 +161,7 @@ namespace Game.Terrain
         /// <summary>
         /// Removes a game object from the tile if there's any.
         /// </summary>
-        /// <exception cref="Exception"
+        /// <exception cref="Exception"></exception>
         public void UnregisterObject()
         {
             Assert(Object != null, "No object here.");
@@ -164,13 +169,12 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Removes a passage from the tile if there's any.
+        /// Removes passge from the tile.
         /// </summary>
-        /// <exception cref="Exception"
         public void UnregisterPassage()
         {
             Assert(Passage != null, "No passage");
-                Passage = null;
+            Passage = null;
         }
     }
 }

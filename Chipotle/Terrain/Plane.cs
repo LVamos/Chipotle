@@ -14,7 +14,9 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a movable resizable rectangle region of the game map.
     /// </summary>
-    /// <remarks>The region is defined by two points: <see cref="Plane.UpperLeftCorner"/> and <see cref="Plane.LowerRightCorner"/>.</remarks>
+    /// <remarks>
+    /// The region is defined by two points: <see cref="Plane.UpperLeftCorner"/> and <see cref="Plane.LowerRightCorner"/>.
+    /// </remarks>
     public class Plane : DebugSO
     {
         /// <summary>
@@ -73,7 +75,7 @@ namespace Game.Terrain
         /// <summary>
         /// Returns coordinates of the center of the plane.
         /// </summary>
-        public Vector2 Center 
+        public Vector2 Center
             => Size == 1 ? UpperLeftCorner : new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);
 
         /// <summary>
@@ -84,7 +86,7 @@ namespace Game.Terrain
         /// <summary>
         /// Returns coordinates of the lower left corner of the plane.
         /// </summary>
-        public Vector2 LowerLeftCorner 
+        public Vector2 LowerLeftCorner
             => new Vector2(UpperLeftCorner.X, LowerRightCorner.Y);
 
         /// <summary>
@@ -97,7 +99,6 @@ namespace Game.Terrain
         /// </summary>
         public float MinimumHeight { get; set; }
 
-
         /// <summary>
         /// Specifies the minimum permitted width of the plane.
         /// </summary>
@@ -106,7 +107,7 @@ namespace Game.Terrain
         /// <summary>
         /// Returns size of the plane.
         /// </summary>
-        public float Size 
+        public float Size
             => Height * Width;
 
         /// <summary>
@@ -122,15 +123,16 @@ namespace Game.Terrain
         /// <summary>
         /// Returns width of the plane.
         /// </summary>
-        public float Width 
+        public float Width
             => 1 + LowerRightCorner.X - UpperLeftCorner.X;
-
 
         /// <summary>
         /// Converts relative coordinates to absolute coordinates.
         /// </summary>
         /// <param name="relative">The coordinates related to upper left corner of <paramref name="locality"/></param>
-        /// <param name="locality">The locality according to which <paramref name="relative"/> was calculated</param>
+        /// <param name="locality">
+        /// The locality according to which <paramref name="relative"/> was calculated
+        /// </param>
         /// <returns>New isntance of <see cref="Plane"/> defined by the absolute coordinates</returns>
         public static Vector2 GetAbsoluteCoordinates(Vector2 relative, Locality locality)
                     => new Vector2(locality.Area.UpperLeftCorner.X + relative.X, locality.Area.UpperLeftCorner.Y - relative.Y);
@@ -148,7 +150,8 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Verifies that <see cref="UpperLeftCorner"/>points more to the left and more upper than the <see cref="LowerRightCorner"/> and rearranges them if necessary.
+        /// Verifies that <see cref="UpperLeftCorner"/> points more to the left and more upper than
+        /// the <see cref="LowerRightCorner"/> and rearranges them if necessary.
         /// </summary>
 		public void ArrangeCorners()
         {
@@ -168,6 +171,13 @@ namespace Game.Terrain
             }
         }
 
+        /// <summary>
+        /// Checks if both instances are equal.
+        /// </summary>
+        /// <param name="p">The other plane to compare</param>
+        /// <returns>True if both instances are equal</returns>
+        public bool Equals(Plane p)
+            => UpperLeftCorner == p.UpperLeftCorner && LowerRightCorner == p.LowerRightCorner;
 
         /// <summary>
         /// Extends the plane to all directions by one unit.
@@ -277,7 +287,9 @@ namespace Game.Terrain
         /// Identifies a perimeter side of the plane on which the specified point lays.
         /// </summary>
         /// <param name="point">The point to be checked</param>
-        /// <returns>A <see cref="Direction"/> enum identifying the side on which the specified point lays.</returns>
+        /// <returns>
+        /// A <see cref="Direction"/> enum identifying the side on which the specified point lays.
+        /// </returns>
         public Direction GetIntersectingSide(Vector2 point)
             => DirectionExtension.BasicDirections
             .Where(d => IntersectsWithSide(d, point))
@@ -354,7 +366,7 @@ namespace Game.Terrain
                     break;
 
                 default:
-                    throw new ArgumentException(nameof(side)); break;
+                    throw new ArgumentException(nameof(side));
             }
         }
 
@@ -400,7 +412,6 @@ namespace Game.Terrain
         /// <returns>Coordinates</returns>
         public IEnumerable<Vector2> GetPointsByDistance(Vector2 defaultPoint)
             => GetPoints().OrderBy(c => (defaultPoint - c).LengthSquared);
-
 
         /// <summary>
         /// Returns a new plane corresponding to coordinates of the specified perimeter side of this plane.
@@ -474,8 +485,8 @@ namespace Game.Terrain
         /// <returns>a directional vector parallel with the specified side</returns>
         public Vector2 GetVectorOfSide(Direction side)
         {
-            (Vector2 Point1, Vector2 Point2) sideDefinition = GetSideDefinition(side);
-            return sideDefinition.Point2 - sideDefinition.Point1;
+            (Vector2 Point1, Vector2 Point2) = GetSideDefinition(side);
+            return Point2 - Point1;
         }
 
         /// <summary>
@@ -510,11 +521,9 @@ namespace Game.Terrain
         /// <returns>if the specified point lays on the specified perimeter side of this plane</returns>
         public bool IntersectsWithSide(Direction side, Vector2 point)
         {
-            (Vector2 Point1, Vector2 Point2) definition = GetSideDefinition(side);
-            return point.X >= definition.Point1.X && point.Y >= definition.Point1.Y && point.X <= definition.Point2.X && point.Y <= definition.Point2.Y;
+            (Vector2 Point1, Vector2 Point2) = GetSideDefinition(side);
+            return point.X >= Point1.X && point.Y >= Point1.Y && point.X <= Point2.X && point.Y <= Point2.Y;
         }
-
-
 
         /// <summary>
         /// Checks if the plane intersects just with one locality.
@@ -531,14 +540,6 @@ namespace Game.Terrain
         public bool IsOnPerimeter(Vector2 point)
             => DirectionExtension.BasicDirections
             .Any(d => IntersectsWithSide(d, point));
-
-        /// <summary>
-        /// Checks if both instances are equal.
-        /// </summary>
-        /// <param name="p">The other plane to compare</param>
-        /// <returns>True if both instances are equal</returns>
-        public bool Equals(Plane p)
-            => UpperLeftCorner == p.UpperLeftCorner && LowerRightCorner == p.LowerRightCorner;
 
         /// <summary>
         /// Checks if the specified point lays on this plane.
@@ -563,7 +564,9 @@ namespace Game.Terrain
         /// <summary>
         /// Transforms plane coordinates to the specified direction.
         /// </summary>
-        /// <param name="direction">The direction defined by a unit vector where the plane is to be moved</param>
+        /// <param name="direction">
+        /// The direction defined by a unit vector where the plane is to be moved
+        /// </param>
         /// <param name="step">Specifies length of the transformation</param>
         public Plane Move(Vector2 direction, float step)
         {
@@ -573,18 +576,21 @@ namespace Game.Terrain
             return this;
         }
 
-
         /// <summary>
         /// Transforms plane coordinates by one unit to the specified direction.
         /// </summary>
-        /// <param name="direction">The direction defined by an unitvector where the plane is to be moved</param>
+        /// <param name="direction">
+        /// The direction defined by an unitvector where the plane is to be moved
+        /// </param>
         public Plane Move(Vector2 direction)
             => Move(direction, 1f);
 
         /// <summary>
         /// Transforms plane coordinates to the specified direction.
         /// </summary>
-        /// <param name="direction">The direction defined by an <see cref="Orientation2D"/> struct where the plane is to be moved</param>
+        /// <param name="direction">
+        /// The direction defined by an <see cref="Orientation2D"/> struct where the plane is to be moved
+        /// </param>
         /// <param name="step">Specifies length of the transformation</param>
         public void Move(Orientation2D direction, float step)
             => Move(direction.UnitVector, step);
@@ -592,7 +598,9 @@ namespace Game.Terrain
         /// <summary>
         /// Transforms plane coordinates one unit to the specified direction.
         /// </summary>
-        /// <param name="direction">The direction defined by an <see cref="Orientation2D"/> struct where the plane is to be moved</param>
+        /// <param name="direction">
+        /// The direction defined by an <see cref="Orientation2D"/> struct where the plane is to be moved
+        /// </param>
         public void Move(Orientation2D direction)
             => Move(direction, 1f);
 
@@ -617,7 +625,9 @@ namespace Game.Terrain
         /// <summary>
         /// Converts the plane to a plane with absolute coordinations.
         /// </summary>
-        /// <param name="locality">The locality according to which coordinates of this plane were calculated</param>
+        /// <param name="locality">
+        /// The locality according to which coordinates of this plane were calculated
+        /// </param>
         /// <returns>A new plane with absolute coordinates</returns>
         /// <remarks>Considers this plane to be relative</remarks>
         public Plane ToAbsolute(Locality locality)

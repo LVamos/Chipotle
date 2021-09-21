@@ -1,7 +1,6 @@
-﻿using Luky;
+﻿using System;
 
-using System;
-using System.Linq;
+using Luky;
 
 namespace Game.Terrain
 {
@@ -10,46 +9,79 @@ namespace Game.Terrain
     /// </summary>
     public enum TerrainType : byte
     {
+        /// <summary>
+        /// Grass
+        /// </summary>
         Grass = 0,
+
+        /// <summary>
+        /// Linoleum
+        /// </summary>
         Linoleum = 1,
+
+        /// <summary>
+        /// Carpet
+        /// </summary>
         Carpet = 2,
+
+        /// <summary>
+        /// Gravel
+        /// </summary>
         Gravel = 3,
+
+        /// <summary>
+        /// Asphalt
+        /// </summary>
         Asphalt = 4,
+
+        /// <summary>
+        /// Cobblestones
+        /// </summary>
         Cobblestones = 5,
+
+        /// <summary>
+        /// Tiles
+        /// </summary>
         Tiles = 6,
+
+        /// <summary>
+        /// Wood
+        /// </summary>
         Wood = 7,
+
+        /// <summary>
+        /// Mud
+        /// </summary>
         Mud = 8,
+
+        /// <summary>
+        /// Puddle
+        /// </summary>
         Puddle = 9,
+
+        /// <summary>
+        /// Concrete
+        /// </summary>
         Concrete = 10,
+
+        /// <summary>
+        /// Clay
+        /// </summary>
         Clay = 11,
+
+        /// <summary>
+        /// Wall
+        /// </summary>
         Wall = 12,
+
+        /// <summary>
+        /// Bush
+        /// </summary>
         Bush = 13
     }
 
     public static class TerrainTypeExtension
     {
-        /// <summary>
-        /// Text descriptions of the terrain in fourth declension case
-        /// </summary>
-        private static readonly string[] _descriptions4Case =
-        {
-            "trávu",
-        "lino",
-        "koberec",
-"štěrk",
-            "asfalt",
-"kočičí hlavy",
-"dlaždice",
-"dřevo",
-"bláto",
-"louži",
-"beton",
-"hlínu",
-"zeď",
-"křoví"
-        };
-
-
         /// <summary>
         /// Text descripitons of the terrain types
         /// </summary>
@@ -69,6 +101,27 @@ namespace Game.Terrain
 "hlína",
 "zeď",
 "Křoví"
+        };
+
+        /// <summary>
+        /// Text descriptions of the terrain in fourth declension case
+        /// </summary>
+        private static readonly string[] _descriptions4Case =
+        {
+            "trávu",
+        "lino",
+        "koberec",
+"štěrk",
+            "asfalt",
+"kočičí hlavy",
+"dlaždice",
+"dřevo",
+"bláto",
+"louži",
+"beton",
+"hlínu",
+"zeď",
+"křoví"
         };
 
         /// <summary>
@@ -111,6 +164,4 @@ namespace Game.Terrain
             return (TerrainType)Enum.Parse(typeof(TerrainType), s);
         }
     }
-
-
 }

@@ -22,12 +22,21 @@ namespace Game.Entities
         /// <remarks>Used when following the Detective Chipotle NPC</remarks>
         private const int _maxDistanceFromPlayer = 10;
 
-
         /// <summary>
         /// Specifies the minimum allowed distance from the Detective Chipotle NPC.
         /// </summary>
         /// <remarks>Used when following the Detective Chipotle NPC</remarks>
         private const int _minDistanceFromPlayer = 2;
+
+        /// <summary>
+        /// Reference to a path finder instance
+        /// </summary>
+        private readonly PathFinder _finder = new PathFinder();
+
+        /// <summary>
+        /// An instance of the Random number generator
+        /// </summary>
+        private readonly Random _random = new Random();
 
         /// <summary>
         /// Indicates if the NPC walks to the Detective Chipotle NPC.
@@ -38,11 +47,6 @@ namespace Game.Entities
         /// Specifies final distance from the Detective Chipotle when in process of approaching to it.
         /// </summary>
         private int _desiredDistanceFromPlayer;
-
-        /// <summary>
-        /// Reference to a path finder instance
-        /// </summary>
-        private PathFinder _finder = new PathFinder();
 
         /// <summary>
         /// Indicates if the NPC keeps following the Detective Chipotle NPC.
@@ -58,11 +62,6 @@ namespace Game.Entities
         /// Reference to the Detective Chipotle NPC
         /// </summary>
         private Entity _player;
-
-        /// <summary>
-        /// An instance of the Random number generator
-        /// </summary>
-        private Random _random = new Random();
 
         /// <summary>
         /// Specifies the length of one step in milliseconds.
@@ -286,7 +285,7 @@ namespace Game.Entities
         /// <summary>
         /// starts walking after the Detective Chipotle NPC.
         /// </summary>
-        private void StartFollowing() 
+        private void StartFollowing()
             => _followPlayer = true;
 
         /// <summary>
@@ -299,11 +298,7 @@ namespace Game.Entities
             Tile targetTile = World.Map[target.Center];
 
             if (!targetTile.Walkable && (targetTile.IsOccupied && targetTile.Object != Owner))
-            {
                 throw new InvalidOperationException("Lost");
-                StopApproachingToPlayer();
-                return;
-            }
 
             // The road is clear! Move!
             SetPosition(target);

@@ -24,9 +24,8 @@ namespace Luky
         /// </summary>
         public readonly string Indexed;
 
-        private static UInt16 _stringCount = 0;
-
         private static readonly Dictionary<string, UInt16> _stringsToIDs = new Dictionary<string, ushort>();
+        private static UInt16 _stringCount = 0;
 
         /// <summary>
         /// Constructor
@@ -95,10 +94,7 @@ namespace Luky
             if (Object.ReferenceEquals(a, b))
                 return true;
 
-            if ((object)a == null || (object)b == null)
-                return false;
-
-            return a.ID == b.ID;
+            return a is Name && b is Name && a.ID == b.ID;
         }
 
         /// <summary>
@@ -121,8 +117,7 @@ namespace Luky
                 return false;
 
             // Try cast to Name
-            Name n = obj as Name;
-            if ((System.Object)n == null)
+            if (!(obj is Name n))
                 return false;
 
             // Check if the fields match
@@ -136,7 +131,7 @@ namespace Luky
         /// <returns>True if both instances are equal</returns>
         public bool Equals(Name n)
         {
-            if ((object)n == null)
+            if (n is null)
                 return false;
 
             // Check if the fields match

@@ -56,31 +56,32 @@ namespace Game.Terrain
         /// <summary>
         /// Height of ceiling of the locality (0 in case of outdoor localities)
         /// </summary>
-        private int _ceiling;
+        private readonly int _ceiling;
 
         /// <summary>
         /// List of NPCs present in this locality.
         /// </summary>
-        private List<Entity> _entities;
+        private readonly List<Entity> _entities;
 
         /// <summary>
         /// List of objects present in this locality.
         /// </summary>
-        private List<GameObject> _objects;
+        private readonly List<GameObject> _objects;
 
         /// <summary>
         /// List of exits from this locality
         /// </summary>
-        private List<Passage> _passages;
+        private readonly List<Passage> _passages;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="Inner and public name of the locality">Name of the locality</param>
+        /// <param name="name">Inner and public name of the locality</param>
         /// <param name="type">Specifies if the locality is outside or inside a building.</param>
-        /// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
         /// <param name="ceiling">Ceiling height of the locality (should be 0 for outdoor localities)</param>
         /// <param name="area">Coordinates of the area occupied by the locality</param>
+        /// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
+        /// <param name="backgroundSound">A background sound played in loop</param>
         public Locality(Name name, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string backgroundSound = null) : base(name, area)
         {
             Type = type;
@@ -137,7 +138,7 @@ namespace Game.Terrain
                         case "front": directions.Add(Direction.Up); break;
                         case "right": directions.Add(Direction.Right); break;
                         case "back": directions.Add(Direction.Down); break;
-                        default: throw new ArgumentException(nameof(word)); break;
+                        default: throw new ArgumentException(nameof(word));
                     }
                 }
 
@@ -161,17 +162,17 @@ namespace Game.Terrain
         /// <returns>True if the entity is here</returns>
         public bool IsItHere(Entity e) => _entities.Contains(e);
 
+        /// <summary>
+        /// Checks if a passage lays in the locality.
+        /// </summary>
+        /// <param name="p">The passage to be checked</param>
+        /// <returns>True if the passage lays in this locality</returns>
         public bool IsItHere(Passage p) => _passages.Contains(p);
 
         /// <summary>
-        /// All neighbour localities in given direction set.
+        /// Gets a message from another messaging object and stores it for processing.
         /// </summary>
-        /// <param name="directions">wanted directions</param>
-        /// <returns>locality list</returns>
-        public IEnumerable<Locality> NeighbourLocalities(Directions directions) =>
-            //todo Location.Neighbours
-            throw new NotImplementedException();
-
+        /// <param name="message">The message to be received</param>
         public override void ReceiveMessage(GameMessage message)
         {
             base.ReceiveMessage(message);
@@ -180,12 +181,15 @@ namespace Game.Terrain
             MessageEntities(message);
         }
 
+        /// <summary>
+        /// Adds an passage to the locality.
+        /// </summary>
+        /// <param name="p">The passage to be added</param>
         public void Register(Passage p)
         {
             // Check if exit isn't already in list
             Assert(!IsItHere(p), "exit already registered");
             _passages.Add(p);
-
         }
 
         /// <summary>
@@ -203,15 +207,18 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Adds an entity to list of present entities.
+        /// Adds an entity to locality.
         /// </summary>
-        /// <param name="e">The entity ot be added</param>
+        /// <param name="e">The entity to be added</param>
         public void Register(Entity e)
         {
             Assert(!IsItHere(e), "Entity already registered.");
             _entities.Add(e);
         }
 
+        /// <summary>
+        /// Initializes the locality and starts its message loop.
+        /// </summary>
         public override void Start()
         {
             base.Start();
@@ -237,17 +244,27 @@ namespace Game.Terrain
         public void Unregister(Entity e)
             => _entities.Remove(e);
 
+        /// <summary>
+        /// Removes a passage from the locality.
+        /// </summary>
+        /// <param name="p">The passage to be removed</param>
         public void Unregister(Passage p)
         {
             _passages.Remove(p);
         }
 
+        /// <summary>
+        /// Displays the locality in game world.
+        /// </summary>
         protected override void Appear()
         {
             foreach (Vector2 point in Area.GetPoints())
                 World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain, point, this) : throw new InvalidOperationException("Tile must be empty");
         }
 
+        /// <summary>
+        /// Erases the locality from game world.
+        /// </summary>
         protected override void Disappear()
         {
             if (!_objects.IsNullOrEmpty())
@@ -262,17 +279,12 @@ namespace Game.Terrain
             Area.GetPoints().Foreach(p => World.Map[p] = null);
         }
 
+        /// <summary>
+        /// Sends a message to all game objects in the locality.
+        /// </summary>
+        /// <param name="message">The message to be sent</param>
         protected void MessageObjects(GameMessage message)
 => _objects.ForEach(o => o.ReceiveMessage(message));
-
-        /// <summary>
-        /// Checks if
-        /// </summary>
-        /// <param name="direction"></param>
-        /// <returns></returns>
-        protected Locality NeighbourLocality(Direction direction) =>
-            //todo NeighbourLocality
-            throw new NotImplementedException();
 
         private void MessageEntities(GameMessage message)
                 => _entities.ForEach(e => e.ReceiveMessage(message));

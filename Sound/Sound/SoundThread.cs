@@ -10,74 +10,133 @@ using OpenTK;
 using Sound;
 
 using EaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb;
-using EfxEaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EfxEaxReverb;
 
 namespace Luky
 {
     /// <summary>
+    /// A sound player running in a separate thread
     /// </summary>
     public sealed class SoundThread : BaseThread
     {
+        /// <summary>
+        /// Name of current EAX reverb preset
+        /// </summary>
         public string ReverbPresetName;
+
+        /// <summary>
+        /// Size of one sound buffer
+        /// </summary>
         private const int _bufferSize = 1920;
+
+        /// <summary>
+        /// Sleep time for thread of the player.
+        /// </summary>
         private const int _millisecondsPerTick = 10;
+
+        /// <summary>
+        /// Path to sound asset folder
+        /// </summary>
         private static string _soundPath;
+
+        /// <summary>
+        /// Delegate using for text output
+        /// </summary>
         private static Action<string> Say;
+
+        /// <summary>
+        /// A buffer used for reading from sound files
+        /// </summary>
         private readonly ShortBuffer _buffer = new ShortBuffer(_bufferSize);
+
+        /// <summary>
+        /// Stores data of currently played sounds.
+        /// </summary>
         private readonly List<ShortBuffer> _buffers;
-        private List<Snapshot> _blendingSnapshots = new List<Snapshot>();
+
+        /// <summary>
+        /// Volumes of individual sound groups
+        /// </summary>
+        private readonly Dictionary<Name, float> _groupVolumes = new Dictionary<Name, float>();
+
+        /// <summary>
+        /// An error handler delegate
+        /// </summary>
+        private readonly Action<Exception> _onError;
+
+        /// <summary>
+        /// stores peaces of sounds to be played.
+        /// </summary>
         private List<DelayedSound> _delayedSounds = new List<DelayedSound>();
-        private Dictionary<Name, float> _groupVolumes = new Dictionary<Name, float>();
+
+        /// <summary>
+        /// Used when assigning sound idS
+        /// </summary>
         private int _incrementingSoundID;
+
+        /// <summary>
+        /// The at vector defining the listener orientation
+        /// </summary>
         private Vector3 _listenerOrientationFacing;
+
+        /// <summary>
+        /// The up vector defining the listener orientation
+        /// </summary>
         private Vector3 _listenerOrientationUp;
+
+        /// <summary>
+        /// Current listener position
+        /// </summary>
         private Vector3 _listenerPosition;
+
+        /// <summary>
+        /// Current listener velocity
+        /// </summary>
         private Vector3 _listenerVelocity;
+
+        /// <summary>
+        /// Reference to instance of the libsndfile wrapper
+        /// </summary>
         private LSFDecoder _lSFDecoder;
+
+        /// <summary>
+        /// Reference to instance of the NAudio player decoder used with MP3 files
+        /// </summary>
         private NAudioDecoder _nAudioDecoder;
-        private Action<Exception> _onError;
+
+        /// <summary>
+        /// Reference to the OpenAL player
+        /// </summary>
         private OpenALSystem _openALSystem;
+
+        /// <summary>
+        /// Reference to the opus sound files decoder used with opus files
+        /// </summary>
         private OpusFileDecoder _opusFileDecoder;
-        private int _presetInx;
-        private int _reverbParameterIndex = -1;
 
-        private string[] _reverbParameters =
-  {
-                "Density",
-                "Diffusion",
-                "Gain",
-                "GainHF",
-                "DecayTime",
-                "DecayHFRatio",
-                "ReflectionsGain",
-                "ReflectionsDelay",
-                "LateReverbGain",
-                "LateReverbDelay",
-                "AirAbsorptionGainHF",
-                "RoomRolloffFactor",
-                "DecayHFLimit",
-                "DecayLFRatio",
-                "EchoDepth",
-                "EchoTime",
-                "GainLF",
-                "HFReference",
-                "LFReference",
-                "ModulationDepth",
-                "ModulationTime",
-                "ReflectionsPan",
-                "LateReverbPan"
-            };
+        /// <summary>
+        /// Stores all parameters for the EAX reverb effect
+        /// </summary>
 
+        /// <summary>
+        /// All available EAX reverb presets
+        /// </summary>
         private List<(string Name, EaxReverb Preset)> _reverbPresets;
-        private EfxEaxReverb _reverbSetting = EaxReverbDefaults.GetDefaultSetting();
+
+        /// <summary>
+        /// All sound files used in the game
+        /// </summary>
         private Dictionary<string, SoundFileInfo> _soundFiles;
 
+        /// <summary>
+        /// currently played sounds.
+        /// </summary>
         private List<Sound> _sounds = new List<Sound>();
 
         /// <summary>
-        /// private constructor
+        /// Constructor
         /// </summary>
-        /// <param name="onError"></param>
+        /// <param name="onError">An error handler delegate</param>
+        /// <param name="say">Text output delegate</param>
         private SoundThread(string soundPath, Action<Exception> onError, Action<string> say)
         {
             _soundPath = soundPath;
@@ -89,6 +148,9 @@ namespace Luky
                 _buffers.Add(new ShortBuffer(_bufferSize));
         }
 
+        /// <summary>
+        /// The at vector for listener orientation
+        /// </summary>
         public Vector3 ListenerOrientationFacing
         {
             get => _listenerOrientationFacing;
@@ -99,6 +161,9 @@ namespace Luky
             }
         }
 
+        /// <summary>
+        /// The up vector for listener orientation
+        /// </summary>
         public Vector3 ListenerOrientationUp
         {
             get => _listenerOrientationUp;
@@ -109,6 +174,9 @@ namespace Luky
             }
         }
 
+        /// <summary>
+        /// current listener position
+        /// </summary>
         public Vector3 ListenerPosition
         {
             get => _listenerPosition;
@@ -119,6 +187,9 @@ namespace Luky
             }
         }
 
+        /// <summary>
+        /// Current listener velocity
+        /// </summary>
         public Vector3 ListenerVelocity
         {
             get => _listenerVelocity;
@@ -129,11 +200,9 @@ namespace Luky
             }
         }
 
-        // used to generate unique sound IDs. Maps names and paths of all sound files in data directory.
-        /// <summary>
-        /// </summary>
-        /// <param name="onError"></param>
-        /// <returns></returns>
+        /// <summary> Creates and runs the player. </summary> <param name="soundPath" <param
+        /// name="onError">An error handler delegate</param> <param name="say">A delegate for text
+        /// output</param> <returns>New instance of the player</returns>
         public static SoundThread CreateAndStartThread(string soundPath, Action<Exception> onError, Action<string> say)
         {
             SoundThread soundThread = new SoundThread(soundPath, onError, say);
@@ -142,48 +211,69 @@ namespace Luky
         }
 
         /// <summary>
+        /// This method will pan a mono sound into interleaved stereo, outputting into the same
+        /// buffer it was given
         /// </summary>
-        /// <param name="ss"></param>
-        public void AddBlendingSnapshot(Snapshot ss)
-        { // we could have a race condition if someone changes the Snapshot after they have passed it to us, so we set it as immutable so we will at least get a runtime exception if we ever accidentally write code like that.
-            ss.Immutable = true;
-            RunCommand(() =>
-            { // the collection of blending snapshots is more like a set than a list, hence why we only add it if it is not already present.
-                if (!_blendingSnapshots.Contains(ss))
-                    _blendingSnapshots.Add(ss);
+        /// <param name="sBuffer">The sound buffer</param>
+        /// <param name="panning">Panning value in range from 0 to 1</param>
+        public static void Pan(ShortBuffer sBuffer, float panning)
+        {
+            if (panning < -1 || panning > 1)
+                throw new ArgumentException("panning must be between -1 and 1");
 
-                RecalculateAllSoundVolumes();
-            });
+            int inLength = sBuffer.Filled;
+            short[] buffer = sBuffer.Data;
+            int outLength = inLength * 2;
+
+            if (buffer.Length < outLength)
+                throw new Exception("Pan requires a buffer that is at least twice the length of the input data");
+
+            float leftMultiplier = (1 - panning) / 2;
+            float rightMultiplier = (1 + panning) / 2;
+
+            // Fill the buffer in reverse, so the same buffer can be used for input and output.
+            for (int monoIndex = inLength - 1; monoIndex >= 0; monoIndex--)
+            {
+                // Read the mono bytes in reverse order. Output the interleaved stereo bytes in
+                // reverse order.
+                int stereoIndex = monoIndex * 2;
+                short monoVal = buffer[monoIndex];
+                buffer[stereoIndex] = (short)Math.Round(monoVal * leftMultiplier);
+                buffer[stereoIndex + 1] = (short)Math.Round(monoVal * rightMultiplier);
+            }
+
+            sBuffer.Filled *= 2;
         }
 
+        /// <summary>
+        /// Enables an EAX reverb preset.
+        /// </summary>
+        /// <param name="name">Name of the preset</param>
+        /// <param name="gain">Reverb gain parameter</param>
         public void ApplyEaxReverbPreset(string name, float gain)
         {
             EaxReverb preset = _reverbPresets.First(p => p.Name.ToLower() == name.ToLower()).Preset;
             RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset, null, gain));
         }
 
-        public void DecreaseReverbParameter()
-        {
-            if (DebugSO._testModeEnabled)
-                AdjustReverbParameter(-1);
-        }
-
-        // 1920 shorts = 20ms of PCM stereo samples at 48000Hz.
         /// <summary>
+        /// Optains dynamic information about the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="state"></param>
-        /// <param name="currentSample"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="state">Reference to a variable to store sound state</param>
+        /// <param name="currentSample">Reference to a variable to store current sample</param>
         public void GetDynamicInfo(int soundID, out SoundState state, out int currentSample)
         {
             object[] results = RunQuery(() =>
             {
                 Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
+
                 if (sound == null)
                     return new object[] { SoundState.Disposed, -1 };
 
                 IPlayback playback = GetPlayback(sound);
                 SoundState ss;
+
                 if (playback.IsPlaying(soundID))
                     ss = SoundState.Playing;
                 else if (playback.IsStopped(soundID))
@@ -191,127 +281,129 @@ namespace Luky
                 else
                     ss = SoundState.Paused;
 
-                // we subtract the buffered samples because when they are full, playback is actually
-                // that far behind the decoder, and the caller wants to know where playback is. we
+                // I subtract the buffered samples because when they are full, playback is actually
+                // that far behind the decoder, and the caller wants to know where playback is. I
                 // divide by 50 because OpenAL buffers always hold 20ms of PCM data, so sampleRate /
                 // 50 is 20ms worth of samples.
                 int bufferedSamples = OpenALSystem.MaxQueuedBuffers * sound.SampleRate / 50;
 
                 IDecoder decoder = GetDecoder(sound);
-                int tempCurrent;
-                decoder.GetDynamicInfo(soundID, out tempCurrent);
+                decoder.GetDynamicInfo(soundID, out int tempCurrent);
+
                 if (tempCurrent != -1)
                     tempCurrent = Math.Max(0, tempCurrent - bufferedSamples);
 
                 return new object[] { ss, tempCurrent };
             });
+
             state = (SoundState)results[0];
             currentSample = (int)results[1];
         }
 
+        /// <summary>
+        /// Returns stream of a random variant of the specified sound file.
+        /// </summary>
+        /// <param name="soundName">The sound</param>
+        /// <returns>The stream</returns>
         public ReadStream GetRandomSoundStream(string soundName)
          => ReadStream.FromFileSystem(GetSoundFileInfo(soundName).GetRandomVariant());
 
+        /// <summary>
+        /// Returns stream of a sound file variant.
+        /// </summary>
+        /// <param name="name">The sound</param>
+        /// <param name="variant">Number of the variant</param>
+        /// <returns>The stream</returns>
         public ReadStream GetSoundStream(string name, int variant = 1)
         {
-            SoundFileInfo info;
-            Assert(_soundFiles.TryGetValue(name.ToLower(), out info), $"Soubor {name} nebyl nalezen.");
+            Assert(_soundFiles.ContainsKey(name.ToLower()), $"Soubor {name} nebyl nalezen.");
             Assert(variant >= 1, $"{nameof(variant)} musí být větší než 0.");
 
             return ReadStream.FromFileSystem(GetSoundFileInfo(name)[variant].Path.ToString());
         }
 
         /// <summary>
+        /// Optains static info about the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="sampleRate"></param>
-        /// <param name="totalSamples"></param>
-        /// <param name="channels"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="sampleRate">Reference to a variable to store sample rate</param>
+        /// <param name="totalSamples">Reference to a variable to store count of samples</param>
+        /// <param name="channels">Reference to a variable to store number of channels</param>
         public void GetStaticInfo(int soundID, out int sampleRate, out int totalSamples, out int channels)
         {
             object[] results = RunQuery(() =>
             {
                 Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
+
                 if (sound == null)
                     return new object[] { -1, -1, -1 };
 
                 IDecoder decoder = GetDecoder(sound);
-                int tempSampleRate, tempTotal, tempChannels;
-                decoder.GetStaticInfo(soundID, out tempSampleRate, out tempTotal, out tempChannels);
+                decoder.GetStaticInfo(soundID, out int tempSampleRate, out int tempTotal, out int tempChannels);
                 return new object[] { tempSampleRate, tempTotal, tempChannels };
             });
+
             sampleRate = (int)results[0];
             totalSamples = (int)results[1];
             channels = (int)results[2];
         }
 
         /// <summary>
+        /// Sets the parameter that decides if the sound should be converted to mono.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="forceMono"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="forceMono">Specifies if the sound should be converted to mono.</param>
         public void ChangeForceMono(int soundID, bool forceMono) => RunCommand(() =>
                                                                   {
                                                                       Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
+
                                                                       if (sound == null)
                                                                           return;
 
                                                                       if (sound.Decoder == Decoder.Opusfile && sound.Playback == Playback.OpenAL)
                                                                       {
-                                                                          int channels, sampleRate;
-                                                                          _opusFileDecoder.ChangeForceMono(soundID, forceMono, out channels, out sampleRate);
-                                                                          // changing to mono on the
-                                                                          // fly doesn't seem to
-                                                                          // work well with OpenAL,
-                                                                          // perhaps the source
-                                                                          // can't be changed to use
-                                                                          // a different number of
-                                                                          // channels after it has started.
+                                                                          _opusFileDecoder.ChangeForceMono(soundID, forceMono, out int channels, out int sampleRate);
                                                                           _openALSystem.ReconfigureSound(soundID, channels, sampleRate);
                                                                       }
                                                                   });
 
         /// <summary>
+        /// Enables or disables looping.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="looping"></param>
+        /// <param name="soundID">ID of the sound to be modified</param>
+        /// <param name="looping">Specifies if looping is enabled or disabled</param>
         public void ChangeLooping(int soundID, bool looping) => RunCommand(() =>
-                                                              {
-                                                                  Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
-                                                                  if (sound == null)
-                                                                      return;
-
-                                                                  IDecoder decoder = GetDecoder(sound);
-                                                                  decoder.ChangeLooping(soundID, looping);
-                                                              });
-
-        public void IncreaseReverbParameter()
         {
-            if (DebugSO._testModeEnabled)
-                AdjustReverbParameter(1);
-        }
+            Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
+
+            if (sound == null)
+                return;
+
+            IDecoder decoder = GetDecoder(sound);
+            decoder.ChangeLooping(soundID, looping);
+        });
 
         /// <summary>
-        /// Maps sound file names to coresponding paths. Allows quickly find a sound file just by name.
+        /// Maps sound file names to coresponding paths.
         /// </summary>
         public void LoadSounds()
         {
             _soundFiles = new Dictionary<string, SoundFileInfo>();
             IEnumerable<string> files = Directory.EnumerateFiles(_soundPath, "*.*", SearchOption.AllDirectories).Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") || f.EndsWith(".flac") || f.EndsWith(".ogg"));
             HashSet<string> usedNames = new HashSet<string>();
+
             foreach (string path in files)
             {
                 string fileName = Path.GetFileNameWithoutExtension(path);
-                Assert(!usedNames.Contains(fileName), $"Duplicitní název souboru: {path}.");
+                Assert(!usedNames.Contains(fileName), $"Duplicate file name: {path}.");
                 usedNames.Add(fileName);
                 string[] nameParts = Regex.Split(fileName, @"\s");
                 string shortName = nameParts[0].ToLower();
-                int variant;
-                Assert(Int32.TryParse(nameParts[1], out variant), $"Chybný název souboru: {path}.");
+                Assert(Int32.TryParse(nameParts[1], out int variant), $"Missing file name: {path}.");
                 variant--;
-                Assert(variant >= 0, $"Chybný název souboru: {path}.");
+                Assert(variant >= 0, $"Missing file name: {path}.");
 
-                SoundFileInfo info;
-                if (!_soundFiles.TryGetValue(shortName, out info))
+                if (!_soundFiles.TryGetValue(shortName, out SoundFileInfo info))
                 {
                     _soundFiles[shortName] = new SoundFileInfo(shortName, path, variant);
                 }
@@ -320,72 +412,85 @@ namespace Luky
             }
         }
 
-        public void NextReverbParameter()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            if (_reverbParameterIndex < _reverbParameters.Length - 1)
-            {
-                _reverbParameterIndex++;
-                SpeakReverbParameter();
-            }
-        }
-
         /// <summary>
+        /// Plays a sound stream.
         /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="role"></param>
-        /// <param name="volumeAdjustment"></param>
-        /// <param name="seekSample"></param>
-        /// <returns></returns>
+        /// <param name="stream">The sound stream to be played</param>
+        /// <param name="role">Name of the sound group to which this sound should be assigned</param>
+        /// <param name="volumeAdjustment">Individual volume of the sound</param>
+        /// <param name="seekSample">The sample from which to start playback</param>
+        /// <returns>Handle of the sound</returns>
         public int Play(ReadStream stream, Name role = null, float volumeAdjustment = 1f, int seekSample = 0)
         => Play(stream, role, false, PositionType.None, Vector3.Zero, false, volumeAdjustment, seekSample: seekSample);
 
         /// <summary>
+        /// Plays a sound file.
         /// </summary>
-        /// <param name="soundName"></param>
-        /// <param name="role"></param>
-        /// <param name="looping"></param>
-        /// <param name="pt"></param>
-        /// <param name="position"></param>
-        /// <param name="forceMono"></param>
-        /// <param name="volumeAdjustment"></param>
-        /// <param name="panning"></param>
-        /// <param name="pitch"></param>
-        /// <param name="seekSample"></param>
-        /// <param name="pb"></param>
-        /// <returns>the soundID</returns>
+        /// <param name="soundName">Path to the sound file to be played</param>
+        /// <param name="role">Name of the sound group to which this sound should be assigned</param>
+        /// <param name="looping">Specifies if the sound should be played in a loop</param>
+        /// <param name="pt">Specifies how the sound position is calculated.</param>
+        /// <param name="position">
+        /// Three-dimensional vector that determines the position in the virtual sound space
+        /// </param>
+        /// <param name="forceMono">Specifies whether to play a stereo sound in mono.</param>
+        /// <param name="volumeAdjustment">Individual volume of the sound</param>
+        /// <param name="panning">Specifies if the sound should be panned</param>
+        /// <param name="pitch">Specifies speed of playback</param>
+        /// <param name="seekSample">The sample from which to start playback</param>
+        /// <param name="pb">Specifies which player to play the audio with.</param>
+        /// <returns>Handle of the sound</returns>
         public int Play(string soundName, Name role, bool looping, PositionType pt, Vector3 position, bool forceMono = false, float volumeAdjustment = 1f, float? panning = null, float pitch = 1f, int seekSample = 0, Playback pb = Playback.OpenAL)
         => Play(GetSoundStream(soundName), role, looping, pt, position, forceMono, volumeAdjustment, panning, pitch, seekSample, pb);
 
+        /// <summary>
+        /// Plays a sound file.
+        /// </summary>
+        /// <param name="soundName">Path to the sound file</param>
+        /// <param name="role">Name of the sound group to which this sound should be assigned</param>
+        /// <param name="looping">Specifies if the sound should be played in a loop</param>
+        /// <param name="pt">Specifies how the sound position is calculated.</param>
+        /// <param name="position">
+        /// Two-dimensional vector that determines the position in the virtual sound space
+        /// </param>
+        /// <param name="forceMono">Specifies whether to play a stereo sound in mono.</param>
+        /// <param name="volumeAdjustment">Individual volume of the sound</param>
+        /// <param name="panning">Specifies if the sound should be panned</param>
+        /// <param name="pitch">Specifies speed of playback</param>
+        /// <param name="seekSample">The sample from which to start playback</param>
+        /// <param name="pb">Specifies which player to play the audio with.</param>
+        /// <returns>Handle of the sound</returns>
         public int Play(string soundName, Name role, bool looping, PositionType pt, Vector2 position, bool forceMono = false, float volumeAdjustment = 1f, float? panning = null, float pitch = 1f, int seekSample = 0, Playback pb = Playback.OpenAL)
-=> Play(soundName, role, looping, pt, position.AsOpenALVector(), forceMono, volumeAdjustment, panning, pitch, seekSample, pb);
+        => Play(soundName, role, looping, pt, position.AsOpenALVector(), forceMono, volumeAdjustment, panning, pitch, seekSample, pb);
 
         /// <summary>
+        /// Plays a sound file.
         /// </summary>
-        /// <param name="soundName"></param>
-        /// <param name="role"></param>
-        /// <param name="volumeAdjustment"></param>
-        /// <param name="seekSample"></param>
-        /// <returns></returns>
+        /// <param name="soundName">Path to the sound file</param>
+        /// <param name="role">Name of the sound group to which this sound should be assigned</param>
+        /// <param name="volumeAdjustment">Individual volume of the sound</param>
+        /// <param name="seekSample">The sample from which to start playback</param>
+        /// <returns>Handle of the sound</returns>
         public int Play(string soundName, Name role = null, float volumeAdjustment = 1f, int seekSample = 0)
         => Play(GetSoundStream(soundName), role, false, PositionType.None, Vector3.Zero, false, volumeAdjustment, seekSample: seekSample);
 
         /// <summary>
+        /// Plays a sound stream.
         /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="role"></param>
-        /// <param name="looping"></param>
-        /// <param name="pt"></param>
-        /// <param name="position"></param>
-        /// <param name="forceMono"></param>
-        /// <param name="volumeAdjustment"></param>
-        /// <param name="panning"></param>
-        /// <param name="pitch"></param>
-        /// <param name="seekSample"></param>
-        /// <param name="pb"></param>
-        /// <returns>the soundID</returns>
+        /// <param name="stream">The stream to be played</param>
+        /// <param name="role">Name of the sound group to which this sound should be assigned</param>
+        /// <param name="looping">Specifies if the sound should be played in a loop</param>
+        /// <param name="pt">Specifies how the sound position is calculated.</param>
+        /// <param name="position">
+        /// Three-dimensional vector that determines the position in the virtual sound space
+        /// </param>
+        /// <param name="forceMono">Specifies whether to play a stereo sound in mono.</param>
+        /// <param name="volumeAdjustment">Individual volume of the sound</param>
+        /// <param name="panning">Specifies if the sound should be panned</param>
+        /// <param name="pitch">Specifies speed of playback</param>
+        /// <param name="seekSample">The sample from which to start playback</param>
+        /// <param name="pb">Specifies which player to play the audio with.</param>
+        /// <returns>Handle of the sound</returns>
         public int Play(ReadStream stream, Name role, bool looping, PositionType pt, Vector3 position, bool forceMono = false, float volumeAdjustment = 1f, float? panning = null, float pitch = 1f, int seekSample = 0, Playback pb = Playback.OpenAL)
         {
             if (pt != PositionType.None && panning.HasValue)
@@ -396,98 +501,41 @@ namespace Luky
 
             int soundID = Interlocked.Increment(ref _incrementingSoundID);
 
-            Action callback = () =>
+            void callback()
+            {
+                Sound sound = InnerInitSound(stream, role, looping, pb, soundID, pt, position, forceMono, volumeAdjustment, panning, pitch);
+                if (sound == null)
+                    return;
+
+                IDecoder decoder = GetDecoder(sound);
+
+                if (seekSample != 0)
+                    decoder.SeekToSample(soundID, seekSample);
+
+                InnerPlay(sound);
+            }
+
+            if (stream.Stream is IAssetStream s && !s.IsPrimed())
+            {
+                DelayedSound ds = new DelayedSound
                 {
-                    // separating init and play is helpful if we want to start a sound playing at a
-                    // location other than the beginning, because we can call init then seek instead.
-                    Sound sound = InnerInitSound(stream, role, looping, pb, soundID, pt, position, forceMono, volumeAdjustment, panning, pitch);
-                    if (sound == null)
-                        return;
-
-                    IDecoder decoder = GetDecoder(sound);
-                    if (seekSample != 0)
-                        decoder.SeekToSample(soundID, seekSample);
-
-                    InnerPlay(sound);
+                    SoundID = soundID,
+                    ReadStream = stream,
+                    Callback = callback
                 };
-
-            if (stream.Stream is IAssetStream && !((IAssetStream)stream.Stream).IsPrimed())
-            { // if it is not primed
-                DelayedSound ds = new DelayedSound();
-                ds.SoundID = soundID;
-                ds.ReadStream = stream;
-                ds.Callback = callback;
                 _delayedSounds.Add(ds);
             }
-            else // it was either a normal stream, or an AssetStream that is primed
+            else // It was either a normal stream or an AssetStream that is primed.
                 RunCommand(callback);
 
             return soundID;
         }
 
-        public void PreviousReverbParameter()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            if (_reverbParameterIndex > 0)
-            {
-                _reverbParameterIndex--;
-                SpeakReverbParameter();
-            }
-        }
-
         /// <summary>
+        /// Jumps to the specified position of a sound.
         /// </summary>
-        /// <param name="ss"></param>
-        public void RemoveBlendingSnapshot(Snapshot ss) => RunCommand(() =>
-                                                         {
-                                                             _blendingSnapshots.Remove(ss);
-                                                             RecalculateAllSoundVolumes();
-                                                         });
-
-        public void SayReverbParameterValue()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            void SayParameter(float parameter)
-                => Say(parameter.ToString("0.0000"));
-
-            switch (_reverbParameterIndex)
-            {
-                case 0: SayParameter(_reverbSetting.Density); break;
-                case 1: SayParameter(_reverbSetting.Diffusion); break;
-                case 2: SayParameter(_reverbSetting.Gain); break;
-                case 3: SayParameter(_reverbSetting.GainHF); break;
-                case 4: SayParameter(_reverbSetting.DecayTime); break;
-                case 5: SayParameter(_reverbSetting.DecayHFRatio); break;
-                case 6: SayParameter(_reverbSetting.ReflectionsGain); break;
-                case 7: SayParameter(_reverbSetting.ReflectionsDelay); break;
-                case 8: SayParameter(_reverbSetting.LateReverbGain); break;
-                case 9: SayParameter(_reverbSetting.LateReverbDelay); break;
-                case 10: SayParameter(_reverbSetting.AirAbsorptionGainHF); break;
-                case 11: SayParameter(_reverbSetting.RoomRolloffFactor); break;
-                case 12: Say(_reverbSetting.DecayHFLimit.ToString()); break;
-                case 13: SayParameter(_reverbSetting.DecayLFRatio); break;
-                case 14: SayParameter(_reverbSetting.EchoDepth); break;
-                case 15: SayParameter(_reverbSetting.EchoTime); break;
-                case 16: SayParameter(_reverbSetting.GainLF); break;
-                case 17: SayParameter(_reverbSetting.HFReference); break;
-                case 18: SayParameter(_reverbSetting.LFReference); break;
-                case 19: SayParameter(_reverbSetting.ModulationDepth); break;
-                case 20: SayParameter(_reverbSetting.ModulationTime); break;
-                case 21: Say(_reverbSetting.ReflectionsPan.ToString()); break;
-                case 22: Say(_reverbSetting.LateReverbPan.ToString()); break;
-            }
-        }
-
-        public void SayReverbPresetName() => Say(string.IsNullOrEmpty(ReverbPresetName) ? "nic" : ReverbPresetName);
-
-        /// <summary>
-        /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="sampleOffset"></param>
+        /// <param name="soundID">The sound</param>
+        /// <param name="sampleOffset">The position</param>
         public void Seek(int soundID, int sampleOffset) => RunCommand(() =>
                                                          {
                                                              Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
@@ -500,21 +548,23 @@ namespace Luky
                                                          });
 
         /// <summary>
+        /// Changes volume of a sound group
         /// </summary>
-        /// <param name="groupName"></param>
-        /// <param name="volume"></param>
+        /// <param name="groupName">Name of the sound group</param>
+        /// <param name="volume">The target volume</param>
         public void SetGroupVolume(Name groupName, float volume) => RunCommand(() =>
                                                                   {
                                                                       _groupVolumes[groupName] = volume;
                                                                       RecalculateAllSoundVolumes();
                                                                   });
 
-        // snapshot and group volume region
         /// <summary>
+        /// Pauses or resumes the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
-        /// <param name="desiredPauseState"></param>
-        public void SetPauseState(int soundID, bool desiredPauseState) => RunCommand(() =>
+        /// <param name="soundID">The sound</param>
+        /// <param name="desiredPauseState">Specifies if the sound should be paused</param>
+        public void SetPauseState(int soundID, bool desiredPauseState)
+            => RunCommand(() =>
                                                                         {
                                                                             Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
                                                                             if (sound == null)
@@ -528,176 +578,53 @@ namespace Luky
                                                                         });
 
         /// <summary>
+        /// Sets position of a sound.
         /// </summary>
-        /// <param name="listenerPosition"></param>
-        /// <param name="listenerFacing"></param>
-        /// <param name="listenerUp"></param>
-        /// <param name="soundIDs"></param>
-        /// <param name="soundPositions"></param>
-        public void SetPositions(Vector3 listenerPosition, Vector3 listenerFacing, Vector3 listenerUp, params (int id, Vector3 position)[] sourceParameters)
-        {
-            ListenerPosition = ListenerPosition;
-            ListenerOrientationFacing = listenerFacing;
-            ListenerOrientationUp = listenerUp;
-
-            // The parameter values are copied to new variables in order to prevent racing condition.
-            RunCommand(() =>
-                {
-                    for (int i = 0; i < _sounds.Count; i++)
-                    {
-                        int id = sourceParameters[i].id;
-                        Vector3 position = sourceParameters[i].position;
-                        Sound sound = _sounds.FirstOrDefault(s => s.ID == id);
-
-                        if (sound != null)
-                            _openALSystem.SetPosition(id, position);
-                    }
-                });
-        }
-
-        public void SetReverbParameterToDefault()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            Say("Výchozí.");
-
-            switch (_reverbParameterIndex)
-            {
-                case 0: _reverbSetting.Density = EaxReverbDefaults.Density; break;
-                case 1: _reverbSetting.Diffusion = EaxReverbDefaults.Diffusion; break;
-                case 2: _reverbSetting.Gain = EaxReverbDefaults.Gain; break;
-                case 3: _reverbSetting.GainHF = EaxReverbDefaults.GainHF; break;
-                case 4: _reverbSetting.DecayTime = EaxReverbDefaults.DecayTime; break;
-                case 5: _reverbSetting.DecayHFRatio = EaxReverbDefaults.DecayHFRatio; break;
-                case 6: _reverbSetting.ReflectionsGain = EaxReverbDefaults.ReflectionsGain; break;
-                case 7: _reverbSetting.ReflectionsDelay = EaxReverbDefaults.ReflectionsDelay; break;
-                case 8: _reverbSetting.LateReverbGain = EaxReverbDefaults.LateReverbGain; break;
-                case 9: _reverbSetting.LateReverbDelay = EaxReverbDefaults.LateReverbDelay; break;
-                case 10: _reverbSetting.AirAbsorptionGainHF = EaxReverbDefaults.AirAbsorptionGainHF; break;
-                case 11: _reverbSetting.RoomRolloffFactor = EaxReverbDefaults.RoomRolloffFactor; break;
-                case 12: _reverbSetting.DecayHFLimit = EaxReverbDefaults.DecayHFLimit ? 1 : 0; break;
-                case 13: _reverbSetting.DecayLFRatio = EaxReverbDefaults.DecayLFRatio; break;
-                case 14: _reverbSetting.EchoDepth = EaxReverbDefaults.EchoDepth; break;
-                case 15: _reverbSetting.EchoTime = EaxReverbDefaults.EchoTime; break;
-                case 16: _reverbSetting.GainLF = EaxReverbDefaults.GainLF; break;
-                case 17: _reverbSetting.HFReference = EaxReverbDefaults.HFReference; break;
-                case 18: _reverbSetting.LFReference = EaxReverbDefaults.LFReference; break;
-                case 19: _reverbSetting.ModulationDepth = EaxReverbDefaults.ModulationDepth; break;
-                case 20: _reverbSetting.ModulationTime = EaxReverbDefaults.ModulationTime; break;
-                case 21: _reverbSetting.ReflectionsPan = EaxReverbDefaults.ReflectionsPan; break;
-                case 22: _reverbSetting.LateReverbPan = EaxReverbDefaults.LateReverbPan; break;
-            }
-
-            RunCommand(() => _openALSystem.SetEaxReverbProperties(_reverbSetting));
-        }
-
-        public void SetReverbParameterToMaximum()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            Say("Maximum");
-
-            switch (_reverbParameterIndex)
-            {
-                case 0: _reverbSetting.Density = EaxReverbDefaults.MaxDensity; break;
-                case 1: _reverbSetting.Diffusion = EaxReverbDefaults.MaxDiffusion; break;
-                case 2: _reverbSetting.Gain = EaxReverbDefaults.MaxGain; break;
-                case 3: _reverbSetting.GainHF = EaxReverbDefaults.MaxGainHF; break;
-                case 4: _reverbSetting.DecayTime = EaxReverbDefaults.MaxDecayTime; break;
-                case 5: _reverbSetting.DecayHFRatio = EaxReverbDefaults.MaxDecayHFRatio; break;
-                case 6: _reverbSetting.ReflectionsGain = EaxReverbDefaults.MaxReflectionsGain; break;
-                case 7: _reverbSetting.ReflectionsDelay = EaxReverbDefaults.MaxReflectionsDelay; break;
-                case 8: _reverbSetting.LateReverbGain = EaxReverbDefaults.MaxLateReverbGain; break;
-                case 9: _reverbSetting.LateReverbDelay = EaxReverbDefaults.MaxLateReverbDelay; break;
-                case 10: _reverbSetting.AirAbsorptionGainHF = EaxReverbDefaults.MaxAirAbsorptionGainHF; break;
-                case 11: _reverbSetting.RoomRolloffFactor = EaxReverbDefaults.MaxRoomRolloffFactor; break;
-                case 12: _reverbSetting.DecayHFLimit = 1; break;
-                case 13: _reverbSetting.DecayLFRatio = EaxReverbDefaults.MaxDecayLFRatio; break;
-                case 14: _reverbSetting.EchoDepth = EaxReverbDefaults.MaxEchoDepth; break;
-                case 15: _reverbSetting.EchoTime = EaxReverbDefaults.MaxEchoTime; break;
-                case 16: _reverbSetting.GainLF = EaxReverbDefaults.MaxGainLF; break;
-                case 17: _reverbSetting.HFReference = EaxReverbDefaults.MaxHFReference; break;
-                case 18: _reverbSetting.LFReference = EaxReverbDefaults.MaxLFReference; break;
-                case 19: _reverbSetting.ModulationDepth = EaxReverbDefaults.MaxModulationDepth; break;
-                case 20: _reverbSetting.ModulationTime = EaxReverbDefaults.MaxModulationTime; break;
-                case 21: _reverbSetting.ReflectionsPan = MathHelper.CompassDegreesToUnitVector(359).AsOpenALVector().AsOpenTKV3(); break;
-                case 22: _reverbSetting.LateReverbPan = MathHelper.CompassDegreesToUnitVector(359).AsOpenALVector().AsOpenTKV3(); break;
-            }
-
-            RunCommand(() => _openALSystem.SetEaxReverbProperties(_reverbSetting));
-        }
-
-        public void SetReverbParameterToMinimum()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            Say("Minimum");
-
-            switch (_reverbParameterIndex)
-            {
-                case 0: _reverbSetting.Density = EaxReverbDefaults.MinDensity; break;
-                case 1: _reverbSetting.Diffusion = EaxReverbDefaults.MinDiffusion; break;
-                case 2: _reverbSetting.Gain = EaxReverbDefaults.MinGain; break;
-                case 3: _reverbSetting.GainHF = EaxReverbDefaults.MinGainHF; break;
-                case 4: _reverbSetting.DecayTime = EaxReverbDefaults.MinDecayTime; break;
-                case 5: _reverbSetting.DecayHFRatio = EaxReverbDefaults.MinDecayHFRatio; break;
-                case 6: _reverbSetting.ReflectionsGain = EaxReverbDefaults.MinReflectionsGain; break;
-                case 7: _reverbSetting.ReflectionsDelay = EaxReverbDefaults.MinReflectionsDelay; break;
-                case 8: _reverbSetting.LateReverbGain = EaxReverbDefaults.MinLateReverbGain; break;
-                case 9: _reverbSetting.LateReverbDelay = EaxReverbDefaults.MinLateReverbDelay; break;
-                case 10: _reverbSetting.AirAbsorptionGainHF = EaxReverbDefaults.MinAirAbsorptionGainHF; break;
-                case 11: _reverbSetting.RoomRolloffFactor = EaxReverbDefaults.MinRoomRolloffFactor; break;
-                case 12: _reverbSetting.DecayHFLimit = 0; break;
-                case 13: _reverbSetting.DecayLFRatio = EaxReverbDefaults.MinDecayLFRatio; break;
-                case 14: _reverbSetting.EchoDepth = EaxReverbDefaults.MinEchoDepth; break;
-                case 15: _reverbSetting.EchoTime = EaxReverbDefaults.MinEchoTime; break;
-                case 16: _reverbSetting.GainLF = EaxReverbDefaults.MinGainLF; break;
-                case 17: _reverbSetting.HFReference = EaxReverbDefaults.MinHFReference; break;
-                case 18: _reverbSetting.LFReference = EaxReverbDefaults.MinLFReference; break;
-                case 19: _reverbSetting.ModulationDepth = EaxReverbDefaults.MinModulationDepth; break;
-                case 20: _reverbSetting.ModulationTime = EaxReverbDefaults.MinModulationTime; break;
-                case 21: _reverbSetting.ReflectionsPan = OpenTK.Vector3.Zero; break;
-                case 22: _reverbSetting.LateReverbPan = OpenTK.Vector3.Zero; break;
-            }
-
-            RunCommand(() => _openALSystem.SetEaxReverbProperties(_reverbSetting));
-        }
-
+        /// <param name="soundID">The sound</param>
+        /// <param name="soundPosition">
+        /// A two-dimensional vecotr defining the position in virtual sound space
+        /// </param>
         public void SetSourcePosition(int soundID, Vector3 soundPosition)
             => RunCommand(() => _openALSystem.SetPosition(soundID, soundPosition));
 
         /// <summary>
+        /// stops the specified sound.
         /// </summary>
-        /// <param name="soundID"></param>
+        /// <param name="soundID">The sound</param>
         public void Stop(int soundID) => RunCommand(() =>
                                        {
-                                           // check for a sound that hadn't started playing yet.
+                                           // Check for a sound that hadn't started playing yet.
                                            DelayedSound ds = _delayedSounds.RemoveFirstOrDefault(p => p.SoundID == soundID);
+
                                            if (ds != null)
                                                ds.ReadStream.Stream.Dispose();
-                                           // otherwise we check for a normal playing sound.
+
+                                           // Otherwise check for a normal playing sound.
                                            Sound sound = _sounds.RemoveFirstOrDefault(p => p.ID == soundID);
+
                                            if (sound == null)
                                                return;
+
                                            IPlayback playback = GetPlayback(sound);
                                            playback.Stop(sound.ID);
                                            DisposeSound(sound);
                                        });
 
+        /// <summary>
+        /// stops all sounds.
+        /// </summary>
         public void StopAll() => RunCommand(() =>
         {
-            // check for sounds that hadn't started playing yet.
+            // Check for sounds that hadn't started playing yet.
             foreach (DelayedSound ds in _delayedSounds)
             {
                 if (ds != null)
                     ds.ReadStream.Stream.Dispose();
             }
+
             _delayedSounds = new List<DelayedSound>();
 
-            // otherwise we check for a normal playing sounds.
+            // Otherwise check for normal playing sounds.
             foreach (Sound sound in _sounds)
             {
                 if (sound != null)
@@ -710,187 +637,80 @@ namespace Luky
             _sounds = new List<Sound>();
         });
 
-        public void SwitchToNextReverbPreset()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            if (_reverbPresets == null)
-                LoadReverbPresets();
-
-            (string Name, EaxReverb Preset) preset = _reverbPresets[_presetInx];
-            ReverbPresetName = preset.Name;
-            RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset.Preset, preset.Name));
-
-            if (_presetInx == _reverbPresets.Count - 1)
-                _presetInx = 0;
-            else _presetInx++;
-        }
-
-        public void SwitchToPreviousReverbPreset()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            if (_reverbPresets == null)
-                LoadReverbPresets();
-
-            (string Name, EaxReverb Preset) preset = _reverbPresets[_presetInx];
-            ReverbPresetName = preset.Name;
-            RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset.Preset, preset.Name));
-
-            if (_presetInx == 0)
-                _presetInx = _reverbPresets.Count - 1;
-            else _presetInx--;
-        }
-
         /// <summary>
+        /// Updates streaming buffers and detects finished sounds that need to be disposed.
         /// </summary>
-        /// <param name="soundID"></param>
-        public void TogglePause(int soundID) => RunCommand(() =>
-                                              {
-                                                  Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
-                                                  if (sound == null)
-                                                      return;
-
-                                                  IPlayback playback = GetPlayback(sound);
-                                                  if (playback.IsPlaying(soundID))
-                                                      playback.Pause(soundID);
-                                                  else
-                                                      playback.Unpause(soundID);
-                                              });
-
-        /// <summary>
-        /// </summary>
+        /// <remarks>
+        /// The method disposes sounds when they stop, but not when they are paused. If a caller
+        /// pauses a sound, it's responsible for unpausing or stopping it.
+        /// </remarks>
         protected override void OnTick()
         {
-            // logic for updating streaming buffers and detecting finished sounds that need to be
-            // disposed goes here. we dispose sounds when they stop, but not when they are paused.
-            // if a caller pauses a sound, they are responsible for unpausing it so it can play to
-            // completion, or eventually calling stop on it, which will dispose it.
-
-            // detect delayed sounds that are now primed
+            // Detect delayed sounds that are now primed.
             for (int i = _delayedSounds.Count - 1; i >= 0; i--)
             {
                 DelayedSound ds = _delayedSounds[i];
                 IAssetStream stream = (IAssetStream)ds.ReadStream.Stream;
+
                 if (stream.IsPrimed())
                 {
                     _delayedSounds.RemoveAt(i);
                     ds.Callback();
                 }
-            } // end foreach delayed sound in reverse
+            }
 
-            // refill streaming buffers
+            // Refill streaming buffers.
             foreach (Sound sound in _sounds)
             {
                 IPlayback playback = GetPlayback(sound);
-                // perhaps this should be while instead of if
+
                 while (playback.IsReadyForBuffer(sound.ID))
                 {
                     IDecoder decoder = GetDecoder(sound);
                     _buffer.Filled = decoder.FillBuffer(sound.ID, _buffer.Data);
-                    //if (length != 1920)
-                    //    Say(length);
+
                     if (sound.Panning.HasValue)
-                        SoundHM.Pan(_buffer, sound.Panning.Value);
+                        Pan(_buffer, sound.Panning.Value);
 
                     playback.QueueBuffer(sound.ID, _buffer);
                 }
-            } // end foreach sound
+            }
 
-            // detect and remove sounds that finished playing
+            // Detect and remove sounds that finished playing.
             for (int i = _sounds.Count - 1; i >= 0; i--)
             {
                 Sound sound = _sounds[i];
                 IPlayback playback = GetPlayback(sound);
+
                 if (playback.IsStopped(sound.ID))
                 {
                     DisposeSound(sound);
                     _sounds.RemoveAt(i);
                 }
-            } // end foreach sound
-        }
-
-        private void AdjustReverbParameter(int sign)
-        {
-            void Adjust(ref float parameter, float defaultValue, float minValue, float maxValue, float delta = .01f) // Local function
-            {
-                float temp = parameter + sign * delta;
-
-                if (temp >= minValue && temp <= maxValue)
-                    parameter = temp;
             }
-
-            switch (_reverbParameterIndex)
-            {
-                case 0: Adjust(ref _reverbSetting.Density, EaxReverbDefaults.Density, EaxReverbDefaults.MinDensity, EaxReverbDefaults.MaxDensity); break;
-                case 1: Adjust(ref _reverbSetting.Diffusion, EaxReverbDefaults.Diffusion, EaxReverbDefaults.MinDiffusion, EaxReverbDefaults.MaxDiffusion); break;
-                case 2: Adjust(ref _reverbSetting.Gain, EaxReverbDefaults.Gain, EaxReverbDefaults.MinGain, EaxReverbDefaults.MaxGain); break;
-                case 3: Adjust(ref _reverbSetting.GainHF, EaxReverbDefaults.GainHF, EaxReverbDefaults.MinGainHF, EaxReverbDefaults.MaxGainHF); break;
-                case 4: Adjust(ref _reverbSetting.DecayTime, EaxReverbDefaults.DecayTime, EaxReverbDefaults.MinDecayTime, EaxReverbDefaults.MaxDecayTime); break;
-                case 5: Adjust(ref _reverbSetting.DecayHFRatio, EaxReverbDefaults.DecayHFRatio, EaxReverbDefaults.MinDecayHFRatio, EaxReverbDefaults.MaxDecayHFRatio); break;
-                case 6: Adjust(ref _reverbSetting.ReflectionsGain, EaxReverbDefaults.ReflectionsGain, EaxReverbDefaults.MinReflectionsGain, EaxReverbDefaults.MaxReflectionsGain); break;
-                case 7: Adjust(ref _reverbSetting.ReflectionsDelay, EaxReverbDefaults.ReflectionsDelay, EaxReverbDefaults.MinReflectionsDelay, EaxReverbDefaults.MaxReflectionsDelay); break;
-                case 8: Adjust(ref _reverbSetting.LateReverbGain, EaxReverbDefaults.LateReverbGain, EaxReverbDefaults.MinLateReverbGain, EaxReverbDefaults.MaxLateReverbGain); break;
-                case 9: Adjust(ref _reverbSetting.LateReverbDelay, EaxReverbDefaults.LateReverbDelay, EaxReverbDefaults.MinLateReverbDelay, EaxReverbDefaults.MaxLateReverbDelay); break;
-                case 10: Adjust(ref _reverbSetting.AirAbsorptionGainHF, EaxReverbDefaults.AirAbsorptionGainHF, EaxReverbDefaults.MinAirAbsorptionGainHF, EaxReverbDefaults.MaxAirAbsorptionGainHF); break;
-                case 11: Adjust(ref _reverbSetting.RoomRolloffFactor, EaxReverbDefaults.RoomRolloffFactor, EaxReverbDefaults.MinRoomRolloffFactor, EaxReverbDefaults.MaxRoomRolloffFactor); break;
-                case 12: _reverbSetting.DecayHFLimit = sign == 1 ? 1 : 0; break;
-                case 13: Adjust(ref _reverbSetting.DecayLFRatio, EaxReverbDefaults.DecayLFRatio, EaxReverbDefaults.MinDecayLFRatio, EaxReverbDefaults.MaxDecayHFRatio); break;
-                case 14: Adjust(ref _reverbSetting.EchoDepth, EaxReverbDefaults.EchoDepth, EaxReverbDefaults.MinEchoDepth, EaxReverbDefaults.MaxEchoDepth); break;
-                case 15: Adjust(ref _reverbSetting.EchoTime, EaxReverbDefaults.EchoTime, EaxReverbDefaults.MinEchoTime, EaxReverbDefaults.MaxEchoTime); break;
-                case 16: Adjust(ref _reverbSetting.GainLF, EaxReverbDefaults.GainLF, EaxReverbDefaults.MinGainLF, EaxReverbDefaults.MaxGainLF); break;
-                case 17: Adjust(ref _reverbSetting.HFReference, EaxReverbDefaults.HFReference, EaxReverbDefaults.MinHFReference, EaxReverbDefaults.MaxHFReference); break;
-                case 18: Adjust(ref _reverbSetting.LFReference, EaxReverbDefaults.LFReference, EaxReverbDefaults.MinLFReference, EaxReverbDefaults.MaxLFReference); break;
-                case 19: Adjust(ref _reverbSetting.ModulationDepth, EaxReverbDefaults.ModulationDepth, EaxReverbDefaults.MinModulationDepth, EaxReverbDefaults.MaxModulationDepth); break;
-                case 20: Adjust(ref _reverbSetting.ModulationTime, EaxReverbDefaults.ModulationTime, EaxReverbDefaults.MinModulationTime, EaxReverbDefaults.MaxModulationTime); break;
-                case 21:
-                case 22:
-                    float radian = sign * MathHelper.DegreesToRadians(1);
-                    float cos = (float)Math.Cos(radian);
-                    float sin = (float)Math.Sin(radian);
-                    OpenTK.Vector3 zero = OpenTK.Vector3.Zero;
-                    OpenTK.Vector3 forward = new OpenTK.Vector3(0, 0, 1);
-
-                    if (_reverbParameterIndex == 21)
-                        _reverbSetting.ReflectionsPan = _reverbSetting.ReflectionsPan == zero ? forward : new OpenTK.Vector3(cos * _reverbSetting.ReflectionsPan.X - sin * _reverbSetting.ReflectionsPan.Z, 0, sin * _reverbSetting.ReflectionsPan.X + cos * _reverbSetting.ReflectionsPan.Z);
-                    else
-                        _reverbSetting.LateReverbPan = _reverbSetting.LateReverbPan == zero ? forward : new OpenTK.Vector3(cos * _reverbSetting.LateReverbPan.X - sin * _reverbSetting.LateReverbPan.Z, 0, sin * _reverbSetting.LateReverbPan.X + cos * _reverbSetting.LateReverbPan.Z);
-
-                    break;
-            }
-
-            RunCommand(() => _openALSystem.SetEaxReverbProperties(_reverbSetting));
         }
 
         /// <summary>
+        /// Calculates individual volume for a sound.
         /// </summary>
-        /// <param name="sound"></param>
-        /// <returns></returns>
+        /// <param name="sound">The sound whose volume is to be calculated</param>
+        /// <returns>The individual volume of the sound</returns>
         private float CalculateVolume(Sound sound)
         {
             float product = sound.IndividualVolume;
+
             foreach (Name gn in sound.GroupNames)
             {
-                float modifier;
-                // mGroupVolumes contains the volume adjustments the user can change in settings
-                if (_groupVolumes.TryGetValue(gn, out modifier))
+                if (_groupVolumes.TryGetValue(gn, out float modifier))
                     product *= modifier;
-                // apply blending snapshots, such as the mod snapshot file, or the built in overlay
-                // and grid snapshots.
-                foreach (Snapshot blend in _blendingSnapshots)
-                {
-                    if (blend.GroupVolumes.TryGetValue(gn, out modifier))
-                        product *= modifier;
-                } // end foreach blending snapshot
-            } // end foreach group name
+            }
             return product;
         }
 
         /// <summary>
+        /// Disposes the specified sound.
         /// </summary>
-        /// <param name="sound"></param>
+        /// <param name="sound">The sound to be disposed</param>
         private void DisposeSound(Sound sound)
         {
             IDecoder decoder = GetDecoder(sound);
@@ -900,9 +720,10 @@ namespace Luky
         }
 
         /// <summary>
+        /// Associates a decoder to the specified sound.
         /// </summary>
-        /// <param name="sound"></param>
-        /// <returns></returns>
+        /// <param name="sound">The sound</param>
+        /// <returns>The decoder</returns>
         private IDecoder GetDecoder(Sound sound)
         {
             switch (sound.Decoder)
@@ -922,38 +743,48 @@ namespace Luky
         }
 
         /// <summary>
+        /// Associates a player to the specified sound.
         /// </summary>
-        /// <param name="sound"></param>
-        /// <returns></returns>
+        /// <param name="sound">The sound</param>
+        /// <returns>The player</returns>
         private IPlayback GetPlayback(Sound sound)
         {
             if (sound.Playback == Playback.OpenAL)
                 return _openALSystem;
-            else
-                throw new InvalidOperationException($"Unrecognized playback system: {sound.Playback.ToString()}");
+            throw new InvalidOperationException($"Unrecognized playback system: {sound.Playback}");
         }
 
+        /// <summary>
+        /// Returns information about a sound file.
+        /// </summary>
+        /// <param name="name">The sound</param>
+        /// <returns>A struct describing the sound file</returns>
         private SoundFileInfo GetSoundFileInfo(string name)
         {
-            SoundFileInfo info;
-            Assert(_soundFiles.TryGetValue(name.ToLower(), out info), $"Žádná varianta zvuku {name} nebyla nalezena.");
+            if (!_soundFiles.TryGetValue(name.ToLower(), out SoundFileInfo info))
+                throw new InvalidOperationException($"No variant of {name} sound was found.");
+
             return info;
         }
 
         /// <summary>
+        /// Prepares a sound.
         /// </summary>
-        /// <param name="rs"></param>
-        /// <param name="role"></param>
-        /// <param name="looping"></param>
-        /// <param name="pb"></param>
-        /// <param name="soundID"></param>
-        /// <param name="pt"></param>
-        /// <param name="position"></param>
-        /// <param name="forceMono"></param>
-        /// <param name="volumeAdjustment"></param>
-        /// <param name="panning"></param>
-        /// <param name="pitch"></param>
-        /// <returns></returns>
+        /// <param name="rs">A sound stream</param>
+        /// <param name="role">Name of the sound group to which this sound should be assigned</param>
+        /// <param name="looping">Specifies if the sound should be played in a loop</param>
+        /// <param name="pb">Specifies which player to play the audio with.</param>
+        /// <param name="soundID">An ID to be associated with the sound</param>
+        /// <param name="pt">Specifies how the sound position is calculated.</param>
+        /// ///
+        /// <param name="position">
+        /// Three-dimensional vector that determines the position in the virtual sound space
+        /// </param>
+        /// <param name="forceMono">Specifies whether to play a stereo sound in mono.</param>
+        /// <param name="volumeAdjustment">Individual volume of the sound</param>
+        /// <param name="panning">Specifies if the sound should be panned</param>
+        /// <param name="pitch">Specifies speed of playback</param>
+        /// <returns>The sound object</returns>
         private Sound InnerInitSound(ReadStream rs, Name role, bool looping, Playback pb, int soundID, PositionType pt, Vector3 position, bool forceMono, float volumeAdjustment, float? panning, float pitch)
         {
             Sound sound = new Sound();
@@ -964,11 +795,13 @@ namespace Luky
             sound.Path = rs.Path;
             sound.Panning = panning;
 
-            sound.GroupNames.Add(Names.NonSpatialized);
+            sound.GroupNames.Add(new Name("nonspatialized"));
+
             if (role != null)
                 sound.GroupNames.Add(role);
 
             string extension = Path.GetExtension(rs.Path).ToLower();
+
             if (extension == ".opus")
                 sound.Decoder = Decoder.Opusfile;
             else if (extension == ".mp3")
@@ -978,13 +811,14 @@ namespace Luky
 
             Stream stream = rs.Stream;
             IDecoder decoder = GetDecoder(sound);
-            int channels, sampleRate;
-            if (panning.HasValue)
-                forceMono = true; // if a sound is going to be panned, we force it to mono so we can later split it to stereo based on the panning.
 
-            decoder.InitStream(soundID, stream, looping, forceMono, out channels, out sampleRate);
             if (panning.HasValue)
-                channels = 2; // if a sound is going to be panned, we will always split it to stereo for playback
+                forceMono = true;
+
+            decoder.InitStream(soundID, stream, looping, forceMono, out int channels, out int sampleRate);
+
+            if (panning.HasValue)
+                channels = 2; // If a sound is going to be panned, split it to stereo for playback.
 
             sound.SampleRate = sampleRate;
             IPlayback playback = GetPlayback(sound);
@@ -994,30 +828,32 @@ namespace Luky
         }
 
         /// <summary>
+        /// starts playback of a sound.
         /// </summary>
-        /// <param name="sound"></param>
+        /// <param name="sound">The sound to be played</param>
         private void InnerPlay(Sound sound)
         {
             IDecoder decoder = GetDecoder(sound);
+
             foreach (ShortBuffer buffer in _buffers)
             {
-                buffer.Filled = decoder.FillBuffer(sound.ID, buffer.Data);
-                // interestingly, the first buffer of every Opusfile decoded sound is always 1296 shorts.
-                //if (buffer.Filled != 1920)
-                //    Say(buffer.Filled);
+                buffer.Filled = decoder.FillBuffer(sound.ID, buffer.Data); // The first buffer of every Opusfile decoded sound is always 1296 shorts.
+
                 if (sound.Panning.HasValue)
-                    SoundHM.Pan(buffer, sound.Panning.Value);
+                    Pan(buffer, sound.Panning.Value);
             }
             IPlayback playback = GetPlayback(sound);
             playback.Play(sound.ID, _buffers);
         }
 
+        /// <summary>
+        /// Preapres EAX reverb presets.
+        /// </summary>
         private void LoadReverbPresets()
-        {
-            _reverbPresets = EaxReverbDefaults.GetEaxPresets().ToList();
-        }
+            => _reverbPresets = EaxReverbDefaults.GetEaxPresets().ToList();
 
         /// <summary>
+        /// Recalculates all volumes after an individual volume was changed.
         /// </summary>
         private void RecalculateAllSoundVolumes()
         {
@@ -1025,13 +861,11 @@ namespace Luky
             {
                 IPlayback playback = GetPlayback(sound);
                 playback.SetVolume(sound.ID, CalculateVolume(sound));
-            } // end foreach sound
+            }
         }
 
-        private void SpeakReverbParameter()
-                                                                                  => Say(_reverbParameters[_reverbParameterIndex]);
-
         /// <summary>
+        /// starts the player in a separate thread.
         /// </summary>
         private void StartThread()
         {
@@ -1049,9 +883,9 @@ namespace Luky
                 catch (Exception ex)
                 { _onError(ex); }
                 finally
-                { // cleanup logic
-                  // the one downside to performing cleanup here is that we don't become aware of
-                  // exceptions thrown during cleanup.
+                {
+                    // cleanup logic The one downside to performing cleanup here is that exceptions
+                    // thrown during cleanup are discarded.
                     _openALSystem.Dispose();
                     _opusFileDecoder.Dispose();
                     _lSFDecoder.Dispose();
@@ -1067,37 +901,71 @@ namespace Luky
         }
 
         /// <summary>
+        /// A sound that was delayed because it was not primed yet
         /// </summary>
         private sealed class DelayedSound
         {
-            // a sound that was delayed because it was not yet primed.
+            /// <summary>
+            /// Initializes a sound when it's primed.
+            /// </summary>
             public Action Callback;
 
+            /// <summary>
+            /// Source of the sound data
+            /// </summary>
             public ReadStream ReadStream;
+
+            /// <summary>
+            /// Unique identifier of the sound
+            /// </summary>
             public int SoundID;
         }
 
         /// <summary>
+        /// Represents a played sound.
         /// </summary>
         private sealed class Sound
         {
+            /// <summary>
+            /// Decoder used with this sound.
+            /// </summary>
             public Decoder Decoder;
 
+            /// <summary>
+            /// Sound groups
+            /// </summary>
             public List<Name> GroupNames = new List<Name>()
             {
-                Names.Master, // for controlling a single master volume on all sounds.
-				Names.Window, // adjusted when the window gains and loses focus.
-			};
+                new Name("master"), // For controlling a single master volume on all sounds
+new Name("window"), // Adjusted when the window gains and loses focus
+	};
 
-            public int ID; // a unique identifier.
+            /// <summary>
+            /// An unique identifier
+            /// </summary>
+            public int ID;
+
+            /// <summary>
+            /// Volume for this sound
+            /// </summary>
             public float IndividualVolume = 1f;
+
+            /// <summary>
+            /// Panning value in range from 0 to 1
+            /// </summary>
             public float? Panning;
+
+            /// <summary>
+            /// Full path to the played sound file
+            /// </summary>
             public FilePath Path;
+
             public Playback Playback = Playback.OpenAL;
 
-            // helpful when debugging. set to null if we are not panning, which is different than
-            // setting it to 0, since we must force mono to later split into stereo if we are panning.
+            /// <summary>
+            /// Sample rat eof the sound data
+            /// </summary>
             public int SampleRate;
-        } // cls
+        }
     } // cls
 }

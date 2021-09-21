@@ -11,9 +11,9 @@ namespace Luky
     public abstract class BaseThread : DebugSO
     {
         protected int _ticks;
+        private readonly BlockingCollection<Message> _messages = new BlockingCollection<Message>();
         private readonly Stopwatch _realTime = new Stopwatch();
         private bool _disposed;
-        private BlockingCollection<Message> _messages = new BlockingCollection<Message>();
 
         private enum MessageType
         {
@@ -77,9 +77,7 @@ namespace Luky
                 //if (sleepTime < 0)
                 sleepTime = 0;
 
-                Message message;
-
-                if (_messages.TryTake(out message, sleepTime))
+                if (_messages.TryTake(out Message message, sleepTime))
                 {
                     if (message.Type == MessageType.Command)
                         message.Command();
@@ -105,9 +103,11 @@ namespace Luky
         /// <param name="command">The acttion to be performed</param>
         protected void RunCommand(Action command)
         {
-            Message m = new Message();
-            m.Type = MessageType.Command;
-            m.Command = command;
+            Message m = new Message
+            {
+                Type = MessageType.Command,
+                Command = command
+            };
             _messages.Add(m);
         }
 
@@ -118,10 +118,12 @@ namespace Luky
         /// <returns>Array of return values</returns>
         protected object[] RunQuery(Func<object[]> queryFunc)
         {
-            Message m = new Message();
-            m.Type = MessageType.Query;
-            m.Query = queryFunc;
-            m.ResetEvent = new ManualResetEvent(false);
+            Message m = new Message
+            {
+                Type = MessageType.Query,
+                Query = queryFunc,
+                ResetEvent = new ManualResetEvent(false)
+            };
             _messages.Add(m);
             m.ResetEvent.WaitOne();
             m.ResetEvent.Dispose();

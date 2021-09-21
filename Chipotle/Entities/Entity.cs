@@ -82,33 +82,45 @@ namespace Game.Entities
         public static Entity CreateBartender()
             => new Entity(new Name("Bartender", "pingl"), "Bartender", new BartenderAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
-        /// <summary> Creates new instance of the Carson NPC. </summary> <returns><New instance of
-        /// the NPC/returns>
+        /// <summary>
+        /// Creates new instance of the Carson NPC.
+        /// </summary>
+        /// <returns>New instance of the NPC</returns>
         public static Entity CreateCarson()
             => new Entity(new Name("Carson", "David Carson"), "Carson", new CarsonAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
-        /// <summary> Creates new instance of the Detective Chipotle NPC. </summary> <returns><New
-        /// instance of the NPC/returns>
+        /// <summary>
+        /// Creates new instance of the Detective Chipotle NPC.
+        /// </summary>
+        /// <returns>New instance of the NPC</returns>
         public static Entity CreateChipotle()
             => new Entity(new Name("Chipotle", "detektiv Chipotle"), "Chipotle", null, new ChipotleInputComponent(), new ChipotlePhysicsComponent(), new ChipotleSoundComponent());
 
-        /// <summary> Creates new instance of the Christine NPC. </summary> <returns><New instance
-        /// of the NPC/returns>
+        /// <summary>
+        /// Creates new instance of the Christine NPC.
+        /// </summary>
+        /// <returns>New instance of the NPC</returns>
         public static Entity CreateChristine()
             => new Entity(new Name("Christine", "Christine Piercová"), "Christine", new ChristineAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
-        /// <summary> Creates new instance of the Mariotti NPC. </summary> <returns><New instance of
-        /// the NPC/returns>
+        /// <summary>
+        /// Creates new instance of the Mariotti NPC.
+        /// </summary>
+        /// <returns>New instance of the NPC</returns>
         public static Entity CreateMariotti()
             => new Entity(new Name("Mariotti", "Paolo Mariotti"), "Mariotti", new MariottiAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
-        /// <summary> Creates new instance of the Sweeney NPC. </summary> <returns><New instance of
-        /// the NPC/returns>
+        /// <summary>
+        /// Creates new instance of the Sweeney NPC.
+        /// </summary>
+        /// <returns>New instance of the NPC</returns>
         public static Entity CreateSweeney()
             => new Entity(new Name("Sweeney", "Derreck Sweeney"), "Sweeney", new SweeneyAIComponent(), null, new PhysicsComponent(), new SoundComponent());
 
-        /// <summary> Creates new instance of the Tuttle NPC. </summary> <returns><New instance of
-        /// the NPC/returns>
+        /// <summary>
+        /// Creates new instance of the Tuttle NPC.
+        /// </summary>
+        /// <returns>New instance of the NPC</returns>
         public static Entity CreateTuttle()
             => new Entity(new Name("Tuttle", "parťák"), "Tuttle", new TuttleAIComponent(), null, new TuttlePhysicsComponent(), new TuttleSoundComponent());
 
@@ -209,7 +221,7 @@ namespace Game.Entities
         /// Processes the Destroy message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnDestroy(Destroy message)
+        private new void OnDestroy(Destroy message)
         {
             Assert(IsInternal(message), "This message can be sent only from an inner component.");
             Destroy();
