@@ -38,7 +38,7 @@ namespace Game.Entities
         /// <summary>
         /// Determines if the object shall be used just once
         /// </summary>
-        private bool _usableOnce;
+        private readonly bool _usableOnce;
 
         /// <summary>
         /// constructor

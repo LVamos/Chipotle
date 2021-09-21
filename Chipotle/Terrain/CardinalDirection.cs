@@ -7,16 +7,46 @@ namespace Game.Terrain
     /// </summary>
     public enum CardinalDirection
     {
+        /// <summary>
+        /// North
+        /// </summary>
         North = 0,
+
+        /// <summary>
+        /// North east
+        /// </summary>
         NorthEast = 45,
+
+        /// <summary>
+        /// East
+        /// </summary>
         East = 90,
+
+        /// <summary>
+        /// South east
+        /// </summary>
         SouthEast = 135,
+
+        /// <summary>
+        /// South
+        /// </summary>
         South = 180,
+
+        /// <summary>
+        /// South vest
+        /// </summary>
         SouthWest = 225,
+
+        /// <summary>
+        /// Vest
+        /// </summary>
         West = 270,
+
+        /// <summary>
+        /// North vest
+        /// </summary>
         NorthWest = 315
     }
-
 
     /// <summary>
     /// Provides methods for conversion.
@@ -26,7 +56,7 @@ namespace Game.Terrain
         /// <summary>
         /// Text descriptions for cardianl directions
         /// </summary>
-        private static Dictionary<CardinalDirection, string> CardinalDirectionDescriptions = new Dictionary<CardinalDirection, string>()
+        private static readonly Dictionary<CardinalDirection, string> CardinalDirectionDescriptions = new Dictionary<CardinalDirection, string>()
         {
             [CardinalDirection.North] = "sever",
             [CardinalDirection.NorthEast] = "severovýchod",
@@ -46,9 +76,4 @@ namespace Game.Terrain
         public static string GetDescription(this CardinalDirection direction)
 => CardinalDirectionDescriptions[direction];
     }
-
-
-
-
-
 }

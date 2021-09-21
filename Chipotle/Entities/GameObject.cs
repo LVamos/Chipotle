@@ -20,6 +20,7 @@ namespace Game.Entities
         /// Constructor
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
+        /// <param name="type">Type of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         public GameObject(Name name, string type, Plane area) : base(name, area)
         {
@@ -36,19 +37,57 @@ namespace Game.Entities
         /// </summary>
         public Locality Locality { get; private set; }
 
-/// <summary>
-/// Creates new instance of the corpse (tělo w1) object in the poolside (bazén w1) locality.
-/// </summary>
-/// <param name="name">Inner and public name of the object</param>
-/// <param name="area">Coordinates of the area that the object occupies</param>
-/// <returns>New instance of the object</returns>
+        /// <summary>
+        /// Creates new instance of the pool (bazének w1) object in the Walsch's bathroom (koupelna
+        /// w1) locality.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateBathroomPool(Name name, Plane area)
+            => new DumpObject(name, area, "bazének", null, "snd7");
+
+        /// <summary>
+        /// Creates new instance of the sink (umyvadlo w1) object in the Walsch's bathroom (koupelna
+        /// w1) locality.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateBathroomSink(Name name, Plane area)
+                        => new DumpObject(name, area, "umyvadlo", null, "snd8");
+
+        /// <summary>
+        /// Creates new instance of the bench (lavička c1) object in the Carson's garden (zahrada
+        /// c1) locality.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateCarsonsBench(Name name, Plane area)
+                    => new CarsonsBench(name, area);
+
+        /// <summary>
+        /// Creates new instance of the coffee maker (kávovar) object.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateCoffeemaker(Name name, Plane area)
+            => new DumpObject(name, area, "kávovar", null, "snd9");
+
+        /// <summary>
+        /// Creates new instance of the corpse (tělo w1) object in the poolside (bazén w1) locality.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
         public static DumpObject CreateCorpse(Name name, Plane area)
             => new Corpse(name, area);
 
-
-
         /// <summary>
-        /// Creates new instance of the electrical box (rozvodna w1) object in the basement (sklep w1) locality.
+        /// Creates new instance of the electrical box (rozvodna w1) object in the basement (sklep
+        /// w1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -66,7 +105,8 @@ namespace Game.Entities
 => new DumpObject(name, area, "akvárko", null, null, "FishTankLoop");
 
         /// <summary>
-        /// Creates new instance of the garden grill (gril c1) object in the Sweeney's garden (zahrada c1) locality.
+        /// Creates new instance of the garden grill (gril c1) object in the Sweeney's garden
+        /// (zahrada c1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -75,7 +115,8 @@ namespace Game.Entities
         => new CarsonsGrill(name, area);
 
         /// <summary>
-        /// Creates new instance of the garden hose (hadice c1) object in the Sweeney's garden(zahrda c1) locality.
+        /// Creates new instance of the garden hose (hadice c1) object in the Sweeney's
+        /// garden(zahrda c1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -93,7 +134,8 @@ namespace Game.Entities
 => new DumpObject(name, area, "dálnice", null, null, "HighwayLoop");
 
         /// <summary>
-        /// Creates new instance of the Detective Chipotle's car (detektivovo auto) object in the Walsch's drive way (příjezdová cesta w1) locality.
+        /// Creates new instance of the Detective Chipotle's car (detektivovo auto) object in the
+        /// Walsch's drive way (příjezdová cesta w1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -185,7 +227,8 @@ namespace Game.Entities
                     => new DumpObject(name, area, "prkno u bazénu", null, null, null, "cs4", true);
 
         /// <summary>
-        /// Creates new instance of the pool steps (schůdky w1) object in the Walsch's pool (bazén w1) locality.
+        /// Creates new instance of the pool steps (schůdky w1) object in the Walsch's pool (bazén
+        /// w1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -231,9 +274,9 @@ namespace Game.Entities
             Disappear();
         }
 
-/// <summary>
-/// Erases the object or NPC from the game world.
-/// </summary>
+        /// <summary>
+        /// Erases the object or NPC from the game world.
+        /// </summary>
         protected override void Disappear()
         {
             base.Disappear();
@@ -265,44 +308,8 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Creates new instance of the pool (bazének w1) object in the Walsch's bathroom (koupelna w1) locality.
-        /// </summary>
-        /// <param name="name">Inner and public name of the object</param>
-        /// <param name="area">Coordinates of the area that the object occupies</param>
-        /// <returns>New instance of the object</returns>
-        public static DumpObject CreateBathroomPool(Name name, Plane area)
-            => new DumpObject(name, area, "bazének", null, "snd7");
-
-        /// <summary>
-        /// Creates new instance of the sink (umyvadlo w1) object in the Walsch's bathroom (koupelna w1) locality.
-        /// </summary>
-        /// <param name="name">Inner and public name of the object</param>
-        /// <param name="area">Coordinates of the area that the object occupies</param>
-        /// <returns>New instance of the object</returns>
-        public static DumpObject CreateBathroomSink(Name name, Plane area)
-                        => new DumpObject(name, area, "umyvadlo", null, "snd8");
-
-
-        /// <summary>
-        /// Creates new instance of the bench (lavička c1) object in the Carson's garden (zahrada c1) locality.
-        /// </summary>
-        /// <param name="name">Inner and public name of the object</param>
-        /// <param name="area">Coordinates of the area that the object occupies</param>
-        /// <returns>New instance of the object</returns>
-        public static DumpObject CreateCarsonsBench(Name name, Plane area)
-                    => new CarsonsBench(name, area);
-
-        /// <summary>
-        /// Creates new instance of the coffee maker (kávovar) object.
-        /// </summary>
-        /// <param name="name">Inner and public name of the object</param>
-        /// <param name="area">Coordinates of the area that the object occupies</param>
-        /// <returns>New instance of the object</returns>
-        public static DumpObject CreateCoffeemaker(Name name, Plane area)
-            => new DumpObject(name, area, "kávovar", null, "snd9");
-
-        /// <summary>
-        /// Creates new instance of the cuckoo clock  (kukačkové hodiny w1) object in the Walsch's dining room (jídelna w1) locality.
+        /// Creates new instance of the cuckoo clock (kukačkové hodiny w1) object in the Walsch's
+        /// dining room (jídelna w1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -320,7 +327,8 @@ namespace Game.Entities
         => new DumpObject(name, area, "", null, "snd11");
 
         /// <summary>
-        /// Creates new instance of the fan (větrák p1) object in the Christine's bed room (ložnice p1) locality.
+        /// Creates new instance of the fan (větrák p1) object in the Christine's bed room (ložnice
+        /// p1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -338,7 +346,8 @@ namespace Game.Entities
         => new DumpObject(name, area, "krb", null, null, "FirePlaceLoop");
 
         /// <summary>
-        /// Creates new instance of the freezer (mrazák v1) object in the Mariotti!s office (kancelář v1) locality.
+        /// Creates new instance of the freezer (mrazák v1) object in the Mariotti!s office
+        /// (kancelář v1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -365,14 +374,16 @@ namespace Game.Entities
         => new DumpObject(name, area, "židle", null, null, null, "snd12");
 
         /// <summary>
-        ///  Creates new instance of the Christine's door bell object in the Belvedere street (ulice p1) locality.
-        ///  </summary>
-        ///  <returns>New instance of the object</returns>
+        /// Creates new instance of the Christine's door bell object in the Belvedere street (ulice
+        /// p1) locality.
+        /// </summary>
+        /// <returns>New instance of the object</returns>
         private static DumpObject CreateChristinesBell(Name name, Plane area)
             => new ChristinesBell(name, area);
 
         /// <summary>
-        /// Creates new instance of the mirror (zrcadlo p1) object in the Christine's bed room (ložnice p1) locality.
+        /// Creates new instance of the mirror (zrcadlo p1) object in the Christine's bed room
+        /// (ložnice p1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -381,7 +392,8 @@ namespace Game.Entities
                     => new DumpObject(name, area, "zrcadlo u Kristýny", null, null, null, "cs14", true);
 
         /// <summary>
-        /// Creates new instance of the icecream machine (automat v1) object in the hall of Vanilla crunch company (hala v1) locality.
+        /// Creates new instance of the icecream machine (automat v1) object in the hall of Vanilla
+        /// crunch company (hala v1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -390,7 +402,8 @@ namespace Game.Entities
                     => new IcecreamMachine(name, area);
 
         /// <summary>
-        /// Creates new instance of the key hanger (věšák v1) object in the garage of Vanilla crunch company (garáž v1) locality.
+        /// Creates new instance of the key hanger (věšák v1) object in the garage of Vanilla crunch
+        /// company (garáž v1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -398,7 +411,8 @@ namespace Game.Entities
         private static DumpObject CreateKeyHanger(Name name, Plane area) => new KeyHanger(name, area);
 
         /// <summary>
-        /// Creates new instance of the Killer's car (zabijákovo auto v1) object in the garage of Vanilla crunch company (garáž v1) locality.
+        /// Creates new instance of the Killer's car (zabijákovo auto v1) object in the garage of
+        /// Vanilla crunch company (garáž v1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -406,9 +420,9 @@ namespace Game.Entities
         private static KillersCar CreateKillersCar(Name name, Plane area) => new KillersCar(name, area);
 
         /// <summary>
-        /// Creates new instance of the Mariotti's chair (křeslo v1) object in the
-        /// kancelář v1 locality. </summary>
-        /// <returns><New instance of the object/returns>
+        /// Creates new instance of the Mariotti's chair (křeslo v1) object in the kancelář v1 locality.
+        /// </summary>
+        /// <returns>New instance of the object</returns>
         private static DumpObject CreateMariottisChair(Name name, Plane area)
             => new DumpObject(name, area, "křeslo u Mariottiho", null, null, null, "cs12", true);
 
@@ -440,15 +454,15 @@ namespace Game.Entities
                         => new DumpObject(name, area, "trezor", null, null, null, "cs18", true);
 
         /// <summary>
-        /// Creates new instance of the Sweeney's door bell object in the Easterby street
-        /// (ulice s1) locality. 
-        /// </summary> 
-        /// <returns><New instance of the object/returns>
+        /// Creates new instance of the Sweeney's door bell object in the Easterby street (ulice s1) locality.
+        /// </summary>
+        /// <returns>New instance of the object</returns>
         private static DumpObject CreateSweeneysBell(Name name, Plane area)
             => new SweeneysBell(name, area);
 
         /// <summary>
-        /// Creates new instance of the computer (počítač s1) object in the Sweeney's bed room (pokoj s1) locality.
+        /// Creates new instance of the computer (počítač s1) object in the Sweeney's bed room
+        /// (pokoj s1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -457,7 +471,8 @@ namespace Game.Entities
                 => new DumpObject(name, area, "počítač u sweeneyho", null, null, "ComputerLoop", "cs16", true);
 
         /// <summary>
-        /// Creates new instance of the cell phone (mobil s1) object in the Sweeney's bed room (pokoj s1) locality.
+        /// Creates new instance of the cell phone (mobil s1) object in the Sweeney's bed room
+        /// (pokoj s1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
@@ -475,7 +490,8 @@ namespace Game.Entities
                                 => new DumpObject(name, area, "stůl u sweeneyho", null, null, null, "cs17", true);
 
         /// <summary>
-        /// Creates new instance of the car (auto) object in the garage of Vanilla crunch company (garáž v1) locality.
+        /// Creates new instance of the car (auto) object in the garage of Vanilla crunch company
+        /// (garáž v1) locality.
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>

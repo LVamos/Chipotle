@@ -115,7 +115,7 @@ namespace Game.Entities
         /// <summary>
         /// Processes the LocalityEntered message.
         /// </summary>
-        /// <param name="m">The message to be processed</param>
+        /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(LocalityEntered message)
         {
             if (message.Sender != World.Player)

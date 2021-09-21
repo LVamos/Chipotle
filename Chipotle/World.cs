@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -13,7 +14,6 @@ using Game.UI;
 using Luky;
 
 using OpenTK;
-using System.Globalization;
 
 namespace Game
 {
@@ -38,34 +38,14 @@ namespace Game
         public static SoundThread Sound;
 
         /// <summary>
-        /// Path to a map file
-        /// </summary>
-        private static readonly string MapPath = Path.Combine(Program.DataPath, @"Map\chipotle.xml");
-
-        /// <summary>
-        /// Information about an ongoing cutscene
-        /// </summary>
-        private static CutsceneBegan _cutsceneBegan;
-
-        /// <summary>
         /// Queue of actions that should be performed at the beginning of the game loop tick
         /// </summary>
-        private static Queue<Action> _delayedActions = new Queue<Action>();
-
-        /// <summary>
-        /// List of all NPCs
-        /// </summary>
-        private static Dictionary<string, Entity> _entities;
-
-        /// <summary>
-        /// List of all localities
-        /// </summary>
-        private static Dictionary<string, Locality> _localities;
+        private static readonly Queue<Action> _delayedActions = new Queue<Action>();
 
         /// <summary>
         /// Map of localities and corresponding background sounds
         /// </summary>
-        private static Dictionary<string, string> _localityLoops = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> _localityLoops = new Dictionary<string, string>()
         {
             ["chodba h1"] = "CzechPubLoop",
             ["balkon p1"] = "BalconyLoop",
@@ -87,6 +67,25 @@ namespace Game
             ["dvorek s1"] = "DriveWayLoop",
         };
 
+        /// <summary>
+        /// Path to a map file
+        /// </summary>
+        private static readonly string MapPath = Path.Combine(Program.DataPath, @"Map\chipotle.xml");
+
+        /// <summary>
+        /// Information about an ongoing cutscene
+        /// </summary>
+        private static CutsceneBegan _cutsceneBegan;
+
+        /// <summary>
+        /// List of all NPCs
+        /// </summary>
+        private static Dictionary<string, Entity> _entities;
+
+        /// <summary>
+        /// List of all localities
+        /// </summary>
+        private static Dictionary<string, Locality> _localities;
 
         /// <summary>
         /// List of all simple game objects
@@ -199,7 +198,6 @@ namespace Game
         public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
            => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Locality).Select(p => p.Value);
 
-
         /// <summary>
         /// Returns the locality nearest from the specified point.
         /// </summary>
@@ -287,7 +285,6 @@ namespace Game
             _passages = new Dictionary<string, Passage>();
         }
 
-
         /// <summary>
         /// Loads the map from file.
         /// </summary>
@@ -310,8 +307,7 @@ namespace Game
             foreach (XElement l in xLocalities)
             {
                 string lIndexedName = Attribute(l, "indexedname");
-                string lLoop = null;
-                _localityLoops.TryGetValue(lIndexedName.ToLower(), out lLoop);
+                _localityLoops.TryGetValue(lIndexedName.ToLower(), out string lLoop);
 
                 Locality locality = new Locality(
                new Name(lIndexedName, Attribute(l, "friendlyname")),
@@ -358,8 +354,6 @@ lLoop);
                 Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed, openable));
             }
         }
-
-
 
         /// <summary>
         /// Plays the specified audio cutscene.
@@ -417,8 +411,6 @@ lLoop);
         /// <param name="o">The object to be removed</param>
         public static void Remove(GameObject o)
                     => _delayedActions.Enqueue(() => _objects.Remove(o.Name.Indexed));
-
-
 
         /// <summary>
         /// Initializes the sound player.
@@ -487,7 +479,7 @@ lLoop);
 
                 if (state != SoundState.Playing)
                 {
-                    Sound.GetStaticInfo(_cutsceneBegan.SoundID, out int _, out int totalSamples, out int __);
+                    Sound.GetStaticInfo(_cutsceneBegan.SoundID, out _, out int totalSamples, out _);
                     if (sample == totalSamples)
                     {
                         ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));

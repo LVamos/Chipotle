@@ -25,7 +25,6 @@ namespace Luky
         /// <summary>
         /// The up vector of listener orientation
         /// </summary>
-        private static readonly Vector3 _up = new Vector3(0, 0, 1);
 
         /// <summary>
         /// slot used for effect binding
@@ -35,7 +34,15 @@ namespace Luky
         /// <summary>
         /// Audio context used for communication with the audio device
         /// </summary>
-        private AudioContext _alContext;
+        private readonly AudioContext _alContext;
+
+        // Maps soundIDs to their associated info.
+        private readonly Dictionary<int, Info> _table = new Dictionary<int, Info>();
+
+        /// <summary>
+        /// A delegate used for text output
+        /// </summary>
+        private readonly Action<string> Say;
 
         /// <summary>
         /// Instance of the effect extension
@@ -43,17 +50,9 @@ namespace Luky
         private EffectsExtension _effectExtension;
 
         /// <summary>
-        /// Handle of an reverb effect 
+        /// Handle of an reverb effect
         /// </summary>
         private int _effectHandle;
-
-        // Maps soundIDs to their associated info.
-        private Dictionary<int, Info> _table = new Dictionary<int, Info>();
-
-        /// <summary>
-        /// A delegate used for text output
-        /// </summary>
-        private Action<string> Say;
 
         /// <summary>
         /// Constructor
@@ -83,8 +82,7 @@ namespace Luky
         public void ApplyEaxReverbPreset(EaxReverb preset, string name = null, float gain = 0)
         {
             EaxReverb eaxReverb = preset;
-            EfxEaxReverb efxReverb;
-            EffectsExtension.GetEaxFromEfxEax(ref eaxReverb, out efxReverb);
+            EffectsExtension.GetEaxFromEfxEax(ref eaxReverb, out EfxEaxReverb efxReverb);
             ValidateReverbPreset(ref efxReverb);
             efxReverb.Gain = gain;
             SetEaxReverbProperties(efxReverb, name);
@@ -107,7 +105,7 @@ namespace Luky
         => _alContext.Dispose();
 
         /// <summary>
-/// Disposes the specified sound.
+        /// Disposes the specified sound.
         /// </summary>
         /// <param name="soundID">ID of the sound</param>
         public void DisposeSound(int soundID)
@@ -154,36 +152,36 @@ namespace Luky
         /// <param name="sampleRate">Reference to a variable to store sample rate of the sound</param>
         public void InitSound(int soundID, int channels, int sampleRate, PositionType pt, Vector3 position, float frequencyMultiplier)
         {
-            Info info = new Info();
-            info.Channels = channels;
-            info.SampleRate = sampleRate;
-            info.SourceID = AL.GenSource();
+            Info info = new Info
+            {
+                Channels = channels,
+                SampleRate = sampleRate,
+                SourceID = AL.GenSource()
+            };
             ALAnnounceError("AL.GenSource");
 
             AL.Source((uint)info.SourceID, ALSource3i.EfxAuxiliarySendFilter, _effectSlot, 0, 0);
 
             if (pt == PositionType.None)
             {
-                // Set the source to have relative coordinates so it will always play in the
-                // center. this is apparently required even when using the direct channels extension.
+                // Set the source to have relative coordinates so it will always play in the center.
+                // this is apparently required even when using the direct channels extension.
                 AL.Source(info.SourceID, ALSourceb.SourceRelative, true);
                 ALAnnounceError("setting source relative to true");
 
                 AL.Source(info.SourceID, ALSourceb.EfxDirectFilterGainHighFrequencyAuto, true); // using the OpenAL Soft direct channels extension to get rid of sound coloring that occurs when HRTF is enabled.
                 ALAnnounceError("setting direct channels to true");
             }
-
             else if (pt == PositionType.Relative)
             {
                 AL.Source(info.SourceID, ALSourceb.SourceRelative, true);
                 ALAnnounceError("setting source relative to true");
 
-                ALSetPosition(info.SourceID, position.AsOpenTKV3());
+                ALSetPosition(info.SourceID, position);
             }
-
             else if (pt == PositionType.Absolute)
             {
-                ALSetPosition(info.SourceID, position.AsOpenTKV3());
+                ALSetPosition(info.SourceID, position);
                 AL.DistanceModel(ALDistanceModel.LinearDistanceClamped);
                 AL.Source(info.SourceID, ALSourcef.ReferenceDistance, 1);
                 ALAnnounceError("set reference distance");
@@ -204,11 +202,11 @@ namespace Luky
             _table[soundID] = info;
         }
 
-/// <summary>
-/// Checks if the specified sound is playing.
-/// </summary>
-/// <param name="soundID">The sound</param>
-/// <returns>True if the sound is playing</returns>
+        /// <summary>
+        /// Checks if the specified sound is playing.
+        /// </summary>
+        /// <param name="soundID">The sound</param>
+        /// <returns>True if the sound is playing</returns>
         public bool IsPlaying(int soundID)
         {
             Info info = _table[soundID];
@@ -224,8 +222,7 @@ namespace Luky
         public bool IsReadyForBuffer(int soundID)
         {
             Info info = _table[soundID];
-            int processed;
-            AL.GetSource(info.SourceID, ALGetSourcei.BuffersProcessed, out processed);
+            AL.GetSource(info.SourceID, ALGetSourcei.BuffersProcessed, out int processed);
             ALAnnounceError("AL.GetSource BuffersProcessed");
             return processed != 0;
         }
@@ -261,7 +258,7 @@ namespace Luky
         public void Play(int soundID, List<ShortBuffer> initialBuffers)
         {
             if (initialBuffers.Count != MaxQueuedBuffers)
-                throw new ArgumentException($"initialBuffers should have length {MaxQueuedBuffers.ToString()} but have length {initialBuffers.Count.ToString()}");
+                throw new ArgumentException($"initialBuffers should have length {MaxQueuedBuffers} but have length {initialBuffers.Count}");
 
             Info info = _table[soundID];
             if (info.QueuedBufferIDs == null)
@@ -348,7 +345,7 @@ namespace Luky
             // Load effect properties
             _alContext.Suspend();
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDensity, reverb.Density);
-            ALAnnounceError($"Setting reverb properties: {nameof(reverb.Density)}: {reverb.Density.ToString("0.0000")}");
+            ALAnnounceError($"Setting reverb properties: {nameof(reverb.Density)}: {reverb.Density:0.0000}");
 
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDiffusion, reverb.Diffusion);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.Diffusion)}.");
@@ -366,7 +363,7 @@ namespace Luky
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayTime)}.");
 
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayHFRatio, reverb.DecayHFRatio);
-            ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayHFRatio)}: {reverb.DecayHFRatio.ToString("0.00")}");
+            ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayHFRatio)}: {reverb.DecayHFRatio:0.00}");
 
             _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayLFRatio, reverb.DecayLFRatio);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayLFRatio)}.");
@@ -425,15 +422,15 @@ namespace Luky
         }
 
         /// <summary>
-///Changes the listener orientation.
+        ///Changes the listener orientation.
         /// </summary>
         /// <param name="at">The at vector</param>
         /// <param name="up">The up vector</param>
         public void SetListenerOrientation(Vector3 at, Vector3 up)
         {
             // the defaults for a fresh OpenAL context are: at(0, 0, -1), up(0, 1, 0)
-            Vector3 oAt = at.AsOpenTKV3();
-            Vector3 oUp = up.AsOpenTKV3();
+            Vector3 oAt = at;
+            Vector3 oUp = up;
             AL.Listener(ALListenerfv.Orientation, ref oAt, ref oUp);
             ALAnnounceError("set listener orientation");
         }
@@ -444,7 +441,7 @@ namespace Luky
         /// <param name="position">New position</param>
         public void SetListenerPosition(Vector3 position)
         {
-            Vector3 otkPos = position.AsOpenTKV3();
+            Vector3 otkPos = position;
             AL.Listener(ALListener3f.Position, ref otkPos);
             ALAnnounceError("set listener position");
         }
@@ -464,7 +461,7 @@ namespace Luky
         public void SetPosition(int soundID, Vector3 position)
         {
             Info info = _table[soundID];
-            ALSetPosition(info.SourceID, position.AsOpenTKV3());
+            ALSetPosition(info.SourceID, position);
         }
 
         /// <summary>
@@ -479,8 +476,8 @@ namespace Luky
         }
 
         /// <summary>
-Stops the specified sound.
-            /// </summary>
+        /// Stops the specified sound.
+        /// </summary>
         /// <param name="soundID">The sound</param>
         public void Stop(int soundID)
         {
@@ -501,35 +498,37 @@ Stops the specified sound.
                 return;
 
             if (info.QueuedBufferIDs == null)
-                throw Exception("Called Unpause on a sound that had never been played");
+                throw new Exception("Called Unpause on a sound that had never been played");
 
             ALPlay(info.SourceID);
             info.ShouldBePlaying = true;
         }
 
         /// <summary>
+        /// Checks for OpenAl error and announces it.
         /// </summary>
-        /// <param name="prefix"></param>
-        /// <param name="args"></param>
+        /// <param name="prefix">Short description of the action performed before the error check</param>
+        /// <param name="args">Details of the action</param>
         private void ALAnnounceError(string prefix, params object[] args)
         {
             ALError error = AL.GetError();
+
             if (error != ALError.NoError)
             {
-                    string text = error + ", " + AL.GetErrorString(error);
+                string text = error + ", " + AL.GetErrorString(error);
                 if (args.Length > 0)
                     text = String.Format(prefix, args) + " " + text;
                 else
                     text = prefix + " " + text;
 
-                Say(text);
-                System.Diagnostics.Debugger.Break();
+                throw new InvalidOperationException(text);
             }
         }
 
         /// <summary>
+        /// Deletes a sound source.
         /// </summary>
-        /// <param name="sourceID"></param>
+        /// <param name="sourceID">The sound source</param>
         private void AlDeleteSource(int sourceID)
         {
             AL.DeleteSource(sourceID);
@@ -537,20 +536,21 @@ Stops the specified sound.
         }
 
         /// <summary>
+        /// Returns current state of the specified sound source.
         /// </summary>
-        /// <param name="sourceID"></param>
-        /// <returns></returns>
+        /// <param name="sourceID">The sound source</param>
+        /// <returns>The state</returns>
         private ALSourceState AlGetState(int sourceID)
         {
-            int state;
-            AL.GetSource(sourceID, ALGetSourcei.SourceState, out state);
+            AL.GetSource(sourceID, ALGetSourcei.SourceState, out int state);
             ALAnnounceError("AL.GetSource");
             return (ALSourceState)state;
         }
 
         /// <summary>
+        /// Pauses the specified sound source.
         /// </summary>
-        /// <param name="sourceID"></param>
+        /// <param name="sourceID">The sound source</param>
         private void ALPause(int sourceID)
         {
             AL.SourcePause(sourceID);
@@ -558,8 +558,9 @@ Stops the specified sound.
         }
 
         /// <summary>
+        /// Plays the specified sound source.
         /// </summary>
-        /// <param name="sourceID"></param>
+        /// <param name="sourceID">The sound source</param>
         private void ALPlay(int sourceID)
         {
             AL.SourcePlay(sourceID);
@@ -567,9 +568,10 @@ Stops the specified sound.
         }
 
         /// <summary>
+        /// Changes position of the specified sound source.
         /// </summary>
-        /// <param name="sourceID"></param>
-        /// <param name="position"></param>
+        /// <param name="sourceID">The sound source</param>
+        /// <param name="position">New position</param>
         private void ALSetPosition(int sourceID, OpenTK.Vector3 position)
         {
             AL.Source(sourceID, ALSource3f.Position, ref position);
@@ -577,18 +579,20 @@ Stops the specified sound.
         }
 
         /// <summary>
+        /// Sets volume of the specified sound source.
         /// </summary>
-        /// <param name="sourceID"></param>
-        /// <param name="value"></param>
-        private void ALSetVolume(int sourceID, float value)
+        /// <param name="sourceID">The sound source</param>
+        /// <param name="volume">New volume</param>
+        private void ALSetVolume(int sourceID, float volume)
         {
-            AL.Source(sourceID, ALSourcef.Gain, value);
-            ALAnnounceError("set gain to {0}", value);
+            AL.Source(sourceID, ALSourcef.Gain, volume);
+            ALAnnounceError("set gain to {0}", volume);
         }
 
         /// <summary>
+        /// Stops the specified sound source.
         /// </summary>
-        /// <param name="sourceID"></param>
+        /// <param name="sourceID">The sound source</param>
         private void ALStop(int sourceID)
         {
             AL.SourceStop(sourceID);
@@ -596,11 +600,12 @@ Stops the specified sound.
         }
 
         /// <summary>
+        /// Associates sound data with a buffer and queues the buffer for playing.
         /// </summary>
-        /// <param name="info"></param>
-        /// <param name="bufferID"></param>
-        /// <param name="buffer"></param>
-        /// <param name="length"></param>
+        /// <param name="info">Sound parameters</param>
+        /// <param name="bufferID">A buffer identifier</param>
+        /// <param name="buffer">The buffer to be queued</param>
+        /// <param name="length">Amount of the data to be read</param>
         private void AssociateAndQueueBuffer(Info info, int bufferID, short[] buffer, int length)
         {
             ALFormat format = info.Channels == 1 ? ALFormat.Mono16 : ALFormat.Stereo16;
@@ -610,6 +615,10 @@ Stops the specified sound.
             ALAnnounceError("AL.SourceQueueBuffer");
         }
 
+        /// <summary>
+        /// Validates a EAX reverb preset and corrects extreme values.
+        /// </summary>
+        /// <param name="r">The preset to be validated</param>
         private void ValidateReverbPreset(ref EfxEaxReverb r)
         {
             void Validate(ref float parameter, float min, float max)
@@ -641,13 +650,33 @@ Stops the specified sound.
         }
 
         /// <summary>
+        /// Stores information about a stream.
         /// </summary>
         private sealed class Info
         {
+            /// <summary>
+            /// Number of channels
+            /// </summary>
             public int Channels;
+
+            /// <summary>
+            /// List of handles to queued buffers
+            /// </summary>
             public List<int> QueuedBufferIDs;
+
+            /// <summary>
+            /// Sample rate of the MP3 file
+            /// </summary>
             public int SampleRate;
+
+            /// <summary>
+            /// starts or stops playback of the sound.
+            /// </summary>
             public bool ShouldBePlaying;
+
+            /// <summary>
+            /// Identifier of the sound
+            /// </summary>
             public int SourceID;
         } // cls
     } // cls

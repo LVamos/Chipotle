@@ -16,7 +16,8 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="start">First point</param>
         /// <param name="end">Second point</param>
-        /// <returns>A list of points leading from start to the end or null if no possible path exists</Vector2>
+        /// <returns>
+        /// A list of points leading from start to the end or null if no possible path exists
         /// </returns>
         public Queue<Vector2> FindPath(Vector2 start, Vector2 end)
         {
@@ -34,8 +35,10 @@ namespace Game.Terrain
             Node last = new Node(end);
             first.ComputeDistance(last.Coords);
 
-            List<Node> open = new List<Node>();
-            open.Add(first);
+            List<Node> open = new List<Node>
+            {
+                first
+            };
             List<Node> closed = new List<Node>();
 
             while (open.Any())

@@ -39,6 +39,10 @@ namespace Game.Messaging
         /// </summary>
         protected MessagingObject() => _messageHandlers = new Dictionary<Type, Action<GameMessage>>();
 
+        /// <summary>
+        /// returns a hash code for the instance.
+        /// </summary>
+        /// <returns>The hash code</returns>
         public override int GetHashCode()
                                             => unchecked(4565 * (566 + _messagingEnabled.GetHashCode()) * (7193 + (_messages == null ? 0 : _messages.GetHashCode())));
 

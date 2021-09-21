@@ -1,10 +1,10 @@
-﻿using NLibsndfile.Native;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+
+using NLibsndfile.Native;
 
 namespace Luky
 {
@@ -19,6 +19,16 @@ namespace Luky
         private const int _bufferSize = 24000;
 
         /// <summary>
+        /// The libsndfile library interface
+        /// </summary>
+        private readonly LibsndfileApi _api = new LibsndfileApi();
+
+        /// <summary>
+        /// Maps sound IDs to their associated info.
+        /// </summary>
+        private readonly Dictionary<int, Info> _table = new Dictionary<int, Info>();
+
+        /// <summary>
         /// A buffer used for sound file reading and writing to sound streams
         /// </summary>
         private readonly short[] _tempBuffer = new short[_bufferSize];
@@ -27,16 +37,6 @@ namespace Luky
         /// A buffer used for sound file reading and writing to sound streams
         /// </summary>
         private readonly byte[] _vioBuffer = new byte[_bufferSize * 2];
-
-        /// <summary>
-        /// The libsndfile library interface
-        /// </summary>
-        private LibsndfileApi _api = new LibsndfileApi();
-
-        /// <summary>
-        /// Maps sound IDs to their associated info.
-        /// </summary>
-        private Dictionary<int, Info> _table = new Dictionary<int, Info>();
 
         /// <summary>
         /// Manipulates with a sound stream.
@@ -48,12 +48,14 @@ namespace Luky
         /// </summary>
         public LSFDecoder()
         {
-            SF_VIRTUAL_IO vio = new SF_VIRTUAL_IO();
-            vio.get_filelen = GetFileLength;
-            vio.seek = seek;
-            vio.read = read;
-            vio.write = Write;
-            vio.tell = GetPosition;
+            SF_VIRTUAL_IO vio = new SF_VIRTUAL_IO
+            {
+                get_filelen = GetFileLength,
+                seek = Seek,
+                read = Read,
+                write = Write,
+                tell = GetPosition
+            };
             _virtualIO = vio;
         }
 
@@ -98,7 +100,8 @@ namespace Luky
             {
                 if (info.Looping && info.Position == info.TotalLength)
                 {
-                    // It reached the end of the stream but looping is enabled so it must start back at the  beginning.
+                    // It reached the end of the stream but looping is enabled so it must start back
+                    // at the beginning.
                     info.Position = 0;
                     _api.Seek(info.SFHandle, 0, (int)SeekOrigin.Begin);
                 }
@@ -237,6 +240,14 @@ namespace Luky
         => GetStream(soundID).Length;
 
         /// <summary>
+        /// Returns current position of the specified sound stream.
+        /// </summary>
+        /// <param name="soundID">ID of the sound stream</param>
+        /// <returns></returns>
+        private Int64 GetPosition(int soundID)
+        => GetStream(soundID).Position;
+
+        /// <summary>
         /// Returns a stream assigned to the <paramref name="soundID"/>.
         /// </summary>
         /// <param name="soundID">ID of the sound</param>
@@ -251,11 +262,11 @@ namespace Luky
         /// <param name="count">Count of samples to be read</param>
         /// <param name="soundID">ID of the source sound</param>
         /// <returns>Count of read bytes</returns>
-        private Int64 read(IntPtr pBuffer, Int64 count, int soundID)
+        private Int64 Read(IntPtr pBuffer, Int64 count, int soundID)
         {
             int lesser = Math.Min(_vioBuffer.Length, (int)count);
             int actual = GetStream(soundID).Read(_vioBuffer, 0, lesser);
-            
+
             Marshal.Copy(_vioBuffer, 0, pBuffer, actual); // copy it to the pointer.
             return actual;
         }
@@ -264,19 +275,13 @@ namespace Luky
         /// Jumps to the specified position of the stream.
         /// </summary>
         /// <param name="offset">The posisiton in the sound stream</param>
-        /// <param name="whence">Specifies if the position is counted from the beginning or the end of the stream.</param>
+        /// <param name="whence">
+        /// Specifies if the position is counted from the beginning or the end of the stream.
+        /// </param>
         /// <param name="soundID">ID of the sound</param>
         /// <returns>New position in the stream</returns>
-        private Int64 seek(Int64 offset, SeekOrigin whence, int soundID)
+        private Int64 Seek(Int64 offset, SeekOrigin whence, int soundID)
         => GetStream(soundID).Seek(offset, whence);
-
-        /// <summary>
-        /// Returns current position of the specified sound stream.
-        /// </summary>
-        /// <param name="soundID">ID of the sound stream</param>
-        /// <returns></returns>
-        private Int64 GetPosition(int soundID)
-        => GetStream(soundID).Position;
 
         /// <summary>
         /// Writes data from memory to the specified stream.
@@ -323,9 +328,9 @@ namespace Luky
             /// </summary>
             public long Position = 0;
 
-/// <summary>
-/// Handle used for communication with the libsndfile library
-/// </summary>
+            /// <summary>
+            /// Handle used for communication with the libsndfile library
+            /// </summary>
             public IntPtr SFHandle;
 
             /// <summary>

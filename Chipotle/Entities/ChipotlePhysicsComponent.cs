@@ -19,6 +19,11 @@ namespace Game.Entities
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
+        /// Stores references to all the localities the NPC has visited.
+        /// </summary>
+        private readonly HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
+
+        /// <summary>
         /// A delayed message of ChipotlesCarMoved type
         /// </summary>
         private ChipotlesCarMoved _carMovement;
@@ -63,11 +68,6 @@ namespace Game.Entities
         /// Indicates if the NPC stepped into the puddle in the pool (bazén w1) locality.
         /// </summary>
         private bool _steppedIntoPuddle;
-
-        /// <summary>
-        /// Stores references to all the localities the NPC has visited.
-        /// </summary>
-        private HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
 
         /// <summary>
         /// Returns reference to the asphalt road (asfaltka c1) locality.
@@ -233,8 +233,8 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// The Detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1) locality to the
-        /// Christine's hall (hala p1) locality.
+        /// The Detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)
+        /// locality to the Christine's hall (hala p1) locality.
         /// </summary>
         private void JumpToChristinesHall()
             => SetPosition(1797, 1125, true);
@@ -332,7 +332,7 @@ namespace Game.Entities
         /// Processes the SayNearestObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnSayNearestObject(SayNearestObject m)
+        private void OnSayNearestObject(SayNearestObject message)
         {
             GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
             if (o == null)

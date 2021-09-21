@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-using DavyKager;
-
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 using Game.UI;
-
-using Luky;
-
-using Microsoft.VisualBasic;
 
 namespace Game.Entities
 {
@@ -38,13 +32,11 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Shortcuts for testing purposes
-                [new KeyShortcut(Keys.J)] = JumpToCoords,
 
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight,
-                [new KeyShortcut(Keys.O)] = SayOrientation,
 
                 // Other shortcuts
                 [new KeyShortcut(Keys.O)] = SayNearestObject,
@@ -59,29 +51,6 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
-
-            if (!_testModeEnabled)
-                return;
-
-            Clipboard.Clear();
-            Timer t = new Timer();
-            t.Interval = 30;
-            t.Tick += (s, e) =>
-            {
-                Plane p;
-
-                try
-                {
-                    p = new Plane(Clipboard.GetText().ToVector2());
-                }
-                catch (Exception ex)
-                {
-                    return;
-                }
-                Owner.ReceiveMessage(new SetPosition(this, p));
-                Clipboard.Clear();
-            };
-            t.Start();
         }
 
         /// <summary>
@@ -103,20 +72,6 @@ namespace Game.Entities
         /// </summary>
         private void Interact()
 => Owner.ReceiveMessage(new UseObject(this));
-
-        /// <summary>
-        /// A test method to move the Detective Chipotle NPC to the coordinates optained from clipboard.
-        /// </summary>
-        /// <remarks>For testing only</remarks>
-        private void JumpToCoords()
-        {
-            if (!_testModeEnabled)
-                return;
-
-            string text = Interaction.InputBox("Zadej souřadnice", "Skok na souřadnice", "");
-            Plane target = new Plane(text.ToVector2());
-            Owner.ReceiveMessage(new SetPosition(this, target));
-        }
 
         /// <summary>
         /// Moves the NPC one step back.
@@ -154,17 +109,6 @@ namespace Game.Entities
         /// </summary>
         private void SayNearestObject()
 => Owner.ReceiveMessage(new SayNearestObject(this));
-
-        /// <summary>
-        /// Reports the current orientation of the NPC using a screen reader or voice synthesizer.
-        /// </summary>
-        private void SayOrientation()
-        {
-            if (!DebugSO._testModeEnabled)
-                return;
-
-            Tolk.Speak($"Columbo orientation: {Owner.Orientation.UnitVector.ToString()}, listener facing: {World.Sound.ListenerOrientationFacing.ToString()}, listener up: {World.Sound.ListenerOrientationUp.ToString()}, listener position: {World.Sound.ListenerPosition.ToString()}.");
-        }
 
         /// <summary>
         /// Stops the currently playing cutscene.

@@ -1,8 +1,8 @@
-﻿using Luky;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Luky;
 
 namespace Game.UI
 {
@@ -12,18 +12,21 @@ namespace Game.UI
     public abstract class VirtualWindow : DebugSO
     {
         /// <summary>
+        /// Reference to parent window
+        /// </summary>
+        protected VirtualWindow _parentWindow;
+
+        /// <summary>
+        /// Key commands and their handlers
+        /// </summary>
+        protected Dictionary<KeyShortcut, Action> _shortcuts;
+
+        /// <summary>
         /// Construktor
         /// </summary>
         protected VirtualWindow() : this(null)
         {
         }
-
-        /// <summary>
-        /// Registers shotcuts and corresponding actions.
-        /// </summary>
-        /// <param name="shortcuts">Set of shortcuts to be registered</param>
-        protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
-
 
         /// <summary>
         /// Constructor
@@ -34,6 +37,11 @@ namespace Game.UI
             _parentWindow = parentWindow;
             _shortcuts = new Dictionary<KeyShortcut, Action>();
         }
+
+        /// <summary>
+        /// Indicates if the window is closed
+        /// </summary>
+        public bool Closed { get; private set; }
 
         /// <summary>
         /// Closes an opened window.
@@ -47,21 +55,6 @@ namespace Game.UI
                 WindowHandler.Switch(_parentWindow);
         }
 
-
-
-        /// <summary>
-        /// KeyDown event handler
-        /// </summary>
-        /// <param name="e">Event parameters</param>
-        public virtual void OnKeyDown(KeyEventParams e)
-        {
-
-            Action action = null;
-            KeyShortcut tmpShortcut = new KeyShortcut(e);
-            if (_shortcuts != null && _shortcuts.TryGetValue(tmpShortcut, out action))
-                action();
-        }
-
         /// <summary>
         /// OnActivate event handler
         /// </summary>
@@ -73,19 +66,20 @@ namespace Game.UI
         public virtual void OnDeactivate() => Closed = true;
 
         /// <summary>
-        /// Key commands and their handlers
+        /// KeyDown event handler
         /// </summary>
-        protected Dictionary<KeyShortcut, Action> _shortcuts;
+        /// <param name="e">Event parameters</param>
+        public virtual void OnKeyDown(KeyEventParams e)
+        {
+            KeyShortcut tmpShortcut = new KeyShortcut(e);
+            if (_shortcuts != null && _shortcuts.TryGetValue(tmpShortcut, out Action action))
+                action();
+        }
 
         /// <summary>
-        /// Reference to parent window
+        /// Registers shotcuts and corresponding actions.
         /// </summary>
-        protected VirtualWindow _parentWindow;
-
-
-        /// <summary>
-        /// Indicates if the window is closed
-        /// </summary>
-        public bool Closed { get; private set; }
+        /// <param name="shortcuts">Set of shortcuts to be registered</param>
+        protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
     }
 }
