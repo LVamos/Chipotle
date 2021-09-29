@@ -1,1 +1,0 @@
-﻿//todo zjistit, jak se definuje rychlost pro zvuk (velocity)

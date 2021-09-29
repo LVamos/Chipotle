@@ -192,9 +192,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Dokumenty\todo.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Core\Core\Core.csproj">
       <Project>{e4525846-a882-43d8-a581-5c39f0978855}</Project>
       <Name>Core</Name>
