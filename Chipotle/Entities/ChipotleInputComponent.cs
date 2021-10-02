@@ -15,6 +15,16 @@ namespace Game.Entities
     public class ChipotleInputComponent : InputComponent
     {
         /// <summary>
+        /// Determines how quickly the game reacts to movement commands. The speed is in milliseconds.
+        /// </summary>
+        private const int _keyboardSpeed = 20;
+
+        /// <summary>
+        /// Measures time from the last arrow key press.
+        /// </summary>
+        private int _keyboardTimer;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public ChipotleInputComponent() : base()
@@ -54,6 +64,17 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+
+            if (_keyboardTimer < _keyboardSpeed)
+                _keyboardTimer++;
+        }
+
+        /// <summary>
         /// Processes the CutsceneBegan message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
@@ -65,6 +86,23 @@ namespace Game.Entities
             {
                 case "cs7": case "cs10": _messagingEnabled = false; break;
             }
+        }
+
+        /// <summary>
+        /// Processes the KeyDown message.
+        /// </summary>
+        /// <param name="message">The message</param>
+        protected override void OnKeyDown(KeyPressed message)
+        {
+            Keys key = message.Shortcut.Key;
+
+            if (
+                (key == Keys.Left || key == Keys.Up || key == Keys.Right || key == Keys.Down)
+                && _keyboardTimer < _keyboardSpeed)
+                return;
+
+            _keyboardTimer = 0;
+            base.OnKeyDown(message);
         }
 
         /// <summary>
