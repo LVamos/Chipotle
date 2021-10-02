@@ -20,7 +20,6 @@ namespace Game.Entities
         /// </summary>
         private readonly Entity _player = World.Player;
 
-
         /// <summary>
         /// A delayed message of ChipotlesCarMoved type
         /// </summary>
@@ -91,15 +90,17 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Instructs the NPC to walk towards the corpse (tělo w1) object and wait there for the Detective Chipotle NPC.
+        /// Instructs the NPC to walk towards the corpse (tělo w1) object and wait there for the
+        /// Detective Chipotle NPC.
         /// </summary>
         private void GoToCorpse()
         {
+            Vector2 goal = new Vector2(936, 1059);
             Queue<Vector2> path =
-            _finder.FindPath(_area.Center, new Vector2(936, 1059))
+            _finder.FindPath(_area.Center, goal)
             ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
             Owner.ReceiveMessage(new StopFollowing(this));
-            Owner.ReceiveMessage(new GotoPoint(this, path, 400));
+            Owner.ReceiveMessage(new GotoPoint(this, path, goal, 400));
         }
 
         /// <summary>
@@ -112,7 +113,9 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// The Detective Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdová cesta w1) locality to the Belvedere street (ulice p1)  locality right outside the Christine's door.
+        /// The Detective Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdová
+        /// cesta w1) locality to the Belvedere street (ulice p1) locality right outside the
+        /// Christine's door.
         /// </summary>
         private void JumpToBelvedereStreet2()
         {
@@ -121,14 +124,15 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// The detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1) locality to the
-        /// Christine's hall (hala p1) locality.
+        /// The detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)
+        /// locality to the Christine's hall (hala p1) locality.
         /// </summary>
         private void JumpToChristinesHall()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));
 
         /// <summary>
-        /// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his room (pokoj s1) locality.
+        /// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his
+        /// room (pokoj s1) locality.
         /// </summary>
         private void JumpToSweeneysRoom()
             => Owner.ReceiveMessage(new SetPosition(this, new Plane("1411, 974"), true));

@@ -54,9 +54,19 @@ namespace Game.Entities
         private bool _followPlayer;
 
         /// <summary>
+        /// The goal that Tuttle is just going to.
+        /// </summary>
+        private Vector2 _goal;
+
+        /// <summary>
         /// Stores the current shortest track towards the Detective Chipotle NPC.
         /// </summary>
         private Queue<Vector2> _path;
+
+        /// <summary>
+        /// Measures elapsed time from the last attempt of finding a path.
+        /// </summary>
+        private int _pathFinderTimer;
 
         /// <summary>
         /// Reference to the Detective Chipotle NPC
@@ -64,9 +74,20 @@ namespace Game.Entities
         private Entity _player;
 
         /// <summary>
+        /// Specifies if Tuttle should start approaching to player when a new path is found after
+        /// walk was interrupted.
+        /// </summary>
+        private bool _restartApproaching;
+
+        /// <summary>
         /// Specifies the length of one step in milliseconds.
         /// </summary>
         private float _stepInterval;
+
+        /// <summary>
+        /// Specifies if Tuttle should repeatedly try to find a path to the current goal.
+        /// </summary>
+        private bool _tryFindPath;
 
         /// <summary>
         /// Specifies if the NPC is currently walking.
@@ -102,9 +123,7 @@ namespace Game.Entities
         public override void Update()
         {
             base.Update();
-
-            if (_walk)
-                PerformWalk();
+            PerformWalk();
         }
 
         /// <summary>
@@ -130,6 +149,28 @@ namespace Game.Entities
                 return 300;
 
             return 150;
+        }
+
+        private void FindNewPath()
+        {
+            if (_pathFinderTimer < 100)
+            {
+                _pathFinderTimer++;
+                return;
+            }
+
+            _path = _finder.FindPath(_area.Center, _goal);
+
+            if (_path == null)
+                return;
+
+            _tryFindPath = false;
+            _pathFinderTimer = 0;
+            if (_restartApproaching)
+            {
+                _restartApproaching = false;
+                GoToPlayer();
+            }
         }
 
         /// <summary>
@@ -161,15 +202,18 @@ namespace Game.Entities
         private void GoToPlayer()
         {
             _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
-            Vector2? target = FindPlaceNearPlayer();
+            Vector2? tempGoal = FindPlaceNearPlayer();
 
-            if (!target.HasValue)
+            if (!tempGoal.HasValue)
                 return;
-            _path = _finder.FindPath(_area.Center, (Vector2)target);
+
+            Vector2 goal = (Vector2)tempGoal;
+            _path = _finder.FindPath(_area.Center, goal);
 
             if (_path == null)
                 return;
 
+            _goal = goal;
             _approachToPlayer = _walk = true;
             _walkSpeed = ComputeWalkSpeed(GetDistanceFromPlayer());
             _stepInterval = 0;
@@ -267,6 +311,15 @@ namespace Game.Entities
         /// </summary>
         private void PerformWalk()
         {
+            if (!_walk)
+                return;
+
+            if (_tryFindPath)
+            {
+                FindNewPath();
+                return;
+            }
+
             if (_approachToPlayer)
                 CheckDistanceFromPlayer();
 
@@ -298,7 +351,17 @@ namespace Game.Entities
             Tile targetTile = World.Map[target.Center];
 
             if (!targetTile.Walkable && (targetTile.IsOccupied && targetTile.Object != Owner))
-                throw new InvalidOperationException("Lost");
+            {
+                _tryFindPath = true;
+
+                if (_approachToPlayer)
+                {
+                    _restartApproaching = true;
+                    StopApproachingToPlayer();
+                }
+
+                return;
+            }
 
             // The road is clear! Move!
             SetPosition(target);
