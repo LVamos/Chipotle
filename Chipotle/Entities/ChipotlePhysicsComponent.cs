@@ -325,7 +325,7 @@ namespace Game.Entities
         {
             Vector2 me = _area.Center;
 
-            GameObject o = 
+            GameObject o =
                 World.GetNearestObjects(me)
                 .Where(obj => obj.Locality == _area.GetLocality())
                 .FirstOrDefault();
@@ -339,7 +339,7 @@ namespace Game.Entities
             Vector2 point = o.Area.GetClosestPointTo(me);
             double x = point.X - me.X;
             double y = point.Y - me.Y;
-            double z = Math.Round(Math.Sqrt(Math.Pow(x, 2) +Math.Pow(y, 2)));
+            double z = Math.Round(Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)));
             double r = Math.Atan2(y, x);
             Angle angle = new Angle(r) + Orientation.Angle;
             double degrees = Math.Round(angle.CartesianDegrees);
@@ -352,7 +352,8 @@ namespace Game.Entities
             else if (degrees >= 135 && degrees < 225)
                 msg += " za tebou";
             else msg += " nalevo";
-            Tolk.Speak(msg + degrees.ToString());
+
+            Tolk.Speak(msg);
         }
 
         /// <summary>
@@ -434,7 +435,6 @@ namespace Game.Entities
 
             return false;
         }
-
 
         /// <summary>
         /// Relocates the NPC near the car of the Detective Chipotle NPC if the car has moved recently.
