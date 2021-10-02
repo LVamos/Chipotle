@@ -1,2 +1,0 @@
-//todo Vyøešit problém s pinvoke stack inballance (v OpenTK pøedìlat dllinport, nastavit callingconvention na cdecl
-						)

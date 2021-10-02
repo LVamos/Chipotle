@@ -1,2 +1,0 @@
-Složka experimenty (obsahuje rùzné testy a pokusy, které by se mohly eventuelnì nìkdy použít)
-Projekty IrrklangTest a AudioTest (dva pokusy s Irrklangem, teï nevím, která je která)
