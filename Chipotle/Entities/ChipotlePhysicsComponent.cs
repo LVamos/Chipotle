@@ -45,16 +45,6 @@ namespace Game.Entities
         private int _phoneInterval;
 
         /// <summary>
-        /// Specifies how many degrees remain to finish an ongoing rotation.
-        /// </summary>
-        private int _plannedRotations;
-
-        /// <summary>
-        /// specifies how quickly the NPC rotates.
-        /// </summary>
-        private int _rotationStep;
-
-        /// <summary>
         /// Indicates if the NPC is sitting at a table in the pub (výčep h1) locality.
         /// </summary>
         private bool _sittingAtPubTable;
@@ -132,7 +122,6 @@ namespace Game.Entities
         public override void Update()
         {
             base.Update();
-            UpdateRotation();
             CountPhone();
         }
 
@@ -334,26 +323,36 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnSayNearestObject(SayNearestObject message)
         {
-            GameObject o = World.GetNearestObjects(_area.UpperLeftCorner).Where(obj => obj.Locality == _area.GetLocality()).FirstOrDefault();
+            Vector2 me = _area.Center;
+
+            GameObject o = 
+                World.GetNearestObjects(me)
+                .Where(obj => obj.Locality == _area.GetLocality())
+                .FirstOrDefault();
+
             if (o == null)
             {
                 Tolk.Speak("Nic tu není");
                 return;
             }
+
+            Vector2 point = o.Area.GetClosestPointTo(me);
+            double x = point.X - me.X;
+            double y = point.Y - me.Y;
+            double z = Math.Round(Math.Sqrt(Math.Pow(x, 2) +Math.Pow(y, 2)));
+            double r = Math.Atan2(y, x);
+            Angle angle = new Angle(r) + Orientation.Angle;
+            double degrees = Math.Round(angle.CartesianDegrees);
+
             string msg = o.Name.Friendly;
-
-            if (o.Area.LowerRightCorner.Y > _area.Center.Y)
+            if (degrees >= 315 || degrees < 45)
                 msg += " před tebou";
-            else if (o.Area.UpperRightCorner.Y < _area.Center.Y)
+            else if (degrees >= 45 && degrees < 135)
+                msg += " napravo";
+            else if (degrees >= 135 && degrees < 225)
                 msg += " za tebou";
-            {
-                if (o.Area.UpperRightCorner.X < _area.Center.X)
-                    msg += " vlevo";
-                else
-                    msg += " vpravo";
-            }
-
-            Tolk.Speak(msg);
+            else msg += " nalevo";
+            Tolk.Speak(msg + degrees.ToString());
         }
 
         /// <summary>
@@ -369,8 +368,8 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnTurnEntity(TurnEntity message)
         {
-            _rotationStep = message.Degrees >= 0 ? 5 : -5;
-            _plannedRotations = Math.Abs(message.Degrees);
+            _orientation.Rotate(message.Degrees);
+            Owner.ReceiveMessage(new TurnEntityResult(this, _orientation));
         }
 
         /// <summary>
@@ -436,21 +435,6 @@ namespace Game.Entities
             return false;
         }
 
-        /// <summary>
-        /// Performs the planned rotation movement of the NPC.
-        /// </summary>
-        /// <completionlist cref="_plannedRotations"/>
-        private void UpdateRotation()
-        {
-            if (_plannedRotations > 0)
-            {
-                _orientation.Rotate(_rotationStep);
-                _plannedRotations -= 5;
-
-                if (_plannedRotations == 0)
-                    Owner.ReceiveMessage(new TurnEntityResult(this, _orientation));
-            }
-        }
 
         /// <summary>
         /// Relocates the NPC near the car of the Detective Chipotle NPC if the car has moved recently.

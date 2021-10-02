@@ -120,11 +120,11 @@ namespace Game.Terrain
         /// Rotates the orientation.
         /// </summary>
         /// <param name="compassDegrees">Specifies how much the orientation should be rotated</param>
-        public void Rotate(float compassDegrees)
+        public void Rotate(double compassDegrees)
         {
-            float radians = Angle.DegreesToRadians(-compassDegrees);
-            float cos = (float)Cos(radians);
-            float sin = (float)Sin(radians);
+            double radians = Angle.DegreesToRadians(-compassDegrees);
+            double cos = Cos(radians);
+            double sin = Sin(radians);
 
             if (compassDegrees == -90)
                 _unitVector = _unitVector.PerpendicularLeft;
@@ -133,7 +133,7 @@ namespace Game.Terrain
             else if (Abs(compassDegrees) == 180)
                 _unitVector = _unitVector.PerpendicularRight.PerpendicularRight;
             else
-                _unitVector = new Vector2(cos * _unitVector.X - sin * _unitVector.Y, sin * _unitVector.X + cos * _unitVector.Y);
+                _unitVector = new Vector2((float)(cos * _unitVector.X - sin * _unitVector.Y), (float)(sin * _unitVector.X + cos * _unitVector.Y));
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="v">The unit vector to be converted</param>
         /// <returns>Result of tghe conversion</returns>
-        private float VectorToRadians(Vector2 v)
-                                    => (float)Atan2(v.Y, v.X);
+        private double VectorToRadians(Vector2 v)
+                                    => Atan2(v.Y, v.X);
     }
 }

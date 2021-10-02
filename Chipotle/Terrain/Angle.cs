@@ -14,29 +14,29 @@ namespace Game.Terrain
         /// <summary>
         /// Value of the angle in radians
         /// </summary>
-        private float _radians;
+        private double _radians;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="radians">An angle in radians</param>
-        public Angle(float radians = 0)
+        public Angle(double radians = 0)
             => _radians = NormalizeRadians(radians);
 
         /// <summary>
         /// The angle in cartesian degrees
         /// </summary>
-        public float CartesianDegrees => RadiansToCartesianDegrees(Radians);
+        public double CartesianDegrees => RadiansToCartesianDegrees(Radians);
 
         /// <summary>
         /// The angle in compass degrees
         /// </summary>
-        public float CompassDegrees => CartesianToCompas(CartesianDegrees);
+        public double CompassDegrees => CartesianToCompas(CartesianDegrees);
 
         /// <summary>
         /// Value of the angle in radians
         /// </summary>
-        public float Radians
+        public double Radians
         {
             get => _radians;
             set => _radians = NormalizeRadians(value);
@@ -47,15 +47,15 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="degrees">An angle in degrees</param>
         /// <returns>The angle in radians</returns>
-        public static float DegreesToRadians(float degrees)
-            => degrees * (float)PI / 180;
+        public static double DegreesToRadians(double degrees)
+            => degrees * PI / 180;
 
         /// <summary>
         /// Creates new instance of the Angle struct from a angle value in cartesian degrees.
         /// </summary>
         /// <param name="degrees">An angle in compass degrees</param>
         /// <returns>New instance of the Angle struct</returns>
-        public static Angle FromCartesianDegrees(float degrees)
+        public static Angle FromCartesianDegrees(double degrees)
             => new Angle(DegreesToRadians(degrees));
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Game.Terrain
         /// Converts an angle struct to degrees.
         /// </summary>
         /// <param name="a">An angle</param>
-        public static implicit operator float(Angle a)
+        public static implicit operator double(Angle a)
             => a.Radians;
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Game.Terrain
         /// <returns>The cardinal direction</returns>
         public CardinalDirection GetCardinalDirection()
         {
-            float d = CompassDegrees;
+            double d = Math.Round(CompassDegrees);
             if (d >= 0 && d < 45)
                 return CardinalDirection.North;
 
@@ -244,7 +244,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="cartesianDegrees">An angle in cartesian degrees</param>
         /// <returns>The angle in compass degrees</returns>
-        private static float CartesianToCompas(float cartesianDegrees)
+        private static double CartesianToCompas(double cartesianDegrees)
             => NormalizeDegrees(450 - cartesianDegrees);
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="compassDegrees">The value in compass degrees</param>
         /// <returns>The angle in cartesian degrees</returns>
-        private static float CompassToCartesian(float compassDegrees)
+        private static double CompassToCartesian(float compassDegrees)
             => NormalizeDegrees(360 + 90 - compassDegrees);
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="degrees">The angle value to be normalized</param>
         /// <returns>Value of the normalized angle</returns>
-        private static float NormalizeDegrees(float degrees)
+        private static double NormalizeDegrees(double degrees)
             => MathHelper.Modulo(degrees, 360);
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="radians">The angle value to be normalized</param>
         /// <returns>Value of the normalized angle</returns>
-        private static float NormalizeRadians(float radians)
+        private static double NormalizeRadians(double radians)
             => MathHelper.Modulo(radians, 2 * (float)PI);
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="radians">An angle in radians</param>
         /// <returns>The angle in cartesian degrees</returns>
-        private static float RadiansToCartesianDegrees(float radians)
+        private static double RadiansToCartesianDegrees(double radians)
             => NormalizeDegrees((float)(radians * 180 / PI));
     }
 }

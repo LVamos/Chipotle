@@ -37,12 +37,12 @@ namespace Luky
         /// <param name="a">Avalue to divide</param>
         /// <param name="n">Modulo range</param>
         /// <returns>Value in range 0..n</returns>
-        public static float Modulo(float a, float n)
+        public static double Modulo(double a, double n)
         {
             if (n == 0)
                 throw new DivideByZeroException(nameof(n));
 
-            float remainder = a % n; // puts a in the [-n+1, n-1] range using the remainder operator.
+            double remainder = a % n; // puts a in the [-n+1, n-1] range using the remainder operator.
 
             if ((n > 0 && remainder < 0) || (n < 0 && remainder > 0))
                 return remainder + n;
