@@ -91,6 +91,7 @@ namespace Game.Entities
             Tile targetTile = World.Map[target.Center];
             Locality sourceLocality = _area?.GetLocality();
             Locality targetLocality = target.GetLocality();
+            Plane source = _area;
 
             if (_area != null)
                 DisAppear();
@@ -99,7 +100,7 @@ namespace Game.Entities
             _area = new Plane(target);
 
             // Announce changes
-            Owner.ReceiveMessage(new PositionChanged(this, _area));
+            Owner.ReceiveMessage(new PositionChanged(this, source, target));
 
             if (!silently)
             {

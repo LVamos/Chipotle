@@ -180,17 +180,22 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         protected void OnPositionChanged(PositionChanged message)
         {
-            _area = message.Area;
-            RecordLocality();
+            _area = message.TargetPosition;
+
+            Locality source = message.SourcePosition?.GetLocality();
+            Locality target = message.TargetPosition.GetLocality();
+
+            if (source != null && source != target)
+                RecordLocality(source);
+
             _ai?.ReceiveMessage(message);
         }
 
         /// <summary>
         /// Records the current locality as visited.
         /// </summary>
-        protected void RecordLocality()
+        protected void RecordLocality(Locality locality)
         {
-            Locality locality = _area.GetLocality();
             if (!VisitedLocalities.Contains(locality))
                 _visitedLocalities.Add(locality);
         }

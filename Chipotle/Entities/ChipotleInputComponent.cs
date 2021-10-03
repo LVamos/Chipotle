@@ -41,10 +41,9 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
-                // Shortcuts for testing purposes
-
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
+                [new KeyShortcut(Keys.V)] = VisitedLocality,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight,
 
@@ -196,5 +195,11 @@ namespace Game.Entities
         /// </summary>
         private void TurnSharplyRight()
 => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyRight));
+
+        /// <summary>
+        /// Reports if the player have already visited the current locality.
+        /// </summary>
+        private void VisitedLocality()
+            => Owner.ReceiveMessage(new SayVisitedLocality(this));
     }
 }

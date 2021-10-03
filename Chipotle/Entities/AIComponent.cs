@@ -40,8 +40,8 @@ namespace Game.Entities
         /// <summary>
         /// Processes the PositionChanged message.
         /// </summary>
-        /// <param name="m">The message to be processed</param>
-        protected void OnPositionChanged(PositionChanged m)
-            => _area = m.Area;
+        /// <param name="message">The message to be processed</param>
+        protected void OnPositionChanged(PositionChanged message)
+            => _area = message.TargetPosition;
     }
 }

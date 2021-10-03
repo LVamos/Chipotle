@@ -97,10 +97,8 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>()
                 {
-                    // Test messages
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
-
-                    // Other messages
+                    [typeof(SayVisitedLocality)] = (message) => OnSayVisitedLocality((SayVisitedLocality)message),
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
@@ -302,7 +300,6 @@ namespace Game.Entities
 
             // The road is clear! Move!
             SetPosition(targetTile.Position);
-            RecordLocality(targetTile.Locality);
 
             // Inform Tuttle
             if (!IsTuttleNearBy())
@@ -366,6 +363,17 @@ namespace Game.Entities
             => Tolk.Speak(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
 
         /// <summary>
+        /// Processes the SayVisitedLocality message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnSayVisitedLocality(SayVisitedLocality message)
+        {
+            if (_visitedLocalities.Contains(_area.GetLocality()))
+                Tolk.Speak("Jo jo");
+            else Tolk.Speak("Ne");
+        }
+
+        /// <summary>
         /// Processes the TurnEntity message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
@@ -404,16 +412,6 @@ namespace Game.Entities
         /// </summary>
         private void QuitGame()
             => World.QuitGame();
-
-        /// <summary>
-        /// Records the specified locality as visited.
-        /// </summary>
-        /// <param name="locality">The locality to be recorded</param>
-        private void RecordLocality(Locality locality)
-        {
-            if (!_visitedLocalities.Contains(locality))
-                _visitedLocalities.Add(locality);
-        }
 
         /// <summary>
         /// He puts the NPC on its feet if it is sitting and plays the appropriate sound.

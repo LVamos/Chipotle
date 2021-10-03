@@ -9,16 +9,27 @@ namespace Game.Messaging.Events
     public class PositionChanged : GameMessage
     {
         /// <summary>
+        /// Original position of the NPC
+        /// </summary>
+        public readonly Plane SourcePosition;
+
+        /// <summary>
         /// New position of the NPC
         /// </summary>
-        public readonly Plane Area;
+        public readonly Plane TargetPosition;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="area">New position of the NPC</param>
-        public PositionChanged(object sender, Plane area) : base(sender)
-            => Area = new Plane(area);
+        /// <param name="sourcePosition">Original position of the NPC</param>
+        /// <param name="targetPosition">New position of the NPC</param>
+        public PositionChanged(object sender, Plane sourcePosition, Plane targetPosition) : base(sender)
+        {
+            if (sourcePosition != null)
+                SourcePosition = new Plane(sourcePosition);
+
+            TargetPosition = new Plane(targetPosition);
+        }
     }
 }
