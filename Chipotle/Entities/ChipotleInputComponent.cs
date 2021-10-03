@@ -17,7 +17,7 @@ namespace Game.Entities
         /// <summary>
         /// Determines how quickly the game reacts to movement commands. The speed is in milliseconds.
         /// </summary>
-        private const int _keyboardSpeed = 20;
+        private const int _keyboardSpeed = 10;
 
         /// <summary>
         /// Measures time from the last arrow key press.
@@ -98,6 +98,7 @@ namespace Game.Entities
 
             if (
                 (key == Keys.Left || key == Keys.Up || key == Keys.Right || key == Keys.Down)
+                && !message.Shortcut.Control
                 && _keyboardTimer < _keyboardSpeed)
                 return;
 
