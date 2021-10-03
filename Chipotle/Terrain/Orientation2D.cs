@@ -47,7 +47,7 @@ namespace Game.Terrain
         /// <summary>
         /// The orientation converted to an angle
         /// </summary>
-        public Angle Angle 
+        public Angle Angle
             => new Angle(VectorToRadians(UnitVector));
 
         /// <summary>
@@ -70,7 +70,6 @@ namespace Game.Terrain
         public static implicit operator Orientation2D(Vector3 v)
             => new Orientation2D(new Vector2(v.X, v.Z));
 
-
         /// <summary>
         /// Converts a <see cref="Vector2"/> struct to <see cref="Orientation2D"/>.
         /// </summary>
@@ -78,14 +77,12 @@ namespace Game.Terrain
         public static implicit operator Orientation2D(Vector2 v)
             => new Orientation2D(v);
 
-
         /// <summary>
         /// Converts a <see cref="Angle"/> struct to <see cref="Orientation2D"/>.
         /// </summary>
         /// <param name="a">The angle struct to be converted</param>
         public static implicit operator Orientation2D(Angle a)
             => new Orientation2D(RadiansToVector2(a));
-
 
         /// <summary>
         /// Converts a <see cref="Orientation2D"/> struct to <see cref="Vector3"/>.
@@ -119,21 +116,22 @@ namespace Game.Terrain
         /// <summary>
         /// Rotates the orientation.
         /// </summary>
-        /// <param name="compassDegrees">Specifies how much the orientation should be rotated</param>
-        public void Rotate(double compassDegrees)
+        /// <param name="degrees">Specifies how much the orientation should be rotated</param>
+        public void Rotate(double degrees)
         {
-            double radians = Angle.DegreesToRadians(-compassDegrees);
-            double cos = Cos(radians);
-            double sin = Sin(radians);
-
-            if (compassDegrees == -90)
+            if (degrees == -90)
                 _unitVector = _unitVector.PerpendicularLeft;
-            else if (compassDegrees == 90)
+            else if (degrees == 90)
                 _unitVector = _unitVector.PerpendicularRight;
-            else if (Abs(compassDegrees) == 180)
+            else if (Abs(degrees) == 180)
                 _unitVector = _unitVector.PerpendicularRight.PerpendicularRight;
             else
+            {
+                double radians = Angle.DegreesToRadians(degrees);
+                double cos = Cos(radians);
+                double sin = -Sin(radians);
                 _unitVector = new Vector2((float)(cos * _unitVector.X - sin * _unitVector.Y), (float)(sin * _unitVector.X + cos * _unitVector.Y));
+            }
         }
 
         /// <summary>

@@ -272,7 +272,9 @@ namespace Game.Entities
                 finalOrientation.Rotate(message.Direction);
 
             // Is the terrain occupable?
-            Tile targetTile = GetNextTile(finalOrientation) ?? throw new InvalidOperationException($"{nameof(OnMakeStep)}: empty tile."); // Null test
+            Tile targetTile = GetNextTile(finalOrientation);
+            if (targetTile == null)
+                return;
 
             if (!targetTile.Permeable)
             {
@@ -341,8 +343,8 @@ namespace Game.Entities
             double y = point.Y - me.Y;
             double z = Math.Round(Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)));
             double r = Math.Atan2(y, x);
-            Angle angle = new Angle(r) + Orientation.Angle;
-            double degrees = Math.Round(angle.CartesianDegrees);
+            Angle angle = new Angle(r) + Angle.FromCartesianDegrees(_orientation.Angle.CompassDegrees);
+            double degrees = Math.Round(angle.CompassDegrees);
 
             string msg = o.Name.Friendly;
             if (degrees >= 315 || degrees < 45)
