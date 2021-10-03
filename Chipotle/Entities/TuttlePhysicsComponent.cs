@@ -251,6 +251,7 @@ namespace Game.Entities
         private void OnGotoPoint(GotoPoint message)
         {
             _path = message.Path;
+            _goal = message.Goal;
             _walkSpeed = message.StepLength;
             _walk = true;
         }
