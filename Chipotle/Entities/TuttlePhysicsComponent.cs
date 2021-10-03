@@ -153,7 +153,7 @@ namespace Game.Entities
 
         private void FindNewPath()
         {
-            if (_pathFinderTimer < 100)
+            if (_pathFinderTimer < 30)
             {
                 _pathFinderTimer++;
                 return;
