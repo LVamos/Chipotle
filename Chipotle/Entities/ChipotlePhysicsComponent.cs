@@ -398,7 +398,7 @@ namespace Game.Entities
             // Detect object in front of Chipotle.
             Tile tileInFront = GetNextTile();
 
-            if (tileInFront.Object != null)
+            if (tileInFront != null && tileInFront.Object != null)
                 tileInFront.Object.ReceiveMessage(new UseObject(Owner, tileInFront));
         }
 
