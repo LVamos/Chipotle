@@ -368,7 +368,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnSayVisitedLocality(SayVisitedLocality message)
         {
-            if (_visitedLocalities.Contains(_area.GetLocality()))
+            if (Owner.VisitedLocalities.Contains(_area.GetLocality()))
                 Tolk.Speak("Jo jo");
             else Tolk.Speak("Ne");
         }
