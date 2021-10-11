@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
 using DavyKager;
 
@@ -176,16 +175,8 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnObjectsCollided(ObjectsCollided message)
         {
-            GameObject collidingObject = message.Tile.Object;
-
-            // Announce
-            Timer t = new Timer
-            {
-                Interval = 500
-            };
-            t.Tick += (object s, EventArgs e) => { Tolk.Speak(collidingObject.Name.Friendly); t.Stop(); };
-            t.Start();
             _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true);
+            Tolk.Speak(message.Tile.Object.Name.Friendly);
         }
 
         /// <summary>
