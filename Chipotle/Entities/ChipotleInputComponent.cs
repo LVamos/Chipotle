@@ -20,11 +20,6 @@ namespace Game.Entities
         private const int _keyboardSpeed = 10;
 
         /// <summary>
-        /// Measures time from the last arrow key press.
-        /// </summary>
-        private int _keyboardTimer;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         public ChipotleInputComponent() : base()
@@ -37,6 +32,13 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
+
+            RegisterMessages(
+                new Dictionary<Type, Action<Messaging.GameMessage>>
+                {
+                    [typeof(KeyReleased)] = (message) => OnKeyUp((KeyReleased)message)
+                }
+                );
 
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
@@ -63,17 +65,6 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Processes incoming messages.
-        /// </summary>
-        public override void Update()
-        {
-            base.Update();
-
-            if (_keyboardTimer < _keyboardSpeed)
-                _keyboardTimer++;
-        }
-
-        /// <summary>
         /// Processes the CutsceneBegan message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
@@ -88,21 +79,21 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Processes the KeyDown message.
+        /// Processes the KeyUp message.
         /// </summary>
         /// <param name="message">The message</param>
-        protected override void OnKeyDown(KeyPressed message)
+        protected void OnKeyUp(KeyReleased message)
         {
-            Keys key = message.Shortcut.Key;
+            HashSet<KeyShortcut> walkCommands = new HashSet<KeyShortcut>()
+            {
+                new KeyShortcut(Keys.Up),
+                new KeyShortcut(Keys.Down),
+                new KeyShortcut(false, true, false, Keys.Left),
+                new KeyShortcut(false, true, false, Keys.Right)
+            };
 
-            if (
-                (key == Keys.Left || key == Keys.Up || key == Keys.Right || key == Keys.Down)
-                && !message.Shortcut.Control
-                && _keyboardTimer < _keyboardSpeed)
-                return;
-
-            _keyboardTimer = 0;
-            base.OnKeyDown(message);
+            if (walkCommands.Contains(message.Shortcut))
+                StopWalk();
         }
 
         /// <summary>
@@ -115,25 +106,25 @@ namespace Game.Entities
         /// Moves the NPC one step back.
         /// </summary>
         private void MoveBack()
-            => Owner.ReceiveMessage(new MakeStep(this, TurnType.Around));
+            => Owner.ReceiveMessage(new StartWalk(this, TurnType.Around));
 
         /// <summary>
         /// Moves the NPC one step forth.
         /// </summary>
         private void MoveForward()
-            => Owner.ReceiveMessage(new MakeStep(this, TurnType.None));
+            => Owner.ReceiveMessage(new StartWalk(this, TurnType.None));
 
         /// <summary>
         /// Moves the NPC one step to the left perpendicullar to current orientation.
         /// </summary>
         private void MoveLeft()
-             => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyLeft));
+             => Owner.ReceiveMessage(new StartWalk(this, TurnType.SharplyLeft));
 
         /// <summary>
         /// Moves the NPC one step to the right perpendicullar to current orientation.
         /// </summary>
         private void MoveRight()
-            => Owner.ReceiveMessage(new MakeStep(this, TurnType.SharplyRight));
+            => Owner.ReceiveMessage(new StartWalk(this, TurnType.SharplyRight));
 
         /// <summary>
         /// Announces the public name of the locality where the NPC is currently located using a
@@ -159,6 +150,12 @@ namespace Game.Entities
                 World.StopCutscene(Owner);
             }
         }
+
+        /// <summary>
+        /// Tells the physics to stop the Chipotle NPC.
+        /// </summary>
+        private void StopWalk()
+            => Owner.ReceiveMessage(new StopWalk(this));
 
         /// <summary>
         /// Reports the terrain on which the NPC is standing.

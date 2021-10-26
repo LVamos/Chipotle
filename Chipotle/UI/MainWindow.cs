@@ -49,6 +49,7 @@ namespace Game.UI
             _tmrGameLoop.Enabled = false;
 
             KeyDown += MainWindow_KeyDown;
+            KeyUp += MainWindow_KeyUp;
             Shown += MainWindow_Shown;
         }
 
@@ -72,6 +73,12 @@ namespace Game.UI
         /// </summary>
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
             => WindowHandler.OnKeyDown(new KeyEventParams(e));
+
+        /// <summary>
+        /// Handler of the KeyUp event
+        /// </summary>
+        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+                        => WindowHandler.OnKeyUp(new KeyEventParams(e));
 
         /// <summary>
         /// Handler of the Shown event

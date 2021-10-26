@@ -19,6 +19,26 @@ namespace Game.Entities
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
+        /// Time interval for backward walk
+        /// </summary>
+        private const int _backwardWalkSpeed = 30;
+
+        /// <summary>
+        /// Time interval for forward walk
+        /// </summary>
+        private const int _forwardWalkSpeed = 20;
+
+        /// <summary>
+        /// Determines maximum time between particullar steps.
+        /// </summary>
+        private const int _maxTimeBetweenSteps = _sideWalkSpeed;
+
+        /// <summary>
+        /// Time interval for walk to the side
+        /// </summary>
+        private const int _sideWalkSpeed = 50;
+
+        /// <summary>
         /// Stores references to all the localities the NPC has visited.
         /// </summary>
         private readonly HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
@@ -45,6 +65,11 @@ namespace Game.Entities
         private int _phoneInterval;
 
         /// <summary>
+        /// Indicates if the player released keys after a step to the side was performed.
+        /// </summary>
+        private bool _sideStepInProgress;
+
+        /// <summary>
         /// Indicates if the NPC is sitting at a table in the pub (výčep h1) locality.
         /// </summary>
         private bool _sittingAtPubTable;
@@ -55,9 +80,34 @@ namespace Game.Entities
         private bool _sittingOnChair;
 
         /// <summary>
+        /// stores information about walk.
+        /// </summary>
+        private StartWalk _startWalkMessage;
+
+        /// <summary>
         /// Indicates if the NPC stepped into the puddle in the pool (bazén w1) locality.
         /// </summary>
         private bool _steppedIntoPuddle;
+
+        /// <summary>
+        /// Counts time from the last step.
+        /// </summary>
+        private int _timeFromLastStep;
+
+        /// <summary>
+        /// Indicates if the Chipotle NPC is currently walking.
+        /// </summary>
+        private bool _walking;
+
+        /// <summary>
+        /// Sets time interval between steps.
+        /// </summary>
+        private int _walkSpeed;
+
+        /// <summary>
+        /// Measures time from last step.
+        /// </summary>
+        private int _walkTimer;
 
         /// <summary>
         /// Returns reference to the asphalt road (asfaltka c1) locality.
@@ -97,6 +147,7 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>()
                 {
+                    [typeof(StopWalk)] = (message) => OnStopWalk((StopWalk)message),
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
                     [typeof(SayVisitedLocality)] = (message) => OnSayVisitedLocality((SayVisitedLocality)message),
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
@@ -104,7 +155,7 @@ namespace Game.Entities
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
                     [typeof(SayNearestObject)] = (m) => OnSayNearestObject((SayNearestObject)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
-                    [typeof(MakeStep)] = (m) => OnMakeStep((MakeStep)m),
+                    [typeof(StartWalk)] = (m) => OnStartWalk((StartWalk)m),
                     [typeof(TurnEntity)] = (message) => OnTurnEntity((TurnEntity)message),
                     [typeof(UseObject)] = (message) => OnUseObject((UseObject)message)
                 }
@@ -121,6 +172,7 @@ namespace Game.Entities
         {
             base.Update();
             CountPhone();
+            PerformWalk();
         }
 
         /// <summary>
@@ -248,20 +300,12 @@ namespace Game.Entities
             => SetPosition(2006, 1166, true);
 
         /// <summary>
-        /// Processes the ChipotlesCarMoved message.
+        /// Performs one step in direction specified in the _startWalkMessage field.
         /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
-=> _carMovement = message;
-
-        /// <summary>
-        /// Processes the MakeStep message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnMakeStep(MakeStep message)
+        private void MakeStep()
         {
-            if (StandUp())
-                return;
+            StartWalk message = _startWalkMessage
+                ?? throw new ArgumentNullException(nameof(_startWalkMessage));
 
             // Get target coordinates
             Orientation2D finalOrientation = _orientation;
@@ -300,6 +344,7 @@ namespace Game.Entities
 
             // The road is clear! Move!
             SetPosition(targetTile.Position);
+            _timeFromLastStep = 0;
 
             // Inform Tuttle
             if (!IsTuttleNearBy())
@@ -308,6 +353,13 @@ namespace Game.Entities
             WatchPuddle(targetTile.Position); // Check if player walked in a puddle
             WatchPhone();
         }
+
+        /// <summary>
+        /// Processes the ChipotlesCarMoved message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
+=> _carMovement = message;
 
         /// <summary>
         /// Processes the SayLocality message.
@@ -374,6 +426,58 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Processes the MakeStep message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnStartWalk(StartWalk message)
+        {
+            if (_walking || StandUp())
+                return;
+
+            _startWalkMessage = message;
+
+            // Allow only single steps when walking to the side.
+            if (message.Direction == TurnType.SharplyLeft || message.Direction == TurnType.SharplyRight)
+            {
+                if (!_sideStepInProgress && _timeFromLastStep >= _sideWalkSpeed)
+                {
+                    MakeStep();
+                    _sideStepInProgress = true;
+                }
+
+                return;
+            }
+
+            // Set walk speed
+            int walkSpeed;
+            switch (message.Direction)
+            {
+                case TurnType.SharplyLeft: case TurnType.SharplyRight: walkSpeed = _sideWalkSpeed; break;
+                case TurnType.Around: walkSpeed = _backwardWalkSpeed; break;
+                default: walkSpeed = _forwardWalkSpeed; break;
+            }
+
+            if (_timeFromLastStep < walkSpeed)
+                return;
+
+            _walkSpeed = walkSpeed;
+            MakeStep();
+            _walkTimer = 0;
+            _walking = true;
+        }
+
+        /// <summary>
+        /// Processes the StopWalk message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnStopWalk(StopWalk message)
+        {
+            _walking = false;
+            _sideStepInProgress = false;
+            _startWalkMessage = null;
+        }
+
+        /// <summary>
         /// Processes the TurnEntity message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
@@ -400,6 +504,22 @@ namespace Game.Entities
 
             if (tileInFront != null && tileInFront.Object != null)
                 tileInFront.Object.ReceiveMessage(new UseObject(Owner, tileInFront));
+        }
+
+        /// <summary>
+        /// Controlls walk of the Chipotle NPC.
+        /// </summary>
+        private void PerformWalk()
+        {
+            if (_walking && _walkTimer >= _walkSpeed)
+            {
+                _walkTimer = 0;
+                MakeStep();
+            }
+            _walkTimer++;
+
+            if (_timeFromLastStep < _maxTimeBetweenSteps)
+                _timeFromLastStep++;
         }
 
         /// <summary>

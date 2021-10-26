@@ -7,7 +7,7 @@ namespace Game.Messaging.Commands
     /// Tells an NPC to make one step in the specified direction.
     /// </summary>
     /// <remarks>Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
-    public class MakeStep : TurnEntity
+    public class StartWalk : TurnEntity
     {
         /// <summary>
         /// Constructor
@@ -15,6 +15,6 @@ namespace Game.Messaging.Commands
         /// <param name="sender">Source of the message</param>
         /// <param name="direction">The direction in which the entity should move</param>
         /// <remarks><see cref="TurnType.None"/> will cause the NPC to move forward.</remarks>
-        public MakeStep(object sender, TurnType direction) : base(sender, direction) { }
+        public StartWalk(object sender, TurnType direction) : base(sender, direction) { }
     }
 }

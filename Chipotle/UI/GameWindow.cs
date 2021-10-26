@@ -38,6 +38,13 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// Processes the KeyUpmessage.
+        /// </summary>
+        /// <param name="e">The message to be handled</param>
+        public override void OnKeyUp(KeyEventParams e)
+            => World.Player.ReceiveMessage(new KeyReleased(this, new KeyShortcut(e)));
+
+        /// <summary>
         /// Quits the game.
         /// </summary>
         private void QuitGame()

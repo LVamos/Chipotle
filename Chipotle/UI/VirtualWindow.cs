@@ -77,6 +77,14 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// KeyUp event handler
+        /// </summary>
+        /// <param name="e">Event parameters</param>
+        /// <remarks>Must be implemented in descendants.</remarks>
+        public virtual void OnKeyUp(KeyEventParams e)
+        { }
+
+        /// <summary>
         /// Registers shotcuts and corresponding actions.
         /// </summary>
         /// <param name="shortcuts">Set of shortcuts to be registered</param>
