@@ -13,6 +13,7 @@ namespace Game.Entities
     /// <summary>
     /// Base class for all simple game objects
     /// </summary>
+    [Serializable]
     public class DumpObject : GameObject
     {
         /// <summary>

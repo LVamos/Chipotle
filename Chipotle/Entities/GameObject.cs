@@ -9,6 +9,7 @@ namespace Game.Entities
     /// <summary>
     /// A base class for all simple objects and NPCS
     /// </summary>
+    [Serializable]
     public class GameObject : MapElement
     {
         /// <summary>

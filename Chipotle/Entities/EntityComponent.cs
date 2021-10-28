@@ -11,6 +11,7 @@ namespace Game.Entities
     /// <summary>
     /// Base class for all NPC components
     /// </summary>
+    [Serializable]
     public abstract class EntityComponent : MessagingObject
     {
         /// <summary>

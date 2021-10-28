@@ -13,6 +13,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents one square tile on the game map.
     /// </summary>
+    [Serializable]
     public class Tile : DebugSO
     {
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Game.Messaging;
@@ -13,6 +14,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents an NPC.
     /// </summary>
+    [Serializable]
     public class Entity : GameObject
     {
         /// <summary>

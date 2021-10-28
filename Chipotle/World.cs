@@ -105,7 +105,7 @@ namespace Game
         /// <summary>
         /// Reference to the Detective Chipotle NPC (the main NPC)
         /// </summary>
-        public static Entity Player { get; private set; }
+        public static Entity Player => GetEntity("Chipotle");
 
         /// <summary>
         /// Registers an entity.
@@ -432,8 +432,7 @@ lLoop);
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());
             _objects.Foreach(p => p.Value.Start());
-            Player = Entity.CreateChipotle();
-            Add(Player);
+            Add(Entity.CreateChipotle());
             Add(Entity.CreateTuttle());
             Add(Entity.CreateCarson());
             Add(Entity.CreateBartender());
