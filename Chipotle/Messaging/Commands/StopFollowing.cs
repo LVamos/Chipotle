@@ -1,9 +1,14 @@
-﻿namespace Game.Messaging.Commands
+﻿using System;
+
+namespace Game.Messaging.Commands
 {
     /// <summary>
     /// Tells the Tuttle NPC to stop following the Detective Chipotle NPC.
     /// </summary>
-    /// <remarks>Can be sent only from inside the NPC from <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    /// <remarks>
+    /// Can be sent only from inside the NPC from <see cref="Game.Entities.EntityComponent"/> class.
+    /// </remarks>
+    [Serializable]
     public class StopFollowing : GameMessage
     {
         /// <summary>

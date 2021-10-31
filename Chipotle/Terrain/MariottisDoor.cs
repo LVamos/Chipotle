@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Luky;
 
@@ -7,8 +8,10 @@ using OpenTK;
 namespace Game.Terrain
 {
     /// <summary>
-    /// Represents the door between the hall of the Vanilla crunch company and (hala v1) locality and the office of the Paolo Mariotti office (kancelář v1) locality.
+    /// Represents the door between the hall of the Vanilla crunch company and (hala v1) locality
+    /// and the office of the Paolo Mariotti office (kancelář v1) locality.
     /// </summary>
+    [Serializable]
     public class MariottisDoor : Door
     {
         /// <summary>
@@ -22,7 +25,9 @@ namespace Game.Terrain
         /// <summary>
         /// Opens the door if possible.
         /// </summary>
-        /// <param name="coords">The coordinates of the place on the door that an NPC is pushing on</param>
+        /// <param name="coords">
+        /// The coordinates of the place on the door that an NPC is pushing on
+        /// </param>
         protected override void Open(Vector2 coords)
             => World.PlayCutscene(this, "cs11");
     }

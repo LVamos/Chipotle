@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Luky;
@@ -8,6 +9,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a passage between two localities.
     /// </summary>
+    [Serializable]
     public class Passage : MapElement
     {
         /// <summary>
@@ -96,7 +98,7 @@ namespace Game.Terrain
         /// </summary>
         protected override void Appear()
         {
-            Area.GetTiles().Foreach(t => t.Register(this));
+            Area.GetTiles().Foreach(t => t.tile.Register(World.GetLocality(t.position).DefaultTerrain));
             _localities.Foreach(l => l.Register(this));
         }
 
@@ -104,10 +106,7 @@ namespace Game.Terrain
         /// Erases the passage from the game world.
         /// </summary>
         protected override void Disappear()
-        {
-            _localities.ForEach(l => l.Unregister(this));
-            Area.GetTiles().Foreach(t => t.UnregisterPassage());
-        }
+            => _localities.ForEach(l => l.Unregister(this));
 
         /// <summary>
         /// Creates new instance of the garage door in the garage of the Vanilla crunch company

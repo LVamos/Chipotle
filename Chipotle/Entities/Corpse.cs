@@ -1,4 +1,6 @@
-﻿using Game.Terrain;
+﻿using System;
+
+using Game.Terrain;
 
 using Luky;
 
@@ -10,6 +12,7 @@ namespace Game.Entities
     /// <remarks>
     /// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 locality.
     /// </remarks>
+    [Serializable]
     public class Corpse : DumpObject
     {
         /// <summary>

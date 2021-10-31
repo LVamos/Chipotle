@@ -14,6 +14,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls movement of the Tuttle NPC.
     /// </summary>
+    [Serializable]
     public class TuttlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
@@ -263,7 +264,6 @@ namespace Game.Entities
         private void OnHide(Hide message)
         {
             StopFollowing();
-            DisAppear();
         }
 
         /// <summary>
@@ -286,7 +286,6 @@ namespace Game.Entities
         private void OnReveal(Reveal message)
         {
             _area = message.Location;
-            Appear(message.Location);
             StartFollowing();
         }
 
@@ -350,8 +349,8 @@ namespace Game.Entities
             // Get target tile
             Plane target = new Plane(_path.Dequeue());
             Tile targetTile = World.Map[target.Center];
-
-            if (!targetTile.Walkable && (targetTile.IsOccupied && targetTile.Object != Owner))
+            GameObject obj = World.GetObject(target.Center);
+            if (!World.IsWalkable(target.Center) && (obj != null && obj != Owner))
             {
                 _tryFindPath = true;
 

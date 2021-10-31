@@ -9,6 +9,7 @@ namespace Game.Terrain
     /// <summary>
     /// Offers methods for convenient angle handling.
     /// </summary>
+    [Serializable]
     public struct Angle
     {
         /// <summary>

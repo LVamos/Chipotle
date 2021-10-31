@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
@@ -10,6 +12,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the bin object in the Walsch's pool (bazén w1) locality.
     /// </summary>
+    [Serializable]
     public class PoolsideBin : DumpObject
     {
         /// <summary>

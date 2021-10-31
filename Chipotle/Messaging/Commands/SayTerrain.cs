@@ -1,9 +1,15 @@
-﻿namespace Game.Messaging.Commands
+﻿using System;
+
+namespace Game.Messaging.Commands
 {
     /// <summary>
     /// Tells an NPC to report the terrain it's currently standing on.
     /// </summary>
-    /// <remarks>Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    /// <remarks>
+    /// Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the
+    /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
+    /// </remarks>
+    [Serializable]
     public class SayTerrain : GameMessage
     {
         /// <summary>

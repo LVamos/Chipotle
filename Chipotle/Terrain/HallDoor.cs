@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Luky;
 
@@ -9,6 +10,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a door in the hall of the Vanilla crunch company (hala v1) locality.
     /// </summary>
+    [Serializable]
     public class HallDoor : Door
     {
         /// <summary>

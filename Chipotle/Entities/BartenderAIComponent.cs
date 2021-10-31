@@ -12,6 +12,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls the behavior of Bartender NPC.
     /// </summary>
+    [Serializable]
     public class BartenderAIComponent : AIComponent
     {
         private readonly Locality BonitaStreet = World.GetLocality("ulice h1");

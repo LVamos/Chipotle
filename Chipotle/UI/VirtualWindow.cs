@@ -9,6 +9,7 @@ namespace Game.UI
     /// <summary>
     /// Base class for all virtual windows
     /// </summary>
+    [Serializable]
     public abstract class VirtualWindow : DebugSO
     {
         /// <summary>

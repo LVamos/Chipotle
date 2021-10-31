@@ -173,7 +173,6 @@ namespace Game.Entities
         {
             Locality?.Unregister(this);
             World.Remove(this);
-            _area.GetTiles().Foreach(t => t.UnregisterObject());
         }
 
         /// <summary>

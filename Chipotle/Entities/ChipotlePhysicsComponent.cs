@@ -16,6 +16,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls movement of the Detective Chipotle NPC.
     /// </summary>
+    [Serializable]
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
@@ -82,6 +83,7 @@ namespace Game.Entities
         /// <summary>
         /// stores information about walk.
         /// </summary>
+        [NonSerialized]
         private StartWalk _startWalkMessage;
 
         /// <summary>
@@ -124,8 +126,8 @@ namespace Game.Entities
         /// <summary>
         /// Returns reference to the tile the NPC currently stands on.
         /// </summary>
-        private Tile CuurrentTile
-            => World.Map[_area.Center];
+        private (Vector2 position, Tile tile) CurrentTile
+            => (_area.Center, World.Map[_area.Center]);
 
         /// <summary>
         /// Returns reference to the Tuttle NPC.
@@ -180,7 +182,10 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneBegan(CutsceneBegan message)
-            => CatchSitting(message);
+        {
+            CatchSitting(message);
+            //World.SaveGame();
+        }
 
         /// <summary>
         /// Processes the CutsceneEnded message.
@@ -189,6 +194,7 @@ namespace Game.Entities
         protected override void OnCutsceneEnded(CutsceneEnded message)
         {
             base.OnCutsceneEnded(message);
+            World.SaveGame();
             WatchCar();
 
             switch (message.CutsceneName)
@@ -235,11 +241,11 @@ namespace Game.Entities
         /// <param name="direction">The direction of the tile to be found</param>
         /// <param name="step">The distance between the NPC and the tile to be found</param>
         /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
-        private Tile GetNextTile(Orientation2D direction, int step = 1)
+        private (Vector2 position, Tile tile) GetNextTile(Orientation2D direction, int step = 1)
         {
             Plane target = new Plane(_area);
             target.Move(direction, step);
-            return World.Map[target.Center];
+            return (target.Center, World.Map[target.Center]);
         }
 
         /// <summary>
@@ -248,7 +254,7 @@ namespace Game.Entities
         /// <param name="step">The distance between the NPC and the required tile</param>
         /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
         /// <completionlist cref="PhysicsComponent.Orientation"/>
-        private Tile GetNextTile(int step = 1)
+        private (Vector2 position, Tile tile) GetNextTile(int step = 1)
             => GetNextTile(Orientation, step);
 
         /// <summary>
@@ -314,43 +320,46 @@ namespace Game.Entities
                 finalOrientation.Rotate(message.Direction);
 
             // Is the terrain occupable?
-            Tile targetTile = GetNextTile(finalOrientation);
-            if (targetTile == null)
+            (Vector2 position, Tile tile) targetTile = GetNextTile(finalOrientation);
+            if (targetTile.tile == null)
                 return;
 
-            if (!targetTile.Permeable)
+            if (!targetTile.tile.Permeable)
             {
-                Owner.ReceiveMessage(new TerrainCollided(this, targetTile));
+                Owner.ReceiveMessage(new TerrainCollided(this, targetTile.position, targetTile.tile));
                 return;
             }
 
             // Isn't an entity or object over there?
-            if (targetTile.IsOccupied && targetTile.Object != Owner)
+            GameObject o = World.GetObject(targetTile.position);
+            if (o != null && o != Owner)
             {
-                Owner.ReceiveMessage(new ObjectsCollided(this, targetTile));
+                Owner.ReceiveMessage(new ObjectsCollided(this, o, targetTile.position, targetTile.tile));
                 return;
             }
 
             // Isn't a closed door over there?
-            if (targetTile.Passage != null && targetTile.Passage is Door)
+            Passage passage = World.GetPassage(targetTile.position);
+            if (passage != null && passage is Door door && door.Closed)
             {
-                Door door = targetTile.Passage as Door;
-                if (door.Closed)
-                {
-                    Owner.ReceiveMessage(new DoorHit(this));
-                    return;
-                }
+                Owner.ReceiveMessage(new DoorHit(this));
+                return;
             }
 
             // The road is clear! Move!
-            SetPosition(targetTile.Position);
+            Locality sourceLocality = _area.GetLocality();
+            Locality targetLocality = World.GetLocality(targetTile.position);
+            SetPosition(targetTile.position);
             _timeFromLastStep = 0;
+
+            if (sourceLocality != null && sourceLocality != targetLocality)
+                World.SaveGame();
 
             // Inform Tuttle
             if (!IsTuttleNearBy())
-                Tuttle.ReceiveMessage(new EntityMoved(Owner, targetTile));
+                Tuttle.ReceiveMessage(new EntityMoved(Owner, targetTile.position));
 
-            WatchPuddle(targetTile.Position); // Check if player walked in a puddle
+            WatchPuddle(targetTile.position); // Check if player walked in a puddle
             WatchPhone();
         }
 
@@ -494,16 +503,26 @@ namespace Game.Entities
         private void OnUseObject(UseObject message)
         {
             // Detect door and use it if possible.
-            IEnumerable<Tile> adjectingTiles = CuurrentTile.GetNeighbours8();
-            Tile tileWithDoor = adjectingTiles.Where(t => t.Passage != null && t.Passage is Door).FirstOrDefault();
-            if (tileWithDoor != null)
-                tileWithDoor.Passage.ReceiveMessage(new UseObject(Owner, tileWithDoor));
+            foreach ((Vector2 position, Tile tile) t in World.Map.GetNeighbours8(CurrentTile.position))
+            {
+                Passage passage = World.GetPassage(t.position);
+
+                if (passage != null && passage is Door door)
+                    door.ReceiveMessage(new UseObject(Owner, t.position, t.tile));
+            }
 
             // Detect object in front of Chipotle.
-            Tile tileInFront = GetNextTile();
+            (Vector2 position, Tile tile) tileInFront = GetNextTile();
 
-            if (tileInFront != null && tileInFront.Object != null)
-                tileInFront.Object.ReceiveMessage(new UseObject(Owner, tileInFront));
+            if (tileInFront.tile != null)
+            {
+                GameObject obj = World.GetObject(tileInFront.position);
+                if (obj != null)
+                {
+                    UseObject useObject = new UseObject(Owner, tileInFront.position, tileInFront.tile);
+                    obj.ReceiveMessage(useObject);
+                }
+            }
         }
 
         /// <summary>

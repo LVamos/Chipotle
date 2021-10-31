@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
@@ -8,6 +10,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the killer's car object in the garage of Vanilla crunch (garáž v1) locality.
     /// </summary>
+    [Serializable]
     public class KillersCar : DumpObject
     {
         /// <summary>

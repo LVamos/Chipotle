@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 using Game.Terrain;
 
 namespace Game.Messaging.Commands
@@ -6,7 +7,11 @@ namespace Game.Messaging.Commands
     /// <summary>
     /// Tells an NPC to make one step in the specified direction.
     /// </summary>
-    /// <remarks>Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    /// <remarks>
+    /// Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the
+    /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
+    /// </remarks>
+    [Serializable]
     public class StartWalk : TurnEntity
     {
         /// <summary>

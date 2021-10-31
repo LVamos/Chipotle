@@ -1,14 +1,16 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
-
 
 namespace Game.Entities
 {
     /// <summary>
     /// Represents the Sweeney's bell (zvonek p1) in the Easterby street (ulice p1) locality.
     /// </summary>
+    [Serializable]
     public class SweeneysBell : DumpObject
     {
         /// <summary>
@@ -30,7 +32,5 @@ namespace Game.Entities
 
             base.OnUseObject(message);
         }
-
-
     }
 }

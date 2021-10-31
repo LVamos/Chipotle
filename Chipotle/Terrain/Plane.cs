@@ -17,6 +17,7 @@ namespace Game.Terrain
     /// <remarks>
     /// The region is defined by two points: <see cref="Plane.UpperLeftCorner"/> and <see cref="Plane.LowerRightCorner"/>.
     /// </remarks>
+    [Serializable]
     public class Plane : DebugSO
     {
         /// <summary>
@@ -129,13 +130,13 @@ namespace Game.Terrain
         /// <summary>
         /// Converts relative coordinates to absolute coordinates.
         /// </summary>
-        /// <param name="relative">The coordinates related to upper left corner of <paramref name="locality"/></param>
-        /// <param name="locality">
+        /// <param name="relative">The coordinates related to upper left corner of <paramref name="area"/></param>
+        /// <param name="area">
         /// The locality according to which <paramref name="relative"/> was calculated
         /// </param>
         /// <returns>New isntance of <see cref="Plane"/> defined by the absolute coordinates</returns>
-        public static Vector2 GetAbsoluteCoordinates(Vector2 relative, Locality locality)
-                    => new Vector2(locality.Area.UpperLeftCorner.X + relative.X, locality.Area.UpperLeftCorner.Y - relative.Y);
+        public static Vector2 GetAbsoluteCoordinates(Vector2 relative, Plane area)
+                    => new Vector2(area.UpperLeftCorner.X + relative.X, area.UpperLeftCorner.Y - relative.Y);
 
         /// <summary>
         /// Converts absolute coordinates to relative coordinates.
@@ -144,8 +145,9 @@ namespace Game.Terrain
         /// <returns></returns>
         public static Vector2 GetRelativeCoordinates(Vector2 absolute)
         {
-            World.Map[absolute].Locality.Area.ArrangeCorners();
-            Vector2 corner = World.Map[absolute].Locality.Area.UpperLeftCorner;
+            Plane locality = World.GetLocality(absolute).Area;
+            locality.ArrangeCorners();
+            Vector2 corner = locality.UpperLeftCorner;
             return new Vector2(absolute.X - corner.X, corner.Y - absolute.Y);
         }
 
@@ -170,6 +172,14 @@ namespace Game.Terrain
                 LowerRightCorner = new Vector2(LowerRightCorner.X, temp);
             }
         }
+
+        /// <summary>
+        /// Checks if the given plane fully intersects this plane.
+        /// </summary>
+        /// <param name="area">The plane to be checked</param>
+        /// <returns>True if the given plane fully intersects this plane</returns>
+        public bool Contains(Plane area)
+            => LaysOnPlane(area.UpperLeftCorner) && LaysOnPlane(area.LowerRightCorner);
 
         /// <summary>
         /// Checks if both instances are equal.
@@ -212,10 +222,10 @@ namespace Game.Terrain
             for (int i = 0; i <= maxDistance; i++)
             {
                 around.Extend();
-                Tile walkable = around.GetPerimeterTiles().FirstOrDefault(t => t.Walkable);
+                (Vector2 position, Tile tile) walkable = around.GetPerimeterTiles().FirstOrDefault(t => World.IsWalkable(t.position));
 
-                if (walkable != null)
-                    return (Vector2?)walkable.Position;
+                if (walkable.tile != null)
+                    return (Vector2?)walkable.position;
             }
             return (Vector2?)null;
         }
@@ -230,13 +240,13 @@ namespace Game.Terrain
             Plane around = new Plane(
                 new Vector2(UpperLeftCorner.X - maxDistance, UpperLeftCorner.Y + maxDistance),
                 new Vector2(LowerRightCorner.X + maxDistance, LowerRightCorner.Y - maxDistance));
-            IEnumerable<Tile> walkables = around.GetWalkableTiles();
+            IEnumerable<(Vector2 position, Tile tile)> walkables = around.GetWalkableTiles();
 
             if (walkables.IsNullOrEmpty())
                 return (Vector2?)null;
 
             int index = (new Random()).Next(walkables.Count());
-            return (Vector2?)walkables.ElementAt(index).Position;
+            return (Vector2?)walkables.ElementAt(index).position;
         }
 
         /// <summary>
@@ -263,25 +273,18 @@ namespace Game.Terrain
                             => unchecked(4112 * (8121 + UpperLeftCorner.GetHashCode()) * (6988 + LowerRightCorner.GetHashCode()));
 
         /// <summary>
-        /// Returns all localities intersecting with the plane.
-        /// </summary>
-        /// <returns>List of intersecting localities</returns>
-        public IEnumerable<Locality> GetIntersectingLocalities()
-            => GetTiles().Select(t => t.Locality).Distinct();
-
-        /// <summary>
         /// Returns all game objects intersecting with the plane.
         /// </summary>
         /// <returns>List of intersecting objects</returns>
         public IEnumerable<GameObject> GetIntersectingObjects()
-            => (from t in GetTiles() where (t != null && t.Object != null) select t.Object).Distinct();
+            => World.GetObjects(this);
 
         /// <summary>
         /// Returns all passages intersecting with the plane.
         /// </summary>
         /// <returns>List of intersecting passages</returns>
         public IEnumerable<Passage> GetIntersectingPassages()
-            => (from t in GetTiles() where (t?.Passage != null) select t.Passage).Distinct();
+            => World.GetPassages(this);
 
         /// <summary>
         /// Identifies a perimeter side of the plane on which the specified point lays.
@@ -300,7 +303,7 @@ namespace Game.Terrain
         /// </summary>
         /// <returns>The intersecting locality if there's just one or null</returns>
         public Locality GetLocality()
-            => IsInOneLocality() ? GetTiles().First().Locality : null;
+            => World.GetLocality(this);
 
         /// <summary>
         /// Enumerates all tiles laying on the perimeter of this plane.
@@ -374,8 +377,12 @@ namespace Game.Terrain
         /// Enumerates all tiles laying on the perimeter of this plane.
         /// </summary>
         /// <returns>all tiles laying on the perimeter of this plane</returns>
-        public IEnumerable<Tile> GetPerimeterTiles()
-            => GetPerimeterPoints().Select(p => World.Map[p]).Where(t => t != null);
+        public IEnumerable<(Vector2 position, Tile tile)> GetPerimeterTiles()
+        {
+            IEnumerable<(Vector2 position, Tile tile)> points = GetPerimeterPoints()
+                .Select(p => (p, World.Map[p]));
+            return points.Where(t => t.tile != null);
+        }
 
         /// <summary>
         /// Enumerates all tiles laying on the specified side of this plane.
@@ -475,8 +482,11 @@ namespace Game.Terrain
         /// Enumerates all tiles intersecting with the plane.
         /// </summary>
         /// <returns>all tiles intersecting with the plane</returns>
-        public IEnumerable<Tile> GetTiles()
-=> GetPoints().Select(p => World.Map[p]).Where(p => p != null);
+        public IEnumerable<(Vector2 position, Tile tile)> GetTiles()
+        {
+            IEnumerable<(Vector2 position, Tile tile)> tiles = GetPoints().Select(p => (p, World.Map[p]));
+            return tiles.Where(p => p.tile != null);
+        }
 
         /// <summary>
         /// Returns a directional vector parallel with the specified side.
@@ -493,8 +503,8 @@ namespace Game.Terrain
         /// Enumerates all walkable intersecting tiles.
         /// </summary>
         /// <returns>all walkable intersecting tiles</returns>
-        public IEnumerable<Tile> GetWalkableTiles()
-            => GetTiles().Where(t => t.Walkable);
+        public IEnumerable<(Vector2 position, Tile tile)> GetWalkableTiles()
+            => GetTiles().Where(t => World.IsWalkable(t.position));
 
         /// <summary>
         /// Checks if this plane intersects with the specified plane.
@@ -526,13 +536,6 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Checks if the plane intersects just with one locality.
-        /// </summary>
-        /// <returns>if the plane intersects just with one locality</returns>
-        public bool IsInOneLocality()
-            => GetTiles().All(t => t != null && t.Locality == GetTiles().First().Locality);
-
-        /// <summary>
         /// Checks if the specified point lays on the periemter of this plane.
         /// </summary>
         /// <param name="point">The point to be checked</param>
@@ -547,12 +550,7 @@ namespace Game.Terrain
         /// <param name="point">The point to be checked</param>
         /// <returns>True if the point lays on the plane</returns>
         public bool LaysOnPlane(Vector2 point)
-        {
-            if (point.X == 2 && point.Y == 7)
-                throw new Exception();
-
-            return point.X >= UpperLeftCorner.X && point.X <= LowerRightCorner.X && point.Y >= LowerRightCorner.Y && point.Y <= UpperLeftCorner.Y;
-        }
+            => point.X >= UpperLeftCorner.X && point.X <= LowerRightCorner.X && point.Y >= LowerRightCorner.Y && point.Y <= UpperLeftCorner.Y;
 
         /// <summary>
         /// Transforms plane coordinates by one unit to the specified direction.
@@ -625,13 +623,11 @@ namespace Game.Terrain
         /// <summary>
         /// Converts the plane to a plane with absolute coordinations.
         /// </summary>
-        /// <param name="locality">
-        /// The locality according to which coordinates of this plane were calculated
-        /// </param>
+        /// <param name="area">The plane according to which coordinates of this plane were calculated</param>
         /// <returns>A new plane with absolute coordinates</returns>
         /// <remarks>Considers this plane to be relative</remarks>
-        public Plane ToAbsolute(Locality locality)
-            => new Plane(GetAbsoluteCoordinates(UpperLeftCorner, locality), GetAbsoluteCoordinates(LowerRightCorner, locality));
+        public Plane ToAbsolute(Plane area)
+            => new Plane(GetAbsoluteCoordinates(UpperLeftCorner, area), GetAbsoluteCoordinates(LowerRightCorner, area));
 
         /// <summary>
         /// converts this plane to a plane with relative coordinates.

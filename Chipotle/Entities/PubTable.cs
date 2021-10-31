@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
@@ -8,6 +10,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents a table in the pub (výčep h1) locality.
     /// </summary>
+    [Serializable]
     public class PubTable : DumpObject
     {
         /// <summary>

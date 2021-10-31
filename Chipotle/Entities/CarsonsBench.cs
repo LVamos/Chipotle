@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Game.Messaging.Commands;
 using Game.Terrain;
@@ -10,6 +11,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents a bench object in the zahrada c1 locality.
     /// </summary>
+    [Serializable]
     public class CarsonsBench : DumpObject
     {
         /// <summary>

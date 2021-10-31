@@ -1,17 +1,19 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
 
-
 namespace Game.Entities
 {
     /// <summary>
-    /// Represents the car of the Vanilla crunch company (auto v1) object standing in the garage of the company (garáž v1) locality.
+    /// Represents the car of the Vanilla crunch company (auto v1) object standing in the garage of
+    /// the company (garáž v1) locality.
     /// </summary>
+    [Serializable]
     public class VanillaCrunchCar : DumpObject
     {
-
         /// <summary>
         /// constructor
         /// </summary>
@@ -20,12 +22,11 @@ namespace Game.Entities
         public VanillaCrunchCar(Name name, Plane area) : base(name, area, "auto Vanilla crunch") { }
 
         /// <summary>
-        /// A reference to the key hanger (věšák v1) object in the garage of the Vanilla crunch company (garáž v1) locality.
+        /// A reference to the key hanger (věšák v1) object in the garage of the Vanilla crunch
+        /// company (garáž v1) locality.
         /// </summary>
-        private KeyHanger KeyHanger 
+        private KeyHanger KeyHanger
             => World.GetObject("věšák v1") as KeyHanger;
-
-
 
         /// <summary>
         /// Processes the UseObject message.

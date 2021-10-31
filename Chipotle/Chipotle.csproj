@@ -78,10 +78,12 @@
     <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
     <Compile Include="Messaging\Commands\SayVisitedLocality.cs" />
     <Compile Include="Messaging\Commands\StopWalk.cs" />
+    <Compile Include="Messaging\Events\GameReloaded.cs" />
     <Compile Include="Messaging\Events\KeyReleased.cs" />
     <Compile Include="Messaging\Events\LocalityChanged.cs" />
     <Compile Include="Messaging\Commands\Reveal.cs" />
     <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
+    <Compile Include="Serializer.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
     <Compile Include="Entities\PubTable.cs" />
     <Compile Include="Entities\SweeneysBell.cs" />

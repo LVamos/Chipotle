@@ -36,7 +36,7 @@ namespace Game.Entities
         /// <summary>
         /// Locality which contains this object
         /// </summary>
-        public Locality Locality { get; private set; }
+        public Locality Locality => _area?.GetLocality();
 
         /// <summary>
         /// Creates new instance of the pool (bazének w1) object in the Walsch's bathroom (koupelna
@@ -257,12 +257,6 @@ namespace Game.Entities
         protected override void Appear()
         {
             base.Appear();
-
-            // Check if all the object lays in one locality
-            Locality = Area.GetLocality();
-            Assert(Locality != null, "Game object must occupy just one locality.");
-
-            Area.GetTiles().Foreach(t => t.Register(this));
         }
 
         /// <summary>
@@ -276,15 +270,6 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Erases the object or NPC from the game world.
-        /// </summary>
-        protected override void Disappear()
-        {
-            base.Disappear();
-            _area.GetTiles().Foreach(t => t.UnregisterObject());
-        }
-
-        /// <summary>
         /// Moves the object to the specified coordinates.
         /// </summary>
         /// <param name="targetArea">Target coordinates</param>
@@ -293,18 +278,15 @@ namespace Game.Entities
             if (targetArea == null)
                 throw new ArgumentNullException(nameof(targetArea));
 
-            Locality sourceLocality = Locality;
-            Locality targetLocality = targetArea.GetLocality();
-
             Disappear();
+            Locality sourceLocality = Locality;
             _area = targetArea;
             Appear();
 
-            if (sourceLocality != targetLocality)
+            if (sourceLocality != Locality)
             {
                 sourceLocality.Unregister(this);
-                targetLocality.Register(this);
-                Locality = targetLocality;
+                Locality.Register(this);
             }
         }
 

@@ -1,12 +1,15 @@
-﻿using Game.Terrain;
+﻿using System;
 
+using Game.Terrain;
 
 namespace Game.Messaging.Commands
 {
     /// <summary>
-    /// Tells the Detective Chipotle's car (detektivovo auto) to make the specified locality accessible for the player.
+    /// Tells the Detective Chipotle's car (detektivovo auto) to make the specified locality
+    /// accessible for the player.
     /// </summary>
     /// <remarks>Applies only to the <see cref="Game.Entities.ChipotlesCar"/> class.</remarks>
+    [Serializable]
     public class UnblockLocality : GameMessage
     {
         /// <summary>

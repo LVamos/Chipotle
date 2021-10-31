@@ -10,6 +10,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls the behavior of an NPC.
     /// </summary>
+    [Serializable]
     public class AIComponent : EntityComponent
     {
         /// <summary>

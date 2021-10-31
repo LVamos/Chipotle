@@ -17,6 +17,7 @@ namespace Game.Messaging
     /// <summary>
     /// Base class for all objects used in the game; receives, sends and processes messages.
     /// </summary>
+    [Serializable]
     public abstract class MessagingObject : DebugSO
     {
         /// <summary>
@@ -52,6 +53,8 @@ namespace Game.Messaging
         /// <param name="message">The message to be received</param>
         public virtual void ReceiveMessage(GameMessage message)
         {
+            Assert(message != null, nameof(message) + " was null.");
+
             if (_messagingEnabled)
                 if (message.Sender != this || (message.Sender == this && (message is CutsceneBegan || message is CutsceneEnded)))
                     EnqueueMessage(message);

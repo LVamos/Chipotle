@@ -11,6 +11,7 @@ namespace Game.UI
     /// <summary>
     /// A virtual window opened during the game
     /// </summary>
+    [Serializable]
     public class GameWindow : VirtualWindow
     {
         /// <summary>
@@ -34,7 +35,9 @@ namespace Game.UI
         public override void OnKeyDown(KeyEventParams e)
         {
             base.OnKeyDown(e);
-            World.Player.ReceiveMessage(new KeyPressed(this, new KeyShortcut(e)));
+
+            if (Program.MainWindow.GameLoopEnabled)
+                World.Player.ReceiveMessage(new KeyPressed(this, new KeyShortcut(e)));
         }
 
         /// <summary>
@@ -42,7 +45,10 @@ namespace Game.UI
         /// </summary>
         /// <param name="e">The message to be handled</param>
         public override void OnKeyUp(KeyEventParams e)
-            => World.Player.ReceiveMessage(new KeyReleased(this, new KeyShortcut(e)));
+        {
+            if (Program.MainWindow.GameLoopEnabled)
+                World.Player.ReceiveMessage(new KeyReleased(this, new KeyShortcut(e)));
+        }
 
         /// <summary>
         /// Quits the game.

@@ -13,6 +13,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls behavior of the Tuttle NPC
     /// </summary>
+    [Serializable]
     public class TuttleAIComponent : AIComponent
     {
         /// <summary>

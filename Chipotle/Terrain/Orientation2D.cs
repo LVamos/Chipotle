@@ -1,4 +1,6 @@
-﻿using OpenTK;
+﻿using System;
+
+using OpenTK;
 
 using static System.Math;
 
@@ -7,6 +9,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents orientation of an NPC.
     /// </summary>
+    [Serializable]
     public struct Orientation2D
     {
         /// <summary>

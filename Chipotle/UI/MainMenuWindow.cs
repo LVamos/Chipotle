@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 using DavyKager;
 
@@ -23,20 +24,39 @@ namespace Game.UI
         /// </summary>
         public void RunMainMenu()
         {
-            string[] items = new string[]
+            string[] items;
+
+            if (File.Exists(Path.Combine(Program.DataPath, "game.sav")))
+            {
+                items = new string[]
             {
                 "Nová hra",
+                "Pokračovat ve hře",
                 "Test sluchátek",
                 "Návod",
                 "Konec"
             };
+            }
+            else
+            {
+                items = new string[]
+                {
+                "Nová hra",
+                "Test sluchátek",
+                "Návod",
+                "Konec"
+                };
+            }
+
             string intro = "Hlavní menu";
             int choice = WindowHandler.Menu(items, intro, true);
-            switch (choice)
+            choice = choice == -1 ? items.Length - 1 : choice;
+            switch (items[choice])
             {
-                case 0: WindowHandler.StartGame(); break;
-                case 1: SpeakerTest(); RunMainMenu(); break;
-                case 2: Help(); RunMainMenu(); break;
+                case "Nová hra": WindowHandler.StartGame(); break;
+                case "Pokračovat ve hře": World.LoadGame(); break;
+                case "Test sluchátek": SpeakerTest(); RunMainMenu(); break;
+                case "Návod": Help(); RunMainMenu(); break;
                 default: ExitGame(); break;
             }
         }

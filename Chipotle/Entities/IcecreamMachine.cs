@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Game.Messaging.Commands;
 using Game.Terrain;
@@ -11,6 +12,7 @@ namespace Game.Entities
     /// Represents the icecream machine object (automat v1) )in the hall of the Vanilla crunch
     /// company (hala v1) locality.
     /// </summary>
+    [Serializable]
     public class IcecreamMachine : DumpObject
     {
         /// <summary>

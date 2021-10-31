@@ -14,6 +14,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a door between two localities.
     /// </summary>
+    [Serializable]
     public class Door : Passage
     {
         /// <summary>
@@ -59,7 +60,7 @@ namespace Game.Terrain
         /// </summary>
         protected void Close(Vector2 coords)
         {
-            if (Area.GetTiles().All(t => t.Walkable))
+            if (Area.GetTiles().All(t => World.IsWalkable(t.position)))
             {
                 Closed = true;
                 World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd24"), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
@@ -76,15 +77,17 @@ namespace Game.Terrain
                 return;
 
             if (Closed)
-                Open(message.Tile.Position);
+                Open(message.Position);
             else
-                Close(message.Tile.Position);
+                Close(message.Position);
         }
 
         /// <summary>
         /// Opens the door if possible.
         /// </summary>
-        /// <param name="coords">The coordinates of the place on the door that an NPC is pushing on</param>
+        /// <param name="coords">
+        /// The coordinates of the place on the door that an NPC is pushing on
+        /// </param>
         protected virtual void Open(Vector2 coords)
         {
             Closed = false;

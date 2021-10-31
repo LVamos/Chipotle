@@ -11,6 +11,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls behavior of the Derreck Sweeney NPC.
     /// </summary>
+    [Serializable]
     public class SweeneyAIComponent : AIComponent
     {
         /// <summary>

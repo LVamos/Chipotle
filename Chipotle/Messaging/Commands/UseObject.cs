@@ -1,4 +1,8 @@
-﻿using Game.Terrain;
+﻿using System;
+
+using Game.Terrain;
+
+using OpenTK;
 
 namespace Game.Messaging.Commands
 {
@@ -9,8 +13,15 @@ namespace Game.Messaging.Commands
     /// Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the
     /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
     /// </remarks>
+    [Serializable]
     public class UseObject : GameMessage
     {
+        /// <summary>
+        /// Position of the tile on which part of the used object lays. It should be always in front
+        /// of the NPC.
+        /// </summary>
+        public readonly Vector2 Position;
+
         /// <summary>
         /// The tile on which part of the used object lays. It should be always in front of the NPC.
         /// </summary>
@@ -20,7 +31,12 @@ namespace Game.Messaging.Commands
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
+        /// <param name="position">Position of the tile on which part of the used object lays</param>
         /// <param name="tile">A tile with the object</param>
-        public UseObject(object sender, Tile tile = null) : base(sender) => Tile = tile;
+        public UseObject(object sender, Vector2 position, Tile tile = null) : base(sender)
+        {
+            Position = position;
+            Tile = tile;
+        }
     }
 }

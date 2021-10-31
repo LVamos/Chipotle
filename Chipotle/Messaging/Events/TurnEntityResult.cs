@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 using Game.Terrain;
 
 namespace Game.Messaging.Events
@@ -7,6 +8,7 @@ namespace Game.Messaging.Events
     /// Indicates that an NPC has completed a rotation.
     /// </summary>
     /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    [Serializable]
     public class TurnEntityResult : GameMessage
     {
         /// <summary>

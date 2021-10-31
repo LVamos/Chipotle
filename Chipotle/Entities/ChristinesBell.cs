@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
@@ -8,6 +10,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the Christine's bell (zvonek p1) in the Belvedere street (ulice p1) locality.
     /// </summary>
+    [Serializable]
     public class ChristinesBell : DumpObject
     {
         /// <summary>

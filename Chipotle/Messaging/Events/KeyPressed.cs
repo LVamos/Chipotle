@@ -1,10 +1,13 @@
-﻿using Game.UI;
+﻿using System;
+
+using Game.UI;
 
 namespace Game.Messaging.Events
 {
     /// <summary>
     /// Indicates that the player fired a keyboard command.
     /// </summary>
+    [Serializable]
     public class KeyPressed : GameMessage
     {
         /// <summary>

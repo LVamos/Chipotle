@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
@@ -8,6 +10,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the key hanger object in the garage in Vanilla crunch company (garáž v1) locality.
     /// </summary>
+    [Serializable]
     public class KeyHanger : DumpObject
     {
         /// <summary>

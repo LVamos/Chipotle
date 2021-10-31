@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
+
+using DavyKager;
 
 using Game.Entities;
 using Game.Messaging;
@@ -100,7 +104,7 @@ namespace Game
         /// <summary>
         /// The game map
         /// </summary>
-        public static TileMap Map { get; set; }
+        public static TileMap Map { get; private set; }
 
         /// <summary>
         /// Reference to the Detective Chipotle NPC (the main NPC)
@@ -172,12 +176,56 @@ namespace Game
         }
 
         /// <summary>
+        /// Builds walls around the given region.
+        /// </summary>
+        /// <param name="walls">Specifies on which sides of the region the walls are to be built.</param>
+        public static void DrawWalls(Plane area, string walls)
+        {
+            IEnumerable<Vector2> wallCoordinates;
+
+            if (walls == "All")
+                wallCoordinates = area.GetPerimeterPoints();
+            else
+            {
+                List<Direction> directions = new List<Direction>();
+
+                foreach (string word in Regex.Split(walls, @", +"))
+                {
+                    switch (word.ToLower())
+                    {
+                        case "left": directions.Add(Direction.Left); break;
+                        case "front": directions.Add(Direction.Up); break;
+                        case "right": directions.Add(Direction.Right); break;
+                        case "back": directions.Add(Direction.Down); break;
+                        default: throw new ArgumentException(nameof(word));
+                    }
+                }
+
+                wallCoordinates = area.GetPerimeterPoints(directions);
+            }
+
+            wallCoordinates.Foreach(c => World.Map[c].Register(TerrainType.Wall, false));
+        }
+
+        /// <summary>
+        /// Returns an entity that stands on the given position.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>Reference to the entity if there's any</returns>
+        public static Entity GetEntity(Vector2 point)
+        {
+            if (GetObject(point) is Entity entity)
+                return entity;
+            return null;
+        }
+
+        /// <summary>
         /// Returns an NPC found by its name.
         /// </summary>
         /// <param name="name">Inner name of the required NPC</param>
         /// <returns>The found NPC or null if nothing was found</returns>
         public static Entity GetEntity(string name)
-=> _entities.TryGetValue(name, out Entity e) ? e : null;
+=> _entities.TryGetValue(name.ToLower(), out Entity e) ? e : null;
 
         /// <summary>
         /// Returns a locality found by its name.
@@ -191,12 +239,31 @@ namespace Game
         }
 
         /// <summary>
+        /// Returns a locality that fully intersects with the given plane.
+        /// </summary>
+        /// <param name="area">The point tto be checked</param>
+        /// <returns>The intersecting locality</returns>
+        public static Locality GetLocality(Plane area)
+            => _localities.Values.FirstOrDefault(l => l.Area.Contains(area));
+
+        /// <summary>
+        /// Returns a locality which intersects with the given point.
+        /// </summary>
+        /// <param name="point">The point tto be checked</param>
+        /// <returns>The intersecting locality</returns>
+        public static Locality GetLocality(Vector2 point)
+            => _localities.Values
+            .FirstOrDefault(l => l.Area.LaysOnPlane(point));
+
+        /// <summary>
         /// Enumerates all localities sorted by distance from the specified point.
         /// </summary>
         /// <param name="point">The point whose surroundings should be explored</param>
         /// <returns>Enumeration of the found localities</returns>
         public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
-           => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Locality).Select(p => p.Value);
+           => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point))
+            .Where(p => p.Value != GetLocality(point))
+            .Select(p => p.Value);
 
         /// <summary>
         /// Returns the locality nearest from the specified point.
@@ -220,15 +287,9 @@ namespace Game
         /// <param name="point">A point whose surroundings are to be searched</param>
         /// <returns>Enumeration of game objects</returns>
         public static IEnumerable<GameObject> GetNearestObjects(Vector2 point)
-            => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point)).Where(o => o.Value != Map[point]?.Object).Select(o => o.Value);
-
-        /// <summary>
-        /// Enumerates all game objects around a tile sorted by distance.
-        /// </summary>
-        /// <param name="tile">A tile whose surrounding is to be explored</param>
-        /// <returns>Enumeration of game objects</returns>
-        public static IEnumerable<GameObject> GetNearestObjects(Tile tile)
-            => GetNearestObjects(tile.Position);
+            => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point))
+            .Where(o => o.Value.Name.Indexed != World.GetObject(point)?.Name.Indexed)
+            .Select(o => o.Value);
 
         /// <summary>
         /// Returns the passage closest to the specified point.
@@ -244,7 +305,9 @@ namespace Game
         /// <param name="point">The point whose surrounding is to be searched</param>
         /// <returns>Enumeration of all passages</returns>
         public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
-                   => _passages.OrderBy(p => p.Value.Area.GetDistanceFrom(point)).Where(p => p.Value != Map[point]?.Passage).Select(p => p.Value);
+                   => _passages.Values
+            .OrderBy(p => p.Area.GetDistanceFrom(point))
+            .Where(p => p != World.GetPassage(point));
 
         /// <summary>
         /// searches for a simple game object by name.
@@ -255,12 +318,42 @@ namespace Game
 => _objects.TryGetValue(name, out DumpObject o) ? o : null;
 
         /// <summary>
+        /// Returns an NPC or game object the tile intersects.
+        /// </summary>
+        public static GameObject GetObject(Vector2 point)
+        {
+            Locality locality = GetLocality(point);
+            GameObject obj = locality?.Objects.FirstOrDefault(o => o.Area.LaysOnPlane(point));
+            return obj
+                ?? locality.Entities.FirstOrDefault(e => e.Area.LaysOnPlane(point));
+        }
+
+        /// <summary>
+        /// Returns all game objects that intersect with the given plane.
+        /// </summary>
+        /// <param name="area">The plane to be checked.</param>
+        /// <returns>Enumeration of intersecting objects</returns>
+        public static IEnumerable<DumpObject> GetObjects(Plane area)
+            => _objects.Values.Where(o => o.Area.Intersects(area));
+
+        /// <summary>
         /// Enumerates all simple game objects of the specified type
         /// </summary>
         /// <param name="type">Type of requested game objects</param>
         /// <returns>Enumeration of game objects</returns>
         public static IEnumerable<DumpObject> GetObjectsByType(string type)
             => _objects.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower(CultureInfo.CurrentCulture) == type.ToLower(CultureInfo.CurrentCulture));
+
+        /// <summary>
+        /// Returns a passage the tile intersects.
+        /// </summary>
+        /// <param name="point">The point to be checked</param>
+        /// <returns>The passage if there's any</returns>
+        public static Passage GetPassage(Vector2 point)
+        {
+            Locality locality = GetLocality(point);
+            return locality?.Passages.FirstOrDefault(p => p.Area.LaysOnPlane(point));
+        }
 
         /// <summary>
         /// Searches for a passage by name.
@@ -274,6 +367,12 @@ namespace Game
         }
 
         /// <summary>
+        /// Returns all passages intersecting with the plane.
+        /// </summary>
+        public static IEnumerable<Passage> GetPassages(Plane area)
+                    => _passages.Values.Where(p => p.Area.Intersects(area));
+
+        /// <summary>
         /// Prepares the game world.
         /// </summary>
         public static void Initialize()
@@ -281,8 +380,58 @@ namespace Game
             _objects = new Dictionary<string, DumpObject>();
             _localities = new Dictionary<string, Locality>();
             _entities = new Dictionary<string, Entity>();
-            Player = null;
             _passages = new Dictionary<string, Passage>();
+        }
+
+        /// <summary>
+        /// Indicates if a tile on the specified position is occupied by an NPC or game object.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>True if there's an object or NPC on the specified position</returns>
+        public static bool IsOccupied(Vector2 point)
+            => GetObject(point) != null || GetEntity(point) != null;
+
+        /// <summary>
+        /// Checks if the tile is walkable for NPCs.
+        /// </summary>
+        public static bool IsWalkable(Vector2 point)
+        {
+            Tile tile = Map[point];
+            return tile != null && tile.Permeable && !IsOccupied(point);
+        }
+
+        /// <summary>
+        /// Loads a saved game state from a binary file.
+        /// </summary>
+        public static void LoadGame()
+        {
+            if (Sound == null)
+            {
+                Tolk.Load();
+                SoundInit(Program.TolkDelegate);
+            }
+
+            // Load terrain, objects, NPCs, localities and passages.
+            LoadTerrain();
+            FileStream stream;
+            BinaryFormatter formatter = new BinaryFormatter();
+            Serializer serializer;
+
+            using (stream = File.OpenRead(Program.SerializationPath))
+            {
+                serializer = (Serializer)formatter.Deserialize(stream);
+            }
+            stream.Close();
+
+            _entities = serializer.Entities;
+            _objects = serializer.Objects;
+            _passages = serializer.Passages;
+            _localities = serializer.Localities;
+            Program.MainWindow.GameLoopEnabled = true;
+            WindowHandler.Switch(new Game.UI.GameWindow());
+            GameReloaded message = new GameReloaded();
+            Player.Area.GetLocality().ReceiveMessage(message);
+            _objects.Values.Foreach(o => o.ReceiveMessage(message));
         }
 
         /// <summary>
@@ -316,28 +465,25 @@ namespace Game
                new Plane(Attribute(l, "coordinates")),
                Attribute(l, "defaultTerrain", false).ToTerrainType(),
 lLoop);
+                Add(locality);
 
                 // Create perimeter walls if they are specified in the map
                 string wallDefinition = Attribute(l, "walls", false);
+
                 if (wallDefinition != "None")
-                {
-                    locality.DrawWalls(wallDefinition);
-                }
+                    DrawWalls(locality.Area, wallDefinition);
 
                 // Draw terrain
-                l.Elements("panel").Foreach(p => Map.DrawTerrain(p, locality));
+                l.Elements("panel").Foreach(p => Map.DrawTerrain(p, locality.Area));
 
                 // Load game objects
                 foreach (XElement o in l.Elements("object"))
                 {
                     Name oName = new Name(Attribute(o, "indexedname"), Attribute(o, "friendlyname"));
                     string oType = Attribute(o, "type");
-                    Plane coordinates = new Plane(Attribute(o, "coordinates")).ToAbsolute(locality);
+                    Plane coordinates = new Plane(Attribute(o, "coordinates")).ToAbsolute(locality.Area);
                     Add(GameObject.CreateObject(oName, coordinates, oType));
                 }
-
-                // register locality
-                Add(locality);
             }
 
             // Place passages
@@ -352,6 +498,36 @@ lLoop);
 
                 // Create and register new passage
                 Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed, openable));
+            }
+        }
+
+        public static void LoadTerrain()
+        {
+            string Attribute(XElement element, string attribute, bool prepareForIndexing = true)
+    => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+
+            XElement root = XDocument.Load(MapPath).Root;
+            IEnumerable<XElement> xLocalities = root.Element("localities").Elements("locality");
+
+            // Create map
+            Map = new TileMap(MapPath);
+
+            // Load localities
+            foreach (XElement l in xLocalities)
+            {
+                Plane area = new Plane(Attribute(l, "coordinates"));
+
+                // Draw terrain
+                TerrainType terrain = Attribute(l, "defaultTerrain", false).ToTerrainType();
+                Map.DrawTerrain(area, terrain, true);
+                l.Elements("panel")
+                    .Foreach(p => Map.DrawTerrain(p, area));
+
+                // Create perimeter walls if they are specified in the map
+                string wallDefinition = Attribute(l, "walls", false);
+
+                if (wallDefinition != "None")
+                    DrawWalls(area, wallDefinition);
             }
         }
 
@@ -389,7 +565,7 @@ lLoop);
         /// </summary>
         /// <param name="message">The message to be sent</param>
         public static void ReceiveMessage(GameMessage message)
-                    => _entities.Values.Foreach(e => e.ReceiveMessage(message));
+            => _entities.Values.Foreach(e => e.ReceiveMessage(message));
 
         /// <summary>
         /// Unregisters the specified locality.
@@ -411,6 +587,22 @@ lLoop);
         /// <param name="o">The object to be removed</param>
         public static void Remove(GameObject o)
                     => _delayedActions.Enqueue(() => _objects.Remove(o.Name.Indexed));
+
+        /// <summary>
+        /// Saves sttate of the game into a binary file.
+        /// </summary>
+        public static void SaveGame()
+        {
+            Serializer serializer = new Serializer(_entities, _objects, _passages, _localities);
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            FileStream stream;
+            using (stream = File.Create(Program.SerializationPath))
+            {
+                formatter.Serialize(stream, serializer);
+            }
+            stream.Close();
+        }
 
         /// <summary>
         /// Initializes the sound player.

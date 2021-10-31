@@ -9,6 +9,7 @@ namespace Game.Messaging.Commands
     /// Tells an NPC or object to walk on a specified route in a specified speed.
     /// </summary>
     /// <remarks>Applies to all descendants of the <see cref="Game.Entities.GameObject"/> class.</remarks>
+    [Serializable]
     public class GotoPoint : GameMessage
     {
         /// <summary>

@@ -1,14 +1,17 @@
-﻿using Game.Entities;
+﻿using System;
+
+using Game.Entities;
 
 namespace Game.Messaging.Events
 {
     /// <summary>
-    /// Tells a <see cref="Game.Terrain.Locality"> object that an <see cref="Game.Entities.Entity"> has left.</see>/> </see>/>that an NPC 
+    /// Tells a <see cref="Game.Terrain.Locality">object that an <see
+    /// cref="Game.Entities.Entity">has left.</see>/&gt;</see>/&gt;that an NPC
     /// </summary>
     /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    [Serializable]
     public class LocalityLeft : GameMessage
     {
-
         /// <summary>
         /// The NPC that leftthe locality
         /// </summary>

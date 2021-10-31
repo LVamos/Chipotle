@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
 
 using DavyKager;
@@ -19,10 +20,17 @@ namespace Game
         /// </summary>
         public static readonly string DataPath = @"Data\";
 
+        public static readonly Action<string> TolkDelegate = (message) => Tolk.Speak(message);
+
         /// <summary>
         /// Reference to the main window
         /// </summary>
         public static MainWindow MainWindow { get; private set; }
+
+        /// <summary>
+        /// Path to file used for serialization.
+        /// </summary>
+        public static string SerializationPath { get; private set; }
 
         /// <summary>
         /// An error handler
@@ -55,12 +63,13 @@ namespace Game
         {
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            SerializationPath = Path.Combine(DataPath, "game.sav");
 
             try
             {
                 Tolk.Load();
                 Tolk.TrySAPI(true);
-                World.SoundInit((message) => Tolk.Speak(message));
+                World.SoundInit(TolkDelegate);
             }
             catch (Exception ex)
             {

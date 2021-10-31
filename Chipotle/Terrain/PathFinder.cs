@@ -9,6 +9,7 @@ namespace Game.Terrain
     /// <summary>
     /// Implementation of A* algorithm
     /// </summary>
+    [Serializable]
     public class PathFinder
     {
         /// <summary>
@@ -83,9 +84,9 @@ namespace Game.Terrain
         /// <param name="goal">The target tile</param>
         /// <returns>Enumeration of all adjacent neighbours</returns>
         private IEnumerable<Node> GetNeighbours(Node parent, Node goal)
-                    => World.Map[parent.Coords].GetNeighbours4()
-                    .Where(t => t.Permeable && !t.IsOccupied)
-                    .Select(t => { Node n = new Node(t.Position, parent.Cost + 1, parent); n.ComputeDistance(goal.Coords); return n; });
+                    => World.Map.GetNeighbours4(parent.Coords)
+                    .Where(t => t.tile.Permeable && !World.IsOccupied(t.position))
+                    .Select(t => { Node n = new Node(t.position, parent.Cost + 1, parent); n.ComputeDistance(goal.Coords); return n; });
 
         /// <summary>
         /// Reprezents one node in a graph corresponding to a tile on a tile map.

@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 using Game.Terrain;
 
 namespace Game.Messaging.Events
@@ -7,13 +8,13 @@ namespace Game.Messaging.Events
     /// Indicates that an NPC moved from one locality to another one.
     /// </summary>
     /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
-    public class LocalityChanged: GameMessage
+    [Serializable]
+    public class LocalityChanged : GameMessage
     {
         /// <summary>
         /// The locality the NPC left
         /// </summary>
         public readonly Locality Source;
-
 
         /// <summary>
         /// The locality the NPC entered
@@ -31,6 +32,5 @@ namespace Game.Messaging.Events
             Source = source;
             Target = target;
         }
-
     }
 }

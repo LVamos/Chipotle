@@ -12,6 +12,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls the behavior of the Carson NPC.
     /// </summary>
+    [Serializable]
     public class CarsonAIComponent : AIComponent
     {
         /// <summary>

@@ -1,22 +1,28 @@
-﻿using Game.Terrain;
+﻿using System;
+
+using Game.Terrain;
+
 namespace Game.Messaging.Commands
 {
     /// <summary>
     /// Tells the NPC to turn a given number of degrees.
     /// </summary>
-    /// <remarks>Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    /// <remarks>
+    /// Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the
+    /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
+    /// </remarks>
+    [Serializable]
     public class TurnEntity : GameMessage
     {
-        /// <summary>
-        /// Specifies how much the NPC should turn.
-        /// </summary>
-        public readonly TurnType Direction;
-
-
         /// <summary>
         /// Specifies how many degrees the NPC should turn.
         /// </summary>
         public readonly int Degrees;
+
+        /// <summary>
+        /// Specifies how much the NPC should turn.
+        /// </summary>
+        public readonly TurnType Direction;
 
         /// <summary>
         /// Constructor

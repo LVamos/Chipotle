@@ -12,6 +12,7 @@ namespace Game.Entities
     /// <summary>
     /// Allows the player to scroll the entity using the keyboard.
     /// </summary>
+    [Serializable]
     public class ChipotleInputComponent : InputComponent
     {
         /// <summary>
@@ -100,7 +101,7 @@ namespace Game.Entities
         /// Allows the player to use a nearby object or door.
         /// </summary>
         private void Interact()
-=> Owner.ReceiveMessage(new UseObject(this));
+=> Owner.ReceiveMessage(new UseObject(this, OpenTK.Vector2.Zero));
 
         /// <summary>
         /// Moves the NPC one step back.

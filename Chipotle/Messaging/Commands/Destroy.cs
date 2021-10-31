@@ -1,9 +1,12 @@
-﻿namespace Game.Messaging.Commands
+﻿using System;
+
+namespace Game.Messaging.Commands
 {
     /// <summary>
     /// Destroys an NPC or object.
     /// </summary>
-    /// <remarks>Applies to all descendants of the <see cref="Game.Entities.GameObject"/>  class.</remarks>
+    /// <remarks>Applies to all descendants of the <see cref="Game.Entities.GameObject"/> class.</remarks>
+    [Serializable]
     public class Destroy : GameMessage
     {
         /// <summary>

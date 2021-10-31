@@ -86,12 +86,12 @@ namespace Game.Entities
             RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {
+        [typeof(GameReloaded)] = (message) => OnGameReloaded(),
         [typeof(ObjectsCollided)] = (m) => OnCollision((ObjectsCollided)m),
         [typeof(UseObject)] = (m) => OnUseObject((UseObject)m)
     });
 
-            if (!string.IsNullOrEmpty(_sounds.loop))
-                _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true);
+            PlayLoop();
         }
 
         /// <summary>
@@ -129,17 +129,35 @@ namespace Game.Entities
                 return;
 
             if (!string.IsNullOrEmpty(_sounds.action))
-                _actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+                _actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
             else
                 World.PlayCutscene(this, _cutscene);
 
+            UsedOnce = !Used;
+
             if (!Used)
-            {
-                Used = true;
-                UsedOnce = true;
-            }
-            else
-                UsedOnce = false;
+                World.SaveGame();
+
+            Used = true;
+        }
+
+        /// <summary>
+        /// Handles the game reloaded message.
+        /// </summary>
+        private void OnGameReloaded()
+        {
+            if (_loopSoundId != 0)
+                PlayLoop();
+            else _loopSoundId = 0;
+        }
+
+        /// <summary>
+        /// Plays the sound loop of this object if there's any.
+        /// </summary>
+        private void PlayLoop()
+        {
+            if (!string.IsNullOrEmpty(_sounds.loop))
+                _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true);
         }
     }
 }

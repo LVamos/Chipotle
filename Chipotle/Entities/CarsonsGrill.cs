@@ -12,6 +12,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the grill object in the zahrada c1 locality.
     /// </summary>
+    [Serializable]
     public class CarsonsGrill : DumpObject
     {
         /// <summary>

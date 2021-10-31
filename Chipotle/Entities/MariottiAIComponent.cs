@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands;
+﻿using System;
+
+using Game.Messaging.Commands;
 using Game.Terrain;
 
 namespace Game.Entities
@@ -6,6 +8,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls behavior of the Paolo Mariotti NPC.
     /// </summary>
+    [Serializable]
     public class MariottiAIComponent : AIComponent
     {
         /// <summary>

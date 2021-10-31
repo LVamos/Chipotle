@@ -1,8 +1,11 @@
-﻿namespace Game.Messaging.Events
+﻿using System;
+
+namespace Game.Messaging.Events
 {
     /// <summary>
     /// Indicates that an audio cutscene has just finished.
     /// </summary>
+    [Serializable]
     public class CutsceneEnded : CutsceneBegan
     {
         /// <summary>

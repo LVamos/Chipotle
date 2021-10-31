@@ -11,6 +11,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls behavior of the Christine Pierce NPC
     /// </summary>
+    [Serializable]
     public class ChristineAIComponent : AIComponent
     {
         /// <summary>

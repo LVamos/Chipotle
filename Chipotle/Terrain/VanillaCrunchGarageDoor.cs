@@ -6,12 +6,12 @@ using Game.Messaging.Events;
 
 using Luky;
 
-
 namespace Game.Terrain
 {
     /// <summary>
     /// Represents the garage door in the garage of the Vanilla crunch company (garáž v1) locality.
     /// </summary>
+    [Serializable]
     public class VanillaCrunchGarageDoor : Door
     {
         /// <summary>

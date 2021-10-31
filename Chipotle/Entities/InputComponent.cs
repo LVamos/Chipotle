@@ -11,6 +11,7 @@ namespace Game.Entities
     /// <summary>
     /// Allows the player to control an NPC.
     /// </summary>
+    [Serializable]
     public abstract class InputComponent : EntityComponent
     {
         /// <summary>

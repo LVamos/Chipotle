@@ -1,14 +1,17 @@
-﻿namespace Game.Messaging.Events
+﻿using System;
+
+namespace Game.Messaging.Events
 {
     /// <summary>
     /// Indicates that an audio cutscene has just started playing.
     /// </summary>
+    [Serializable]
     public class CutsceneBegan : GameMessage
     {
         /// <summary>
         /// Name of the played cutscene
         /// </summary>
-        public readonly  string CutsceneName;
+        public readonly string CutsceneName;
 
         /// <summary>
         /// Handle of the sound object for the played cutscene
@@ -26,6 +29,5 @@
             CutsceneName = cutsceneName;
             SoundID = soundID;
         }
-
     }
 }

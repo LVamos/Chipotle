@@ -5,8 +5,6 @@ using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
-using Luky;
-
 using OpenTK;
 
 namespace Game.Entities
@@ -14,6 +12,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls movement of an NPC.
     /// </summary>
+    [Serializable]
     public class PhysicsComponent : EntityComponent
     {
         /// <summary>
@@ -52,19 +51,6 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Displays the NPC in game World and assigns it to a corresponding locality.
-        /// </summary>
-        /// <param name="target">Coordinates of the area occupied by the NPC</param>
-        protected void Appear(Plane target) => target.GetTiles().Foreach(t => t.Register(Owner));
-
-        /// <summary>
-        /// Erases the NPC from the game World and unassignes it from the corresponding locality.
-        /// </summary>
-        protected void DisAppear()
-            => _area.GetTiles()
-            .Foreach(t => t.UnregisterObject());
-
-        /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
         /// <param name="x">X coordinate of the target position</param>
@@ -93,10 +79,6 @@ namespace Game.Entities
             Locality targetLocality = target.GetLocality();
             Plane source = _area;
 
-            if (_area != null)
-                DisAppear();
-
-            Appear(target);
             _area = new Plane(target);
 
             // Announce changes
@@ -104,8 +86,8 @@ namespace Game.Entities
 
             if (!silently)
             {
-                EntityMoved moved = new EntityMoved(Owner, targetTile);
-                Owner.ReceiveMessage(new EntityMoved(this, targetTile));
+                EntityMoved moved = new EntityMoved(Owner, target.Center);
+                Owner.ReceiveMessage(new EntityMoved(this, target.Center));
                 targetLocality.ReceiveMessage(moved);
             }
 

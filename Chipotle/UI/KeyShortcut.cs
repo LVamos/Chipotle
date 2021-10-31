@@ -6,6 +6,7 @@ namespace Game.UI
     /// <summary>
     /// Represents a keyboard shortcut.
     /// </summary>
+    [Serializable]
     public struct KeyShortcut
     {
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using Game.Entities;
+﻿using System;
+
+using Game.Entities;
 using Game.Terrain;
 
 namespace Game.Messaging.Events
@@ -7,6 +9,7 @@ namespace Game.Messaging.Events
     /// Indicates that the Detective Chipotle's car object (detektivovo auto) has moved.
     /// </summary>
     /// <remarks>Sent from the <see cref="Game.Entities.ChipotlesCar"/> class.</remarks>
+    [Serializable]
     public class ChipotlesCarMoved : GameMessage
     {
         /// <summary>

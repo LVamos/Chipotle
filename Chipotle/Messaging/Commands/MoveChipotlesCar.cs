@@ -1,5 +1,6 @@
-﻿using Game.Terrain;
+﻿using System;
 
+using Game.Terrain;
 
 namespace Game.Messaging.Commands
 {
@@ -7,6 +8,7 @@ namespace Game.Messaging.Commands
     /// Relocates the Detective's car (detektivovo auto) to the specified locality.
     /// </summary>
     /// <remarks>Applies to the <see cref="Game.Entities.ChipotlesCar"/> class.</remarks>
+    [Serializable]
     public class MoveChipotlesCar : GameMessage
     {
         /// <summary>

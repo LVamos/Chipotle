@@ -16,6 +16,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls the sound output of the detective Chipotle NPC
     /// </summary>
+    [Serializable]
     public class ChipotleSoundComponent : SoundComponent
     {
         /// <summary>
@@ -167,7 +168,7 @@ namespace Game.Entities
         /// Processes the MovementDone message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnMovementDone(EntityMoved message) => PlayTerrain(message.Target);
+        private void OnMovementDone(EntityMoved message) => PlayTerrain(World.Map[message.Target]);
 
         /// <summary>
         /// Processes the ObjectsCollided message.
@@ -175,8 +176,8 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnObjectsCollided(ObjectsCollided message)
         {
-            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Tile.Position.AsOpenALVector(), true);
-            Tolk.Speak(message.Tile.Object.Name.Friendly);
+            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Position.AsOpenALVector(), true);
+            Tolk.Speak(message.Object.Name.Friendly);
         }
 
         /// <summary>

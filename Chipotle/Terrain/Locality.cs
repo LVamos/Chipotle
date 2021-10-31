@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
 
 using Game.Entities;
 using Game.Messaging;
@@ -16,6 +15,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents one region on the game map (e.g. a room).
     /// </summary>
+    [Serializable]
     public class Locality : MapElement
     {
         /// <summary>
@@ -117,38 +117,6 @@ namespace Game.Terrain
         public ReadOnlyCollection<GameObject> Objects { get; }
 
         /// <summary>
-        /// Builds walls around the locality.
-        /// </summary>
-        /// <param name="walls">Specifies on which sides of the lokality the walls are to be built.</param>
-        public void DrawWalls(string walls)
-        {
-            IEnumerable<Vector2> wallCoordinates;
-
-            if (walls == "All")
-                wallCoordinates = Area.GetPerimeterPoints();
-            else
-            {
-                List<Direction> directions = new List<Direction>();
-
-                foreach (string word in Regex.Split(walls, @", +"))
-                {
-                    switch (word.ToLower())
-                    {
-                        case "left": directions.Add(Direction.Left); break;
-                        case "front": directions.Add(Direction.Up); break;
-                        case "right": directions.Add(Direction.Right); break;
-                        case "back": directions.Add(Direction.Down); break;
-                        default: throw new ArgumentException(nameof(word));
-                    }
-                }
-
-                wallCoordinates = Area.GetPerimeterPoints(directions);
-            }
-
-            wallCoordinates.Foreach(c => World.Map[c].Register(TerrainType.Wall, false));
-        }
-
-        /// <summary>
         /// Checks if the specified game object is present in this locality in the moment.
         /// </summary>
         /// <param name="o">The object to be checked</param>
@@ -225,6 +193,7 @@ namespace Game.Terrain
 
             RegisterMessages(new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(GameReloaded)] = (message) => OnGameReloaded(),
                 [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                 [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
             });
@@ -259,7 +228,7 @@ namespace Game.Terrain
         protected override void Appear()
         {
             foreach (Vector2 point in Area.GetPoints())
-                World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain, point, this) : throw new InvalidOperationException("Tile must be empty");
+                World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain) : throw new InvalidOperationException("Tile must be empty");
         }
 
         /// <summary>
@@ -287,14 +256,28 @@ namespace Game.Terrain
 => _objects.ForEach(o => o.ReceiveMessage(message));
 
         private void MessageEntities(GameMessage message)
-                => _entities.ForEach(e => e.ReceiveMessage(message));
+                        => _entities.ForEach(e => e.ReceiveMessage(message));
 
+        /// <summary>
+        /// Handles the GameReloaded message.
+        /// </summary>
+        private void OnGameReloaded()
+        {
+            if (IsItHere(World.Player))
+                PlayBackgroundSound();
+            else _backgroundSoundId = 0;
+        }
+
+        /// <summary>
+        /// Handles the LocalityEntered message.
+        /// </summary>
+        /// <param name="message">The message</param>
         private void OnLocalityEntered(LocalityEntered message)
         {
             Register(message.Sender as Entity);
 
             if (message.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
-                _backgroundSoundId = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
+                PlayBackgroundSound();
 
             _entities.ForEach(e => e.ReceiveMessage(message));
             _objects.ForEach(o => o.ReceiveMessage(message));
@@ -307,5 +290,11 @@ namespace Game.Terrain
             if (message.Sender == World.Player && _backgroundSoundId > 0)
                 World.Sound.Stop(_backgroundSoundId);
         }
+
+        /// <summary>
+        /// Plays the background sound of this locality in a loop.
+        /// </summary>
+        private void PlayBackgroundSound()
+                => _backgroundSoundId = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
     }
 }

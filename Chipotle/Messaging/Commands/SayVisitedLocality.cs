@@ -1,9 +1,12 @@
-﻿namespace Game.Messaging.Commands
+﻿using System;
+
+namespace Game.Messaging.Commands
 {
     /// <summary>
     /// Makes the Chipotle NPC announce if it have already visited the locality it's currently
     /// located in.
     /// </summary>
+    [Serializable]
     public class SayVisitedLocality : GameMessage
     {
         /// <summary>
