@@ -21,6 +21,11 @@ namespace Game.Entities
         protected Plane _area;
 
         /// <summary>
+        /// Stores reference to a locality in which the NPC is currently located.
+        /// </summary>
+        protected Locality _locality;
+
+        /// <summary>
         /// Current orientation of the NPC
         /// </summary>
         protected Orientation2D _orientation;
@@ -80,6 +85,7 @@ namespace Game.Entities
             Plane source = _area;
 
             _area = new Plane(target);
+            _locality = _area.GetLocality();
 
             // Announce changes
             Owner.ReceiveMessage(new PositionChanged(this, source, target));
