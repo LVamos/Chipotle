@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 using Game.Entities;
 using Game.Messaging;
@@ -115,6 +116,13 @@ namespace Game.Terrain
         /// List of objects present in this locality.
         /// </summary>
         public ReadOnlyCollection<GameObject> Objects { get; }
+
+        /// <summary>
+        /// Returns all adjecting localities to which it's possible to get from this locality.
+        /// </summary>
+        /// <returns>An enumeration of all adjecting accessible localities</returns>
+        public IEnumerable<Locality> GetAccessibleLocalities()
+            => _passages.Select(p => p.AnotherLocality(this));
 
         /// <summary>
         /// Checks if the specified game object is present in this locality in the moment.
