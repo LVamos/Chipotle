@@ -10,6 +10,11 @@ namespace Luky
     public sealed class Name : DebugSO
     {
         /// <summary>
+        /// Display name in czech four declension case
+        /// </summary>
+        public readonly string FourthCase;
+
+        /// <summary>
         /// A public display name
         /// </summary>
         public readonly string Friendly;
@@ -51,6 +56,14 @@ namespace Luky
                 _stringsToIDs.Add(Indexed, ID);
             }
         }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="indexedName">Inner name</param>
+        /// <param name="friendlyName">Public name</param>
+        /// <param name="fourthCase">Display name in fourth czech declension case</param>
+        public Name(string indexed, string friendly, string fourthCase) : this(indexed, friendly) => FourthCase = fourthCase;
 
         /// <summary>
         /// Copy constructor
