@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Luky;
 
@@ -14,5 +15,24 @@ namespace Game.Entities
         /// Reference to the sound player
         /// </summary>
         protected SoundThread _sound => World.Sound;
+
+        /// <summary>
+        /// Converts a string list to a CSV string.
+        /// </summary>
+        /// <param name="stringList">The string list to be formatted</param>
+        /// <param name="addAnd">Specifies if last two items should by separated with " a " conjunction.</param>
+        /// <returns>CSV string</returns>
+        protected string FormatStringList(List<string> stringList, bool addAnd)
+        {
+            int count = stringList.Count;
+            if (count > 2)
+            {
+                for (int i = 0; i < count.Count - 2; i++)
+                    stringList[i] += ", ";
+            }
+
+            stringList[exits.Count - 2] += addAnd ? " a " : ", ";
+            return String.Join(string.Empty, stringList);
+        }
     }
 }
