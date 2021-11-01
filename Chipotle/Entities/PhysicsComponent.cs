@@ -56,6 +56,16 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Calculates an angle between the NPC and a specified point.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="b"></param>
+        /// <param name="orientation"></param>
+        /// <returns></returns>
+        protected double GetAngle(Vector2 point)
+            => Luky.MathHelper.GetAngle(point, _area.Center, _orientation);
+
+        /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
         /// <param name="x">X coordinate of the target position</param>
