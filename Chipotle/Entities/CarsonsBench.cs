@@ -19,7 +19,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name for the object</param>
         /// <param name="area">The coordinates of the area that the object occupies</param>
-        public CarsonsBench(Name name, Plane area) : base(name, area, "lavice u Carsona", null, null, null, "cs32", true)
+        public CarsonsBench(Name name, Plane area, bool decorative) : base(name, area, "lavice u Carsona", decorative, null, null, null, "cs32", true)
         { }
 
         /// <summary>

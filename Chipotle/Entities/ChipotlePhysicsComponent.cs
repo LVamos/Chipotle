@@ -404,8 +404,9 @@ namespace Game.Entities
         private void OnSaySurroundingObjects(SaySurroundingObjects message)
         {
             Vector2 me = _area.Center;
-            IEnumerable<GameObject> nearestObjects =
+            IEnumerable<DumpObject> nearestObjects =
                  _locality.Objects
+                 .Where(o => !o.Decorative)
                  .Where(o => o.Area.GetDistanceFrom(me) <= 20)
                  .OrderBy(o => o.Area.GetDistanceFrom(me));
 

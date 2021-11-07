@@ -230,7 +230,8 @@ namespace Game.Entities
         /// Processes the TerrainCollided message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnInpermeableTerrainCollision(TerrainCollided message) => PlayTerrain(message.Tile);
+        private void OnInpermeableTerrainCollision(TerrainCollided message)
+             => PlayTerrain(message.Tile.Terrain);
 
         /// <summary>
         /// Processes the LocalityChanged message.
@@ -247,7 +248,7 @@ namespace Game.Entities
         /// Processes the MovementDone message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnMovementDone(EntityMoved message) => PlayTerrain(World.Map[message.Target]);
+        private void OnMovementDone(EntityMoved message) => PlayTerrain(World.Map[message.Target].Terrain);
 
         /// <summary>
         /// Processes the ObjectsCollided message.
@@ -269,10 +270,13 @@ namespace Game.Entities
         /// Plays a sound representation of a tile.
         /// </summary>
         /// <param name="tile">A tile to be announced</param>
-        private void PlayTerrain(Tile tile)
+        private void PlayTerrain(TerrainType terrain)
         {
-            string soundName = "movstep" + Enum.GetName(tile.Terrain.GetType(), tile.Terrain);
+            string soundName = "movstep" + Enum.GetName(terrain.GetType(), terrain);
             _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, new Vector3(0, -1.7f, 0), true, 1f, null, 1f, 0, Playback.OpenAL);
+
+            if (terrain == TerrainType.Wall)
+                Tolk.Speak("zeď");
         }
     }
 }

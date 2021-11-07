@@ -19,7 +19,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public VanillaCrunchCar(Name name, Plane area) : base(name, area, "auto Vanilla crunch") { }
+        public VanillaCrunchCar(Name name, Plane area, bool decorative) : base(name, area, "auto Vanilla crunch", decorative) { }
 
         /// <summary>
         /// A reference to the key hanger (věšák v1) object in the garage of the Vanilla crunch

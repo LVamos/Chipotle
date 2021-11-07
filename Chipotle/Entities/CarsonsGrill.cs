@@ -20,7 +20,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name for the object</param>
         /// <param name="area">The coordinates of the area that the object occupies</param>
-        public CarsonsGrill(Name name, Plane area) : base(name, area, "gril u Carsona")
+        public CarsonsGrill(Name name, Plane area, bool decorative) : base(name, area, "gril u Carsona", decorative)
         { }
 
         /// <summary>

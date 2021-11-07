@@ -500,10 +500,12 @@ lLoop
                 // Load game objects
                 foreach (XElement o in l.Elements("object"))
                 {
-                    Name oName = new Name(A(o, "indexedname"), A(o, "friendlyname"));
-                    string oType = A(o, "type");
-                    Plane coordinates = new Plane(A(o, "coordinates")).ToAbsolute(locality.Area);
-                    Add(GameObject.CreateObject(oName, coordinates, oType));
+                    Add(GameObject.CreateObject(
+                        new Name(A(o, "indexedname"), A(o, "friendlyname")),
+                        new Plane(A(o, "coordinates")).ToAbsolute(locality.Area),
+                        A(o, "type"),
+                        A(o, "decorative").ToBool()
+                        ));
                 }
             }
 

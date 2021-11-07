@@ -72,7 +72,7 @@ namespace Game.Terrain
         /// <summary>
         /// List of objects present in this locality.
         /// </summary>
-        private readonly List<GameObject> _objects;
+        private readonly List<DumpObject> _objects;
 
         /// <summary>
         /// List of exits from this locality
@@ -101,7 +101,7 @@ namespace Game.Terrain
             Passages = _passages.AsReadOnly();
             _entities = new List<Entity>();
             Entities = _entities.AsReadOnly();
-            _objects = new List<GameObject>();
+            _objects = new List<DumpObject>();
             Objects = _objects.AsReadOnly();
             DefaultTerrain = defaultTerrain;
             Area.MinimumHeight = MinimumHeight;
@@ -124,7 +124,7 @@ namespace Game.Terrain
         /// <summary>
         /// List of objects present in this locality.
         /// </summary>
-        public ReadOnlyCollection<GameObject> Objects { get; }
+        public ReadOnlyCollection<DumpObject> Objects { get; }
 
         /// <summary>
         /// Returns all adjecting localities to which it's possible to get from this locality.
@@ -185,7 +185,7 @@ namespace Game.Terrain
         {
             Assert(!IsItHere(o), "Object already registered.");
 
-            _objects.Add(o);
+            _objects.Add(o as DumpObject);
             if (_messagingEnabled)
             {
             }
@@ -221,7 +221,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="o"></param>
         public void Unregister(GameObject o)
-            => _objects.Remove(o);
+            => _objects.Remove(o as DumpObject);
 
         /// <summary>
         /// Immediately removes an entity from list of present entities.

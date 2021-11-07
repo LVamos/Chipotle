@@ -18,7 +18,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public KeyHanger(Name name, Plane area) : base(name, area, "věšák na klíče") { }
+        public KeyHanger(Name name, Plane area, bool decorative) : base(name, area, "věšák na klíče", decorative) { }
 
         /// <summary>
         /// Indicates if the keys are on the hanger.

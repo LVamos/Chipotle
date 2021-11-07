@@ -17,6 +17,12 @@ namespace Game.Entities
     public class DumpObject : GameObject
     {
         /// <summary>
+        /// Specifies if the object works as a decorator.
+        /// </summary>
+        /// <remarks>When it's true the object isn't reported in SaySurroundingObjects command.</remarks>
+        public bool Decorative;
+
+        /// <summary>
         /// Action sound effect handle. It expires after the sound is played.
         /// </summary>
         protected int _actionSoundID;
@@ -59,8 +65,9 @@ namespace Game.Entities
         /// <remarks>
         /// The type parameter allows assigning objects with some special behavior to proper classes.
         /// </remarks>
-        public DumpObject(Name name, Plane area, string type = null, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false) : base(name, type, area)
+        public DumpObject(Name name, Plane area, string type, bool decorative, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false) : base(name, type, area)
         {
+            Decorative = decorative;
             _usableOnce = usableOnce;
             _sounds = (collisionSound ?? _sounds.collision, actionSound ?? _sounds.action, loopSound ?? _sounds.loop); // Modify sounds of the object.
             _cutscene = cutscene;
