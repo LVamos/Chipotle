@@ -22,14 +22,19 @@ namespace Game.Entities
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
+        /// Specifies if the NPC can walk.
+        /// </summary>
+        protected bool _blockWalk;
+
+        /// <summary>
         /// Time interval for backward walk
         /// </summary>
-        private const int _backwardWalkSpeed = 30;
+        private const int _backwardWalkSpeed = 20;
 
         /// <summary>
         /// Time interval for forward walk
         /// </summary>
-        private const int _forwardWalkSpeed = 20;
+        private const int _forwardWalkSpeed = 15;
 
         /// <summary>
         /// Determines maximum time between particullar steps.
@@ -39,7 +44,7 @@ namespace Game.Entities
         /// <summary>
         /// Time interval for walk to the side
         /// </summary>
-        private const int _sideWalkSpeed = 50;
+        private const int _sideWalkSpeed = 24;
 
         /// <summary>
         /// Stores references to all the localities the NPC has visited.
@@ -330,6 +335,9 @@ namespace Game.Entities
         /// </summary>
         private void MakeStep()
         {
+            if (!_sideStepInProgress && !_walking)
+                return;
+
             StartWalk message = _startWalkMessage
                 ?? throw new ArgumentNullException(nameof(_startWalkMessage));
 
@@ -346,6 +354,9 @@ namespace Game.Entities
 
             if (!targetTile.tile.Permeable)
             {
+                _walking = false;
+                _startWalkMessage = null;
+                _sideStepInProgress = false;
                 Owner.ReceiveMessage(new TerrainCollided(this, targetTile.position, targetTile.tile));
                 return;
             }
@@ -354,6 +365,7 @@ namespace Game.Entities
             GameObject o = World.GetObject(targetTile.position);
             if (o != null && o != Owner)
             {
+                _walking = false;
                 Owner.ReceiveMessage(new ObjectsCollided(this, o, targetTile.position, targetTile.tile));
                 return;
             }
@@ -362,6 +374,7 @@ namespace Game.Entities
             Passage passage = World.GetPassage(targetTile.position);
             if (passage != null && passage is Door door && door.Closed)
             {
+                _walking = false;
                 Owner.ReceiveMessage(new DoorHit(this));
                 return;
             }
@@ -441,9 +454,10 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnStartWalk(StartWalk message)
         {
-            if (_walking || StandUp())
+            if (_blockWalk || StandUp())
                 return;
 
+            _blockWalk = true;
             _startWalkMessage = message;
 
             // Allow only single steps when walking to the side.
@@ -451,8 +465,8 @@ namespace Game.Entities
             {
                 if (!_sideStepInProgress && _timeFromLastStep >= _sideWalkSpeed)
                 {
-                    MakeStep();
                     _sideStepInProgress = true;
+                    MakeStep();
                 }
 
                 return;
@@ -471,9 +485,10 @@ namespace Game.Entities
                 return;
 
             _walkSpeed = walkSpeed;
-            MakeStep();
+            _walking = true;
             _walkTimer = 0;
             _walking = true;
+            MakeStep();
         }
 
         /// <summary>
@@ -482,6 +497,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnStopWalk(StopWalk message)
         {
+            _blockWalk = false;
             _walking = false;
             _sideStepInProgress = false;
             _startWalkMessage = null;
