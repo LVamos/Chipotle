@@ -37,6 +37,7 @@ namespace Game.Messaging.Events
         /// <param name="tile">The tile under the object the NPC bumped to</param>
         public ObjectsCollided(object sender, GameObject collidingObject, Vector2 position, Tile tile) : base(sender)
         {
+            Object = collidingObject;
             Position = position;
             Tile = tile;
         }
