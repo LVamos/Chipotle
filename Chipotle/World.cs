@@ -460,7 +460,7 @@ namespace Game
         /// </summary>
         public static void LoadMap()
         {
-            string Attribute(XElement element, string attribute, bool prepareForIndexing = true)
+            string A(XElement element, string attribute, bool prepareForIndexing = true)
                 => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
             XDocument xDocument = XDocument.Load(MapPath);
@@ -476,21 +476,20 @@ namespace Game
             // Load localities
             foreach (XElement l in xLocalities)
             {
-                string lIndexedName = Attribute(l, "indexedname");
-                string lfourthCase = Attribute(l, "fourthcase");
-                _localityLoops.TryGetValue(lIndexedName.ToLower(), out string lLoop);
-
+                _localityLoops.TryGetValue(A(l, "indexedname"), out string lLoop);
                 Locality locality = new Locality(
-               new Name(lIndexedName, Attribute(l, "friendlyname"), lfourthCase),
-               Attribute(l, "type").ToLocalityType(),
-               int.Parse(Attribute(l, "height")),
-               new Plane(Attribute(l, "coordinates")),
-               Attribute(l, "defaultTerrain", false).ToTerrainType(),
-lLoop);
+           new Name(A(l, "indexedname"), A(l, "friendlyname")),
+           A(l, "to"),
+           A(l, "type").ToLocalityType(),
+           int.Parse(A(l, "height")),
+           new Plane(A(l, "coordinates")),
+           A(l, "defaultTerrain", false).ToTerrainType(),
+lLoop
+);
                 Add(locality);
 
                 // Create perimeter walls if they are specified in the map
-                string wallDefinition = Attribute(l, "walls", false);
+                string wallDefinition = A(l, "walls", false);
 
                 if (wallDefinition != "None")
                     DrawWalls(locality.Area, wallDefinition);
@@ -501,9 +500,9 @@ lLoop);
                 // Load game objects
                 foreach (XElement o in l.Elements("object"))
                 {
-                    Name oName = new Name(Attribute(o, "indexedname"), Attribute(o, "friendlyname"));
-                    string oType = Attribute(o, "type");
-                    Plane coordinates = new Plane(Attribute(o, "coordinates")).ToAbsolute(locality.Area);
+                    Name oName = new Name(A(o, "indexedname"), A(o, "friendlyname"));
+                    string oType = A(o, "type");
+                    Plane coordinates = new Plane(A(o, "coordinates")).ToAbsolute(locality.Area);
                     Add(GameObject.CreateObject(oName, coordinates, oType));
                 }
             }
@@ -511,12 +510,12 @@ lLoop);
             // Place passages
             foreach (XElement p in xPassages)
             {
-                Name pIndexedName = new Name(Attribute(p, "indexedname"));
-                bool isDoor = Attribute(p, "door").ToBool();
-                bool closed = Attribute(p, "closed").ToBool();
-                bool openable = Attribute(p, "openable").ToBool();
-                Plane area = new Plane(Attribute(p, "coordinates"));
-                List<Locality> localities = new List<Locality> { GetLocality(Attribute(p, "from")), GetLocality(Attribute(p, "to").PrepareForIndexing()) };
+                Name pIndexedName = new Name(A(p, "indexedname"));
+                bool isDoor = A(p, "door").ToBool();
+                bool closed = A(p, "closed").ToBool();
+                bool openable = A(p, "openable").ToBool();
+                Plane area = new Plane(A(p, "coordinates"));
+                List<Locality> localities = new List<Locality> { GetLocality(A(p, "from")), GetLocality(A(p, "to").PrepareForIndexing()) };
 
                 // Create and register new passage
                 Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed, openable));
