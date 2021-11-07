@@ -227,7 +227,7 @@ namespace Game.Entities
             IEnumerable<Passage> exits = _locality.Passages.OrderBy(e => e.Area.GetDistanceFrom(me));
 
             IEnumerable<(string description, double compassDegrees)> exitInfo = exits
-                .Select(e => (e.AnotherLocality(_locality).Name.FourthCase, GetAngle(e.Area.GetClosestPointTo(me))));
+                .Select(e => (e.AnotherLocality(_locality).To, GetAngle(e.Area.GetClosestPointTo(me))));
 
             SayExits newMessage = exitInfo.IsNullOrEmpty() ? new SayExits(this, true) : new SayExits(this, exitInfo);
             Owner.ReceiveMessage(newMessage);

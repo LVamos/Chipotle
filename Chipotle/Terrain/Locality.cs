@@ -30,6 +30,11 @@ namespace Game.Terrain
         public readonly IReadOnlyList<Passage> Passages;
 
         /// <summary>
+        /// Name of the locality in a shape that expresses a direction to the locality.
+        /// </summary>
+        public readonly string To;
+
+        /// <summary>
         /// Specifies if the locality is outside or inside a building.
         /// </summary>
         public readonly LocalityType Type;
@@ -78,13 +83,17 @@ namespace Game.Terrain
         /// Constructor
         /// </summary>
         /// <param name="name">Inner and public name of the locality</param>
+        /// <param name="to">
+        /// Name of the locality in a shape that expresses a direction to the locality
+        /// </param>
         /// <param name="type">Specifies if the locality is outside or inside a building.</param>
         /// <param name="ceiling">Ceiling height of the locality (should be 0 for outdoor localities)</param>
         /// <param name="area">Coordinates of the area occupied by the locality</param>
         /// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
         /// <param name="backgroundSound">A background sound played in loop</param>
-        public Locality(Name name, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string backgroundSound = null) : base(name, area)
+        public Locality(Name name, string to, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string backgroundSound = null) : base(name, area)
         {
+            To = to;
             Type = type;
             _ceiling = Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
             _ceiling = type == LocalityType.Outdoor ? 0 : ceiling;

@@ -476,17 +476,16 @@ namespace Game
             // Load localities
             foreach (XElement l in xLocalities)
             {
-                string lIndexedName = Attribute(l, "indexedname");
-                string lfourthCase = Attribute(l, "fourthcase");
-                _localityLoops.TryGetValue(lIndexedName.ToLower(), out string lLoop);
-
+                _localityLoops.TryGetValue(Attribute(l, "indexedname"), out string lLoop);
                 Locality locality = new Locality(
-               new Name(lIndexedName, Attribute(l, "friendlyname"), lfourthCase),
-               Attribute(l, "type").ToLocalityType(),
-               int.Parse(Attribute(l, "height")),
-               new Plane(Attribute(l, "coordinates")),
-               Attribute(l, "defaultTerrain", false).ToTerrainType(),
-lLoop);
+           new Name(Attribute(l, "indexedname"), Attribute(l, "friendlyname")),
+           Attribute(l, "fourthcase"),
+           Attribute(l, "type").ToLocalityType(),
+           int.Parse(Attribute(l, "height")),
+           new Plane(Attribute(l, "coordinates")),
+           Attribute(l, "defaultTerrain", false).ToTerrainType(),
+lLoop
+);
                 Add(locality);
 
                 // Create perimeter walls if they are specified in the map
