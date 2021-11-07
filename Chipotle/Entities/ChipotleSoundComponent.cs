@@ -86,6 +86,7 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
                 [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
                 [typeof(SaySurroundingObjects)] = (message) => OnSayNearestObjects((SaySurroundingObjects)message),
                 [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
@@ -188,6 +189,12 @@ namespace Game.Entities
                 Tolk.Speak(FormatStringList(objectInfo));
             }
         }
+
+        /// <summary>
+        /// Processes the CutsceneBegan message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnSayOrientation(SayOrientation message) => SayOrientation();
 
         /// <summary>
         /// Reports the current orientation of the Detective Chipotle NPC using a screen reader or

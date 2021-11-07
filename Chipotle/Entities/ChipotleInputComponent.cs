@@ -44,6 +44,7 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
+                [new KeyShortcut(Keys.S)] = SayOrientation,
                 [new KeyShortcut(Keys.V)] = SayExits,
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
@@ -102,6 +103,11 @@ namespace Game.Entities
         /// Reports list of all exits from current locality.
         /// </summary>
         protected void SayExits() => Owner.ReceiveMessage(new SayExits(this));
+
+        /// <summary>
+        /// Reports current orientation setting of the Chipotle NPC.
+        /// </summary>
+        protected void SayOrientation() => Owner.ReceiveMessage(new SayOrientation(this));
 
         /// <summary>
         /// Allows the player to use a nearby object or door.
