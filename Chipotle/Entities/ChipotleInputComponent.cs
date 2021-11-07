@@ -44,6 +44,7 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
+                [new KeyShortcut(Keys.E)] = SayExits,
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
                 [new KeyShortcut(Keys.V)] = VisitedLocality,
@@ -98,6 +99,11 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Reports list of all exits from current locality.
+        /// </summary>
+        protected void SayExits() => Owner.ReceiveMessage(new SayExits(this));
+
+        /// <summary>
         /// Allows the player to use a nearby object or door.
         /// </summary>
         private void Interact()
@@ -138,7 +144,7 @@ namespace Game.Entities
         /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
         /// </summary>
         private void SayNearestObject()
-=> Owner.ReceiveMessage(new SayNearestObject(this));
+=> Owner.ReceiveMessage(new SayNearestObjects(this));
 
         /// <summary>
         /// Stops the currently playing cutscene.

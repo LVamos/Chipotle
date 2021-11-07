@@ -9,6 +9,8 @@ using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
+using Luky;
+
 using OpenTK;
 
 namespace Game.Entities
@@ -149,13 +151,14 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>()
                 {
+                    [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
                     [typeof(StopWalk)] = (message) => OnStopWalk((StopWalk)message),
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
                     [typeof(SayVisitedLocality)] = (message) => OnSayVisitedLocality((SayVisitedLocality)message),
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
-                    [typeof(SayNearestObject)] = (m) => OnSayNearestObject((SayNearestObject)m),
+                    [typeof(SayNearestObjects)] = (m) => OnSayNearestObjects((SayNearestObjects)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
                     [typeof(StartWalk)] = (m) => OnStartWalk((StartWalk)m),
                     [typeof(TurnEntity)] = (message) => OnTurnEntity((TurnEntity)message),
@@ -211,6 +214,23 @@ namespace Game.Entities
                 case "cs23": JumpToSweeneysHall(); break;
                 case "cs35": QuitGame(); break;
             }
+        }
+
+        /// <summary>
+        /// Processes the SayExits message.
+        /// </summary>
+        /// <param name="message">The message</param>
+        protected void OnSayExits(SayExits message)
+        {
+            Vector2 me = _area.Center;
+
+            IEnumerable<Passage> exits = _locality.Passages.OrderBy(e => e.Area.GetDistanceFrom(me));
+
+            IEnumerable<(string description, double compassDegrees)> exitInfo = exits
+                .Select(e => (e.AnotherLocality(_locality).Name.FourthCase, GetAngle(e.Area.GetClosestPointTo(me))));
+
+            SayExits newMessage = exitInfo.IsNullOrEmpty() ? new SayExits(this, true) : new SayExits(this, exitInfo);
+            Owner.ReceiveMessage(newMessage);
         }
 
         /// <summary>
@@ -381,39 +401,19 @@ namespace Game.Entities
         /// Processes the SayNearestObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnSayNearestObject(SayNearestObject message)
+        private void OnSayNearestObjects(SayNearestObjects message)
         {
             Vector2 me = _area.Center;
+            IEnumerable<GameObject> nearestObjects =
+                 _locality.Objects
+                 .Where(o => o.Area.GetDistanceFrom(me) <= 20)
+                 .OrderBy(o => o.Area.GetDistanceFrom(me));
 
-            GameObject o =
-                World.GetNearestObjects(me)
-                .Where(obj => obj.Locality == _area.GetLocality())
-                .FirstOrDefault();
+            IEnumerable<(string friendlyName, double compassDegrees)> objectInfo = nearestObjects
+                .Select(o => (o.Name.Friendly, GetAngle(o.Area.GetClosestPointTo(me))));
 
-            if (o == null)
-            {
-                Tolk.Speak("Nic tu není");
-                return;
-            }
-
-            Vector2 point = o.Area.GetClosestPointTo(me);
-            double x = point.X - me.X;
-            double y = point.Y - me.Y;
-            double z = Math.Round(Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)));
-            double r = Math.Atan2(y, x);
-            Angle angle = new Angle(r) + Angle.FromCartesianDegrees(_orientation.Angle.CompassDegrees);
-            double degrees = Math.Round(angle.CompassDegrees);
-
-            string msg = o.Name.Friendly;
-            if (degrees >= 315 || degrees < 45)
-                msg += " před tebou";
-            else if (degrees >= 45 && degrees < 135)
-                msg += " napravo";
-            else if (degrees >= 135 && degrees < 225)
-                msg += " za tebou";
-            else msg += " nalevo";
-
-            Tolk.Speak(msg);
+            SayNearestObjects newMessage = objectInfo.IsNullOrEmpty() ? new SayNearestObjects(this, true) : new SayNearestObjects(this, objectInfo);
+            Owner.ReceiveMessage(newMessage);
         }
 
         /// <summary>

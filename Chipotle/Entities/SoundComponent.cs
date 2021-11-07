@@ -22,16 +22,19 @@ namespace Game.Entities
         /// <param name="stringList">The string list to be formatted</param>
         /// <param name="addAnd">Specifies if last two items should by separated with " a " conjunction.</param>
         /// <returns>CSV string</returns>
-        protected string FormatStringList(List<string> stringList, bool addAnd)
+        protected string FormatStringList(List<string> stringList, bool addAnd = false)
         {
             int count = stringList.Count;
+            if (count == 1)
+                return stringList[0];
+
             if (count > 2)
             {
-                for (int i = 0; i < count.Count - 2; i++)
+                for (int i = 0; i < count - 2; i++)
                     stringList[i] += ", ";
             }
 
-            stringList[exits.Count - 2] += addAnd ? " a " : ", ";
+            stringList[count - 2] += addAnd ? " a " : ", ";
             return String.Join(string.Empty, stringList);
         }
     }

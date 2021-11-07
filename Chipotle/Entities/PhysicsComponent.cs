@@ -63,7 +63,7 @@ namespace Game.Entities
         /// <param name="orientation"></param>
         /// <returns></returns>
         protected double GetAngle(Vector2 point)
-            => Luky.MathHelper.GetAngle(point, _area.Center, _orientation);
+            => World.GetAngle(point, _area.Center, _orientation);
 
         /// <summary>
         /// Immediately changes position of the NPC.

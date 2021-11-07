@@ -32,22 +32,6 @@ namespace Luky
             => (float)(d * (PI / 180));
 
         /// <summary>
-        /// Calculates an angle between two point acording to the specified orientation.
-        /// </summary>
-        /// <param name="a">The first point</param>
-        /// <param name="b">The second point</param>
-        /// <param name="orientation">The orientation according to which the angle should be calculated</param>
-        /// <returns>Compass degrees</returns>
-        public static double GetAngle(Vector2 a, Vector2 b, Orientation2D orientation)
-        {
-            double x = a.X - b.X;
-            double y = a.Y - b.Y;
-            double z = Math.Round(Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)));
-            Angle angle = new Angle(Math.Atan2(y, x)) + Angle.FromCartesianDegrees(orientation.Angle.CompassDegrees);
-            return Math.Round(angle.CompassDegrees);
-        }
-
-        /// <summary>
         /// Correct modulo function that works properly with negative values.
         /// </summary>
         /// <param name="a">Avalue to divide</param>

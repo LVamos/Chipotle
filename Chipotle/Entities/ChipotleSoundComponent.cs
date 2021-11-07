@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using DavyKager;
 
 using Game.Messaging;
+using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
@@ -84,6 +86,8 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
+                [typeof(SayNearestObjects)] = (message) => OnSayNearestObjects((SayNearestObjects)message),
                 [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
@@ -105,6 +109,23 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Returns word description of the specified angle.
+        /// </summary>
+        /// <param name="compassDegrees">The angle in compass degrees to be described</param>
+        /// <returns>A word description in a string</returns>
+        protected string GetAngleDescription(double compassDegrees, bool to = false)
+        {
+            if (compassDegrees >= 315 || compassDegrees < 45)
+                return "před tebou";
+            if (compassDegrees >= 45 && compassDegrees < 135)
+                return " napravo";
+            if (compassDegrees >= 135 && compassDegrees < 225)
+                return " za tebou";
+
+            return " nalevo";
+        }
+
+        /// <summary>
         /// Processes the CutsceneBegan message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
@@ -114,6 +135,57 @@ namespace Game.Entities
             switch (message.CutsceneName)
             {
                 case "cs7": case "cs8": case "cs10": _sound.ApplyEaxReverbPreset("carpettedhallway", 0); break;
+            }
+        }
+
+        /// <summary>
+        /// Processes the SayExits message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnSayExits(SayExits message)
+        {
+            if (message.ExitInfo == null && !message.NothingFound)
+                return;
+
+            if (message.NothingFound)
+                Tolk.Speak("žádné východy");
+            else
+            {
+                List<string> info = message.ExitInfo
+                    .Select(e => GetAngleDescription(e.compassDegrees) + " " + e.description)
+                    .ToList<string>();
+
+                if (info.Count == 1)
+                {
+                    (string description, double compassDegrees) record = message.ExitInfo.First();
+                    Tolk.Speak($"{GetAngleDescription(record.compassDegrees)} je východ {record.description}");
+                    return;
+                }
+
+                string number;
+                if (info.Count == 2 || info.Count == 3)
+                    number = "Jsou tady " + (info.Count == 2 ? "dva" : "3") + " východy: ";
+                else number = "Je tady " + info.Count.ToString() + " východů: ";
+                Tolk.Speak(number + FormatStringList(info, true));
+            }
+        }
+
+        /// <summary>
+        /// Handles the SayNearestObjects message.
+        /// </summary>
+        /// <param name="message">The message</param>
+        protected void OnSayNearestObjects(SayNearestObjects message)
+        {
+            if (message.ObjectInfo == null && !message.NothingFound)
+                return;
+
+            if (message.NothingFound)
+                Tolk.Speak("Nic tu není");
+            else
+            {
+                List<string> objectInfo = message.ObjectInfo
+                    .Select(o => o.friendlyName + " " + GetAngleDescription(o.compassDegrees)).ToList<string>();
+                Tolk.Speak(FormatStringList(objectInfo));
             }
         }
 

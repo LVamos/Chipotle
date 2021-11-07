@@ -260,10 +260,10 @@ namespace Game.Terrain
         /// <summary>
         /// Returns distance between the plane and the default point.
         /// </summary>
-        /// <param name="defaultPoint">The point from which the distance is to be calculated</param>
+        /// <param name="point">The point from which the distance is to be calculated</param>
         /// <returns>The distance between the default point and the plane</returns>
-        public float GetDistanceFrom(Vector2 defaultPoint)
-            => (defaultPoint - GetClosestPointTo(defaultPoint)).LengthSquared;
+        public float GetDistanceFrom(Vector2 point)
+            => World.GetDistance(point, GetClosestPointTo(point));
 
         /// <summary>
         /// Returns hash code of this instance.
@@ -413,12 +413,10 @@ namespace Game.Terrain
         /// <summary>
         /// Enumerates all points sorted by distance from the default point.
         /// </summary>
-        /// <param name="defaultPoint">
-        /// Coordinates of the default point whose surroundings should be explored.
-        /// </param>
+        /// <param name="point">Coordinates of the default point whose surroundings should be explored.</param>
         /// <returns>Coordinates</returns>
-        public IEnumerable<Vector2> GetPointsByDistance(Vector2 defaultPoint)
-            => GetPoints().OrderBy(c => (defaultPoint - c).LengthSquared);
+        public IEnumerable<Vector2> GetPointsByDistance(Vector2 point)
+            => GetPoints().OrderBy(p => World.GetDistance(p, point));
 
         /// <summary>
         /// Returns a new plane corresponding to coordinates of the specified perimeter side of this plane.

@@ -182,20 +182,11 @@ namespace Game.Entities
 => _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
 
         /// <summary>
-        /// Computes distance between two points.
-        /// </summary>
-        /// <param name="a">The first point</param>
-        /// <param name="b">The second point</param>
-        /// <returns>The distance between the points</returns>
-        private int GetDistance(Vector2 a, Vector2 b)
-=> (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
-
-        /// <summary>
         /// Computes distance between the NPC and the Detective Chipotle NPC.
         /// </summary>
         /// <returns>Distance between the NPC and the Detective Chipotle NPC</returns>
         private int GetDistanceFromPlayer()
-=> GetDistance(_area.Center, _player.Area.Center);
+=> World.GetDistance(_area.Center, _player.Area.Center);
 
         /// <summary>
         /// start walking the shortest path to the Detective Chipotle NPC.

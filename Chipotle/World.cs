@@ -208,6 +208,27 @@ namespace Game
         }
 
         /// <summary>
+        /// Calculates an angle between two point acording to the specified orientation.
+        /// </summary>
+        /// <param name="a">The first point</param>
+        /// <param name="b">The second point</param>
+        /// <param name="orientation">The orientation according to which the angle should be calculated</param>
+        /// <returns>Compass degrees</returns>
+        public static double GetAngle(Vector2 a, Vector2 b, Orientation2D orientation)
+        {
+            double x = a.X - b.X;
+            double y = a.Y - b.Y;
+            double z = Math.Round(Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)));
+            Angle angle = new Angle(Math.Atan2(y, x)) + Angle.FromCartesianDegrees(orientation.Angle.CompassDegrees);
+            return Math.Round(angle.CompassDegrees);
+        }
+
+        /// </summary> <param name="a">The first point</param> <param name="b">The second
+        /// point</param> <returns>The distance between the points</returns>
+        public static int GetDistance(Vector2 a, Vector2 b)
+=> (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
+
+        /// <summary>
         /// Returns an entity that stands on the given position.
         /// </summary>
         /// <param name="point"></param>
@@ -456,10 +477,11 @@ namespace Game
             foreach (XElement l in xLocalities)
             {
                 string lIndexedName = Attribute(l, "indexedname");
+                string lfourthCase = Attribute(l, "fourthcase");
                 _localityLoops.TryGetValue(lIndexedName.ToLower(), out string lLoop);
 
                 Locality locality = new Locality(
-               new Name(lIndexedName, Attribute(l, "friendlyname")),
+               new Name(lIndexedName, Attribute(l, "friendlyname"), lfourthCase),
                Attribute(l, "type").ToLocalityType(),
                int.Parse(Attribute(l, "height")),
                new Plane(Attribute(l, "coordinates")),
