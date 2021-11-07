@@ -120,7 +120,7 @@
     <Compile Include="Entities\TuttleSoundComponent.cs" />
     <Compile Include="Messaging\Events\LocalityLeft.cs" />
     <Compile Include="Messaging\Events\LocalityEntered.cs" />
-    <Compile Include="Messaging\Commands\SayNearestObjects.cs" />
+    <Compile Include="Messaging\Commands\SaySurroundingObjects.cs" />
     <Compile Include="Messaging\Commands\SayLocality.cs" />
     <Compile Include="Messaging\Events\PositionChanged.cs" />
     <Compile Include="Messaging\Events\TerrainCollided.cs" />

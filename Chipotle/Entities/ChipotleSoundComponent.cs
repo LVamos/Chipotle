@@ -87,7 +87,7 @@ namespace Game.Entities
             new Dictionary<Type, Action<GameMessage>>()
             {
                 [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
-                [typeof(SayNearestObjects)] = (message) => OnSayNearestObjects((SayNearestObjects)message),
+                [typeof(SaySurroundingObjects)] = (message) => OnSayNearestObjects((SaySurroundingObjects)message),
                 [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
@@ -174,7 +174,7 @@ namespace Game.Entities
         /// Handles the SayNearestObjects message.
         /// </summary>
         /// <param name="message">The message</param>
-        protected void OnSayNearestObjects(SayNearestObjects message)
+        protected void OnSayNearestObjects(SaySurroundingObjects message)
         {
             if (message.ObjectInfo == null && !message.NothingFound)
                 return;

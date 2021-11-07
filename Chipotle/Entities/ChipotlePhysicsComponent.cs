@@ -158,7 +158,7 @@ namespace Game.Entities
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
-                    [typeof(SayNearestObjects)] = (m) => OnSayNearestObjects((SayNearestObjects)m),
+                    [typeof(SaySurroundingObjects)] = (m) => OnSaySurroundingObjects((SaySurroundingObjects)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
                     [typeof(StartWalk)] = (m) => OnStartWalk((StartWalk)m),
                     [typeof(TurnEntity)] = (message) => OnTurnEntity((TurnEntity)message),
@@ -273,7 +273,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="step">The distance between the NPC and the required tile</param>
         /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
-        /// <completionlist cref="PhysicsComponent.Orientation"/>
+        /// <see cref="PhysicsComponent.Orientation"/>
         private (Vector2 position, Tile tile) GetNextTile(int step = 1)
             => GetNextTile(Orientation, step);
 
@@ -401,7 +401,7 @@ namespace Game.Entities
         /// Processes the SayNearestObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnSayNearestObjects(SayNearestObjects message)
+        private void OnSaySurroundingObjects(SaySurroundingObjects message)
         {
             Vector2 me = _area.Center;
             IEnumerable<GameObject> nearestObjects =
@@ -412,7 +412,7 @@ namespace Game.Entities
             IEnumerable<(string friendlyName, double compassDegrees)> objectInfo = nearestObjects
                 .Select(o => (o.Name.Friendly, GetAngle(o.Area.GetClosestPointTo(me))));
 
-            SayNearestObjects newMessage = objectInfo.IsNullOrEmpty() ? new SayNearestObjects(this, true) : new SayNearestObjects(this, objectInfo);
+            SaySurroundingObjects newMessage = objectInfo.IsNullOrEmpty() ? new SaySurroundingObjects(this, true) : new SaySurroundingObjects(this, objectInfo);
             Owner.ReceiveMessage(newMessage);
         }
 

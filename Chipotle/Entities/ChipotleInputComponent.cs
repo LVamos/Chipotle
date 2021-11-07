@@ -44,15 +44,15 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
-                [new KeyShortcut(Keys.E)] = SayExits,
+                [new KeyShortcut(Keys.V)] = SayExits,
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
-                [new KeyShortcut(Keys.V)] = VisitedLocality,
+                [new KeyShortcut(Keys.N)] = VisitedLocality,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight,
 
                 // Other shortcuts
-                [new KeyShortcut(Keys.O)] = SayNearestObject,
+                [new KeyShortcut(Keys.O)] = SaySurroundingObjects,
                 [new KeyShortcut(Keys.L)] = SayLocality,
                 [new KeyShortcut(Keys.Up)] = MoveForward,
                 [new KeyShortcut(Keys.Down)] = MoveBack,
@@ -143,8 +143,8 @@ namespace Game.Entities
         /// <summary>
         /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
         /// </summary>
-        private void SayNearestObject()
-=> Owner.ReceiveMessage(new SayNearestObjects(this));
+        private void SaySurroundingObjects()
+=> Owner.ReceiveMessage(new SaySurroundingObjects(this));
 
         /// <summary>
         /// Stops the currently playing cutscene.

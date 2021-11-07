@@ -11,7 +11,7 @@ namespace Game.Messaging.Commands
     /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
     /// </remarks>
     [Serializable]
-    public class SayNearestObjects : GameMessage
+    public class SaySurroundingObjects : GameMessage
     {
         /// <summary>
         /// Indicates that no objects were found.
@@ -27,14 +27,14 @@ namespace Game.Messaging.Commands
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public SayNearestObjects(object sender) : base(sender) { }
+        public SaySurroundingObjects(object sender) : base(sender) { }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Sorce of the message</param>
         /// <param name="objectInfo">Information about the nearest objects</param>
-        public SayNearestObjects(object sender, IEnumerable<(string friendlyName, double compassDegrees)> objectInfo) : this(sender)
+        public SaySurroundingObjects(object sender, IEnumerable<(string friendlyName, double compassDegrees)> objectInfo) : this(sender)
         => ObjectInfo = objectInfo;
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Game.Messaging.Commands
         /// </summary>
         /// <param name="sender">Sorce of the message</param>
         /// <param name="nothingFound">Indicates that no objects were found</param>
-        public SayNearestObjects(object sender, bool nothingFound) : this(sender)
+        public SaySurroundingObjects(object sender, bool nothingFound) : this(sender)
         => NothingFound = nothingFound;
     }
 }
