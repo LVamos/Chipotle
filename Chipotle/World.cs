@@ -223,8 +223,12 @@ namespace Game
             return Math.Round(angle.CompassDegrees);
         }
 
-        /// </summary> <param name="a">The first point</param> <param name="b">The second
-        /// point</param> <returns>The distance between the points</returns>
+        /// <summary>
+        /// Computes cartesian distance between two points.
+        /// </summary>
+        /// <param name="a">First point</param>
+        /// <param name="b">Second point</param>
+        /// <returns>Rounded distance between two given points</returns>
         public static int GetDistance(Vector2 a, Vector2 b)
 => (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
 

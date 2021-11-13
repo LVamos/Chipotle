@@ -190,9 +190,17 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneBegan(CutsceneBegan message)
+            => CatchSitting(message);
+
+        protected void SaveGame()
         {
-            CatchSitting(message);
-            //World.SaveGame();
+            int temp = _currentRegion;
+            bool temp2 = _inVisitedRegion;
+            _currentRegion = -1;
+            _inVisitedRegion = true;
+            World.SaveGame();
+            _currentRegion = temp;
+            _inVisitedRegion = temp2;
         }
 
         /// <summary>
@@ -202,7 +210,7 @@ namespace Game.Entities
         protected override void OnCutsceneEnded(CutsceneEnded message)
         {
             base.OnCutsceneEnded(message);
-            World.SaveGame();
+            SaveGame();
             WatchCar();
 
             switch (message.CutsceneName)
@@ -331,6 +339,67 @@ namespace Game.Entities
             => SetPosition(2006, 1166, true);
 
         /// <summary>
+        /// Stores indexes of regions visited by the NPC.
+        /// </summary>
+        /// <remarks>Each locality is divided into regions of same size specified by the _motionTrackRadius field. Index of a region define distance from the top left region of the current locality (MotionTrackWidth *row +column). Last row and last column can be smaller.</remarks>
+        protected readonly Dictionary<Locality, HashSet<int>> _motionTrack = new Dictionary<Locality, HashSet<int>>();
+
+        /// <summary>
+        /// Computes amount of horizontal motion track regions for the current locality.
+        /// </summary>
+        protected int MotionTrackWidth => (int)(_locality.Area.Width/ _motionTrackRadius + (_locality.Area.Width % _motionTrackRadius > 0 ? 1 : 0));
+
+        /// <summary>
+        /// Computes amount of vertical motion track regions for the current locality.
+        /// </summary>
+        protected int MotionTrackHeight => (int)(_locality.Area.Height/ _motionTrackRadius + (_locality.Area.Height% _motionTrackRadius > 0 ? 1 : 0));
+
+        protected int GetRegionIndex(Vector2 point)
+        {
+            Vector2 relative = Plane.GetRelativeCoordinates(point);
+
+            int rX = (int)(relative.X / _motionTrackRadius + (relative.X % _motionTrackRadius > 0 ? 1 : 0));
+            int rY = (int)(relative.Y / _motionTrackRadius + (relative.Y % _motionTrackRadius > 0 ? 1 : 0));
+            return rX + rY;
+        }
+
+        /// <summary>
+        /// Indicates if the NPC stands in a previously visited region.
+        /// </summary>
+        protected bool _inVisitedRegion;
+
+        /// <summary>
+        /// Specifies radius of surroundings around the NPC in steps used in motion tracking.
+        /// </summary>
+        protected const int _motionTrackRadius = 10;
+
+        /// <summary>
+        /// Stores index of current motion track region.
+        /// </summary>
+        protected int _currentRegion;
+
+        /// <summary>
+        /// Marks current nearest surroundings of the NPC as visited. If it's already been visited then the _inVisitedRegion is set to true.
+        /// </summary>
+        /// <param name="point">Current position of the NPC</param>
+        protected void RecordRegion(Vector2 point)
+        {
+            if (!_motionTrack.ContainsKey(_locality))
+                _motionTrack[_locality] = new HashSet<int>();
+
+            int regionIndex = GetRegionIndex(point);
+
+            if (_currentRegion != regionIndex)
+            {
+                _currentRegion = regionIndex;
+                _inVisitedRegion = _motionTrack[_locality].Contains(regionIndex);
+
+                if (!_inVisitedRegion)
+                    _motionTrack[_locality].Add(regionIndex);
+            }
+        }
+
+        /// <summary>
         /// Performs one step in direction specified in the _startWalkMessage field.
         /// </summary>
         private void MakeStep()
@@ -383,10 +452,11 @@ namespace Game.Entities
             Locality sourceLocality = _area.GetLocality();
             Locality targetLocality = World.GetLocality(targetTile.position);
             SetPosition(targetTile.position);
+            RecordRegion(targetTile.position);
             _timeFromLastStep = 0;
 
             if (sourceLocality != null && sourceLocality != targetLocality)
-                World.SaveGame();
+                SaveGame();
 
             // Inform Tuttle
             if (!IsTuttleNearBy())
@@ -442,11 +512,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnSayVisitedLocality(SayVisitedLocality message)
-        {
-            if (Owner.VisitedLocalities.Contains(_area.GetLocality()))
-                Tolk.Speak("Jo jo");
-            else Tolk.Speak("Ne");
-        }
+            => Owner.ReceiveMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
 
         /// <summary>
         /// Processes the MakeStep message.

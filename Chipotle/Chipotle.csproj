@@ -79,6 +79,7 @@
     <Compile Include="Messaging\Commands\SayExits.cs" />
     <Compile Include="Messaging\Commands\SayOrientation.cs" />
     <Compile Include="Messaging\Commands\SayVisitedLocality.cs" />
+    <Compile Include="Messaging\Events\SayVisitedLocalityResult.cs" />
     <Compile Include="Messaging\Commands\StopWalk.cs" />
     <Compile Include="Messaging\Events\GameReloaded.cs" />
     <Compile Include="Messaging\Events\KeyReleased.cs" />

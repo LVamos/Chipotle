@@ -86,6 +86,7 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(SayVisitedLocalityResult)] = (message) => OnSayVisitedLocality((SayVisitedLocalityResult)message),
                 [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
                 [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
                 [typeof(SaySurroundingObjects)] = (message) => OnSayNearestObjects((SaySurroundingObjects)message),
@@ -99,6 +100,9 @@ namespace Game.Entities
             }
             );
         }
+
+        private void OnSayVisitedLocality(SayVisitedLocalityResult message)
+            => Tolk.Speak(message.Visited ? "jo jo" : "ne");
 
         /// <summary>
         /// Processes incoming messages.
