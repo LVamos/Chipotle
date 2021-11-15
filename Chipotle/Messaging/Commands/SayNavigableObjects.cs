@@ -11,12 +11,12 @@ namespace Game.Messaging.Commands
     /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
     /// </remarks>
     [Serializable]
-    public class SaySurroundingObjects : GameMessage
+    public class SayNavigableObjects : GameMessage
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public SaySurroundingObjects(object sender) : base(sender) { }
+        public SayNavigableObjects(object sender) : base(sender) { }
     }
 }

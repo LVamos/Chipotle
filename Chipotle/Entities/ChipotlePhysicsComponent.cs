@@ -8,6 +8,7 @@ using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
+using Game.UI;
 
 using Luky;
 
@@ -156,6 +157,9 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>()
                 {
+                    [typeof(ObjectNavigationStopped )] = (message) => OnObjectNavigationStopped((ObjectNavigationStopped)message),
+                    [typeof(StopObjectNavigation)] = (message) => OnStopObjectNavigation((StopObjectNavigation)message),
+                    [typeof(ListNavigableObjects)] = (message) => OnListNavigableObjects((ListNavigableObjects)message),
                     [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
                     [typeof(StopWalk)] = (message) => OnStopWalk((StopWalk)message),
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
@@ -163,7 +167,7 @@ namespace Game.Entities
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
-                    [typeof(SaySurroundingObjects)] = (m) => OnSaySurroundingObjects((SaySurroundingObjects)m),
+                    [typeof(SayNavigableObjects)] = (m) => OnSayNavigableObjects((SayNavigableObjects)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
                     [typeof(StartWalk)] = (m) => OnStartWalk((StartWalk)m),
                     [typeof(TurnEntity)] = (message) => OnTurnEntity((TurnEntity)message),
@@ -174,6 +178,74 @@ namespace Game.Entities
             // Play intro cutscene
             World.PlayCutscene(Owner, "cs6");
         }
+
+        /// <summary>
+        /// Processes the ObjectNavigationStopped message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnObjectNavigationStopped(ObjectNavigationStopped message)
+            => _navigatedObject = null;
+
+        /// <summary>
+        /// Processes the StopObjectNavigation message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnStopObjectNavigation(StopObjectNavigation message) 
+            => StopObjectNavigation();
+
+        /// <summary>
+        /// Specifies max radius for navigable objects enumeration.
+        /// </summary>
+        protected const int _navigableObjectsRadius = 20;
+
+        /// <summary>
+        /// Processes the ListNavigableObjects message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnListNavigableObjects(ListNavigableObjects message)
+        {
+            List<(DumpObject o, double compassDegrees)> objects = GetNavigableObjects(_navigableObjectsRadius).ToList<(DumpObject o, double compassDegrees)>();
+
+            if (objects.IsNullOrEmpty())
+            {
+                Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, null));
+                return;
+            }
+
+            string[] items = objects
+    .Select(r => r.o.Name.Friendly + " " + Angle.GetAngleDescription(r.compassDegrees))
+    .ToArray<string>();
+
+            int option = WindowHandler.Menu(items, "Okolní objekty");
+
+            if (option == -1)
+                return;
+
+            DumpObject targett = objects[option].o;
+
+            if (_navigatedObject!=null && targett != _navigatedObject)
+                StopObjectNavigation();
+
+            _navigatedObject = targett;
+            _navigatedObject.ReceiveMessage(new StartObjectNavigation (Owner));
+        }
+
+        /// <summary>
+        /// Stops ongoing object navigation.
+        /// </summary>
+        private void StopObjectNavigation()
+            {
+            if (_navigatedObject != null)
+            {
+                _navigatedObject.ReceiveMessage(new StopObjectNavigation(Owner));
+                _navigatedObject = null;
+            }
+        }
+
+        /// <summary>
+        /// Objectt to which tthe NPC is currently navigated.
+        /// </summary>
+        protected DumpObject _navigatedObject;
 
         /// <summary>
         /// Processes incoming messages.
@@ -499,8 +571,8 @@ namespace Game.Entities
         /// Processes the SayNearestObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnSaySurroundingObjects(SaySurroundingObjects message)
-            => Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, GetNavigableObjects(20)));
+        private void OnSayNavigableObjects(SayNavigableObjects message)
+            => Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, GetNavigableObjects(_navigableObjectsRadius)));
 
         /// <summary>
         /// Processes the SayTerrain message.

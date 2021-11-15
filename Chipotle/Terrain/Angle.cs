@@ -13,6 +13,24 @@ namespace Game.Terrain
     public struct Angle
     {
         /// <summary>
+        /// Returns word description of the specified angle.
+        /// </summary>
+        /// <param name="compassDegrees">The angle in compass degrees to be described</param>
+        /// <returns>A word description in a string</returns>
+        public static string GetAngleDescription(double compassDegrees, bool to = false)
+        {
+            if (compassDegrees >= 315 || compassDegrees < 45)
+                return "před tebou";
+            if (compassDegrees >= 45 && compassDegrees < 135)
+                return " napravo";
+            if (compassDegrees >= 135 && compassDegrees < 225)
+                return " za tebou";
+
+            return " nalevo";
+        }
+
+
+        /// <summary>
         /// Value of the angle in radians
         /// </summary>
         private double _radians;

@@ -8,6 +8,8 @@ using Game.Terrain;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Entities
 {
     /// <summary>
@@ -93,6 +95,9 @@ namespace Game.Entities
             RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {
+        [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
+        [typeof(StartObjectNavigation )] = (message) => OnStartObjectNavigation((StartObjectNavigation )message),
+        [typeof(StopObjectNavigation)] = (message) => OnStopObjectNavigation((StopObjectNavigation)message),
         [typeof(GameReloaded)] = (message) => OnGameReloaded(),
         [typeof(ObjectsCollided)] = (m) => OnCollision((ObjectsCollided)m),
         [typeof(UseObject)] = (m) => OnUseObject((UseObject)m)
@@ -100,6 +105,83 @@ namespace Game.Entities
 
             PlayLoop();
         }
+
+        /// <summary>
+        /// Returns pooint that belongs to this object and is tho most close to tthe player.
+        /// </summary>
+        protected Vector2 GetClosestPointToPlayer()
+            => _area.GetClosestPointTo(World.Player.Area.Center);
+
+        /// <summary>
+        /// Processes the EntityMoved message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnEntityMoved(EntityMoved message)
+        {
+            if (!_navigating || message.Sender != World.Player)
+                return;
+
+            World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
+        }
+
+        /// <summary>
+        /// Processes the StopNavigation message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnStopObjectNavigation(StopObjectNavigation message)
+        {
+            if (message.Sender != World.Player)
+                throw new ArgumentException(nameof(message.Sender));
+
+            StopNavigation();
+        }
+
+        /// <summary>
+        /// Stops the sound navigation.
+        /// </summary>
+        protected void StopNavigation()
+        {
+            World.Sound.ChangeLooping(_navigationSoundID, false);
+            _navigating = false;
+            World.Player.ReceiveMessage(new ObjectNavigationStopped(this));
+        }
+
+
+        /// <summary>
+        /// Name of the sound used for navigation
+        /// </summary>
+        protected const string _navigationSound = "SonarLoop";
+
+        /// <summary>
+        /// Processes the StartNavigation message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnStartObjectNavigation(StartObjectNavigation  message)
+        {
+            if (message.Sender != World.Player)
+                throw new ArgumentException(nameof(message.Sender));
+
+            StartNavigation();
+        }
+
+        /// <summary>
+        /// Starts sound navigation.
+        /// </summary>
+        private void StartNavigation()
+        {
+            _navigationSoundID = World.Sound.Play(_navigationSound, null, true, PositionType.Absolute, GetClosestPointToPlayer(), true);
+            _navigating = true;
+        }
+
+        /// <summary>
+        /// Handle of a soound used for navigation
+        /// </summary>
+        protected int _navigationSoundID;
+
+        /// <summary>
+        /// Indicates if the sound navigation is enabled.
+        /// </summary>
+        protected bool _navigating;
 
         /// <summary>
         /// Destroys the object.
@@ -166,5 +248,34 @@ namespace Game.Entities
             if (!string.IsNullOrEmpty(_sounds.loop))
                 _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true);
         }
+
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+            WatchNavigation();
+        }
+
+        /// <summary>
+        /// Returns distance from this object to the player.
+        /// </summary>
+        /// <returns>Distance in meters</returns>
+        protected int GetDistanceFromPlayer()
+            => World.GetDistance(GetClosestPointToPlayer(), World.Player.Area.Center);
+
+        /// <summary>
+        /// Watches distance of tthe player and turns navigation off if he approaches the object.
+        /// </summary>
+        private void WatchNavigation()
+        {
+            if (!_navigating)
+                return;
+
+            if(GetDistanceFromPlayer() <= 1 | _area.GetLocality() != World.Player.Area.GetLocality())
+                StopNavigation();
+        }
+
     }
 }

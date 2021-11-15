@@ -28,6 +28,11 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Lists navigable objects.
+        /// </summary>
+        protected void ListNavigableObjects() => Owner.ReceiveMessage(new ListNavigableObjects(this));
+
+        /// <summary>
         /// Initializes the component and starts its message loop.
         /// </summary>
         public override void Start()
@@ -44,6 +49,8 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
+                [new KeyShortcut(false, true, false, Keys.Return)] = StopNavigation,
+                [new KeyShortcut(false, true, false, Keys.O)] = ListNavigableObjects,
                 [new KeyShortcut(Keys.S)] = SayOrientation,
                 [new KeyShortcut(Keys.V)] = SayExits,
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
@@ -66,6 +73,12 @@ namespace Game.Entities
             }
             );
         }
+
+        /// <summary>
+        /// Stops ongoing object navigation.
+        /// </summary>
+        protected void StopNavigation()
+            => Owner.ReceiveMessage(new StopObjectNavigation(this));
 
         /// <summary>
         /// Processes the CutsceneBegan message.
@@ -150,7 +163,7 @@ namespace Game.Entities
         /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
         /// </summary>
         private void SaySurroundingObjects()
-=> Owner.ReceiveMessage(new SaySurroundingObjects(this));
+=> Owner.ReceiveMessage(new SayNavigableObjects(this));
 
         /// <summary>
         /// Stops the currently playing cutscene.
