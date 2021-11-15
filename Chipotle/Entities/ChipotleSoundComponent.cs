@@ -89,7 +89,7 @@ namespace Game.Entities
                 [typeof(SayVisitedLocalityResult)] = (message) => OnSayVisitedLocality((SayVisitedLocalityResult)message),
                 [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
                 [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
-                [typeof(SaySurroundingObjects)] = (message) => OnSayNearestObjects((SaySurroundingObjects)message),
+                [typeof(SaySurroundingObjectsResult)] = (message) => OnSaySurroundingObjectsResult((SaySurroundingObjectsResult)message),
                 [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
@@ -179,19 +179,17 @@ namespace Game.Entities
         /// Handles the SayNearestObjects message.
         /// </summary>
         /// <param name="message">The message</param>
-        protected void OnSayNearestObjects(SaySurroundingObjects message)
+        protected void OnSaySurroundingObjectsResult(SaySurroundingObjectsResult message)
         {
-            if (message.ObjectInfo == null && !message.NothingFound)
-                return;
-
-            if (message.NothingFound)
-                Tolk.Speak("Nic tu není");
-            else
+            if (message.ObjectInfo.IsNullOrEmpty())
             {
-                List<string> objectInfo = message.ObjectInfo
-                    .Select(o => o.friendlyName + " " + GetAngleDescription(o.compassDegrees)).ToList<string>();
-                Tolk.Speak(FormatStringList(objectInfo));
+                Tolk.Speak("Nic tu není");
+                return;
             }
+
+                List<string> objectInfo = message.ObjectInfo
+                    .Select(r => r.o.Name.Friendly + " " + GetAngleDescription(r.compassDegrees)).ToList<string>();
+                Tolk.Speak(FormatStringList(objectInfo));
         }
 
         /// <summary>

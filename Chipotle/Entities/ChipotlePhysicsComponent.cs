@@ -481,24 +481,26 @@ namespace Game.Entities
 => Tolk.Speak(_area.GetLocality().Name.Friendly);
 
         /// <summary>
+        /// Enumerates all objects from current locality in the specified radius around the NPC.
+        /// </summary>
+        /// <param name="radius">Max radius around the NPC</param>
+        /// <returns>Enumeration of dump objects</returns>
+        protected IEnumerable<(DumpObject o, double compassDegrees)> GetNavigableObjects(int radius)
+        {
+            Vector2 me = _area.Center;
+            IEnumerable<DumpObject> nearestObjects = _locality.GetSurroundingObjects(me, radius);
+
+            return
+                from o in nearestObjects
+                select ((o, GetAngle(o.Area.GetClosestPointTo(me))));
+        }
+
+        /// <summary>
         /// Processes the SayNearestObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnSaySurroundingObjects(SaySurroundingObjects message)
-        {
-            Vector2 me = _area.Center;
-            IEnumerable<DumpObject> nearestObjects =
-                 _locality.Objects
-                 .Where(o => !o.Decorative)
-                 .Where(o => o.Area.GetDistanceFrom(me) <= 20)
-                 .OrderBy(o => o.Area.GetDistanceFrom(me));
-
-            IEnumerable<(string friendlyName, double compassDegrees)> objectInfo = nearestObjects
-                .Select(o => (o.Name.Friendly, GetAngle(o.Area.GetClosestPointTo(me))));
-
-            SaySurroundingObjects newMessage = objectInfo.IsNullOrEmpty() ? new SaySurroundingObjects(this, true) : new SaySurroundingObjects(this, objectInfo);
-            Owner.ReceiveMessage(newMessage);
-        }
+            => Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, GetNavigableObjects(20)));
 
         /// <summary>
         /// Processes the SayTerrain message.

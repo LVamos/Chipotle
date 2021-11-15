@@ -14,35 +14,9 @@ namespace Game.Messaging.Commands
     public class SaySurroundingObjects : GameMessage
     {
         /// <summary>
-        /// Indicates that no objects were found.
-        /// </summary>
-        public readonly bool NothingFound;
-
-        /// <summary>
-        /// Information about the nearest objects
-        /// </summary>
-        public readonly IEnumerable<(string friendlyName, double compassDegrees)> ObjectInfo;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
         public SaySurroundingObjects(object sender) : base(sender) { }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="sender">Sorce of the message</param>
-        /// <param name="objectInfo">Information about the nearest objects</param>
-        public SaySurroundingObjects(object sender, IEnumerable<(string friendlyName, double compassDegrees)> objectInfo) : this(sender)
-        => ObjectInfo = objectInfo;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="sender">Sorce of the message</param>
-        /// <param name="nothingFound">Indicates that no objects were found</param>
-        public SaySurroundingObjects(object sender, bool nothingFound) : this(sender)
-        => NothingFound = nothingFound;
     }
 }
