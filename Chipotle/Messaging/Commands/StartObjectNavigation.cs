@@ -9,6 +9,7 @@ namespace Game.Messaging.Commands
     /// <summary>
     /// Tells a dump object to start announcing its position with a sound loop.
     /// </summary>
+[Serializable]
     public class StartObjectNavigation :GameMessage
     {
         /// <summary>

@@ -153,6 +153,10 @@ namespace Game.Entities
         protected const string _navigationSound = "SonarLoop";
 
         /// <summary>
+        /// Name of sound played when the player passes by.
+        /// </summary>
+        protected const string _passBySound="ObjectPassBy";
+        /// <summary>
         /// Processes the StartNavigation message.
         /// </summary>
         /// <param name="message">The message to be processed</param>

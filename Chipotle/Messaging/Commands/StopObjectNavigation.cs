@@ -9,6 +9,7 @@ namespace Game.Messaging.Commands
     /// <summary>
     /// Tells a dump object to stop ongoing sound navigation.
     /// </summary>
+[Serializable]
     public class StopObjectNavigation : GameMessage
     {
         /// <summary>

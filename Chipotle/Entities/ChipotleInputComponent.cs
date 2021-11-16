@@ -49,6 +49,7 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
+                [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
                 [new KeyShortcut(false, true, false, Keys.Return)] = StopNavigation,
                 [new KeyShortcut(false, true, false, Keys.O)] = ListNavigableObjects,
                 [new KeyShortcut(Keys.S)] = SayOrientation,
@@ -73,6 +74,12 @@ namespace Game.Entities
             }
             );
         }
+
+        /// <summary>
+        /// Lists exits from current locality.
+        /// </summary>
+        protected void ListExits()
+            => Owner.ReceiveMessage(new ListExits(this));
 
         /// <summary>
         /// Stops ongoing object navigation.

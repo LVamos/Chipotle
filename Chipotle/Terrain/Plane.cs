@@ -404,9 +404,7 @@ namespace Game.Terrain
             for (position.X = UpperLeftCorner.X; position.X <= LowerRightCorner.X; position.X++)
             {
                 for (position.Y = LowerRightCorner.Y; position.Y <= UpperLeftCorner.Y; position.Y++)
-                {
                     yield return position;
-                }
             }
         }
 

@@ -88,7 +88,7 @@ namespace Game.Entities
             {
                 [typeof(SayVisitedLocalityResult)] = (message) => OnSayVisitedLocality((SayVisitedLocalityResult)message),
                 [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
-                [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
+                [typeof(SayExitsResult)] = (message) => OnSayExitsResult((SayExitsResult)message),
                 [typeof(SaySurroundingObjectsResult)] = (message) => OnSaySurroundingObjectsResult((SaySurroundingObjectsResult)message),
                 [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
@@ -130,15 +130,22 @@ namespace Game.Entities
         /// Processes the SayExits message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected void OnSayExits(SayExits message)
+        protected void OnSayExitsResult(SayExitsResult message)
         {
-            if (message.ExitInfo == null && !message.NothingFound)
-                return;
-
-            if (message.NothingFound)
-                Tolk.Speak("žádné východy");
-            else
+            if (message.OccupiedPassage != null)
             {
+                string type = message.OccupiedPassage is Door ? " ve dveřích " : " v průchodu ";
+                string to = message.OccupiedPassage.AnotherLocality(Owner.Locality).To;
+                Tolk.Speak($"Stojíš {type}{to}");
+                return;
+            }
+
+            if (message.ExitInfo.IsNullOrEmpty())
+            {
+                Tolk.Speak("žádné východy");
+                return;
+            }
+
                 List<string> info = message.ExitInfo
                     .Select(e => Angle.GetAngleDescription(e.compassDegrees) + " " + e.description)
                     .ToList<string>();
@@ -155,7 +162,6 @@ namespace Game.Entities
                     number = "Jsou tady " + (info.Count == 2 ? "dva" : "3") + " východy: ";
                 else number = "Je tady " + info.Count.ToString() + " východů: ";
                 Tolk.Speak(number + FormatStringList(info, true));
-            }
         }
 
         /// <summary>

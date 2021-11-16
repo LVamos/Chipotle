@@ -21,6 +21,21 @@ namespace Game.Terrain
     public class Locality : MapElement
     {
         /// <summary>
+        /// Enumerates passages ordered by distance from the specified point.
+        /// </summary>
+        /// <param name="point">The default point</param>
+        /// <param name="radius">distance in which exits from current locality are searched</param>
+        /// <returns>Enumeration of passages</returns>
+        public IEnumerable<Passage> GetNearestExits(Vector2 point, int radius)
+        {
+            return
+                from e in Passages
+                where(!e.Area.LaysOnPlane(point) && World.GetDistance(e.Area.GetClosestPointTo(point), point) <=radius)
+                orderby e.Area.GetDistanceFrom(point)
+                select e;
+        }
+
+        /// <summary>
         /// Enumerates all dump objects around the specified <paramref name="point"/>.
         /// </summary>
         /// <param name="point">The point in whose surroundings the objects should be listed.</param>

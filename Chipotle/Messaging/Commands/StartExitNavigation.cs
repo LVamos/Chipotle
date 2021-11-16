@@ -4,17 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Game.Entities;
-
-namespace Game.Messaging.Events
+namespace Game.Messaging.Commands
 {
+    /// <summary>
+    /// Tells a passage to start announcing its position with a sound loop.
+    /// </summary>
 [Serializable]
-    public class ObjectNavigationStopped: GameMessage
+    public class StartExitNavigation : GameMessage
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public ObjectNavigationStopped(object sender) : base(sender) { }
+        public StartExitNavigation(object sender) : base(sender) { }
     }
 }

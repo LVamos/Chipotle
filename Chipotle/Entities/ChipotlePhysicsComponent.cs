@@ -157,7 +157,9 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>()
                 {
-                    [typeof(ObjectNavigationStopped )] = (message) => OnObjectNavigationStopped((ObjectNavigationStopped)message),
+                    [typeof(ExitNavigationStopped)] = (message) => OnExitNavigationStopped((ExitNavigationStopped)message),
+                    [typeof(ListExits)] = (message) => OnListExits((ListExits)message),
+                    [typeof(ObjectNavigationStopped)] = (message) => OnObjectNavigationStopped((ObjectNavigationStopped)message),
                     [typeof(StopObjectNavigation)] = (message) => OnStopObjectNavigation((StopObjectNavigation)message),
                     [typeof(ListNavigableObjects)] = (message) => OnListNavigableObjects((ListNavigableObjects)message),
                     [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
@@ -180,23 +182,72 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Processes the ExitNavigationStopped message.
+        /// </summary>
+        /// <param name="message">source of the message</param>
+        private void OnExitNavigationStopped(ExitNavigationStopped message)
+        {
+            if(message.Sender == _navigatedExit)
+_navigatedExit = null;
+        }
+
+        /// <summary>
+        /// Processes the ListExits message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnListExits(ListExits message)
+        {
+            Vector2 me = _area.Center;
+            List<Passage> exits = _locality.GetNearestExits(me, _exitRadius).ToList<Passage>();
+
+            if (exits.IsNullOrEmpty())
+            {
+                Owner.ReceiveMessage(new SayExitsResult(this, exitInfo: null));
+                return;
+            }
+
+            string[] items = exits
+                .Select(e => e.AnotherLocality(_locality).To +" " +Angle.GetAngleDescription(GetAngle(e.Area.GetClosestPointTo(me))))
+            .ToArray<string>();
+
+            int option = WindowHandler.Menu(items, "Východy", true);
+
+            if (option == -1)
+                return;
+
+            Passage target = exits[option];
+            if (_navigatedExit != null && _navigatedExit != target)
+                StopNavigation();
+
+            _navigatedExit = target;
+            _navigatedExit.ReceiveMessage(new StartExitNavigation(Owner));
+        }
+
+        /// <summary>
+        /// An exit to which the NPC is navigated.
+        /// </summary>
+        protected Passage _navigatedExit;
+        /// <summary>
         /// Processes the ObjectNavigationStopped message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnObjectNavigationStopped(ObjectNavigationStopped message)
-            => _navigatedObject = null;
+        {
+            if (message.Sender == _navigatedObject)
+                _navigatedObject = null;
+        }
 
         /// <summary>
         /// Processes the StopObjectNavigation message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnStopObjectNavigation(StopObjectNavigation message) 
-            => StopObjectNavigation();
+            => StopNavigation();
 
         /// <summary>
         /// Specifies max radius for navigable objects enumeration.
         /// </summary>
-        protected const int _navigableObjectsRadius = 20;
+        protected const int _navigableObjectsRadius = 30;
 
         /// <summary>
         /// Processes the ListNavigableObjects message.
@@ -224,7 +275,7 @@ namespace Game.Entities
             DumpObject targett = objects[option].o;
 
             if (_navigatedObject!=null && targett != _navigatedObject)
-                StopObjectNavigation();
+                StopNavigation();
 
             _navigatedObject = targett;
             _navigatedObject.ReceiveMessage(new StartObjectNavigation (Owner));
@@ -233,13 +284,13 @@ namespace Game.Entities
         /// <summary>
         /// Stops ongoing object navigation.
         /// </summary>
-        private void StopObjectNavigation()
+        private void StopNavigation()
             {
             if (_navigatedObject != null)
-            {
                 _navigatedObject.ReceiveMessage(new StopObjectNavigation(Owner));
-                _navigatedObject = null;
-            }
+
+            if (_navigatedExit!= null)
+                _navigatedExit.ReceiveMessage(new StopExitNavigation(Owner));
         }
 
         /// <summary>
@@ -309,13 +360,19 @@ namespace Game.Entities
         {
             Vector2 me = _area.Center;
 
-            IEnumerable<Passage> exits = _locality.Passages.OrderBy(e => e.Area.GetDistanceFrom(me));
+            // If the player stands in a passage inform him.
+            Passage occupiedPassage = World.GetPassage(me);
+            if (occupiedPassage != null)
+            {
+                Owner.ReceiveMessage(new SayExitsResult(this, occupiedPassage));
+                return;
+            }
+
+            IEnumerable<Passage> exits = _locality.GetNearestExits(me, _exitRadius);
 
             IEnumerable<(string description, double compassDegrees)> exitInfo = exits
                 .Select(e => (e.AnotherLocality(_locality).To, GetAngle(e.Area.GetClosestPointTo(me))));
-
-            SayExits newMessage = exitInfo.IsNullOrEmpty() ? new SayExits(this, true) : new SayExits(this, exitInfo);
-            Owner.ReceiveMessage(newMessage);
+            Owner.ReceiveMessage(new SayExitsResult(this, exitInfo));
         }
 
         /// <summary>
@@ -449,6 +506,11 @@ namespace Game.Entities
         /// Stores index of current motion track region.
         /// </summary>
         protected int _currentRegion;
+
+        /// <summary>
+        /// Specifies distance in which exits from current locality are searched.
+        /// </summary>
+        protected const int _exitRadius=40;
 
         /// <summary>
         /// Marks current nearest surroundings of the NPC as visited. If it's already been visited then the _inVisitedRegion is set to true.

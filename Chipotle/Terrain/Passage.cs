@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+
 using Luky;
+
+using OpenTK;
 
 namespace Game.Terrain
 {
@@ -118,5 +123,132 @@ namespace Game.Terrain
         /// <returns>A new instance of the door</returns>
         private static Passage CreateVanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities)
             => new VanillaCrunchGarageDoor(name, area, localities);
+
+
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+            WatchNavigation();
+        }
+
+        /// <summary>
+        /// Handle of a sound used for navigation.
+        /// </summary>
+        protected int _navigationSoundID;
+
+        /// <summary>
+        /// Indicates if sound navigation is in progress.
+        /// </summary>
+        protected bool _navigating;
+
+        /// <summary>
+        /// Starts sound navigation.
+        /// </summary>
+        protected void StartNavigation()
+        {
+            _playersLocality = World.Player.Area.GetLocality();
+            _navigationSoundID = World.Sound.Play(_navigationSound, null, true, PositionType.Absolute, GetClosestPointToPlayer(), true);
+            _navigating = true;
+        }
+
+        /// <summary>
+        /// Name of the sound used for navigation
+        /// </summary>
+        protected const string _navigationSound = "ExitLoop";
+
+        /// <summary>
+        /// Returns pooint that belongs to this object and is the most close to the player.
+        /// </summary>
+        protected Vector2 GetClosestPointToPlayer()
+            => _area.GetClosestPointTo(World.Player.Area.Center);
+
+        /// <summary>
+        /// stops ongoing sound navigation.
+        /// </summary>
+        protected void StopNavigation()
+        {
+            World.Sound.ChangeLooping(_navigationSoundID, false);
+            _navigating = false;
+            World.Player.ReceiveMessage(new ExitNavigationStopped(this));
+        }
+
+        /// <summary>
+        /// Watches between this passage and the player and terminates navigation if he gets close.
+        /// </summary>
+        protected void WatchNavigation()
+        {
+            if (!_navigating)
+                return;
+
+            if (GetDistanceFromPlayer() <= 1 | _playersLocality != World.Player.Area.GetLocality())
+                StopNavigation();
+        }
+
+        /// <summary>
+        /// stores a locality in which the player is located after navigation start.
+        /// </summary>
+        protected Locality _playersLocality;
+
+        /// <summary>
+        /// Returns distance from this passage to the player.
+        /// </summary>
+        /// <returns>Distance in meters</returns>
+        protected int GetDistanceFromPlayer()
+            => World.GetDistance(GetClosestPointToPlayer(), World.Player.Area.Center);
+
+        /// <summary>
+        /// Initializes the passage and starts its message loop.
+        /// </summary>
+        public override void Start()
+        {
+            base.Start();
+
+            RegisterMessages(
+                new Dictionary<Type, Action<Messaging.GameMessage>>()
+                {
+                    [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
+                    [typeof(StartExitNavigation)] = (message) => OnStartExitNavigation((StartExitNavigation)message),
+                    [typeof(StopExitNavigation)] = (message) => OnStopExitNavigation((StopExitNavigation)message)
+                });
+        }
+
+        /// <summary>
+        /// Processes the EntityMoved message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnEntityMoved(EntityMoved message)
+        {
+            if (!_navigating || message.Sender != World.Player)
+                return;
+
+            World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
+        }
+
+        /// <summary>
+        /// Processes the StopExitNavigation message.
+        /// </summary>
+        /// <param name="message">Source of the message</param>
+        protected void OnStopExitNavigation(StopExitNavigation message)
+        {
+            if (message.Sender != World.Player)
+                throw new ArgumentException(nameof(message.Sender));
+
+            StopNavigation();
+        }
+
+        /// <summary>
+        /// Processes the StartExitNavigation message.
+        /// </summary>
+        /// <param name="message">Source of the message</param>
+        protected void OnStartExitNavigation(StartExitNavigation message)
+        {
+            if (message.Sender != World.Player)
+                throw new ArgumentException(nameof(message.Sender));
+
+            StartNavigation();
+        }
     }
 }

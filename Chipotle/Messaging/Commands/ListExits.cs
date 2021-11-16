@@ -4,17 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Game.Entities;
-
-namespace Game.Messaging.Events
+namespace Game.Messaging.Commands
 {
-[Serializable]
-    public class ObjectNavigationStopped: GameMessage
+    public class ListExits: GameMessage
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public ObjectNavigationStopped(object sender) : base(sender) { }
+        public ListExits(object sender) : base(sender) { }
     }
 }
