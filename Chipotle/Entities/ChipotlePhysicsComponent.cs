@@ -508,6 +508,11 @@ _navigatedExit = null;
         protected int _currentRegion;
 
         /// <summary>
+        /// Indicates if a step to the side was performed at least once before keys were released.
+        /// </summary>
+        protected bool _sideStepPerformed;
+
+        /// <summary>
         /// Specifies distance in which exits from current locality are searched.
         /// </summary>
         protected const int _exitRadius=40;
@@ -538,10 +543,13 @@ _navigatedExit = null;
         /// </summary>
         private void MakeStep()
         {
-            if (!_sideStepInProgress && !_walking)
+            if (_sideStepPerformed)
                 return;
 
-            StartWalk message = _startWalkMessage
+            if (_sideStepInProgress)
+                _sideStepPerformed = true;
+
+                StartWalk message = _startWalkMessage
                 ?? throw new ArgumentNullException(nameof(_startWalkMessage));
 
             // Get target coordinates
@@ -569,6 +577,8 @@ _navigatedExit = null;
             if (o != null && o != Owner)
             {
                 _walking = false;
+                _startWalkMessage = null;
+                _sideStepInProgress = false;
                 Owner.ReceiveMessage(new ObjectsCollided(this, o, targetTile.position, targetTile.tile));
                 return;
             }
@@ -702,6 +712,7 @@ _navigatedExit = null;
             _blockWalk = false;
             _walking = false;
             _sideStepInProgress = false;
+            _sideStepPerformed = false;
             _startWalkMessage = null;
         }
 
