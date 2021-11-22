@@ -62,14 +62,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EaxReverbDefaults.cs" />
+    <Compile Include="FadingRecord.cs" />
     <Compile Include="LSFDecoder.cs" />
     <Compile Include="NAudioDecoder.cs" />
     <Compile Include="OpenALSystem.cs" />
     <Compile Include="OpusFileDecoder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sound.cs" />
     <Compile Include="SoundFileInfo.cs" />
     <Compile Include="SoundThread.cs" />
     <Compile Include="SoundExtensionMethods.cs" />
+    <Compile Include="DelayedSound.cs" />
     <Compile Include="SoundTypes.cs" />
   </ItemGroup>
   <ItemGroup>

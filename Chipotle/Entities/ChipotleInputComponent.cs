@@ -50,7 +50,6 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
-                [new KeyShortcut(false, true, false, Keys.Return)] = StopNavigation,
                 [new KeyShortcut(false, true, false, Keys.O)] = ListNavigableObjects,
                 [new KeyShortcut(Keys.S)] = SayOrientation,
                 [new KeyShortcut(Keys.V)] = SayExits,
@@ -80,12 +79,6 @@ namespace Game.Entities
         /// </summary>
         protected void ListExits()
             => Owner.ReceiveMessage(new ListExits(this));
-
-        /// <summary>
-        /// Stops ongoing object navigation.
-        /// </summary>
-        protected void StopNavigation()
-            => Owner.ReceiveMessage(new StopObjectNavigation(this));
 
         /// <summary>
         /// Processes the CutsceneBegan message.

@@ -16,7 +16,7 @@ namespace Luky
     /// <summary>
     /// A sound player running in a separate thread
     /// </summary>
-    public sealed class SoundThread : BaseThread
+    public sealed partial class SoundThread : BaseThread
     {
         /// <summary>
         /// Name of current EAX reverb preset
@@ -505,7 +505,7 @@ namespace Luky
             {
                 Sound sound = InnerInitSound(stream, role, looping, pb, soundID, pt, position, forceMono, volumeAdjustment, panning, pitch);
                 if (sound == null)
-                    return;
+                    throw new InvalidOperationException(nameof(Play));
 
                 IDecoder decoder = GetDecoder(sound);
 
@@ -605,6 +605,13 @@ namespace Luky
                                            if (sound == null)
                                                return;
 
+                                           // Stop fading
+                                           for (int i = 0; i < _fadingTable.Count; i++)
+                                           {
+                                               if(_fadingTable[i].Sound.ID==soundID)
+                                                   _fadingTable.RemoveAt(i);
+                                           }
+
                                            IPlayback playback = GetPlayback(sound);
                                            playback.Stop(sound.ID);
                                            DisposeSound(sound);
@@ -615,6 +622,8 @@ namespace Luky
         /// </summary>
         public void StopAll() => RunCommand(() =>
         {
+            _fadingTable.Clear(); // Stop fading.
+
             // Check for sounds that hadn't started playing yet.
             foreach (DelayedSound ds in _delayedSounds)
             {
@@ -646,7 +655,108 @@ namespace Luky
         /// </remarks>
         protected override void OnTick()
         {
-            // Detect delayed sounds that are now primed.
+            ManageDelayedSounds(); // Detect delayed sounds that are now primed.
+            RefillBuffers(); // Refill streaming buffers.
+            ReleaseSounds(); // Detect and remove sounds that finished playing.
+            PerformFading();
+        }
+
+        /// <summary>
+        /// Performs sound fading.
+        /// </summary>
+        private void PerformFading()
+        {
+            for (int i = 0; i < _fadingTable.Count; i++)
+            {
+                FadingRecord f = _fadingTable[i];
+                //GetDynamicInfo(f.Sound.ID, out SoundState state, out int _);
+
+                //if (state != SoundState.Playing)
+                //{
+                //    _fadingTable.RemoveAt(i);
+                //    continue;
+                //}
+
+                float plannedVolume;
+
+                if (f.Type == FadingRecord.FadingType.In)
+                {
+                    if (f.Sound.IndividualVolume >= f.TargetVolume)
+                    {
+                        _fadingTable.RemoveAt(i);
+                        continue;
+                    }
+
+                    plannedVolume = f.Sound.IndividualVolume + f.VolumeDelta;
+                    if (plannedVolume >= f.TargetVolume)
+                    {
+                        f.Sound.IndividualVolume = plannedVolume;
+                        RunCommand(() => _openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
+                        continue;
+                    }
+
+                    f.Sound.IndividualVolume += f.VolumeDelta;
+                    RunCommand(() => _openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
+                }
+                else
+                {
+                    if (f.Sound.IndividualVolume <= f.TargetVolume)
+                    {
+                        _fadingTable.RemoveAt(i);
+                        continue;
+                    }
+
+                    plannedVolume = f.Sound.IndividualVolume - f.VolumeDelta;
+                    if (plannedVolume < f.TargetVolume)
+                    {
+                        f.Sound.IndividualVolume = f.TargetVolume;
+                        RunCommand(() =>_openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
+                        continue;
+                    }
+
+                    f.Sound.IndividualVolume += f.VolumeDelta;
+                    RunCommand(() => _openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fades the specified sound in.
+        /// </summary>
+        /// <param name="soundID">Handle of the sound to be faded</param>
+        /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
+        public void FadeSourceIn(int soundID, float volumeDelta)
+            => FadeSource(soundID, FadingRecord.FadingType.In, volumeDelta, _groupVolumes["master"]);
+
+        /// <summary>
+        /// Fades the specified sound out.
+        /// </summary>
+        /// <param name="soundID">Handle of the sound to be faded</param>
+        /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
+        public void FadeSourceOut(int soundID, float volumeDelta)
+            => FadeSource(soundID, FadingRecord.FadingType.Out, volumeDelta, 0);
+
+        /// <summary>
+        /// Performs volume fading on the specified sound source.
+        /// </summary>
+        /// <param name="soundID">Handle of the sound to be faded</param>
+        /// <param name="type">Specifies if the soudn should be faded in or out.</param>
+        /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
+        /// <param name="targetVolume">Specifies the final volume of the sound source</param>
+        public void FadeSource(int soundID, FadingRecord.FadingType type, float volumeDelta, float targetVolume)
+        {                _fadingTable.Add(new FadingRecord(sound, type, volumeDelta, targetVolume));
+        }
+
+        /// <summary>
+        /// Stores records about sound fading.
+        /// </summary>
+        private List<FadingRecord> _fadingTable = new List<FadingRecord>();
+
+        /// <summary>
+        /// Releases delayed sounds that are primed.
+        /// </summary>
+        private void ManageDelayedSounds()
+        {
             for (int i = _delayedSounds.Count - 1; i >= 0; i--)
             {
                 DelayedSound ds = _delayedSounds[i];
@@ -659,7 +769,13 @@ namespace Luky
                 }
             }
 
-            // Refill streaming buffers.
+        }
+
+        /// <summary>
+        /// Refills sound buffers if needed.
+        /// </summary>
+        private void RefillBuffers()
+        {
             foreach (Sound sound in _sounds)
             {
                 IPlayback playback = GetPlayback(sound);
@@ -676,7 +792,13 @@ namespace Luky
                 }
             }
 
-            // Detect and remove sounds that finished playing.
+        }
+
+        /// <summary>
+        /// Removes sounds that finished playback.
+        /// </summary>
+        private void ReleaseSounds()
+        {
             for (int i = _sounds.Count - 1; i >= 0; i--)
             {
                 Sound sound = _sounds[i];
@@ -688,6 +810,7 @@ namespace Luky
                     _sounds.RemoveAt(i);
                 }
             }
+
         }
 
         /// <summary>
@@ -878,6 +1001,8 @@ namespace Luky
                     _lSFDecoder = new LSFDecoder();
                     _opusFileDecoder = new OpusFileDecoder();
                     _nAudioDecoder = new NAudioDecoder();
+
+                    // Start thread loop
                     ProcessMessages(_millisecondsPerTick);
                 }
                 catch (Exception ex)
@@ -899,73 +1024,5 @@ namespace Luky
             RunCommand(() => _openALSystem.EnableReverb());
             LoadReverbPresets();
         }
-
-        /// <summary>
-        /// A sound that was delayed because it was not primed yet
-        /// </summary>
-        private sealed class DelayedSound
-        {
-            /// <summary>
-            /// Initializes a sound when it's primed.
-            /// </summary>
-            public Action Callback;
-
-            /// <summary>
-            /// Source of the sound data
-            /// </summary>
-            public ReadStream ReadStream;
-
-            /// <summary>
-            /// Unique identifier of the sound
-            /// </summary>
-            public int SoundID;
-        }
-
-        /// <summary>
-        /// Represents a played sound.
-        /// </summary>
-        private sealed class Sound
-        {
-            /// <summary>
-            /// Decoder used with this sound.
-            /// </summary>
-            public Decoder Decoder;
-
-            /// <summary>
-            /// Sound groups
-            /// </summary>
-            public List<Name> GroupNames = new List<Name>()
-            {
-                new Name("master"), // For controlling a single master volume on all sounds
-new Name("window"), // Adjusted when the window gains and loses focus
-	};
-
-            /// <summary>
-            /// An unique identifier
-            /// </summary>
-            public int ID;
-
-            /// <summary>
-            /// Volume for this sound
-            /// </summary>
-            public float IndividualVolume = 1f;
-
-            /// <summary>
-            /// Panning value in range from 0 to 1
-            /// </summary>
-            public float? Panning;
-
-            /// <summary>
-            /// Full path to the played sound file
-            /// </summary>
-            public FilePath Path;
-
-            public Playback Playback = Playback.OpenAL;
-
-            /// <summary>
-            /// Sample rat eof the sound data
-            /// </summary>
-            public int SampleRate;
-        }
-    } // cls
+    }
 }

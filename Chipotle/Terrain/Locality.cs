@@ -344,6 +344,11 @@ namespace Game.Terrain
         /// Plays the background sound of this locality in a loop.
         /// </summary>
         private void PlayBackgroundSound()
-                => _backgroundSoundId = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
+        {
+                _backgroundSoundId = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 0, null, 1, 0, Playback.OpenAL);
+            //World.Sound.FadeSourceOut(_backgroundSoundId, .1f);
+            World.Sound.FadeSource(_backgroundSoundId, FadingRecord.FadingType.In, .0001f, 3);
+
+        }
     }
 }

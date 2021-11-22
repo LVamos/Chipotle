@@ -197,6 +197,11 @@ _navigatedExit = null;
         /// <param name="message">The message to be processed</param>
         private void OnListExits(ListExits message)
         {
+            // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
+            StopNavigation();
+            if (NavigationInProgress)
+                return;
+
             Vector2 me = _area.Center;
             List<Passage> exits = _locality.GetNearestExits(me, _exitRadius).ToList<Passage>();
 
@@ -255,6 +260,11 @@ _navigatedExit = null;
         /// <param name="message">The message to be processed</param>
         private void OnListNavigableObjects(ListNavigableObjects message)
         {
+            // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
+            StopNavigation();
+            if (NavigationInProgress)
+                return;
+
             List<(DumpObject o, double compassDegrees)> objects = GetNavigableObjects(_navigableObjectsRadius).ToList<(DumpObject o, double compassDegrees)>();
 
             if (objects.IsNullOrEmpty())
@@ -292,6 +302,12 @@ _navigatedExit = null;
             if (_navigatedExit!= null)
                 _navigatedExit.ReceiveMessage(new StopExitNavigation(Owner));
         }
+
+        /// <summary>
+        /// Checks if there's any navigation in progress.
+        /// </summary>
+        protected bool NavigationInProgress 
+            => _navigatedExit != null || _navigatedObject != null;
 
         /// <summary>
         /// Objectt to which tthe NPC is currently navigated.
@@ -358,6 +374,11 @@ _navigatedExit = null;
         /// <param name="message">The message</param>
         protected void OnSayExits(SayExits message)
         {
+            // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
+            StopNavigation();
+            if (NavigationInProgress)
+                return;
+
             Vector2 me = _area.Center;
 
             // If the player stands in a passage inform him.
@@ -644,7 +665,12 @@ _navigatedExit = null;
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnSayNavigableObjects(SayNavigableObjects message)
-            => Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, GetNavigableObjects(_navigableObjectsRadius)));
+        {
+            // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
+            StopNavigation();
+            if (!NavigationInProgress)
+            Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, GetNavigableObjects(_navigableObjectsRadius)));
+        }
 
         /// <summary>
         /// Processes the SayTerrain message.
