@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="EaxReverbDefaults.cs" />
     <Compile Include="FadingRecord.cs" />
+    <Compile Include="FadingType.cs" />
     <Compile Include="LSFDecoder.cs" />
     <Compile Include="NAudioDecoder.cs" />
     <Compile Include="OpenALSystem.cs" />

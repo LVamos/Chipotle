@@ -606,12 +606,10 @@ namespace Luky
                                                return;
 
                                            // Stop fading
-                                           for (int i = 0; i < _fadingTable.Count; i++)
-                                           {
-                                               if(_fadingTable[i].Sound.ID==soundID)
-                                                   _fadingTable.RemoveAt(i);
-                                           }
+                                           if (_fadings.ContainsKey(soundID))
+                                               _fadings.Remove(soundID);
 
+                                           // Stop the sound.
                                            IPlayback playback = GetPlayback(sound);
                                            playback.Stop(sound.ID);
                                            DisposeSound(sound);
@@ -622,7 +620,7 @@ namespace Luky
         /// </summary>
         public void StopAll() => RunCommand(() =>
         {
-            _fadingTable.Clear(); // Stop fading.
+            _fadings.Clear(); // Stop fading.
 
             // Check for sounds that hadn't started playing yet.
             foreach (DelayedSound ds in _delayedSounds)
@@ -666,9 +664,28 @@ namespace Luky
         /// </summary>
         private void PerformFading()
         {
-            for (int i = 0; i < _fadingTable.Count; i++)
+            // Move pending fadings to active fadings if the corresponding sounds started.
+            foreach (KeyValuePair record in _pendingFadings)
             {
-                FadingRecord f = _fadingTable[i];
+                int id = (int)record.Key;
+                FadingRecord fading = (FadingRecord)record.Value;
+
+                if (fading.Pending)
+                {
+                    Sound sound = _sounds.FirstOrDefault(s => s.ID == id);
+
+                    if (sound != null)
+                    {
+                        fading.Pending = false;
+                        fading.Volume = sound.IndividualVolume;
+                        continue;
+                    }
+                }
+            }
+
+            foreach(KeyValuePair record in _fadings)
+            {
+                FadingRecord f = _fadings[i];
                 //GetDynamicInfo(f.Sound.ID, out SoundState state, out int _);
 
                 //if (state != SoundState.Playing)
@@ -679,11 +696,11 @@ namespace Luky
 
                 float plannedVolume;
 
-                if (f.Type == FadingRecord.FadingType.In)
+                if (f.Type == FadingType.In)
                 {
                     if (f.Sound.IndividualVolume >= f.TargetVolume)
                     {
-                        _fadingTable.RemoveAt(i);
+                        _fadings.RemoveAt(i);
                         continue;
                     }
 
@@ -702,7 +719,7 @@ namespace Luky
                 {
                     if (f.Sound.IndividualVolume <= f.TargetVolume)
                     {
-                        _fadingTable.RemoveAt(i);
+                        _fadings.RemoveAt(i);
                         continue;
                     }
 
@@ -743,14 +760,13 @@ namespace Luky
         /// <param name="type">Specifies if the soudn should be faded in or out.</param>
         /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
         /// <param name="targetVolume">Specifies the final volume of the sound source</param>
-        public void FadeSource(int soundID, FadingRecord.FadingType type, float volumeDelta, float targetVolume)
-        {                _fadingTable.Add(new FadingRecord(sound, type, volumeDelta, targetVolume));
-        }
+        public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume)
+                => _fadings[soundID] = new FadingRecord(type, 0, volumeDelta, targetVolume);
 
         /// <summary>
         /// Stores records about sound fading.
         /// </summary>
-        private List<FadingRecord> _fadingTable = new List<FadingRecord>();
+        private Dictionary<int, FadingRecord> _fadings = new Dictionary<int, FadingRecord>();
 
         /// <summary>
         /// Releases delayed sounds that are primed.
