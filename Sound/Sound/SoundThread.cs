@@ -606,12 +606,10 @@ namespace Luky
                                                return;
 
                                            // Stop fading
-                                           for (int i = 0; i < _fadingTable.Count; i++)
-                                           {
-                                               if(_fadingTable[i].Sound.ID==soundID)
-                                                   _fadingTable.RemoveAt(i);
-                                           }
+                                           if (_fadings.ContainsKey(soundID))
+                                               _fadings.Remove(soundID);
 
+                                           // Stop the sound.
                                            IPlayback playback = GetPlayback(sound);
                                            playback.Stop(sound.ID);
                                            DisposeSound(sound);
@@ -622,7 +620,8 @@ namespace Luky
         /// </summary>
         public void StopAll() => RunCommand(() =>
         {
-            _fadingTable.Clear(); // Stop fading.
+            // stop fading effects
+            _fadings = new Dictionary<int, FadingRecord>();
 
             // Check for sounds that hadn't started playing yet.
             foreach (DelayedSound ds in _delayedSounds)
@@ -666,59 +665,60 @@ namespace Luky
         /// </summary>
         private void PerformFading()
         {
-            for (int i = 0; i < _fadingTable.Count; i++)
+            Sound sound;
+            float newVolume;
+            FadingRecord fading;
+            IPlayback playback;
+
+            // Change pending fadings to active if the corresponding sounds are playing.
+            foreach (int id in _fadings.Keys)
             {
-                FadingRecord f = _fadingTable[i];
-                //GetDynamicInfo(f.Sound.ID, out SoundState state, out int _);
-
-                //if (state != SoundState.Playing)
-                //{
-                //    _fadingTable.RemoveAt(i);
-                //    continue;
-                //}
-
-                float plannedVolume;
-
-                if (f.Type == FadingRecord.FadingType.In)
+                // Local function
+                void Apply(float volume)
                 {
-                    if (f.Sound.IndividualVolume >= f.TargetVolume)
-                    {
-                        _fadingTable.RemoveAt(i);
-                        continue;
-                    }
-
-                    plannedVolume = f.Sound.IndividualVolume + f.VolumeDelta;
-                    if (plannedVolume >= f.TargetVolume)
-                    {
-                        f.Sound.IndividualVolume = plannedVolume;
-                        RunCommand(() => _openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
-                        continue;
-                    }
-
-                    f.Sound.IndividualVolume += f.VolumeDelta;
-                    RunCommand(() => _openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
+                    sound.IndividualVolume = volume;
+                    RunCommand(() => playback.SetVolume(id, volume));
                 }
-                else
+
+                // Check if the faded sound is loaded.
+                sound = _sounds.FirstOrDefault(s => s.ID == id);
+                if (sound == null)
+                    continue;
+
+                // Remove stopped sounds
+                fading = _fadings[id];
+                playback = sound != null ? GetPlayback(sound) : null;
+                if (!playback.IsPlaying(id))
                 {
-                    if (f.Sound.IndividualVolume <= f.TargetVolume)
-                    {
-                        _fadingTable.RemoveAt(i);
-                        continue;
-                    }
-
-                    plannedVolume = f.Sound.IndividualVolume - f.VolumeDelta;
-                    if (plannedVolume < f.TargetVolume)
-                    {
-                        f.Sound.IndividualVolume = f.TargetVolume;
-                        RunCommand(() =>_openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
-                        continue;
-                    }
-
-                    f.Sound.IndividualVolume += f.VolumeDelta;
-                    RunCommand(() => _openALSystem.SetVolume(f.Sound.ID, CalculateVolume(f.Sound)));
+                    _inactiveFadings.Add(id);
+                    continue;
                 }
+
+                // Fade the sound.
+                if (
+                    (fading.Type == FadingType.In && sound.IndividualVolume >= fading.TargetVolume)
+                    || (fading.Type == FadingType.Out && sound.IndividualVolume<=fading.TargetVolume)
+                    )
+                    _inactiveFadings.Add(id);
+                    else Apply(fading.Type == FadingType.In ? sound.IndividualVolume + fading.VolumeDelta : sound.IndividualVolume - fading.VolumeDelta);
             }
-        }
+
+            // Delete unused fadings
+            foreach (int id in _inactiveFadings)
+            {
+                if(_fadings[id].Type == FadingType.Out)
+                    Stop(id);
+
+                _fadings.Remove(id);
+
+            }
+            _inactiveFadings = new List<int>();
+            }
+
+        /// <summary>
+        /// Stores handles of sounds with finsihed or cancelled fadings.
+        /// </summary>
+        private List<int> _inactiveFadings = new List<int>();
 
         /// <summary>
         /// Fades the specified sound in.
@@ -726,7 +726,7 @@ namespace Luky
         /// <param name="soundID">Handle of the sound to be faded</param>
         /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
         public void FadeSourceIn(int soundID, float volumeDelta)
-            => FadeSource(soundID, FadingRecord.FadingType.In, volumeDelta, _groupVolumes["master"]);
+            => FadeSource(soundID, FadingType.In, volumeDelta, _groupVolumes["master"]);
 
         /// <summary>
         /// Fades the specified sound out.
@@ -734,7 +734,7 @@ namespace Luky
         /// <param name="soundID">Handle of the sound to be faded</param>
         /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
         public void FadeSourceOut(int soundID, float volumeDelta)
-            => FadeSource(soundID, FadingRecord.FadingType.Out, volumeDelta, 0);
+            => FadeSource(soundID, FadingType.Out, volumeDelta, 0);
 
         /// <summary>
         /// Performs volume fading on the specified sound source.
@@ -743,14 +743,13 @@ namespace Luky
         /// <param name="type">Specifies if the soudn should be faded in or out.</param>
         /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
         /// <param name="targetVolume">Specifies the final volume of the sound source</param>
-        public void FadeSource(int soundID, FadingRecord.FadingType type, float volumeDelta, float targetVolume)
-        {                _fadingTable.Add(new FadingRecord(sound, type, volumeDelta, targetVolume));
-        }
+        public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume)
+                => _fadings[soundID] = new FadingRecord(type, 0, volumeDelta, targetVolume);
 
         /// <summary>
         /// Stores records about sound fading.
         /// </summary>
-        private List<FadingRecord> _fadingTable = new List<FadingRecord>();
+        private Dictionary<int, FadingRecord> _fadings = new Dictionary<int, FadingRecord>();
 
         /// <summary>
         /// Releases delayed sounds that are primed.
