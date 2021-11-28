@@ -647,6 +647,7 @@ lLoop
         /// </summary>
         public static void StartGame()
         {
+            Sound.SetGroupVolume("master", 3);
             LoadMap();
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());

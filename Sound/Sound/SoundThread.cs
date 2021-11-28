@@ -661,10 +661,57 @@ namespace Luky
         }
 
         /// <summary>
+        /// Currently planned fading for master volume
+        /// </summary>
+        private FadingRecord _masterFading;
+
+        /// <summary>
+        /// Applies a fade in effect on the master volume.
+        /// </summary>
+        /// <param name="volumeDelta">Specifies how much the master volume changes in one step.</param>
+        /// <param name="targetVolume">The final master volume</param>
+        public void MasterFadeIn(float volumeDelta, float targetVolume)
+            => FadeMaster(FadingType.In, volumeDelta, targetVolume);
+
+
+        /// <summary>
+        /// Applies a fade out effect on the master volume.
+        /// </summary>
+        /// <param name="volumeDelta">Specifies how much the master volume changes in one step.</param>
+        /// <param name="targetVolume">The final master volume</param>
+        public void MasterFadeOut(float volumeDelta, float targetVolume)
+            => FadeMaster(FadingType.Out, volumeDelta, targetVolume);
+
+        /// <summary>
+        /// Applies a fading effect on master volume.
+        /// </summary>
+        /// <param name="type">Type of the fading effect</param>
+        /// <param name="volumeDelta">Specifies how much the volume is changed in one step.</param>
+        /// <param name="targetVolume">Specifies the final master volume</param>
+        public void FadeMaster(FadingType type, float volumeDelta, float targetVolume)
+            => _masterFading = new FadingRecord(type, volumeDelta, targetVolume);
+
+        /// <summary>
         /// Performs sound fading.
         /// </summary>
         private void PerformFading()
         {
+            // Perform master volume fading
+            if (_masterFading != null)
+            {
+                if (
+                    (_masterFading.Type == FadingType.In && _groupVolumes["master"] >= _masterFading.TargetVolume)
+                    || (_masterFading.Type == FadingType.Out && _groupVolumes["master"] <= _masterFading.TargetVolume +_masterFading.VolumeDelta)
+                    )
+                {
+                    SetGroupVolume("master", _masterFading.TargetVolume);
+                    _masterFading = null;
+                }
+                else
+                    SetGroupVolume("master", _groupVolumes["master"] + (_masterFading.Type == FadingType.In ? _masterFading.VolumeDelta : -_masterFading.VolumeDelta));
+            }
+
+            // Fading of individual sounds
             Sound sound;
             float newVolume;
             FadingRecord fading;
@@ -744,7 +791,7 @@ namespace Luky
         /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
         /// <param name="targetVolume">Specifies the final volume of the sound source</param>
         public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume)
-                => _fadings[soundID] = new FadingRecord(type, 0, volumeDelta, targetVolume);
+                => _fadings[soundID] = new FadingRecord(type, volumeDelta, targetVolume);
 
         /// <summary>
         /// Stores records about sound fading.
