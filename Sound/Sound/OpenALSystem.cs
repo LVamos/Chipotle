@@ -147,9 +147,8 @@ namespace Luky
         /// <param name="soundID">ID of the sound</param>
         /// <param name="stream">The stream to be read</param>
         /// <param name="looping">Specifies if looping is enabled or disabled</param>
-        /// <param name="forceMono">Specifies if the sound should be converted to mono</param>
-        /// <param name="channels">Reference to a variable to store number of channels of the sound</param>
-        /// <param name="sampleRate">Reference to a variable to store sample rate of the sound</param>
+        /// <param name="channels">Number of channels of the sound</param>
+        /// <param name="sampleRate">Sample rate of the sound</param>
         public void InitSound(int soundID, int channels, int sampleRate, PositionType pt, Vector3 position, float frequencyMultiplier)
         {
             Info info = new Info

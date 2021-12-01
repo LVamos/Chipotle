@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DavyKager;
@@ -92,7 +94,6 @@ namespace Game.UI
             _items = items;
             Assert(items != null, nameof(items));
             _introText = introText;
-            Assert(!string.IsNullOrEmpty(introText), nameof(introText));
             _wrappingAllowed = wrappingAllowed;
             _introSound = introSound;
             _outroSound = outroSound;
@@ -134,22 +135,25 @@ namespace Game.UI
             base.OnActivate();
             Play(_introSound);
 
-            if (string.IsNullOrEmpty(_introSound))
+            if (!string.IsNullOrEmpty(_introText))
             {
-                Tolk.Speak(_introText);
-                return;
+                Task.Run(() => 
+                { 
+                    Thread.Sleep(1000); 
+                    Tolk.Speak(_introText); 
+                }
+                );
             }
-
-            Timer t = new Timer
-            {
-                Interval = 1000
-            };
-            t.Tick += (s, e) =>
-            {
-                Tolk.Speak(_introText);
-                t.Stop();
-            };
-            t.Start();
+            //Timer t = new Timer
+            //{
+            //    Interval = 1000
+            //};
+            //t.Tick += (s, e) =>
+            //{
+            //    Tolk.Speak(_introText);
+            //    t.Stop();
+            //};
+            //t.Start();
         }
 
         /// <summary>

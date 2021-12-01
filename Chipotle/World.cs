@@ -250,7 +250,7 @@ namespace Game
         /// <param name="name">Inner name of the required NPC</param>
         /// <returns>The found NPC or null if nothing was found</returns>
         public static Entity GetEntity(string name)
-=> _entities.TryGetValue(name.ToLower(), out Entity e) ? e : null;
+=>  _entities.TryGetValue(name.ToLower(), out Entity e) ? e : null;
 
         /// <summary>
         /// Returns a locality found by its name.
@@ -583,7 +583,8 @@ lLoop
         {
             Program.MainWindow.GameLoopEnabled = false;
             _cutsceneBegan = null;
-            Sound.StopAll();
+            Sound.FadeAndStopAll(.00008f);
+            System.Threading.Thread.Sleep(1000);
             WindowHandler.MainMenu();
         }
 
@@ -647,7 +648,8 @@ lLoop
         /// </summary>
         public static void StartGame()
         {
-            Sound.SetGroupVolume("master", 3);
+            //Sound.SetGroupVolume("master", 0);
+            //Sound.FadeMasterIn(.00001f, 3);
             LoadMap();
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());

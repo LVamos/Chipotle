@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using System.Threading;
+
+using NAudio.CoreAudioApi;
 
 using OpenTK;
 
@@ -353,20 +357,19 @@ namespace Luky
         /// </summary>
         /// <param name="soundID">The sound</param>
         /// <param name="forceMono">Specifies if the sound should be converted to mono.</param>
-        public void ChangeForceMono(int soundID, bool forceMono) => RunCommand(() =>
-                                                                  {
-                                                                      Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
+        public void ChangeForceMono(int soundID, bool forceMono)
+        {
+            RunCommand(() =>
+               {
+                   Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
 
-                                                                      if (sound == null)
-                                                                          return;
+                   if (sound == null || sound.Decoder != Decoder.Opusfile || sound.Playback != Playback.OpenAL)
+                       return;
 
-                                                                      if (sound.Decoder == Decoder.Opusfile && sound.Playback == Playback.OpenAL)
-                                                                      {
-                                                                          _opusFileDecoder.ChangeForceMono(soundID, forceMono, out int channels, out int sampleRate);
-                                                                          _openALSystem.ReconfigureSound(soundID, channels, sampleRate);
-                                                                      }
-                                                                  });
-
+                       _opusFileDecoder.ChangeForceMono(soundID, forceMono, out int channels, out int sampleRate);
+                       _openALSystem.ReconfigureSound(soundID, channels, sampleRate);
+               });
+        }
         /// <summary>
         /// Enables or disables looping.
         /// </summary>
@@ -611,6 +614,8 @@ namespace Luky
 
                                            // Stop the sound.
                                            IPlayback playback = GetPlayback(sound);
+
+                                           if(playback.IsPlaying(sound.ID))
                                            playback.Stop(sound.ID);
                                            DisposeSound(sound);
                                        });
@@ -670,16 +675,25 @@ namespace Luky
         /// </summary>
         /// <param name="volumeDelta">Specifies how much the master volume changes in one step.</param>
         /// <param name="targetVolume">The final master volume</param>
-        public void MasterFadeIn(float volumeDelta, float targetVolume)
+        public void FadeMasterIn(float volumeDelta, float targetVolume)
             => FadeMaster(FadingType.In, volumeDelta, targetVolume);
 
+        /// <summary>
+        /// Fades all currently playing sounds to zero.
+        /// </summary>
+        /// <param name="volumeDelta">Specifies how much the volume is changed in one step.</param>
+        public void FadeAndStopAll(float volumeDelta)
+        {
+            foreach (Sound s in _sounds)
+                _fadings[s.ID] = new FadingRecord(FadingType.Out, volumeDelta, 0);
+        }
 
         /// <summary>
         /// Applies a fade out effect on the master volume.
         /// </summary>
         /// <param name="volumeDelta">Specifies how much the master volume changes in one step.</param>
         /// <param name="targetVolume">The final master volume</param>
-        public void MasterFadeOut(float volumeDelta, float targetVolume)
+        public void FadeMasterOut(float volumeDelta, float targetVolume)
             => FadeMaster(FadingType.Out, volumeDelta, targetVolume);
 
         /// <summary>
@@ -744,7 +758,7 @@ namespace Luky
                 // Fade the sound.
                 if (
                     (fading.Type == FadingType.In && sound.IndividualVolume >= fading.TargetVolume)
-                    || (fading.Type == FadingType.Out && sound.IndividualVolume<=fading.TargetVolume)
+                    || (fading.Type == FadingType.Out && sound.IndividualVolume<=fading.TargetVolume +fading.VolumeDelta)
                     )
                     _inactiveFadings.Add(id);
                     else Apply(fading.Type == FadingType.In ? sound.IndividualVolume + fading.VolumeDelta : sound.IndividualVolume - fading.VolumeDelta);
@@ -753,8 +767,8 @@ namespace Luky
             // Delete unused fadings
             foreach (int id in _inactiveFadings)
             {
-                if(_fadings[id].Type == FadingType.Out)
-                    Stop(id);
+                if(_fadings[id].Type == FadingType.Out && _fadings[id].Stop)
+                                Stop(id);
 
                 _fadings.Remove(id);
 
@@ -790,8 +804,9 @@ namespace Luky
         /// <param name="type">Specifies if the soudn should be faded in or out.</param>
         /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
         /// <param name="targetVolume">Specifies the final volume of the sound source</param>
-        public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume)
-                => _fadings[soundID] = new FadingRecord(type, volumeDelta, targetVolume);
+        /// <param name="stop">Specifies if the sound should be stopped after it was muted.</param>
+        public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume=0, bool stop=true)
+                => _fadings[soundID] = new FadingRecord(type, volumeDelta, targetVolume, stop);
 
         /// <summary>
         /// Stores records about sound fading.
