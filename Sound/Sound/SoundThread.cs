@@ -10,6 +10,7 @@ using System.Threading;
 using NAudio.CoreAudioApi;
 
 using OpenTK;
+using OpenTK.Audio.OpenAL;
 
 using Sound;
 
@@ -283,6 +284,16 @@ namespace Luky
 
             sBuffer.Filled *= 2;
         }
+
+        public void SetEaxReverbReflectionsGain(float value)
+            => RunCommand(() => _openALSystem.SetEaxReverbReflectionsGain(value));
+
+        /// <summary>
+        /// Changes value of the EAX reverb reflections parameter.
+        /// </summary>
+        /// <param name="pan">The pan vector</param>
+        public void SetEaxReverbReflections(Vector3 pan)
+            => RunCommand(() => _openALSystem.SetEaxReverbReflectionsPan(pan));
 
         /// <summary>
         /// Enables an EAX reverb preset.

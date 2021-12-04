@@ -249,6 +249,17 @@ namespace Luky
             info.ShouldBePlaying = false;
         }
 
+
+        /// <summary>
+        /// Changes the EAX reverb reflections gain parameter
+        /// </summary>
+        /// <param name="value">The reflections gain value</param>
+        public void SetEaxReverbReflectionsGain(float value)
+        {
+            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbReflectionsGain, value);
+            ALAnnounceError($"Setting reverb properties: {nameof(value)}.");
+        }
+
         /// <summary>
         /// Plays the specified sound.
         /// </summary>
@@ -332,6 +343,16 @@ namespace Luky
             Info info = _table[soundID];
             info.Channels = channels;
             info.SampleRate = sampleRate;
+        }
+
+        /// <summary>
+        /// Changes value of reflections parameter of EAX reverb.
+        /// </summary>
+        /// <param name="pan">The reflections pan vector</param>
+        public void SetEaxReverbReflectionsPan(Vector3 pan)
+        {
+            _effectExtension.Effect(_effectHandle, EfxEffect3f.EaxReverbReflectionsPan, ref pan);
+            ALAnnounceError($"Setting reverb properties: {nameof(pan)}.");
         }
 
         /// <summary>

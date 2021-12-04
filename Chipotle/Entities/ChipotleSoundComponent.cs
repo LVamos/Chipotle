@@ -239,7 +239,8 @@ namespace Game.Entities
         /// Processes the MovementDone message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnMovementDone(EntityMoved message) => PlayTerrain(World.Map[message.Target].Terrain);
+        private void OnMovementDone(EntityMoved message)
+            => PlayTerrain(World.Map[message.Target].Terrain);
 
         /// <summary>
         /// Processes the ObjectsCollided message.

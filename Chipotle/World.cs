@@ -670,7 +670,7 @@ lLoop
         /// <param name="sender">The object or NPC which wants to stop the cutscene</param>
         public static void StopCutscene(object sender)
         {
-            Sound.Stop(_cutsceneBegan.SoundID);
+            Sound.FadeSourceOut(_cutsceneBegan.SoundID, .00006f);
             ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
             _cutsceneBegan = null;
         }
