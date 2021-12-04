@@ -148,7 +148,7 @@ namespace Game.Entities
         /// </summary>
         public override void Start()
         {
-            // set initial position.
+            // set initial position.&
             SetPosition(1028, 1034, true);
             _orientation = new Orientation2D(0, 1);
 
@@ -176,6 +176,7 @@ namespace Game.Entities
                     [typeof(UseObject)] = (message) => OnUseObject((UseObject)message)
                 }
                 );
+
 
             // Play intro cutscene
             World.PlayCutscene(Owner, "cs6");

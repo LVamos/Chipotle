@@ -76,6 +76,11 @@ namespace Game.Entities
         };
 
         /// <summary>
+        /// Stores a position the player was located on when the last cutscene started.
+        /// </summary>
+        private Vector2 _cutsceneStartPosition;
+
+        /// <summary>
         /// Initializes the component and starts its message loop.
         /// </summary>
         public override void Start()
@@ -120,6 +125,8 @@ namespace Game.Entities
         protected override void OnCutsceneBegan(CutsceneBegan message)
         {
             base.OnCutsceneBegan(message);
+            _cutsceneStartPosition = Owner.Area.Center;
+
             switch (message.CutsceneName)
             {
                 case "cs7": case "cs8": case "cs10": _sound.ApplyEaxReverbPreset("carpettedhallway", 0); break;
@@ -240,7 +247,19 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnMovementDone(EntityMoved message)
-            => PlayTerrain(World.Map[message.Target].Terrain);
+        {
+            PlayTerrain(World.Map[message.Target].Terrain);
+            WatchCutscene();
+        }
+
+        /// <summary>
+        /// Stops an ongoing cutscene if the player moved 10 steps away from the initial position he was locayted on when the cutscene started.
+        /// </summary>
+        private void WatchCutscene()
+        {
+            if (World.GetDistance(_cutsceneStartPosition, Owner.Area.Center) > 5)
+                World.StopCutscene(Owner);
+        }
 
         /// <summary>
         /// Processes the ObjectsCollided message.
