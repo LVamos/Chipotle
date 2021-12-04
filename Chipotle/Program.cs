@@ -86,7 +86,11 @@ namespace Game
         /// <param name="error">The error message</param>
         private static void OnError(string error)
         {
-            string text = $"Current position: {World.Player.Area.Center.ToString()}{Environment.NewLine}" + error;
+            string text = string.Empty;
+
+            if (World.Player != null)
+                text = $"Current position: {World.Player.Area.Center.ToString()}{Environment.NewLine}";
+            text += error;
             Action action = () =>
             {
                 MessageBox.Show(MainWindow, $"Hlášení o chybě zkopírováno do schránky{Environment.NewLine}" + text, AppDomain.CurrentDomain.FriendlyName + ": závažná chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);

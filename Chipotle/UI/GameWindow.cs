@@ -46,7 +46,7 @@ namespace Game.UI
         /// <param name="e">The message to be handled</param>
         public override void OnKeyUp(KeyEventParams e)
         {
-            if (Program.MainWindow.GameLoopEnabled)
+            if (Program.MainWindow.GameLoopEnabled && World.Player!=null)
                 World.Player.ReceiveMessage(new KeyReleased(this, new KeyShortcut(e)));
         }
 

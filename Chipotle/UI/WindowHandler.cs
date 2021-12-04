@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Game.UI
@@ -12,11 +13,6 @@ namespace Game.UI
         /// Internal reference to currently active window
         /// </summary>
         private static VirtualWindow _activeWindow;
-
-        /// <summary>
-        /// Static constructor
-        /// </summary>
-        static WindowHandler() => _activeWindow = null;
 
         /// <summary>
         /// Currently focused window

@@ -23,6 +23,41 @@ namespace Luky
     public sealed partial class SoundThread : BaseThread
     {
         /// <summary>
+        /// Default general volume
+        /// </summary>
+        public readonly float DefaultMasterVolume = 2;
+
+        /// <summary>
+        /// Indicates if the sounds are muted.
+        /// </summary>
+        public bool Muted;
+
+        /// <summary>
+        /// Stores last value of master volume before muting.
+        /// </summary>
+        private float _masterVolumeBackup;
+
+        /// <summary>
+        /// Temporarely fades all sounds out.
+        /// </summary>
+        public void Mute()
+        {
+            Muted = true;
+            _masterVolumeBackup = _groupVolumes["master"];
+            FadeMasterOut(.0001f, 0);
+        }
+
+        /// <summary>
+        /// Unmutes all sounds to last volume.
+        /// </summary>
+        public void Unmute()
+        {
+            Muted = false;
+            FadeMasterIn(.0001f, _masterVolumeBackup);
+            _masterVolumeBackup = 0;
+        }
+
+        /// <summary>
         /// Name of current EAX reverb preset
         /// </summary>
         public string ReverbPresetName;

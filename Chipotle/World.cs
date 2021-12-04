@@ -109,8 +109,8 @@ namespace Game
         /// <summary>
         /// Reference to the Detective Chipotle NPC (the main NPC)
         /// </summary>
-        public static Entity Player => GetEntity("Chipotle");
-
+        public static Entity Player
+=> GetEntity("Chipotle");
         /// <summary>
         /// Registers an entity.
         /// </summary>
@@ -640,7 +640,7 @@ lLoop
         {
             Sound = SoundThread.CreateAndStartThread(Path.Combine(Program.DataPath, "Sounds"), Program.OnError, say);
             Sound.LoadSounds();
-            Sound.SetGroupVolume("master", 1);
+            Sound.SetGroupVolume("master", Sound.DefaultMasterVolume);
         }
 
         /// <summary>
@@ -648,8 +648,7 @@ lLoop
         /// </summary>
         public static void StartGame()
         {
-            //Sound.SetGroupVolume("master", 0);
-            //Sound.FadeMasterIn(.00001f, 3);
+            Sound.SetGroupVolume("master", Sound.DefaultMasterVolume);
             LoadMap();
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());

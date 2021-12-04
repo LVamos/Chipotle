@@ -20,6 +20,11 @@ namespace Game.UI
         private bool _gameLoopEnabled = false;
 
         /// <summary>
+        /// Indicates if the master volume is muted.
+        /// </summary>
+        private bool _muted;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public MainWindow()
@@ -51,6 +56,36 @@ namespace Game.UI
             KeyDown += MainWindow_KeyDown;
             KeyUp += MainWindow_KeyUp;
             Shown += MainWindow_Shown;
+            FormClosing += MainWindow_FormClosing;
+            Deactivate += MainWindow_Deactivate;
+            Activated += MainWindow_Activated;
+        }
+
+        /// <summary>
+        /// Handles the Activated message.
+        /// </summary>
+        /// <param name="sender">Source of the message</param>
+        /// <param name="e">The message</param>
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
+            if (World.Sound.Muted)
+                World.Sound.Unmute();
+        }
+
+        /// <summary>
+        /// Handles the Deactivate message.
+        /// </summary>
+        /// <param name="sender">Source fo the message</param>
+        /// <param name="e">The message</param>
+        private void MainWindow_Deactivate(object sender, EventArgs e)
+            => World.Sound.Mute();
+
+        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            World.Sound.FadeMasterOut(.0001f, 0);
+            System.Threading.Thread.Sleep(1300);
+            Environment.Exit(0);
         }
 
         /// <summary>

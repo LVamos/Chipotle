@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System;
 using System.IO;
 
@@ -16,6 +17,11 @@ namespace Game.UI
     /// </summary>
     public class MainMenuWindow : VirtualWindow
     {
+        /// <summary>
+        /// Default volume for the menu loop
+        /// </summary>
+        private const float _loopVolume= .2f;
+
         /// <summary>
         /// Actions performed when the window is activated.
         /// </summary>
@@ -129,7 +135,7 @@ namespace Game.UI
         private void StopLoop()
         {
             World.Sound.FadeSourceOut(_menuLoopID, .1f);
-            World.Sound.Play(World.Sound.GetSoundStream(_endSound), null, false, PositionType.None, Vector3.Zero, false, .3f, null, 1, 0, Playback.OpenAL);
+            World.Sound.Play(World.Sound.GetSoundStream(_endSound), null, false, PositionType.None, Vector3.Zero, false, _loopVolume, null, 1, 0, Playback.OpenAL);
         }
 
         /// <summary>
@@ -138,7 +144,7 @@ namespace Game.UI
         private void PlayLoop()
         {
             if (_menuLoopID == 0)
-                _menuLoopID = World.Sound.Play(_menuLoopSound, null, true, PositionType.None, Vector3.Zero, false, .3f);
+                _menuLoopID = World.Sound.Play(_menuLoopSound, null, true, PositionType.None, Vector3.Zero, false, _loopVolume);
         }
 
         /// <summary>
@@ -146,12 +152,10 @@ namespace Game.UI
         /// </summary>
         public void SpeakerTest()
         {
-            Task.Run(() => {
-                World.Sound.FadeSource(_menuLoopID, FadingType.Out, .0001f, .1f, false);
+            World.Sound.GetDynamicInfo(_speakerTestSoundID, out SoundState state, out int _);
+
+            if(state != SoundState.Playing)
                 _speakerTestSoundID = World.Sound.Play(_speakerTestSound);
-                Thread.Sleep(3600);
-                World.Sound.FadeSource(_menuLoopID, FadingType.In, .0001f, .3f); Thread.Sleep(4000);
-            });
             _loopInProgress = true;
             RunMainMenu();
         }
