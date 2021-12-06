@@ -491,7 +491,7 @@ namespace Luky
         /// <param name="volume">The new volume</param>
         public void SetVolume(int soundID, float volume)
         {
-            Info info = _table[soundID];
+if(_table.TryGetValue(soundID, out Info info))
             ALSetVolume(info.SourceID, volume);
         }
 
