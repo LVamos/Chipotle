@@ -28,6 +28,10 @@ namespace Game.UI
         public override void OnActivate()
         {
             base.OnActivate();
+
+            if (_voicingEnabled)
+                Tolk.Speak("Hlavní menu");
+
             RunMainMenu();
         }
 
@@ -52,9 +56,37 @@ namespace Game.UI
         private bool _loopInProgress = false;
 
         /// <summary>
-        /// Name of the sound with the speaker test.
+        /// Default menu items
         /// </summary>
-        private const string _speakerTestSound= "SpeakerTest";
+        private string[] _items = new string[]
+                {
+                "Nová hra",
+                "Test sluchátek",
+                "Návod",
+                "Konec"
+                };
+
+        /// <summary>
+        /// Enables or disables voicing in the main menu.
+        /// </summary>
+        private bool _voicingEnabled = true;
+
+        /// <summary>
+        /// Items including the Load game command
+        /// </summary>
+        private readonly string[] _itemsWithLoadGame = new string[]
+            {
+                "Nová hra",
+                "Pokračovat ve hře",
+                "Test sluchátek",
+                "Návod",
+                "Konec"
+            };
+
+    /// <summary>
+    /// Name of the sound with the speaker test.
+    /// </summary>
+    private const string _speakerTestSound= "SpeakerTest";
 
         /// <summary>
         /// Name of the sound played when the application is being closed
@@ -74,30 +106,7 @@ namespace Game.UI
             string intro =_menuLoopID == 0 ? "Hlavní menu" : String.Empty;
             PlayLoop();
 
-            string[] items;
-
-            if (File.Exists(Path.Combine(Program.DataPath, "game.sav")))
-            {
-                items = new string[]
-            {
-                "Nová hra",
-                "Pokračovat ve hře",
-                "Test sluchátek",
-                "Návod",
-                "Konec"
-            };
-            }
-            else
-            {
-                items = new string[]
-                {
-                "Nová hra",
-                "Test sluchátek",
-                "Návod",
-                "Konec"
-                };
-            }
-
+            string[] items = GameStateSaved() ? _itemsWithLoadGame : _items;
             int choice = WindowHandler.Menu(items, intro, true);
             choice = choice == -1 ? items.Length - 1 : choice;
             switch (items[choice])
@@ -109,6 +118,13 @@ namespace Game.UI
                 default: ExitGame(); break;
             }
         }
+
+        /// <summary>
+        /// Checks if a game state was previously saved on disc.
+        /// </summary>
+        /// <returns>True if a saved game state was found on disc.</returns>
+        private bool GameStateSaved()
+            => File.Exists(Path.Combine(Program.DataPath, "game.sav"));
 
         /// <summary>
         /// Loads a saved game from file.
@@ -134,6 +150,7 @@ namespace Game.UI
         /// <param name="shortEnd">Specifies if the closing jingle should be short or long.</param>
         private void StopLoop()
         {
+            _voicingEnabled = false;
             World.Sound.FadeSourceOut(_menuLoopID, .1f);
             World.Sound.Play(World.Sound.GetSoundStream(_endSound), null, false, PositionType.None, Vector3.Zero, false, _loopVolume, null, 1, 0, Playback.OpenAL);
         }

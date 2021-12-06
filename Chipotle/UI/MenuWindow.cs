@@ -136,24 +136,7 @@ namespace Game.UI
             Play(_introSound);
 
             if (!string.IsNullOrEmpty(_introText))
-            {
-                Task.Run(() => 
-                { 
-                    Thread.Sleep(1000); 
-                    Tolk.Speak(_introText); 
-                }
-                );
-            }
-            //Timer t = new Timer
-            //{
-            //    Interval = 1000
-            //};
-            //t.Tick += (s, e) =>
-            //{
-            //    Tolk.Speak(_introText);
-            //    t.Stop();
-            //};
-            //t.Start();
+                    Tolk.Speak(_introText);
         }
 
         /// <summary>
