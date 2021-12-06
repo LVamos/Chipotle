@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+
+using Game.Messaging;
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using Game.Terrain;
+
+namespace Game.Entities
+{
+    /// <summary>
+    /// Controls behavior of the Derreck Sweeney NPC.
+    /// </summary>
+    [Serializable]
+    public class SweeneyAIComponent : AIComponent
+    {
+        /// <summary>
+        /// Initializes the component and starts its message loop.
+        /// </summary>
+        public override void Start()
+        {
+            base.Start();
+
+            RegisterMessages(
+                new Dictionary<Type, Action<GameMessage>>()
+                {
+                    [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message)
+                }
+                );
+
+            Owner.ReceiveMessage(new SetPosition(this, new Plane("1402, 960"), true));
+        }
+
+        /// <summary>
+        /// Processes the CutsceneEnded message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected override void OnCutsceneEnded(CutsceneEnded message)
+        {
+            base.OnCutsceneEnded(message);
+
+            switch (message.CutsceneName)
+            {
+                case "cs23": JumpToSweeneysRoom(); break;
+            }
+        }
+
+        /// <summary>
+        /// Relocates the Detective Chipotle and Tuttle NPCs from Easterby street (ulice s1)
+        /// locality to the sweeney's hall (hala s1) locality.
+        /// </summary>
+        private void JumpToSweeneysRoom()
+            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1407, 978"), true));
+    }
+}

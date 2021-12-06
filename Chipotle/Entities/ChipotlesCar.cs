@@ -1,0 +1,259 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Game.Messaging.Commands;
+using Game.Messaging.Events;
+using Game.Terrain;
+using Game.UI;
+
+using Luky;
+
+namespace Game.Entities
+{
+    /// <summary>
+    /// Represents the car of the Detective Chipotle NPC.
+    /// </summary>
+    [Serializable]
+    public class ChipotlesCar : DumpObject
+    {
+        /// <summary>
+        /// Indicates if the object has moved at least once.
+        /// </summary>
+        public bool Moved;
+
+        /// <summary>
+        /// List of the localities the object can move to.
+        /// </summary>
+        protected HashSet<Locality> _allowedDestinations = new HashSet<Locality>();
+
+        /// <summary>
+        /// List of all localities visited by the object.
+        /// </summary>
+        protected HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
+
+        /// <summary>
+        /// Maps all possible movements among localities.
+        /// </summary>
+        private readonly Dictionary<string, string> _destinations = new Dictionary<string, string>() // locality inner name/rectangle coordinates
+        {
+            ["ulice p1"] = "1810, 1123, 1812, 1119", // at Christine's
+            ["ulice h1"] = "1539, 1000, 1543, 998", // At the pub
+            ["ulice s1"] = "1324, 1036, 1328, 1034", // In safe distance from Sweeney's house
+            ["příjezdová cesta w1"] = "1025, 1036, 1027, 1032", // At a fence
+            ["ulice v1"] = "2006, 1087, 2008, 1083", // On park place next to Vanilla crunch
+            ["asfaltka c1"] = "1207, 984, 1209, 980" // At the edge of "cesta c1"
+        };
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        public ChipotlesCar(Name name, Plane area, bool decorative) : base(name, area, "detektivovo auto", decorative, null, null, null, null)
+        { }
+
+        /// <summary>
+        /// Reference to the Detective Chipotle NPC
+        /// </summary>
+        private Entity Player => World.Player;
+
+        /// <summary>
+        /// List of all localities visited by the object
+        /// </summary>
+        public IReadOnlyCollection<Locality> VisitedLocalities => _visitedLocalities;
+
+        /// <summary>
+        /// Reference to the Tuttle NPC
+        /// </summary>
+        private Entity _tuttle
+            => World.GetEntity("tuttle");
+
+        /// <summary>
+        /// List of all crutial object in the Walsch's area
+        /// </summary>
+        private IEnumerable<DumpObject> WalshAreaObjects =>
+                    (new string[]
+        {"tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w1"})
+                    .Select(o => World.GetObject(o) as DumpObject);
+
+        /// <summary>
+        /// Initializes the object and starts its message loop.
+        /// </summary>
+        public override void Start()
+        {
+            base.Start();
+
+            RegisterMessages(
+                new Dictionary<System.Type, System.Action<Messaging.GameMessage>>
+                {
+                    [typeof(MoveChipotlesCar)] = (message) => OnMoveChipotlesCar((MoveChipotlesCar)message),
+                    [typeof(UnblockLocality)] = (message) => OnUnblockLocality((UnblockLocality)message)
+                }
+                );
+        }
+
+        /// <summary>
+        /// Moves the object to the specified position.
+        /// </summary>
+        /// <param name="target">Coordinates of the target location</param>
+        protected override void Move(Plane target)
+        {
+            base.Move(target);
+            ChipotlesCarMoved message = new ChipotlesCarMoved(this, target);
+            Player.ReceiveMessage(message);
+            _tuttle.ReceiveMessage(message);
+        }
+
+        /// <summary>
+        /// Processes the UseObject message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected override void OnUseObject(UseObject message)
+        {
+            base.OnUseObject(message);
+
+            // When it's not allowed to use the car, play a knocking souund.
+            if (
+                            (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
+            || (_area.GetLocality().Name.Indexed == "asfaltka c1" && !CarsonsBenchesUsed()))
+                _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, 1, null, 1, 0, Playback.OpenAL);
+
+            // If player didn't leave Walsh area but used required objects and went through all area
+            else if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
+            {
+                AllowDestination(World.GetLocality("ulice p1"));
+                DestinationMenu("cs20");
+                AllowDestination(World.GetLocality("příjezdová cesta w1"));
+            }
+            else DestinationMenu(); // Let player seldct destination.
+        }
+
+        /// <summary>
+        /// Makes the specified locality accessible.
+        /// </summary>
+        /// <param name="destination">The locality to be allowed</param>
+        private void AllowDestination(Locality destination)
+        {
+            if (!_allowedDestinations.Contains(destination))
+                _allowedDestinations.Add(destination);
+        }
+
+        /// <summary>
+        /// Checks if some of the Carsons's bench (lavička c1 or lavička c2) objects was used.
+        /// </summary>
+        /// <returns>
+        /// True if some of the Carsons's bench (lavička c1 or lavička c2) objects was used
+        /// </returns>
+        private bool CarsonsBenchesUsed()
+                        => World.GetObjectsByType("lavice u carsona")
+                    .Any(o => o.Used);
+
+        /// <summary>
+        /// Launches a menu from which the player selects the location he wants to go to. Then a
+        /// cutscene is played.
+        /// </summary>
+        /// <param name="preferredCutscene">Name of a cutscene to be played.</param>
+        /// <remarks>If the preferredCutscene is'n.t defined a default one is played.</remarks>
+        private void DestinationMenu(string preferredCutscene = null)
+        {
+            Assert(!_allowedDestinations.IsNullOrEmpty(), "No allowed destinations.");
+
+            string cutscene;
+            if (string.IsNullOrEmpty(preferredCutscene))
+                cutscene = IsChipotleAlone() ? "cs37" : "cs36";
+            else cutscene = preferredCutscene;
+            string[] innerNames = _allowedDestinations.Select(d => d.Name.Indexed).ToArray<string>();
+
+            Dictionary<string, Locality> destinations = new Dictionary<string, Locality>();
+            _allowedDestinations.Where(d => d != _area.GetLocality())
+            .Foreach(d => destinations.Add(d.Name.Friendly, d));
+            if (destinations.Count == 1)
+            {
+                Move(destinations.First().Value, cutscene);
+                return;
+            }
+
+            string[] items = destinations.Keys.ToArray<string>();//_allowedDestinations.Select(d => d.Name.Friendly).ToArray<string>();
+            int item = WindowHandler.Menu(items, "Kam chceš jet?");
+
+            if (item >= 0)
+                Move(destinations[items[item]], cutscene);
+        }
+
+        /// <summary>
+        /// Checks if the Detective Chipotle and Tuttle NPC are in the same locality.
+        /// </summary>
+        /// <returns>True if the Detective Chipotle and Tuttle NPC are in the same locality</returns>
+        private bool IsChipotleAlone()
+                    => !_area.GetLocality().IsItHere(_tuttle);
+
+        /// <summary>
+        /// Moves the object to the specified position and plays a cutscene.
+        /// </summary>
+        /// <param name="target">Coordinate sof the target location</param>
+        /// <param name="cutscene">Name of the cutscene to be played</param>
+        private void Move(Plane target, string cutscene)
+        {
+            World.PlayCutscene(this, cutscene);
+            Move(target);
+            Moved = true;
+        }
+
+        /// <summary>
+        /// Moves the object to the specified locality.
+        /// </summary>
+        /// <param name="locality">Inner name of the target locality</param>
+        /// <remarks>
+        /// The exact target location is taken from the _destinations dictionary. The movement is
+        /// allowed only if the specified locality is in the _allowedDestinations hash set.
+        /// </remarks>
+        /// <completionlist cref="_destinations"/>
+        private void Move(Locality locality) => Move(new Plane(_destinations[locality.Name.Indexed]));
+
+        /// <summary>
+        /// Moves the object to the specified locality.
+        /// </summary>
+        /// <param name="locality">Inner name of the target locality</param>
+        /// <param name="cutscene">Name of a cutscene to be played</param>
+        /// <remarks>
+        /// The exact target location is taken from the _destinations dictionary. The movement is
+        /// allowed only if the specified locality is in the _allowedDestinations hash set. If no
+        /// cutscene is defined then a predefined alternative is played.
+        /// </remarks>
+        private void Move(Locality locality, string cutscene)
+            => Move(new Plane(_destinations[locality.Name.Indexed]), cutscene);
+
+        /// <summary>
+        /// Processes the MoveChipotlesCar message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnMoveChipotlesCar(MoveChipotlesCar message)
+                            => Move(message.Destination);
+
+        /// <summary>
+        /// Processes the UnblockLocality message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnUnblockLocality(UnblockLocality message)
+        {
+            if (!_allowedDestinations.Contains(message.Locality))
+                _allowedDestinations.Add(message.Locality);
+        }
+
+        /// <summary>
+        /// Checks if all the Walsch's area was explored.
+        /// </summary>
+        /// <returns>True if all the Walsch's area was explored</returns>
+        private bool WalshAreaExplored()
+            => Player.VisitedLocalities.Count == 14
+                    && Player.VisitedLocalities.All(l => l.Name.Indexed.ToLower().Contains("w1"));
+
+        /// <summary>
+        /// Checks if all crutial objects in Walsch's area were used.
+        /// </summary>
+        /// <returns>True if all crutial objects in Walsch's area were used</returns>
+        private bool WalshAreaObjectsUsed()
+            => WalshAreaObjects.All(o => o.Used);
+    }
+}
