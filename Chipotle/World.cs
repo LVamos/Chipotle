@@ -570,6 +570,7 @@ lLoop
         /// <param name="cutscene">Name of the soudn file to be played</param>
         public static void PlayCutscene(object sender, string cutscene)
         {
+            return;
             if (string.IsNullOrEmpty(cutscene))
                 throw new ArgumentNullException(nameof(cutscene));
 
