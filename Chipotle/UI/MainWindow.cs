@@ -83,7 +83,7 @@ namespace Game.UI
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
-            World.Sound.FadeMasterOut(.0001f, 0);
+            World.Sound.FadeMasterOut(.0002f, 0);
             System.Threading.Thread.Sleep(1300);
             Environment.Exit(0);
         }
