@@ -39,7 +39,7 @@ namespace Game.Terrain
         /// Returns copy of the area occupied by the element
         /// </summary>
         public Plane Area
-            => new Plane(_area);
+            =>_area == null ? null : new Plane(_area);
 
         /// <summary>
         /// Initializes the element and starts its message loop.

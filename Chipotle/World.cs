@@ -51,7 +51,7 @@ namespace Game
         /// </summary>
         private static readonly Dictionary<string, string> _localityLoops = new Dictionary<string, string>()
         {
-            ["chodba h1"] = "CzechPubLoop",
+            ["chodba h1"] = "ElectricalBoxLoop",
             ["balkon p1"] = "BalconyLoop",
             ["terasa w1"] = "BalconyLoop",
             ["výčep h1"] = "CzechPubLoop",
@@ -111,6 +111,7 @@ namespace Game
         /// </summary>
         public static Entity Player
 => GetEntity("Chipotle");
+
         /// <summary>
         /// Registers an entity.
         /// </summary>
@@ -250,7 +251,11 @@ namespace Game
         /// <param name="name">Inner name of the required NPC</param>
         /// <returns>The found NPC or null if nothing was found</returns>
         public static Entity GetEntity(string name)
-=>  _entities.TryGetValue(name.ToLower(), out Entity e) ? e : null;
+        {
+            if (_entities != null && _entities.TryGetValue(name.ToLower(), out Entity e))
+                return e;
+            return null;
+        }
 
         /// <summary>
         /// Returns a locality found by its name.
@@ -565,6 +570,7 @@ lLoop
         /// <param name="cutscene">Name of the soudn file to be played</param>
         public static void PlayCutscene(object sender, string cutscene)
         {
+            return;
             if (string.IsNullOrEmpty(cutscene))
                 throw new ArgumentNullException(nameof(cutscene));
 

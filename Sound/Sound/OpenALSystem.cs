@@ -208,9 +208,9 @@ namespace Luky
         /// <returns>True if the sound is playing</returns>
         public bool IsPlaying(int soundID)
         {
-            Info info = _table[soundID];
-            ALSourceState state = AlGetState(info.SourceID);
-            return state == ALSourceState.Playing;
+            if(_table.TryGetValue(soundID, out Info info))
+            return AlGetState(info.SourceID) == ALSourceState.Playing;
+            return false;
         }
 
         /// <summary>
@@ -267,6 +267,7 @@ namespace Luky
         /// <param name="initialBuffers">First chunk of sound data</param>
         public void Play(int soundID, List<ShortBuffer> initialBuffers)
         {
+
             if (initialBuffers.Count != MaxQueuedBuffers)
                 throw new ArgumentException($"initialBuffers should have length {MaxQueuedBuffers} but have length {initialBuffers.Count}");
 
@@ -478,9 +479,11 @@ namespace Luky
         /// </summary>
         /// <param name="soundID">The sound</param>
         /// <param name="position">New position of the sound</param>
-        public void SetPosition(int soundID, Vector3 position)
+        public void SetPosition(int soundID, Vector3 position, PositionType type = PositionType.Absolute)
         {
             Info info = _table[soundID];
+
+                AL.Source(info.SourceID, ALSourceb.SourceRelative, type == PositionType.Relative);
             ALSetPosition(info.SourceID, position);
         }
 
