@@ -412,7 +412,7 @@ namespace Luky
                    if (sound == null || sound.Decoder != Decoder.Opusfile || sound.Playback != Playback.OpenAL)
                        return;
 
-                       _opusFileDecoder.ChangeForceMono(soundID, forceMono, out int channels, out int sampleRate);
+                   _opusFileDecoder.ChangeForceMono(soundID, forceMono, out int channels, out int sampleRate);
                        _openALSystem.ReconfigureSound(soundID, channels, sampleRate);
                });
         }
@@ -611,8 +611,8 @@ namespace Luky
         /// Pauses or resumes the specified sound.
         /// </summary>
         /// <param name="soundID">The sound</param>
-        /// <param name="desiredPauseState">Specifies if the sound should be paused</param>
-        public void SetPauseState(int soundID, bool desiredPauseState)
+        /// <param name="paused">Specifies if the sound should be paused</param>
+        public void SetPauseState(int soundID, bool paused)
             => RunCommand(() =>
                                                                         {
                                                                             Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
@@ -620,7 +620,7 @@ namespace Luky
                                                                                 return;
 
                                                                             IPlayback playback = GetPlayback(sound);
-                                                                            if (desiredPauseState)
+                                                                            if (paused)
                                                                                 playback.Pause(soundID);
                                                                             else
                                                                                 playback.Unpause(soundID);
@@ -630,11 +630,11 @@ namespace Luky
         /// Sets position of a sound.
         /// </summary>
         /// <param name="soundID">The sound</param>
-        /// <param name="soundPosition">
+        /// <param name="position">
         /// A two-dimensional vecotr defining the position in virtual sound space
         /// </param>
-        public void SetSourcePosition(int soundID, Vector3 soundPosition)
-            => RunCommand(() => _openALSystem.SetPosition(soundID, soundPosition));
+        public void SetSourcePosition(int soundID, Vector3 position, PositionType type = PositionType.Absolute)
+            => RunCommand(() => _openALSystem.SetPosition(soundID, position, type));
 
         /// <summary>
         /// stops the specified sound.
@@ -778,7 +778,7 @@ namespace Luky
             IPlayback playback;
 
             // Change pending fadings to active if the corresponding sounds are playing.
-            foreach (int id in _fadings.Keys)
+            foreach (int id in _fadings.Keys.ToArray<int>())
             {
                 // Local function
                 void Apply(float volume)
@@ -1044,7 +1044,11 @@ namespace Luky
 
             if (panning.HasValue)
                 forceMono = true;
-
+            //if (rs.Path.Contains("czech"))
+            //{
+            //    Say("hraje " +sound.ID.ToString());
+            //    System.Diagnostics.Debugger.Break();
+            //}
             decoder.InitStream(soundID, stream, looping, forceMono, out int channels, out int sampleRate);
 
             if (panning.HasValue)

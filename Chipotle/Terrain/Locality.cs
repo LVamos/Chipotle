@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
+using DavyKager;
+
 using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Commands;
@@ -20,6 +22,7 @@ namespace Game.Terrain
     [Serializable]
     public class Locality : MapElement
     {
+
         /// <summary>
         /// Enumerates passages ordered by distance from the specified point.
         /// </summary>
@@ -80,6 +83,8 @@ namespace Game.Terrain
         /// Handle of a background sound played in loop when the Detective Chipotle NPC is inside
         /// </summary>
         protected int _backgroundSoundId;
+        private int _backgroundSoundIdTemp;
+        private bool _playerNearby;
 
         /// <summary>
         /// The minimum permitted Y dimension of the floor in this locality
@@ -246,6 +251,8 @@ namespace Game.Terrain
                 [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                 [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
             });
+
+            PlayBackground(true);
         }
 
         /// <summary>
@@ -312,9 +319,8 @@ namespace Game.Terrain
         /// </summary>
         private void OnGameReloaded()
         {
-            if (IsItHere(World.Player))
-                PlayBackgroundSound();
-            else _backgroundSoundId = 0;
+            _backgroundSoundId = 0;
+                PlayBackground(IsItHere(World.Player));
         }
 
         /// <summary>
@@ -326,7 +332,7 @@ namespace Game.Terrain
             Register(message.Sender as Entity);
 
             if (message.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
-                PlayBackgroundSound();
+                PlayBackground();
 
             _entities.ForEach(e => e.ReceiveMessage(message));
             _objects.ForEach(o => o.ReceiveMessage(message));
@@ -336,14 +342,52 @@ namespace Game.Terrain
         private void OnLocalityLeft(LocalityLeft message)
         {
             Unregister(message.Sender as Entity);
-            if (message.Sender == World.Player && _backgroundSoundId > 0)
-                World.Sound.Stop(_backgroundSoundId);
+            if (message.Sender == World.Player)
+                PlayBackground(true);
         }
+
+        /// <summary>
+        /// Stores handles for all background sound instances.
+        /// </summary>
+        private List<int> _backgroundSounds = new List<int>();
 
         /// <summary>
         /// Plays the background sound of this locality in a loop.
         /// </summary>
-        private void PlayBackgroundSound()
-=> _backgroundSoundId = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
+        /// <param name="far">Specifies if the background sound should be played in mono in the middle of the locality.</param>
+        private void PlayBackground(bool far=false)
+        {
+            if (string.IsNullOrEmpty(_backgroundSound))
+                return;
+
+            StopBackground();
+            if (far)
+            {
+                foreach (Passage p in _passages)
+                {
+                    Vector2 center = p.Area.Center;
+                    Vector3 position = Area.GetClosestPointTo(center).AsOpenALVector();
+                int id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.Absolute, position, true, 1, null, 1, 0, Playback.OpenAL);
+                    _backgroundSounds.Add(id);
+                }
+            }
+            else
+            {
+                int id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
+            _backgroundSounds.Add(id);
+            }
+            _playerNearby = far;
+        }
+
+        /// <summary>
+        /// Stops all isntances of background sound.
+        /// </summary>
+        private void StopBackground()
+        {
+            foreach (int id in _backgroundSounds)
+                World.Sound.Stop(id);
+
+            _backgroundSounds = new List<int>();
+        }
     }
 }
