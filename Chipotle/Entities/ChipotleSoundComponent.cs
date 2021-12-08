@@ -78,7 +78,7 @@ namespace Game.Entities
         /// <summary>
         /// Stores a position the player was located on when the last cutscene started.
         /// </summary>
-        private Vector2 _cutsceneStartPosition;
+        private Vector2? _cutsceneStartPosition;
 
         /// <summary>
         /// Initializes the component and starts its message loop.
@@ -257,8 +257,11 @@ namespace Game.Entities
         /// </summary>
         private void WatchCutscene()
         {
-            if (World.GetDistance(_cutsceneStartPosition, Owner.Area.Center) > 5)
+            if (_cutsceneStartPosition.HasValue && World.GetDistance((Vector2)_cutsceneStartPosition, Owner.Area.Center) > 5)
+            {
+                _cutsceneStartPosition = null;
                 World.StopCutscene(Owner);
+            }
         }
 
         /// <summary>
