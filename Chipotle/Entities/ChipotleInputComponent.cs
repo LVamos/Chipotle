@@ -7,6 +7,8 @@ using Game.Messaging.Events;
 using Game.Terrain;
 using Game.UI;
 
+using OpenTK;
+
 namespace Game.Entities
 {
     /// <summary>
@@ -49,6 +51,10 @@ namespace Game.Entities
             RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
+                // Test commands
+                [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
+
+                // Other commands
                 [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
                 [new KeyShortcut(false, true, false, Keys.O)] = ListNavigableObjects,
                 [new KeyShortcut(Keys.S)] = SayOrientation,
@@ -72,6 +78,18 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
+        }
+
+        /// <summary>
+        /// Test method that moves Chipotle to coords taken from clipboard
+        /// </summary>
+        private void GoToClipboardCoords()
+        {
+            if (!_testModeEnabled)
+                return;
+
+            Plane v = new Plane(Clipboard.GetText());
+            Owner.ReceiveMessage(new SetPosition(this, v));
         }
 
         /// <summary>
