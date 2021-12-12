@@ -17,6 +17,39 @@ namespace Luky
     /// </summary>
     internal sealed class OpenALSystem : DebugSO, IPlayback
     {
+        public void ApplyLowpassFilter(int sourceID, float gain, float gainHF)
+        {
+            int id = _table[sourceID].SourceID;
+
+            if (_lowpassFilter==0)
+            _lowpassFilter = _efx.GenFilter();
+            ALAnnounceError("Creating lowpass filter");
+
+            if (!_efx.IsFilter(_lowpassFilter))
+                throw new InvalidOperationException("Filter creation failed");
+
+            _efx.Filter(_lowpassFilter, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
+            ALAnnounceError("Setting filter type to lowpass");
+
+            _efx.Filter(_lowpassFilter, EfxFilterf.LowpassGain, Gain);
+            ALAnnounceError("Setting lowpass gain");
+
+            _efx.Filter(_lowpassFilter, EfxFilterf.LowpassGainHF, gainHF);
+            ALAnnounceError("setting lowpass gainHF");
+
+            AL.Source(id, ALSourcei.EfxDirectFilter, _lowpassFilter);
+            ALAnnounceError("Binding lowpass filter to a source");
+        }
+
+        /// <summary>
+        /// Removes the currently applied filter from the specified source.
+        /// </summary>
+        /// <param name="id">Handle of the source</param>
+        public void DisableFilters(int id)
+        {
+            AL.Source(_table[id].SourceID, ALSourcei.EfxDirectFilter, 0);
+        }
+
         /// <summary>
         /// Maximum allowed number of buffers filled in the same time
         /// </summary>
@@ -47,12 +80,13 @@ namespace Luky
         /// <summary>
         /// Instance of the effect extension
         /// </summary>
-        private EffectsExtension _effectExtension;
+        private EffectsExtension _efx;
 
         /// <summary>
         /// Handle of an reverb effect
         /// </summary>
-        private int _effectHandle;
+        private int _reverb;
+        private int _lowpassFilter;
 
         /// <summary>
         /// Constructor
@@ -128,16 +162,16 @@ namespace Luky
         /// </summary>
         public void EnableReverb()
         {
-            _effectExtension = new EffectsExtension();
+            _efx = new EffectsExtension();
             ALAnnounceError("Creating instance of EffectsExtension.");
 
-            _effectHandle = _effectExtension.GenEffect();
+            _reverb = _efx.GenEffect();
             ALAnnounceError("Geneffect.");
 
-            _effectExtension.BindEffect(_effectHandle, EfxEffectType.EaxReverb);
+            _efx.BindEffect(_reverb, EfxEffectType.EaxReverb);
             ALAnnounceError("efx.BindEffect");
 
-            _effectSlot = _effectExtension.GenAuxiliaryEffectSlot();
+            _effectSlot = _efx.GenAuxiliaryEffectSlot();
             ALAnnounceError("Creating effect slot.");
         }
 
@@ -256,7 +290,7 @@ namespace Luky
         /// <param name="value">The reflections gain value</param>
         public void SetEaxReverbReflectionsGain(float value)
         {
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbReflectionsGain, value);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbReflectionsGain, value);
             ALAnnounceError($"Setting reverb properties: {nameof(value)}.");
         }
 
@@ -352,7 +386,7 @@ namespace Luky
         /// <param name="pan">The reflections pan vector</param>
         public void SetEaxReverbReflectionsPan(Vector3 pan)
         {
-            _effectExtension.Effect(_effectHandle, EfxEffect3f.EaxReverbReflectionsPan, ref pan);
+            _efx.Effect(_reverb, EfxEffect3f.EaxReverbReflectionsPan, ref pan);
             ALAnnounceError($"Setting reverb properties: {nameof(pan)}.");
         }
 
@@ -364,78 +398,76 @@ namespace Luky
         public void SetEaxReverbProperties(EfxEaxReverb reverb, string name = null)
         {
             // Load effect properties
-            _alContext.Suspend();
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDensity, reverb.Density);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbDensity, reverb.Density);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.Density)}: {reverb.Density:0.0000}");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDiffusion, reverb.Diffusion);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbDiffusion, reverb.Diffusion);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.Diffusion)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbGain, reverb.Gain);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbGain, reverb.Gain);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.Gain)}. ");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbGainHF, reverb.GainHF);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbGainHF, reverb.GainHF);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.GainHF)}. ");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbGainLF, reverb.GainLF);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbGainLF, reverb.GainLF);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.GainLF)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayTime, reverb.DecayTime);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbDecayTime, reverb.DecayTime);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayTime)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayHFRatio, reverb.DecayHFRatio);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbDecayHFRatio, reverb.DecayHFRatio);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayHFRatio)}: {reverb.DecayHFRatio:0.00}");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbDecayLFRatio, reverb.DecayLFRatio);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbDecayLFRatio, reverb.DecayLFRatio);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayLFRatio)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbReflectionsGain, reverb.ReflectionsGain);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbReflectionsGain, reverb.ReflectionsGain);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ReflectionsGain)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbReflectionsDelay, reverb.ReflectionsDelay);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbReflectionsDelay, reverb.ReflectionsDelay);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ReflectionsDelay)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffect3f.EaxReverbReflectionsPan, ref reverb.ReflectionsPan);
+            _efx.Effect(_reverb, EfxEffect3f.EaxReverbReflectionsPan, ref reverb.ReflectionsPan);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ReflectionsPan)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbLateReverbGain, reverb.LateReverbGain);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbLateReverbGain, reverb.LateReverbGain);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LateReverbGain)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbLateReverbDelay, reverb.LateReverbDelay);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbLateReverbDelay, reverb.LateReverbDelay);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LateReverbDelay)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffect3f.EaxReverbLateReverbPan, ref reverb.LateReverbPan);
+            _efx.Effect(_reverb, EfxEffect3f.EaxReverbLateReverbPan, ref reverb.LateReverbPan);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LateReverbPan)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbEchoTime, reverb.EchoTime);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbEchoTime, reverb.EchoTime);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.EchoTime)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbEchoDepth, reverb.EchoDepth);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbEchoDepth, reverb.EchoDepth);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.EchoDepth)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbModulationTime, reverb.ModulationTime);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbModulationTime, reverb.ModulationTime);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ModulationTime)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbModulationDepth, reverb.ModulationDepth);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbModulationDepth, reverb.ModulationDepth);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.ModulationDepth)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbAirAbsorptionGainHF, reverb.AirAbsorptionGainHF);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbAirAbsorptionGainHF, reverb.AirAbsorptionGainHF);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.AirAbsorptionGainHF)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbHFReference, reverb.HFReference);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbHFReference, reverb.HFReference);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.HFReference)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbLFReference, reverb.LFReference);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbLFReference, reverb.LFReference);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.LFReference)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffectf.EaxReverbRoomRolloffFactor, reverb.RoomRolloffFactor);
+            _efx.Effect(_reverb, EfxEffectf.EaxReverbRoomRolloffFactor, reverb.RoomRolloffFactor);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.RoomRolloffFactor)}.");
 
-            _effectExtension.Effect(_effectHandle, EfxEffecti.EaxReverbDecayHFLimit, (int)reverb.DecayHFLimit);
+            _efx.Effect(_reverb, EfxEffecti.EaxReverbDecayHFLimit, (int)reverb.DecayHFLimit);
             ALAnnounceError($"Setting reverb properties: {nameof(reverb.DecayHFLimit)}.");
 
-            _alContext.Process();
-            _effectExtension.AuxiliaryEffectSlot(_effectSlot, EfxAuxiliaryi.EffectslotEffect, _effectHandle);
+            _efx.AuxiliaryEffectSlot(_effectSlot, EfxAuxiliaryi.EffectslotEffect, _reverb);
             ALAnnounceError($"Apply changes to effect slot.");
 
             if (!string.IsNullOrEmpty(name))
@@ -544,7 +576,7 @@ if(_table.TryGetValue(soundID, out Info info))
                 else
                     text = prefix + " " + text;
 
-                throw new InvalidOperationException(text);
+                                throw new InvalidOperationException(text);
             }
         }
 

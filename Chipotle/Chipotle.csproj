@@ -85,6 +85,7 @@
     <Compile Include="Messaging\Commands\StartObjectNavigation.cs" />
     <Compile Include="Messaging\Commands\StopExitNavigation.cs" />
     <Compile Include="Messaging\Commands\StopObjectNavigation.cs" />
+    <Compile Include="Messaging\Events\DoorManipulated.cs" />
     <Compile Include="Messaging\Events\ExitNavigationStopped.cs" />
     <Compile Include="Messaging\Events\ObjectNavigationStopped.cs" />
     <Compile Include="Messaging\Events\SayExitsResult.cs" />

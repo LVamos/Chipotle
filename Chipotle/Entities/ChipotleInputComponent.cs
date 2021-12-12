@@ -85,7 +85,7 @@ namespace Game.Entities
         /// </summary>
         private void GoToClipboardCoords()
         {
-            if (!_testModeEnabled)
+            if (!Program.TestMode)
                 return;
 
             Plane v = new Plane(Clipboard.GetText());

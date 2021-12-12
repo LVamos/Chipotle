@@ -24,6 +24,28 @@ namespace Luky
     public sealed partial class SoundThread : BaseThread
     {
         /// <summary>
+        /// Removes the currently applied filter from the specified source.
+        /// </summary>
+        /// <param name="id">Handle of the source</param>
+        public void DisableLowpass(int id)
+            => RunCommand(() => _openALSystem.DisableFilters(id));
+
+        /// <summary>
+        /// Applies lowpass filter setting on a sound.
+        /// </summary>
+        /// <param name="soundID">Handle of the sound</param>
+        /// <param name="gain">Lowpass gain</param>
+        /// <param name="gainHF">Lowpass high frequency gain</param>
+        public void ApplyLowpass(int soundID, float gain, float gainHF)
+            => RunCommand(() => _openALSystem.ApplyLowpassFilter(soundID, gain, gainHF));
+            //=> _lowpassSettings[soundID] = (gain, gainHF);
+
+        /// <summary>
+        /// Stores planned lowpass filter settings.
+        /// </summary>
+        private Dictionary<int, (float gain, float gainHF)> _lowpassSettings = new Dictionary<int, (float gain, float gainHF)>();
+
+        /// <summary>
         /// Default general volume
         /// </summary>
         public readonly float DefaultMasterVolume = 2;
@@ -709,6 +731,7 @@ namespace Luky
             RefillBuffers(); // Refill streaming buffers.
             ReleaseSounds(); // Detect and remove sounds that finished playing.
             PerformFading();
+            SetFilters();
         }
 
         /// <summary>
@@ -750,6 +773,36 @@ namespace Luky
         /// <param name="targetVolume">Specifies the final master volume</param>
         public void FadeMaster(FadingType type, float volumeDelta, float targetVolume)
             => _masterFading = new FadingRecord(type, volumeDelta, targetVolume);
+
+        /// <summary>
+        /// Applies planned lowpass filter settings.
+        /// </summary>
+        private void SetFilters()
+        {
+            if (_lowpassSettings.IsNullOrEmpty())
+                return;
+
+            Sound sound;
+            IPlayback playback;
+
+            foreach (int id in  _lowpassSettings.Keys.ToArray<int>())
+            {
+                // Check if the sound is loaded.
+                sound = _sounds.FirstOrDefault(s => s.ID == id);
+                if (sound == null)
+                    continue;
+
+                // Remove stopped sounds
+                playback = sound != null ? GetPlayback(sound) : null;
+                if (playback.IsPlaying(id))
+                {
+                    // Apply the filter.
+                    (float gain, float gainHF) setting = _lowpassSettings[id];
+                    RunCommand(() => _openALSystem.ApplyLowpassFilter(id, setting.gain, setting.gainHF));
+                    _lowpassSettings.Remove(id);
+                }
+            }
+        }
 
         /// <summary>
         /// Performs sound fading.
@@ -1105,8 +1158,8 @@ namespace Luky
         {
             Thread t = new Thread(() =>
             {
-                try
-                {
+                //try
+                //{
                     // init logic
                     _openALSystem = OpenALSystem.CreateAndBindToThisThread(Say);
                     _lSFDecoder = new LSFDecoder();
@@ -1115,18 +1168,20 @@ namespace Luky
 
                     // Start thread loop
                     ProcessMessages(_millisecondsPerTick);
-                }
-                catch (Exception ex)
-                { _onError(ex); }
-                finally
-                {
+                //}
+                //catch (Exception ex)
+                //{ 
+                    //_onError(ex); 
+                //}
+                //finally
+                //{
                     // cleanup logic The one downside to performing cleanup here is that exceptions
                     // thrown during cleanup are discarded.
-                    _openALSystem.Dispose();
-                    _opusFileDecoder.Dispose();
-                    _lSFDecoder.Dispose();
-                    _nAudioDecoder.Dispose();
-                }
+                    //_openALSystem.Dispose();
+                    //_opusFileDecoder.Dispose();
+                    //_lSFDecoder.Dispose();
+                    //_nAudioDecoder.Dispose();
+                //}
             });
 
             t.SetApartmentState(ApartmentState.STA);

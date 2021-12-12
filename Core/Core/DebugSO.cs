@@ -9,11 +9,6 @@ namespace Luky
     public abstract class DebugSO
     {
         /// <summary>
-        /// Enables some test methods.
-        /// </summary>
-        protected const bool _testModeEnabled = true;
-
-        /// <summary>
         /// Checks for a condition; if the condition is false, throws an Exception.
         /// </summary>
         /// <param name="condition">The condition to test</param>
