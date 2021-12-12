@@ -83,9 +83,14 @@ namespace Game.UI
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
-            World.Sound.FadeMasterOut(.0002f, 0);
-            System.Threading.Thread.Sleep(1300);
-            Environment.Exit(0);
+            World.Sound.FadeMasterOut(.0009f, 0);
+            System.Threading.Tasks.Task.Run(() => 
+            {
+                System.Threading.Thread.Sleep(1100);
+                Environment.Exit(0);
+
+            }
+            );
         }
 
         /// <summary>
@@ -121,7 +126,11 @@ namespace Game.UI
         private void MainWindow_Shown(object sender, EventArgs e)
         {
             Focus();
-            WindowHandler.MainMenu();
+            if(Program.TestMode)
+            WindowHandler.StartGame();
+            else
+                WindowHandler.MainMenu();
+
         }
     }
 }

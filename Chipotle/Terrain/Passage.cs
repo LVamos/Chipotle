@@ -79,14 +79,14 @@ namespace Game.Terrain
         /// <param name="closed">Specifies if the passage is closed.</param>
         /// <param name="openable">Specifies if it can be opened by an NPC.</param>
         /// <returns>A new instance of the passage</returns>
-        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, bool closed, bool openable)
+        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, Door.DoorState state, bool openable)
         {
             switch (name.Indexed)
             {
                 case "dcgv1": return CreateVanillaCrunchGarageDoor(name, area, localities);
                 case "dhkv1": return CreateMariottisDoor(name, area, localities);
                 case "d hala w1": return CreateHallDoor(name, area, localities);
-                default: return isDoor ? new Door(name, closed, area, localities, openable) : new Passage(name, area, localities);
+                default: return isDoor ? new Door(name, state, area, localities, openable) : new Passage(name, area, localities);
             }
         }
 

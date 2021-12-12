@@ -247,13 +247,27 @@ namespace Game.Terrain
 
             RegisterMessages(new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(DoorManipulated)] = (message) => OnDoorManipulated((DoorManipulated)message),
                 [typeof(GameReloaded)] = (message) => OnGameReloaded(),
                 [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
                 [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
             });
 
-            PlayBackground(true);
+            PlayBackground();
         }
+
+        /// <summary>
+        /// Handles the DoorManipulated message.
+        /// </summary>
+        /// <param name="message">Source of the message</param>
+        private void OnDoorManipulated(DoorManipulated message)
+            => PlayBackground();
+
+        /// <summary>
+        /// Indicates if the player is in the locality.
+        /// </summary>
+        /// <returns>True if the player is in the locality.</returns>
+        private bool _playerInHere;
 
         /// <summary>
         /// Immediately removes a game object from list of present objects.
@@ -320,7 +334,8 @@ namespace Game.Terrain
         private void OnGameReloaded()
         {
             _backgroundSoundId = 0;
-                PlayBackground(IsItHere(World.Player));
+            _playerInHere = IsItHere(World.Player);
+                PlayBackground();
         }
 
         /// <summary>
@@ -331,19 +346,37 @@ namespace Game.Terrain
         {
             Register(message.Sender as Entity);
 
-            if (message.Entity == World.Player && !string.IsNullOrEmpty(_backgroundSound))
-                PlayBackground();
+            _playerInHere = message.Entity== World.Player;
+            PlayBackground(true);
 
-            _entities.ForEach(e => e.ReceiveMessage(message));
-            _objects.ForEach(o => o.ReceiveMessage(message));
-            _passages.ForEach(p => p.ReceiveMessage(message));
+            MessageEntities(message);
+            MessageObjects(message);
+            MessagePassages(message);
         }
 
+        /// <summary>
+        /// Distributes a game message to all passages.
+        /// </summary>
+        /// <param name="message">The message to be sent</param>
+        private void MessagePassages(GameMessage message)
+        {
+            foreach (Passage p in _passages)
+                p.ReceiveMessage(message);
+        }
+
+        /// <summary>
+        /// Handles the LocalityLeft message.
+        /// </summary>
+        /// <param name="message">The message</param>
         private void OnLocalityLeft(LocalityLeft message)
         {
             Unregister(message.Sender as Entity);
-            if (message.Sender == World.Player)
+            _playerInHere = IsItHere(World.Player);
                 PlayBackground(true);
+
+            MessageEntities(message);
+            MessageObjects(message);
+            MessagePassages(message);
         }
 
         /// <summary>
@@ -352,31 +385,64 @@ namespace Game.Terrain
         private List<int> _backgroundSounds = new List<int>();
 
         /// <summary>
+        /// Lowpass filter parameters used when player is standing out the locality.
+        /// </summary>
+        private readonly (float gain, float gainHF) _closedDoorLowpass = (1, .5f);
+
+        /// <summary>
+        /// Default volume of the background sound used when the player is inside.
+        /// </summary>
+        private const float _backgroundVolumeInside = 1;
+
+        /// <summary>
         /// Plays the background sound of this locality in a loop.
         /// </summary>
-        /// <param name="far">Specifies if the background sound should be played in mono in the middle of the locality.</param>
-        private void PlayBackground(bool far=false)
+        /// <param name="playerMoved">Specifies if the player just moved from one locality to another one.</param>
+        private void PlayBackground(bool playerMoved=false)
         {
             if (string.IsNullOrEmpty(_backgroundSound))
                 return;
 
-            StopBackground();
-            if (far)
+            int id;
+            if (!_playerInHere)
             {
+            StopBackground();
                 foreach (Passage p in _passages)
                 {
-                    Vector2 center = p.Area.Center;
-                    Vector3 position = Area.GetClosestPointTo(center).AsOpenALVector();
-                int id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.Absolute, position, true, 1, null, 1, 0, Playback.OpenAL);
+                    Vector2 position;
+
+                    if (World.Player == null || World.Player.Area == null)
+                        position = p.Area.Center;
+                    else
+                    {
+                        Vector2 player = World.Player.Area.Center;
+                        position =
+                        (
+                            from point in p.Area.GetPoints()
+                            where (point.X == player.X || point.Y == player.Y)
+                            select (point)
+                            ).FirstOrDefault();
+
+                        if (position == default(Vector2))
+                            position = p.Area.Center;
+                    }
+
+                    id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.Absolute, position.AsOpenALVector(), true, _backgroundVolumeInside, null, 1, 0, Playback.OpenAL);
                     _backgroundSounds.Add(id);
+
+                    if (p is Door d && d.State == Door.DoorState.Closed)
+                        World.Sound.ApplyLowpass(id, _closedDoorLowpass.gain, _closedDoorLowpass.gainHF);
                 }
+                return;
             }
-            else
+
+            // Player is inside.
+            if (playerMoved)
             {
-                int id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, 1, null, 1, 0, Playback.OpenAL);
-            _backgroundSounds.Add(id);
+            StopBackground();
+                id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, _backgroundVolumeInside, null, 1, 0, Playback.OpenAL);
+                _backgroundSounds.Add(id);
             }
-            _playerNearby = far;
         }
 
         /// <summary>
@@ -385,7 +451,7 @@ namespace Game.Terrain
         private void StopBackground()
         {
             foreach (int id in _backgroundSounds)
-                World.Sound.Stop(id);
+                World.Sound.FadeSource(id, FadingType.Out, .0002f, 0, true);
 
             _backgroundSounds = new List<int>();
         }

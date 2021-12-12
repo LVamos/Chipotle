@@ -20,7 +20,7 @@ namespace Game.Terrain
         /// <param name="name">Inner name of the door</param>
         /// <param name="area">Coordinates of the area occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
-        public VanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, true, area, localities, false) { }
+        public VanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, Door.DoorState.Closed, area, localities, false) { }
 
         /// <summary>
         /// Initializes the door and starts its message loop.
@@ -41,6 +41,6 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(LocalityEntered message)
-            => Closed = false;
+            => State = DoorState.Closed;
     }
 }

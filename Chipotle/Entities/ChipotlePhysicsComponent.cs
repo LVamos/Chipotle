@@ -149,8 +149,11 @@ namespace Game.Entities
         public override void Start()
         {
             // set initial position.&
+            if(Program.TestMode)
+            SetPosition(1551, 1018, true);
+            else
             SetPosition(1028, 1034, true);
-            _orientation = new Orientation2D(0, 1);
+                _orientation = new Orientation2D(0, 1);
 
             base.Start();
 
@@ -607,7 +610,7 @@ _navigatedExit = null;
 
             // Isn't a closed door over there?
             Passage passage = World.GetPassage(targetTile.position);
-            if (passage != null && passage is Door door && door.Closed)
+            if (passage != null && passage is Door door && door.State == Door.DoorState.Closed)
             {
                 _walking = false;
                 Owner.ReceiveMessage(new DoorHit(this));
@@ -765,7 +768,10 @@ _navigatedExit = null;
                 Passage passage = World.GetPassage(t.position);
 
                 if (passage != null && passage is Door door)
+                {
                     door.ReceiveMessage(new UseObject(Owner, t.position, t.tile));
+                    break;
+                }
             }
 
             // Detect object in front of Chipotle.

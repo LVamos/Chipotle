@@ -16,6 +16,11 @@ namespace Game
     internal class Program : DebugSO
     {
         /// <summary>
+        /// Enables some test methods.
+        /// </summary>
+        public const bool TestMode = false;
+
+        /// <summary>
         /// Path to data folder
         /// </summary>
         public static readonly string DataPath = @"Data\";
@@ -37,7 +42,10 @@ namespace Game
         /// </summary>
         /// <param name="ex">The exception</param>
         public static void OnError(Exception ex)
-        => OnError(ex.ToString());
+        {
+            throw ex;
+        OnError(ex.ToString());
+        }
 
         /// <summary>
         /// An error handler
@@ -45,7 +53,10 @@ namespace Game
         /// <param name="sender">Source of the exception</param>
         /// <param name="e">The exception</param>
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
-   => OnError(e.Exception);
+        {
+            throw e.Exception;
+   OnError(e.Exception);
+        }
 
         /// <summary>
         /// An error handler
@@ -53,7 +64,10 @@ namespace Game
         /// <param name="sender">Source of the exception</param>
         /// <param name="e">The exception</param>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-  => OnError(e.ExceptionObject.ToString());
+        {
+            throw (Exception)e.ExceptionObject;
+   OnError(e.ExceptionObject.ToString());
+        }
 
         /// <summary>
         /// entry point of the application

@@ -523,13 +523,13 @@ lLoop
             {
                 Name pIndexedName = new Name(A(p, "indexedname"));
                 bool isDoor = A(p, "door").ToBool();
-                bool closed = A(p, "closed").ToBool();
+                Door.DoorState state = A(p, "closed").ToBool() ? Door.DoorState.Closed : Door.DoorState.Open;
                 bool openable = A(p, "openable").ToBool();
                 Plane area = new Plane(A(p, "coordinates"));
                 List<Locality> localities = new List<Locality> { GetLocality(A(p, "from")), GetLocality(A(p, "to").PrepareForIndexing()) };
 
                 // Create and register new passage
-                Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, closed, openable));
+                Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, state, openable));
             }
         }
 
@@ -570,7 +570,9 @@ lLoop
         /// <param name="cutscene">Name of the soudn file to be played</param>
         public static void PlayCutscene(object sender, string cutscene)
         {
+            if(Program.TestMode)
             return;
+
             if (string.IsNullOrEmpty(cutscene))
                 throw new ArgumentNullException(nameof(cutscene));
 
@@ -589,7 +591,7 @@ lLoop
         {
             Program.MainWindow.GameLoopEnabled = false;
             _cutsceneBegan = null;
-            Sound.FadeAndStopAll(.00008f);
+            Sound.FadeAndStopAll(.0002f);
             System.Threading.Thread.Sleep(1000);
             WindowHandler.MainMenu();
         }

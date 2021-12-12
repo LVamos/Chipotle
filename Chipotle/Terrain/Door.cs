@@ -4,6 +4,7 @@ using System.Linq;
 
 using Game.Messaging;
 using Game.Messaging.Commands;
+using Game.Messaging.Events;
 
 using Luky;
 
@@ -18,6 +19,20 @@ namespace Game.Terrain
     public class Door : Passage
     {
         /// <summary>
+        /// Describes if a door is opened or closed.
+        /// </summary>
+        public enum DoorState
+        {
+            Open,
+            Closed
+        }
+
+        /// <summary>
+        /// Indicates if the door is open or closed.
+        /// </summary>
+        public DoorState State { get; protected set; }
+
+        /// <summary>
         /// specifies if the door can be opened by an NPC.
         /// </summary>
         protected readonly bool _openable;
@@ -30,16 +45,11 @@ namespace Game.Terrain
         /// <param name="area">Location of the door</param>
         /// <param name="localities">Two localities connected by the door</param>
         /// <param name="openable">Specifies whether the door can be opened by an NPC.</param>
-        public Door(Name name, bool closed, Plane area, IEnumerable<Locality> localities, bool openable = true) : base(name, area, localities)
+        public Door(Name name, DoorState state, Plane area, IEnumerable<Locality> localities, bool openable = true) : base(name, area, localities)
         {
-            Closed = closed;
+            State = state;
             _openable = openable;
         }
-
-        /// <summary>
-        /// Specifies if the door is closed or open.
-        /// </summary>
-        public bool Closed { get; protected set; }
 
         /// <summary>
         /// Initializes the door and starts its message loop.
@@ -62,8 +72,13 @@ namespace Game.Terrain
         {
             if (Area.GetTiles().All(t => World.IsWalkable(t.position)))
             {
-                Closed = true;
-                World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd24"), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+                State = DoorState.Closed;
+
+                DoorManipulated message = new DoorManipulated(this);
+                foreach (Locality l in Localities)
+                    l.ReceiveMessage(message);
+
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd24"), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
             }
         }
 
@@ -76,7 +91,7 @@ namespace Game.Terrain
             if (!_openable)
                 return;
 
-            if (Closed)
+            if (State == DoorState.Closed)
                 Open(message.Position);
             else
                 Close(message.Position);
@@ -88,10 +103,15 @@ namespace Game.Terrain
         /// <param name="coords">
         /// The coordinates of the place on the door that an NPC is pushing on
         /// </param>
-        protected virtual void Open(Vector2 coords)
+        protected virtual void Open(Vector2 coords)     
         {
-            Closed = false;
-            World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd23"), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+            State = DoorState.Open;
+
+            DoorManipulated message = new DoorManipulated(this);
+            foreach (Locality l in Localities)
+                l.ReceiveMessage(message);
+
+            World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd23"), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
         }
     }
 }
