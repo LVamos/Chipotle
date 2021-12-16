@@ -106,10 +106,8 @@ namespace Game.Entities
         {
             base.OnCutsceneBegan(message);
 
-            switch (message.CutsceneName)
-            {
-                case "cs7": case "cs10": _messagingEnabled = false; break;
-            }
+            if(message.CutsceneName == "cs7" || message.CutsceneName == "cs10")
+                _messagingEnabled = false;
         }
 
         /// <summary>
@@ -118,6 +116,9 @@ namespace Game.Entities
         /// <param name="message">The message</param>
         protected void OnKeyUp(KeyReleased message)
         {
+            if (_cutsceneInProgress)
+                return;
+
             HashSet<KeyShortcut> walkCommands = new HashSet<KeyShortcut>()
             {
                 new KeyShortcut(Keys.Up),
@@ -242,5 +243,17 @@ namespace Game.Entities
         /// </summary>
         private void VisitedLocality()
             => Owner.ReceiveMessage(new SayVisitedLocality(this));
+
+        /// <summary>
+        /// Processes the KeyDown message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected override void OnKeyDown(KeyPressed message)
+        {
+            if (_cutsceneInProgress && message.Shortcut != new KeyShortcut(Keys.Space))
+                return;
+
+            base.OnKeyDown(message);
+        }
     }
 }
