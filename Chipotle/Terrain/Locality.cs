@@ -451,7 +451,7 @@ namespace Game.Terrain
         private void StopBackground()
         {
             foreach (int id in _backgroundSounds)
-                World.Sound.Stop(id);
+                World.Sound.FadeSource(id, FadingType.Out, .0002f, 0, true);
 
             _backgroundSounds = new List<int>();
         }
