@@ -77,7 +77,7 @@ namespace Game.Terrain
         /// <summary>
         /// Name of a background sound played in loop when the Detective Chipotle NPC is inside
         /// </summary>
-        protected readonly string _backgroundSound;
+        protected readonly (string sound, float volume) _backgroundInfo;
 
         /// <summary>
         /// Handle of a background sound played in loop when the Detective Chipotle NPC is inside
@@ -127,8 +127,8 @@ namespace Game.Terrain
         /// <param name="ceiling">Ceiling height of the locality (should be 0 for outdoor localities)</param>
         /// <param name="area">Coordinates of the area occupied by the locality</param>
         /// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
-        /// <param name="backgroundSound">A background sound played in loop</param>
-        public Locality(Name name, string to, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string backgroundSound = null) : base(name, area)
+        /// <param name="backgroundInfo">A background sound played in loop</param>
+        public Locality(Name name, string to, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, (string sound, float volume) backgroundInfo) : base(name, area)
         {
             To = to;
             Type = type;
@@ -143,7 +143,7 @@ namespace Game.Terrain
             DefaultTerrain = defaultTerrain;
             Area.MinimumHeight = MinimumHeight;
             Area.MinimumWidth = MinimumWidth;
-            _backgroundSound = backgroundSound;
+            _backgroundInfo = backgroundInfo;
 
             Appear();
         }
@@ -390,17 +390,12 @@ namespace Game.Terrain
         private readonly (float gain, float gainHF) _closedDoorLowpass = (1, .5f);
 
         /// <summary>
-        /// Default volume of the background sound used when the player is inside.
-        /// </summary>
-        private const float _backgroundVolumeInside = 1;
-
-        /// <summary>
         /// Plays the background sound of this locality in a loop.
         /// </summary>
         /// <param name="playerMoved">Specifies if the player just moved from one locality to another one.</param>
         private void PlayBackground(bool playerMoved=false)
         {
-            if (string.IsNullOrEmpty(_backgroundSound))
+            if (string.IsNullOrEmpty(_backgroundInfo.sound))
                 return;
 
             int id;
@@ -427,7 +422,7 @@ namespace Game.Terrain
                             position = p.Area.Center;
                     }
 
-                    id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.Absolute, position.AsOpenALVector(), true, _backgroundVolumeInside, null, 1, 0, Playback.OpenAL);
+                    id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundInfo.sound), null, true, PositionType.Absolute, position.AsOpenALVector(), true, _backgroundInfo.volume);
                     _backgroundSounds.Add(id);
 
                     if (p is Door d && d.State == Door.DoorState.Closed)
@@ -440,7 +435,7 @@ namespace Game.Terrain
             if (playerMoved)
             {
             StopBackground();
-                id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundSound), null, true, PositionType.None, Vector3.Zero, false, _backgroundVolumeInside, null, 1, 0, Playback.OpenAL);
+                id = World.Sound.Play(World.Sound.GetSoundStream(_backgroundInfo.sound), null, true, PositionType.None, Vector3.Zero, false, _backgroundInfo.volume);
                 _backgroundSounds.Add(id);
             }
         }

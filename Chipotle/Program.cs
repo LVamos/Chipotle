@@ -8,6 +8,8 @@ using Game.UI;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game
 {
     /// <summary>
@@ -18,7 +20,9 @@ namespace Game
         /// <summary>
         /// Enables some test methods.
         /// </summary>
-        public const bool TestMode = false;
+        public const bool TestMode = true;
+
+        public static readonly Vector2 TestChipotlesStartPosition = new Vector2(1089, 1006);
 
         /// <summary>
         /// Path to data folder

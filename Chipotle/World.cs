@@ -49,26 +49,26 @@ namespace Game
         /// <summary>
         /// Map of localities and corresponding background sounds
         /// </summary>
-        private static readonly Dictionary<string, string> _localityLoops = new Dictionary<string, string>()
+        private static readonly Dictionary<string, (string sound, float volume)> _localityLoops = new Dictionary<string, (string sound, float volume)>
         {
-            ["chodba h1"] = "ElectricalBoxLoop",
-            ["balkon p1"] = "BalconyLoop",
-            ["terasa w1"] = "BalconyLoop",
-            ["výčep h1"] = "CzechPubLoop",
-            ["ulice h1"] = "BonitaStreetLoop",
-            ["příjezdová cesta w1"] = "DriveWayLoop",
-            ["bazén w1"] = "PoolLoop",
-            ["zahrada c1"] = "CarsonsGardenLoop",
-            ["asfaltka c1"] = "AsphaltRoadLoop",
-            ["cesta c1"] = "AsphaltRoadLoop",
-            ["ulice p1"] = "BelvedereStreetLoop",
-            ["ulice v1"] = "GordonStreetLoop",
-            ["garáž v1"] = "GarageLoop",
-            ["garáž s1"] = "GarageLoop",
-            ["garáž w1"] = "GarageLoop",
-            ["garáž p1"] = "GarageLoop",
-            ["ulice s1"] = "BonitaStreetLoop",
-            ["dvorek s1"] = "DriveWayLoop",
+            ["chodba h1"] = ("ElectricalBoxLoop", 1),
+            ["balkon p1"] = ("BalconyLoop", .5f),
+            ["terasa w1"] = ("BalconyLoop", .4f),
+            ["výčep h1"] = ("CzechPubLoop", 1),
+            ["ulice h1"] = ("BonitaStreetLoop", 1),
+            ["příjezdová cesta w1"] = ("DriveWayLoop", 1),
+            ["bazén w1"] = ("PoolLoop", 1),
+            ["zahrada c1"] = ("CarsonsGardenLoop", 1),
+            ["asfaltka c1"] = ("AsphaltRoadLoop", 1),
+            ["cesta c1"] = ("AsphaltRoadLoop", 1),
+            ["ulice p1"] = ("BelvedereStreetLoop", 1),
+            ["ulice v1"] = ("GordonStreetLoop", 1),
+            ["garáž v1"] = ("GarageLoop", 1),
+            ["garáž s1"] = ("GarageLoop", 1),
+            ["garáž w1"] = ("GarageLoop", 1),
+            ["garáž p1"] = ("GarageLoop", 1),
+            ["ulice s1"] = ("BonitaStreetLoop", 1),
+            ["dvorek s1"] = ("DriveWayLoop", 1),
         };
 
         /// <summary>
@@ -485,7 +485,8 @@ namespace Game
             // Load localities
             foreach (XElement l in xLocalities)
             {
-                _localityLoops.TryGetValue(A(l, "indexedname"), out string lLoop);
+                (string sound, float volume) lBackgroundInfo;
+                _localityLoops.TryGetValue(A(l, "indexedname"), out lBackgroundInfo);
                 Locality locality = new Locality(
            new Name(A(l, "indexedname"), A(l, "friendlyname")),
            A(l, "to"),
@@ -493,7 +494,7 @@ namespace Game
            int.Parse(A(l, "height")),
            new Plane(A(l, "coordinates")),
            A(l, "defaultTerrain", false).ToTerrainType(),
-lLoop
+lBackgroundInfo
 );
                 Add(locality);
 

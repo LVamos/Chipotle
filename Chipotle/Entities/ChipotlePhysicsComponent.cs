@@ -150,7 +150,7 @@ namespace Game.Entities
         {
             // set initial position.&
             if(Program.TestMode)
-            SetPosition(1551, 1018, true);
+            SetPosition(Program.TestChipotlesStartPosition, true);
             else
             SetPosition(1028, 1034, true);
                 _orientation = new Orientation2D(0, 1);
