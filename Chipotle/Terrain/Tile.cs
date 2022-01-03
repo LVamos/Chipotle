@@ -23,13 +23,13 @@ namespace Game.Terrain
         public Tile(TerrainType terrain, bool permeable = true)
         {
             Terrain = terrain;
-            Permeable = permeable;
+            Walkable = permeable;
         }
 
         /// <summary>
         /// Specifies if the tile is walkable
         /// </summary>
-        public bool Permeable { get; private set; }
+        public bool Walkable { get; private set; }
 
         /// <summary>
         /// type of the terrain laying on this tile
@@ -44,7 +44,7 @@ namespace Game.Terrain
         public void Register(TerrainType terrain, bool permeable = true)
         {
             Terrain = terrain;
-            Permeable = permeable;
+            Walkable = permeable;
         }
     }
 }

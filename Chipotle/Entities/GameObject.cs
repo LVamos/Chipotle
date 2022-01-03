@@ -13,6 +13,22 @@ namespace Game.Entities
     public class GameObject : MapElement
     {
         /// <summary>
+        /// Checks if a specified object is located in the same locality as this object.
+        /// </summary>
+        /// <param name="o">The object to be checked</param>
+        /// <returns>True if the specified object is located in the same locality as this object.</returns>
+        public bool IsInSameLocality(DumpObject o)
+            => Locality.IsItHere(o);
+
+        /// <summary>
+        /// Checks if a specified NPC is located in the same locality as this object.
+        /// </summary>
+        /// <param name="e">The NPC to be checked</param>
+        /// <returns>True if the specified NPC is located in the same locality as this object.</returns>
+        public bool IsInSameLocality(Entity e)
+            => Locality.IsItHere(e);
+
+        /// <summary>
         /// Type of the object; it allows grouping objects with tha same behavior.
         /// </summary>
         public readonly string Type;
@@ -27,16 +43,24 @@ namespace Game.Entities
         {
             Type = type.PrepareForIndexing();
 
-            if (area != null)
+            if (_area!= null)
+            {
                 Appear();
+                Locality = _area.GetLocality();
+            }
 
-            Locality?.Register(this);
+            if (Locality != null)
+            {
+                if (this is DumpObject d)
+                    Locality.Register(d);
+                else Locality.Register(this as Entity);
+            }
         }
 
         /// <summary>
         /// Locality which contains this object
         /// </summary>
-        public Locality Locality => _area?.GetLocality();
+        public Locality Locality { get; protected set; }
 
         /// <summary>
         /// Creates new instance of the pool (bazének w1) object in the Walsch's bathroom (koupelna
@@ -94,7 +118,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateElectricalBox(Name name, Plane area, bool decorative)
-=> new DumpObject(name, area, "rozvodna", decorative, null, null, "ElectricalBoxLoop");
+=> new DumpObject(name, area, "rozvodna", decorative, null, null, "ElectricalBoxLoop", loopVolume: .5f);
 
         /// <summary>
         /// Creates new instance of the fish tank (akvárko w1) object in the basement (sklep w1) locality.
@@ -253,14 +277,6 @@ namespace Game.Entities
                     => Name.Friendly;
 
         /// <summary>
-        /// Displays the object in the game world and assigns it to the appropriate locality.
-        /// </summary>
-        protected override void Appear()
-        {
-            base.Appear();
-        }
-
-        /// <summary>
         /// Destroys the object or NPC.
         /// </summary>
         protected override void Destroy()
@@ -280,14 +296,23 @@ namespace Game.Entities
                 throw new ArgumentNullException(nameof(targetArea));
 
             Disappear();
-            Locality sourceLocality = Locality;
             _area = targetArea;
+            Locality sourceLocality = Locality;
+            Locality = _area.GetLocality();
             Appear();
 
             if (sourceLocality != Locality)
             {
-                sourceLocality.Unregister(this);
-                Locality.Register(this);
+                if (this is DumpObject d)
+                {
+                    sourceLocality.Unregister(d);
+                    Locality.Register(d);
+                }
+                else if (this is Entity e)
+                {
+                    sourceLocality.Unregister(e);
+                    Locality.Register(e);
+                }
             }
         }
 
@@ -299,7 +324,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateCuckooClock(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "kukačkové hodiny", decorative, null, null, "CuckooClockLoop");
+        => new DumpObject(name, area, "kukačkové hodiny", decorative, null, null, "CuckooClockLoop",null,false, loopVolume: .3f);
 
         /// <summary>
         /// Creates new instance of the dish washer (myčka) object.
@@ -346,7 +371,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateFridge(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "lednice", decorative, null, "snd10", "FridgeLoop");
+        => new DumpObject(name, area, "lednice", decorative, null, "snd10", "FridgeLoop", loopVolume: .5f);
 
         /// <summary>
         /// Creates new instance of the chair (židle) object.
@@ -490,6 +515,6 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateWallClock(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "hodiny", decorative, null, null, "WallClockLoop");
+        => new DumpObject(name, area, "hodiny", decorative, null, null, "WallClockLoop", null, false);
     }
 }

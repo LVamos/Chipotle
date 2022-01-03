@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
+using DavyKager;
+
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -52,6 +54,7 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
+                [new KeyShortcut(false, true, false, Keys.C)] = SayAbsoluteCoords,
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
 
                 // Other commands
@@ -79,6 +82,17 @@ namespace Game.Entities
             }
             );
         }
+
+        private void SayAbsoluteCoords()
+        {
+            if (!Program.TestMode)
+                return;
+
+            string coords = Owner.Area.Center.ToString();
+            Clipboard.SetText(coords);
+            Tolk.Speak(coords);
+        }
+
 
         /// <summary>
         /// Test method that moves Chipotle to coords taken from clipboard

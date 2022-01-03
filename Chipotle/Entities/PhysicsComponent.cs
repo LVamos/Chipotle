@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+
+using DavyKager;
 
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
@@ -15,6 +18,11 @@ namespace Game.Entities
     [Serializable]
     public class PhysicsComponent : EntityComponent
     {
+        /// <summary>
+        /// Defines start position of the NPC.
+        /// </summary>
+        public Vector2? StartPosition { get; protected set; }
+
         /// <summary>
         /// Coordinates of the area currently occupied by the NPC
         /// </summary>
@@ -98,28 +106,20 @@ namespace Game.Entities
             _locality = _area.GetLocality();
 
             // Announce changes
-            Owner.ReceiveMessage(new PositionChanged(this, source, target));
+            Owner.ReceiveMessage(new PositionChanged(this, source, target, sourceLocality, targetLocality));
 
             if (!silently)
-            {
-                EntityMoved moved = new EntityMoved(Owner, target.Center);
-                Owner.ReceiveMessage(new EntityMoved(this, target.Center));
-                targetLocality.ReceiveMessage(moved);
-            }
+                Owner.ReceiveMessage(new EntityMoved(this, target.Center)); // Inform other components.
 
             if (targetLocality != sourceLocality)
-            {
-                sourceLocality?.ReceiveMessage(new LocalityLeft(Owner, Owner));
-                targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
                 Owner.ReceiveMessage(new LocalityChanged(this, sourceLocality, targetLocality));
             }
-        }
 
-        /// <summary>
-        /// Processes the SetPosition message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnSetPosition(SetPosition message)
+            /// <summary>
+            /// Processes the SetPosition message.
+            /// </summary>
+            /// <param name="message">The message to be processed</param>
+            private void OnSetPosition(SetPosition message)
             => SetPosition(message.Target, message.Silently);
     }
 }

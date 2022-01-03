@@ -9,6 +9,8 @@ using Game.Terrain;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Entities
 {
     /// <summary>
@@ -65,6 +67,13 @@ namespace Game.Entities
             _components = (new EntityComponent[] { ai, input, sound, physics }).Where(c => c != null).ToList<EntityComponent>();
 
             _components.ForEach(c => c.Owner = this);
+
+            if (_physics.StartPosition.HasValue)
+            {
+                Vector2 position = (Vector2)_physics.StartPosition;
+                _area = new Plane(position);
+                Locality = _area.GetLocality();
+            }
         }
 
         /// <summary>
@@ -152,11 +161,18 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<System.Type, System.Action<GameMessage>>
                 {
+                    [typeof(LocalityChanged)] = (message) => OnLocalityChanged((LocalityChanged)message),
                     [typeof(PositionChanged)] = (m) => OnPositionChanged((PositionChanged)m),
                 }
                 );
         }
 
+        /// <summary>
+        /// Processes the LocalityChanged message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnLocalityChanged(LocalityChanged message)
+=> Locality = message.Target;
         /// <summary>
         /// Processes incoming messages.
         /// </summary>
@@ -181,15 +197,43 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         protected void OnPositionChanged(PositionChanged message)
         {
-            _area = message.TargetPosition;
+            _area = message.TargetPosition; // Set new position.
 
-            Locality source = message.SourcePosition?.GetLocality();
-            Locality target = message.TargetPosition.GetLocality();
+            Locality sourceLocality = message.SourcePosition?.GetLocality();
+            Locality targetLocality = message.TargetPosition.GetLocality();
 
-            if (source != null && source != target)
-                RecordLocality(source);
+            // Record visited locality.
+            if (sourceLocality != null && sourceLocality != targetLocality)
+                RecordLocality(sourceLocality);
 
-            _ai?.ReceiveMessage(message);
+            // Inform all adjecting localities
+            List<Locality> localities = new List<Locality>();
+            if (sourceLocality != null)
+            {
+                localities.Add(sourceLocality);
+                localities.AddRange(sourceLocality.Neighbours);
+            }
+            if (targetLocality != null)
+            {
+                localities.Add(targetLocality);
+                localities.AddRange(targetLocality.Neighbours);
+            }
+            IEnumerable<Locality> targetLocalities = localities.Distinct<Locality>();
+
+            EntityMoved moved = new EntityMoved(this, _area.Center);
+            LocalityLeft left = new LocalityLeft(this, this, sourceLocality);
+            LocalityEntered entered = new LocalityEntered(this, this, targetLocality);
+
+            foreach (Locality l in targetLocalities)
+            {
+                l.ReceiveMessage(moved);
+
+                if (targetLocality != sourceLocality)
+                {
+                    l.ReceiveMessage(left);
+                    l.ReceiveMessage(entered);
+                }
+            }
         }
 
         /// <summary>

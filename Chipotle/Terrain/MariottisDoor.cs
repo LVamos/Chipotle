@@ -20,7 +20,7 @@ namespace Game.Terrain
         /// <param name="name">Inner name of the door</param>
         /// <param name="area">Coordinates of the area the door occupies</param>
         /// <param name="localities">The localities connected by the door</param>
-        public MariottisDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, Door.DoorState.Closed, area, localities) { }
+        public MariottisDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, PassageState.Closed, area, localities) { }
 
         /// <summary>
         /// Opens the door if possible.

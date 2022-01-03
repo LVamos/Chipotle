@@ -21,6 +21,38 @@ namespace Game.Terrain
     public class Plane : DebugSO
     {
         /// <summary>
+        /// Checks if all the plane is walkable.
+        /// </summary>
+        public bool Walkable()
+            => GetPoints().All(p => World.IsWalkable(p));
+
+        /// <summary>
+        /// Checks if the plane is a line.
+        /// </summary>
+        public bool IsLine
+            => Size > 1 && (Width == 1 || Height == 1);
+
+        /// <summary>
+        /// Checks if the plane is a horizohntal rectangle.
+        /// </summary>
+        /// <returns>True if the plane is a horizontal rectangle</returns>
+        public bool Horizontal
+            => Width > Height;
+
+        /// <summary>
+        /// Checks if the plane is a vertical rectangle.
+        /// </summary>
+        /// <returns>True if the plane is a vertical rectangle</returns>
+        public bool Vertical
+            => Width < Height;
+
+        /// <summary>
+        /// Checks if the plane is a square.
+        /// </summary>
+        public bool IsSquare
+            => Height == Width;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="upperLeft">Coordinates of the upper left corner of the rectangle</param>
@@ -465,6 +497,43 @@ namespace Game.Terrain
                 for (point.Y = largerLowerRight.Y; point.Y < largerUpperLeft.Y; point.Y++)
                     yield return point;
             }
+        }
+
+        /// <summary>
+        /// Checks if the specified point is opposite to one of sides of the plane.
+        /// </summary>
+        /// <param name="point">The point to be checked</param>
+        /// <returns><True if the point is opposite to one of the sides of the plane/returns>
+        public bool IsOpposite(Vector2 point)
+        {
+            return
+            !LaysOnPlane(point)
+            && ((point.X >= UpperLeftCorner.X && point.X <= UpperRightCorner.X)
+            || (point.Y >= LowerLeftCorner.Y && point.Y <= UpperLeftCorner.Y));
+                }
+
+        /// <summary>
+        /// Checks if the specified plane is opposite to this plane.
+        /// </summary>
+        /// <param name="p">The plane to be checked</param>
+        /// <returns>True if the specified plane is opposite to this plane</returns>
+        public bool IsOpposite(Plane p)
+            => IsOpposite(p.UpperLeftCorner) || IsOpposite(p.LowerRightCorner);
+
+        /// <summary>
+        /// Selects a point from the specified plane which is opposite to this plane.
+        /// </summary>
+        /// <param name="plane">The plane to be checked</param>
+        /// <returns>The opposite point or null</returns>
+        public Vector2? FindOppositePoint(Plane plane)
+        {
+            foreach (Vector2 point in plane.GetPoints())
+            {
+                if (IsOpposite(point))
+                    return (Vector2)point;
+            }
+
+            return null;
         }
 
         /// <summary>

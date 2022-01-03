@@ -119,7 +119,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(LocalityEntered message)
         {
-            if (message.Sender != World.Player)
+            if (message.Entity!= World.Player || message.Locality != Owner.Locality)
                 return;
 
             if (_velcomeChipotle)

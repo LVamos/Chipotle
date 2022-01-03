@@ -149,12 +149,14 @@
     <Compile Include="Terrain\HallDoor.cs" />
     <Compile Include="Terrain\LocalityType.cs" />
     <Compile Include="Terrain\MapElement.cs" />
+    <Compile Include="Terrain\ObstacleType.cs" />
     <Compile Include="Terrain\Orientation2D.cs" />
     <Compile Include="Terrain\Passage.cs" />
     <Compile Include="Entities\PhysicsComponent.cs" />
     <Compile Include="Entities\SoundComponent.cs" />
     <Compile Include="Messaging\GameMessage.cs" />
     <Compile Include="Terrain\Direction.cs" />
+    <Compile Include="Terrain\PassageState.cs" />
     <Compile Include="Terrain\PathFinder.cs" />
     <Compile Include="Terrain\Plane.cs" />
     <Compile Include="Terrain\Locality.cs" />

@@ -154,7 +154,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(LocalityEntered message)
         {
-            if (message.Sender == _player && _area.GetLocality().Name.Indexed == "bazén w1" && !_playerWasByPool)
+            if (message.Entity== _player && Owner.Locality.Name.Indexed == "bazén w1" && !_playerWasByPool)
             {
                 _playerWasByPool = true;
                 Owner.ReceiveMessage(new StartFollowing(this));

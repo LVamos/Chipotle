@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Game.Entities;
+using Game.Terrain;
 
 namespace Game.Messaging.Events
 {
@@ -10,18 +11,15 @@ namespace Game.Messaging.Events
     /// </summary>
     /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
     [Serializable]
-    public class LocalityLeft : GameMessage
+    public class LocalityLeft : LocalityEntered
     {
-        /// <summary>
-        /// The NPC that leftthe locality
-        /// </summary>
-        public readonly Entity Entity;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="sender">Source of the message</param>
-        /// <param name="entity">The NPC that left the locality</param>
-        public LocalityLeft(object sender, Entity entity) : base(sender) => Entity = entity;
-    }
+/// <summary>
+/// Constructor
+/// </summary>
+/// <param name="sender">The object that sent this message</param>
+/// <param name="entity">The NPC that left the locality</param>
+/// <param name="locality">The locality left by the NPC</param>
+        public LocalityLeft(object sender, Entity entity, Locality locality): base(sender, entity, locality)
+        { }
+           }
 }

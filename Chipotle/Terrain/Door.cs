@@ -19,20 +19,6 @@ namespace Game.Terrain
     public class Door : Passage
     {
         /// <summary>
-        /// Describes if a door is opened or closed.
-        /// </summary>
-        public enum DoorState
-        {
-            Open,
-            Closed
-        }
-
-        /// <summary>
-        /// Indicates if the door is open or closed.
-        /// </summary>
-        public DoorState State { get; protected set; }
-
-        /// <summary>
         /// specifies if the door can be opened by an NPC.
         /// </summary>
         protected readonly bool _openable;
@@ -45,7 +31,7 @@ namespace Game.Terrain
         /// <param name="area">Location of the door</param>
         /// <param name="localities">Two localities connected by the door</param>
         /// <param name="openable">Specifies whether the door can be opened by an NPC.</param>
-        public Door(Name name, DoorState state, Plane area, IEnumerable<Locality> localities, bool openable = true) : base(name, area, localities)
+        public Door(Name name, PassageState state, Plane area, IEnumerable<Locality> localities, bool openable = true) : base(name, area, localities)
         {
             State = state;
             _openable = openable;
@@ -72,7 +58,7 @@ namespace Game.Terrain
         {
             if (Area.GetTiles().All(t => World.IsWalkable(t.position)))
             {
-                State = DoorState.Closed;
+                State = PassageState.Closed;
 
                 DoorManipulated message = new DoorManipulated(this);
                 foreach (Locality l in Localities)
@@ -91,7 +77,7 @@ namespace Game.Terrain
             if (!_openable)
                 return;
 
-            if (State == DoorState.Closed)
+            if (State == PassageState.Closed)
                 Open(message.Position);
             else
                 Close(message.Position);
@@ -105,7 +91,7 @@ namespace Game.Terrain
         /// </param>
         protected virtual void Open(Vector2 coords)     
         {
-            State = DoorState.Open;
+            State = PassageState.Open;
 
             DoorManipulated message = new DoorManipulated(this);
             foreach (Locality l in Localities)

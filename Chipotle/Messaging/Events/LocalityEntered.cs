@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Game.Entities;
+using Game.Terrain;
 
 namespace Game.Messaging.Events
 {
@@ -18,10 +19,20 @@ namespace Game.Messaging.Events
         public readonly Entity Entity;
 
         /// <summary>
+        /// The concerning locality
+        /// </summary>
+        public readonly Locality Locality;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="entity">The NPC that entered the locality</param>
-        public LocalityEntered(object sender, Entity entity) : base(sender) => Entity = entity;
+        /// <param name="locality">The concerning locality</param>
+        public LocalityEntered(object sender, Entity entity, Locality locality) : base(sender)
+        {
+             Entity = entity;
+            this.Locality = locality;
+        }
     }
 }

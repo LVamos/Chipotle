@@ -85,7 +85,7 @@ namespace Game.Terrain
         /// <returns>Enumeration of all adjacent neighbours</returns>
         private IEnumerable<Node> GetNeighbours(Node parent, Node goal)
                     => World.Map.GetNeighbours4(parent.Coords)
-                    .Where(t => t.tile.Permeable && !World.IsOccupied(t.position))
+                    .Where(t => t.tile.Walkable && !World.IsOccupied(t.position))
                     .Select(t => { Node n = new Node(t.position, parent.Cost + 1, parent); n.ComputeDistance(goal.Coords); return n; });
 
         /// <summary>
