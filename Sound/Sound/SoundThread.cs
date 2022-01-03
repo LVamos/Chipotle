@@ -28,7 +28,14 @@ namespace Luky
         /// </summary>
         /// <param name="id">Handle of the source</param>
         public void DisableLowpass(int id)
-            => RunCommand(() => _openALSystem.DisableFilters(id));
+            => RunCommand(() => _OpenAL.DisableFilters(id));
+
+        /// <summary>
+        /// Deactivates the lowpass filter on the specified source.
+        /// </summary>
+        /// <param name="sourceID">Handle of the source to be affected</param>
+        public void CancelLowpass(int sourceID)
+            => RunCommand(() => _OpenAL.CancelLowpass(sourceID));
 
         /// <summary>
         /// Applies lowpass filter setting on a sound.
@@ -36,9 +43,8 @@ namespace Luky
         /// <param name="soundID">Handle of the sound</param>
         /// <param name="gain">Lowpass gain</param>
         /// <param name="gainHF">Lowpass high frequency gain</param>
-        public void ApplyLowpass(int soundID, float gain, float gainHF)
-            => RunCommand(() => _openALSystem.ApplyLowpassFilter(soundID, gain, gainHF));
-            //=> _lowpassSettings[soundID] = (gain, gainHF);
+        public void ApplyLowpass(int soundID, (float gain, float gainHF) parameters)
+            => RunCommand(() => _OpenAL.ApplyLowpassFilter(soundID, parameters));
 
         /// <summary>
         /// Stores planned lowpass filter settings.
@@ -168,7 +174,7 @@ namespace Luky
         /// <summary>
         /// Reference to the OpenAL player
         /// </summary>
-        private OpenALSystem _openALSystem;
+        private OpenALSystem _OpenAL;
 
         /// <summary>
         /// Reference to the opus sound files decoder used with opus files
@@ -219,7 +225,7 @@ namespace Luky
             set
             {
                 _listenerOrientationFacing = value;
-                RunCommand(() => _openALSystem.SetListenerOrientation(value, _listenerOrientationUp));
+                RunCommand(() => _OpenAL.SetListenerOrientation(value, _listenerOrientationUp));
             }
         }
 
@@ -232,7 +238,7 @@ namespace Luky
             set
             {
                 _listenerOrientationUp = value;
-                RunCommand(() => _openALSystem.SetListenerOrientation(_listenerOrientationFacing, value));
+                RunCommand(() => _OpenAL.SetListenerOrientation(_listenerOrientationFacing, value));
             }
         }
 
@@ -245,7 +251,7 @@ namespace Luky
             set
             {
                 _listenerPosition = value;
-                RunCommand(() => _openALSystem.SetListenerPosition(value));
+                RunCommand(() => _OpenAL.SetListenerPosition(value));
             }
         }
 
@@ -258,7 +264,7 @@ namespace Luky
             set
             {
                 _listenerVelocity = value;
-                RunCommand(() => _openALSystem.SetListenerVelocity(value));
+                RunCommand(() => _OpenAL.SetListenerVelocity(value));
             }
         }
 
@@ -308,14 +314,14 @@ namespace Luky
         }
 
         public void SetEaxReverbReflectionsGain(float value)
-            => RunCommand(() => _openALSystem.SetEaxReverbReflectionsGain(value));
+            => RunCommand(() => _OpenAL.SetEaxReverbReflectionsGain(value));
 
         /// <summary>
         /// Changes value of the EAX reverb reflections parameter.
         /// </summary>
         /// <param name="pan">The pan vector</param>
         public void SetEaxReverbReflections(Vector3 pan)
-            => RunCommand(() => _openALSystem.SetEaxReverbReflectionsPan(pan));
+            => RunCommand(() => _OpenAL.SetEaxReverbReflectionsPan(pan));
 
         /// <summary>
         /// Enables an EAX reverb preset.
@@ -325,7 +331,7 @@ namespace Luky
         public void ApplyEaxReverbPreset(string name, float gain)
         {
             EaxReverb preset = _reverbPresets.First(p => p.Name.ToLower() == name.ToLower()).Preset;
-            RunCommand(() => _openALSystem.ApplyEaxReverbPreset(preset, null, gain));
+            RunCommand(() => _OpenAL.ApplyEaxReverbPreset(preset, null, gain));
         }
 
         /// <summary>
@@ -370,6 +376,21 @@ namespace Luky
 
             state = (SoundState)results[0];
             currentSample = (int)results[1];
+        }
+
+        /// <summary>
+        /// Sets volume of an individual source.
+        /// </summary>
+        /// <param name="id">Handle of the source to be affected</param>
+        /// <param name="volume">Target volume of the specified source</param>
+        public void SetVolume(int id, float volume)
+        {
+            RunCommand(() =>
+            {
+                GetPlayback(GetSound(id))
+.SetVolume(id, volume);
+            }
+            );
         }
 
         /// <summary>
@@ -435,7 +456,7 @@ namespace Luky
                        return;
 
                    _opusFileDecoder.ChangeForceMono(soundID, forceMono, out int channels, out int sampleRate);
-                       _openALSystem.ReconfigureSound(soundID, channels, sampleRate);
+                       _OpenAL.ReconfigureSound(soundID, channels, sampleRate);
                });
         }
         /// <summary>
@@ -656,7 +677,7 @@ namespace Luky
         /// A two-dimensional vecotr defining the position in virtual sound space
         /// </param>
         public void SetSourcePosition(int soundID, Vector3 position, PositionType type = PositionType.Absolute)
-            => RunCommand(() => _openALSystem.SetPosition(soundID, position, type));
+            => RunCommand(() => _OpenAL.SetPosition(soundID, position, type));
 
         /// <summary>
         /// stops the specified sound.
@@ -731,7 +752,6 @@ namespace Luky
             RefillBuffers(); // Refill streaming buffers.
             ReleaseSounds(); // Detect and remove sounds that finished playing.
             PerformFading();
-            SetFilters();
         }
 
         /// <summary>
@@ -773,36 +793,6 @@ namespace Luky
         /// <param name="targetVolume">Specifies the final master volume</param>
         public void FadeMaster(FadingType type, float volumeDelta, float targetVolume)
             => _masterFading = new FadingRecord(type, volumeDelta, targetVolume);
-
-        /// <summary>
-        /// Applies planned lowpass filter settings.
-        /// </summary>
-        private void SetFilters()
-        {
-            if (_lowpassSettings.IsNullOrEmpty())
-                return;
-
-            Sound sound;
-            IPlayback playback;
-
-            foreach (int id in  _lowpassSettings.Keys.ToArray<int>())
-            {
-                // Check if the sound is loaded.
-                sound = _sounds.FirstOrDefault(s => s.ID == id);
-                if (sound == null)
-                    continue;
-
-                // Remove stopped sounds
-                playback = sound != null ? GetPlayback(sound) : null;
-                if (playback.IsPlaying(id))
-                {
-                    // Apply the filter.
-                    (float gain, float gainHF) setting = _lowpassSettings[id];
-                    RunCommand(() => _openALSystem.ApplyLowpassFilter(id, setting.gain, setting.gainHF));
-                    _lowpassSettings.Remove(id);
-                }
-            }
-        }
 
         /// <summary>
         /// Performs sound fading.
@@ -1033,7 +1023,7 @@ namespace Luky
         private IPlayback GetPlayback(Sound sound)
         {
             if (sound.Playback == Playback.OpenAL)
-                return _openALSystem;
+                return _OpenAL;
             throw new InvalidOperationException($"Unrecognized playback system: {sound.Playback}");
         }
 
@@ -1140,6 +1130,21 @@ namespace Luky
             => _reverbPresets = EaxReverbDefaults.GetEaxPresets().ToList();
 
         /// <summary>
+        /// Returns a sound record assigned to the specified handle.
+        /// </summary>
+        /// <param name="id">Handle of the requested sound</param>
+        /// <returns>a Sound struct</returns>
+        private Sound GetSound(int id)
+        {
+                return
+                (
+                from s in _sounds
+                where (s.ID == id)
+                select s
+                ).First();
+        }
+
+        /// <summary>
         /// Recalculates all volumes after an individual volume was changed.
         /// </summary>
         private void RecalculateAllSoundVolumes()
@@ -1161,7 +1166,7 @@ namespace Luky
                 //try
                 //{
                     // init logic
-                    _openALSystem = OpenALSystem.CreateAndBindToThisThread(Say);
+                    _OpenAL = OpenALSystem.CreateAndBindToThisThread(Say);
                     _lSFDecoder = new LSFDecoder();
                     _opusFileDecoder = new OpusFileDecoder();
                     _nAudioDecoder = new NAudioDecoder();
@@ -1187,7 +1192,7 @@ namespace Luky
             t.SetApartmentState(ApartmentState.STA);
             t.IsBackground = true; // this ensures it closes when the main thread closes, safe for threads that read from files, but not for those that write to files. Though Environment.Exit takes care of this when an exception is caught, and for normal shutdown scenarios we should be calling dispose, so I'm leaving this commented.
             t.Start();
-            RunCommand(() => _openALSystem.EnableReverb());
+            RunCommand(() => _OpenAL.EnableReverb());
             LoadReverbPresets();
         }
     }

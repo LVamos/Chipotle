@@ -9,6 +9,8 @@ using Luky;
 
 using OpenTK;
 
+using static Game.Terrain.Door;
+
 namespace Game.Terrain
 {
     /// <summary>
@@ -17,6 +19,19 @@ namespace Game.Terrain
     [Serializable]
     public class Passage : MapElement
     {
+        /// <summary>
+        /// Indicates if the door is open or closed.
+        /// </summary>
+        public PassageState State { get; protected set; } = PassageState.Open;
+
+        /// <summary>
+        /// Checks if the passage leads to the specified locality.
+        /// </summary>
+        /// <param name="l">The locality to be checked</param>
+        /// <returns>True if the passage leads to the specified locality</returns>
+        public bool LeadsTo(Locality l)
+            => Localities.Contains(l);
+
         /// <summary>
         /// Localities connected by the passage
         /// </summary>
@@ -79,7 +94,7 @@ namespace Game.Terrain
         /// <param name="closed">Specifies if the passage is closed.</param>
         /// <param name="openable">Specifies if it can be opened by an NPC.</param>
         /// <returns>A new instance of the passage</returns>
-        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, Door.DoorState state, bool openable)
+        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, PassageState state, bool openable)
         {
             switch (name.Indexed)
             {
@@ -96,7 +111,9 @@ namespace Game.Terrain
         /// <param name="comparedLocality">The locality to be compared</param>
         /// <returns>The other side of the passage than the specified one</returns>
         public Locality AnotherLocality(Locality comparedLocality)
-                    => _localities.First(l => l != comparedLocality);
+        {
+            return _localities.First(l => l != comparedLocality);
+        }
 
         /// <summary>
         /// Displays the passage in the game world.

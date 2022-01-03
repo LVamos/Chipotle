@@ -12,6 +12,16 @@ namespace Game.Messaging.Events
     public class PositionChanged : GameMessage
     {
         /// <summary>
+        /// The locality in which the NPC was originally located.
+        /// </summary>
+        public readonly Locality SourceLocality;
+
+        /// <summary>
+        /// The locality in which the NPC is currently located.
+        /// </summary>
+        public readonly Locality TargetLocality;
+
+        /// <summary>
         /// Original position of the NPC
         /// </summary>
         public readonly Plane SourcePosition;
@@ -27,12 +37,14 @@ namespace Game.Messaging.Events
         /// <param name="sender">Source of the message</param>
         /// <param name="sourcePosition">Original position of the NPC</param>
         /// <param name="targetPosition">New position of the NPC</param>
-        public PositionChanged(object sender, Plane sourcePosition, Plane targetPosition) : base(sender)
+        public PositionChanged(object sender, Plane sourcePosition, Plane targetPosition, Locality sourceLocality, Locality targetLocality) : base(sender)
         {
             if (sourcePosition != null)
                 SourcePosition = new Plane(sourcePosition);
 
             TargetPosition = new Plane(targetPosition);
+            SourceLocality = sourceLocality;
+            TargetLocality = targetLocality;
         }
     }
 }

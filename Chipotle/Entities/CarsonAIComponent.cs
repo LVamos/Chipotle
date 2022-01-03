@@ -64,7 +64,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(LocalityEntered message)
         {
-            if (message.Sender != World.Player)
+            if (message.Entity!= World.Player || message.Locality != Owner.Locality)
                 return;
 
             // This happens just once.
@@ -81,7 +81,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityLeft(LocalityLeft message)
         {
-            if (message.Sender != World.Player)
+            if (message.Locality != Owner.Locality || message.Entity!= World.Player)
                 return;
 
             bool benchUsed = World.GetObjectsByType("lavice u carsona").Any(o => o.Used);

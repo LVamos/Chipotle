@@ -9,6 +9,8 @@ using Game.Terrain;
 
 using Luky;
 
+using OpenTK;
+
 namespace Game.Entities
 {
     /// <summary>
@@ -65,6 +67,12 @@ namespace Game.Entities
             _components = (new EntityComponent[] { ai, input, sound, physics }).Where(c => c != null).ToList<EntityComponent>();
 
             _components.ForEach(c => c.Owner = this);
+
+            if (_physics.StartPosition.HasValue)
+            {
+                Vector2 position = (Vector2)_physics.StartPosition;
+                _area = new Plane(position);
+            }
         }
 
         /// <summary>
@@ -152,11 +160,18 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<System.Type, System.Action<GameMessage>>
                 {
+                    [typeof(LocalityChanged)] = (message) => OnLocalityChanged((LocalityChanged)message),
                     [typeof(PositionChanged)] = (m) => OnPositionChanged((PositionChanged)m),
                 }
                 );
         }
 
+        /// <summary>
+        /// Processes the LocalityChanged message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnLocalityChanged(LocalityChanged message)
+=> Locality = message.Target;
         /// <summary>
         /// Processes incoming messages.
         /// </summary>

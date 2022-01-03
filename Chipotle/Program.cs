@@ -22,7 +22,7 @@ namespace Game
         /// </summary>
         public const bool TestMode = true;
 
-        public static readonly Vector2 TestChipotlesStartPosition = new Vector2(1089, 1006);
+        public static readonly Vector2 TestChipotlesStartPosition = new Vector2(1093, 991);
 
         /// <summary>
         /// Path to data folder

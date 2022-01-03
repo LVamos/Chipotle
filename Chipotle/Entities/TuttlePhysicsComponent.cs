@@ -263,7 +263,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityLeft(LocalityLeft message)
         {
-            if (message.Sender != _player)
+            if (message.Locality != Owner.Locality || message.Entity!= _player)
                 return;
 
             StopApproachingToPlayer();

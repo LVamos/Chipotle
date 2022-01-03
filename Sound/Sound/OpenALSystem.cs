@@ -17,7 +17,25 @@ namespace Luky
     /// </summary>
     internal sealed class OpenALSystem : DebugSO, IPlayback
     {
-        public void ApplyLowpassFilter(int sourceID, float gain, float gainHF)
+        /// <summary>
+        /// Deactivates lowpass filter on the specified source.
+        /// </summary>
+        /// <param name="sourceID">Handle of the source to be affected</param>
+        public void CancelLowpass(int sourceID)
+        {
+            int id = _table[sourceID].SourceID;
+            AL.Source(id, ALSourcei.EfxDirectFilter, 0);
+            ALAnnounceError("Cancelling lowpass filter ona source");
+    }
+
+        /// <summary>
+        /// Applies the lowpass filter effect on the specified source.
+        /// </summary>
+        /// <param name="sourceID">Handle of the source to be affected</param>
+        /// <param name="gain">Gain of the lowpass parameter</param>
+        /// <param name="gainHF">Gain of higher frequencies</param>
+        /// <exception cref="InvalidOperationException">Raised when filter creation fails</exception>
+        public void ApplyLowpassFilter(int sourceID, (float gain, float gainHF) parameters)
         {
             int id = _table[sourceID].SourceID;
 
@@ -31,10 +49,10 @@ namespace Luky
             _efx.Filter(_lowpassFilter, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
             ALAnnounceError("Setting filter type to lowpass");
 
-            _efx.Filter(_lowpassFilter, EfxFilterf.LowpassGain, Gain);
+            _efx.Filter(_lowpassFilter, EfxFilterf.LowpassGain, parameters.gain);
             ALAnnounceError("Setting lowpass gain");
 
-            _efx.Filter(_lowpassFilter, EfxFilterf.LowpassGainHF, gainHF);
+            _efx.Filter(_lowpassFilter, EfxFilterf.LowpassGainHF, parameters.gainHF);
             ALAnnounceError("setting lowpass gainHF");
 
             AL.Source(id, ALSourcei.EfxDirectFilter, _lowpassFilter);
@@ -576,7 +594,7 @@ if(_table.TryGetValue(soundID, out Info info))
                 else
                     text = prefix + " " + text;
 
-                                throw new InvalidOperationException(text);
+                                        throw new InvalidOperationException(text);
             }
         }
 

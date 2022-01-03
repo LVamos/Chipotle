@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
@@ -15,6 +16,11 @@ namespace Game.Entities
     [Serializable]
     public class PhysicsComponent : EntityComponent
     {
+        /// <summary>
+        /// Defines start position of the NPC.
+        /// </summary>
+        public Vector2? StartPosition { get; protected set; }
+
         /// <summary>
         /// Coordinates of the area currently occupied by the NPC
         /// </summary>
@@ -98,7 +104,7 @@ namespace Game.Entities
             _locality = _area.GetLocality();
 
             // Announce changes
-            Owner.ReceiveMessage(new PositionChanged(this, source, target));
+            Owner.ReceiveMessage(new PositionChanged(this, source, target, sourceLocality, targetLocality));
 
             if (!silently)
             {
@@ -109,8 +115,21 @@ namespace Game.Entities
 
             if (targetLocality != sourceLocality)
             {
-                sourceLocality?.ReceiveMessage(new LocalityLeft(Owner, Owner));
-                targetLocality.ReceiveMessage(new LocalityEntered(Owner, Owner));
+                IEnumerable<Locality> localities = Enumerable.Empty<Locality>();
+                if (sourceLocality != null)
+                    localities = localities.Union(sourceLocality.Neighbours);
+                if (targetLocality != null)
+                    localities = localities.Union(targetLocality.Neighbours);
+
+                LocalityLeft left = new LocalityLeft(Owner, Owner, sourceLocality);
+                LocalityEntered entered = new LocalityEntered(Owner, Owner, targetLocality);
+
+                foreach (Locality l in localities)
+                {
+                    l.ReceiveMessage(left);
+                    l.ReceiveMessage(entered);
+                }
+
                 Owner.ReceiveMessage(new LocalityChanged(this, sourceLocality, targetLocality));
             }
         }

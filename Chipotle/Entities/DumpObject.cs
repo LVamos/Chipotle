@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Game.Messaging;
 using Game.Messaging.Commands;
@@ -67,12 +68,13 @@ namespace Game.Entities
         /// <remarks>
         /// The type parameter allows assigning objects with some special behavior to proper classes.
         /// </remarks>
-        public DumpObject(Name name, Plane area, string type, bool decorative, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false) : base(name, type, area)
+        public DumpObject(Name name, Plane area, string type, bool decorative, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls=true) : base(name, type, area)
         {
             Decorative = decorative;
             _usableOnce = usableOnce;
             _sounds = (collisionSound ?? _sounds.collision, actionSound ?? _sounds.action, loopSound ?? _sounds.loop); // Modify sounds of the object.
             _cutscene = cutscene;
+            _audibleOverWalls = audibleOverWalls;
         }
 
         /// <summary>
@@ -95,6 +97,8 @@ namespace Game.Entities
             RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {
+        [typeof(LocalityEntered)] = (message) => OnLocalityEntered((LocalityEntered)message),
+        [typeof(DoorManipulated)] = (message) => OnDoorManipulated((DoorManipulated)message),
         [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
         [typeof(StartObjectNavigation )] = (message) => OnStartObjectNavigation((StartObjectNavigation )message),
         [typeof(StopObjectNavigation)] = (message) => OnStopObjectNavigation((StopObjectNavigation)message),
@@ -103,8 +107,78 @@ namespace Game.Entities
         [typeof(UseObject)] = (m) => OnUseObject((UseObject)m)
     });
 
+            // Play loop sound if any and if the player can hear it.
+            Entity player = World.Player;
+            if(IsInSameLocality(player) || Locality.GetApertures(player.Locality).Any())
             PlayLoop();
         }
+
+        /// <summary>
+        /// Handles the LocalityEntered message.
+        /// </summary>
+        /// <param name="message">Source of the message</param>
+        private void OnLocalityEntered(LocalityEntered message)
+        {
+            if (message.Entity != World.Player)
+                return;
+
+            bool neighbour = message.Locality.IsNeighbour(Locality);
+            bool accessible = message.Locality.IsAccessible(Locality);
+            bool apertures = message.Locality.GetApertures(Locality).Any();
+
+            if (
+                !neighbour
+                || (neighbour && !accessible)
+                )
+                StopLoop();
+
+            else if (neighbour)
+                PlayLoop(!apertures);
+        }
+
+        /// <summary>
+        /// Handles the DoorManipulated message.
+        /// </summary>
+        /// <param name="message">The message</param>
+        protected void OnDoorManipulated(DoorManipulated message)
+        {
+            bool open = message.Sender.State == PassageState.Open;
+                Locality other = message.Sender.AnotherLocality(Locality);
+
+            if (!other.IsItHere(World.Player))
+                return;
+
+            if (open)
+            {
+                PlayLoop();
+                return;
+            }
+
+            // Player is in another locality and can't hear the object.
+            if (!open && !_audibleOverWalls && Locality.GetApertures(other).IsNullOrEmpty())
+            {
+                StopLoop();
+                return;
+            }
+
+            // The door is closed but the player can hear attenuated sound of the object.
+            if (!open && _audibleOverWalls)
+                PlayLoop(true);
+        }
+
+        /// <summary>
+        /// Stops sound loop of this object, if any.
+        /// </summary>
+        private void StopLoop()
+        {
+                World.Sound.Stop(_loopSoundId);
+            _loopSoundId = 0;
+        }
+
+        /// <summary>
+        /// Determines if the object should be heart over walls and closed doors in other localities.
+        /// </summary>
+        protected readonly bool _audibleOverWalls;
 
         /// <summary>
         /// Returns pooint that belongs to this object and is tho most close to tthe player.
@@ -186,6 +260,16 @@ namespace Game.Entities
         /// Indicates if the sound navigation is enabled.
         /// </summary>
         protected bool _navigating;
+        
+        /// <summary>
+        /// Enables or disables sound attenuation.
+        /// </summary>
+        protected bool _attenuationEnabled;
+
+        /// <summary>
+        /// Default volume for the sound loop if there's any.
+        /// </summary>
+        protected float _defaultLoopVolume = 1;
 
         /// <summary>
         /// Destroys the object.
@@ -247,11 +331,37 @@ namespace Game.Entities
         /// <summary>
         /// Plays the sound loop of this object if there's any.
         /// </summary>
-        private void PlayLoop()
+        /// <param name="attenuated">Determines if the sound of the object should be played over a wall or other obstacles.</param>
+        private void PlayLoop(bool attenuated=false)
         {
-            if (!string.IsNullOrEmpty(_sounds.loop))
-                _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true);
+            if (string.IsNullOrEmpty(_sounds.loop))
+                return;
+
+            // Start the loop if not playing.
+            if(_loopSoundId==0)
+                _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, Area.Center, true, _defaultLoopVolume);
+
+            // Start the sound attenuation if needed.
+            if (attenuated)
+            {
+                World.Sound.ApplyLowpass(_loopSoundId, _lowpass);
+                World.Sound.SetVolume(_loopSoundId, _defaultLoopVolume /2);
+            }
+            else
+            {
+                if (_attenuationEnabled && !attenuated)
+                {
+                    World.Sound.CancelLowpass(_loopSoundId);
+                    World.Sound.SetVolume(_loopSoundId, _defaultLoopVolume);
+                }
+            }
+            _attenuationEnabled = attenuated;
         }
+
+        /// <summary>
+        /// Lowpass setting for sound obstruction of the sound loop.
+        /// </summary>
+        protected readonly (float gain, float gainHF) _lowpass = (1, .5f);
 
         /// <summary>
         /// Processes incoming messages.

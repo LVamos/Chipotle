@@ -22,6 +22,16 @@ namespace Game.Entities
     [Serializable]
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
+        public ChipotlePhysicsComponent() : base()
+        {
+            // set initial position.&
+            if (Program.TestMode)
+              StartPosition = (Vector2?)Program.TestChipotlesStartPosition;
+            else
+                StartPosition = (Vector2?)(new Vector2(1028, 1034));
+
+        }
+
         /// <summary>
         /// Specifies if the NPC can walk.
         /// </summary>
@@ -148,11 +158,7 @@ namespace Game.Entities
         /// </summary>
         public override void Start()
         {
-            // set initial position.&
-            if(Program.TestMode)
-            SetPosition(Program.TestChipotlesStartPosition, true);
-            else
-            SetPosition(1028, 1034, true);
+            SetPosition((Vector2)StartPosition, true);
                 _orientation = new Orientation2D(0, 1);
 
             base.Start();
@@ -610,7 +616,7 @@ _navigatedExit = null;
 
             // Isn't a closed door over there?
             Passage passage = World.GetPassage(targetTile.position);
-            if (passage != null && passage is Door door && door.State == Door.DoorState.Closed)
+            if (passage != null && passage.State == PassageState.Closed)
             {
                 _walking = false;
                 Owner.ReceiveMessage(new DoorHit(this));

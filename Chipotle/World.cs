@@ -524,7 +524,7 @@ lBackgroundInfo
             {
                 Name pIndexedName = new Name(A(p, "indexedname"));
                 bool isDoor = A(p, "door").ToBool();
-                Door.DoorState state = A(p, "closed").ToBool() ? Door.DoorState.Closed : Door.DoorState.Open;
+                PassageState state = A(p, "closed").ToBool() ? PassageState.Closed : PassageState.Open;
                 bool openable = A(p, "openable").ToBool();
                 Plane area = new Plane(A(p, "coordinates"));
                 List<Locality> localities = new List<Locality> { GetLocality(A(p, "from")), GetLocality(A(p, "to").PrepareForIndexing()) };
@@ -636,7 +636,7 @@ lBackgroundInfo
             FileStream stream;
             using (stream = File.Create(Program.SerializationPath))
             {
-                formatter.Serialize(stream, serializer);
+                    formatter.Serialize(stream, serializer);
             }
             stream.Close();
         }
@@ -659,10 +659,10 @@ lBackgroundInfo
         {
             Sound.SetGroupVolume("master", Sound.DefaultMasterVolume);
             LoadMap();
+            Add(Entity.CreateChipotle());
             _localities.Foreach(p => p.Value.Start());
             _passages.Foreach(p => p.Value.Start());
             _objects.Foreach(p => p.Value.Start());
-            Add(Entity.CreateChipotle());
             Add(Entity.CreateTuttle());
             Add(Entity.CreateCarson());
             Add(Entity.CreateBartender());
