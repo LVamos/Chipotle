@@ -182,6 +182,7 @@ namespace Game.UI
         /// </summary>
         private void ExitGame()
         {
+            Program.EnableJAWSKeyHook();
             StopLoop();
             Thread.Sleep(7000);
             Environment.Exit(0);

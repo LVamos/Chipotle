@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 using DavyKager;
@@ -69,7 +70,7 @@ namespace Game
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             throw (Exception)e.ExceptionObject;
-   OnError(e.ExceptionObject.ToString());
+            OnError(e.ExceptionObject.ToString());
         }
 
         /// <summary>
@@ -86,6 +87,7 @@ namespace Game
             {
                 Tolk.Load();
                 Tolk.TrySAPI(true);
+                DisableJAWSKeyHook();
                 World.SoundInit(TolkDelegate);
             }
             catch (Exception ex)
@@ -95,6 +97,54 @@ namespace Game
 
             MainWindow = new MainWindow();
             Application.Run(MainWindow);
+            EnableJAWSKeyHook();
+        }
+
+        /// <summary>
+        /// Stores reference to JAWS COM object.
+        /// </summary>
+        private static Type _jaws;
+
+        private static Object _jawsObject;
+
+        /// <summary>
+        /// Sets access to JAWS COM object.
+        /// </summary>
+        /// <returns>True if JAWS could be initialized</returns>
+        private static bool InitJAWS()
+        {
+            if (_jaws != null)
+                return true;
+
+                _jaws = Type.GetTypeFromProgID("FreedomSci.JawsApi");
+
+                if (_jaws == null)
+                    return false;
+
+            _jawsObject = Activator.CreateInstance(_jaws);
+            return true;
+        }
+
+        /// <summary>
+        /// Enables JAWS keyhook.
+        /// </summary>
+        public static void EnableJAWSKeyHook()
+        {
+            if (!InitJAWS())
+                return;
+
+            _jaws.InvokeMember("Enable", System.Reflection.BindingFlags.InvokeMethod, null, _jawsObject, new object[] { true });
+        }
+
+        /// <summary>
+        /// Removes JAWS keyhook.
+        /// </summary>
+        public static void DisableJAWSKeyHook()
+        {
+            if (!InitJAWS())
+return;
+
+            _jaws.InvokeMember("Disable", System.Reflection.BindingFlags.InvokeMethod, null, _jawsObject, null);
         }
 
         /// <summary>
@@ -103,6 +153,7 @@ namespace Game
         /// <param name="error">The error message</param>
         private static void OnError(string error)
         {
+            EnableJAWSKeyHook();
             string text = string.Empty;
 
             if (World.Player != null)
