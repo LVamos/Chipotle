@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using DavyKager;
@@ -25,8 +26,8 @@ namespace Game.Entities
         public ChipotlePhysicsComponent() : base()
         {
             // set initial position.&
-            if (Program.TestMode)
-              StartPosition = (Vector2?)Program.TestChipotlesStartPosition;
+            if (Program.TestMode && File.Exists("initpos.txt"))
+              StartPosition = (Vector2?) new Plane(File.ReadAllText("initpos.txt")).Center;
             else
                 StartPosition = (Vector2?)(new Vector2(1028, 1034));
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 
 using DavyKager;
@@ -54,6 +55,7 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
+                [new KeyShortcut(Keys.F11)] = SaveStartPosition,
                 [new KeyShortcut(false, true, false, Keys.C)] = SayAbsoluteCoords,
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
 
@@ -81,6 +83,19 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
+        }
+
+        /// <summary>
+        /// A test method that saves current position as start position.
+        /// </summary>
+        private void SaveStartPosition()
+        {
+            if (!Program.TestMode)
+                return;
+
+            string pos = Owner.Area.Center.X.ToString() + ", " + Owner.Area.Center.Y.ToString();
+            File.WriteAllText("initpos.txt", pos);
+            Tolk.Speak("Startovní pozice uložena");
         }
 
         private void SayAbsoluteCoords()
