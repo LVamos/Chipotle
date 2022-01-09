@@ -23,14 +23,6 @@ namespace Luky
         }
 
         /// <summary>
-        /// Checks if any component of Vector2 is negative.
-        /// </summary>
-        /// <param name="v">The vector to check</param>
-        /// <returns>True if any component of the vector is negative</returns>
-        public static bool IsNegative(this Vector2 v)
-            => v.X < 0 || v.Y < 0;
-
-        /// <summary>
         /// Indicates whether the specified IEnumerable is null or empty.
         /// </summary>
         /// <param name="collection">The IEnumerable to check</param>
