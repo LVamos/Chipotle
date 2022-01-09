@@ -635,6 +635,7 @@ lBackgroundInfo.volume
             Program.MainWindow.GameLoopEnabled = false;
             _cutsceneBegan = null;
             Sound.FadeAndStopAll(.0002f);
+            SaveGame();
             System.Threading.Thread.Sleep(1000);
             WindowHandler.MainMenu();
         }

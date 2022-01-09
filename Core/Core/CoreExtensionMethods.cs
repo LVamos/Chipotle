@@ -35,7 +35,7 @@ namespace Luky
         /// </summary>
         /// <param name="s">The string to modify</param>
         /// <returns>The string converted to lowercase without leading and trailing spaces</returns>
-        public static string PrepareForIndexing(this string s)
+            public static string PrepareForIndexing(this string s)
     => s?.Trim(new char[] { ' ' }).ToLower();
 
         /// <summary>

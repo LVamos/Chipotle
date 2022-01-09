@@ -283,7 +283,7 @@ namespace Game.Entities
 
             UsedOnce = !Used;
 
-            if (!Used)
+            if (!Used && Program.TestMode)
                 World.SaveGame();
 
             Used = true;

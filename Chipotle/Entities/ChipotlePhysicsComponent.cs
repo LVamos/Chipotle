@@ -347,7 +347,10 @@ _navigatedExit = null;
             bool temp2 = _inVisitedRegion;
             _currentRegion = -1;
             _inVisitedRegion = true;
+
+            if(Program.TestMode)
             World.SaveGame();
+
             _currentRegion = temp;
             _inVisitedRegion = temp2;
         }
