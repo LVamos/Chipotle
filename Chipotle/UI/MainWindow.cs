@@ -68,6 +68,8 @@ namespace Game.UI
         /// <param name="e">The message</param>
         private void MainWindow_Activated(object sender, EventArgs e)
         {
+            Program.DisableJAWSKeyHook();
+
             if (World.Sound.Muted)
                 World.Sound.Unmute();
         }
@@ -78,12 +80,16 @@ namespace Game.UI
         /// <param name="sender">Source fo the message</param>
         /// <param name="e">The message</param>
         private void MainWindow_Deactivate(object sender, EventArgs e)
-            => World.Sound.Mute();
+        {
+            Program.EnableJAWSKeyHook();
+            World.Sound.Mute();
+        }
 
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
             World.Sound.FadeMasterOut(.0009f, 0);
+            Program.EnableJAWSKeyHook();
             System.Threading.Tasks.Task.Run(() => 
             {
                 System.Threading.Thread.Sleep(1100);
