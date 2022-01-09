@@ -633,10 +633,6 @@ _navigatedExit = null;
             if (sourceLocality != null && sourceLocality != targetLocality)
                 SaveGame();
 
-            // Inform Tuttle
-            if (!IsTuttleNearBy())
-                Tuttle.ReceiveMessage(new EntityMoved(Owner, targetTile.position));
-
             WatchPuddle(targetTile.position); // Check if player walked in a puddle
             WatchPhone();
         }
