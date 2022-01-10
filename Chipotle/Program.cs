@@ -47,6 +47,7 @@ namespace Game
         /// <param name="ex">The exception</param>
         public static void OnError(Exception ex)
         {
+            EnableJAWSKeyHook();
             throw ex;
         OnError(ex.ToString());
         }
@@ -58,8 +59,9 @@ namespace Game
         /// <param name="e">The exception</param>
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
+            EnableJAWSKeyHook();
             throw e.Exception;
-   OnError(e.Exception);
+            OnError(e.Exception);
         }
 
         /// <summary>
@@ -69,6 +71,7 @@ namespace Game
         /// <param name="e">The exception</param>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            EnableJAWSKeyHook();
             throw (Exception)e.ExceptionObject;
             OnError(e.ExceptionObject.ToString());
         }
