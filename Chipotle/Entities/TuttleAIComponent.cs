@@ -54,7 +54,9 @@ namespace Game.Entities
                 }
                 );
 
-            Owner.ReceiveMessage(new SetPosition(this, new Plane(new Vector2(1030, 1036)), true));
+            // Set position
+            _area = new Plane(new Vector2(1030, 1036));
+            Owner.ReceiveMessage(new SetPosition(this, new Plane(_area), true));
         }
 
         /// <summary>
@@ -97,7 +99,7 @@ namespace Game.Entities
         private void GoToCorpse()
         {
             Vector2 goal = new Vector2(936, 1059);
-            Queue<Vector2> path =
+                Queue<Vector2> path =
             _finder.FindPath(_area.Center, goal)
             ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
             Owner.ReceiveMessage(new StopFollowing(this));

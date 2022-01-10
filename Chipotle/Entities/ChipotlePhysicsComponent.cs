@@ -186,10 +186,6 @@ namespace Game.Entities
                     [typeof(UseObject)] = (message) => OnUseObject((UseObject)message)
                 }
                 );
-
-
-            // Play intro cutscene
-            World.PlayCutscene(Owner, "cs6");
         }
 
         /// <summary>

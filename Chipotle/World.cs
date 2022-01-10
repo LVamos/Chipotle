@@ -613,9 +613,6 @@ lBackgroundInfo.volume
         /// <param name="cutscene">Name of the soudn file to be played</param>
         public static void PlayCutscene(object sender, string cutscene)
         {
-            if(Program.TestMode)
-            return;
-
             if (string.IsNullOrEmpty(cutscene))
                 throw new ArgumentNullException(nameof(cutscene));
 
@@ -712,8 +709,18 @@ lBackgroundInfo.volume
             Add(Entity.CreateChristine());
             Add(Entity.CreateSweeney());
             Add(Entity.CreateMariotti());
-            _entities.Foreach(p => p.Value.Start());
+
+            // start entities
+            foreach (Entity e in _entities.Values)
+                e.Start();
+
             Program.MainWindow.GameLoopEnabled = true;
+
+            // Play the first cutscene
+            PlayCutscene(null, "cs6");
+
+            if (Program.TestMode)
+                StopCutscene(null);
         }
 
         /// <summary>
