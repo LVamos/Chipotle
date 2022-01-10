@@ -341,8 +341,21 @@ namespace Game.Entities
             Plane target = new Plane(_path.Dequeue());
             Tile targetTile = World.Map[target.Center];
             GameObject obj = World.GetObject(target.Center);
-            if (!World.IsWalkable(target.Center) && (obj != null && obj != Owner))
+
+            if (obj == Owner)
+                return;
+
+            if (!World.IsWalkable(target.Center))
             {
+                // If the obstacle is a door open it.
+                Passage p = World.GetPassage(target.Center);
+                if (p != null && p.State == PassageState.Closed)
+                {
+                    // Open the door and keep walking.
+                    p.ReceiveMessage(new UseObject(Owner, target.Center));
+                    return;
+                }
+
                 _tryFindPath = true;
 
                 if (_approachToPlayer)

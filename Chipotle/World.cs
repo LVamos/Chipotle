@@ -468,7 +468,7 @@ namespace Game
             Passage p = GetPassage(point);
             return 
                 t != null && t.Walkable && !IsOccupied(point) 
-                && (p == null || p.State == PassageState.Open);
+                && (p == null || (p != null && p.State == PassageState.Open));
         }
 
         /// <summary>
