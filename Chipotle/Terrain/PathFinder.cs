@@ -59,16 +59,12 @@ namespace Game.Terrain
                     if (closed.Any(n => n.Coords == neighbour.Coords))
                         continue;
 
-                    if (open.Any(n => n.Coords == neighbour.Coords))
-                    {
-                        Node test = open.First(n => n.Coords == neighbour.Coords);
-
-                        if (test.Priority > node.Priority)
+                        Node test = open.FirstOrDefault(n => n.Coords == neighbour.Coords);
+                    if (test != null && test.Priority > node.Priority)
                         {
                             open.Remove(test);
                             open.Add(neighbour);
                         }
-                    }
                     else
                         open.Add(neighbour);
                 }
