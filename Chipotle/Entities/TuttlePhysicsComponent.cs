@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
@@ -175,11 +176,22 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// finds a walkable tile near the Detective Chipotle NPC.
+        /// finds a walkable tile near the Detective Chipotle NPC. Prefers the locality in which the player is located.
         /// </summary>
         /// <returns>Coordinates of tthe target tile</returns>
         private Vector2? FindPlaceNearPlayer()
-=> _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
+        {
+            // Find possible goals. Try select a goal from the current locality of the player.
+            Vector2? farther = _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
+
+            if (Owner.IsInSameLocality(_player))
+                return farther;
+
+            Vector2? closer = _player.Area.FindNearestWalkableTile(_minDistanceFromPlayer);
+            if (closer.HasValue && _player.Locality.Area.LaysOnPlane((Vector2)closer))
+                return closer;
+            return farther;
+        }
 
         /// <summary>
         /// Computes distance between the NPC and the Detective Chipotle NPC.
@@ -194,12 +206,12 @@ namespace Game.Entities
         private void GoToPlayer()
         {
             _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
-            Vector2? tempGoal = FindPlaceNearPlayer();
+            Vector2? tmp = FindPlaceNearPlayer();
 
-            if (!tempGoal.HasValue)
+            if (!tmp.HasValue)
                 return;
 
-            Vector2 goal = (Vector2)tempGoal;
+            Vector2 goal = (Vector2)tmp;
             _path = _finder.FindPath(_area.Center, goal);
 
             if (_path == null)
