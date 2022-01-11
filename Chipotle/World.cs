@@ -89,8 +89,8 @@ namespace Game
         private static readonly Dictionary<string, (string sound, float volume)> _localityLoops = new Dictionary<string, (string sound, float volume)>
         {
             ["chodba h1"] = ("ElectricalBoxLoop", 1),
-            ["balkon p1"] = ("BalconyLoop", .5f),
-            ["terasa w1"] = ("BalconyLoop", .4f),
+            ["balkon p1"] = ("BelvedereStreetLoop", .5f),
+            ["terasa w1"] = ("PoolLoop", .4f),
             ["výčep h1"] = ("CzechPubLoop", 1),
             ["ulice h1"] = ("BonitaStreetLoop", 1),
             ["příjezdová cesta w1"] = ("DriveWayLoop", 1),
