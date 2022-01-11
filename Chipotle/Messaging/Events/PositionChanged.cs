@@ -1,5 +1,6 @@
 ﻿using System;
 
+using Game.Entities;
 using Game.Terrain;
 
 namespace Game.Messaging.Events
@@ -9,42 +10,33 @@ namespace Game.Messaging.Events
     /// </summary>
     /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
     [Serializable]
-    public class PositionChanged : GameMessage
+    public class PositionChanged : EntityMoved
     {
         /// <summary>
-        /// The locality in which the NPC was originally located.
+        /// Describes type of obstacle between the entity and the player if any.
         /// </summary>
-        public readonly Locality SourceLocality;
+        public readonly ObstacleType Obstacle;
 
         /// <summary>
-        /// The locality in which the NPC is currently located.
+        /// Indicates if foot steps of the NPC should be audible.
         /// </summary>
-        public readonly Locality TargetLocality;
-
-        /// <summary>
-        /// Original position of the NPC
-        /// </summary>
-        public readonly Plane SourcePosition;
-
-        /// <summary>
-        /// New position of the NPC
-        /// </summary>
-        public readonly Plane TargetPosition;
+        public readonly bool Silently;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="sourcePosition">Original position of the NPC</param>
-        /// <param name="targetPosition">New position of the NPC</param>
-        public PositionChanged(object sender, Plane sourcePosition, Plane targetPosition, Locality sourceLocality, Locality targetLocality) : base(sender)
+        /// <param name="sourcePosition">Source position of the NPC</param>
+        /// <param name="targetPosition">Target position of the NPC</param>
+        /// <param name="sourceLocality"Source locality of the NPC></param>
+        /// <param name="targetLocality">Target locality of the NPC</param>
+        /// <param name="obstacle">Describes type of obstacle between the entity and the player if any</param>
+        /// <param name="silently">Determines if the fott steps of the NPC should be audible</param>
+        public PositionChanged(object sender, Plane sourcePosition, Plane targetPosition, Locality sourceLocality, Locality targetLocality, ObstacleType obstacle = ObstacleType.None, bool silently = false) : base(sender, sourcePosition, targetPosition, sourceLocality, targetLocality)
         {
-            if (sourcePosition != null)
-                SourcePosition = new Plane(sourcePosition);
+            Obstacle = obstacle;
+            Silently = silently;
 
-            TargetPosition = new Plane(targetPosition);
-            SourceLocality = sourceLocality;
-            TargetLocality = targetLocality;
         }
     }
 }

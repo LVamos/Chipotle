@@ -18,7 +18,7 @@ namespace Game.Entities
     [Serializable]
     public class TuttlePhysicsComponent : PhysicsComponent
     {
-        /// <summ        /// <summary>
+        /// <summary>
         /// Constructs path from the NPC to the specified goal avoiding all obstacles.
         /// </summary>
         /// <param name="goal">The target position</param>

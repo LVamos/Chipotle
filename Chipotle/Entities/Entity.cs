@@ -203,24 +203,24 @@ namespace Game.Entities
             Locality targetLocality = message.TargetPosition.GetLocality();
 
             // Record visited locality.
-            if (sourceLocality != null && sourceLocality != targetLocality)
-                RecordLocality(sourceLocality);
+            if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
+                RecordLocality(message.SourceLocality);
 
             // Inform all adjecting localities
             List<Locality> localities = new List<Locality>();
-            if (sourceLocality != null)
+            if (message.SourceLocality!= null)
             {
-                localities.Add(sourceLocality);
-                localities.AddRange(sourceLocality.Neighbours);
+                localities.Add(message.SourceLocality);
+                localities.AddRange(message.SourceLocality.Neighbours);
             }
-            if (targetLocality != null)
+            if (message.TargetLocality!= null)
             {
-                localities.Add(targetLocality);
-                localities.AddRange(targetLocality.Neighbours);
+                localities.Add(message.TargetLocality);
+                localities.AddRange(message.TargetLocality.Neighbours);
             }
             IEnumerable<Locality> targetLocalities = localities.Distinct<Locality>();
 
-            EntityMoved moved = new EntityMoved(this, _area.Center);
+            EntityMoved moved = new EntityMoved(this, message.SourcePosition, message.TargetPosition, message.SourceLocality, message.TargetLocality);
             LocalityLeft left = new LocalityLeft(this, this, sourceLocality);
             LocalityEntered entered = new LocalityEntered(this, this, targetLocality);
 

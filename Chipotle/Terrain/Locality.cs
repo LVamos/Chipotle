@@ -534,7 +534,7 @@ namespace Game.Terrain
 
                     if (p.State == PassageState.Closed)
                     {
-                        World.Sound.ApplyLowpass(id, _overDoorLowpass);
+                        World.Sound.ApplyLowpass(id, World.Sound.OverDoorLowpass);
                         World.Sound.FadeSource(id, FadingType.Out, .00005f, OverDoorVolume, false);
                     }
                     else
@@ -546,7 +546,7 @@ namespace Game.Terrain
             // Player is in a distant locality or behind a wall without doors.
             id = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, _area.Center.AsOpenALVector(), true, OverWallVolume);
             _loops.Add(id);
-            World.Sound.ApplyLowpass(id, _overDoorLowpass);
+            World.Sound.ApplyLowpass(id, World.Sound.OverDoorLowpass);
         }
 
         /// <summary>

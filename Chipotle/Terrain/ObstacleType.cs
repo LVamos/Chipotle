@@ -10,6 +10,7 @@
         Wall,
         Object,
         Bushes,
-        IndirectPath
+        IndirectPath,
+        Far
     }
 }

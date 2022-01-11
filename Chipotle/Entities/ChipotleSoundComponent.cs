@@ -99,7 +99,7 @@ namespace Game.Entities
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
                 [typeof(TurnEntityResult)] = (m) => OnTurnoverDone((TurnEntityResult)m),
-                [typeof(EntityMoved)] = (m) => OnMovementDone((EntityMoved)m),
+                [typeof(PositionChanged)] = (message) => OnPositionChanged((PositionChanged)message),
                 [typeof(ObjectsCollided)] = (m) => OnObjectsCollided((ObjectsCollided)m),
                 [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
             }
@@ -246,9 +246,9 @@ namespace Game.Entities
         /// Processes the MovementDone message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnMovementDone(EntityMoved message)
+        private void OnPositionChanged(PositionChanged message)
         {
-            PlayTerrain(World.Map[message.Target].Terrain);
+            PlayTerrain(World.Map[message.TargetPosition.Center].Terrain);
             WatchCutscene();
         }
 

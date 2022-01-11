@@ -27,12 +27,51 @@ namespace Game
     public static class World
     {
         /// <summary>
+        /// Detects acoustic obstacles between the player and the specified map element.
+        /// </summary>
+        /// <param name="area">The map element to be checked</param>
+        /// <returns>The corresponding obstacle type</returns>
+        public static ObstacleType DetectAcousticObstacles(Plane area)
+        {
+            Locality playersLocality = Player.Locality;
+                Locality otherLocality = area.GetLocality();
+            bool neighbour = playersLocality.IsNeighbour(otherLocality);
+            bool behindDoors = otherLocality.IsAccessible(playersLocality);
+
+            // Are the regions in inadjecting localities?
+            if (playersLocality != otherLocality && (!neighbour || (neighbour && !behindDoors)))
+                return ObstacleType.Far;  // Inaudible
+
+            // Adjecting localities
+            Plane path = new Plane(area.GetClosestPointTo(Player.Area.Center), area.GetClosestPointTo(Player.Area.Center));
+            ObstacleType obstacle = DetectObstacles(path);
+
+            if (neighbour && behindDoors)
+            {
+                Passage atPassage = Player.Locality.IsAtPassage(area.Center);
+
+                if (obstacle == ObstacleType.IndirectPath && atPassage == null)
+                    return ObstacleType.Wall;
+
+                if (atPassage != null)
+                {
+                    if (atPassage.State == PassageState.Closed)
+                        return ObstacleType.Door;
+
+                    return ObstacleType.None;
+                }
+            }
+
+            return obstacle != ObstacleType.Wall ? obstacle : ObstacleType.Object;
+        }
+
+/// <summary>
         /// Checks if there are some obstacles between the specified points. The edge points arn't included.
         /// </summary>
         /// <param name="p1">First point</param>
         /// <param name="p2">Second point</param>
         /// <returns>ObstacleType</returns>
-        public static ObstacleType GetObstacles(Plane path)
+        public static ObstacleType DetectObstacles(Plane path)
         {
             bool Intersects(Plane area)
                 => area.LaysOnPlane(path.UpperLeftCorner) || area.LaysOnPlane(path.LowerRightCorner);

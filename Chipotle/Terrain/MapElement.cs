@@ -14,21 +14,6 @@ namespace Game.Terrain
     [Serializable]
     public abstract class MapElement : MessagingObject
     {
-        /// <summary>     
-        /// <summary>
-        /// Lowpass setting for simulation of sounds obstructed by an object.
-        /// </summary>
-        protected (float gain, float gainHF) _overWallLowpass = (.9f, .03f);
-
-        /// <summary>
-        /// Lowpass setting for simulation of sounds over wall.
-        /// </summary>
-        protected (float gain, float gainHF) _overObjectLowpass = (.7f, .3f);
-
-        /// <summary>
-        /// Lowpass setting for simulation of sounds obstructed by a door.
-        /// </summary>
-        protected (float gain, float gainHF) _overDoorLowpass = (.3f, .5f);
 
         /// <summary>
         /// Default volume for the sound loop if there's any.

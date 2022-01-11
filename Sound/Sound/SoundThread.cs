@@ -23,6 +23,39 @@ namespace Luky
     /// </summary>
     public sealed partial class SoundThread : BaseThread
     {
+        /// <summary>             /// <summary>
+        /// Volume used with sound attenuation.
+        /// </summary>
+        public float GetOverWallVolume(float defaultVolume) 
+            => defaultVolume * .4f;
+
+        /// <summary>
+        /// Volume used with sound attenuation.
+        /// </summary>
+        public float GetOverDoorVolume(float defaultVolume) 
+            => defaultVolume * .5f;
+
+        /// <summary>
+        /// Volume used with sound attenuation.
+        /// </summary>
+        public float GetOverObjectVolume(float defaultVolume)
+            => defaultVolume * .9f;
+
+        /// <summary>
+        /// Lowpass setting for simulation of sounds obstructed by an object.
+        /// </summary>
+        public (float gain, float gainHF) OverWallLowpass = (.9f, .03f);
+
+        /// <summary>
+        /// Lowpass setting for simulation of sounds over wall.
+        /// </summary>
+        public (float gain, float gainHF) OverObjectLowpass = (.7f, .3f);
+
+        /// <summary>
+        /// Lowpass setting for simulation of sounds obstructed by a door.
+        /// </summary>
+        public (float gain, float gainHF) OverDoorLowpass = (.3f, .5f);
+
         /// <summary>
         /// Removes the currently applied filter from the specified source.
         /// </summary>

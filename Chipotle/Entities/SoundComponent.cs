@@ -12,6 +12,10 @@ namespace Game.Entities
     public class SoundComponent : EntityComponent
     {
         /// <summary>
+        /// Default volume for sound output
+        /// </summary>
+        protected float _defaultVolume = 1;
+        /// <summary>
         /// Reference to the sound player
         /// </summary>
         protected SoundThread _sound => World.Sound;

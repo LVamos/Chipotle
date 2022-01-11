@@ -93,23 +93,24 @@ namespace Game.Entities
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
-        /// <param name="target">coordinates of the target position</param>
+        /// <param name="targetPosition">coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void SetPosition(Plane target, bool silently = false)
+        protected void SetPosition(Plane targetPosition, bool silently = false)
         {
-            Tile targetTile = World.Map[target.Center];
             Locality sourceLocality = _area?.GetLocality();
-            Locality targetLocality = target.GetLocality();
-            Plane source = _area;
+            Locality targetLocality = targetPosition.GetLocality();
+            Plane sourcePosition = _area;
 
-            _area = new Plane(target);
+            _area = new Plane(targetPosition);
             _locality = _area.GetLocality();
 
-            // Announce changes
-            Owner.ReceiveMessage(new PositionChanged(this, source, target, sourceLocality, targetLocality));
+            // If it isn't the player detect obstacles between him and this NPC.
+            Entity player = World.Player;
+            ObstacleType obstacle = Owner != player ? World.DetectAcousticObstacles(_area) : ObstacleType.None;
 
-            if (!silently)
-                Owner.ReceiveMessage(new EntityMoved(this, target.Center)); // Inform other components.
+            // Announce changes
+            PositionChanged changed = new PositionChanged(this, sourcePosition, targetPosition, sourceLocality, targetLocality, obstacle, silently);
+            Owner.ReceiveMessage(changed);
 
             if (targetLocality != sourceLocality)
                 Owner.ReceiveMessage(new LocalityChanged(this, sourceLocality, targetLocality));
