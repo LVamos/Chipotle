@@ -663,7 +663,8 @@ _navigatedExit = null;
 
             return
                 from o in nearestObjects
-                select ((o, GetAngle(o.Area.GetClosestPointTo(me))));
+                let p = o.Area.GetClosestPointTo(me)
+                select ((o, GetAngle(p)));
         }
 
         /// <summary>
