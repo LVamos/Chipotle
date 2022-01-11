@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Game.Entities;
+
 using OpenTK;
 
 namespace Game.Terrain
@@ -20,8 +22,15 @@ namespace Game.Terrain
         /// <returns>
         /// A list of points leading from start to the end or null if no possible path exists
         /// </returns>
-        public Queue<Vector2> FindPath(Vector2 start, Vector2 end)
+        public Queue<Vector2> FindPath(Vector2 start, Vector2 end, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false)
         {
+            // Tests if a node is walkable.
+            bool Inaccessible(Node n)
+                        => (!throughObjects && n.IsObjectOrEntity())
+                        || (!throughClosedDoors && n.IsClosedDoor())
+                        || (!throughImpermeableTerrain && n.IsImpermeableTerrain());
+
+            // Reconstructs the path.
             Queue<Vector2> GetPath(Node lastStep)
             {
                 Queue<Vector2> coords = new Queue<Vector2>();
@@ -32,40 +41,45 @@ namespace Game.Terrain
                 return new Queue<Vector2>(coords.Reverse());
             }
 
+            // Find the path.
+            // Začni výchozím uzlem.
             Node first = new Node(start);
             Node last = new Node(end);
             first.ComputeDistance(last.Coords);
 
-            List<Node> open = new List<Node>
-            {
-                first
-            };
+            // Přidej výchozí uzel do seznamu otevřených uzlů.
+            List<Node> open = new List<Node> { first };
             List<Node> closed = new List<Node>();
 
+            // Procházej seznam otevřených uzlů, dokud se nevyprázdní.
             while (open.Any())
             {
-                Node node = open.OrderByDescending(n => n.Priority).Last();
+                // Z otevřených uzlů vyber ten nejlevnější.
+                Node node = open.OrderByDescending(n => n.Price).Last();
 
+                // Pokud už jsme v cíli, skonči.
                 if (node.Coords == last.Coords)
                     return GetPath(node);
 
+                // Jinak přesuň uzel z otevřených do uzavřených.
                 closed.Add(node);
                 open.Remove(node);
 
-                IEnumerable<Node> neighbours = GetNeighbours(node, last);
-
-                foreach (Node neighbour in neighbours)
+// Projdi sousedy
+                foreach (Node neighbour in GetNeighbours(node, last))
                 {
-                    if (closed.Any(n => n.Coords == neighbour.Coords))
+                    // Pokud soused patří mezi uzavřené nebo je na něm nepovolená překážka, přeskoč ho.
+                    if (
+                        closed.Any(c => c.Coords == neighbour.Coords)
+                        || Inaccessible(neighbour)
+                        )
                         continue;
 
-                        Node test = open.FirstOrDefault(n => n.Coords == neighbour.Coords);
-                    if (test != null && test.Priority > node.Priority)
-                        {
-                            open.Remove(test);
-                            open.Add(neighbour);
-                        }
-                    else
+                    // Jinak pokud je v otevřených uzel, který má stejné souřadnice jako soused, ale je dražší, nahraď ho sousedem. v opačném případě jen přidej souseda mezi otevřené.
+                        Node openNode = open.FirstOrDefault(o => o.Coords == neighbour.Coords);
+                    if (openNode != null && openNode.Price > node.Price)
+                            open.Remove(openNode);
+
                         open.Add(neighbour);
                 }
             }
@@ -90,6 +104,30 @@ namespace Game.Terrain
         private class Node
         {
             /// <summary>
+            /// Checks if there's a closed door on this node.
+            /// </summary>
+            /// <returns>True if there's a closed door on the node</returns>
+            public bool IsClosedDoor()
+            {
+                Passage p = World.GetPassage(Coords);
+                return p != null && p.State == PassageState.Closed;
+            }
+
+            /// <summary>
+            /// Checks if there's an object or entity on this node.
+            /// </summary>
+            /// <returns>True if there's an object or entity on the node</returns>
+            public bool IsObjectOrEntity()
+                => World.IsOccupied(Coords);
+
+            /// <summary>
+            /// Checks if there's an impermeable terrain on this node.
+            /// </summary>
+            /// <returns>True if there's an object or entity on the node</returns>
+            public bool IsImpermeableTerrain()
+                => !World.Map[Coords].Walkable;
+
+            /// <summary>
             /// constructor
             /// </summary>
             /// <param name="coords">Coordinates of the node</param>
@@ -108,12 +146,12 @@ namespace Game.Terrain
             public Vector2 Coords { get; private set; }
 
             /// <summary>
-            /// Distance from current node
+            /// Heuristic function determining number of steps taken from the first node to this node.
             /// </summary>
             public int Cost { get; private set; }
 
             /// <summary>
-            /// Distance between this node and the goal node
+            /// Heuristic function expressing distance between this node and the goal node.
             /// </summary>
             public int Distance { get; private set; }
 
@@ -123,9 +161,9 @@ namespace Game.Terrain
             public Node Parent { get; private set; }
 
             /// <summary>
-            /// A heuristic parameter
+            /// A heuristic function expressing length of potential path from the start to the goal across this node.
             /// </summary>
-            public int Priority => Cost + Distance;
+            public int Price => Cost + Distance;
 
             /// <summary>
             /// Calculates distance between this node and the lastnode
