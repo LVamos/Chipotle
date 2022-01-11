@@ -129,7 +129,7 @@ namespace Game.Entities
                 Vector2 me = _area.GetClosestPointTo(player);
             Plane path = new Plane(me, player);
 
-            return World.GetObstacles(path);
+            return World.DetectObstacles(path);
         }
 
         /// <summary>
@@ -308,47 +308,10 @@ namespace Game.Entities
             if (string.IsNullOrEmpty(_sounds.loop))
                 return;
 
-            Entity player = World.Player;
-            bool neighbour = player.Locality.IsNeighbour(Locality);
-            bool behindDoors = Locality.IsAccessible(player.Locality);
-
-            // Is he in an inadjecting locality?
-            if 
-                (
-                !IsInSameLocality(player)
-                &&(
-                !neighbour || (neighbour && !behindDoors)
-                ) // Inaudible
-                )
-            {
+            ObstacleType obstacle = World.DetectAcousticObstacles(_area);
+            if (obstacle == ObstacleType.Far)
                 StopLoop();
-                return;
-            }
-
-            ObstacleType obstacle = GetObstacles();
-
-// In adjecting locality
-            if (neighbour && behindDoors)
-            {
-                Passage atPassage = Locality.IsAtPassage(player.Area.Center);
-
-                if (obstacle == ObstacleType.IndirectPath && atPassage== null)
-                {
-                    PlayLoop(ObstacleType.Wall);
-                    return;
-                }
-
-                if (atPassage != null)
-                {
-                    if (atPassage.State == PassageState.Closed)
-                        PlayLoop(ObstacleType.Door);
-                    else PlayLoop();
-                    return;
-                }
-            }
-
-            // Play the loop according to the type of obstruction. 
-            PlayLoop(obstacle != ObstacleType.Wall ? obstacle: ObstacleType.Object);
+            else PlayLoop(obstacle);// != ObstacleType.Wall ? obstacle: ObstacleType.Object);
         }
 
         /// <summary>
@@ -368,9 +331,9 @@ namespace Game.Entities
 
             switch (obstacle)
             {
-                case ObstacleType.Wall: lowpass = _overWallLowpass; volume = OverWallVolume;  break;
-                case ObstacleType.Door: lowpass = _overDoorLowpass; volume = OverDoorVolume;  break;
-                case ObstacleType.Object: lowpass = _overObjectLowpass; volume = OverObjectVolume;  break;
+                case ObstacleType.Wall: lowpass = World.Sound.OverWallLowpass; volume = OverWallVolume;  break;
+                case ObstacleType.Door: lowpass = World.Sound.OverDoorLowpass; volume = OverDoorVolume;  break;
+                case ObstacleType.Object: lowpass = World.Sound.OverObjectLowpass; volume = OverObjectVolume;  break;
             }
 
             if (attenuate)
