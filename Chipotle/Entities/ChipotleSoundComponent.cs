@@ -165,9 +165,9 @@ namespace Game.Entities
                 }
 
                 string number;
-                if (info.Count == 2 || info.Count == 3)
-                    number = "Jsou tady " + (info.Count == 2 ? "dva" : "3") + " východy: ";
-                else number = "Je tady " + info.Count.ToString() + " východů: ";
+                if (info.Count >= 2 && info.Count <= 4)
+                    number = "Jsou tu " + (info.Count == 2 ? "dva" : "3") + " východy: ";
+                else number = "Je tu " + info.Count.ToString() + " východů: ";
                 Tolk.Speak(number + FormatStringList(info, true));
         }
 
