@@ -149,7 +149,7 @@ namespace Game.Entities
 
             if (message.ExitInfo.IsNullOrEmpty())
             {
-                Tolk.Speak("žádné východy");
+                Tolk.Speak("žádné východy nevidíš");
                 return;
             }
 
