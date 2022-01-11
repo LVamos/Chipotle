@@ -18,11 +18,6 @@ namespace Game.Messaging.Commands
         public readonly Vector2 Goal;
 
         /// <summary>
-        /// A preplanned route to walk on.
-        /// </summary>
-        public readonly Queue<Vector2> Path;
-
-        /// <summary>
         /// Length of one step in milliseconds
         /// </summary>
         public readonly int StepLength;
@@ -31,12 +26,10 @@ namespace Game.Messaging.Commands
         /// constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="path">A preplanned route to walk on</param>
         /// <param name="goal">The goal Tuttle should go to</param>
         /// <param name="stepLength">Length of one step in milliseconds</param>
-        public GotoPoint(object sender, Queue<Vector2> path, Vector2 goal, int stepLength) : base(sender)
+        public GotoPoint(object sender, Vector2 goal, int stepLength) : base(sender)
         {
-            Path = path ?? throw new ArgumentNullException(nameof(path));
             Goal = goal;
             StepLength = stepLength;
         }

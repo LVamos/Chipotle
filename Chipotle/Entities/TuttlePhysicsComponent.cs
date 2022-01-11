@@ -18,6 +18,17 @@ namespace Game.Entities
     [Serializable]
     public class TuttlePhysicsComponent : PhysicsComponent
     {
+        /// <summ        /// <summary>
+        /// Constructs path from the NPC to the specified goal avoiding all obstacles.
+        /// </summary>
+        /// <param name="goal">The target position</param>
+        /// <returns>Queue with nodes leading to the target</returns>
+        protected Queue<Vector2> FindPath(Vector2 goal)
+        {
+            Vector2? start = _area.FindNearestWalkableTile(3);
+            return start.HasValue ? _finder.FindPath((Vector2)start, goal) : null;
+        }
+
         /// <summary>
         /// Specifies the maximum allowed distance from the Detective Chipotle NPC.
         /// </summary>
@@ -161,7 +172,7 @@ namespace Game.Entities
                 return;
             }
 
-            _path = _finder.FindPath(_area.Center, _goal);
+            _path = FindPath(_goal);
 
             if (_path == null)
                 return;
@@ -212,7 +223,7 @@ namespace Game.Entities
                 return;
 
             Vector2 goal = (Vector2)tmp;
-            _path = _finder.FindPath(_area.Center, goal);
+            _path = FindPath(goal);
 
             if (_path == null)
                 return;
@@ -243,6 +254,7 @@ namespace Game.Entities
         {
             if (message.Sender != _player)
                 return;
+            //System.Diagnostics.Debugger.Break();
 
             if (_followPlayer && !_approachToPlayer)
                 CheckDistanceFromPlayer();
@@ -254,7 +266,11 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnGotoPoint(GotoPoint message)
         {
-            _path = message.Path;
+            _path = FindPath(message.Goal);
+
+            if (_path == null) // No path exists
+                return;
+
             _goal = message.Goal;
             _walkSpeed = message.StepLength;
             _walk = true;
@@ -299,7 +315,7 @@ namespace Game.Entities
         private void OnStartFollowing(StartFollowing message)
         {
             _path = null;
-            _followPlayer = true;
+            StartFollowing();
         }
 
         /// <summary>

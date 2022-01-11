@@ -98,12 +98,10 @@ namespace Game.Entities
         /// </summary>
         private void GoToCorpse()
         {
-            Vector2 goal = new Vector2(936, 1059);
-                Queue<Vector2> path =
-            _finder.FindPath(_area.Center, goal)
-            ?? throw new InvalidOperationException(nameof(OnCutsceneEnded));
             Owner.ReceiveMessage(new StopFollowing(this));
-            Owner.ReceiveMessage(new GotoPoint(this, path, goal, 400));
+
+            Vector2 goal = new Vector2(936, 1059);
+            Owner.ReceiveMessage(new GotoPoint(this, goal, 400));
         }
 
         /// <summary>
