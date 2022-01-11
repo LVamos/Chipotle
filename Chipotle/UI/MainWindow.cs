@@ -55,11 +55,20 @@ namespace Game.UI
 
             KeyDown += MainWindow_KeyDown;
             KeyUp += MainWindow_KeyUp;
+            KeyPress += MainWindow_KeyPress;
             Shown += MainWindow_Shown;
             FormClosing += MainWindow_FormClosing;
             Deactivate += MainWindow_Deactivate;
             Activated += MainWindow_Activated;
         }
+
+        /// <summary>
+        /// Handles the KeyPress message.
+        /// </summary>
+        /// <param name="sender">Source of the message</param>
+        /// <param name="e">The message</param>
+        private void MainWindow_KeyPress(object sender, KeyPressEventArgs e)
+            => WindowHandler.OnKeyPress(e.KeyChar);
 
         /// <summary>
         /// Handles the Activated message.

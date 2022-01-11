@@ -10,6 +10,13 @@ namespace Game.UI
     public static class WindowHandler
     {
         /// <summary>
+        /// Handles the KeyPress message.
+        /// </summary>
+        /// <param name="letter">The key that was pressed</param>
+        public static void OnKeyPress(char letter)
+            => ActiveWindow.OnKeyPress(letter);
+
+        /// <summary>
         /// Internal reference to currently active window
         /// </summary>
         private static VirtualWindow _activeWindow;

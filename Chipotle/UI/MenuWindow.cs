@@ -6,9 +6,11 @@ using System.Windows.Forms;
 
 using DavyKager;
 
+using Luky;
+
 namespace Game.UI
 {
-    /// <summary>
+/// <summary>
     /// a virtual window for voice menus
     /// </summary>
     public class MenuWindow : VirtualWindow
@@ -260,6 +262,39 @@ namespace Game.UI
         {
             Cursor = _lastItem;
             Play(_wrapDownSound);
-        }//mtd
+        }
+
+        /// <summary>
+        /// Handles the KeyPress message.
+        /// </summary>
+        /// <param name="letter">The key that was pressed</param>
+        public override void OnKeyPress(char letter)
+        {
+            base.OnKeyPress(letter);
+
+            Navigate(letter);
+        }
+
+        /// <summary>
+        /// Finds an item beginning with the specified letter and moves the cursor to it.
+        /// </summary>
+        /// <param name="letter">First letter of the requested item</param>
+        protected void Navigate(char letter)
+        {
+            int result = -1;
+            for (int i = 0; i < _items.Length && result == -1; i++)
+            {
+                string item = _items[i].PrepareForIndexing();
+
+                if (item[0] == letter)
+                    result = i;
+            }
+
+            if (result != -1)
+            {
+                Cursor = result;
+                SayItem();
+            }
+        }
     }
 }

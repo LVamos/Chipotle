@@ -79,6 +79,12 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// Handles the KeyPress message.
+        /// </summary>
+        /// <param name="letter">The key that was pressed</param>
+        public virtual void OnKeyPress(char letter) { }
+
+        /// <summary>
         /// KeyUp event handler
         /// </summary>
         /// <param name="e">Event parameters</param>
