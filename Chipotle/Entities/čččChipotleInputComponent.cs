@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 using DavyKager;
@@ -56,7 +55,6 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
-                [new KeyShortcut(Keys.F10)] = JumpToLocality,
                 [new KeyShortcut(Keys.F11)] = SaveStartPosition,
                 [new KeyShortcut(false, true, false, Keys.C)] = SayAbsoluteCoords,
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
@@ -85,30 +83,6 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
-        }
-
-        /// <summary>
-        /// Opens a menu with all localities and jumps to the nearest walkable position in the selected locality.
-        /// </summary>
-        private void JumpToLocality()
-        {
-            if (!Program.TestMode)
-                return;
-
-            Vector2 me = Owner.Area.Center;
-            string[] items =
-                (
-                from l in World.GetLocalities()
-                select (l.Name.Indexed)
-                ).ToArray<string>();
-
-            int item = WindowHandler.Menu(items, "Vyber lokaci");
-            if (item == -1)
-                return;
-
-            Locality locality = World.GetLocality(items[item]);
-            Vector2 point = locality.Area.GetWalkableTiles().First().position;
-            Owner.ReceiveMessage(new SetPosition(this, new Plane(point)));
         }
 
         /// <summary>

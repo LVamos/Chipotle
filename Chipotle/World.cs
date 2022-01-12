@@ -103,6 +103,12 @@ namespace Game
         }
 
         /// <summary>
+        /// Enumerates all localities.
+        /// </summary>
+        /// <returns>Enumeration of all localities</returns>
+        public static IEnumerable<Locality> GetLocalities()
+=> _localities.Values;
+        /// <summary>
         /// Interval between game loop ticks
         /// </summary>
         public const int DeltaTime = 1000 / FramesPerSecond;
