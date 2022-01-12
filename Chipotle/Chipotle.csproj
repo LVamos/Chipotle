@@ -160,6 +160,7 @@
     <Compile Include="Terrain\PathFinder.cs" />
     <Compile Include="Terrain\Plane.cs" />
     <Compile Include="Terrain\Locality.cs" />
+    <Compile Include="Terrain\SlidingDoor.cs" />
     <Compile Include="Terrain\TerrainType.cs" />
     <Compile Include="Terrain\Tile.cs" />
     <Compile Include="Terrain\TileMap.cs" />

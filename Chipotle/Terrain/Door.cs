@@ -24,6 +24,26 @@ namespace Game.Terrain
         protected readonly bool _openable;
 
         /// <summary>
+        /// Sound of the door being opened
+        /// </summary>
+        protected string _openingSound = "snd23";
+
+        /// <summary>
+        /// Sound of the door being closed
+        /// </summary>
+        protected string _closingSound;
+
+        /// <summary>
+        /// Sound played when an NPC bumps to the door.
+        /// </summary>
+        protected string _hitSound;
+
+        /// <summary>
+        /// Sound of the door being opened
+        /// </summary>
+        protected string _lockedSound;
+
+        /// <summary>
         /// constructor
         /// </summary>
         /// <param name="name">Inner name for the door</param>
@@ -64,7 +84,7 @@ namespace Game.Terrain
                 foreach (Locality l in Localities)
                     l.ReceiveMessage(message);
 
-                World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd24"), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_closingSound), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
             }
         }
 
@@ -94,10 +114,10 @@ namespace Game.Terrain
             State = PassageState.Open;
 
             DoorManipulated message = new DoorManipulated(this);
-            foreach (Locality l in Localities)
-                l.ReceiveMessage(message);
+                Localities[0].ReceiveMessage(message);
+                Localities[1].ReceiveMessage(message);
 
-            World.Sound.Play(stream: World.Sound.GetRandomSoundStream("snd23"), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+            World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_openingSound), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
         }
     }
 }

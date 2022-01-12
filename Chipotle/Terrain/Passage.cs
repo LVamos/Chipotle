@@ -108,6 +108,16 @@ namespace Game.Terrain
         }
 
         /// <summary>
+        /// Creates new instance of a sliding door.
+        /// </summary>
+        /// <param name="name">Inner name of the door</param>
+        /// <param name="area">Coordinates of the are occupied by the door</param>
+        /// <param name="localities">Localities connected by the door</param>
+        /// <returns>A new instance of the door</returns>
+        public static SlidingDoor CreateSlidingDoor(Name name, Plane area, IEnumerable<Locality> localities)
+=> new SlidingDoor(name, area, localities);
+
+        /// <summary>
         /// Creates new instance of the door in the hall of the Vanilla crunch company (hala v1) locality.
         /// </summary>
         /// <param name="name">Inner name of the door</param>
@@ -142,6 +152,7 @@ namespace Game.Terrain
         {
             switch (name.Indexed)
             {
+                case "duhv1": return CreateSlidingDoor(name, area, localities);
                 case "dcgv1": return CreateVanillaCrunchGarageDoor(name, area, localities);
                 case "dhkv1": return CreateMariottisDoor(name, area, localities);
                 case "d hala w1": return CreateHallDoor(name, area, localities);
@@ -280,7 +291,7 @@ namespace Game.Terrain
         /// Processes the EntityMoved message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected void OnEntityMoved(EntityMoved message)
+        protected virtual void OnEntityMoved(EntityMoved message)
         {
             if (!_navigating || message.Sender != World.Player)
                 return;
