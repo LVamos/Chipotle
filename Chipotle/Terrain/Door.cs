@@ -31,7 +31,7 @@ namespace Game.Terrain
         /// <summary>
         /// Sound of the door being closed
         /// </summary>
-        protected string _closingSound;
+        protected string _closingSound = "snd24";
 
         /// <summary>
         /// Sound played when an NPC bumps to the door.
