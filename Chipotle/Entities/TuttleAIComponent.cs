@@ -98,6 +98,9 @@ namespace Game.Entities
         /// </summary>
         private void GoToCorpse()
         {
+            if (Program.TestMode)
+                return;
+
             Owner.ReceiveMessage(new StopFollowing(this));
 
             Vector2 goal = new Vector2(936, 1059);

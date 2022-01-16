@@ -56,6 +56,7 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.T)] = SayTuttlesPosition,
                 [new KeyShortcut(Keys.F10)] = JumpToLocality,
                 [new KeyShortcut(Keys.F11)] = SaveStartPosition,
                 [new KeyShortcut(false, true, false, Keys.C)] = SayAbsoluteCoords,
@@ -88,6 +89,20 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Test function to announce Tuttle's position
+        /// </summary>
+        private void SayTuttlesPosition()
+        {
+            if (!Program.TestMode)
+                return;
+
+            Entity tuttle = World.GetEntity("tuttle");
+            string position = tuttle.Area.Center.ToString();
+            string locality = tuttle.Locality.Name.Indexed;
+            Tolk.Speak(locality+" " +position);
+        }
+
+        /// <summary>
         /// Opens a menu with all localities and jumps to the nearest walkable position in the selected locality.
         /// </summary>
         private void JumpToLocality()
@@ -99,6 +114,7 @@ namespace Game.Entities
             string[] items =
                 (
                 from l in World.GetLocalities()
+                orderby l.Name.Indexed
                 select (l.Name.Indexed)
                 ).ToArray<string>();
 
@@ -109,6 +125,10 @@ namespace Game.Entities
             Locality locality = World.GetLocality(items[item]);
             Vector2 point = locality.Area.GetWalkableTiles().First().position;
             Owner.ReceiveMessage(new SetPosition(this, new Plane(point)));
+
+            // Move Tuttle
+            point = locality.Area.GetWalkableTiles().First(t => t.position != point).position;
+            World.GetEntity("tuttle").ReceiveMessage(new SetPosition(null, new Plane(point)));
         }
 
         /// <summary>
