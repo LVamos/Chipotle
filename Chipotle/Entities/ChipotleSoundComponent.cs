@@ -107,7 +107,7 @@ namespace Game.Entities
         }
 
         private void OnSayVisitedLocality(SayVisitedLocalityResult message)
-            => Tolk.Speak(message.Visited ? "jo jo" : "ne");
+            => Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
 
         /// <summary>
         /// Processes incoming messages.
@@ -143,13 +143,13 @@ namespace Game.Entities
             {
                 string type = message.OccupiedPassage is Door ? " ve dveřích " : " v průchodu ";
                 string to = message.OccupiedPassage.AnotherLocality(Owner.Locality).To;
-                Tolk.Speak($"Stojíš {type}{to}");
+                Tolk.Speak($"Stojíš {type}{to}", true);
                 return;
             }
 
             if (message.ExitInfo.IsNullOrEmpty())
             {
-                Tolk.Speak("žádné východy nevidíš");
+                Tolk.Speak("žádné východy nevidíš", true);
                 return;
             }
 
@@ -160,7 +160,7 @@ namespace Game.Entities
                 if (info.Count == 1)
                 {
                     (string description, double compassDegrees) record = message.ExitInfo.First();
-                    Tolk.Speak($"{Angle.GetAngleDescription(record.compassDegrees)} je východ {record.description}");
+                    Tolk.Speak($"{Angle.GetAngleDescription(record.compassDegrees)} je východ {record.description}", true);
                     return;
                 }
 
@@ -168,7 +168,7 @@ namespace Game.Entities
                 if (info.Count >= 2 && info.Count <= 4)
                     number = "Jsou tu " + (info.Count == 2 ? "dva" : "3") + " východy: ";
                 else number = "Je tu " + info.Count.ToString() + " východů: ";
-                Tolk.Speak(number + FormatStringList(info, true));
+                Tolk.Speak(number + FormatStringList(info, true), true);
         }
 
         /// <summary>
@@ -179,13 +179,13 @@ namespace Game.Entities
         {
             if (message.ObjectInfo.IsNullOrEmpty())
             {
-                Tolk.Speak("Nic tu není");
+                Tolk.Speak("Nic tu není", true);
                 return;
             }
 
                 List<string> objectInfo = message.ObjectInfo
                     .Select(r => r.o.Name.Friendly + " " + Angle.GetAngleDescription(r.compassDegrees)).ToList<string>();
-                Tolk.Speak(FormatStringList(objectInfo));
+                Tolk.Speak(FormatStringList(objectInfo), true);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Game.Entities
         /// voice synthesizer..
         /// </summary>
         protected void SayOrientation()
-                    => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription());
+                    => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
 
         /// <summary>
         /// sets listener's orientation according to the current orientation of the Detective
@@ -222,7 +222,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnEntityHitDoor(DoorHit message)
-=> Tolk.Speak("dveře");
+=> Tolk.Speak("dveře", true);
 
         /// <summary>
         /// Processes the TerrainCollided message.
@@ -271,7 +271,7 @@ namespace Game.Entities
         private void OnObjectsCollided(ObjectsCollided message)
         {
             _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Position.AsOpenALVector(), true);
-            Tolk.Speak(message.Object.Name.Friendly);
+            Tolk.Speak(message.Object.Name.Friendly, true);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace Game.Entities
             _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, new Vector3(0, -1.7f, 0), true, 1f, null, 1f, 0, Playback.OpenAL);
 
             if (terrain == TerrainType.Wall)
-                Tolk.Speak("zeď");
+                Tolk.Speak("zeď", true);
         }
     }
 }

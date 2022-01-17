@@ -159,7 +159,7 @@ namespace Game.UI
             Play(_introSound);
 
             if (!string.IsNullOrEmpty(_introText))
-                    Tolk.Speak(_introText);
+                    Tolk.Speak(_introText, true);
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace Game.UI
         private void SayItem()
         {
             Play(_selectionSound);
-            Tolk.Speak(_items[Cursor]);
+            Tolk.Speak(_items[Cursor], true);
         }
 
         /// <summary>

@@ -60,6 +60,6 @@ namespace Game.UI
         /// Reports relative coordiantes of the Detective Chipotle NPC.
         /// </summary>
         private void SayCoordinates()
-            => Tolk.Speak(World.Player.Area.ToRelative().Center.ToString());
+            => Tolk.Speak(World.Player.Area.ToRelative().Center.ToString(), true);
     }
 }

@@ -99,7 +99,7 @@ namespace Game.Entities
             Entity tuttle = World.GetEntity("tuttle");
             string position = tuttle.Area.Center.ToString();
             string locality = tuttle.Locality.Name.Indexed;
-            Tolk.Speak(locality+" " +position);
+            Tolk.Speak(locality+" " +position, true);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Game.Entities
 
             string pos = Owner.Area.Center.X.ToString() + ", " + Owner.Area.Center.Y.ToString();
             File.WriteAllText("initpos.txt", pos);
-            Tolk.Speak("Startovní pozice uložena");
+            Tolk.Speak("Startovní pozice uložena", true);
         }
 
         private void SayAbsoluteCoords()
@@ -151,7 +151,7 @@ namespace Game.Entities
 
             string coords = Owner.Area.Center.ToString();
             Clipboard.SetText(coords);
-            Tolk.Speak(coords);
+            Tolk.Speak(coords, true);
         }
 
 

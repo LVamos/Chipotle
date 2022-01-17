@@ -30,7 +30,7 @@ namespace Game.UI
             base.OnActivate();
 
             if (_voicingEnabled)
-                Tolk.Speak("Hlavní menu");
+                Tolk.Speak("Hlavní menu", true);
 
             RunMainMenu();
         }
@@ -193,7 +193,7 @@ namespace Game.UI
         /// </summary>
         private void Help()
         {
-            Tolk.Speak("Otvírám nápovědu");
+            Tolk.Speak("Otvírám nápovědu", true);
             System.Diagnostics.Process.Start("help.html");
         }
 

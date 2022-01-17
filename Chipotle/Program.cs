@@ -29,7 +29,7 @@ namespace Game
         /// </summary>
         public static readonly string DataPath = @"Data\";
 
-        public static readonly Action<string> TolkDelegate = (message) => Tolk.Speak(message);
+        public static readonly Action<string> TolkDelegate = (message) => Tolk.Speak(message, true);
 
         /// <summary>
         /// Reference to the main window

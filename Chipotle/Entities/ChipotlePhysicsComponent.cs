@@ -649,7 +649,7 @@ _navigatedExit = null;
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnSayLocality(SayLocality message)
-=> Tolk.Speak(_area.GetLocality().Name.Friendly);
+=> Tolk.Speak(_area.GetLocality().Name.Friendly, true);
 
         /// <summary>
         /// Enumerates all objects from current locality in the specified radius around the NPC.
@@ -684,7 +684,7 @@ _navigatedExit = null;
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnSayTerrain(SayTerrain message)
-            => Tolk.Speak(World.Map[_area.UpperLeftCorner].Terrain.GetDescription());
+            => Tolk.Speak(World.Map[_area.UpperLeftCorner].Terrain.GetDescription(), true);
 
         /// <summary>
         /// Processes the SayVisitedLocality message.
