@@ -108,6 +108,9 @@ namespace Game.UI
             RegisterShortcuts(
     new Dictionary<KeyShortcut, Action>
     {
+
+        [new KeyShortcut(Keys.End)] = LastItem,
+        [new KeyShortcut(Keys.Home)] = FirstItem,
         [new KeyShortcut(Keys.Up)] = PreviousItem,
         [new KeyShortcut(Keys.Left)] = PreviousItem,
         [new KeyShortcut(Keys.Down)] = NextItem,
@@ -116,6 +119,24 @@ namespace Game.UI
         [new KeyShortcut(Keys.Escape)] = Quit
     }
     );
+        }
+
+        /// <summary>
+        /// Sets the cursor to the last item and announces it.
+        /// </summary>
+        private void LastItem()
+        {
+            Cursor = _lastItem;
+            SayItem();
+        }
+
+        /// <summary>
+        /// Sets the cursor to the first item and announces it.
+        /// </summary>
+        private void FirstItem()
+        {
+            Cursor = _firstItem;
+            SayItem();
         }
 
         /// <summary>
