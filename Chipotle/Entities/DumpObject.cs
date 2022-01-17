@@ -169,7 +169,7 @@ namespace Game.Entities
                 return;
 
             if (_navigating)
-            World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
+                UpdateNavigatingSound();
 
             UpdateLoop();
         }
@@ -225,6 +225,7 @@ namespace Game.Entities
         {
             _navigationSoundID = World.Sound.Play(_navigationSound, null, true, PositionType.Absolute, GetClosestPointToPlayer(), true);
             _navigating = true;
+            UpdateNavigatingSound();
         }
 
         /// <summary>
@@ -240,7 +241,7 @@ namespace Game.Entities
         /// <summary>
         /// Enables or disables sound attenuation.
         /// </summary>
-        protected bool _attenuationEnabled;
+        protected bool _attenuate;
 
         /// <summary>
         /// Destroys the object.
@@ -344,14 +345,14 @@ namespace Game.Entities
             else
             {
                 // Turn of attenuation
-                if (_attenuationEnabled && !attenuate)
+                if (_attenuate && !attenuate)
                 {
                     World.Sound.CancelLowpass(_loopSoundId);
                     World.Sound.FadeSource(_loopSoundId, FadingType.In, .00005f, _defaultVolume);
                 }
             }
 
-            _attenuationEnabled = attenuate;
+            _attenuate = attenuate;
         }
 
         /// <summary>
@@ -369,6 +370,45 @@ namespace Game.Entities
         /// <returns>Distance in meters</returns>
         protected int GetDistanceFromPlayer()
             => World.GetDistance(GetClosestPointToPlayer(), World.Player.Area.Center);
+
+        /// <summary>
+        /// Updates position and attenuation of navigating sound if the navigation is in progress.
+        /// </summary>
+        private void UpdateNavigatingSound()
+        {
+            // To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player.
+            World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
+
+            // Find opposite point
+            Vector2? opposite = World.Player.Area.FindOppositePoint(_area);
+            if (!opposite.HasValue)
+                return; // Sound isn't blocked, play it normally.
+
+            // Detect potentional acoustic obstacles and set up attenuate parameters
+            ObstacleType obstacle = World.DetectAcousticObstacles(new Plane((Vector2)opposite));
+            float volume;
+            (float gain, float gainHF) lowpass;
+            bool attenuate = obstacle == ObstacleType.Wall || obstacle == ObstacleType.Object;
+
+            if (obstacle == ObstacleType.Wall)
+            {
+                World.Sound.ApplyLowpass(_navigationSoundID, World.Sound.OverWallLowpass);
+                World.Sound.SetVolume(_navigationSoundID, OverWallVolume);
+            }
+            else if (obstacle == ObstacleType.Object)
+            {
+                World.Sound.ApplyLowpass(_navigationSoundID, World.Sound.OverObjectLowpass);
+                World.Sound.SetVolume(_navigationSoundID, OverObjectVolume);
+            }
+            else if (_attenuate)
+            {
+                // Turn off attenuation
+                World.Sound.CancelLowpass(_navigationSoundID);
+                World.Sound.SetVolume(_navigationSoundID, _defaultVolume);
+            }
+
+            _attenuate = attenuate;
+        }
 
         /// <summary>
         /// Watches distance of tthe player and turns navigation off if he approaches the object.
