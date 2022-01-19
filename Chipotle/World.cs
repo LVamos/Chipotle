@@ -312,8 +312,18 @@ namespace Game
         /// <param name="a">First point</param>
         /// <param name="b">Second point</param>
         /// <returns>Rounded distance between two given points</returns>
-        public static int GetDistance(Vector2 a, Vector2 b)
-=> (int)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
+        public static float GetDistance(Vector2 a, Vector2 b)
+=> (float)(Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y));
+
+
+        /// <summary>
+        /// Computes cartesian distance between two 3d points.
+        /// </summary>
+        /// <param name="a">First point</param>
+        /// <param name="b">Second point</param>
+        /// <returns>Distance between two given points</returns>
+        public static float GetDistance(Vector3 a, Vector3 b)
+=> (float)(Math.Pow(Math.Abs(a.X - b.X), 2) + Math.Pow(Math.Abs(a.Y - b.Y), 2) +Math.Pow(Math.Abs(a.Z -b.Z), 2)) * 0.5f;
 
         /// <summary>
         /// Returns an entity that stands on the given position.

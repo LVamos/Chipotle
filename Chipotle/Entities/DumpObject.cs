@@ -368,7 +368,7 @@ namespace Game.Entities
         /// Returns distance from this object to the player.
         /// </summary>
         /// <returns>Distance in meters</returns>
-        protected int GetDistanceFromPlayer()
+        protected float GetDistanceFromPlayer()
             => World.GetDistance(GetClosestPointToPlayer(), World.Player.Area.Center);
 
         /// <summary>

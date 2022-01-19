@@ -276,7 +276,7 @@ namespace Game.Terrain
         /// Returns distance from this passage to the player.
         /// </summary>
         /// <returns>Distance in meters</returns>
-        protected int GetDistanceFromPlayer()
+        protected float GetDistanceFromPlayer()
             => World.GetDistance(GetClosestPointToPlayer(), World.Player.Area.Center);
 
         /// <summary>

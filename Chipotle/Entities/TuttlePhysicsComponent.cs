@@ -144,7 +144,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="distance">Distance from the Detective Chipotle NPC</param>
         /// <returns>The walk speed</returns>
-        private int ComputeWalkSpeed(int distance)
+        private int ComputeWalkSpeed(float distance)
         {
             if (distance < 5)
                 return 1200;
@@ -208,7 +208,7 @@ namespace Game.Entities
         /// Computes distance between the NPC and the Detective Chipotle NPC.
         /// </summary>
         /// <returns>Distance between the NPC and the Detective Chipotle NPC</returns>
-        private int GetDistanceFromPlayer()
+        private float GetDistanceFromPlayer()
 => World.GetDistance(_area.Center, _player.Area.Center);
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace Game.Entities
         /// </summary>
         private void CheckDistanceFromPlayer()
         {
-            int distance = GetDistanceFromPlayer();
+            float distance = GetDistanceFromPlayer();
             if (distance > _maxDistanceFromPlayer && !_approachToPlayer)
                 GoToPlayer();
             else if (_approachToPlayer && (distance <= _desiredDistanceFromPlayer || _path.IsNullOrEmpty()))
