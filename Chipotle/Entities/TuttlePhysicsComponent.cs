@@ -19,6 +19,20 @@ namespace Game.Entities
     public class TuttlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
+        /// sets state of the NPC and announces the change to other components.
+        /// </summary>
+        private void SetState(TuttleState state)
+        {
+            _state = state;
+            Owner.ReceiveMessage(new TuttleStateChanged(this, state));
+        }
+
+        /// <summary>
+        /// Indicates what the NPC is doing in the moment.
+        /// </summary>
+        protected TuttleState _state = TuttleState.Waiting;
+
+        /// <summary>
         /// Constructs path from the NPC to the specified goal avoiding all obstacles.
         /// </summary>
         /// <param name="goal">The target position</param>
@@ -33,13 +47,13 @@ namespace Game.Entities
         /// Specifies the maximum allowed distance from the Detective Chipotle NPC.
         /// </summary>
         /// <remarks>Used when following the Detective Chipotle NPC</remarks>
-        private const int _maxDistanceFromPlayer = 10;
+        private const int _maxDistance = 10;
 
         /// <summary>
         /// Specifies the minimum allowed distance from the Detective Chipotle NPC.
         /// </summary>
         /// <remarks>Used when following the Detective Chipotle NPC</remarks>
-        private const int _minDistanceFromPlayer = 2;
+        private const int _minDistance = 2;
 
         /// <summary>
         /// Reference to a path finder instance
@@ -52,19 +66,9 @@ namespace Game.Entities
         private readonly Random _random = new Random();
 
         /// <summary>
-        /// Indicates if the NPC walks to the Detective Chipotle NPC.
-        /// </summary>
-        private bool _approachToPlayer;
-
-        /// <summary>
         /// Specifies final distance from the Detective Chipotle when in process of approaching to it.
         /// </summary>
-        private int _desiredDistanceFromPlayer;
-
-        /// <summary>
-        /// Indicates if the NPC keeps following the Detective Chipotle NPC.
-        /// </summary>
-        private bool _followPlayer;
+        private int _targetDistance;
 
         /// <summary>
         /// The goal that Tuttle is just going to.
@@ -79,7 +83,7 @@ namespace Game.Entities
         /// <summary>
         /// Measures elapsed time from the last attempt of finding a path.
         /// </summary>
-        private int _pathFinderTimer;
+        private int _finderTimer;
 
         /// <summary>
         /// Reference to the Detective Chipotle NPC
@@ -98,14 +102,9 @@ namespace Game.Entities
         private float _stepInterval;
 
         /// <summary>
-        /// Specifies if Tuttle should repeatedly try to find a path to the current goal.
+        /// Specifies if the NPC walks in constant speed.
         /// </summary>
-        private bool _tryFindPath;
-
-        /// <summary>
-        /// Specifies if the NPC is currently walking.
-        /// </summary>
-        private bool _walk;
+        private bool _constantSpeed;
 
         /// <summary>
         /// Initializes the component and starts its message loop.
@@ -117,18 +116,25 @@ namespace Game.Entities
 
             RegisterMessages(new Dictionary<Type, Action<Messaging.GameMessage>>
             {
+                [typeof(TuttleStateChanged)] = (message) => OnTuttleStateChanged((TuttleStateChanged)message),
                 [typeof(Reveal)] = (message) => OnReveal((Reveal)message),
                 [typeof(Hide)] = (message) => OnHide((Hide)message),
                 [typeof(GotoPoint)] = (m) => OnGotoPoint((GotoPoint)m),
                 [typeof(StartFollowing)] = (m) => OnStartFollowing((StartFollowing)m),
                 [typeof(StopFollowing)] = (m) => OnStopFollowing((StopFollowing)m),
-                [typeof(LocalityLeft)] = (message) => OnLocalityLeft((LocalityLeft)message),
                 [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message)
             }
                 );
 
             base.Start();
         }
+
+        /// <summary>
+        /// Handles the TuttleStateChanged message.
+        /// </summary>
+        /// <param name="message">The message</param>
+        private void OnTuttleStateChanged(TuttleStateChanged message)
+=> _state = message.State;
 
         /// <summary>
         /// Processes incoming messages.
@@ -146,29 +152,25 @@ namespace Game.Entities
         /// <returns>The walk speed</returns>
         private int ComputeWalkSpeed(float distance)
         {
-            if (distance < 5)
-                return 1200;
+            const int minSpeed = 200;
+            const int maxSpeed = 400;
+            const int interval = 5;
+            const int minDistance = 10;
+            const int maxDistance = 80;
+            const int speedInterval = (maxSpeed - minSpeed) / ((maxDistance - minDistance) / interval);
 
-            if (distance < 7)
-                return 1000;
+            if (distance > maxDistance)
+                return minSpeed;
 
-            if (distance < 10)
-                return 900;
-
-            if (distance < 15)
-                return 500;
-
-            if (distance < 20)
-                return 300;
-
-            return 150;
+            int tp = (int)distance/ interval;
+            return maxSpeed - (speedInterval *tp);
         }
 
         private void FindNewPath()
         {
-            if (_pathFinderTimer < 30)
+            if (_finderTimer < 30)
             {
-                _pathFinderTimer++;
+                _finderTimer++;
                 return;
             }
 
@@ -177,13 +179,9 @@ namespace Game.Entities
             if (_path == null)
                 return;
 
-            _tryFindPath = false;
-            _pathFinderTimer = 0;
-            if (_restartApproaching)
-            {
                 _restartApproaching = false;
+            _finderTimer = 0;
                 GoToPlayer();
-            }
         }
 
         /// <summary>
@@ -193,12 +191,12 @@ namespace Game.Entities
         private Vector2? FindPlaceNearPlayer()
         {
             // Find possible goals. Try select a goal from the current locality of the player.
-            Vector2? farther = _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
+            Vector2? farther = _player.Area.FindNearestWalkableTile(_maxDistance);
 
             if (Owner.IsInSameLocality(_player))
                 return farther;
 
-            Vector2? closer = _player.Area.FindNearestWalkableTile(_minDistanceFromPlayer);
+            Vector2? closer = _player.Area.FindNearestWalkableTile(_minDistance);
             if (closer.HasValue && _player.Locality.Area.LaysOnPlane((Vector2)closer))
                 return closer;
             return farther;
@@ -212,11 +210,18 @@ namespace Game.Entities
 => World.GetDistance(_area.Center, _player.Area.Center);
 
         /// <summary>
+        /// Computes distance between the NPC and the current goal.
+        /// </summary>
+        /// <returns>Distance between the NPC and the current goal</returns>
+        private float GetDistanceFromGoal()
+=> World.GetDistance(_area.Center, _goal);
+
+        /// <summary>
         /// start walking the shortest path to the Detective Chipotle NPC.
         /// </summary>
         private void GoToPlayer()
         {
-            _desiredDistanceFromPlayer = _random.Next(_minDistanceFromPlayer, _maxDistanceFromPlayer);
+            _targetDistance = _random.Next(_minDistance, _maxDistance);
             Vector2? tmp = FindPlaceNearPlayer();
 
             if (!tmp.HasValue)
@@ -229,21 +234,30 @@ namespace Game.Entities
                 return;
 
             _goal = goal;
-            _approachToPlayer = _walk = true;
-            _walkSpeed = ComputeWalkSpeed(GetDistanceFromPlayer());
+            SetState(TuttleState.GoingToPlayer);
+            SetWalkSpeed();
             _stepInterval = 0;
+        }
+
+        /// <summary>
+        /// Computes the walk speed according to distance from the player.
+        /// </summary>
+        private void SetWalkSpeed()
+        {
+                _walkSpeed = ComputeWalkSpeed(_state == TuttleState.GoingToPlayer ? GetDistanceFromPlayer() : GetDistanceFromGoal());
+
         }
 
         /// <summary>
         /// Checks if the NPC isn't too far away from the Detective Chipotle NPC.
         /// </summary>
-        private void CheckDistanceFromPlayer()
+        private void CheckDistance()
         {
             float distance = GetDistanceFromPlayer();
-            if (distance > _maxDistanceFromPlayer && !_approachToPlayer)
+            if (distance > _maxDistance && _state == TuttleState.WatchingPlayer)
                 GoToPlayer();
-            else if (_approachToPlayer && (distance <= _desiredDistanceFromPlayer || _path.IsNullOrEmpty()))
-                StopApproachingToPlayer();
+            else if (_state == TuttleState.GoingToPlayer && distance <= _targetDistance)
+                StopWalk();
         }
 
         /// <summary>
@@ -252,12 +266,8 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnEntityMoved(EntityMoved message)
         {
-            if (message.Sender != _player)
-                return;
-            //System.Diagnostics.Debugger.Break();
-
-            if (_followPlayer && !_approachToPlayer)
-                CheckDistanceFromPlayer();
+            if (message.Sender == _player && _state == TuttleState.WatchingPlayer)
+                CheckDistance();
         }
 
         /// <summary>
@@ -266,15 +276,28 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnGotoPoint(GotoPoint message)
         {
+            StopFollowing();
             _path = FindPath(message.Goal);
 
             if (_path == null) // No path exists
                 return;
 
             _goal = message.Goal;
-            _walkSpeed = message.StepLength;
-            _walk = true;
+
+            if (message.WalkSpeed > 0)
+            {
+                _constantSpeed = true;
+                _walkSpeed = message.WalkSpeed;
+            }
+            else SetWalkSpeed();
+
+            SetState(TuttleState.GoingToTarget);
         }
+
+        /// <summary>
+        /// Checks if the NPC is walking in the moment.
+        /// </summary>
+        private bool Walking => _state == TuttleState.GoingToTarget || _state == TuttleState.GoingToPlayer;
 
         /// <summary>
         /// Processes the Hide message.
@@ -283,19 +306,6 @@ namespace Game.Entities
         private void OnHide(Hide message)
         {
             StopFollowing();
-        }
-
-        /// <summary>
-        /// Processes the LocalityLeft message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnLocalityLeft(LocalityLeft message)
-        {
-            if (message.Locality != Owner.Locality || message.Entity!= _player)
-                return;
-
-            StopApproachingToPlayer();
-            GoToPlayer();
         }
 
         /// <summary>
@@ -313,10 +323,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnStartFollowing(StartFollowing message)
-        {
-            _path = null;
-            StartFollowing();
-        }
+            => StartFollowing();
 
         /// <summary>
         /// Processes the StopFollowing message.
@@ -330,82 +337,69 @@ namespace Game.Entities
         /// </summary>
         private void PerformWalk()
         {
-            if (!_walk)
-                return;
-
-            if (_tryFindPath)
-            {
+            if (Walking && _path.IsNullOrEmpty())
+                StopWalk();
+            else if (_restartApproaching)
                 FindNewPath();
-                return;
-            }
-
-            if (_approachToPlayer)
-                CheckDistanceFromPlayer();
-
-            if (_stepInterval >= _walkSpeed)
+            else if (_state == TuttleState.WatchingPlayer)
+                CheckDistance();
+            else if (Walking && _stepInterval >= _walkSpeed)
             {
                 _stepInterval = 0;
                 Step();
             }
-            else
+            else if (Walking)
                 _stepInterval += World.DeltaTime;
-
-            if (_path.IsNullOrEmpty())
-                StopWalk();
         }
 
         /// <summary>
         /// starts walking after the Detective Chipotle NPC.
         /// </summary>
         private void StartFollowing()
-            => _followPlayer = true;
+        {
+            StopWalk();
+            SetState(TuttleState.WatchingPlayer);
+        }
 
         /// <summary>
         /// Performs one step in the direction given by the current orientation of the entity.
         /// </summary>
         private void Step()
         {
-            // Get target tile
-            Plane target = new Plane(_path.Dequeue());
-            Tile targetTile = World.Map[target.Center];
-            GameObject obj = World.GetObject(target.Center);
+            SetWalkSpeed();
+            Vector2 target = _path.Dequeue(); // Get target tile
 
-            if (obj == Owner)
+            // Detect obstacles
+            if (!World.IsWalkable(target))
+                AvoidObstacle(target);
+else SetPosition(target);  // The road is clear! Move!
+        }
+
+        /// <summary>
+        /// Avoids an obstacle or walks through a door if any.
+        /// </summary>
+        /// <param name="target">The target coordinates</param>
+        private void AvoidObstacle(Vector2 target)
+        {
+            // Temporaryly solve a weird error that causes that the NPC bumps to it self.
+            if (World.GetObject(target) == Owner)
                 return;
 
-            if (!World.IsWalkable(target.Center))
-            {
-                // If the obstacle is a door open it.
-                Passage p = World.GetPassage(target.Center);
-                if (p != null && p.State == PassageState.Closed)
-                {
-                    // Open the door and keep walking.
-                    p.ReceiveMessage(new UseObject(Owner, target.Center));
-                    return;
-                }
-
-                _tryFindPath = true;
-
-                if (_approachToPlayer)
-                {
-                    _restartApproaching = true;
-                    StopApproachingToPlayer();
-                }
-
-                return;
-            }
-
-            // The road is clear! Move!
-            SetPosition(target);
+            // If the obstacle is a door open it.
+            Passage p = World.GetPassage(target);
+            if (p != null && p.State == PassageState.Closed)
+                p.ReceiveMessage(new UseObject(Owner, target)); // Open the door and keep walking.
+            else if (_state == TuttleState.GoingToPlayer)
+                _restartApproaching = true;
         }
 
         /// <summary>
         /// Stops coming to the Detective Chipotle NPC.
         /// </summary>
-        private void StopApproachingToPlayer()
+        private void StopApproaching()
         {
-            _walk = _approachToPlayer = false;
-            _path = null;
+            StopWalk();
+            SetState(TuttleState.Waiting);
         }
 
         /// <summary>
@@ -413,8 +407,8 @@ namespace Game.Entities
         /// </summary>
         private void StopFollowing()
         {
-            _followPlayer = false;
             StopWalk();
+            SetState(TuttleState.Waiting);
         }
 
         /// <summary>
@@ -422,9 +416,13 @@ namespace Game.Entities
         /// </summary>
         private void StopWalk()
         {
-            _walk = false;
+            _constantSpeed = false;
             _path = null;
             _stepInterval = 0;
+
+            if (_state == TuttleState.GoingToPlayer)
+                SetState(TuttleState.WatchingPlayer);
+            else SetState(TuttleState.Waiting);
         }
     }
 }

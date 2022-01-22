@@ -16,6 +16,28 @@ namespace Game.Entities
     [Serializable]
     public class TuttleAIComponent : AIComponent
     {
+
+        /// <summary>
+        /// Handles the TuttleStateChanged message.
+        /// </summary>
+        /// <param name="message">The message</param>
+        private void OnTuttleStateChanged(TuttleStateChanged message)
+=> _state = message.State;
+
+        /// <summary>
+        /// sets state of the NPC and announces the change to other components.
+        /// </summary>
+        private void SetState(TuttleState state)
+        {
+            _state = state;
+            Owner.ReceiveMessage(new TuttleStateChanged(this, state));
+        }
+
+        /// <summary>
+        /// Indicates what the NPC is doing in the moment.
+        /// </summary>
+        private TuttleState _state    = TuttleState.Waiting;
+
         /// <summary>
         /// Reference to the Detective Chipotle NPC
         /// </summary>
@@ -46,6 +68,7 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>
                 {
+                [typeof(TuttleStateChanged)] = (message) => OnTuttleStateChanged((TuttleStateChanged)message),
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
@@ -85,7 +108,7 @@ namespace Game.Entities
 
             switch (message.CutsceneName)
             {
-                case "cs6": GoToCorpse(); break;
+                case "cs6": GoToPool(); break;
                 case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs23": JumpToSweeneysRoom(); break;
@@ -96,16 +119,16 @@ namespace Game.Entities
         /// Instructs the NPC to walk towards the corpse (tělo w1) object and wait there for the
         /// Detective Chipotle NPC.
         /// </summary>
-        private void GoToCorpse()
+        private void GoToPool()
         {
-            if (Program.TestMode)
-                return;
-
-            Owner.ReceiveMessage(new StopFollowing(this));
-
-            Vector2 goal = new Vector2(936, 1059);
-            Owner.ReceiveMessage(new GotoPoint(this, goal, 400));
+            Vector2 goal = new Vector2(1005, 1051);
+            Owner.ReceiveMessage(new GotoPoint(this, goal));
         }
+
+        /// <summary>
+        /// Indicates that the player moved from his original location to the bazén w1 locality. It also means that he walked past the Tuttle NPC because 
+        /// </summary>
+        private bool _playerWasByThePool;
 
         /// <summary>
         /// Makes the NPC invisible for the other NPCs and objects.
@@ -157,6 +180,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(LocalityEntered message)
         {
+            // When the player first time enters the loclaity start following him.
             if (message.Entity== _player && Owner.Locality.Name.Indexed == "bazén w1" && !_playerWasByPool)
             {
                 _playerWasByPool = true;

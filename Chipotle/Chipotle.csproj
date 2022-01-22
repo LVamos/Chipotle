@@ -75,6 +75,7 @@
     <Compile Include="Entities\IcecreamMachine.cs" />
     <Compile Include="Entities\KeyHanger.cs" />
     <Compile Include="Entities\KillersCar.cs" />
+    <Compile Include="Entities\TuttleState.cs" />
     <Compile Include="Messaging\Commands\ListExits.cs" />
     <Compile Include="Messaging\Commands\ListNavigableObjects.cs" />
     <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Messaging\Events\LocalityChanged.cs" />
     <Compile Include="Messaging\Commands\Reveal.cs" />
     <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
+    <Compile Include="Messaging\Events\TuttleStateChanged.cs" />
     <Compile Include="Serializer.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
     <Compile Include="Entities\PubTable.cs" />

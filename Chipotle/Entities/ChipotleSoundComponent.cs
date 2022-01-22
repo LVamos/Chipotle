@@ -310,7 +310,18 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnObjectsCollided(ObjectsCollided message)
         {
-            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, PositionType.Absolute, message.Position.AsOpenALVector(), true);
+            Vector2 position = message.Position;
+            Vector2 myOrientation = Owner.Orientation.UnitVector;
+            Vector2 myPosition = Owner.Area.Center;
+            Vector2 opposite = myOrientation.PerpendicularRight.PerpendicularRight +myPosition;
+            PositionType positionType = PositionType.Absolute;
+            if (position == opposite)
+            {
+                positionType = PositionType.Relative;
+                position = new Vector2(0, -3);
+            }
+
+            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, positionType, position.AsOpenALVector(), true);
             Tolk.Speak(message.Object.Name.Friendly, true);
         }
 

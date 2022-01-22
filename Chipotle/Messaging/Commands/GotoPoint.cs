@@ -17,10 +17,20 @@ namespace Game.Messaging.Commands
         /// </summary>
         public readonly Vector2 Goal;
 
+
         /// <summary>
         /// Length of one step in milliseconds
         /// </summary>
-        public readonly int StepLength;
+        public readonly int WalkSpeed;
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="sender">Source of the message</param>
+        /// <param name="goal">The goal Tuttle should go to</param>
+        public GotoPoint(object sender, Vector2 goal) : this(sender, goal, 0) { }
+
+
 
         /// <summary>
         /// constructor
@@ -31,7 +41,7 @@ namespace Game.Messaging.Commands
         public GotoPoint(object sender, Vector2 goal, int stepLength) : base(sender)
         {
             Goal = goal;
-            StepLength = stepLength;
+            WalkSpeed = stepLength;
         }
     }
 }

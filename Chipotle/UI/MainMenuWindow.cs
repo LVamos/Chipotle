@@ -151,6 +151,10 @@ namespace Game.UI
         private void StopLoop()
         {
             _voicingEnabled = false;
+
+            if (Program.TestMode)
+                return;
+
             World.Sound.FadeSourceOut(_menuLoopID, .1f);
             World.Sound.Play(World.Sound.GetSoundStream(_endSound), null, false, PositionType.None, Vector3.Zero, false, _loopVolume, null, 1, 0, Playback.OpenAL);
         }
@@ -160,6 +164,10 @@ namespace Game.UI
         /// </summary>
         private void PlayLoop()
         {
+            if (Program.TestMode)
+                return;
+
+
             if (_menuLoopID == 0)
                 _menuLoopID = World.Sound.Play(_menuLoopSound, null, true, PositionType.None, Vector3.Zero, false, _loopVolume);
         }
