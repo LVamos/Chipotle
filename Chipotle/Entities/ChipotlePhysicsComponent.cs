@@ -159,7 +159,7 @@ namespace Game.Entities
         /// </summary>
         public override void Start()
         {
-            SetPosition((Vector2)StartPosition, true);
+            Move((Vector2)StartPosition, true);
                 _orientation = new Orientation2D(0, 1);
 
             base.Start();
@@ -467,7 +467,7 @@ _navigatedExit = null;
             Random r = new Random();
             _phoneInterval = r.Next(30000, 120000);
             _phoneDeltaTime = 0;
-            SetPosition(1805, 1121, true);
+            Move(1805, 1121, true);
         }
 
         /// <summary>
@@ -475,28 +475,28 @@ _navigatedExit = null;
         /// locality to the Christine's hall (hala p1) locality.
         /// </summary>
         private void JumpToChristinesHall()
-            => SetPosition(1797, 1125, true);
+            => Move(1797, 1125, true);
 
         /// <summary>
         /// Relocates the NPC from the hall in Vanilla crunch company (hala v1) into the Mariotti's
         /// office (kancelář v1) locality.
         /// </summary>
         private void JumpToMariottisOffice()
-            => SetPosition(2018, 1123, true);
+            => Move(2018, 1123, true);
 
         /// <summary>
         /// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) locality to the
         /// Sweeney's hall (hala s1) locality.
         /// </summary>
         private void JumpToSweeneysHall()
-            => SetPosition(1405, 965, true);
+            => Move(1405, 965, true);
 
         /// <summary>
         /// Relocates the NPC from the Mariotti's office (kancelář v1) into the garage of the
         /// vanilla crunch company (garáž v1) locality.
         /// </summary>
         private void JumpToVanillaCrunchGarage()
-            => SetPosition(2006, 1166, true);
+            => Move(2006, 1166, true);
 
         /// <summary>
         /// Stores indexes of regions visited by the NPC.
@@ -626,7 +626,7 @@ _navigatedExit = null;
             // The road is clear! Move!
             Locality sourceLocality = _area.GetLocality();
             Locality targetLocality = World.GetLocality(targetTile.position);
-            SetPosition(targetTile.position);
+            Move(targetTile.position);
             RecordRegion(targetTile.position);
             _timeFromLastStep = 0;
 
@@ -851,7 +851,7 @@ _navigatedExit = null;
 
             Vector2? target = _carMovement.Target.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");
-            SetPosition((Vector2)target, true);
+            Move((Vector2)target, true);
             _carMovement = null;
         }
 

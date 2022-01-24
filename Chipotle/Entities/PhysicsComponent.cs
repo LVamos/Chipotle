@@ -18,6 +18,53 @@ namespace Game.Entities
     [Serializable]
     public class PhysicsComponent : EntityComponent
     {
+        protected float GetDistanceCoefficient(float distance, float minSpeed = .5f, float maxSpeed = 2, float distanceInterval= 5, float minDistance = 10, float maxDistance = 80)
+        {
+            if (distance > maxDistance)
+                return minSpeed;
+
+            if (distance < minDistance)
+                return maxSpeed;
+
+            float speedInterval = (maxSpeed - minSpeed) / ((maxDistance - minDistance) / distanceInterval);
+                return maxSpeed - (speedInterval * (distance / distanceInterval));
+        }
+
+        /// <summary>
+        /// Computes length of the next step of the NPC.
+        /// </summary>
+        /// <param name="nextStep">Target coordinates of next step of the NPC</param>
+        protected virtual int GetSpeed(Vector2 nextStep)
+            => _speeds[World.Map[nextStep].Terrain];
+
+        /// <summary>
+        /// Computes length of the next step of the NPC.
+        /// </summary>
+        /// <param name="nextStep">Coordinates of the next location in the game world</param>
+        /// <param name="goal">Coordinates of the goal of an ongoing movement of the NPC</param>
+        protected virtual int GetSpeed(Vector2 nextStep, Vector2 goal)
+            => (int) (GetSpeed(nextStep) * GetDistanceCoefficient(World.GetDistance(Owner.Area.Center, goal)));
+
+        /// <summary>
+        /// Contains walk speed settings for particullar terrain types.
+        /// </summary>
+        protected readonly Dictionary<TerrainType, int> _speeds = new Dictionary<TerrainType, int>()
+        {
+            [TerrainType.Grass] = 430,
+            [TerrainType.Linoleum] = 300,
+            [TerrainType.Carpet] = 340,
+            [TerrainType.Gravel] = 360,
+            [TerrainType.Asphalt] = 310,
+            [TerrainType.Cobblestones] = 410,
+            [TerrainType.Tiles] = 300,
+            [TerrainType.Wood] = 330,
+            [TerrainType.Mud] = 500,
+            [TerrainType.Puddle] = 450,
+            [TerrainType.Concrete] = 280,
+            [TerrainType.Clay] = 406,
+            [TerrainType.Bush] = 600
+        };
+
         /// <summary>
         /// Defines start position of the NPC.
         /// </summary>
@@ -41,7 +88,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies the length of one step.
         /// </summary>
-        protected int _walkSpeed;
+        protected int _speed;
 
         /// <summary>
         /// Current orientation of the NPC
@@ -79,23 +126,23 @@ namespace Game.Entities
         /// <param name="x">X coordinate of the target position</param>
         /// <param name="y">Y coordinate of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void SetPosition(float x, float y, bool silently = false)
-            => SetPosition(new Vector2(x, y), silently);
+        protected void Move(float x, float y, bool silently = false)
+            => Move(new Vector2(x, y), silently);
 
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
         /// <param name="coords">Coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void SetPosition(Vector2 coords, bool silently = false)
-            => SetPosition(new Plane(coords), silently);
+        protected void Move(Vector2 coords, bool silently = false)
+            => Move(new Plane(coords), silently);
 
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
         /// <param name="targetPosition">coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void SetPosition(Plane targetPosition, bool silently = false)
+        protected void Move(Plane targetPosition, bool silently = false)
         {
             Locality sourceLocality = _area?.GetLocality();
             Locality targetLocality = targetPosition.GetLocality();
@@ -121,6 +168,6 @@ namespace Game.Entities
             /// </summary>
             /// <param name="message">The message to be processed</param>
             private void OnSetPosition(SetPosition message)
-            => SetPosition(message.Target, message.Silently);
+            => Move(message.Target, message.Silently);
     }
 }

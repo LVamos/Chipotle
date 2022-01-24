@@ -146,26 +146,8 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// Computes speed of walk according to the distance from the Detective Chipotle NPC.
+        /// Repeats an attempt to find path to a goal specified in _goal field.
         /// </summary>
-        /// <param name="distance">Distance from the Detective Chipotle NPC</param>
-        /// <returns>The walk speed</returns>
-        private int ComputeWalkSpeed(float distance)
-        {
-            const int minSpeed = 200;
-            const int maxSpeed = 400;
-            const int interval = 5;
-            const int minDistance = 10;
-            const int maxDistance = 80;
-            const int speedInterval = (maxSpeed - minSpeed) / ((maxDistance - minDistance) / interval);
-
-            if (distance > maxDistance)
-                return minSpeed;
-
-            int tp = (int)distance/ interval;
-            return maxSpeed - (speedInterval *tp);
-        }
-
         private void FindNewPath()
         {
             if (_finderTimer < 30)
@@ -235,17 +217,7 @@ namespace Game.Entities
 
             _goal = goal;
             SetState(TuttleState.GoingToPlayer);
-            SetWalkSpeed();
             _stepInterval = 0;
-        }
-
-        /// <summary>
-        /// Computes the walk speed according to distance from the player.
-        /// </summary>
-        private void SetWalkSpeed()
-        {
-                _walkSpeed = ComputeWalkSpeed(_state == TuttleState.GoingToPlayer ? GetDistanceFromPlayer() : GetDistanceFromGoal());
-
         }
 
         /// <summary>
@@ -287,9 +259,8 @@ namespace Game.Entities
             if (message.WalkSpeed > 0)
             {
                 _constantSpeed = true;
-                _walkSpeed = message.WalkSpeed;
+                _speed = message.WalkSpeed;
             }
-            else SetWalkSpeed();
 
             SetState(TuttleState.GoingToTarget);
         }
@@ -343,10 +314,10 @@ namespace Game.Entities
                 FindNewPath();
             else if (_state == TuttleState.WatchingPlayer)
                 CheckDistance();
-            else if (Walking && _stepInterval >= _walkSpeed)
+            else if (Walking && _stepInterval >= _speed)
             {
                 _stepInterval = 0;
-                Step();
+                MakeStep();
             }
             else if (Walking)
                 _stepInterval += World.DeltaTime;
@@ -364,15 +335,19 @@ namespace Game.Entities
         /// <summary>
         /// Performs one step in the direction given by the current orientation of the entity.
         /// </summary>
-        private void Step()
+        private void MakeStep()
         {
-            SetWalkSpeed();
             Vector2 target = _path.Dequeue(); // Get target tile
 
             // Detect obstacles
             if (!World.IsWalkable(target))
+            {
                 AvoidObstacle(target);
-else SetPosition(target);  // The road is clear! Move!
+                return;
+            }
+
+          _speed = GetSpeed(target);
+            Move(target);  // The road is clear! Move!
         }
 
         /// <summary>
