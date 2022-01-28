@@ -18,6 +18,97 @@ namespace Game.Entities
     [Serializable]
     public class PhysicsComponent : EntityComponent
     {
+        /// <summary>
+        /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
+        /// </summary>
+        /// <param name="step">The distance between the NPC and the required tile</param>
+        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+        /// <see cref="PhysicsComponent.Orientation"/>
+        protected virtual Vector2 GetNextTile()
+            => _path.Dequeue();
+
+        /// <summary>
+        /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
+        /// </summary>
+        /// <param name="step">The distance between the NPC and the required tile</param>
+        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+        /// <see cref="PhysicsComponent.Orientation"/>
+        protected (Vector2 position, Tile tile) GetNextTile(int step)
+            => GetNextTile(Orientation, step);
+
+        /// <summary>
+        /// Returns a tile at the specified distance and direction.
+        /// </summary>
+        /// <param name="direction">The direction of the tile to be found</param>
+        /// <param name="step">The distance between the NPC and the tile to be found</param>
+        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+        protected (Vector2 position, Tile tile) GetNextTile(Orientation2D direction, int step)
+        {
+            Plane target = new Plane(_area);
+            target.Move(direction, step);
+            return (target.Center, World.Map[target.Center]);
+        }
+
+        /// <summary>
+        /// Stores the current shortest track towards the Detective Chipotle NPC.
+        /// </summary>
+        protected Queue<Vector2> _path;
+
+        /// <summary>
+        /// Reference to a path finder instance
+        /// </summary>
+        protected readonly PathFinder _finder = new PathFinder();
+
+        /// <summary>
+        /// Solves a situation when the NPC encounters an obstacle.
+        /// </summary>
+        /// <param name="obstacle">Nearest point of the obstacle</param>
+        protected virtual bool SolveObstacle(Vector2 obstacle)
+            => true;
+
+        /// <summary>
+        /// Performs one step in direction specified in the _startWalkMessage field.
+        /// </summary>
+        protected virtual void MakeStep() 
+        {
+            _speed = GetSpeed();
+            _walkTimer = 0;
+        }
+
+        /// <summary>
+        /// Specifies the length of one step in milliseconds.
+        /// </summary>
+        protected int _walkTimer;
+
+        /// <summary>
+        /// Performs walk on a preplanned route.
+        /// </summary>
+        protected virtual void PerformWalk()
+        {
+            if (_walkTimer < _speed)
+                _walkTimer += World.DeltaTime;
+        }
+
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+            PerformWalk();
+        }
+
+        /// <summary>
+        /// The goal that Tuttle is just going to.
+        /// </summary>
+        protected Vector2 _goal;
+
+        /// <summary>
+        /// Returns reference to the tile the NPC currently stands on.
+        /// </summary>
+        protected (Vector2 position, Tile tile) CurrentTile
+            => (_area.Center, World.Map[_area.Center]);
+
         protected float GetDistanceCoefficient(float distance, float minSpeed = .5f, float maxSpeed = 2, float distanceInterval= 5, float minDistance = 10, float maxDistance = 80)
         {
             if (distance > maxDistance)
@@ -33,36 +124,35 @@ namespace Game.Entities
         /// <summary>
         /// Computes length of the next step of the NPC.
         /// </summary>
-        /// <param name="nextStep">Target coordinates of next step of the NPC</param>
-        protected virtual int GetSpeed(Vector2 nextStep)
-            => _speeds[World.Map[nextStep].Terrain];
+        /// <param name="goal">Coordinates of the goal of an ongoing movement of the NPC</param>
+        protected virtual int GetSpeed()
+            => (int) (GetTerrainSpeed() * GetDistanceCoefficient(World.GetDistance(_area.Center, _goal)));
 
         /// <summary>
-        /// Computes length of the next step of the NPC.
+        /// Returns speed of the terrain on which the NPC stands.
         /// </summary>
-        /// <param name="nextStep">Coordinates of the next location in the game world</param>
-        /// <param name="goal">Coordinates of the goal of an ongoing movement of the NPC</param>
-        protected virtual int GetSpeed(Vector2 nextStep, Vector2 goal)
-            => (int) (GetSpeed(nextStep) * GetDistanceCoefficient(World.GetDistance(Owner.Area.Center, goal)));
+        /// <returns></returns>
+        protected int GetTerrainSpeed()
+            => _speeds[CurrentTile.tile.Terrain];
 
         /// <summary>
         /// Contains walk speed settings for particullar terrain types.
         /// </summary>
         protected readonly Dictionary<TerrainType, int> _speeds = new Dictionary<TerrainType, int>()
         {
-            [TerrainType.Grass] = 430,
-            [TerrainType.Linoleum] = 300,
-            [TerrainType.Carpet] = 340,
-            [TerrainType.Gravel] = 360,
-            [TerrainType.Asphalt] = 310,
-            [TerrainType.Cobblestones] = 410,
-            [TerrainType.Tiles] = 300,
-            [TerrainType.Wood] = 330,
-            [TerrainType.Mud] = 500,
-            [TerrainType.Puddle] = 450,
-            [TerrainType.Concrete] = 280,
-            [TerrainType.Clay] = 406,
-            [TerrainType.Bush] = 600
+            [TerrainType.Grass] = 600,
+            [TerrainType.Linoleum] = 540,
+            [TerrainType.Carpet] = 570,
+            [TerrainType.Gravel] = 523,
+            [TerrainType.Asphalt] = 440,
+            [TerrainType.Cobblestones] = 510,
+            [TerrainType.Tiles] = 400,
+            [TerrainType.Wood] = 570,
+            [TerrainType.Mud] = 940,
+            [TerrainType.Puddle] = 650,
+            [TerrainType.Concrete] = 468,
+            [TerrainType.Clay] = 460,
+            [TerrainType.Bush] = 970
         };
 
         /// <summary>
@@ -132,23 +222,23 @@ namespace Game.Entities
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
-        /// <param name="coords">Coordinates of the target position</param>
+        /// <param name="target">Coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void Move(Vector2 coords, bool silently = false)
-            => Move(new Plane(coords), silently);
+        protected virtual void Move(Vector2 target, bool silently = false)
+            => Move(new Plane(target), silently);
 
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
-        /// <param name="targetPosition">coordinates of the target position</param>
+        /// <param name="target">coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void Move(Plane targetPosition, bool silently = false)
+        protected void Move(Plane target, bool silently = false)
         {
             Locality sourceLocality = _area?.GetLocality();
-            Locality targetLocality = targetPosition.GetLocality();
+            Locality targetLocality = target.GetLocality();
             Plane sourcePosition = _area;
 
-            _area = new Plane(targetPosition);
+            _area = new Plane(target);
             _locality = _area.GetLocality();
 
             // If it isn't the player detect obstacles between him and this NPC.
@@ -156,7 +246,7 @@ namespace Game.Entities
             ObstacleType obstacle = Owner != player ? World.DetectAcousticObstacles(_area) : ObstacleType.None;
 
             // Announce changes
-            PositionChanged changed = new PositionChanged(this, sourcePosition, targetPosition, sourceLocality, targetLocality, obstacle, silently);
+            PositionChanged changed = new PositionChanged(this, sourcePosition, target, sourceLocality, targetLocality, obstacle, silently);
             Owner.ReceiveMessage(changed);
 
             if (targetLocality != sourceLocality)

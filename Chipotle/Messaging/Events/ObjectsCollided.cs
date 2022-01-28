@@ -24,22 +24,16 @@ namespace Game.Messaging.Events
         public readonly Vector2 Position;
 
         /// <summary>
-        /// The tile under the object the NPC bumped to
-        /// </summary>
-        public readonly Tile Tile;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="collidingObject">The colliding object</param>
         /// <param name="position">POint of the collision</param>
         /// <param name="tile">The tile under the object the NPC bumped to</param>
-        public ObjectsCollided(object sender, GameObject collidingObject, Vector2 position, Tile tile) : base(sender)
+        public ObjectsCollided(object sender, GameObject collidingObject, Vector2 position) : base(sender)
         {
             Object = collidingObject;
             Position = position;
-            Tile = tile;
         }
     }
 }

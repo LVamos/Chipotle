@@ -23,6 +23,45 @@ namespace Game.Entities
     [Serializable]
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
+        /// <summary>
+        /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
+        /// </summary>
+        /// <param name="step">The distance between the NPC and the required tile</param>
+        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+        /// <see cref="PhysicsComponent.Orientation"/>
+        protected override Vector2 GetNextTile()
+        {
+            Orientation2D finalOrientation = _orientation;
+            if (_startWalkMessage.Direction != TurnType.None)
+                finalOrientation.Rotate(_startWalkMessage.Direction);
+            return GetNextTile(finalOrientation, 1).position;
+        }
+
+        /// <summary>
+        /// Immediately changes position of the NPC.
+        /// </summary>
+        /// <param name="target">Coordinates of the target position</param>
+        /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
+        protected override void Move(Vector2 target, bool silently = false)
+        {
+                Locality sourceLocality = _area?.GetLocality();
+            Locality targetLocality = World.GetLocality(target);
+            base.Move(target, silently);
+
+            RecordRegion(target);
+
+            if (sourceLocality != null && sourceLocality != targetLocality)
+                SaveGame();
+
+            // Watch important events
+            WatchPuddle(target); // Check if player walked in a puddle
+            WatchPhone();
+        }
+
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public ChipotlePhysicsComponent() : base()
         {
             // set initial position.&
@@ -41,7 +80,7 @@ namespace Game.Entities
         /// <summary>
         /// Time interval for backward walk
         /// </summary>
-        private const int _backwardWalkSpeed = 20;
+        private const float _backwardSpeed = 2;
 
         /// <summary>
         /// Time interval for forward walk
@@ -49,14 +88,9 @@ namespace Game.Entities
         private const int _forwardWalkSpeed = 15;
 
         /// <summary>
-        /// Determines maximum time between particullar steps.
-        /// </summary>
-        private const int _maxTimeBetweenSteps = _sideWalkSpeed;
-
-        /// <summary>
         /// Time interval for walk to the side
         /// </summary>
-        private const int _sideWalkSpeed = 24;
+        private const float _sideSpeed = 1.6f;
 
         /// <summary>
         /// Stores references to all the localities the NPC has visited.
@@ -85,11 +119,6 @@ namespace Game.Entities
         private int _phoneInterval;
 
         /// <summary>
-        /// Indicates if the player released keys after a step to the side was performed.
-        /// </summary>
-        private bool _sideStepInProgress;
-
-        /// <summary>
         /// Indicates if the NPC is sitting at a table in the pub (výčep h1) locality.
         /// </summary>
         private bool _sittingAtPubTable;
@@ -111,24 +140,9 @@ namespace Game.Entities
         private bool _steppedIntoPuddle;
 
         /// <summary>
-        /// Counts time from the last step.
-        /// </summary>
-        private int _timeFromLastStep;
-
-        /// <summary>
         /// Indicates if the Chipotle NPC is currently walking.
         /// </summary>
         private bool _walking;
-
-        /// <summary>
-        /// Sets time interval between steps.
-        /// </summary>
-        private int _walkSpeed;
-
-        /// <summary>
-        /// Measures time from last step.
-        /// </summary>
-        private int _walkTimer;
 
         /// <summary>
         /// Returns reference to the asphalt road (asfaltka c1) locality.
@@ -141,12 +155,6 @@ namespace Game.Entities
         /// </summary>
         private ChipotlesCar Car
             => World.GetObject("detektivovo auto") as ChipotlesCar;
-
-        /// <summary>
-        /// Returns reference to the tile the NPC currently stands on.
-        /// </summary>
-        private (Vector2 position, Tile tile) CurrentTile
-            => (_area.Center, World.Map[_area.Center]);
 
         /// <summary>
         /// Returns reference to the Tuttle NPC.
@@ -429,28 +437,6 @@ _navigatedExit = null;
         }
 
         /// <summary>
-        /// Returns a tile at the specified distance and direction.
-        /// </summary>
-        /// <param name="direction">The direction of the tile to be found</param>
-        /// <param name="step">The distance between the NPC and the tile to be found</param>
-        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
-        private (Vector2 position, Tile tile) GetNextTile(Orientation2D direction, int step = 1)
-        {
-            Plane target = new Plane(_area);
-            target.Move(direction, step);
-            return (target.Center, World.Map[target.Center]);
-        }
-
-        /// <summary>
-        /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
-        /// </summary>
-        /// <param name="step">The distance between the NPC and the required tile</param>
-        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
-        /// <see cref="PhysicsComponent.Orientation"/>
-        private (Vector2 position, Tile tile) GetNextTile(int step = 1)
-            => GetNextTile(Orientation, step);
-
-        /// <summary>
         /// Checks if Tuttle and Chipotle NPCs are in the same locality.
         /// </summary>
         /// <returns>True if Tuttle and Chipotle NPCs are in the same locality</returns>
@@ -539,11 +525,6 @@ _navigatedExit = null;
         protected int _currentRegion;
 
         /// <summary>
-        /// Indicates if a step to the side was performed at least once before keys were released.
-        /// </summary>
-        protected bool _sideStepPerformed;
-
-        /// <summary>
         /// Specifies distance in which exits from current locality are searched.
         /// </summary>
         protected const int _exitRadius=40;
@@ -572,69 +553,19 @@ _navigatedExit = null;
         /// <summary>
         /// Performs one step in direction specified in the _startWalkMessage field.
         /// </summary>
-        private void MakeStep()
+        protected override void MakeStep()
         {
-            if (_sideStepPerformed)
+            // Speed limitation
+            if (_walkTimer < _speed)
                 return;
 
-            if (_sideStepInProgress)
-                _sideStepPerformed = true;
+            base.MakeStep();
 
-                StartWalk message = _startWalkMessage
-                ?? throw new ArgumentNullException(nameof(_startWalkMessage));
+            Vector2 target = GetNextTile(); // Get target coordinates
 
-            // Get target coordinates
-            Orientation2D finalOrientation = _orientation;
-
-            if (message.Direction != TurnType.None)
-                finalOrientation.Rotate(message.Direction);
-
-            // Is the terrain occupable?
-            (Vector2 position, Tile tile) targetTile = GetNextTile(finalOrientation);
-            if (targetTile.tile == null)
-                return;
-
-            if (!targetTile.tile.Walkable)
-            {
-                _walking = false;
-                _startWalkMessage = null;
-                _sideStepInProgress = false;
-                Owner.ReceiveMessage(new TerrainCollided(this, targetTile.position, targetTile.tile));
-                return;
-            }
-
-            // Isn't an entity or object over there?
-            GameObject o = World.GetObject(targetTile.position);
-            if (o != null && o != Owner)
-            {
-                _walking = false;
-                _startWalkMessage = null;
-                _sideStepInProgress = false;
-                Owner.ReceiveMessage(new ObjectsCollided(this, o, targetTile.position, targetTile.tile));
-                return;
-            }
-
-            // Isn't a closed door over there?
-            Passage passage = World.GetPassage(targetTile.position);
-            if (passage != null && passage.State == PassageState.Closed)
-            {
-                _walking = false;
-                Owner.ReceiveMessage(new DoorHit(this));
-                return;
-            }
-
-            // The road is clear! Move!
-            Locality sourceLocality = _area.GetLocality();
-            Locality targetLocality = World.GetLocality(targetTile.position);
-            Move(targetTile.position);
-            RecordRegion(targetTile.position);
-            _timeFromLastStep = 0;
-
-            if (sourceLocality != null && sourceLocality != targetLocality)
-                SaveGame();
-
-            WatchPuddle(targetTile.position); // Check if player walked in a puddle
-            WatchPhone();
+            // Move if the terrain is occupable.
+            if (!SolveObstacle(target))
+            Move(target);
         }
 
         /// <summary>
@@ -704,34 +635,6 @@ _navigatedExit = null;
 
             _blockWalk = true;
             _startWalkMessage = message;
-
-            // Allow only single steps when walking to the side.
-            if (message.Direction == TurnType.SharplyLeft || message.Direction == TurnType.SharplyRight)
-            {
-                if (!_sideStepInProgress && _timeFromLastStep >= _sideWalkSpeed)
-                {
-                    _sideStepInProgress = true;
-                    MakeStep();
-                }
-
-                return;
-            }
-
-            // Set walk speed
-            int walkSpeed;
-            switch (message.Direction)
-            {
-                case TurnType.SharplyLeft: case TurnType.SharplyRight: walkSpeed = _sideWalkSpeed; break;
-                case TurnType.Around: walkSpeed = _backwardWalkSpeed; break;
-                default: walkSpeed = _forwardWalkSpeed; break;
-            }
-
-            if (_timeFromLastStep < walkSpeed)
-                return;
-
-            _walkSpeed = walkSpeed;
-            _walking = true;
-            _walkTimer = 0;
             _walking = true;
             MakeStep();
         }
@@ -744,8 +647,6 @@ _navigatedExit = null;
         {
             _blockWalk = false;
             _walking = false;
-            _sideStepInProgress = false;
-            _sideStepPerformed = false;
             _startWalkMessage = null;
         }
 
@@ -778,7 +679,7 @@ _navigatedExit = null;
             }
 
             // Detect object in front of Chipotle.
-            (Vector2 position, Tile tile) tileInFront = GetNextTile();
+            (Vector2 position, Tile tile) tileInFront = GetNextTile(1);
 
             if (tileInFront.tile != null)
             {
@@ -794,17 +695,12 @@ _navigatedExit = null;
         /// <summary>
         /// Controlls walk of the Chipotle NPC.
         /// </summary>
-        private void PerformWalk()
+        protected override void PerformWalk()
         {
-            if (_walking && _walkTimer >= _walkSpeed)
-            {
-                _walkTimer = 0;
-                MakeStep();
-            }
-            _walkTimer++;
+            base.PerformWalk();
 
-            if (_timeFromLastStep < _maxTimeBetweenSteps)
-                _timeFromLastStep++;
+            if (_walking && _walkTimer >= _speed)
+                MakeStep();
         }
 
         /// <summary>
@@ -916,6 +812,47 @@ _navigatedExit = null;
                 Car.ReceiveMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
                 World.PlayCutscene(Owner, "cs19");
             }
+        }
+
+        /// <summary>
+        /// Computes length of the next step of the NPC.
+        /// </summary>
+        /// <param name="goal">Coordinates of the goal of an ongoing movement of the NPC</param>
+        protected override int GetSpeed()
+        {
+            float coefficient = 1;
+              if (_startWalkMessage.Direction == TurnType.SharplyLeft || _startWalkMessage.Direction == TurnType.SharplyRight)
+                coefficient = _sideSpeed;
+                else if(_startWalkMessage.Direction == TurnType.Around)
+                coefficient = _backwardSpeed;
+
+            return (int) (GetTerrainSpeed() * coefficient);
+        }
+
+        /// <summary>
+        /// Solves a situation when the NPC encounters an obstacle.
+        /// </summary>
+        /// <param name="obstacle">Nearest point of the obstacle</param>
+        protected override bool SolveObstacle(Vector2 obstacle)
+        {
+            Tile t = World.Map[obstacle];
+            if (t == null) // Off the map
+                return true;
+
+            GameObject o = World.GetObject(obstacle);
+            Passage p = World.GetPassage(obstacle);
+
+            if (o != null && o != Owner)
+                Owner.ReceiveMessage(new ObjectsCollided(this, o, obstacle));
+            else if (p != null && p.State == PassageState.Closed)
+                Owner.ReceiveMessage(new DoorHit(this));
+            else if (!t.Walkable)
+                Owner.ReceiveMessage(new TerrainCollided(this, obstacle));
+            else return false;
+
+            _walking = false;
+            _startWalkMessage = null;
+            return true;
         }
     }
 }

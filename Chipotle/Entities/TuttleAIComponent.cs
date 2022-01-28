@@ -121,6 +121,9 @@ namespace Game.Entities
         /// </summary>
         private void GoToPool()
         {
+            //if (Program.TestMode)
+            //    return;
+
             Vector2 goal = new Vector2(1005, 1051);
             Owner.ReceiveMessage(new GotoPoint(this, goal));
         }

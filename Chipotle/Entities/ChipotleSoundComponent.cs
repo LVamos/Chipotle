@@ -246,7 +246,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnInpermeableTerrainCollision(TerrainCollided message)
-             => PlayTerrain(message.Tile.Terrain);
+             => PlayTerrain(World.Map[message.Position].Terrain);
 
         /// <summary>
         /// Processes the LocalityChanged message.

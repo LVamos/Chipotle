@@ -56,11 +56,6 @@ namespace Game.Entities
         private const int _minDistance = 2;
 
         /// <summary>
-        /// Reference to a path finder instance
-        /// </summary>
-        private readonly PathFinder _finder = new PathFinder();
-
-        /// <summary>
         /// An instance of the Random number generator
         /// </summary>
         private readonly Random _random = new Random();
@@ -69,16 +64,6 @@ namespace Game.Entities
         /// Specifies final distance from the Detective Chipotle when in process of approaching to it.
         /// </summary>
         private int _targetDistance;
-
-        /// <summary>
-        /// The goal that Tuttle is just going to.
-        /// </summary>
-        private Vector2 _goal;
-
-        /// <summary>
-        /// Stores the current shortest track towards the Detective Chipotle NPC.
-        /// </summary>
-        private Queue<Vector2> _path;
 
         /// <summary>
         /// Measures elapsed time from the last attempt of finding a path.
@@ -95,16 +80,6 @@ namespace Game.Entities
         /// walk was interrupted.
         /// </summary>
         private bool _restartApproaching;
-
-        /// <summary>
-        /// Specifies the length of one step in milliseconds.
-        /// </summary>
-        private float _stepInterval;
-
-        /// <summary>
-        /// Specifies if the NPC walks in constant speed.
-        /// </summary>
-        private bool _constantSpeed;
 
         /// <summary>
         /// Initializes the component and starts its message loop.
@@ -135,15 +110,6 @@ namespace Game.Entities
         /// <param name="message">The message</param>
         private void OnTuttleStateChanged(TuttleStateChanged message)
 => _state = message.State;
-
-        /// <summary>
-        /// Processes incoming messages.
-        /// </summary>
-        public override void Update()
-        {
-            base.Update();
-            PerformWalk();
-        }
 
         /// <summary>
         /// Repeats an attempt to find path to a goal specified in _goal field.
@@ -203,6 +169,9 @@ namespace Game.Entities
         /// </summary>
         private void GoToPlayer()
         {
+            if (Program.TestMode)
+                return;
+
             _targetDistance = _random.Next(_minDistance, _maxDistance);
             Vector2? tmp = FindPlaceNearPlayer();
 
@@ -217,7 +186,7 @@ namespace Game.Entities
 
             _goal = goal;
             SetState(TuttleState.GoingToPlayer);
-            _stepInterval = 0;
+            _walkTimer = 0;
         }
 
         /// <summary>
@@ -255,12 +224,6 @@ namespace Game.Entities
                 return;
 
             _goal = message.Goal;
-
-            if (message.WalkSpeed > 0)
-            {
-                _constantSpeed = true;
-                _speed = message.WalkSpeed;
-            }
 
             SetState(TuttleState.GoingToTarget);
         }
@@ -306,21 +269,18 @@ namespace Game.Entities
         /// <summary>
         /// Performs walk on a preplanned route.
         /// </summary>
-        private void PerformWalk()
+        protected override void PerformWalk()
         {
+            base.PerformWalk();
+
             if (Walking && _path.IsNullOrEmpty())
                 StopWalk();
             else if (_restartApproaching)
                 FindNewPath();
             else if (_state == TuttleState.WatchingPlayer)
                 CheckDistance();
-            else if (Walking && _stepInterval >= _speed)
-            {
-                _stepInterval = 0;
+            else if (Walking && _walkTimer >= _speed)
                 MakeStep();
-            }
-            else if (Walking)
-                _stepInterval += World.DeltaTime;
         }
 
         /// <summary>
@@ -335,37 +295,40 @@ namespace Game.Entities
         /// <summary>
         /// Performs one step in the direction given by the current orientation of the entity.
         /// </summary>
-        private void MakeStep()
+        protected override void MakeStep()
         {
-            Vector2 target = _path.Dequeue(); // Get target tile
-
-            // Detect obstacles
-            if (!World.IsWalkable(target))
-            {
-                AvoidObstacle(target);
-                return;
-            }
-
-          _speed = GetSpeed(target);
+            base.MakeStep();
+            // Move if there are no obstacles.
+            Vector2 target = GetNextTile();
+            if (!SolveObstacle(target))
             Move(target);  // The road is clear! Move!
         }
 
         /// <summary>
         /// Avoids an obstacle or walks through a door if any.
         /// </summary>
-        /// <param name="target">The target coordinates</param>
-        private void AvoidObstacle(Vector2 target)
+        /// <param name="obstacle">The target coordinates</param>
+        protected override bool SolveObstacle(Vector2 obstacle)
         {
             // Temporaryly solve a weird error that causes that the NPC bumps to it self.
-            if (World.GetObject(target) == Owner)
-                return;
+            if (World.GetObject(obstacle) == Owner)
+                return false;
 
             // If the obstacle is a door open it.
-            Passage p = World.GetPassage(target);
+            Passage p = World.GetPassage(obstacle);
             if (p != null && p.State == PassageState.Closed)
-                p.ReceiveMessage(new UseObject(Owner, target)); // Open the door and keep walking.
-            else if (_state == TuttleState.GoingToPlayer)
+            {
+                p.ReceiveMessage(new UseObject(Owner, obstacle)); // Open the door and keep walking.
+                return false;
+            }
+
+            // There is an insurmountable obstacle.
+            if (_state == TuttleState.GoingToPlayer)
+            {
                 _restartApproaching = true;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -391,9 +354,8 @@ namespace Game.Entities
         /// </summary>
         private void StopWalk()
         {
-            _constantSpeed = false;
             _path = null;
-            _stepInterval = 0;
+            _walkTimer = 0;
 
             if (_state == TuttleState.GoingToPlayer)
                 SetState(TuttleState.WatchingPlayer);

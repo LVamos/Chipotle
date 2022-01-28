@@ -13,24 +13,18 @@ namespace Game.Messaging.Events
     [Serializable]
     public class TerrainCollided : GameMessage
     {
-        /// Position of the tile on which part of the colliding object lays. It should be always in
-        /// front of the NPC. </summary>
-        public readonly Vector2 Position;
-
         /// <summary>
-        /// Tile with the impermeable terrain
+        /// Position of the tile on which part of the colliding object lays. It should be always in
+        /// front of the NPC
         /// </summary>
-        public readonly Tile Tile;
+        public readonly Vector2 Position;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="tile">Tile with the impermeable terrain</param>
-        public TerrainCollided(object sender, Vector2 position, Tile tile) : base(sender)
-        {
-            Position = position;
-            Tile = tile;
-        }
+        /// <param name="position">Position of the colliding terrain</param>
+        public TerrainCollided(object sender, Vector2 position) : base(sender)
+            => Position = position;
     }
 }

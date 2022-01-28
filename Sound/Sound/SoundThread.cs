@@ -853,7 +853,7 @@ namespace Luky
             IPlayback playback;
 
             // Change pending fadings to active if the corresponding sounds are playing.
-            foreach (int id in _fadings.Keys.ToArray<int>())
+            foreach (int id in  _fadings.Keys.ToArray<int>())
             {
                 // Local function
                 void Apply(float volume)
