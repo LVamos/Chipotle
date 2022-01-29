@@ -12,6 +12,11 @@ namespace Game.Entities
     public class SoundComponent : EntityComponent
     {
         /// <summary>
+        /// Volume for foot steps
+        /// </summary>
+        protected float _walkingVolume = 1;
+
+        /// <summary>
         /// Default volume for sound output
         /// </summary>
         protected float _defaultVolume = 1;

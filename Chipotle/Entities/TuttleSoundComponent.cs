@@ -19,6 +19,9 @@ namespace Game.Entities
     [Serializable]
     public class TuttleSoundComponent : SoundComponent
     {
+        public TuttleSoundComponent(): base()
+            => _walkingVolume = .2f;
+
         /// <summary>
         /// Initializes the component and starts its message loop.
         /// </summary>
@@ -55,13 +58,13 @@ namespace Game.Entities
             // Set attenuation parameters
             bool attenuate = obstacle != ObstacleType.None && obstacle != ObstacleType.IndirectPath; ;
             (float gain, float gainHF) lowpass = default;
-            float volume = _defaultVolume;
+            float volume = _walkingVolume;
 
             switch (obstacle)
             {
-                case ObstacleType.Wall: lowpass = World.Sound.OverWallLowpass; volume = World.Sound.GetOverWallVolume(_defaultVolume); break;
-                case ObstacleType.Door: lowpass = World.Sound.OverDoorLowpass; volume = World.Sound.GetOverDoorVolume(_defaultVolume); break;
-                case ObstacleType.Object: lowpass = World.Sound.OverObjectLowpass; volume = World.Sound.GetOverObjectVolume(_defaultVolume); break;
+                case ObstacleType.Wall: lowpass = World.Sound.OverWallLowpass; volume = World.Sound.GetOverWallVolume(_walkingVolume); break;
+                case ObstacleType.Door: lowpass = World.Sound.OverDoorLowpass; volume = World.Sound.GetOverDoorVolume(_walkingVolume); break;
+                case ObstacleType.Object: lowpass = World.Sound.OverObjectLowpass; volume = World.Sound.GetOverObjectVolume(_walkingVolume); break;
             }
 
             // Play the sound

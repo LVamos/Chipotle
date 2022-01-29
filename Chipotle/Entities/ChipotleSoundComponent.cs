@@ -335,7 +335,7 @@ namespace Game.Entities
         private void PlayTerrain(TerrainType terrain)
         {
             string soundName = "movstep" + Enum.GetName(terrain.GetType(), terrain);
-            _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, new Vector3(0, -1.7f, 0), true, 1f, null, 1f, 0, Playback.OpenAL);
+            _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, Vector3.Zero, true, _walkingVolume, null, 1f, 0, Playback.OpenAL);
 
             if (terrain == TerrainType.Wall)
                 Tolk.Speak("zeď", true);
