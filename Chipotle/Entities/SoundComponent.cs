@@ -26,9 +26,9 @@ namespace Game.Entities
         /// <param name="stringList">The string list to be formatted</param>
         /// <param name="addAnd">Specifies if last two items should by separated with " a " conjunction.</param>
         /// <returns>CSV string</returns>
-        protected string FormatStringList(List<string> stringList, bool addAnd = false)
+        protected string FormatStringList(string[] stringList, bool addAnd = false)
         {
-            int count = stringList.Count;
+            int count = stringList.Length;
             if (count == 1)
                 return stringList[0];
 

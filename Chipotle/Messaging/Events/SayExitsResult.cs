@@ -12,10 +12,9 @@ namespace Game.Messaging.Events
     public class SayExitsResult: GameMessage
     {
         /// <summary>
-        /// Information about the exits including description of particular exits and angles between
-        /// an NPC and each exit
+        /// Information about the exits including description of their location.
         /// </summary>
-        public readonly IEnumerable<(string description, double compassDegrees)> ExitInfo;
+        public readonly string[] Exits;
 
         /// <summary>
         /// An exit the NPC stands in.
@@ -27,8 +26,8 @@ namespace Game.Messaging.Events
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="exitInfo">Information about the exits</param>
-        public SayExitsResult(object sender, IEnumerable<(string description, double compassDegrees)> exitInfo) : base(sender)
-            => ExitInfo = exitInfo;
+        public SayExitsResult(object sender, string[] exits) : base(sender)
+            => Exits = exits;
 
         /// <summary>
         /// Constructor
@@ -38,8 +37,13 @@ namespace Game.Messaging.Events
         public SayExitsResult(object sender, Passage occupiedPassage):base(sender)
         {
             OccupiedPassage = occupiedPassage;
-            ExitInfo = null;
-
+            Exits = null;
         }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="sender">Source of the message</param>
+        public SayExitsResult(object sender): base(sender) { }
     }
 }

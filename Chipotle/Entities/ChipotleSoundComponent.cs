@@ -149,28 +149,25 @@ namespace Game.Entities
                 return;
             }
 
-            if (message.ExitInfo.IsNullOrEmpty())
+            if (message.Exits.IsNullOrEmpty())
             {
                 Tolk.Speak("žádné východy nevidíš", true);
                 return;
             }
 
-                List<string> info = message.ExitInfo
-                    .Select(e => Angle.GetAngleDescription(e.compassDegrees) + " " + e.description)
-                    .ToList<string>();
-
-                if (info.Count == 1)
+            int count = message.Exits.Length;
+                if (count == 1)
                 {
-                    (string description, double compassDegrees) record = message.ExitInfo.First();
-                    Tolk.Speak($"{Angle.GetAngleDescription(record.compassDegrees)} je východ {record.description}", true);
+                    Tolk.Speak(message.Exits[0], true);
                     return;
                 }
 
                 string number;
-                if (info.Count >= 2 && info.Count <= 4)
-                    number = "Jsou tu " + (info.Count == 2 ? "dva" : "3") + " východy: ";
-                else number = "Je tu " + info.Count.ToString() + " východů: ";
-                Tolk.Speak(number + FormatStringList(info, true), true);
+                if (count >= 2 && count <= 4)
+                    number = "Jsou tu " + (count == 2 ? "dva" : "3") + " východy: ";
+                else number = "Je tu " + count.ToString() + " východů: ";
+
+                Tolk.Speak(number + FormatStringList(message.Exits, true), true);
         }
 
         /// <summary>
@@ -185,8 +182,8 @@ namespace Game.Entities
                 return;
             }
 
-                List<string> objectInfo = message.ObjectInfo
-                    .Select(r => r.o.Name.Friendly + " " + Angle.GetAngleDescription(r.compassDegrees)).ToList<string>();
+                string[] objectInfo = message.ObjectInfo
+                    .Select(r => r.o.Name.Friendly + " " + Angle.GetAngleDescription(r.compassDegrees)).ToArray<string>();
                 Tolk.Speak(FormatStringList(objectInfo), true);
         }
 

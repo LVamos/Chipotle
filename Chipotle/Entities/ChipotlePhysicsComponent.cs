@@ -217,25 +217,19 @@ _navigatedExit = null;
             if (NavigationInProgress)
                 return;
 
-            Vector2 me = _area.Center;
-            List<Passage> exits = _locality.GetNearestExits(me, _exitRadius).ToList<Passage>();
-
-            if (exits.IsNullOrEmpty())
+            (string[] descriptions, Passage[] exits) result = GetExitDescriptions();
+            if (result.descriptions.IsNullOrEmpty())
             {
-                Owner.ReceiveMessage(new SayExitsResult(this, exitInfo: null));
+                Owner.ReceiveMessage(new SayExitsResult(this));
                 return;
             }
 
-            string[] items = exits
-                .Select(e => e.AnotherLocality(_locality).To +" " +Angle.GetAngleDescription(GetAngle(e.Area.GetClosestPointTo(me))))
-            .ToArray<string>();
-
-            int option = WindowHandler.Menu(items, "Východy", true);
-
+            // Run the menu
+            int option = WindowHandler.Menu(result.descriptions, "Východy", true);
             if (option == -1)
                 return;
 
-            Passage target = exits[option];
+            Passage target = result.exits[option];
             if (_navigatedExit != null && _navigatedExit != target)
                 StopNavigation();
 
@@ -397,21 +391,28 @@ _navigatedExit = null;
             if (NavigationInProgress)
                 return;
 
-            Vector2 me = _area.Center;
-
             // If the player stands in a passage inform him.
-            Passage occupiedPassage = World.GetPassage(me);
+            Passage occupiedPassage = World.GetPassage(_area.Center);
             if (occupiedPassage != null)
-            {
                 Owner.ReceiveMessage(new SayExitsResult(this, occupiedPassage));
-                return;
-            }
+            else Owner.ReceiveMessage(new SayExitsResult(this, GetExitDescriptions().descriptions));
+        }
 
-            IEnumerable<Passage> exits = _locality.GetNearestExits(me, _exitRadius);
+        private (string[] descriptions, Passage[] exits) GetExitDescriptions()
+        {
+            Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Passage>();
 
-            IEnumerable<(string description, double compassDegrees)> exitInfo = exits
-                .Select(e => (e.AnotherLocality(_locality).To, GetAngle(e.Area.GetClosestPointTo(me))));
-            Owner.ReceiveMessage(new SayExitsResult(this, exitInfo));
+            string[] descriptions =
+    (
+    from e in exits
+    let type = e is Door ? "dveře " : "průchod "
+    let to = e.AnotherLocality(_locality).To + " "
+    let point = e.Area.GetClosestPointTo(_area.Center)
+    let angle = Angle.GetAngleDescription(GetAngle(point))
+    select (type + to + angle)
+    ).ToArray<string>();
+
+            return (descriptions, exits);
         }
 
         /// <summary>
