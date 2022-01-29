@@ -169,9 +169,6 @@ namespace Game.Entities
         /// </summary>
         private void GoToPlayer()
         {
-            if (Program.TestMode)
-                return;
-
             _targetDistance = _random.Next(_minDistance, _maxDistance);
             Vector2? tmp = FindPlaceNearPlayer();
 
@@ -298,6 +295,7 @@ namespace Game.Entities
         protected override void MakeStep()
         {
             base.MakeStep();
+
             // Move if there are no obstacles.
             Vector2 target = GetNextTile();
             if (!SolveObstacle(target))
@@ -311,23 +309,20 @@ namespace Game.Entities
         protected override bool SolveObstacle(Vector2 obstacle)
         {
             // Temporaryly solve a weird error that causes that the NPC bumps to it self.
-            if (World.GetObject(obstacle) == Owner)
-                return false;
+            GameObject o = World.GetObject(obstacle);
+            if (o != null && o != Owner)
+            {
+                if (_state == TuttleState.GoingToPlayer)
+                    _restartApproaching = true;
+
+                    return true;
+            }
 
             // If the obstacle is a door open it.
             Passage p = World.GetPassage(obstacle);
             if (p != null && p.State == PassageState.Closed)
-            {
                 p.ReceiveMessage(new UseObject(Owner, obstacle)); // Open the door and keep walking.
-                return false;
-            }
 
-            // There is an insurmountable obstacle.
-            if (_state == TuttleState.GoingToPlayer)
-            {
-                _restartApproaching = true;
-                return true;
-            }
             return false;
         }
 
