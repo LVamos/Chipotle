@@ -86,7 +86,7 @@ namespace Game.Entities
         public override void Start()
         {
             _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
-            _listenerPosition.steps = 70;
+            _listenerPosition.steps = 30;
             _listenerPosition.currentStep = -1;
             base.Start();
 
