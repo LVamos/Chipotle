@@ -445,9 +445,15 @@ namespace Game
         public static GameObject GetObject(Vector2 point)
         {
             Locality locality = GetLocality(point);
-            GameObject obj = locality?.Objects.FirstOrDefault(o => o.Area.LaysOnPlane(point));
-            return obj
-                ?? locality.Entities.FirstOrDefault(e => e.Area.LaysOnPlane(point));
+            if (locality == null)
+                return null;
+
+            DumpObject obj = locality.Objects.FirstOrDefault(o => o.Area.LaysOnPlane(point));
+            if (obj != null)
+                return obj;
+
+            Entity entity = locality.Entities.FirstOrDefault(e => e.Area.LaysOnPlane(point));
+                return entity;
         }
 
         /// <summary>
@@ -774,8 +780,8 @@ lBackgroundInfo.volume
             // Play the first cutscene
             PlayCutscene(null, "cs6");
 
-            if (Program.TestMode)
-                StopCutscene(null);
+            //if (Program.TestMode)
+            //    StopCutscene(null);
         }
 
         /// <summary>
