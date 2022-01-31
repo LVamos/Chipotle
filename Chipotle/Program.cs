@@ -83,7 +83,7 @@ namespace Game
         /// <summary>
         /// Enables some test methods.
         /// </summary>
-        public const bool TestMode = false;
+        public const bool TestMode = true;
 
 
         /// <summary>

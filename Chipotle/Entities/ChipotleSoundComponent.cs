@@ -285,7 +285,9 @@ namespace Game.Entities
             _listenerPosition.step = step;
             _listenerPosition.currentStep = 0;
 
+            if(!message.Silently)
             PlayTerrain(World.Map[message.TargetPosition.Center].Terrain);
+
             WatchCutscene();
         }
 
