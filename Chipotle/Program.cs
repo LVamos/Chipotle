@@ -21,7 +21,7 @@ namespace Game
         /// <summary>
         /// Enables some test methods.
         /// </summary>
-        public const bool TestMode = true;
+        public const bool TestMode = false;
 
 
         /// <summary>
@@ -48,8 +48,11 @@ namespace Game
         public static void OnError(Exception ex)
         {
             EnableJAWSKeyHook();
+
+            if(TestMode)
             throw ex;
-        OnError(ex.ToString());
+
+            OnError(ex.ToString());
         }
 
         /// <summary>
@@ -60,7 +63,10 @@ namespace Game
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
             EnableJAWSKeyHook();
+
+            if(TestMode)
             throw e.Exception;
+
             OnError(e.Exception);
         }
 
@@ -72,7 +78,10 @@ namespace Game
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             EnableJAWSKeyHook();
+
+            if(TestMode)
             throw (Exception)e.ExceptionObject;
+
             OnError(e.ExceptionObject.ToString());
         }
 
@@ -95,6 +104,11 @@ namespace Game
             }
             catch (Exception ex)
             {
+                EnableJAWSKeyHook();
+
+                if (TestMode)
+                    throw ex;
+
                 OnError(ex);
             }
 

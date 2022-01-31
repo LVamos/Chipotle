@@ -141,8 +141,9 @@ namespace Game.UI
         private void MainWindow_Shown(object sender, EventArgs e)
         {
             Focus();
-            if(Program.TestMode)
-            WindowHandler.StartGame();
+
+            if (Program.TestMode)
+                WindowHandler.StartGame();
             else
                 WindowHandler.MainMenu();
 

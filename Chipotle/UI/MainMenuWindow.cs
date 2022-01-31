@@ -167,7 +167,6 @@ namespace Game.UI
             if (Program.TestMode)
                 return;
 
-
             if (_menuLoopID == 0)
                 _menuLoopID = World.Sound.Play(_menuLoopSound, null, true, PositionType.None, Vector3.Zero, false, _loopVolume);
         }
