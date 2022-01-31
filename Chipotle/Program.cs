@@ -1,5 +1,9 @@
-﻿using System;
+﻿using System.Net;
+using System.Net.Mail;
+using System;
 using System.IO;
+using System.Net.Mail;
+using System.Net;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -10,6 +14,7 @@ using Game.UI;
 using Luky;
 
 using OpenTK;
+using System.Text;
 
 namespace Game
 {
@@ -18,6 +23,63 @@ namespace Game
     /// </summary>
     internal class Program : DebugSO
     {
+        /// <summary>
+        /// Current version of the game
+        /// </summary>
+        public static string Version = "0.4.2";
+
+        /// <summary>
+        /// Sends an e-mail message to my Gmail account.
+        /// </summary>
+        /// <param name="subject">Subject for the message</param>
+        /// <param name="body">Body of the message</param>
+        /// <returns>True if the message is sent properly</returns>
+        private static bool SendMeMail(string subject, string body, Attachment attachment)
+        {
+            var fromAddress = new MailAddress("lukas.vamos@gmail.com", Environment.UserName);
+            var toAddress = new MailAddress("lukas.vamos@gmail.com", "Lukáš Vámoš");
+            const string fromPassword = "zphoeiuuqlbvemgy";
+
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+
+            // Send it
+
+            try
+            {
+                using (var message = new MailMessage(fromAddress, toAddress)
+                {
+                    Subject = subject,
+                    Body = body
+                })
+                {
+                    if (attachment != null)
+                        message.Attachments.Add(attachment);
+
+                    smtp.Send(message);
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private static bool ReportError(string message)
+        {
+            string path = @"data\game.sav";
+            Attachment attachment = File.Exists(path) ? new Attachment(path) : null;
+            return SendMeMail("Chipotle - hlášení o chybě", message, attachment);
+        }
+
         /// <summary>
         /// Enables some test methods.
         /// </summary>
@@ -171,15 +233,23 @@ return;
         private static void OnError(string error)
         {
             EnableJAWSKeyHook();
-            string text = string.Empty;
+            StringBuilder text = new StringBuilder();
+            text.AppendLine("Hlášení o pádu Chipotla.");
+            text.AppendLine("Uživatel: " +Environment.UserName);
+            text.AppendLine("Verze: " + Version);
+            text.AppendLine("Datum a čas: " + DateTime.Now.ToString());
 
             if (World.Player != null)
-                text = $"Current position: {World.Player.Area.Center.ToString()}{Environment.NewLine}";
-            text += error;
+                text.AppendLine ("Aktuální pozice: " +World.Player.Area.Center.ToString());
+
+            text.AppendLine("Výpis stack trace:");
+            text.AppendLine(error);
+            string message = text.ToString();
+
             Action action = () =>
             {
-                MessageBox.Show(MainWindow, $"Hlášení o chybě zkopírováno do schránky{Environment.NewLine}" + text, AppDomain.CurrentDomain.FriendlyName + ": závažná chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Clipboard.SetText(text);
+                string tmp = ReportError(message) ? "Luki už má hlášení o chybě na mailu. Ten bude mít radost." : "Chtěl sem Lukimu poslat hlášení, ale nepovedlo se to. Tak mu hlavně napiš, jinak ti už v životě neudělá tiramisu.";
+                MessageBox.Show(MainWindow, "Došlo k chybě a ta zkurvená hra spadla. " +tmp, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             };
 
             if (MainWindow != null)
