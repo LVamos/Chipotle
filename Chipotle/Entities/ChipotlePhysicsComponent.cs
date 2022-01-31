@@ -843,12 +843,12 @@ _navigatedExit = null;
             GameObject o = World.GetObject(obstacle);
             Passage p = World.GetPassage(obstacle);
 
-            if (o != null && o != Owner)
+            if (!t.Walkable)
+                Owner.ReceiveMessage(new TerrainCollided(this, obstacle));
+            else if (o != null && o != Owner)
                 Owner.ReceiveMessage(new ObjectsCollided(this, o, obstacle));
             else if (p != null && p.State == PassageState.Closed)
                 Owner.ReceiveMessage(new DoorHit(this));
-            else if (!t.Walkable)
-                Owner.ReceiveMessage(new TerrainCollided(this, obstacle));
             else return false;
 
             _walking = false;
