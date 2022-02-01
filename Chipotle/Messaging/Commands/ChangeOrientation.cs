@@ -12,7 +12,7 @@ namespace Game.Messaging.Commands
     /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
     /// </remarks>
     [Serializable]
-    public class TurnEntity : GameMessage
+    public class ChangeOrientation : GameMessage
     {
         /// <summary>
         /// Specifies how many degrees the NPC should turn.
@@ -29,7 +29,7 @@ namespace Game.Messaging.Commands
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="direction">Specifies how much the NPC should turn.</param>
-        public TurnEntity(object sender, TurnType direction) : base(sender)
+        public ChangeOrientation(object sender, TurnType direction) : base(sender)
         {
             Direction = direction;
             Degrees = (int)direction;

@@ -12,7 +12,7 @@ namespace Game.Messaging.Commands
     /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
     /// </remarks>
     [Serializable]
-    public class StartWalk : TurnEntity
+    public class StartWalk : ChangeOrientation
     {
         /// <summary>
         /// Constructor

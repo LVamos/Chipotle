@@ -169,7 +169,7 @@ namespace Game.Entities
         {
             Move((Vector2)StartPosition, true);
                 _orientation = new Orientation2D(0, 1);
-
+            Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
             base.Start();
 
             RegisterMessages(
@@ -190,7 +190,7 @@ namespace Game.Entities
                     [typeof(SayNavigableObjects)] = (m) => OnSayNavigableObjects((SayNavigableObjects)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
                     [typeof(StartWalk)] = (m) => OnStartWalk((StartWalk)m),
-                    [typeof(TurnEntity)] = (message) => OnTurnEntity((TurnEntity)message),
+                    [typeof(ChangeOrientation)] = (message) => OnChangeOrientation((ChangeOrientation)message),
                     [typeof(UseObject)] = (message) => OnUseObject((UseObject)message)
                 }
                 );
@@ -655,10 +655,11 @@ _navigatedExit = null;
         /// Processes the TurnEntity message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnTurnEntity(TurnEntity message)
+        private void OnChangeOrientation(ChangeOrientation message)
         {
+            Orientation2D source = _orientation;
             _orientation.Rotate(message.Degrees);
-            Owner.ReceiveMessage(new TurnEntityResult(this, _orientation));
+            Owner.ReceiveMessage(new OrientationChanged(this, source, _orientation, message.Direction));
         }
 
         /// <summary>

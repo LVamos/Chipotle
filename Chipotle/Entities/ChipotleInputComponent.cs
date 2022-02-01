@@ -287,31 +287,31 @@ namespace Game.Entities
         /// Rotates the NPC around Z axis.
         /// </summary>
         private void TurnAround()
-            => Owner.ReceiveMessage(new TurnEntity(this, TurnType.Around));
+            => Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.Around));
 
         /// <summary>
         /// Rotates the NPC around Z axis 45 degrees to the left.
         /// </summary>
         private void TurnLeft()
-=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyLeft));
+=> Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SlightlyLeft));
 
         /// <summary>
         /// Rotates the NPC around Z axis 45 degrees to the right.
         /// </summary>
         private void TurnRight()
-=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SlightlyRight));
+=> Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SlightlyRight));
 
         /// <summary>
         /// Rotates the NPC around Z axis 90 degrees to the left.
         /// </summary>
         private void TurnSharplyLeft()
-                        => Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyLeft));
+                        => Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SharplyLeft));
 
         /// <summary>
         /// Rotates the NPC around Z axis 90 degrees to the right.
         /// </summary>
         private void TurnSharplyRight()
-=> Owner.ReceiveMessage(new TurnEntity(this, TurnType.SharplyRight));
+=> Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SharplyRight));
 
         /// <summary>
         /// Reports if the player have already visited the current locality.

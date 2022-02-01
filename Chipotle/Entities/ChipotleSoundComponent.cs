@@ -86,6 +86,7 @@ namespace Game.Entities
         public override void Start()
         {
             _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
+            _listenerOrientation.steps = -1;
             _listenerPosition.steps = 30;
             _listenerPosition.currentStep = -1;
             base.Start();
@@ -100,7 +101,7 @@ namespace Game.Entities
                 [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
-                [typeof(TurnEntityResult)] = (m) => OnTurnoverDone((TurnEntityResult)m),
+                [typeof(OrientationChanged)] = (m) => OnOrientationChanged((OrientationChanged)m),
                 [typeof(PositionChanged)] = (message) => OnPositionChanged((PositionChanged)message),
                 [typeof(ObjectsCollided)] = (m) => OnObjectsCollided((ObjectsCollided)m),
                 [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
@@ -211,12 +212,12 @@ namespace Game.Entities
         /// </summary>
         protected void UpdateListener()
         {
-            // Update orientation
-            Vector2 orientation = Owner.Orientation.UnitVector;
-            if (_sound.ListenerOrientationFacing.X != orientation.X || _sound.ListenerOrientationFacing.Z != orientation.Y)
-                _sound.ListenerOrientationFacing = orientation.AsOpenALVector();
+            UpdateListenerOrientation();
+            UpdateListenerPosition();
+        }
 
-            // Update position
+        private void UpdateListenerPosition()
+        {
             if (_listenerPosition.currentStep == -1)
                 return;
 
@@ -227,8 +228,30 @@ namespace Game.Entities
                 return;
             }
 
-                _sound.ListenerPosition += _listenerPosition.step;
-                _listenerPosition.currentStep++;
+            _sound.ListenerPosition += _listenerPosition.step;
+            _listenerPosition.currentStep++;
+        }
+
+        /// <summary>
+        /// Updates orientation of the listener.
+        /// </summary>
+        private void UpdateListenerOrientation()
+        {
+            if (_listenerOrientation.steps < 0)
+                return;
+
+            if (_listenerOrientation.steps > 0) // Partial rotation
+            {
+                _listenerOrientation.current = _listenerOrientation.current.Rotate(_listenerOrientation.step); // Partial rotation
+                _listenerOrientation.steps--;
+            }
+            else if (_listenerOrientation.steps == 0)  // Final step
+            {
+                _listenerOrientation.current = _listenerOrientation.final;
+                _listenerOrientation.steps = -1;
+            }
+
+            _sound.ListenerOrientationFacing = _listenerOrientation.current.UnitVector.AsOpenALVector(); // Apply changes
         }
 
         /// <summary>
@@ -328,7 +351,29 @@ namespace Game.Entities
         /// Processes the TurnoverDone message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnTurnoverDone(TurnEntityResult message) => SayOrientation();
+        private void OnOrientationChanged(OrientationChanged message)
+        {
+             SayOrientation();
+
+            // Immediate change
+            if (message.Immediately)
+            {
+                _sound.ListenerOrientationFacing = message.Target.UnitVector.AsOpenALVector();
+                return;
+            }
+
+            // Fluent change
+            _listenerOrientation.steps = Math.Abs(message.Degrees);
+                _listenerOrientation.step = message.Degrees / _listenerOrientation.steps;
+            _listenerOrientation.current = message.Source;
+            _listenerOrientation.final= message.Target;
+        }
+
+        /// <summary>
+        /// Stores information for dynamic listener orientation settings.
+        /// </summary>
+        private (Orientation2D current, Orientation2D final, int step, int steps) _listenerOrientation;
+        private const int _orientationSteps = 70;
 
         /// <summary>
         /// Plays a sound representation of a tile.

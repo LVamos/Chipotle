@@ -120,7 +120,8 @@ namespace Game.Terrain
         /// Rotates the orientation.
         /// </summary>
         /// <param name="degrees">Specifies how much the orientation should be rotated</param>
-        public void Rotate(double degrees)
+        /// <returns>The rotated orientation</returns>
+        public Orientation2D Rotate(double degrees)
         {
             if (degrees == -90)
                 _unitVector = _unitVector.PerpendicularLeft;
@@ -135,6 +136,8 @@ namespace Game.Terrain
                 double sin = -Sin(radians);
                 _unitVector = new Vector2((float)(cos * _unitVector.X - sin * _unitVector.Y), (float)(sin * _unitVector.X + cos * _unitVector.Y));
             }
+
+            return this;
         }
 
         /// <summary>
