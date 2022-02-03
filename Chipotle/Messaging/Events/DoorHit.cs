@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Game.Terrain;
+
+using OpenTK;
+
+using System;
 
 namespace Game.Messaging.Events
 {
@@ -12,12 +16,26 @@ namespace Game.Messaging.Events
     [Serializable]
     public class DoorHit : GameMessage
     {
+            /// <summary>
+            /// The door to which an NPC bumped.
+            /// </summary>
+            public readonly Door Door;
+
+        /// <summary>
+        /// The point at which the door was hit.
+        /// </summary>
+        public readonly Vector2 Point;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="sender">Source of the message</param>
-        public DoorHit(object sender) : base(sender)
+        /// <param name="sender"></param>
+        /// <param name="door"></param>
+        /// <param name="point"></param>
+        public DoorHit(object sender, Door door, Vector2 point) : base(sender)
         {
+            Door = door;
+            Point = point;
         }
     }
 }

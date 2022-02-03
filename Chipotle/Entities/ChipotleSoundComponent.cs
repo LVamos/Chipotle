@@ -253,7 +253,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnEntityHitDoor(DoorHit message)
-=> Tolk.Speak("dveře", true);
+            => Tolk.Speak("dveře", true);
 
         /// <summary>
         /// Processes the TerrainCollided message.

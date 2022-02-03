@@ -873,7 +873,10 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
             else if (o != null && o != Owner)
                 Owner.ReceiveMessage(new ObjectsCollided(this, o, obstacle));
             else if (p != null && p.State == PassageState.Closed)
-                Owner.ReceiveMessage(new DoorHit(this));
+            {
+                p.ReceiveMessage(new DoorHit(Owner, p as Door, obstacle));
+                Owner.ReceiveMessage(new DoorHit(this, p as Door, obstacle));
+            }
             else return false;
 
             _walking = false;

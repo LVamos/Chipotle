@@ -36,7 +36,7 @@ namespace Game.Terrain
         /// <summary>
         /// Sound played when an NPC bumps to the door.
         /// </summary>
-        protected string _hitSound;
+        protected string _hitSound = "KitchenDoorCrash";
 
         /// <summary>
         /// Sound of the door being opened
@@ -67,8 +67,19 @@ namespace Game.Terrain
             RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {
+        [typeof(DoorHit)] = (message) => OnDoorHit((DoorHit)message),
         [typeof(UseObject)] = (m) => OnUseObject((UseObject)m)
     });
+        }
+
+        /// <summary>
+        ///  Handles the DoorHit message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected virtual void OnDoorHit(DoorHit message)
+        {
+            World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_hitSound), role: null, looping: false, PositionType.Absolute, message.Point.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+
         }
 
         /// <summary>
@@ -84,7 +95,7 @@ namespace Game.Terrain
                 foreach (Locality l in Localities)
                     l.ReceiveMessage(message);
 
-                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_closingSound), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_closingSound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
             }
         }
 
@@ -117,7 +128,7 @@ namespace Game.Terrain
                 Localities[0].ReceiveMessage(message);
                 Localities[1].ReceiveMessage(message);
 
-            World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_openingSound), role: null, looping: false, PositionType.Absolute, Area.Center.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+            World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_openingSound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
         }
     }
 }
