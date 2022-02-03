@@ -97,7 +97,7 @@ namespace Game.Entities
                 [typeof(SayVisitedLocalityResult)] = (message) => OnSayVisitedLocality((SayVisitedLocalityResult)message),
                 [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
                 [typeof(SayExitsResult)] = (message) => OnSayExitsResult((SayExitsResult)message),
-                [typeof(SaySurroundingObjectsResult)] = (message) => OnSaySurroundingObjectsResult((SaySurroundingObjectsResult)message),
+                [typeof(SayObjectsResult)] = (message) => OnSayObjectsResult((SayObjectsResult)message),
                 [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
@@ -168,24 +168,18 @@ namespace Game.Entities
                     number = "Jsou tu " + (count == 2 ? "dva" : "3") + " východy: ";
                 else number = "Je tu " + count.ToString() + " východů: ";
 
-                Tolk.Speak(number + FormatStringList(message.Exits, true), true);
+                Tolk.Speak(number + FormatStringList(message.Exits, true) +".", true);
         }
 
         /// <summary>
         /// Handles the SayNearestObjects message.
         /// </summary>
         /// <param name="message">The message</param>
-        protected void OnSaySurroundingObjectsResult(SaySurroundingObjectsResult message)
+        protected void OnSayObjectsResult(SayObjectsResult message)
         {
-            if (message.ObjectInfo.IsNullOrEmpty())
-            {
+            if (message.Objects.IsNullOrEmpty())
                 Tolk.Speak("Nic tu není", true);
-                return;
-            }
-
-                string[] objectInfo = message.ObjectInfo
-                    .Select(r => r.o.Name.Friendly + " " + Angle.GetAngleDescription(r.compassDegrees)).ToArray<string>();
-                Tolk.Speak(FormatStringList(objectInfo), true);
+                else Tolk.Speak(FormatStringList(message.Objects), true);
         }
 
         /// <summary>

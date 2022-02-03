@@ -43,7 +43,7 @@ namespace Game
                 return ObstacleType.Far;  // Inaudible
 
             // Adjecting localities
-            Plane path = new Plane(area.GetClosestPointTo(Player.Area.Center), Player.Area.Center);
+            Plane path = new Plane(area.GetClosestPoint(Player.Area.Center), Player.Area.Center);
             ObstacleType obstacle = DetectObstacles(path);
 
             if (neighbour && behindDoors)

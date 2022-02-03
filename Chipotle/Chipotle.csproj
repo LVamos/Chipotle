@@ -77,7 +77,7 @@
     <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Entities\TuttleState.cs" />
     <Compile Include="Messaging\Commands\ListExits.cs" />
-    <Compile Include="Messaging\Commands\ListNavigableObjects.cs" />
+    <Compile Include="Messaging\Commands\ListObjects.cs" />
     <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
     <Compile Include="Messaging\Commands\SayExits.cs" />
     <Compile Include="Messaging\Commands\SayOrientation.cs" />
@@ -90,7 +90,7 @@
     <Compile Include="Messaging\Events\ExitNavigationStopped.cs" />
     <Compile Include="Messaging\Events\ObjectNavigationStopped.cs" />
     <Compile Include="Messaging\Events\SayExitsResult.cs" />
-    <Compile Include="Messaging\Events\SaySurroundingObjectsResult.cs" />
+    <Compile Include="Messaging\Events\SayObjectsResult.cs" />
     <Compile Include="Messaging\Events\SayVisitedLocalityResult.cs" />
     <Compile Include="Messaging\Commands\StopWalk.cs" />
     <Compile Include="Messaging\Events\GameReloaded.cs" />
@@ -135,7 +135,7 @@
     <Compile Include="Entities\TuttleSoundComponent.cs" />
     <Compile Include="Messaging\Events\LocalityLeft.cs" />
     <Compile Include="Messaging\Events\LocalityEntered.cs" />
-    <Compile Include="Messaging\Commands\SayNavigableObjects.cs" />
+    <Compile Include="Messaging\Commands\SayObjects.cs" />
     <Compile Include="Messaging\Commands\SayLocality.cs" />
     <Compile Include="Messaging\Events\PositionChanged.cs" />
     <Compile Include="Messaging\Events\TerrainCollided.cs" />

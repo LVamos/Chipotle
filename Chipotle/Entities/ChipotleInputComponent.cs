@@ -36,7 +36,7 @@ namespace Game.Entities
         /// <summary>
         /// Lists navigable objects.
         /// </summary>
-        protected void ListNavigableObjects() => Owner.ReceiveMessage(new ListNavigableObjects(this));
+        protected void ListNavigableObjects() => Owner.ReceiveMessage(new ListObjects(this));
 
         /// <summary>
         /// Initializes the component and starts its message loop.
@@ -257,7 +257,7 @@ namespace Game.Entities
         /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
         /// </summary>
         private void SaySurroundingObjects()
-=> Owner.ReceiveMessage(new SayNavigableObjects(this));
+=> Owner.ReceiveMessage(new SayObjects(this));
 
         /// <summary>
         /// Stops the currently playing cutscene.
