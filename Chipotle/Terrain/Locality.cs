@@ -129,7 +129,7 @@ namespace Game.Terrain
         {
             return
                 from e in Passages
-                where(!e.Area.LaysOnPlane(point) && World.GetDistance(e.Area.GetClosestPointTo(point), point) <=radius)
+                where(!e.Area.LaysOnPlane(point) && World.GetDistance(e.Area.GetClosestPoint(point), point) <=radius)
                 orderby e.Area.GetDistanceFrom(point)
                 select e;
         }

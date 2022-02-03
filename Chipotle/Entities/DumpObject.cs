@@ -126,7 +126,7 @@ namespace Game.Entities
         protected ObstacleType GetObstacles()
         {
             Vector2 player = World.Player.Area.Center;
-                Vector2 me = _area.GetClosestPointTo(player);
+                Vector2 me = _area.GetClosestPoint(player);
             Plane path = new Plane(me, player);
 
             return World.DetectObstacles(path);
@@ -157,7 +157,7 @@ namespace Game.Entities
         /// Returns pooint that belongs to this object and is tho most close to tthe player.
         /// </summary>
         protected Vector2 GetClosestPointToPlayer()
-            => _area.GetClosestPointTo(World.Player.Area.Center);
+            => _area.GetClosestPoint(World.Player.Area.Center);
 
         /// <summary>
         /// Processes the EntityMoved message.

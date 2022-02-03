@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 
 using DavyKager;
 
@@ -179,7 +180,7 @@ namespace Game.Entities
                     [typeof(ListExits)] = (message) => OnListExits((ListExits)message),
                     [typeof(ObjectNavigationStopped)] = (message) => OnObjectNavigationStopped((ObjectNavigationStopped)message),
                     [typeof(StopObjectNavigation)] = (message) => OnStopObjectNavigation((StopObjectNavigation)message),
-                    [typeof(ListNavigableObjects)] = (message) => OnListNavigableObjects((ListNavigableObjects)message),
+                    [typeof(ListObjects)] = (message) => OnListObjects((ListObjects)message),
                     [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
                     [typeof(StopWalk)] = (message) => OnStopWalk((StopWalk)message),
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
@@ -187,7 +188,7 @@ namespace Game.Entities
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
-                    [typeof(SayNavigableObjects)] = (m) => OnSayNavigableObjects((SayNavigableObjects)m),
+                    [typeof(SayObjects)] = (m) => OnSayObjects((SayObjects)m),
                     [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
                     [typeof(StartWalk)] = (m) => OnStartWalk((StartWalk)m),
                     [typeof(ChangeOrientation)] = (message) => OnChangeOrientation((ChangeOrientation)message),
@@ -212,13 +213,13 @@ _navigatedExit = null;
         /// <param name="message">The message to be processed</param>
         private void OnListExits(ListExits message)
         {
-            // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
-            StopNavigation();
+            StopNavigation(); // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             if (NavigationInProgress)
                 return;
 
-            (string[] descriptions, Passage[] exits) result = GetExitDescriptions();
-            if (result.descriptions.IsNullOrEmpty())
+            (string[] descriptions, Passage[] exits) result = GetNavigableExits();
+
+            if (result.descriptions.IsNullOrEmpty()) // No objects near by
             {
                 Owner.ReceiveMessage(new SayExitsResult(this));
                 return;
@@ -267,36 +268,31 @@ _navigatedExit = null;
         /// Processes the ListNavigableObjects message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnListNavigableObjects(ListNavigableObjects message)
+        private void OnListObjects(ListObjects message)
         {
-            // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
-            StopNavigation();
+            StopNavigation(); // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             if (NavigationInProgress)
                 return;
 
-            List<(DumpObject o, double compassDegrees)> objects = GetNavigableObjects(_navigableObjectsRadius).ToList<(DumpObject o, double compassDegrees)>();
+            (string[] descriptions, DumpObject[] objects) objects = GetNavigableObjects();
 
-            if (objects.IsNullOrEmpty())
+            if (objects.objects.IsNullOrEmpty())
             {
-                Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, null));
+                Owner.ReceiveMessage(new SayObjectsResult(this, null));
                 return;
             }
 
-            string[] items = objects
-    .Select(r => r.o.Name.Friendly + " " + Angle.GetAngleDescription(r.compassDegrees))
-    .ToArray<string>();
-
-            int option = WindowHandler.Menu(items, "Okolní objekty");
+            int option = WindowHandler.Menu(objects.descriptions, "Okolní objekty");
 
             if (option == -1)
                 return;
 
-            DumpObject targett = objects[option].o;
+            DumpObject target = objects.objects[option];
 
-            if (_navigatedObject!=null && targett != _navigatedObject)
-                StopNavigation();
+            //if (_navigatedObject!=null && target != _navigatedObject)
+            //    StopNavigation();
 
-            _navigatedObject = targett;
+            _navigatedObject = target;
             _navigatedObject.ReceiveMessage(new StartObjectNavigation (Owner));
         }
 
@@ -395,21 +391,43 @@ _navigatedExit = null;
             Passage occupiedPassage = World.GetPassage(_area.Center);
             if (occupiedPassage != null)
                 Owner.ReceiveMessage(new SayExitsResult(this, occupiedPassage));
-            else Owner.ReceiveMessage(new SayExitsResult(this, GetExitDescriptions().descriptions));
+            else Owner.ReceiveMessage(new SayExitsResult(this, GetNavigableExits().descriptions));
         }
 
-        private (string[] descriptions, Passage[] exits) GetExitDescriptions()
+        /// <summary>
+        /// Generates a text representation of the specified distance in Czech.
+        /// </summary>
+        /// <param name="distance">The distance in meters to be described</param>
+        /// <returns>The text representation of the specified distance</returns>
+        private string GetDistanceDescription(int distance)
         {
-            Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Passage>();
+            string d = distance.ToString();
 
+            if (distance == 1)
+                return string.Empty;
+            if (distance >= 2 && distance <= 4)
+                return $" {d} metry ";
+            return $" {d} metrů ";
+        }
+
+        /// <summary>
+        /// Returns text descriptions of the specified exits including distance and position.
+        /// </summary>
+        /// <returns>A string array</returns>
+        private (string[] descriptions, Passage[] exits) GetNavigableExits()
+        {
+Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Passage>();
+
+            Vector2 me = _area.Center;
             string[] descriptions =
     (
     from e in exits
+    let point = e.Area.GetClosestPoint(_area.Center)
+    let distance = GetDistanceDescription((int)World.GetDistance(me, point))
     let type = e is Door ? "dveře " : "průchod "
     let to = e.AnotherLocality(_locality).To + " "
-    let point = e.Area.GetClosestPointTo(_area.Center)
-    let angle = Angle.GetAngleDescription(GetAngle(point))
-    select (type + to + angle)
+    let angle = Angle.GetDescription(GetAngle(point))
+    select ($"{type} {to}: {distance} {angle}:")
     ).ToArray<string>();
 
             return (descriptions, exits);
@@ -584,31 +602,37 @@ _navigatedExit = null;
 => Tolk.Speak(_area.GetLocality().Name.Friendly, true);
 
         /// <summary>
-        /// Enumerates all objects from current locality in the specified radius around the NPC.
+        /// Returns information about all navigable objects from current locality in the specified radius around the NPC.
         /// </summary>
-        /// <param name="radius">Max radius around the NPC</param>
-        /// <returns>Enumeration of dump objects</returns>
-        protected IEnumerable<(DumpObject o, double compassDegrees)> GetNavigableObjects(int radius)
+        /// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
+        protected (string[] descriptions, DumpObject[] objects) GetNavigableObjects()
         {
             Vector2 me = _area.Center;
-            IEnumerable<DumpObject> nearestObjects = _locality.GetSurroundingObjects(me, radius);
+            DumpObject[] objects = _locality.GetSurroundingObjects(me, _navigableObjectsRadius).ToArray<DumpObject>();
 
-            return
-                from o in nearestObjects
-                let p = o.Area.GetClosestPointTo(me)
-                select ((o, GetAngle(p)));
+            string[] descriptions =
+                (
+                from o in objects
+                let point = o.Area.GetClosestPoint(me)
+                let name = o.Name.Friendly
+                let distance = GetDistanceDescription((int)World.GetDistance(me, point))
+                let angle = Angle.GetDescription(GetAngle(point))
+                select ($"{name}: {distance} {angle}: ")
+                ).ToArray<string>();
+
+            return (descriptions, objects);
         }
 
         /// <summary>
         /// Processes the SayNearestObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnSayNavigableObjects(SayNavigableObjects message)
+        private void OnSayObjects(SayObjects message)
         {
             // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             StopNavigation();
             if (!NavigationInProgress)
-            Owner.ReceiveMessage(new SaySurroundingObjectsResult(this, GetNavigableObjects(_navigableObjectsRadius)));
+            Owner.ReceiveMessage(new SayObjectsResult(this, GetNavigableObjects().descriptions));
         }
 
         /// <summary>

@@ -238,7 +238,7 @@ namespace Game.Terrain
         /// Returns pooint that belongs to this object and is the most close to the player.
         /// </summary>
         protected Vector2 GetClosestPointToPlayer()
-            => _area.GetClosestPointTo(World.Player.Area.Center);
+            => _area.GetClosestPoint(World.Player.Area.Center);
 
         /// <summary>
         /// stops ongoing sound navigation.

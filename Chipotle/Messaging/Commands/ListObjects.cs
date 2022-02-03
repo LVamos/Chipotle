@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Game.Messaging.Commands
 {
-    public class ListNavigableObjects: GameMessage
+    public class ListObjects: GameMessage
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public ListNavigableObjects(object sender) : base(sender) { }
+        public ListObjects(object sender) : base(sender) { }
     }
 }

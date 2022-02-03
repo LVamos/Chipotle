@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Luky;
 
@@ -17,16 +19,21 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="compassDegrees">The angle in compass degrees to be described</param>
         /// <returns>A word description in a string</returns>
-        public static string GetAngleDescription(double compassDegrees, bool to = false)
+        public static string GetDescription(double compassDegrees)
         {
-            if (compassDegrees >= 315 || compassDegrees < 45)
-                return "před tebou";
-            if (compassDegrees >= 45 && compassDegrees < 135)
-                return " napravo";
-            if (compassDegrees >= 135 && compassDegrees < 225)
-                return " za tebou";
+            // Possible sides
+            (int degrees1, int degrees2, string description)[] sides = 
+            {(315, 359, " před tebou"),
+                (0, 44, " před tebou"),
+                (45, 74, " vpravo před tebou"),
+                (75, 104, " napravo"),
+                (105, 164, " vpravo za tebou"),
+                (165, 194, " za tebou"),
+                (195, 254, " vlevo za tebou"),
+                (255, 284, " nalevo"),
+(285, 314, " vlevo před tebou")};
 
-            return " nalevo";
+            return sides.First(s => compassDegrees >= s.degrees1 && compassDegrees <= s.degrees2).description;
         }
 
 

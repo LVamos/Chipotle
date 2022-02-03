@@ -286,7 +286,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="point">Coordinates of the point whose surroundings are to be explored</param>
         /// <returns>The point closest to the default point toward this plane</returns>
-        public Vector2 GetClosestPointTo(Vector2 point)
+        public Vector2 GetClosestPoint(Vector2 point)
             => GetPointsByDistance(point).First();
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Game.Terrain
         /// <param name="point">The point from which the distance is to be calculated</param>
         /// <returns>The distance between the default point and the plane</returns>
         public float GetDistanceFrom(Vector2 point)
-            => World.GetDistance(point, GetClosestPointTo(point));
+            => World.GetDistance(point, GetClosestPoint(point));
 
         /// <summary>
         /// Returns hash code of this instance.
