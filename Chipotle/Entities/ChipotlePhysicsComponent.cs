@@ -261,7 +261,7 @@ _navigatedExit = null;
         /// <summary>
         /// Specifies max radius for navigable objects enumeration.
         /// </summary>
-        protected const int _navigableObjectsRadius = 30;
+        protected const int _navigableObjectsRadius =s50;
 
         /// <summary>
         /// Processes the ListNavigableObjects message.
