@@ -261,7 +261,7 @@ _navigatedExit = null;
         /// <summary>
         /// Specifies max radius for navigable objects enumeration.
         /// </summary>
-        protected const int _navigableObjectsRadius =s50;
+        protected const int _navigableObjectsRadius = 50;
 
         /// <summary>
         /// Processes the ListNavigableObjects message.
@@ -528,7 +528,7 @@ _navigatedExit = null;
         /// <summary>
         /// Specifies distance in which exits from current locality are searched.
         /// </summary>
-        protected const int _exitRadius=40;
+        protected const int _exitRadius = 80;
 
         /// <summary>
         /// Marks current nearest surroundings of the NPC as visited. If it's already been visited then the _inVisitedRegion is set to true.
