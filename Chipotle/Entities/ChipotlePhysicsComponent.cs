@@ -686,6 +686,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
             OrientationChanged newMessage = new OrientationChanged(this, source, _orientation, message.Direction);
             Owner.ReceiveMessage(newMessage);
             _locality.ReceiveMessage(newMessage);
+            _speed += Math.Abs(message.Degrees) * World.DeltaTime *2;
         }
 
         /// <summary>
