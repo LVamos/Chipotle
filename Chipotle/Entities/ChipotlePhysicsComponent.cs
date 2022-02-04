@@ -683,7 +683,9 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         {
             Orientation2D source = _orientation;
             _orientation.Rotate(message.Degrees);
-            Owner.ReceiveMessage(new OrientationChanged(this, source, _orientation, message.Direction));
+            OrientationChanged newMessage = new OrientationChanged(this, source, _orientation, message.Direction);
+            Owner.ReceiveMessage(newMessage);
+            _locality.ReceiveMessage(newMessage);
         }
 
         /// <summary>

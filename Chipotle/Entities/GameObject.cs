@@ -70,7 +70,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateBathroomPool(Name name, Plane area, bool decorative)
-            => new DumpObject(name, area, "bazének", decorative, null, "snd7");
+            => new DumpObject(name, area, "bazének", decorative, null, "snd7", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the sink (umyvadlo w1) object in the Walsch's bathroom (koupelna
@@ -80,7 +80,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateBathroomSink(Name name, Plane area, bool decorative)
-                        => new DumpObject(name, area, "umyvadlo", decorative, null, "snd8");
+                        => new DumpObject(name, area, "umyvadlo", decorative, null, "snd8", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the bench (lavička c1) object in the Carson's garden (zahrada
@@ -147,7 +147,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateGardenHose(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "zahradní hadice", decorative, null, "snd1", null);
+        => new DumpObject(name, area, "zahradní hadice", decorative, null, "snd1", null, stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of a high way (dálnice w1) object.
@@ -371,7 +371,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateFridge(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "lednice", decorative, null, "snd10", "FridgeLoop", loopVolume: .5f);
+        => new DumpObject(name, area, "lednice", decorative, null, "snd10", "FridgeLoop", loopVolume: .5f, stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the chair (židle) object.
@@ -442,7 +442,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreatePinball(Name name, Plane area, bool decorative)
-            => new DumpObject(name, area, "pinball", decorative, null, "snd15");
+            => new DumpObject(name, area, "pinball", decorative, null, "snd15", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the table (stůl) object in the pub (výčep h1) locality.

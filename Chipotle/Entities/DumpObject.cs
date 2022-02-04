@@ -23,6 +23,11 @@ namespace Game.Entities
     public class DumpObject : GameObject
     {
         /// <summary>
+        /// Indicates if the object stops playing its action sound when the player moves or turns.
+        /// </summary>
+        protected readonly bool _stopWhenPlayerMoves;
+
+        /// <summary>
         /// Specifies if the object works as a decorator.
         /// </summary>
         /// <remarks>When it's true the object isn't reported in SaySurroundingObjects command.</remarks>
@@ -71,7 +76,7 @@ namespace Game.Entities
         /// <remarks>
         /// The type parameter allows assigning objects with some special behavior to proper classes.
         /// </remarks>
-        public DumpObject(Name name, Plane area, string type, bool decorative, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls=true, float loopVolume=1) : base(name, type, area)
+        public DumpObject(Name name, Plane area, string type, bool decorative, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls=true, float loopVolume=1, bool stopWhenPlayerMoves = false) : base(name, type, area)
         {
             Decorative = decorative;
             _usableOnce = usableOnce;
@@ -79,6 +84,7 @@ namespace Game.Entities
             _cutscene = cutscene;
             _audibleOverWalls = audibleOverWalls;
             _defaultVolume = loopVolume;
+            _stopWhenPlayerMoves = stopWhenPlayerMoves;
         }
 
         /// <summary>
@@ -101,6 +107,7 @@ namespace Game.Entities
             RegisterMessages(
     new Dictionary<Type, Action<GameMessage>>()
     {
+        [typeof(OrientationChanged)] = (message) => OnOrientationChanged((OrientationChanged)message),
         [typeof(LocalityEntered)] = (message) => OnLocalityEntered((LocalityEntered)message),
         [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
         [typeof(DoorManipulated)] = (message) => OnDoorManipulated((DoorManipulated)message),
@@ -116,6 +123,12 @@ namespace Game.Entities
             UpdateLoop();
         }
 
+        /// <summary>
+        /// Processes the Collision message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnOrientationChanged(OrientationChanged message)
+=> WatchPlayersMovement();
         private void OnLocalityEntered(LocalityEntered message)
             => UpdateLoop();
 
@@ -168,10 +181,18 @@ namespace Game.Entities
             if (message.Sender != World.Player)
                 return;
 
-            if (_navigating)
                 UpdateNavigatingSound();
-
             UpdateLoop();
+            WatchPlayersMovement();
+        }
+
+        /// <summary>
+        /// Stops the action sound.
+        /// </summary>
+        protected void WatchPlayersMovement()
+        {
+            if (_stopWhenPlayerMoves)
+                World.Sound.FadeSource(_actionSoundID, FadingType.Out, .0005f, 0, true);
         }
 
         /// <summary>
@@ -376,8 +397,11 @@ namespace Game.Entities
         /// </summary>
         private void UpdateNavigatingSound()
         {
-            // To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player.
-            World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
+            if (!_navigating)
+                return;
+
+                // To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player.
+                World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
 
             // Find opposite point
             Vector2? opposite = World.Player.Area.FindOppositePoint(_area);

@@ -50,7 +50,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public ChipotlesCar(Name name, Plane area, bool decorative) : base(name, area, "detektivovo auto", decorative, null, null, null, null)
+        public ChipotlesCar(Name name, Plane area, bool decorative) : base(name: name, area: area, type: "detektivovo auto", decorative: decorative, stopWhenPlayerMoves: true)
         { }
 
         /// <summary>
