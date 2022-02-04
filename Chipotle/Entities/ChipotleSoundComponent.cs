@@ -347,14 +347,14 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnOrientationChanged(OrientationChanged message)
         {
-             SayOrientation();
-
             // Immediate change
             if (message.Immediately)
             {
                 _sound.ListenerOrientationFacing = message.Target.UnitVector.AsOpenALVector();
                 return;
             }
+
+            SayOrientation();
 
             // Fluent change
             _listenerOrientation.steps = Math.Abs(message.Degrees);

@@ -161,7 +161,7 @@ namespace Luky
         /// <summary>
         /// An error handler delegate
         /// </summary>
-        private readonly Action<Exception> _onError;
+        private readonly Action<Exception, string> _onError;
 
         /// <summary>
         /// stores peaces of sounds to be played.
@@ -237,7 +237,7 @@ namespace Luky
         /// </summary>
         /// <param name="onError">An error handler delegate</param>
         /// <param name="say">Text output delegate</param>
-        private SoundThread(string soundPath, Action<Exception> onError, Action<string> say)
+        private SoundThread(string soundPath, Action<Exception, string> onError, Action<string> say)
         {
             _soundPath = soundPath;
             Say = say;
@@ -303,7 +303,7 @@ namespace Luky
         /// <summary> Creates and runs the player. </summary> <param name="soundPath" <param
         /// name="onError">An error handler delegate</param> <param name="say">A delegate for text
         /// output</param> <returns>New instance of the player</returns>
-        public static SoundThread CreateAndStartThread(string soundPath, Action<Exception> onError, Action<string> say)
+        public static SoundThread CreateAndStartThread(string soundPath, Action<Exception, string> onError, Action<string> say)
         {
             SoundThread soundThread = new SoundThread(soundPath, onError, say);
             soundThread.StartThread();

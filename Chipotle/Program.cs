@@ -83,8 +83,7 @@ namespace Game
         /// <summary>
         /// Enables some test methods.
         /// </summary>
-        public const bool TestMode = true;
-
+        public const bool TestMode = false;
 
         /// <summary>
         /// Path to data folder
@@ -107,14 +106,44 @@ namespace Game
         /// An error handler
         /// </summary>
         /// <param name="ex">The exception</param>
-        public static void OnError(Exception ex)
+        public static void OnError(Exception ex, string message = null)
         {
-            EnableJAWSKeyHook();
+                EnableJAWSKeyHook(); // Restore JAWS key hook
 
-            if(TestMode)
-            throw ex;
+            // Prepare an error message
+                StringBuilder text = new StringBuilder();
+                text.AppendLine("Hlášení o pádu Chipotla.");
+                text.AppendLine("Uživatel: " + Environment.UserName);
+                text.AppendLine("Verze: " + Version);
+                text.AppendLine("Datum a čas: " + DateTime.Now.ToString());
 
-            OnError(ex.ToString());
+                if (World.Player != null)
+                    text.AppendLine("Aktuální pozice Chipotla: " + World.Player.Area.Center.ToString()).AppendLine();
+
+            if (!string.IsNullOrEmpty(message))
+                text.AppendLine("Zdroj výjimky: " +message);
+            text.AppendLine("Typ výjimky: " +ex.GetType().ToString()).AppendLine();
+
+            text.AppendLine("Zpráva: " + ex.Message).AppendLine();
+
+            text.AppendLine("Výpis stack trace" +ex.StackTrace);
+
+                Action action = () =>
+                {
+                    bool ok = ReportError(text.ToString()); // send e-mail with the error message to me.
+                    string tmp = ok ? "Luki už má hlášení o chybě na mailu. Ten bude mít radost." : "Chtěl sem Lukimu poslat hlášení, ale nepovedlo se to. Tak mu hlavně napiš, jinak ti už v životě neudělá tiramisu.";
+                    MessageBox.Show(MainWindow, "Došlo k chybě a ta zkurvená hra spadla. " + tmp, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                };
+
+                if (MainWindow != null)
+                    MainWindow.Invoke(action);
+                else
+                    action();
+
+                Environment.Exit(0);
+
+            //if (TestMode)
+            //    throw ex;
         }
 
         /// <summary>
@@ -123,14 +152,7 @@ namespace Game
         /// <param name="sender">Source of the exception</param>
         /// <param name="e">The exception</param>
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
-        {
-            EnableJAWSKeyHook();
-
-            if(TestMode)
-            throw e.Exception;
-
-            OnError(e.Exception);
-        }
+            => OnError(e.Exception);
 
         /// <summary>
         /// An error handler
@@ -138,14 +160,7 @@ namespace Game
         /// <param name="sender">Source of the exception</param>
         /// <param name="e">The exception</param>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            EnableJAWSKeyHook();
-
-            if(TestMode)
-            throw (Exception)e.ExceptionObject;
-
-            OnError(e.ExceptionObject.ToString());
-        }
+            => OnError((Exception)e.ExceptionObject, sender.ToString());
 
         /// <summary>
         /// entry point of the application
@@ -166,11 +181,6 @@ namespace Game
             }
             catch (Exception ex)
             {
-                EnableJAWSKeyHook();
-
-                if (TestMode)
-                    throw ex;
-
                 OnError(ex);
             }
 
@@ -224,40 +234,6 @@ namespace Game
 return;
 
             _jaws.InvokeMember("Disable", System.Reflection.BindingFlags.InvokeMethod, null, _jawsObject, null);
-        }
-
-        /// <summary>
-        /// An error handler
-        /// </summary>
-        /// <param name="error">The error message</param>
-        private static void OnError(string error)
-        {
-            EnableJAWSKeyHook();
-            StringBuilder text = new StringBuilder();
-            text.AppendLine("Hlášení o pádu Chipotla.");
-            text.AppendLine("Uživatel: " +Environment.UserName);
-            text.AppendLine("Verze: " + Version);
-            text.AppendLine("Datum a čas: " + DateTime.Now.ToString());
-
-            if (World.Player != null)
-                text.AppendLine ("Aktuální pozice: " +World.Player.Area.Center.ToString());
-
-            text.AppendLine("Výpis stack trace:");
-            text.AppendLine(error);
-            string message = text.ToString();
-
-            Action action = () =>
-            {
-                string tmp = ReportError(message) ? "Luki už má hlášení o chybě na mailu. Ten bude mít radost." : "Chtěl sem Lukimu poslat hlášení, ale nepovedlo se to. Tak mu hlavně napiš, jinak ti už v životě neudělá tiramisu.";
-                MessageBox.Show(MainWindow, "Došlo k chybě a ta zkurvená hra spadla. " +tmp, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            };
-
-            if (MainWindow != null)
-                MainWindow.Invoke(action);
-            else
-                action();
-
-            Environment.Exit(0);
         }
     }
 }
