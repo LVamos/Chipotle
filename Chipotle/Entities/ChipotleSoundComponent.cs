@@ -87,7 +87,7 @@ namespace Game.Entities
         {
             _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
             _listenerOrientation.steps = -1;
-            _listenerPosition.steps = 30;
+            _listenerPosition.steps = 5;
             _listenerPosition.currentStep = -1;
             base.Start();
 
