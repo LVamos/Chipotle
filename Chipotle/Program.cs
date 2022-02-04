@@ -83,7 +83,7 @@ namespace Game
         /// <summary>
         /// Enables some test methods.
         /// </summary>
-        public const bool TestMode = false;
+        public const bool TestMode = true;
 
         /// <summary>
         /// Path to data folder
@@ -143,7 +143,7 @@ namespace Game
                 Environment.Exit(0);
 
             //if (TestMode)
-            //    throw ex;
+            throw ex;
         }
 
         /// <summary>

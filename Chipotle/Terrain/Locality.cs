@@ -41,6 +41,13 @@ namespace Game.Terrain
         {
             foreach (Passage p in _passageLoops.Keys)
             {
+                Vector2 player = World.Player.Area.Center;
+                if (p.Area.LaysOnPlane(player))
+                {
+                    World.Sound.SetSourcePosition(_passageLoops[p], player.AsOpenALVector());
+                    continue;
+                }
+
                 Vector2? point = World.Player.Area.FindOppositePoint(p.Area);
                 if (point.HasValue)
                     World.Sound.SetSourcePosition(_passageLoops[p], ((Vector2)point).AsOpenALVector());
@@ -556,7 +563,15 @@ namespace Game.Terrain
                 foreach (Passage p in World.Player.Locality.GetPassagesTo(this))
                 {
                     Vector2? tmp = World.Player.Area.FindOppositePoint(p.Area);
-                    Vector2 position = tmp.HasValue ? (Vector2)tmp : p.Area.Center;
+
+                    Vector2 position, player = World.Player.Area.Center;
+
+                    if (tmp.HasValue)
+                        position = (Vector2)tmp;
+                    else if (p.Area.LaysOnPlane(player))
+                        position = player;
+                    else position = p.Area.GetClosestPoint(player);
+
                     float volume = p.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
                     _passageLoops[p] = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, position.AsOpenALVector(), true, volume);
 

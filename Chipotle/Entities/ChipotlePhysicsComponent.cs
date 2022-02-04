@@ -554,7 +554,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// <param name="point">Current position of the NPC</param>
         protected void RecordRegion(Vector2 point)
         {
-            if (!_motionTrack.ContainsKey(_locality))
+                if (!_motionTrack.ContainsKey(_locality))
                 _motionTrack[_locality] = new HashSet<int>();
 
             int regionIndex = GetRegionIndex(point);

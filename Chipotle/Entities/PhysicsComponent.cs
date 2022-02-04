@@ -46,7 +46,9 @@ namespace Game.Entities
         {
             Plane target = new Plane(_area);
             target.Move(direction, step);
-            return (target.Center, World.Map[target.Center]);
+            Vector2 result = target.Center;
+            result = new Vector2((float)Math.Round(result.X), (float)Math.Round(result.Y));
+            return (result, World.Map[result]);
         }
 
         /// <summary>
@@ -239,7 +241,7 @@ namespace Game.Entities
             Plane sourcePosition = _area;
 
             _area = new Plane(target);
-            _locality = _area.GetLocality();
+                _locality = _area.GetLocality() ?? throw new ArgumentNullException(nameof(_locality));
 
             // If it isn't the player detect obstacles between him and this NPC.
             Entity player = World.Player;
