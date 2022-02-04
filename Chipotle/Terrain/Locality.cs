@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Luky;
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -22,6 +24,29 @@ namespace Game.Terrain
     [Serializable]
     public class Locality : MapElement
     {
+        /// <summary>
+        /// Handles the EntityMoved message.
+        /// </summary>
+        /// <param name="message">The mesage to be handled</param>
+        private void OnEntityMoved(EntityMoved message)
+        {
+            if (message.Sender == World.Player)
+                UpdatePassageLoops();
+        }
+
+        /// <summary>
+        /// Updates position of passage sound loops.
+        /// </summary>
+        private void UpdatePassageLoops()
+        {
+            foreach (Passage p in _passageLoops.Keys)
+            {
+                Vector2? point = World.Player.Area.FindOppositePoint(p.Area);
+                if (point.HasValue)
+                    World.Sound.SetSourcePosition(_passageLoops[p], ((Vector2)point).AsOpenALVector());
+            }
+        }
+
         /// <summary>
         /// Checks if the specified point lays in front or behind a passage.
         /// </summary>
@@ -340,6 +365,7 @@ namespace Game.Terrain
 
             RegisterMessages(new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
                 [typeof(DoorManipulated)] = (message) => OnDoorManipulated((DoorManipulated)message),
                 [typeof(GameReloaded)] = (message) => OnGameReloaded(),
                 [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
@@ -473,9 +499,9 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Stores handles for all background sound instances.
+        /// Handle of the stereo sound loop played when the player is inside the locality.
         /// </summary>
-        private List<int> _loops = new List<int>();
+        private int _loopID;
 
         /// <summary>
         /// Name of loop sound.
@@ -501,6 +527,11 @@ namespace Game.Terrain
         }
 
         /// <summary>
+        /// Stores the identifiers of location audio loops played in passages.
+        /// </summary>
+        private Dictionary<Passage, int> _passageLoops = new Dictionary<Passage, int>();
+
+        /// <summary>
         /// Plays soudn loop of the locality.
         /// </summary>
         /// <param name="playerInHere">Determines if the player is in this locality.</param>
@@ -511,13 +542,11 @@ namespace Game.Terrain
                 return;
 
             StopBackground(); // The loop must be stopped everytime due to problems with fading effects.
-            int id; // sound handle
 
             // Player is in the locality
             if (playerInHere)
             {
-                id = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.None, Vector3.Zero, false, _defaultVolume);
-                _loops.Add(id);
+                _loopID = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.None, Vector3.Zero, false, _defaultVolume);
                 return;
             }
 
@@ -529,24 +558,22 @@ namespace Game.Terrain
                     Vector2? tmp = World.Player.Area.FindOppositePoint(p.Area);
                     Vector2 position = tmp.HasValue ? (Vector2)tmp : p.Area.Center;
                     float volume = p.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
-                    id = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, position.AsOpenALVector(), true, volume);
-                    _loops.Add(id);
+                    _passageLoops[p] = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, position.AsOpenALVector(), true, volume);
 
                     if (p.State == PassageState.Closed)
                     {
-                        World.Sound.ApplyLowpass(id, World.Sound.OverDoorLowpass);
-                        World.Sound.FadeSource(id, FadingType.Out, .00005f, OverDoorVolume, false);
+                        World.Sound.ApplyLowpass(_passageLoops[p], World.Sound.OverDoorLowpass);
+                        World.Sound.FadeSource(_passageLoops[p], FadingType.Out, .00005f, OverDoorVolume, false);
                     }
                     else
-                        World.Sound.FadeSource(id, FadingType.In, .00005f, _defaultVolume, false);
+                        World.Sound.FadeSource(_passageLoops[p], FadingType.In, .00005f, _defaultVolume, false);
                 }
                 return;
             }
 
             // Player is in a distant locality or behind a wall without doors.
-            id = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, _area.Center.AsOpenALVector(), true, OverWallVolume);
-            _loops.Add(id);
-            World.Sound.ApplyLowpass(id, World.Sound.OverDoorLowpass);
+            _loopID = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, _area.Center.AsOpenALVector(), true, OverWallVolume);
+            World.Sound.ApplyLowpass(_loopID, World.Sound.OverDoorLowpass);
         }
 
         /// <summary>
@@ -565,10 +592,16 @@ namespace Game.Terrain
         /// </summary>
         private void StopBackground()
         {
-            foreach (int id in _loops)
-                World.Sound.FadeSource(id, FadingType.Out, .0002f, 0, true);
+            World.Sound.FadeSource(_loopID, FadingType.Out, .0002f, 0, true);
 
-            _loops = new List<int>();
+            if (!_passageLoops.IsNullOrEmpty())
+            {
+                foreach (int id in _passageLoops.Values)
+                    World.Sound.FadeSource(id, FadingType.Out, .0002f, 0, true);
+
+                _passageLoops = new Dictionary<Passage, int>();
+            }
+
         }
     }
 }
