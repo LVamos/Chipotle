@@ -26,7 +26,7 @@ namespace Game
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.4.2";
+        public static string Version = "0.5";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
