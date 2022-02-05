@@ -562,15 +562,21 @@ namespace Game.Terrain
             {
                 foreach (Passage p in World.Player.Locality.GetPassagesTo(this))
                 {
-                    Vector2? tmp = World.Player.Area.FindOppositePoint(p.Area);
+                    //if (p.Name.Indexed == "příjezdová cesta-bazén1") System.Diagnostics.Debugger.Break();
 
-                    Vector2 position, player = World.Player.Area.Center;
+                    Vector2 position = default, player = World.Player.Area.Center;
 
-                    if (tmp.HasValue)
-                        position = (Vector2)tmp;
-                    else if (p.Area.LaysOnPlane(player))
-                        position = player;
-                    else position = p.Area.GetClosestPoint(player);
+                                        if (p.Area.LaysOnPlane(player))
+                    {
+                        Locality other = p.AnotherLocality(World.Player.Locality);
+                        position = other.Area.GetClosestPoint(player);
+                    }
+                                        else
+                    {
+                        Vector2? tmp = World.Player.Area.FindOppositePoint(p.Area);
+                        if (tmp.HasValue)
+                            position = (Vector2)tmp;
+                    }
 
                     float volume = p.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
                     _passageLoops[p] = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, position.AsOpenALVector(), true, volume);
