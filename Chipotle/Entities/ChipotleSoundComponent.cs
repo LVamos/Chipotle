@@ -87,8 +87,6 @@ namespace Game.Entities
         {
             _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
             _listenerOrientation.steps = -1;
-            _listenerPosition.steps = 5;
-            _listenerPosition.currentStep = -1;
             base.Start();
 
             RegisterMessages(
@@ -118,7 +116,7 @@ namespace Game.Entities
         public override void Update()
         {
             base.Update();
-            UpdateListener();
+            UpdateListenerOrientation();
         }
 
         /// <summary>
@@ -196,37 +194,6 @@ namespace Game.Entities
                     => Tolk.Speak(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
 
         /// <summary>
-        /// Settings for listener position updates
-        /// </summary>
-        private (Vector3 final, Vector3 step, int steps, int currentStep) _listenerPosition;
-
-        /// <summary>
-        /// sets listener's orientation according to the current orientation of the Detective
-        /// Chipotle NPC.
-        /// </summary>
-        protected void UpdateListener()
-        {
-            UpdateListenerOrientation();
-            UpdateListenerPosition();
-        }
-
-        private void UpdateListenerPosition()
-        {
-            if (_listenerPosition.currentStep == -1)
-                return;
-
-            if (_listenerPosition.currentStep == _listenerPosition.steps)
-            {
-                _sound.ListenerPosition = _listenerPosition.final;
-                _listenerPosition.currentStep = -1;
-                return;
-            }
-
-            _sound.ListenerPosition += _listenerPosition.step;
-            _listenerPosition.currentStep++;
-        }
-
-        /// <summary>
         /// Updates orientation of the listener.
         /// </summary>
         private void UpdateListenerOrientation()
@@ -279,28 +246,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnPositionChanged(PositionChanged message)
         {
-            Vector3 current = _sound.ListenerPosition;
-            Vector3 final = message.TargetPosition.Center.AsOpenALVector();
-            final.Y = current.Y;
-
-            // Skip it if the distance is too big
-            if (World.GetDistance(current, final) > 5)
-            {
-                _listenerPosition.currentStep = -1;
-                _sound.ListenerPosition = final;
-                return;
-            }
-
-            // Plan update of listener's position
-            _listenerPosition.final = final;
-
-            Vector3 step = new Vector3(
-            (Math.Abs(final.X - current.X) * (final.X < current.X ? -1 : 1)) / _listenerPosition.steps,
-            0,
-            (Math.Abs(final.Z - current.Z) * (final.Z < current.Z ? -1 : 1)) / _listenerPosition.steps
-            );
-            _listenerPosition.step = step;
-            _listenerPosition.currentStep = 0;
+            _sound.ListenerPosition = message.TargetPosition.Center.AsOpenALVector();
 
             if(!message.Silently)
             PlayTerrain(World.Map[message.TargetPosition.Center].Terrain);
