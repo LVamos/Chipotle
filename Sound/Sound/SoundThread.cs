@@ -783,7 +783,8 @@ namespace Luky
             ManageDelayedSounds(); // Detect delayed sounds that are now primed.
             RefillBuffers(); // Refill streaming buffers.
             ReleaseSounds(); // Detect and remove sounds that finished playing.
-            PerformFading();
+            MasterFading();
+            SourceFading();
         }
 
         /// <summary>
@@ -827,16 +828,16 @@ namespace Luky
             => _masterFading = new FadingRecord(type, volumeDelta, targetVolume);
 
         /// <summary>
-        /// Performs sound fading.
+        /// Performs master fading
         /// </summary>
-        private void PerformFading()
+        private void MasterFading()
         {
-            // Perform master volume fading
-            if (_masterFading != null)
-            {
+            if (_masterFading == null)
+                return;
+
                 if (
                     (_masterFading.Type == FadingType.In && _groupVolumes["master"] >= _masterFading.TargetVolume)
-                    || (_masterFading.Type == FadingType.Out && _groupVolumes["master"] <= _masterFading.TargetVolume +_masterFading.VolumeDelta)
+                    || (_masterFading.Type == FadingType.Out && _groupVolumes["master"] <= _masterFading.TargetVolume + _masterFading.VolumeDelta)
                     )
                 {
                     SetGroupVolume("master", _masterFading.TargetVolume);
@@ -844,32 +845,41 @@ namespace Luky
                 }
                 else
                     SetGroupVolume("master", _groupVolumes["master"] + (_masterFading.Type == FadingType.In ? _masterFading.VolumeDelta : -_masterFading.VolumeDelta));
-            }
+        }
 
-            // Fading of individual sounds
+        /// <summary>
+        /// Performs sound fading.
+        /// </summary>
+        private void SourceFading()
+        {
             Sound sound;
-            float newVolume;
             FadingRecord fading;
             IPlayback playback;
+
+            void Apply(int handle, float volume)
+            {
+                sound.IndividualVolume = volume;
+                RunCommand(() => playback.SetVolume(handle, volume));
+            }
 
             // Change pending fadings to active if the corresponding sounds are playing.
             foreach (int id in  _fadings.Keys.ToArray<int>())
             {
-                // Local function
-                void Apply(float volume)
+                // Ensure the sound hasn't expired.
+                fading = _fadings[id];
+                fading.Ticks++;
+                if (fading.Ticks++ > 11000)
                 {
-                    sound.IndividualVolume = volume;
-                    RunCommand(() => playback.SetVolume(id, volume));
+                    _inactiveFadings.Add(id);
+                    continue;
                 }
 
                 // Check if the faded sound is loaded.
-                sound = _sounds.FirstOrDefault(s => s.ID == id);
-                if (sound == null)
+                if ((sound = GetSound(id)) == null)
                     continue;
 
                 // Remove stopped sounds
-                fading = _fadings[id];
-                playback = sound != null ? GetPlayback(sound) : null;
+                playback = GetPlayback(sound);
                 if (!playback.IsPlaying(id))
                 {
                     _inactiveFadings.Add(id);
@@ -882,17 +892,17 @@ namespace Luky
                     || (fading.Type == FadingType.Out && sound.IndividualVolume<=fading.TargetVolume +fading.VolumeDelta)
                     )
                     _inactiveFadings.Add(id);
-                    else Apply(fading.Type == FadingType.In ? sound.IndividualVolume + fading.VolumeDelta : sound.IndividualVolume - fading.VolumeDelta);
+                    else Apply(id, fading.Type == FadingType.In ? sound.IndividualVolume + fading.VolumeDelta : sound.IndividualVolume - fading.VolumeDelta);
             }
 
             // Delete unused fadings
             foreach (int id in _inactiveFadings)
             {
-                if(_fadings[id].Type == FadingType.Out && _fadings[id].Stop)
+                FadingRecord f = _fadings[id];
+                if(f.Type == FadingType.Out && f.Stop)
                                 Stop(id);
 
                 _fadings.Remove(id);
-
             }
             _inactiveFadings = new List<int>();
             }
@@ -1167,14 +1177,7 @@ namespace Luky
         /// <param name="id">Handle of the requested sound</param>
         /// <returns>a Sound struct</returns>
         private Sound GetSound(int id)
-        {
-                return
-                (
-                from s in _sounds
-                where (s.ID == id)
-                select s
-                ).First();
-        }
+            => _sounds.FirstOrDefault(s => s.ID == id);
 
         /// <summary>
         /// Recalculates all volumes after an individual volume was changed.

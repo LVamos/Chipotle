@@ -731,6 +731,7 @@ lBackgroundInfo.volume
         /// </summary>
         public static void SaveGame()
         {
+            return;
             Serializer serializer = new Serializer(_entities, _objects, _passages, _localities);
             BinaryFormatter formatter = new BinaryFormatter();
 

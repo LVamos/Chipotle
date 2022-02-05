@@ -191,8 +191,8 @@ namespace Game.Entities
         /// </summary>
         protected void WatchPlayersMovement()
         {
-            if (_stopWhenPlayerMoves)
-                World.Sound.FadeSource(_actionSoundID, FadingType.Out, .0005f, 0, true);
+            if (_stopWhenPlayerMoves && _actionSoundID > 0)
+                World.Sound.Stop(_actionSoundID);
         }
 
         /// <summary>

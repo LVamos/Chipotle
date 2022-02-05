@@ -12,6 +12,11 @@ namespace Luky
     public class FadingRecord
     {
         /// <summary>
+        /// Counts time from initialization.
+        /// </summary>
+        public int Ticks;
+
+        /// <summary>
         /// Method of fading for the specified sound
         /// </summary>
         public readonly FadingType Type;

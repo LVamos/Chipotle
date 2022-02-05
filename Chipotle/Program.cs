@@ -135,15 +135,19 @@ namespace Game
                     MessageBox.Show(MainWindow, "Došlo k chybě a ta zkurvená hra spadla. " + tmp, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 };
 
+            if (!TestMode)
+            {
                 if (MainWindow != null)
                     MainWindow.Invoke(action);
                 else
                     action();
-
-                Environment.Exit(0);
+            }
 
             //if (TestMode)
             throw ex;
+
+            Environment.Exit(0);
+
         }
 
         /// <summary>
