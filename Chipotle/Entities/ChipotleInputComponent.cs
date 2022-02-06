@@ -97,9 +97,10 @@ namespace Game.Entities
                 return;
 
             Entity tuttle = World.GetEntity("tuttle");
+            string distance = World.GetDistance(tuttle.Area.Center, Owner.Area.Center).ToString();
             string position = tuttle.Area.Center.ToString();
             string locality = tuttle.Locality.Name.Indexed;
-            Tolk.Speak(locality+" " +position, true);
+            Tolk.Speak(distance +Environment.NewLine +locality+" " +position, true);
         }
 
         /// <summary>
@@ -220,7 +221,7 @@ namespace Game.Entities
         /// Allows the player to use a nearby object or door.
         /// </summary>
         private void Interact()
-=> Owner.ReceiveMessage(new UseObject(this, OpenTK.Vector2.Zero));
+=> Owner.ReceiveMessage(new UseObject(this));
 
         /// <summary>
         /// Moves the NPC one step back.

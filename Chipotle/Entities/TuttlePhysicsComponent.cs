@@ -169,6 +169,11 @@ namespace Game.Entities
         /// </summary>
         private void GoToPlayer()
         {
+            // This is helpful in test mode if the Tuttle is set to follow the player right from the begining. If the Chiptoel isn't initialized yet Tuttle will keep trying to approach him.
+            if (Owner.Locality == null || World.Player == null)
+                return;
+
+
             _targetDistance = _random.Next(_minDistance, _maxDistance);
             Vector2? tmp = FindPlaceNearPlayer();
 

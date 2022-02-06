@@ -31,9 +31,9 @@ namespace Game.Terrain
             bool near = _area.GetDistanceFrom(entity.Area.Center)<= _minDistance;
 
             if (opposite && near && State == PassageState.Closed)
-                Open(_area.Center);
+                Open(_area.Center, entity);
             else if (!near && State == PassageState.Open)
-                Close(_area.Center);
+                Close(_area.Center, entity);
         }
 
         /// <summary>

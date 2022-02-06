@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Game.Entities;
+
 using Luky;
 
 using OpenTK;
@@ -28,7 +30,7 @@ namespace Game.Terrain
         /// <param name="coords">
         /// The coordinates of the place on the door that an NPC is pushing on
         /// </param>
-        protected override void Open(Vector2 coords)
+        protected override void Open(Vector2 position, object sender)
             => World.PlayCutscene(this, "cs11");
     }
 }

@@ -17,26 +17,20 @@ namespace Game.Messaging.Commands
     public class UseObject : GameMessage
     {
         /// <summary>
-        /// Position of the tile on which part of the used object lays. It should be always in front
-        /// of the NPC.
+        /// A point of the object at which it's used
         /// </summary>
         public readonly Vector2 Position;
-
-        /// <summary>
-        /// The tile on which part of the used object lays. It should be always in front of the NPC.
-        /// </summary>
-        public readonly Tile Tile;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="position">Position of the tile on which part of the used object lays</param>
+        /// <param name="position">A point of the object at which it's used</param>
         /// <param name="tile">A tile with the object</param>
-        public UseObject(object sender, Vector2 position, Tile tile = null) : base(sender)
+        /// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
+        public UseObject(object sender, Vector2 position = default) : base(sender)
         {
             Position = position;
-            Tile = tile;
         }
     }
 }

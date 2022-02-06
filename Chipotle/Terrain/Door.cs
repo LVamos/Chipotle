@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
@@ -85,7 +86,7 @@ namespace Game.Terrain
         /// <summary>
         /// Closes the door if possible
         /// </summary>
-        protected void Close(Vector2 coords)
+        protected void Close(Vector2 position, object sender)
         {
             if (Area.GetTiles().All(t => World.IsWalkable(t.position)))
             {
@@ -95,8 +96,49 @@ namespace Game.Terrain
                 foreach (Locality l in Localities)
                     l.ReceiveMessage(message);
 
-                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_closingSound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+                Play(_closingSound, position, sender);
             }
+        }
+
+        /// <summary>
+        /// Plays the specified sound.
+        /// </summary>
+        /// <param name="sound">Name of the sound to be played</param>
+        /// <param name="position"></param>
+        /// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
+        protected void Play(string sound, Vector2 position, object sender)
+        {
+
+            // Set attenuation parameters
+            Entity entity = sender as Entity;
+            ObstacleType obstacle = sender!= World.Player ? World.DetectAcousticObstacles(entity.Area) : ObstacleType.None;
+
+            if (obstacle == ObstacleType.Far)
+            {
+                Locality l = World.Player.Locality;
+                if (Localities[0].IsAccessible(l) || Localities[1].IsAccessible(l)) // Can be heart from the adjecting locality
+                    obstacle = ObstacleType.Wall;
+                    else return; // Too far and inaudible
+
+            }
+
+                // Set attenuation parameters
+                bool attenuate = obstacle != ObstacleType.None && obstacle != ObstacleType.IndirectPath; ;
+                (float gain, float gainHF) lowpass = default;
+                float volume = _defaultVolume;
+
+                switch (obstacle)
+                {
+                    case ObstacleType.Wall: lowpass = World.Sound.OverWallLowpass; volume = World.Sound.GetOverWallVolume(_defaultVolume); break;
+                    case ObstacleType.Door: lowpass = World.Sound.OverDoorLowpass; volume = World.Sound.GetOverDoorVolume(_defaultVolume); break;
+                    case ObstacleType.Object: lowpass = World.Sound.OverObjectLowpass; volume = World.Sound.GetOverObjectVolume(_defaultVolume); break;
+                }
+
+                // Play the sound
+                int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(sound), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, volume);
+
+                if (attenuate)
+                    World.Sound.ApplyLowpass(id, lowpass);
         }
 
         /// <summary>
@@ -109,18 +151,18 @@ namespace Game.Terrain
                 return;
 
             if (State == PassageState.Closed)
-                Open(message.Position);
+                Open(message.Position, message.Sender);
             else
-                Close(message.Position);
+                Close(message.Position, message.Sender);
         }
 
         /// <summary>
         /// Opens the door if possible.
         /// </summary>
-        /// <param name="coords">
+        /// <param name="position">
         /// The coordinates of the place on the door that an NPC is pushing on
         /// </param>
-        protected virtual void Open(Vector2 coords)     
+        protected virtual void Open(Vector2 position, object sender)     
         {
             State = PassageState.Open;
 
@@ -128,7 +170,7 @@ namespace Game.Terrain
                 Localities[0].ReceiveMessage(message);
                 Localities[1].ReceiveMessage(message);
 
-            World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_openingSound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+            Play(_openingSound, position, sender);
         }
     }
 }

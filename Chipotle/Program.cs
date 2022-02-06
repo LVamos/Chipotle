@@ -102,6 +102,9 @@ namespace Game
         /// </summary>
         public static string SerializationPath { get; private set; }
 
+
+        public static Vector2? TuttleTestStart = new Vector2(1070, 1058);
+
         /// <summary>
         /// An error handler
         /// </summary>

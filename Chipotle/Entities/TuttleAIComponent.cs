@@ -78,7 +78,9 @@ namespace Game.Entities
                 );
 
             // Set position
-            _area = new Plane(new Vector2(1030, 1036));
+            if (Program.TestMode && Program.TuttleTestStart.HasValue)
+                _area = new Plane((Vector2)Program.TuttleTestStart);
+            else _area = new Plane(new Vector2(1030, 1036));
             Owner.ReceiveMessage(new SetPosition(this, new Plane(_area), true));
         }
 
@@ -108,7 +110,7 @@ namespace Game.Entities
 
             switch (message.CutsceneName)
             {
-                case "cs6": GoToPool(); break;
+                case "cs6": Owner.ReceiveMessage(new StartFollowing(this)); /*GoToPool();*/ break;
                 case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs23": JumpToSweeneysRoom(); break;

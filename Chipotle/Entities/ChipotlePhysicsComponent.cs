@@ -702,7 +702,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
 
                 if (passage != null && passage is Door door)
                 {
-                    door.ReceiveMessage(new UseObject(Owner, t.position, t.tile));
+                    door.ReceiveMessage(new UseObject(Owner, t.position));
                     break;
                 }
             }
@@ -715,7 +715,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
                 GameObject obj = World.GetObject(tileInFront.position);
                 if (obj != null)
                 {
-                    UseObject useObject = new UseObject(Owner, tileInFront.position, tileInFront.tile);
+                    UseObject useObject = new UseObject(Owner, tileInFront.position);
                     obj.ReceiveMessage(useObject);
                 }
             }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Game.Entities;
+
 using Luky;
 
 using OpenTK;
@@ -26,12 +28,12 @@ namespace Game.Terrain
         /// <summary>
         /// Opens the door if possible.
         /// </summary>
-        protected override void Open(Vector2 coords)
+        protected override void Open(Vector2 position, object sender)
         {
             if (!World.GetObject("lavička w1").Used)
                 return;
 
-            base.Open(coords);
+            base.Open(position, sender);
         }
     }
 }

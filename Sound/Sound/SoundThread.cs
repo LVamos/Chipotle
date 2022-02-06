@@ -553,7 +553,7 @@ namespace Luky
         /// <param name="soundName">Path to the sound file to be played</param>
         /// <param name="role">Name of the sound group to which this sound should be assigned</param>
         /// <param name="looping">Specifies if the sound should be played in a loop</param>
-        /// <param name="pt">Specifies how the sound position is calculated.</param>
+        /// <param name="positionType">Specifies how the sound position is calculated.</param>
         /// <param name="position">
         /// Three-dimensional vector that determines the position in the virtual sound space
         /// </param>
@@ -564,8 +564,8 @@ namespace Luky
         /// <param name="seekSample">The sample from which to start playback</param>
         /// <param name="pb">Specifies which player to play the audio with.</param>
         /// <returns>Handle of the sound</returns>
-        public int Play(string soundName, Name role, bool looping, PositionType pt, Vector3 position, bool forceMono = false, float volumeAdjustment = 1f, float? panning = null, float pitch = 1f, int seekSample = 0, Playback pb = Playback.OpenAL)
-        => Play(GetSoundStream(soundName), role, looping, pt, position, forceMono, volumeAdjustment, panning, pitch, seekSample, pb);
+        public int Play(string soundName, Name role, bool looping, PositionType positionType, Vector3 position, bool forceMono = false, float volumeAdjustment = 1f, float? panning = null, float pitch = 1f, int seekSample = 0, Playback pb = Playback.OpenAL)
+        => Play(GetSoundStream(soundName), role, looping, positionType, position, forceMono, volumeAdjustment, panning, pitch, seekSample, pb);
 
         /// <summary>
         /// Plays a sound file.
