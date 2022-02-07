@@ -80,6 +80,7 @@
     <Compile Include="Messaging\Commands\ListObjects.cs" />
     <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
     <Compile Include="Messaging\Commands\SayExits.cs" />
+    <Compile Include="Messaging\Commands\SayLocalitySize.cs" />
     <Compile Include="Messaging\Commands\SayOrientation.cs" />
     <Compile Include="Messaging\Commands\SayVisitedLocality.cs" />
     <Compile Include="Messaging\Commands\StartExitNavigation.cs" />

@@ -63,6 +63,7 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
 
                 // Other commands
+                [new KeyShortcut(Keys.R)] = SayLocalitySize,
                 [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
                 [new KeyShortcut(false, true, false, Keys.O)] = ListNavigableObjects,
                 [new KeyShortcut(Keys.S)] = SayOrientation,
@@ -87,6 +88,12 @@ namespace Game.Entities
             }
             );
         }
+
+        /// <summary>
+        /// Reports size of the locality in which the Chipotle NPC is currently located.
+        /// </summary>
+        private void SayLocalitySize()
+            => Owner.ReceiveMessage(new SayLocalitySize(this));
 
         /// <summary>
         /// Test function to announce Tuttle's position

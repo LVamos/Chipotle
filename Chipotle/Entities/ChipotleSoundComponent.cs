@@ -92,6 +92,7 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(SayLocalitySize)] = (message) => OnSayLocalitySize((SayLocalitySize)message),
                 [typeof(SayVisitedLocalityResult)] = (message) => OnSayVisitedLocality((SayVisitedLocalityResult)message),
                 [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
                 [typeof(SayExitsResult)] = (message) => OnSayExitsResult((SayExitsResult)message),
@@ -105,6 +106,17 @@ namespace Game.Entities
                 [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
             }
             );
+        }
+
+
+        /// <summary>
+        /// Processes the CutsceneBegan message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnSayLocalitySize(SayLocalitySize message)
+        {
+            Plane a = Owner.Locality.Area;
+            Tolk.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
         }
 
         private void OnSayVisitedLocality(SayVisitedLocalityResult message)
