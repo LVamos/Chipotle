@@ -574,6 +574,11 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// </summary>
         protected override void MakeStep()
         {
+
+            int b = 5;
+            int c = 0;
+                int a = b / c;
+
             // Speed limitation
             if (_walkTimer < _speed)
                 return;

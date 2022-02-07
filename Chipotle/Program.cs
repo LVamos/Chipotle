@@ -26,7 +26,7 @@ namespace Game
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.5";
+        public static string Version = "0.6";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
@@ -83,7 +83,7 @@ namespace Game
         /// <summary>
         /// Enables some test methods.
         /// </summary>
-        public const bool TestMode = true;
+        public const bool TestMode = false;
 
         /// <summary>
         /// Path to data folder
@@ -103,7 +103,7 @@ namespace Game
         public static string SerializationPath { get; private set; }
 
 
-        public static Vector2? TuttleTestStart = new Vector2(1070, 1058);g
+        public static Vector2? TuttleTestStart = new Vector2(1070, 1058);
 
         /// <summary>
         /// An error handler
@@ -113,29 +113,37 @@ namespace Game
         {
                 EnableJAWSKeyHook(); // Restore JAWS key hook
 
-            // Prepare an error message
-                StringBuilder text = new StringBuilder();
-                text.AppendLine("Hlášení o pádu Chipotla.");
-                text.AppendLine("Uživatel: " + Environment.UserName);
-                text.AppendLine("Verze: " + Version);
-                text.AppendLine("Datum a čas: " + DateTime.Now.ToString());
-
-                if (World.Player != null)
-                    text.AppendLine("Aktuální pozice Chipotla: " + World.Player.Area.Center.ToString()).AppendLine();
-
-            if (!string.IsNullOrEmpty(message))
-                text.AppendLine("Zdroj výjimky: " +message);
-            text.AppendLine("Typ výjimky: " +ex.GetType().ToString()).AppendLine();
-
-            text.AppendLine("Zpráva: " + ex.Message).AppendLine();
-
-            text.AppendLine("Výpis stack trace" +ex.StackTrace);
 
                 Action action = () =>
                 {
-                    bool ok = ReportError(text.ToString()); // send e-mail with the error message to me.
-                    string tmp = ok ? "Luki už má hlášení o chybě na mailu. Ten bude mít radost." : "Chtěl sem Lukimu poslat hlášení, ale nepovedlo se to. Tak mu hlavně napiš, jinak ti už v životě neudělá tiramisu.";
-                    MessageBox.Show(MainWindow, "Došlo k chybě a ta zkurvená hra spadla. " + tmp, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    // Ask for comment
+                DialogResult result = MessageBox.Show(MainWindow, "Ta zkurvená hra spadla. Posílám Lukymu hlášení. Chceš k tomu přidat komentář?", "Chyba", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                    string comment = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej popis chyby", "");
+
+                    // Prepare an error message
+                    StringBuilder text = new StringBuilder();
+                    text.AppendLine("Uživatel: " + Environment.UserName)
+                    .AppendLine(comment)
+                    .AppendLine("Verze: " + Version)
+                    .AppendLine("Datum a čas: " + DateTime.Now.ToString());
+
+                    if (World.Player != null)
+                        text.AppendLine("Aktuální pozice Chipotla: " + World.Player.Area.Center.ToString()).AppendLine();
+
+                    if (!string.IsNullOrEmpty(message))
+                        text.AppendLine("Zdroj výjimky: " + message);
+
+                    text.AppendLine("Typ výjimky: " + ex.GetType().ToString()).AppendLine();
+                    text.AppendLine("Zpráva: " + ex.Message).AppendLine();
+                    text.AppendLine("Výpis stack trace" + ex.StackTrace);
+
+                    string report = text.ToString();
+                    bool ok = ReportError(report); // send e-mail with the error message to me.
+                    if (!ok)
+                        File.WriteAllText(_errorReportPath, report);
+
+                    report = ok ? "Už to má na mailu. Ten bude mít radost." : "Nepovedlo se to. Hlášení se odešle při příštím spuštění.";
+                    MessageBox.Show(MainWindow, report, "", MessageBoxButtons.OK);
                 };
 
             if (!TestMode)
@@ -147,7 +155,7 @@ namespace Game
             }
 
             //if (TestMode)
-            throw ex;
+            //throw ex;
 
             Environment.Exit(0);
 
@@ -175,6 +183,7 @@ namespace Game
         [STAThread]
         private static void Main()
         {
+            SendDelayedReport();
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             SerializationPath = Path.Combine(DataPath, "game.sav");
@@ -194,6 +203,33 @@ namespace Game
             MainWindow = new MainWindow();
                 Application.Run(MainWindow);
             EnableJAWSKeyHook();
+        }
+
+        /// <summary>
+        /// Path to a file containing a delayed error report.
+        /// </summary>
+        private const string _errorReportPath = @"data\error.dat";
+
+        /// <summary>
+        /// Sends a delayed error report from previous execution if it's saved on the disc.
+        /// </summary>
+        private static void SendDelayedReport()
+        {
+            if (!File.Exists(_errorReportPath))
+                return;
+
+                string message = null;
+                try
+                {
+                    message = File.ReadAllText(_errorReportPath);
+                }
+                catch (Exception e)
+                {
+                    return;
+                }
+
+                if (ReportError(message))
+                    File.Delete(_errorReportPath);
         }
 
         /// <summary>
