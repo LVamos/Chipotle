@@ -139,7 +139,6 @@ namespace Game.Terrain
                 if (Localities[0].IsBehindDoor(l) || Localities[1].IsBehindDoor(l)) // Can be heart from the adjecting locality
                     obstacle = ObstacleType.Wall;
                     else return; // Too far and inaudible
-
             }
 
                 // Set attenuation parameters
@@ -155,8 +154,8 @@ namespace Game.Terrain
                 }
 
             // Play the sound
-            Vector2 coords = (Vector2)_area.FindOppositePoint(entity.Area);
-                int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(sound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, volume);
+            Vector2 coords = (Vector2)entity.Area.FindOppositePoint(_area);
+            int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(sound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, volume);
 
                 if (attenuate)
                     World.Sound.ApplyLowpass(id, lowpass);
