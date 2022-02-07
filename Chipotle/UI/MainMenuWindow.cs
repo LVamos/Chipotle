@@ -155,7 +155,7 @@ namespace Game.UI
             if (Program.TestMode)
                 return;
 
-            World.Sound.FadeSourceOut(_menuLoopID, .1f);
+            World.Sound.FadeSource(_menuLoopID, FadingType.Out, .1f, 0);
             World.Sound.Play(World.Sound.GetSoundStream(_endSound), null, false, PositionType.None, Vector3.Zero, false, _loopVolume, null, 1, 0, Playback.OpenAL);
         }
 

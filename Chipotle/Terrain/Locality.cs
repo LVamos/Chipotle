@@ -639,12 +639,13 @@ namespace Game.Terrain
         /// </summary>
         private void StopBackground()
         {
-            World.Sound.Stop(_loopID);
+            World.Sound.FadeSource(_loopID, FadingType.Out, .0001f, 0);
 
             if (!_passageLoops.IsNullOrEmpty())
             {
                 foreach (int id in _passageLoops.Values)
-                    World.Sound.Stop(id);
+                    World.Sound.FadeSource(id, FadingType.Out, .0001f, 0);
+
 
                 _passageLoops = new Dictionary<Passage, int>();
             }

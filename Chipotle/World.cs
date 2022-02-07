@@ -794,7 +794,7 @@ lBackgroundInfo.volume
             if (_cutsceneBegan == null)
                 return;
 
-            Sound.FadeSourceOut(_cutsceneBegan.SoundID, .0001f);
+            Sound.FadeSource(_cutsceneBegan.SoundID, FadingType.Out, .0001f, 0);
             ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
             _cutsceneBegan = null;
         }

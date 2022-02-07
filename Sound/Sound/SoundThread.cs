@@ -913,22 +913,6 @@ namespace Luky
         private List<int> _inactiveFadings = new List<int>();
 
         /// <summary>
-        /// Fades the specified sound in.
-        /// </summary>
-        /// <param name="soundID">Handle of the sound to be faded</param>
-        /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
-        public void FadeSourceIn(int soundID, float volumeDelta)
-            => FadeSource(soundID, FadingType.In, volumeDelta, _groupVolumes["master"]);
-
-        /// <summary>
-        /// Fades the specified sound out.
-        /// </summary>
-        /// <param name="soundID">Handle of the sound to be faded</param>
-        /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
-        public void FadeSourceOut(int soundID, float volumeDelta)
-            => FadeSource(soundID, FadingType.Out, volumeDelta, 0);
-
-        /// <summary>
         /// Performs volume fading on the specified sound source.
         /// </summary>
         /// <param name="soundID">Handle of the sound to be faded</param>
@@ -936,8 +920,8 @@ namespace Luky
         /// <param name="volumeDelta">Specifies how much the volume changes in one step.</param>
         /// <param name="targetVolume">Specifies the final volume of the sound source</param>
         /// <param name="stop">Specifies if the sound should be stopped after it was muted.</param>
-        public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume=0, bool stop=true)
-                => _fadings[soundID] = new FadingRecord(type, volumeDelta, targetVolume, stop);
+        public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume = 0, bool stop = true)
+                => RunCommand(() => _fadings[soundID] = new FadingRecord(type, volumeDelta, targetVolume, stop));
 
         /// <summary>
         /// Stores records about sound fading.

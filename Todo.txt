@@ -1,6 +1,5 @@
 Chyby
 Chipotle se někdy odmítá zastavit (chůze do strany)
-změnit tlumení zvuků předmětů a atmosfér z jiných místností: přestat hrát, až když je hráč v nesousední místnosti se zavřenýma dveřma
 
 Vylepšení
 namluvit všechny hlášky
