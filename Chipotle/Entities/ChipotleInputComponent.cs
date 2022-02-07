@@ -204,6 +204,11 @@ namespace Game.Entities
 
             HashSet<KeyShortcut> walkCommands = new HashSet<KeyShortcut>()
             {
+
+                new KeyShortcut(Keys.LShiftKey),
+                new KeyShortcut(Keys.RShiftKey),
+                new KeyShortcut(Keys.Left),
+                new KeyShortcut(Keys.Right),
                 new KeyShortcut(Keys.Up),
                 new KeyShortcut(Keys.Down),
                 new KeyShortcut(false, true, false, Keys.Left),

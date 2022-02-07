@@ -213,6 +213,12 @@ _navigatedExit = null;
         /// <param name="message">The message to be processed</param>
         private void OnListExits(ListExits message)
         {
+            if (_walking)
+            {
+                SayExits();
+                return;
+            }
+
             StopNavigation(); // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             if (NavigationInProgress)
                 return;
@@ -270,6 +276,12 @@ _navigatedExit = null;
         /// <param name="message">The message to be processed</param>
         private void OnListObjects(ListObjects message)
         {
+            if (_walking)
+            {
+                SayObjects();
+                return;
+            }
+
             StopNavigation(); // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             if (NavigationInProgress)
                 return;
@@ -334,7 +346,10 @@ _navigatedExit = null;
         /// </summary>
         /// <param name="message">The message to be processed</param>
         protected override void OnCutsceneBegan(CutsceneBegan message)
-            => CatchSitting(message);
+        {
+            StopWalk();
+            CatchSitting(message);
+        }
 
         protected void SaveGame()
         {
@@ -381,6 +396,12 @@ _navigatedExit = null;
         /// </summary>
         /// <param name="message">The message</param>
         protected void OnSayExits(SayExits message)
+            => SayExits();
+
+        /// <summary>
+        /// Announces the nearest exits from the locality in which the Chipotle NPC is located.
+        /// </summary>
+        private void SayExits()
         {
             // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             StopNavigation();
@@ -628,11 +649,17 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnSayObjects(SayObjects message)
+            => SayObjects();
+
+        /// <summary>
+        /// Announces the nearest objects around the Chipotle 
+        /// </summary>
+        private void SayObjects()
         {
             // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             StopNavigation();
             if (!NavigationInProgress)
-            Owner.ReceiveMessage(new SayObjectsResult(this, GetNavigableObjects().descriptions));
+                Owner.ReceiveMessage(new SayObjectsResult(this, GetNavigableObjects().descriptions));
         }
 
         /// <summary>
@@ -669,6 +696,12 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnStopWalk(StopWalk message)
+            => StopWalk();
+
+/// <summary>
+/// Interrupts walk of the Chipotle NPC.
+/// </summary>
+        private void StopWalk()
         {
             _blockWalk = false;
             _walking = false;
