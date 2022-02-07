@@ -117,8 +117,10 @@ namespace Game
                 Action action = () =>
                 {
                     // Ask for comment
+                    string comment = string.Empty;
                 DialogResult result = MessageBox.Show(MainWindow, "Ta zkurvená hra spadla. Posílám Lukymu hlášení. Chceš k tomu přidat komentář?", "Chyba", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                    string comment = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej popis chyby", "");
+                    if(result == DialogResult.Yes)
+                    comment = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej popis chyby", "");
 
                     // Prepare an error message
                     StringBuilder text = new StringBuilder();
