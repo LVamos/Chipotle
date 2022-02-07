@@ -20,6 +20,22 @@ namespace Game.Terrain
     public class Door : Passage
     {
         /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+
+            if (_timer < _timeLimit)
+                _timer += World.DeltaTime;
+        }
+
+        /// <summary>
+        /// Conts time from last opening / closing.
+        /// </summary>
+        protected int _timer;
+
+        /// <summary>
         /// specifies if the door can be opened by an NPC.
         /// </summary>
         protected readonly bool _openable;
@@ -147,13 +163,19 @@ namespace Game.Terrain
         }
 
         /// <summary>
+        /// A time interval between opening and closing.
+        /// </summary>
+        protected const int _timeLimit = 100 * World.DeltaTime;
+
+        /// <summary>
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
         protected virtual void OnUseObject(UseObject message)
         {
-            if (!_openable)
+            if (!_openable || _timer < _timeLimit)
                 return;
+            _timer = 0;
 
             if (State == PassageState.Closed)
                 Open(message.Sender);
