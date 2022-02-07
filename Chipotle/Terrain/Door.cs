@@ -86,18 +86,23 @@ namespace Game.Terrain
         /// <summary>
         /// Closes the door if possible
         /// </summary>
-        protected void Close(Vector2 position, object sender)
+        protected void Close(object sender)
         {
             if (Area.GetTiles().All(t => World.IsWalkable(t.position)))
             {
                 State = PassageState.Closed;
 
-                DoorManipulated message = new DoorManipulated(this);
-                foreach (Locality l in Localities)
-                    l.ReceiveMessage(message);
-
-                Play(_closingSound, position, sender);
+                AnnounceManipulation();
+                Play(_closingSound, sender as Entity);
             }
+        }
+
+        private void AnnounceManipulation()
+        {
+            DoorManipulated message = new DoorManipulated(this);
+            IEnumerable<Locality> accessibles = Localities[0].GetAccessibleLocalities().Concat(Localities[1].GetAccessibleLocalities()).Distinct();
+            foreach (Locality l in accessibles)
+                l.ReceiveMessage(message);
         }
 
         /// <summary>
@@ -106,17 +111,16 @@ namespace Game.Terrain
         /// <param name="sound">Name of the sound to be played</param>
         /// <param name="position"></param>
         /// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
-        protected void Play(string sound, Vector2 position, object sender)
+        protected void Play(string sound, Entity entity)
         {
 
             // Set attenuation parameters
-            Entity entity = sender as Entity;
-            ObstacleType obstacle = sender!= World.Player ? World.DetectAcousticObstacles(entity.Area) : ObstacleType.None;
+            ObstacleType obstacle = entity != World.Player ? World.DetectAcousticObstacles(entity.Area) : ObstacleType.None;
 
             if (obstacle == ObstacleType.Far)
             {
                 Locality l = World.Player.Locality;
-                if (Localities[0].IsAccessible(l) || Localities[1].IsAccessible(l)) // Can be heart from the adjecting locality
+                if (Localities[0].IsBehindDoor(l) || Localities[1].IsBehindDoor(l)) // Can be heart from the adjecting locality
                     obstacle = ObstacleType.Wall;
                     else return; // Too far and inaudible
 
@@ -134,8 +138,9 @@ namespace Game.Terrain
                     case ObstacleType.Object: lowpass = World.Sound.OverObjectLowpass; volume = World.Sound.GetOverObjectVolume(_defaultVolume); break;
                 }
 
-                // Play the sound
-                int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(sound), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, volume);
+            // Play the sound
+            Vector2 coords = (Vector2)_area.FindOppositePoint(entity.Area);
+                int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(sound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, volume);
 
                 if (attenuate)
                     World.Sound.ApplyLowpass(id, lowpass);
@@ -151,9 +156,9 @@ namespace Game.Terrain
                 return;
 
             if (State == PassageState.Closed)
-                Open(message.Position, message.Sender);
+                Open(message.Sender);
             else
-                Close(message.Position, message.Sender);
+                Close(message.Sender);
         }
 
         /// <summary>
@@ -162,15 +167,12 @@ namespace Game.Terrain
         /// <param name="position">
         /// The coordinates of the place on the door that an NPC is pushing on
         /// </param>
-        protected virtual void Open(Vector2 position, object sender)     
+        protected virtual void Open(object sender)     
         {
             State = PassageState.Open;
 
-            DoorManipulated message = new DoorManipulated(this);
-                Localities[0].ReceiveMessage(message);
-                Localities[1].ReceiveMessage(message);
-
-            Play(_openingSound, position, sender);
+            AnnounceManipulation();
+            Play(_openingSound, sender as Entity);
         }
     }
 }

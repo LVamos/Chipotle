@@ -28,12 +28,12 @@ namespace Game.Terrain
         /// <summary>
         /// Opens the door if possible.
         /// </summary>
-        protected override void Open(Vector2 position, object sender)
+        protected override void Open(object sender)
         {
             if (!World.GetObject("lavička w1").Used)
                 return;
 
-            base.Open(position, sender);
+            base.Open(sender);
         }
     }
 }

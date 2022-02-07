@@ -30,7 +30,7 @@ namespace Game.Terrain
         /// <param name="coords">
         /// The coordinates of the place on the door that an NPC is pushing on
         /// </param>
-        protected override void Open(Vector2 position, object sender)
+        protected override void Open(object sender)
             => World.PlayCutscene(this, "cs11");
     }
 }

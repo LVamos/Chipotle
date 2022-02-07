@@ -36,17 +36,18 @@ namespace Game
             Locality playersLocality = Player.Locality;
                 Locality otherLocality = area.GetLocality();
             bool neighbour = playersLocality.IsNeighbour(otherLocality);
-            bool behindDoors = otherLocality.IsAccessible(playersLocality);
+            bool accessible = otherLocality.IsAccessible(playersLocality);
+
 
             // Are the regions in inadjecting localities?
-            if (playersLocality != otherLocality && (!neighbour || (neighbour && !behindDoors)))
+            if (playersLocality != otherLocality && (!neighbour || (neighbour && !accessible)))
                 return ObstacleType.Far;  // Inaudible
 
             // Adjecting localities
             Plane path = new Plane(area.GetClosestPoint(Player.Area.Center), Player.Area.Center);
             ObstacleType obstacle = DetectObstacles(path);
 
-            if (neighbour && behindDoors)
+            if (neighbour && accessible)
             {
                 Passage atPassage = Player.Locality.IsAtPassage(area.Center);
 
@@ -731,7 +732,6 @@ lBackgroundInfo.volume
         /// </summary>
         public static void SaveGame()
         {
-            return;
             Serializer serializer = new Serializer(_entities, _objects, _passages, _localities);
             BinaryFormatter formatter = new BinaryFormatter();
 

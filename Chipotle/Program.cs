@@ -192,7 +192,7 @@ namespace Game
             }
 
             MainWindow = new MainWindow();
-            Application.Run(MainWindow);
+                Application.Run(MainWindow);
             EnableJAWSKeyHook();
         }
 

@@ -110,7 +110,7 @@ namespace Game.Entities
 
             switch (message.CutsceneName)
             {
-                case "cs6": Owner.ReceiveMessage(new StartFollowing(this)); /*GoToPool();*/ break;
+                case "cs6": GoToPool(); break;
                 case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs23": JumpToSweeneysRoom(); break;

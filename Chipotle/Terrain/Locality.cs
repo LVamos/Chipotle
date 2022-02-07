@@ -24,6 +24,13 @@ namespace Game.Terrain
     [Serializable]
     public class Locality : MapElement
     {
+        public IEnumerable<Locality> GetAccessibleLocalities()
+        {
+            IEnumerable<IEnumerable<Locality>> all = GetLocalitiesBehindDoor().Select(l2 => l2.GetLocalitiesBehindDoor());
+            return all.SelectMany(loc => loc);
+        }
+
+
         /// <summary>
         /// Handles the EntityMoved message.
         /// </summary>
@@ -84,7 +91,7 @@ namespace Game.Terrain
         /// <param name="e">The entity to be checked</param>
         /// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
         public Locality IsInAccessibleLocality(Entity e)
-            => GetAccessibleLocalities().FirstOrDefault(l => l.IsItHere(e));
+            => GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
 
         /// <summary>
         /// Checks if the specified object is in any accessible neighbour locality.
@@ -92,7 +99,7 @@ namespace Game.Terrain
         /// <param name="o">The object to be checked</param>
         /// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
         public Locality IsInAccessibleLocality(DumpObject o)
-            => GetAccessibleLocalities().FirstOrDefault(l => l.IsItHere(o));
+            => GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
 
         /// <summary>
         /// Returns all open passages.
@@ -106,8 +113,16 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="l">The locality to be checked</param>
         /// <returns>True if the specified locality is accessible form this locality</returns>
-        public bool IsAccessible(Locality l)
-            => GetAccessibleLocalities().Any(locality => locality==l);
+        public bool IsBehindDoor(Locality l)
+            => GetLocalitiesBehindDoor().Any(locality => locality==l);
+
+        /// <summary>
+        /// Checks if it's possible to get to the specified locality from this locality over doors or open passages.
+        /// </summary>
+        /// <param name="locality">The target locality</param>
+        /// <returns>True if there's a way between this loclaity and the specified locality</returns>
+        public bool IsAccessible(Locality locality)
+            => Neighbours.Any(l => l.IsBehindDoor(locality));
 
         /// <summary>
         /// Checks if the specified locality is next to this locality.
@@ -292,7 +307,7 @@ namespace Game.Terrain
         /// Returns all adjecting localities to which it's possible to get from this locality.
         /// </summary>
         /// <returns>An enumeration of all adjecting accessible localities</returns>
-        public IEnumerable<Locality> GetAccessibleLocalities()
+        public IEnumerable<Locality> GetLocalitiesBehindDoor()
             => _passages.Select(p => p.AnotherLocality(this));
 
         /// <summary>
@@ -526,9 +541,12 @@ namespace Game.Terrain
         /// <param name="playerMoved">Specifies if the player just moved from one locality to another one.</param>
         private void UpdateLoop()
         {
+            //if (Name.Indexed == "výčep h1") System.Diagnostics.Debugger.Break();
+
+
             if (_playerInHere)
                 PlayLoop();
-            else if (IsInAccessibleLocality(World.Player) != null)
+            else if (IsAccessible(World.Player.Locality) != null)
                 PlayLoop(false, true);
             else PlayLoop(false, false);
         }
@@ -560,31 +578,39 @@ namespace Game.Terrain
             // Player is in a neighbour accessible locality 
             if (accessible)
             {
-                foreach (Passage p in World.Player.Locality.GetPassagesTo(this))
+                // Find a passage to an accessible locality
+                Locality playersLocality = World.Player.Locality;
+                foreach (Passage p in Passages.Where(p => p.Localities.Any(l => l.IsBehindDoor(playersLocality))))
                 {
-                    //if (p.Name.Indexed == "příjezdová cesta-bazén1") System.Diagnostics.Debugger.Break();
-
                     Vector2 position = default, player = World.Player.Area.Center;
 
-                                        if (p.Area.LaysOnPlane(player))
+                    // Player stands in the passage
+                    if (p.Area.LaysOnPlane(player))
                     {
                         Locality other = p.AnotherLocality(World.Player.Locality);
                         position = other.Area.GetClosestPoint(player);
                     }
                                         else
                     {
+                        // Is the player standing in opposit to the passage?
                         Vector2? tmp = World.Player.Area.FindOppositePoint(p.Area);
                         if (tmp.HasValue)
                             position = (Vector2)tmp;
                     }
 
+                    // Make it quiter if the player is in a inadjecting loclaity behind a closed door.
+                    Locality between = playersLocality.GetLocalitiesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
+                    bool doubleAttenuation = (between != null && playersLocality.GetApertures(between).IsNullOrEmpty());
                     float volume = p.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
+                    if (doubleAttenuation)
+                        volume *= .01f;
+
                     _passageLoops[p] = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.Absolute, position.AsOpenALVector(), true, volume);
 
                     if (p.State == PassageState.Closed)
                     {
-                        World.Sound.ApplyLowpass(_passageLoops[p], World.Sound.OverDoorLowpass);
-                        World.Sound.FadeSource(_passageLoops[p], FadingType.Out, .00005f, OverDoorVolume, false);
+                        (float gain, float gainHF) lowpass = doubleAttenuation ? World.Sound.OverWallLowpass : World.Sound.OverDoorLowpass;
+                        World.Sound.ApplyLowpass(_passageLoops[p], lowpass);
                     }
                     else
                         World.Sound.FadeSource(_passageLoops[p], FadingType.In, .00005f, _defaultVolume, false);
