@@ -1,3 +1,0 @@
-- Odstraněn problém s nepřirozeným houpáním zvuků při chůzi
-- Opraven problém se ztišováním, který způsoboval pád při přechodu mezi lokacemi
-- Opravena kritická chyba, která způsobovala pád programu v případě, kdy byl Chipotle natočen šikmo a pokusil se přejít hranice lokace
