@@ -173,6 +173,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityChanged(LocalityChanged message)
 => Locality = message.Target;
+
         /// <summary>
         /// Processes incoming messages.
         /// </summary>
@@ -187,7 +188,7 @@ namespace Game.Entities
         /// </summary>
         protected override void Destroy()
         {
-            Locality?.Unregister(this);
+            Locality.ReceiveMessage(new LocalityLeft(this, this, Locality));
             World.Remove(this);
         }
 

@@ -129,7 +129,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnOrientationChanged(OrientationChanged message)
 => WatchPlayersMovement();
-        private void OnLocalityEntered(LocalityEntered message)
+        protected virtual void OnLocalityEntered(LocalityEntered message)
             => UpdateLoop();
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Game.Entities
         /// <summary>
         /// Stops sound loop of this object, if any.
         /// </summary>
-        private void StopLoop()
+        protected void StopLoop()
         {
                 World.Sound.Stop(_loopSoundId);
             _loopSoundId = 0;

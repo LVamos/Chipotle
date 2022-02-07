@@ -20,7 +20,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name for the object</param>
         /// <param name="area">The coordinates of the area that the object occupies</param>
-        public CarsonsGrill(Name name, Plane area, bool decorative) : base(name, area, "gril u Carsona", decorative)
+        public CarsonsGrill(Name name, Plane area, bool decorative) : base(name, area, "gril u Carsona", decorative, null, null, "snd17")
         { }
 
         /// <summary>
@@ -33,26 +33,19 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>
                 {
-                    [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m)
+                    [typeof(LocalityLeft)] = (message) => OnLocalityLeft((LocalityLeft)message)
                 }
                 );
         }
 
         /// <summary>
-        /// Processes the LocalityEntered message.
+        /// Handles the LocalityLeft message.
         /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnLocalityEntered(LocalityEntered message)
+        /// <param name="message">The message to be handled</param>
+        private void OnLocalityLeft(LocalityLeft message)
         {
-            if (message.Sender != World.Player || message.Locality != Locality)
-                return;
-
-            // Start loop if Carson is present
-            if (Locality.IsItHere(World.GetEntity("carson")))
-            {
-                _sounds.loop = "snd17";
-                _loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, World.GetObject("gril c1").Area.Center, true);
-            }
+            if (message.Sender == World.GetEntity("carson"))
+                StopLoop();
         }
     }
 }
