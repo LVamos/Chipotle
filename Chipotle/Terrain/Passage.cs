@@ -258,7 +258,8 @@ namespace Game.Terrain
             if (!_navigating)
                 return;
 
-            if (GetDistanceFromPlayer() <= 1 | _playersLocality != World.Player.Area.GetLocality())
+            float distance = GetDistanceFromPlayer();
+            if (distance <= 1 || distance >= 50 | _playersLocality != World.Player.Locality)
                 StopNavigation();
         }
 

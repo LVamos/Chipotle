@@ -617,8 +617,6 @@ namespace Luky
         /// <returns>Handle of the sound</returns>
         public int Play(ReadStream stream, Name role, bool looping, PositionType pt, Vector3 position, bool forceMono = false, float volumeAdjustment = 1f, float? panning = null, float pitch = 1f, int seekSample = 0, Playback pb = Playback.OpenAL)
         {
-            //if (stream.Path.Contains("garage")) System.Diagnostics.Debugger.Break();
-
             if (pt != PositionType.None && panning.HasValue)
                 throw new InvalidOperationException("PositionType must be set to None if panning has a value");
 

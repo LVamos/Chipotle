@@ -443,7 +443,8 @@ namespace Game.Entities
             if (!_navigating)
                 return;
 
-            if(GetDistanceFromPlayer() <= 1 | _area.GetLocality() != World.Player.Area.GetLocality())
+            float distance = GetDistanceFromPlayer();
+            if(distance<= 1 | distance >= 50 || !Locality.IsItHere(World.Player))
                 StopNavigation();
         }
 
