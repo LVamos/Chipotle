@@ -232,7 +232,7 @@ _navigatedExit = null;
             }
 
             // Run the menu
-            int option = WindowHandler.Menu(result.descriptions, "Východy", true);
+            int option = WindowHandler.Menu(result.descriptions, "Východy", false);
             if (option == -1)
                 return;
 
@@ -294,7 +294,7 @@ _navigatedExit = null;
                 return;
             }
 
-            int option = WindowHandler.Menu(objects.descriptions, "Okolní objekty");
+            int option = WindowHandler.Menu(objects.descriptions, "Okolní objekty", false);
 
             if (option == -1)
                 return;
