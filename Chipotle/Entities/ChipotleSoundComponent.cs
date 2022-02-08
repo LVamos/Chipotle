@@ -315,8 +315,8 @@ namespace Game.Entities
             SayOrientation();
 
             // Fluent change
-            _listenerOrientation.steps = Math.Abs(message.Degrees);
-                _listenerOrientation.step = message.Degrees / _listenerOrientation.steps;
+            _listenerOrientation.step = 2 * (message.Degrees / Math.Abs(message.Degrees));
+            _listenerOrientation.steps = message.Degrees / _listenerOrientation.step;
             _listenerOrientation.current = message.Source;
             _listenerOrientation.final= message.Target;
         }
