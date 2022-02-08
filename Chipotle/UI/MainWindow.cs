@@ -142,9 +142,9 @@ namespace Game.UI
         {
             Focus();
 
-            if (Program.TestMode)
-                WindowHandler.StartGame();
-            else
+            //if (Program.TestMode)
+                //WindowHandler.StartGame();
+            //else
                 WindowHandler.MainMenu();
 
         }

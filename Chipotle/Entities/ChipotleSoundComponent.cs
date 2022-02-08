@@ -101,7 +101,7 @@ namespace Game.Entities
                 [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
                 [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
                 [typeof(OrientationChanged)] = (m) => OnOrientationChanged((OrientationChanged)m),
-                [typeof(PositionChanged)] = (message) => OnPositionChanged((PositionChanged)message),
+                [typeof(PositionChanged)] = (message) =>    OnPositionChanged((PositionChanged)message),
                 [typeof(ObjectsCollided)] = (m) => OnObjectsCollided((ObjectsCollided)m),
                 [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
             }

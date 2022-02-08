@@ -26,7 +26,7 @@ namespace Game
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.6";
+        public static string Version = "0.8";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
@@ -148,7 +148,7 @@ namespace Game
                     MessageBox.Show(MainWindow, report, "", MessageBoxButtons.OK);
                 };
 
-            if (!TestMode)
+            if (TestMode)
             {
                 if (MainWindow != null)
                     MainWindow.Invoke(action);
@@ -157,7 +157,7 @@ namespace Game
             }
 
             //if (TestMode)
-            //throw ex;
+            throw ex;
 
             Environment.Exit(0);
 
@@ -195,6 +195,7 @@ namespace Game
                 Tolk.Load();
                 Tolk.TrySAPI(true);
                 DisableJAWSKeyHook();
+
                 World.SoundInit(TolkDelegate);
             }
             catch (Exception ex)

@@ -46,6 +46,7 @@ namespace Game.Entities
         /// <summary>
         /// Background sound effect handle. It expires after the sound is stopped.
         /// </summary>
+[NonSerialized]
         protected int _loopSoundId;
 
         /// <summary>

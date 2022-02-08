@@ -37,9 +37,9 @@ namespace Luky
         /// <exception cref="InvalidOperationException">Raised when filter creation fails</exception>
         public void ApplyLowpassFilter(int sourceID, (float gain, float gainHF) parameters)
         {
-            if (!_table.TryGetValue(sourceID, out Info i))
-                return;
-            int id = i.SourceID;
+            //if (!_table.TryGetValue(sourceID, out Info i))
+            //    return;
+            int id = _table[sourceID].SourceID;
 
             if (_lowpassFilter==0)
             _lowpassFilter = _efx.GenFilter();
@@ -535,7 +535,7 @@ namespace Luky
         {
             Info info = _table[soundID];
 
-                AL.Source(info.SourceID, ALSourceb.SourceRelative, type == PositionType.Relative);
+                    AL.Source(info.SourceID, ALSourceb.SourceRelative, type == PositionType.Relative);
             ALSetPosition(info.SourceID, position);
         }
 

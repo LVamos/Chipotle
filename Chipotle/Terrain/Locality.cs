@@ -46,6 +46,9 @@ namespace Game.Terrain
         /// </summary>
         private void UpdatePassageLoops()
         {
+            if (_passageLoops.IsNullOrEmpty())
+                return;
+
             foreach (Passage p in _passageLoops.Keys)
             {
                 Vector2 player = World.Player.Area.Center;
@@ -473,8 +476,9 @@ namespace Game.Terrain
         private void OnGameReloaded()
         {
             _backgroundSoundId = 0;
+            _passageLoops = new Dictionary<Passage, int>();
             _playerInHere = IsItHere(World.Player);
-                UpdateLoop();
+            UpdateLoop();
         }
 
         /// <summary>
@@ -541,7 +545,7 @@ namespace Game.Terrain
         /// <param name="playerMoved">Specifies if the player just moved from one locality to another one.</param>
         private void UpdateLoop()
         {
-            //if (Name.Indexed == "výčep h1") System.Diagnostics.Debugger.Break();
+            //if (Name.Indexed == "garáž p1") System.Diagnostics.Debugger.Break();
 
 
             if (_playerInHere)
@@ -554,6 +558,7 @@ namespace Game.Terrain
         /// <summary>
         /// Stores the identifiers of location audio loops played in passages.
         /// </summary>
+[NonSerialized]
         private Dictionary<Passage, int> _passageLoops = new Dictionary<Passage, int>();
 
         /// <summary>
@@ -645,11 +650,9 @@ namespace Game.Terrain
             {
                 foreach (int id in _passageLoops.Values)
                     World.Sound.FadeSource(id, FadingType.Out, .0001f, 0);
-
-
-                _passageLoops = new Dictionary<Passage, int>();
             }
 
+            _passageLoops = new Dictionary<Passage, int>();
         }
     }
 }
