@@ -27,6 +27,43 @@ namespace Game
     public static class World
     {
         /// <summary>
+        /// Resumes a paused cutscene.
+        /// </summary>
+        public static void ResumeCutscene()
+        {
+            if (_cutscene.message == null || !_cutscene.paused)
+                return;
+
+            // Rewind the scene about 2 secs back.
+            int position = _cutscene.position - 192000; // 2 secs
+            if (position < 0)
+                position = 0;
+
+            // Play it
+            int id = Sound.Play(_cutscene.message.CutsceneName, null, false, PositionType.None, Vector3.Zero, false, 0, null, 1, position);
+            Sound.FadeSource(id, FadingType.In, .0001f, 1, false);
+            // Refresh information about paused cutscene.
+            _cutscene.message = new CutsceneBegan(null, _cutscene.message.CutsceneName, id);
+            _cutscene.paused = false;
+            _cutscene.position = 0;
+
+
+        }
+
+        /// <summary>
+        /// Pauses an ongoing cutscene.
+        /// </summary>
+        public static void PauseCutscene()
+        {
+            if (_cutscene.message == null || _cutscene.paused)
+                return;
+
+            _cutscene.paused = true;
+            Sound.GetDynamicInfo(_cutscene.message.SoundID, out SoundState _, out _cutscene.position);
+            Sound.FadeSource(_cutscene.message.SoundID, FadingType.Out, .00001f, 0, true);
+        }
+
+        /// <summary>
         /// Detects acoustic obstacles between the player and the specified map element.
         /// </summary>
         /// <param name="area">The map element to be checked</param>
@@ -38,9 +75,9 @@ namespace Game
             bool neighbour = playersLocality.IsNeighbour(otherLocality);
             bool accessible = otherLocality.IsAccessible(playersLocality);
 
-
             // Are the regions in inadjecting localities?
-            if (playersLocality != otherLocality && (!neighbour || (neighbour && !accessible)))
+            if (GetDistance(area.Center, Player.Area.Center) > 100 ||
+                (playersLocality != otherLocality && (!neighbour || (neighbour && !accessible))))
                 return ObstacleType.Far;  // Inaudible
 
             // Adjecting localities
@@ -162,7 +199,7 @@ namespace Game
         /// <summary>
         /// Information about an ongoing cutscene
         /// </summary>
-        private static CutsceneBegan _cutsceneBegan;
+        private static (CutsceneBegan message, bool paused, int position) _cutscene;
 
         /// <summary>
         /// List of all NPCs
@@ -678,12 +715,12 @@ lBackgroundInfo.volume
             if (string.IsNullOrEmpty(cutscene))
                 throw new ArgumentNullException(nameof(cutscene));
 
-            if (_cutsceneBegan != null)
+            if (_cutscene.message != null)
                 StopCutscene(null);
 
             int id = Sound.Play(cutscene);
-            _cutsceneBegan = new CutsceneBegan(sender, cutscene, id);
-            ReceiveMessage(_cutsceneBegan);
+            _cutscene.message = new CutsceneBegan(sender, cutscene, id);
+            ReceiveMessage(_cutscene.message);
         }
 
         /// <summary>
@@ -692,7 +729,7 @@ lBackgroundInfo.volume
         public static void QuitGame()
         {
             Program.MainWindow.GameLoopEnabled = false;
-            _cutsceneBegan = null;
+            _cutscene.message = null;
             Sound.FadeAndStopAll(.0002f);
             SaveGame();
             System.Threading.Thread.Sleep(1000);
@@ -781,8 +818,8 @@ lBackgroundInfo.volume
             // Play the first cutscene
             PlayCutscene(null, "cs6");
 
-            if (Program.TestMode)
-                StopCutscene(null);
+            //if (Program.TestMode)
+                //StopCutscene(null);
         }
 
         /// <summary>
@@ -791,12 +828,13 @@ lBackgroundInfo.volume
         /// <param name="sender">The object or NPC which wants to stop the cutscene</param>
         public static void StopCutscene(object sender)
         {
-            if (_cutsceneBegan == null)
+            if (_cutscene.message == null)
                 return;
 
-            Sound.FadeSource(_cutsceneBegan.SoundID, FadingType.Out, .0001f, 0);
-            ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
-            _cutsceneBegan = null;
+            Sound.FadeSource(_cutscene.message.SoundID, FadingType.Out, .0001f, 0);
+            ReceiveMessage(new CutsceneEnded(_cutscene.message.Sender, _cutscene.message.CutsceneName, _cutscene.message.SoundID));
+            _cutscene.message = null;
+            _cutscene.paused = false;
         }
 
         /// <summary>
@@ -817,18 +855,18 @@ lBackgroundInfo.volume
         /// </summary>
         private static void HandleCutscene()
         {
-            if (_cutsceneBegan != null)
+            if (_cutscene.message != null)
             {
-                Sound.GetDynamicInfo(_cutsceneBegan.SoundID, out SoundState state, out int sample);
+                Sound.GetDynamicInfo(_cutscene.message.SoundID, out SoundState state, out int sample);
 
                 if (state != SoundState.Playing)
                 {
-                    Sound.GetStaticInfo(_cutsceneBegan.SoundID, out _, out int totalSamples, out _);
+                    Sound.GetStaticInfo(_cutscene.message.SoundID, out _, out int totalSamples, out _);
 
-                    if (sample == totalSamples)
+                    if (sample == totalSamples && !_cutscene.paused)
                     {
-                        ReceiveMessage(new CutsceneEnded(_cutsceneBegan.Sender, _cutsceneBegan.CutsceneName, _cutsceneBegan.SoundID));
-                        _cutsceneBegan = null;
+                        ReceiveMessage(new CutsceneEnded(_cutscene.message.Sender, _cutscene.message.CutsceneName, _cutscene.message.SoundID));
+                        _cutscene .message = null;
                     }
                 }
             }

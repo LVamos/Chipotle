@@ -53,13 +53,13 @@ namespace Game.UI
             _tmrGameLoop.Tick += GameLoop;
             _tmrGameLoop.Enabled = false;
 
-            KeyDown += MainWindow_KeyDown;
-            KeyUp += MainWindow_KeyUp;
-            KeyPress += MainWindow_KeyPress;
-            Shown += MainWindow_Shown;
-            FormClosing += MainWindow_FormClosing;
-            Deactivate += MainWindow_Deactivate;
-            Activated += MainWindow_Activated;
+            KeyDown += OnKeyDown;
+            KeyUp += OnKeyUp;
+            KeyPress += OnKeyPress;
+            Shown += OnShown;
+            FormClosing += OnFormClosing;
+            Deactivate += OnDeactivate;
+            Activated += OnActivated;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Game.UI
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="e">The message</param>
-        private void MainWindow_KeyPress(object sender, KeyPressEventArgs e)
+        private void OnKeyPress(object sender, KeyPressEventArgs e)
             => WindowHandler.OnKeyPress(e.KeyChar);
 
         /// <summary>
@@ -75,12 +75,15 @@ namespace Game.UI
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="e">The message</param>
-        private void MainWindow_Activated(object sender, EventArgs e)
+        private void OnActivated(object sender, EventArgs e)
         {
             Program.DisableJAWSKeyHook();
 
             if (World.Sound.Muted)
+            {
+            World.ResumeCutscene();
                 World.Sound.Unmute();
+            }
         }
 
         /// <summary>
@@ -88,13 +91,14 @@ namespace Game.UI
         /// </summary>
         /// <param name="sender">Source fo the message</param>
         /// <param name="e">The message</param>
-        private void MainWindow_Deactivate(object sender, EventArgs e)
+        private void OnDeactivate(object sender, EventArgs e)
         {
             Program.EnableJAWSKeyHook();
+            World.PauseCutscene();
             World.Sound.Mute();
         }
 
-        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
+        private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
             World.Sound.FadeMasterOut(.0009f, 0);
@@ -126,19 +130,19 @@ namespace Game.UI
         /// <summary>
         /// Handler of the KeyDown event
         /// </summary>
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        private void OnKeyDown(object sender, KeyEventArgs e)
             => WindowHandler.OnKeyDown(new KeyEventParams(e));
 
         /// <summary>
         /// Handler of the KeyUp event
         /// </summary>
-        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        private void OnKeyUp(object sender, KeyEventArgs e)
                         => WindowHandler.OnKeyUp(new KeyEventParams(e));
 
         /// <summary>
         /// Handler of the Shown event
         /// </summary>
-        private void MainWindow_Shown(object sender, EventArgs e)
+        private void OnShown(object sender, EventArgs e)
         {
             Focus();
 

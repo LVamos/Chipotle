@@ -340,18 +340,18 @@ namespace Game.Terrain
             if (obstacle == ObstacleType.Wall)
             {
                 World.Sound.ApplyLowpass(_navigationSoundID, World.Sound.OverWallLowpass);
-                World.Sound.SetVolume(_navigationSoundID, OverWallVolume);
+                World.Sound.SetSourceVolume(_navigationSoundID, OverWallVolume);
             }
                 else if (obstacle == ObstacleType.Object)
             {
                 World.Sound.ApplyLowpass(_navigationSoundID, World.Sound.OverObjectLowpass);
-                World.Sound.SetVolume(_navigationSoundID, OverObjectVolume);
+                World.Sound.SetSourceVolume(_navigationSoundID, OverObjectVolume);
             }
             else if (_attenuate)
             {
                 // Turn off attenuation
                 World.Sound.CancelLowpass(_navigationSoundID);
-                World.Sound.SetVolume(_navigationSoundID, _defaultVolume);
+                World.Sound.SetSourceVolume(_navigationSoundID, _defaultVolume);
             }
 
             _attenuate = attenuate;

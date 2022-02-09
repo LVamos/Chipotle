@@ -113,8 +113,11 @@ namespace Luky
         /// </summary>
         public void Unmute()
         {
-            Muted = false;
-            FadeMasterIn(.0001f, _masterVolumeBackup);
+            if (!Muted)
+                return;
+                Muted = false;
+
+            FadeMasterIn(.0003f, _masterVolumeBackup);
             _masterVolumeBackup = 0;
         }
 
@@ -415,7 +418,7 @@ namespace Luky
         /// </summary>
         /// <param name="id">Handle of the source to be affected</param>
         /// <param name="volume">Target volume of the specified source</param>
-        public void SetVolume(int id, float volume)
+        public void SetSourceVolume(int id, float volume)
         {
             RunCommand(() =>
             {
@@ -687,7 +690,7 @@ namespace Luky
         /// </summary>
         /// <param name="soundID">The sound</param>
         /// <param name="paused">Specifies if the sound should be paused</param>
-        public void SetPauseState(int soundID, bool paused)
+        public void SetSourceState(int soundID, bool paused)
             => RunCommand(() =>
                                                                         {
                                                                             Sound sound = _sounds.FirstOrDefault(p => p.ID == soundID);
@@ -807,7 +810,7 @@ namespace Luky
         public void FadeAndStopAll(float volumeDelta)
         {
             foreach (Sound s in _sounds)
-                _fadings[s.ID] = new FadingRecord(FadingType.Out, volumeDelta, 0);
+                _fadings[s.ID] = new FadingRecord("", FadingType.Out, volumeDelta, 0);
         }
 
         /// <summary>
@@ -825,7 +828,7 @@ namespace Luky
         /// <param name="volumeDelta">Specifies how much the volume is changed in one step.</param>
         /// <param name="targetVolume">Specifies the final master volume</param>
         public void FadeMaster(FadingType type, float volumeDelta, float targetVolume)
-            => _masterFading = new FadingRecord(type, volumeDelta, targetVolume);
+            => _masterFading = new FadingRecord("", type, volumeDelta, targetVolume);
 
         /// <summary>
         /// Performs master fading
@@ -921,7 +924,7 @@ namespace Luky
         /// <param name="targetVolume">Specifies the final volume of the sound source</param>
         /// <param name="stop">Specifies if the sound should be stopped after it was muted.</param>
         public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume = 0, bool stop = true)
-                => RunCommand(() => _fadings[soundID] = new FadingRecord(type, volumeDelta, targetVolume, stop));
+            => RunCommand(() => _fadings[soundID] = new FadingRecord("", type, volumeDelta, targetVolume, stop));
 
         /// <summary>
         /// Stores records about sound fading.
