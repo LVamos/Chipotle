@@ -35,7 +35,6 @@ namespace Game.Entities
             ["hala s1"] = ("castlecupboard", .13f),
             ["koupelna s1"] = ("prefabcaravan", .1f),
             ["kuchyň s1"] = ("carpettedhallway", .1f),
-            ["ložnice w1"] = ("carpettedhallway", .1f),
             ["pokoj s1"] = ("carpettedhallway", .1f),
             ["ulice s1"] = ("prefabouthouse", .2f),
             ["chodba h1"] = ("woodenshortpassage", .15f),
