@@ -728,30 +728,18 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// <param name="message">The message to be processed</param>
         private void OnUseObject(UseObject message)
         {
-            // Detect door and use it if possible.
-            foreach ((Vector2 position, Tile tile) t in World.Map.GetNeighbours8(CurrentTile.position))
+            void Use(MapElement e)
             {
-                Passage passage = World.GetPassage(t.position);
+                if (e == null)
+                    return;
 
-                if (passage != null && passage is Door door)
-                {
-                    door.ReceiveMessage(new UseObject(Owner, t.position));
-                    break;
-                }
+                Vector2? tmp = e.Area.FindOppositePoint(_area);
+                Vector2 point = tmp.HasValue ? (Vector2)tmp : e.Area.GetClosestPoint(CurrentTile.position);
+                e.ReceiveMessage(new UseObject(Owner, point));
             }
 
-            // Detect object in front of Chipotle.
-            (Vector2 position, Tile tile) tileInFront = GetNextTile(1);
-
-            if (tileInFront.tile != null)
-            {
-                GameObject obj = World.GetObject(tileInFront.position);
-                if (obj != null)
-                {
-                    UseObject useObject = new UseObject(Owner, tileInFront.position);
-                    obj.ReceiveMessage(useObject);
-                }
-            }
+            Use(World.GetNearestPassages(CurrentTile.position, true, 3).FirstOrDefault()); // Detect doors within a radius of 2 meters and use the nearest one.
+            Use(World.GetObject(GetNextTile(1).position)); // Detect object in front of Chipotle and use it.
         }
 
         /// <summary>

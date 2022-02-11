@@ -117,7 +117,7 @@ namespace Game.Entities
             if (
                             (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
             || (_area.GetLocality().Name.Indexed == "asfaltka c1" && !CarsonsBenchesUsed()))
-                _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, 1, null, 1, 0, Playback.OpenAL);
+                _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.Point.AsOpenALVector(), true, 1, null, 1, 0, Playback.OpenAL);
 
             // If player didn't leave Walsh area but used required objects and went through all area
             else if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())

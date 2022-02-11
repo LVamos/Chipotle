@@ -471,11 +471,27 @@ namespace Game
         /// Enumerates all passages sorted by distance from the specified point.
         /// </summary>
         /// <param name="point">The point whose surrounding is to be searched</param>
+        /// <param name="doors">Specifies if the result should should be narrowed to doors only</param>
         /// <returns>Enumeration of all passages</returns>
-        public static IEnumerable<Passage> GetNearestPassages(Vector2 point)
-                   => _passages.Values
-            .OrderBy(p => p.Area.GetDistanceFrom(point))
-            .Where(p => p != World.GetPassage(point));
+        public static IEnumerable<Passage> GetNearestPassages(Vector2 point, bool doors = false)
+        {
+            return
+                   from p in _passages.Values
+                   let d = p.Area.GetDistanceFrom(point)
+                   orderby d
+                   where !p.Area.LaysOnPlane(point) &&
+                               ((doors && p is Door) || (!doors && p is Passage))
+                   select p;
+        }
+
+        /// <summary>
+        /// Enumerates all passages sorted by distance from the specified point.
+        /// </summary>
+        /// <param name="point">The point whose surrounding is to be searched</param>
+        /// <param name="maxDistance">Max allowed distance from the specified point</param>
+        /// <returns>Enumeration of all passages</returns>
+        public static IEnumerable<Passage> GetNearestPassages(Vector2 point, bool doors, float maxDistance)
+            => GetNearestPassages(point, doors).Where(p => p.Area.GetDistanceFrom(point) <= maxDistance);
 
         /// <summary>
         /// searches for a simple game object by name.

@@ -19,7 +19,7 @@ namespace Game.Messaging.Commands
         /// <summary>
         /// A point of the object at which it's used
         /// </summary>
-        public readonly Vector2 Position;
+        public readonly Vector2 Point;
 
         /// <summary>
         /// Constructor
@@ -30,7 +30,7 @@ namespace Game.Messaging.Commands
         /// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
         public UseObject(object sender, Vector2 position = default) : base(sender)
         {
-            Position = position;
+            Point = position;
         }
     }
 }

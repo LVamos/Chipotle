@@ -102,14 +102,14 @@ namespace Game.Terrain
         /// <summary>
         /// Closes the door if possible
         /// </summary>
-        protected void Close(object sender)
+        protected void Close(object sender, Vector2 point)
         {
             if (Area.GetTiles().All(t => World.IsWalkable(t.position)))
             {
                 State = PassageState.Closed;
 
                 AnnounceManipulation();
-                Play(_closingSound, sender as Entity);
+                Play(_closingSound, sender as Entity, point);
             }
         }
 
@@ -127,7 +127,7 @@ namespace Game.Terrain
         /// <param name="sound">Name of the sound to be played</param>
         /// <param name="position"></param>
         /// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
-        protected void Play(string sound, Entity entity)
+        protected void Play(string sound, Entity entity, Vector2 point)
         {
 
             // Set attenuation parameters
@@ -154,8 +154,7 @@ namespace Game.Terrain
                 }
 
             // Play the sound
-            Vector2 coords = (Vector2)entity.Area.FindOppositePoint(_area);
-            int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(sound), role: null, looping: false, PositionType.Absolute, coords.AsOpenALVector(), true, volume);
+            int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(sound), role: null, looping: false, PositionType.Absolute, point.AsOpenALVector(), true, volume);
 
                 if (attenuate)
                     World.Sound.ApplyLowpass(id, lowpass);
@@ -177,9 +176,9 @@ namespace Game.Terrain
             _timer = 0;
 
             if (State == PassageState.Closed)
-                Open(message.Sender);
+                Open(message.Sender, message.Point);
             else
-                Close(message.Sender);
+                Close(message.Sender, message.Point);
         }
 
         /// <summary>
@@ -188,12 +187,12 @@ namespace Game.Terrain
         /// <param name="position">
         /// The coordinates of the place on the door that an NPC is pushing on
         /// </param>
-        protected virtual void Open(object sender)     
+        protected virtual void Open(object sender, Vector2 point)     
         {
             State = PassageState.Open;
 
             AnnounceManipulation();
-            Play(_openingSound, sender as Entity);
+            Play(_openingSound, sender as Entity, point);
         }
     }
 }

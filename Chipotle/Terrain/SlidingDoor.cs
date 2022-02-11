@@ -30,10 +30,14 @@ namespace Game.Terrain
             bool opposite = IsInFrontOrBehind(entity.Area.Center);
             bool near = _area.GetDistanceFrom(entity.Area.Center)<= _minDistance;
 
+            // Find point from which the door sound should be heart.
+            Vector2? tmp = _area.FindOppositePoint(entity.Area);
+            Vector2 point = tmp.HasValue ? (Vector2)tmp : _area.GetClosestPoint(entity.Area.Center);
+
             if (opposite && near && State == PassageState.Closed)
-                Open(entity);
+                Open(entity, point);
             else if (!near && State == PassageState.Open)
-                Close(entity);
+                Close(entity, point);
         }
 
         /// <summary>

@@ -300,7 +300,7 @@ namespace Game.Entities
                 return;
 
             if (!string.IsNullOrEmpty(_sounds.action))
-                _actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+                _actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Point.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
             else
                 World.PlayCutscene(this, _cutscene);
 
