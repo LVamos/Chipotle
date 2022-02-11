@@ -91,6 +91,7 @@ namespace Game.Entities
             RegisterMessages(
             new Dictionary<Type, Action<GameMessage>>()
             {
+                [typeof(SayCoordinates)] = (message) => OnSayCoordinates((SayCoordinates)message),
                 [typeof(SayLocalitySize)] = (message) => OnSayLocalitySize((SayLocalitySize)message),
                 [typeof(SayVisitedLocalityResult)] = (message) => OnSayVisitedLocality((SayVisitedLocalityResult)message),
                 [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
@@ -105,6 +106,17 @@ namespace Game.Entities
                 [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
             }
             );
+        }
+
+        /// <summary>
+        /// Handles the SayCoordinates message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        private void OnSayCoordinates(SayCoordinates message)
+        {
+            if(message.Relative)
+                            Tolk.Speak(Owner.Area.ToRelative().Center.ToString(), true);
+            else Tolk.Speak(Owner.Area.Center.ToString(), true);
         }
 
 

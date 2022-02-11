@@ -22,6 +22,12 @@ namespace Game.Entities
     public class ChipotleInputComponent : InputComponent
     {
         /// <summary>
+        /// Reports current position of the player in relative coordinates.
+        /// </summary>
+        private void SayRelativeCoordinates()
+            => Owner.ReceiveMessage(new SayCoordinates(this));
+
+        /// <summary>
         /// Determines how quickly the game reacts to movement commands. The speed is in milliseconds.
         /// </summary>
         private const int _keyboardSpeed = 10;
@@ -36,7 +42,7 @@ namespace Game.Entities
         /// <summary>
         /// Lists navigable objects.
         /// </summary>
-        protected void ListNavigableObjects() => Owner.ReceiveMessage(new ListObjects(this));
+        protected void ListObjects() => Owner.ReceiveMessage(new ListObjects(this));
 
         /// <summary>
         /// Initializes the component and starts its message loop.
@@ -56,29 +62,31 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
+                [new KeyShortcut(Keys.C)] = SayRelativeCoordinates,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.T)] = SayTuttlesPosition,
                 [new KeyShortcut(Keys.F10)] = JumpToLocality,
                 [new KeyShortcut(Keys.F11)] = SaveStartPosition,
-                [new KeyShortcut(false, true, false, Keys.C)] = SayAbsoluteCoords,
+                [new KeyShortcut(false, true, false, Keys.C)] = SayAbsoluteCoordinates,
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
 
                 // Other commands
+                [new KeyShortcut(Keys.Tab)] = GameMenu,
                 [new KeyShortcut(Keys.R)] = SayLocalitySize,
                 [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
-                [new KeyShortcut(false, true, false, Keys.O)] = ListNavigableObjects,
+                [new KeyShortcut(false, true, false, Keys.O)] = ListObjects,
                 [new KeyShortcut(Keys.S)] = SayOrientation,
                 [new KeyShortcut(Keys.V)] = SayExits,
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
-                [new KeyShortcut(Keys.N)] = VisitedLocality,
-                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = MoveLeft,
-                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = MoveRight,
+                [new KeyShortcut(Keys.N)] = SayVisitedRegion,
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = GoLeft,
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = GoRight,
 
                 // Other shortcuts
-                [new KeyShortcut(Keys.O)] = SaySurroundingObjects,
+                [new KeyShortcut(Keys.O)] = SayObjects,
                 [new KeyShortcut(Keys.L)] = SayLocality,
-                [new KeyShortcut(Keys.Up)] = MoveForward,
-                [new KeyShortcut(Keys.Down)] = MoveBack,
+                [new KeyShortcut(Keys.Up)] = GoForward,
+                [new KeyShortcut(Keys.Down)] = GoBack,
                 [new KeyShortcut(Keys.Left)] = TurnLeft,
                 [new KeyShortcut(Keys.Right)] = TurnRight,
                 [new KeyShortcut(KeyShortcut.Modifiers.Control, Keys.Left)] = TurnSharplyLeft,
@@ -87,6 +95,82 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
+        }
+
+        /// <summary>
+        /// Runs the game menu
+        /// </summary>
+        private void GameMenu()
+        {
+            Owner.ReceiveMessage(new StopWalk(this)); // Stop Chipotle if he's going somewhere.
+
+            // Prepare the menu
+            (string name, Action command)[] commands =
+            {
+                                ("použít objekt nebo otevřít dveře: entr", Interact),
+                ("krok dopředu: horní šipka", StepForward),
+                ("krok zpět: dolní šipka", StepBack),
+                ("krok doleva: šift levá šipka", StepLeft),
+                ("krok doprava: šift pravá šipka", StepRight),
+                ("zahnout trochu doleva: levá šipka", TurnLeft),
+                ("zahnout trochu doprava: pravá šipka", TurnRight),
+                ("zahnout ostře doleva: kontrol levá šipka", TurnSharplyLeft),
+                ("zahnout ostře doprava: kontrol pravá šipka", TurnSharplyRight),
+                ("čelem vzad: kontrol dolní šipka", TurnAround),
+                ("okolní objekty: O", SayObjects),
+                ("navigovat k objektu: šift O", ListObjects),
+                ("východy: Vé", SayExits),
+                                ("navigovat k východu: šift vé", ListExits),
+                                                ("kde jsem: El", SayLocality),
+                                                                ("Byl jsem tu: En", SayVisitedRegion),
+                                                                                ("Rozměry lokace: Er", SayLocalitySize),
+                                                                                                ("kompas: Es", SayOrientation),
+                                                                                                                ("souřadnice: Cé", SayAbsoluteCoordinates),
+                                                                                                                                ("hlavní menu: Iskejp", World.QuitGame),
+            };
+
+            // Run the menu
+            string[] items = commands.Select(c => c.name).ToArray<string>();
+            int item = WindowHandler.Menu(items, "Menu");
+
+            if (item > 0)
+                commands[item].command();
+        }
+
+        /// <summary>
+        /// Moves the NPC one step to the right.
+        /// </summary>
+        private void StepRight()
+        {
+            GoRight();
+            StopWalk();
+        }
+
+        /// <summary>
+        /// Moves the NPC one step to the left.
+        /// </summary>
+        private void StepLeft()
+        {
+            GoLeft();
+            StopWalk();
+        }
+
+        /// <summary>
+        /// Moves the NPC one step back.
+        /// </summary>
+        private void StepBack()
+        {
+            GoBack();
+            StopWalk();
+        }
+
+        /// <summary>
+        /// Moves the NPC one step forth.
+        /// </summary>
+        private void StepForward()
+        {
+            GoForward();
+            StopWalk();
         }
 
         /// <summary>
@@ -152,14 +236,13 @@ namespace Game.Entities
             Tolk.Speak("Startovní pozice uložena", true);
         }
 
-        private void SayAbsoluteCoords()
+        private void SayAbsoluteCoordinates()
         {
             if (!Program.TestMode)
                 return;
 
-            string coords = Owner.Area.Center.ToString();
-            Clipboard.SetText(coords);
-            Tolk.Speak(coords, true);
+            Clipboard.SetText(Owner.Area.Center.ToString());
+            Owner.ReceiveMessage(new SayCoordinates(this, false));
         }
 
 
@@ -238,25 +321,25 @@ namespace Game.Entities
         /// <summary>
         /// Moves the NPC one step back.
         /// </summary>
-        private void MoveBack()
+        private void GoBack()
             => Owner.ReceiveMessage(new StartWalk(this, TurnType.Around));
 
         /// <summary>
-        /// Moves the NPC one step forth.
+        /// Starts Moving the NPC forth.
         /// </summary>
-        private void MoveForward()
+        private void GoForward()
             => Owner.ReceiveMessage(new StartWalk(this, TurnType.None));
 
         /// <summary>
-        /// Moves the NPC one step to the left perpendicullar to current orientation.
+        /// Starts moving the NPC to the left.
         /// </summary>
-        private void MoveLeft()
+        private void GoLeft()
              => Owner.ReceiveMessage(new StartWalk(this, TurnType.SharplyLeft));
 
         /// <summary>
         /// Moves the NPC one step to the right perpendicullar to current orientation.
         /// </summary>
-        private void MoveRight()
+        private void GoRight()
             => Owner.ReceiveMessage(new StartWalk(this, TurnType.SharplyRight));
 
         /// <summary>
@@ -269,7 +352,7 @@ namespace Game.Entities
         /// <summary>
         /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
         /// </summary>
-        private void SaySurroundingObjects()
+        private void SayObjects()
 => Owner.ReceiveMessage(new SayObjects(this));
 
         /// <summary>
@@ -329,8 +412,8 @@ namespace Game.Entities
         /// <summary>
         /// Reports if the player have already visited the current locality.
         /// </summary>
-        private void VisitedLocality()
-            => Owner.ReceiveMessage(new SayVisitedLocality(this));
+        private void SayVisitedRegion()
+            => Owner.ReceiveMessage(new SayVisitedRegion(this));
 
         /// <summary>
         /// Processes the KeyDown message.

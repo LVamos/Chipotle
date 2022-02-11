@@ -184,7 +184,7 @@ namespace Game.Entities
                     [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
                     [typeof(StopWalk)] = (message) => OnStopWalk((StopWalk)message),
                     [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
-                    [typeof(SayVisitedLocality)] = (message) => OnSayVisitedLocality((SayVisitedLocality)message),
+                    [typeof(SayVisitedRegion)] = (message) => OnSayVisitedLocality((SayVisitedRegion)message),
                     [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
                     [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
                     [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
@@ -673,7 +673,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// Processes the SayVisitedLocality message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnSayVisitedLocality(SayVisitedLocality message)
+        private void OnSayVisitedLocality(SayVisitedRegion message)
             => Owner.ReceiveMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
 
         /// <summary>
