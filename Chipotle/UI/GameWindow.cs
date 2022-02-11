@@ -21,8 +21,7 @@ namespace Game.UI
         {
             Dictionary<KeyShortcut, Action> shortcuts = new Dictionary<KeyShortcut, Action>()
             {
-                [new KeyShortcut(Keys.C)] = SayCoordinates,
-                [new KeyShortcut(Keys.Escape)] = QuitGame,
+                [new KeyShortcut(Keys.Escape)] = QuitGame
             };
 
             RegisterShortcuts(shortcuts);
@@ -55,11 +54,5 @@ namespace Game.UI
         /// </summary>
         private void QuitGame()
             => World.QuitGame();
-
-        /// <summary>
-        /// Reports relative coordiantes of the Detective Chipotle NPC.
-        /// </summary>
-        private void SayCoordinates()
-            => Tolk.Speak(World.Player.Area.ToRelative().Center.ToString(), true);
     }
 }

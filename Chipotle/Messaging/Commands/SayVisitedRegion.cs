@@ -7,12 +7,12 @@ namespace Game.Messaging.Commands
     /// located in.
     /// </summary>
     [Serializable]
-    public class SayVisitedLocality : GameMessage
+    public class SayVisitedRegion : GameMessage
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public SayVisitedLocality(object sender) : base(sender) { }
+        public SayVisitedRegion(object sender) : base(sender) { }
     }
 }

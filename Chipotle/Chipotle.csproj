@@ -79,10 +79,11 @@
     <Compile Include="Messaging\Commands\ListExits.cs" />
     <Compile Include="Messaging\Commands\ListObjects.cs" />
     <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
+    <Compile Include="Messaging\Commands\SayCoordinates.cs" />
     <Compile Include="Messaging\Commands\SayExits.cs" />
     <Compile Include="Messaging\Commands\SayLocalitySize.cs" />
     <Compile Include="Messaging\Commands\SayOrientation.cs" />
-    <Compile Include="Messaging\Commands\SayVisitedLocality.cs" />
+    <Compile Include="Messaging\Commands\SayVisitedRegion.cs" />
     <Compile Include="Messaging\Commands\StartExitNavigation.cs" />
     <Compile Include="Messaging\Commands\StartObjectNavigation.cs" />
     <Compile Include="Messaging\Commands\StopExitNavigation.cs" />

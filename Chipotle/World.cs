@@ -27,6 +27,14 @@ namespace Game
     public static class World
     {
         /// <summary>
+        /// Replays the last cutscene
+        /// </summary>
+        public static void RepeatCutscene()
+        {
+
+        }
+
+        /// <summary>
         /// Resumes a paused cutscene.
         /// </summary>
         public static void ResumeCutscene()
@@ -818,8 +826,8 @@ lBackgroundInfo.volume
             // Play the first cutscene
             PlayCutscene(null, "cs6");
 
-            //if (Program.TestMode)
-                //StopCutscene(null);
+            if (Program.TestMode)
+                StopCutscene(null);
         }
 
         /// <summary>
