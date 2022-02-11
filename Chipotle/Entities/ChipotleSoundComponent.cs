@@ -114,9 +114,9 @@ namespace Game.Entities
         /// <param name="message">The message to be handled</param>
         private void OnSayCoordinates(SayCoordinates message)
         {
-            if(message.Relative)
-                            Tolk.Speak(Owner.Area.ToRelative().Center.ToString(), true);
-            else Tolk.Speak(Owner.Area.Center.ToString(), true);
+            Vector2 coords = message.Relative ? Owner.Area.ToRelative().Center : Owner.Area.Center;
+            string result = Math.Round(coords.X).ToString() +(message.Relative ? " " : ", ") + Math.Round(coords.Y).ToString();
+            Tolk.Speak(result, true);
         }
 
 

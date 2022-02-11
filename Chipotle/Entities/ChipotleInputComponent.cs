@@ -241,7 +241,9 @@ namespace Game.Entities
             if (!Program.TestMode)
                 return;
 
-            Clipboard.SetText(Owner.Area.Center.ToString());
+            Vector2 coords = Owner.Area.Center;
+            string result = Math.Round(coords.X).ToString() + ", " + Math.Round(coords.Y);
+            Clipboard.SetText(result);
             Owner.ReceiveMessage(new SayCoordinates(this, false));
         }
 
