@@ -235,7 +235,7 @@ namespace Luky
             else if (pt == PositionType.Absolute)
             {
                 ALSetPosition(info.SourceID, position);
-                AL.DistanceModel(ALDistanceModel.LinearDistanceClamped);
+                AL.DistanceModel(ALDistanceModel.LinearDistance);
                 AL.Source(info.SourceID, ALSourcef.ReferenceDistance, 1);
                 ALAnnounceError("set reference distance");
 
