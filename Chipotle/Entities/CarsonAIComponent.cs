@@ -41,7 +41,7 @@ namespace Game.Entities
                     [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
                 }
                 );
-            SetPosition message = new SetPosition(this, new Plane("1229, 1017"), true); // Sitting on a bench at a table
+            SetPosition message = new SetPosition(this, new Plane("1230, 1017"), true); // Sitting on a bench at a table
             Owner.ReceiveMessage(message);
         }
 
