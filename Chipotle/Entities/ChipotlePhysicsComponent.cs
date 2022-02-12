@@ -567,7 +567,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// <summary>
         /// Specifies distance in which exits from current locality are searched.
         /// </summary>
-        protected const int _exitRadius = 80;
+        protected const int _exitRadius = 50;
 
         /// <summary>
         /// Marks current nearest surroundings of the NPC as visited. If it's already been visited then the _inVisitedRegion is set to true.
