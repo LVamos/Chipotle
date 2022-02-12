@@ -99,7 +99,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateCoffeemaker(Name name, Plane area, bool decorative)
-            => new DumpObject(name, area, "kávovar", decorative, null, "snd9");
+            => new DumpObject(name, area, "kávovar", decorative, null, "snd9", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the corpse (tělo w1) object in the poolside (bazén w1) locality.
@@ -118,7 +118,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateElectricalBox(Name name, Plane area, bool decorative)
-=> new DumpObject(name, area, "rozvodna", decorative, null, null, "ElectricalBoxLoop", loopVolume: .5f);
+=> new DumpObject(name, area, "rozvodna", decorative, null, null, "ElectricalBoxLoop", volume: .5f);
 
         /// <summary>
         /// Creates new instance of the fish tank (akvárko w1) object in the basement (sklep w1) locality.
@@ -324,7 +324,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateCuckooClock(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "kukačkové hodiny", decorative, null, null, "CuckooClockLoop",null,false, loopVolume: .3f);
+        => new DumpObject(name, area, "kukačkové hodiny", decorative, null, null, "CuckooClockLoop",null,false, volume: .5f);
 
         /// <summary>
         /// Creates new instance of the dish washer (myčka) object.
@@ -343,7 +343,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateFan(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "větrák", decorative, null, null, "FanLoop");
+        => new DumpObject(name, area, "větrák", decorative, null, null, "FanLoop", volume: 1);
 
         /// <summary>
         /// Creates new instance of the fire place (krb) object.
@@ -371,7 +371,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateFridge(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "lednice", decorative, null, "snd10", "FridgeLoop", loopVolume: .5f, stopWhenPlayerMoves: true);
+        => new DumpObject(name, area, "lednice", decorative, null, "snd10", "FridgeLoop", volume: .5f, stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the chair (židle) object.
@@ -417,7 +417,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateKeyHanger(Name name, Plane area, bool decorative) => new KeyHanger(name, area, decorative);
+        private static DumpObject CreateKeyHanger(Name name, Plane area, bool decorative) 
+            => new KeyHanger(name, area, decorative);
 
         /// <summary>
         /// Creates new instance of the Killer's car (zabijákovo auto v1) object in the garage of
