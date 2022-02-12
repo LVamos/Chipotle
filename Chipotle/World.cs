@@ -26,6 +26,8 @@ namespace Game
     /// </summary>
     public static class World
     {
+        private static readonly float _cutsceneVolume = .5f;
+
         /// <summary>
         /// Replays the last cutscene
         /// </summary>
@@ -180,22 +182,22 @@ namespace Game
         private static readonly Dictionary<string, (string sound, float volume)> _localityLoops = new Dictionary<string, (string sound, float volume)>
         {
             ["chodba h1"] = ("ElectricalBoxLoop", 1),
-            ["balkon p1"] = ("BelvedereStreetLoop", .5f),
+            ["balkon p1"] = ("BelvedereStreetLoop", 1),
             ["terasa w1"] = ("PoolLoop", .4f),
-            ["výčep h1"] = ("CzechPubLoop", 1),
-            ["ulice h1"] = ("BonitaStreetLoop", 1),
+            ["výčep h1"] = ("CzechPubLoop", .7f),
+            ["ulice h1"] = ("BonitaStreetLoop", .5f),
             ["příjezdová cesta w1"] = ("DriveWayLoop", 1),
             ["bazén w1"] = ("PoolLoop", 1),
-            ["zahrada c1"] = ("CarsonsGardenLoop", 1),
-            ["asfaltka c1"] = ("AsphaltRoadLoop", 1),
-            ["cesta c1"] = ("AsphaltRoadLoop", 1),
-            ["ulice p1"] = ("BelvedereStreetLoop", 1),
+            ["zahrada c1"] = ("CarsonsGardenLoop", .1f),
+            ["asfaltka c1"] = ("AsphaltRoadLoop", .5f),
+            ["cesta c1"] = ("AsphaltRoadLoop", .5f),
+            ["ulice p1"] = ("BelvedereStreetLoop", 1.5f),
             ["ulice v1"] = ("GordonStreetLoop", 1),
             ["garáž v1"] = ("GarageLoop", 1),
             ["garáž s1"] = ("GarageLoop", 1),
             ["garáž w1"] = ("GarageLoop", 1),
             ["garáž p1"] = ("GarageLoop", 1),
-            ["ulice s1"] = ("BonitaStreetLoop", 1),
+            ["ulice s1"] = ("BonitaStreetLoop", .7f),
             ["dvorek s1"] = ("DriveWayLoop", 1),
         };
 
@@ -742,7 +744,7 @@ lBackgroundInfo.volume
             if (_cutscene.message != null)
                 StopCutscene(null);
 
-            int id = Sound.Play(cutscene);
+            int id = Sound.Play(Sound.GetRandomSoundStream(cutscene), null, false, PositionType.None, Vector3.Zero, false, _cutsceneVolume);
             _cutscene.message = new CutsceneBegan(sender, cutscene, id);
             ReceiveMessage(_cutscene.message);
         }

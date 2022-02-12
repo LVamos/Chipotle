@@ -49,7 +49,7 @@ namespace Luky
         /// <summary>
         /// Lowpass setting for simulation of sounds over wall.
         /// </summary>
-        public (float gain, float gainHF) OverObjectLowpass = (.7f, .3f);
+        public (float gain, float gainHF) OverObjectLowpass = (.7f, .8f);
 
         /// <summary>
         /// Lowpass setting for simulation of sounds obstructed by a door.
@@ -87,7 +87,7 @@ namespace Luky
         /// <summary>
         /// Default general volume
         /// </summary>
-        public readonly float DefaultMasterVolume = 2;
+        public readonly float DefaultMasterVolume = .5f;
 
         /// Indicates if the sounds are muted.
         /// </summary>

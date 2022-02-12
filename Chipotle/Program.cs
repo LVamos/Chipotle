@@ -26,7 +26,7 @@ namespace Game
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.8";
+        public static string Version = "0.10";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
@@ -148,7 +148,7 @@ namespace Game
                     MessageBox.Show(MainWindow, report, "", MessageBoxButtons.OK);
                 };
 
-            if (TestMode)
+            if (!TestMode)
             {
                 if (MainWindow != null)
                     MainWindow.Invoke(action);

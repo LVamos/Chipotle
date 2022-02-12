@@ -33,7 +33,7 @@ namespace Game.Terrain
         /// <summary>
         /// Volume used with sound attenuation.
         /// </summary>
-        protected float OverObjectVolume => _defaultVolume * .9f;
+        protected float OverObjectVolume => _defaultVolume * .95f;
 
         /// Inner and public name of the element
         /// </summary>

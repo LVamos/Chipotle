@@ -312,7 +312,8 @@ namespace Game.Entities
         /// <summary>
         /// Reports current orientation setting of the Chipotle NPC.
         /// </summary>
-        protected void SayOrientation() => Owner.ReceiveMessage(new SayOrientation(this));
+        protected void SayOrientation() 
+            => Owner.ReceiveMessage(new SayOrientation(this));
 
         /// <summary>
         /// Allows the player to use a nearby object or door.

@@ -20,7 +20,7 @@ namespace Game.UI
         /// <summary>
         /// Default volume for the menu loop
         /// </summary>
-        private const float _loopVolume= .2f;
+        private const float _loopVolume = .5f;
 
         /// <summary>
         /// Actions performed when the window is activated.
