@@ -66,7 +66,7 @@ namespace Game.Entities
         public ChipotlePhysicsComponent() : base()
         {
             // set initial position.&
-            if (Program.TestMode && File.Exists("initpos.txt"))
+            if (Program.Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
               StartPosition = (Vector2?) new Plane(File.ReadAllText("initpos.txt")).Center;
             else
                 StartPosition = (Vector2?)(new Vector2(1028, 1034));
@@ -268,7 +268,7 @@ _navigatedExit = null;
         /// <summary>
         /// Specifies max radius for navigable objects enumeration.
         /// </summary>
-        protected const int _navigableObjectsRadius = 50;
+        protected const int _navigableObjectsRadius = 50    ;
 
         /// <summary>
         /// Processes the ListNavigableObjects message.
@@ -358,7 +358,7 @@ _navigatedExit = null;
             _currentRegion = -1;
             _inVisitedRegion = true;
 
-            if(Program.TestMode)
+            if(Program.Settings.SaveGameInEachLocality)
             World.SaveGame();
 
             _currentRegion = temp;

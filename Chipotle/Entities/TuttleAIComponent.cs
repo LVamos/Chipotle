@@ -78,8 +78,8 @@ namespace Game.Entities
                 );
 
             // Set position
-            if (Program.TestMode && Program.TuttleTestStart.HasValue)
-                _area = new Plane((Vector2)Program.TuttleTestStart);
+            if (Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
+                _area = new Plane((Vector2)Program.Settings.TuttleTestStart);
             else _area = new Plane(new Vector2(1030, 1036));
             Owner.ReceiveMessage(new SetPosition(this, new Plane(_area), true));
         }
@@ -123,7 +123,7 @@ namespace Game.Entities
         /// </summary>
         private void GoToPool()
         {
-            if (Program.TestMode)
+            if (!Program.Settings.SendTuttleToPool)
                 return;
 
             Vector2 goal = new Vector2(1005, 1051);
@@ -189,6 +189,8 @@ namespace Game.Entities
             if (message.Entity== _player && Owner.Locality.Name.Indexed == "bazén w1" && !_playerWasByPool)
             {
                 _playerWasByPool = true;
+
+                if(Program.Settings.LetTuttleFollowChipotle)
                 Owner.ReceiveMessage(new StartFollowing(this));
             }
         }

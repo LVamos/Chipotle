@@ -146,7 +146,7 @@ namespace Game.UI
         {
             Focus();
 
-            if (Program.TestMode)
+            if (!Program.Settings.MainMenuAtStartup)
                 WindowHandler.StartGame();
             else
                 WindowHandler.MainMenu();

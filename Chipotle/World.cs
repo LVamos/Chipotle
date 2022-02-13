@@ -844,7 +844,7 @@ lBackgroundInfo.volume
             // Play the first cutscene
             PlayCutscene(null, "cs6");
 
-            if (Program.TestMode)
+            if (!Program.Settings.PlayCutscenes)
                 StopCutscene(null);
         }
 

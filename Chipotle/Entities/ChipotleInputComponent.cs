@@ -184,7 +184,7 @@ namespace Game.Entities
         /// </summary>
         private void SayTuttlesPosition()
         {
-            if (!Program.TestMode)
+            if (!Program.Settings.TestCommandsEnabled)
                 return;
 
             Entity tuttle = World.GetEntity("tuttle");
@@ -199,7 +199,7 @@ namespace Game.Entities
         /// </summary>
         private void JumpToLocality()
         {
-            if (!Program.TestMode)
+            if (!Program.Settings.TestCommandsEnabled)
                 return;
 
             Vector2 me = Owner.Area.Center;
@@ -228,7 +228,7 @@ namespace Game.Entities
         /// </summary>
         private void SaveStartPosition()
         {
-            if (!Program.TestMode)
+            if (!Program.Settings.TestCommandsEnabled)
                 return;
 
             string pos = Owner.Area.Center.X.ToString() + ", " + Owner.Area.Center.Y.ToString();
@@ -238,7 +238,7 @@ namespace Game.Entities
 
         private void SayAbsoluteCoordinates()
         {
-            if (!Program.TestMode)
+            if (!Program.Settings.TestCommandsEnabled)
                 return;
 
             Vector2 coords = Owner.Area.Center;
@@ -253,7 +253,7 @@ namespace Game.Entities
         /// </summary>
         private void GoToClipboardCoords()
         {
-            if (!Program.TestMode)
+            if (!Program.Settings.TestCommandsEnabled)
                 return;
 
             Plane v = new Plane(Clipboard.GetText());
