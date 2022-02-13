@@ -728,6 +728,9 @@ lBackgroundInfo.volume
 
                 if (wallDefinition != "None")
                     DrawWalls(area, wallDefinition);
+
+                // Load terrain panels
+                l.Elements("panel").Foreach(p => Map.DrawTerrain(p, area));
             }
         }
 
