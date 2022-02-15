@@ -626,7 +626,9 @@ namespace Game
             Program.MainWindow.GameLoopEnabled = true;
             WindowHandler.Switch(new Game.UI.GameWindow());
             GameReloaded message = new GameReloaded();
-            Player.Area.GetLocality().ReceiveMessage(message);
+            Player.ReceiveMessage(message);
+            Player.Locality.ReceiveMessage(message);
+            Player.Locality.Neighbours.Foreach(n => n.ReceiveMessage(message));
             _objects.Values.Foreach(o => o.ReceiveMessage(message));
         }
 

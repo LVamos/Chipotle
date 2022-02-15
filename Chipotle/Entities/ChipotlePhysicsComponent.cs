@@ -76,6 +76,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies if the NPC can walk.
         /// </summary>
+        [NonSerialized]
         protected bool _blockWalk;
 
         /// <summary>
@@ -143,6 +144,7 @@ namespace Game.Entities
         /// <summary>
         /// Indicates if the Chipotle NPC is currently walking.
         /// </summary>
+        [NonSerialized]
         private bool _walking;
 
         /// <summary>
@@ -176,6 +178,7 @@ namespace Game.Entities
             RegisterMessages(
                 new Dictionary<Type, Action<GameMessage>>()
                 {
+                    [typeof(GameReloaded)] = (message) => OnGameReloaded((GameReloaded)message),
                     [typeof(ExitNavigationStopped)] = (message) => OnExitNavigationStopped((ExitNavigationStopped)message),
                     [typeof(ListExits)] = (message) => OnListExits((ListExits)message),
                     [typeof(ObjectNavigationStopped)] = (message) => OnObjectNavigationStopped((ObjectNavigationStopped)message),
@@ -195,6 +198,12 @@ namespace Game.Entities
                     [typeof(UseObject)] = (message) => OnUseObject((UseObject)message)
                 }
                 );
+        }
+
+        private void OnGameReloaded(GameReloaded message)
+        {
+            Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
+            Owner.ReceiveMessage(new PositionChanged(this, _area, _area, _locality, _locality, ObstacleType.None, true));
         }
 
         /// <summary>
@@ -247,6 +256,7 @@ _navigatedExit = null;
         /// <summary>
         /// An exit to which the NPC is navigated.
         /// </summary>
+        [NonSerialized]
         protected Passage _navigatedExit;
         /// <summary>
         /// Processes the ObjectNavigationStopped message.
@@ -329,6 +339,7 @@ _navigatedExit = null;
         /// <summary>
         /// Objectt to which tthe NPC is currently navigated.
         /// </summary>
+        [NonSerialized]
         protected DumpObject _navigatedObject;
 
         /// <summary>

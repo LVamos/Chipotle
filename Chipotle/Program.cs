@@ -38,7 +38,7 @@ namespace Game
             /// <summary>
             /// Enables or disables cutscenes.
             /// </summary>
-            public static bool PlayCutscenes = true;
+            public static bool PlayCutscenes = false;
 
             /// <summary>
             /// Custom initial position for Tuttle
@@ -83,18 +83,18 @@ namespace Game
             /// <summary>
             /// Enables or disables sending Tuttle to the pool locality at startup.
             /// </summary>
-            public static bool SendTuttleToPool = true;
+            public static bool SendTuttleToPool = false;
 
             /// <summary>
             /// Enables or disables Tuttle's Chipotle following.
             /// </summary>
-            public static bool LetTuttleFollowChipotle = true;
+            public static bool LetTuttleFollowChipotle = false;
         }
 
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.10";
+        public static string Version = "0.11";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.

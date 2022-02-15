@@ -52,15 +52,17 @@ namespace Game.Terrain
             foreach (Passage p in _passageLoops.Keys)
             {
                 Vector2 player = World.Player.Area.Center;
+
+                // If the palyer is standing right in the passage locate the sound right on his position.
                 if (p.Area.LaysOnPlane(player))
                 {
-                    World.Sound.SetSourcePosition(_passageLoops[p], player.AsOpenALVector());
+                    Locality other = p.AnotherLocality(World.Player.Locality);
+                    World.Sound.SetSourcePosition(_passageLoops[p], other.Area.GetClosestPoint(player).AsOpenALVector());
                     continue;
                 }
 
-                Vector2? point = World.Player.Area.FindOppositePoint(p.Area);
-                if (point.HasValue)
-                    World.Sound.SetSourcePosition(_passageLoops[p], ((Vector2)point).AsOpenALVector());
+                // Try find a point of the passage which lays in opposite to the player.
+                    World.Sound.SetSourcePosition(_passageLoops[p], p.Area.GetClosestPoint(player).AsOpenALVector());
             }
         }
 
@@ -475,7 +477,6 @@ namespace Game.Terrain
         /// </summary>
         private void OnGameReloaded()
         {
-            _backgroundSoundId = 0;
             _passageLoops = new Dictionary<Passage, int>();
             _playerInHere = IsItHere(World.Player);
             UpdateLoop();
@@ -545,9 +546,6 @@ namespace Game.Terrain
         /// <param name="playerMoved">Specifies if the player just moved from one locality to another one.</param>
         private void UpdateLoop()
         {
-            //if (Name.Indexed == "garáž p1") System.Diagnostics.Debugger.Break();
-
-
             if (_playerInHere)
                 PlayLoop();
             else if (IsAccessible(World.Player.Locality) != null)
@@ -587,7 +585,8 @@ namespace Game.Terrain
                 Locality playersLocality = World.Player.Locality;
                 foreach (Passage p in Passages.Where(p => p.Localities.Any(l => l.IsBehindDoor(playersLocality))))
                 {
-                    Vector2 position = default, player = World.Player.Area.Center;
+                    Vector2 position = default;
+                  Vector2 player = World.Player.Area.Center;
 
                     // Player stands in the passage
                     if (p.Area.LaysOnPlane(player))
@@ -603,7 +602,7 @@ namespace Game.Terrain
                             position = (Vector2)tmp;
                     }
 
-                    // Make it quiter if the player is in a inadjecting loclaity behind a closed door.
+                    // Make it quieter if the player is in a inadjecting locality behind a closed door.
                     Locality between = playersLocality.GetLocalitiesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
                     bool doubleAttenuation = (between != null && playersLocality.GetApertures(between).IsNullOrEmpty());
                     float volume = p.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;

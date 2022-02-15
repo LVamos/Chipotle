@@ -37,9 +37,9 @@ namespace Luky
         /// <exception cref="InvalidOperationException">Raised when filter creation fails</exception>
         public void ApplyLowpassFilter(int sourceID, (float gain, float gainHF) parameters)
         {
-            //if (!_table.TryGetValue(sourceID, out Info i))
-            //    return;
-            int id = _table[sourceID].SourceID;
+            if (!_table.TryGetValue(sourceID, out Info i))
+                return;
+            int id = i.SourceID;
 
             if (_lowpassFilter==0)
             _lowpassFilter = _efx.GenFilter();

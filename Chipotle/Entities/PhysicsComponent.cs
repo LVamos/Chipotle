@@ -54,6 +54,7 @@ namespace Game.Entities
         /// <summary>
         /// Stores the current shortest track towards the Detective Chipotle NPC.
         /// </summary>
+        [NonSerialized]
         protected Queue<Vector2> _path;
 
         /// <summary>
@@ -80,6 +81,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies the length of one step in milliseconds.
         /// </summary>
+[NonSerialized]
         protected int _walkTimer;
 
         /// <summary>
@@ -103,6 +105,7 @@ namespace Game.Entities
         /// <summary>
         /// The goal that Tuttle is just going to.
         /// </summary>
+        [NonSerialized]
         protected Vector2 _goal;
 
         /// <summary>
@@ -180,6 +183,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies the length of one step.
         /// </summary>
+        [NonSerialized]
         protected int _speed;
 
         /// <summary>
