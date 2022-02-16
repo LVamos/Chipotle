@@ -14,7 +14,6 @@ namespace Game.Terrain
     [Serializable]
     public abstract class MapElement : MessagingObject
     {
-
         /// <summary>
         /// Default volume for the sound loop if there's any.
         /// </summary>
@@ -62,21 +61,6 @@ namespace Game.Terrain
             =>_area == null ? null : new Plane(_area);
 
         /// <summary>
-        /// Initializes the element and starts its message loop.
-        /// </summary>
-        public override void Start()
-        {
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>
-                {
-                    [typeof(Destroy)] = (m) => OnDestroy((Destroy)m)
-                }
-                );
-        }
-
-        /// <summary>
         /// Returns the public name of the element.
         /// </summary>
         /// <returns>Public name of the element</returns>
@@ -109,5 +93,18 @@ namespace Game.Terrain
         /// <param name="message">The message to be processed</param>
         protected virtual void OnDestroy(Destroy message)
             => Destroy();
+
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case Destroy d: OnDestroy(d); break;
+                default: base.HandleMessage(message); break;
+            }
+        }
     }
 }

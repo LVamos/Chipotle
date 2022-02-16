@@ -38,7 +38,7 @@ namespace Game.Terrain
         /// <summary>
         /// specifies if the door can be opened by an NPC.
         /// </summary>
-        protected readonly bool _openable;
+        protected bool _openable;
 
         /// <summary>
         /// Sound of the door being opened
@@ -75,18 +75,17 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Initializes the door and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-    new Dictionary<Type, Action<GameMessage>>()
-    {
-        [typeof(DoorHit)] = (message) => OnDoorHit((DoorHit)message),
-        [typeof(UseObject)] = (m) => OnUseObject((UseObject)m)
-    });
+            switch (message)
+            {
+                        case DoorHit dh: OnDoorHit(dh); break;
+                case UseObject uo: OnUseObject(uo); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

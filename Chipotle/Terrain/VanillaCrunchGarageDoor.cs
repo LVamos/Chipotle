@@ -23,17 +23,16 @@ namespace Game.Terrain
         public VanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, PassageState.Closed, area, localities, false) { }
 
         /// <summary>
-        /// Initializes the door and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>()
-                {
-                    [typeof(LocalityEntered)] = (message) => OnLocalityEntered((LocalityEntered)message)
-                });
+            switch (message)
+            {
+                case LocalityEntered le: OnLocalityEntered(le); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

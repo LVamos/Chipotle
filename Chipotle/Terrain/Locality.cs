@@ -389,15 +389,23 @@ namespace Game.Terrain
         {
             base.Start();
             FindNeighbours();
+        }
 
-            RegisterMessages(new Dictionary<Type, Action<GameMessage>>()
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
             {
-                [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
-                [typeof(DoorManipulated)] = (message) => OnDoorManipulated((DoorManipulated)message),
-                [typeof(GameReloaded)] = (message) => OnGameReloaded(),
-                [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
-                [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
-            });
+                case EntityMoved em: OnEntityMoved(em); break;
+                    case DoorManipulated dm: OnDoorManipulated(dm); break;
+                case GameReloaded gr: OnGameReloaded(); break;
+                case LocalityLeft ll: OnLocalityLeft(ll); break;
+                case LocalityEntered le: OnLocalityEntered(le); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>
@@ -467,10 +475,22 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="message">The message to be sent</param>
         protected void MessageObjects(GameMessage message)
-=> _objects.ForEach(o => o.ReceiveMessage(message));
+        {
+            foreach (DumpObject o in _objects)
+            {
+                if (o != message.Sender)
+                    o.ReceiveMessage(message);
+            }
+        }
 
         private void MessageEntities(GameMessage message)
-                        => _entities.ForEach(e => e.ReceiveMessage(message));
+        {
+            foreach(Entity e in _entities)
+            {
+                if (e != message.Sender)
+                    e.ReceiveMessage(message);
+            }
+        }
 
         /// <summary>
         /// Handles the GameReloaded message.
@@ -506,8 +526,12 @@ namespace Game.Terrain
         private void MessagePassages(GameMessage message)
         {
             foreach (Passage p in _passages)
-                p.ReceiveMessage(message);
+            {
+                if (p != message.Sender)
+                    p.ReceiveMessage(message);
+            }
         }
+
 
         /// <summary>
         /// Handles the LocalityLeft message.

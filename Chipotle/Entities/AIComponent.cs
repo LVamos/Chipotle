@@ -24,19 +24,17 @@ namespace Game.Entities
         protected PathFinder _finder = new PathFinder();
 
         /// <summary>
-        /// Initializes the component and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>
-                {
-                    [typeof(PositionChanged)] = (m) => OnPositionChanged((PositionChanged)m)
-                }
-                );
-        }
+            switch (message)
+            {
+                case PositionChanged pc: OnPositionChanged(pc); break;
+                default: base.HandleMessage(message); break;
+            }
+    }
 
         /// <summary>
         /// Processes the PositionChanged message.

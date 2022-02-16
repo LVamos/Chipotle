@@ -80,6 +80,31 @@ namespace Game.Entities
         private Vector2? _cutsceneStartPosition;
 
         /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case SayCoordinates sc:  OnSayCoordinates(sc); break;
+                case SayLocalitySize sl:  OnSayLocalitySize(sl); break;
+                case SayVisitedLocalityResult svl:  OnSayVisitedLocality(svl); break;
+                case SayOrientation sor:  OnSayOrientation(sor); break;
+                case SayExitsResult ser:  OnSayExitsResult(ser); break;
+                case SayObjectsResult sor:  OnSayObjectsResult(sor); break;
+                case CutsceneBegan cb:  OnCutsceneBegan(cb); break;
+                case LocalityChanged lcd: OnLocalityChanged(lcd); break;
+                case DoorHit dh: OnEntityHitDoor(dh); break;
+                case OrientationChanged ocd: OnOrientationChanged(ocd); break;
+                case PositionChanged pcd:  OnPositionChanged(pcd); break;
+                case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
+                case TerrainCollided tcl:  OnInpermeableTerrainCollision(tcl); break;
+                default: base.HandleMessage(message); break;
+            }
+        }
+
+        /// <summary>
         /// Initializes the component and starts its message loop.
         /// </summary>
         public override void Start()
@@ -87,25 +112,6 @@ namespace Game.Entities
             _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
             _listenerOrientation.steps = -1;
             base.Start();
-
-            RegisterMessages(
-            new Dictionary<Type, Action<GameMessage>>()
-            {
-                [typeof(SayCoordinates)] = (message) => OnSayCoordinates((SayCoordinates)message),
-                [typeof(SayLocalitySize)] = (message) => OnSayLocalitySize((SayLocalitySize)message),
-                [typeof(SayVisitedLocalityResult)] = (message) => OnSayVisitedLocality((SayVisitedLocalityResult)message),
-                [typeof(SayOrientation)] = (message) => OnSayOrientation((SayOrientation)message),
-                [typeof(SayExitsResult)] = (message) => OnSayExitsResult((SayExitsResult)message),
-                [typeof(SayObjectsResult)] = (message) => OnSayObjectsResult((SayObjectsResult)message),
-                [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
-                [typeof(LocalityChanged)] = (m) => OnLocalityChanged((LocalityChanged)m),
-                [typeof(DoorHit)] = (m) => OnEntityHitDoor((DoorHit)m),
-                [typeof(OrientationChanged)] = (m) => OnOrientationChanged((OrientationChanged)m),
-                [typeof(PositionChanged)] = (message) =>    OnPositionChanged((PositionChanged)message),
-                [typeof(ObjectsCollided)] = (m) => OnObjectsCollided((ObjectsCollided)m),
-                [typeof(TerrainCollided)] = (message) => OnInpermeableTerrainCollision((TerrainCollided)message)
-            }
-            );
         }
 
         /// <summary>

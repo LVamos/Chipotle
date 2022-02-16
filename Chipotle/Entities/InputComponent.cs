@@ -15,24 +15,29 @@ namespace Game.Entities
     public abstract class InputComponent : EntityComponent
     {
         /// <summary>
+        /// Constructor
+        /// </summary>
+        public InputComponent()
+            => _shortcuts = new Dictionary<KeyShortcut, Action>();
+
+        /// <summary>
         /// Registered keyboard shortcuts and corresponding actions
         /// </summary>
         protected Dictionary<KeyShortcut, Action> _shortcuts;
 
         /// <summary>
-        /// Constructor
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public InputComponent() : base()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            // Assign an KeyDown handler
-            Dictionary<Type, Action<GameMessage>> handlers = new Dictionary<Type, Action<GameMessage>>()
+            switch (message)
             {
-                [typeof(KeyPressed)] = (m) => OnKeyDown((KeyPressed)m),
-                [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
-                [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
-            };
-            RegisterMessages(handlers);
-            _shortcuts = new Dictionary<KeyShortcut, Action>();
+                case KeyPressed kp: OnKeyDown(kp); break;
+                case CutsceneEnded ce: OnCutsceneEnded(ce); break;
+                case CutsceneBegan cb: OnCutsceneBegan(cb); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

@@ -104,22 +104,6 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-
-            RegisterMessages(
-    new Dictionary<Type, Action<GameMessage>>()
-    {
-        [typeof(OrientationChanged)] = (message) => OnOrientationChanged((OrientationChanged)message),
-        [typeof(LocalityEntered)] = (message) => OnLocalityEntered((LocalityEntered)message),
-        [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
-        [typeof(DoorManipulated)] = (message) => OnDoorManipulated((DoorManipulated)message),
-        [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
-        [typeof(StartObjectNavigation )] = (message) => OnStartObjectNavigation((StartObjectNavigation )message),
-        [typeof(StopObjectNavigation)] = (message) => OnStopObjectNavigation((StopObjectNavigation)message),
-        [typeof(GameReloaded)] = (message) => OnGameReloaded(),
-        [typeof(ObjectsCollided)] = (m) => OnCollision((ObjectsCollided)m),
-        [typeof(UseObject)] = (m) => OnUseObject((UseObject)m)
-    });
-
             // Play loop sound if any and if the player can hear it.
             UpdateLoop();
         }
@@ -448,5 +432,25 @@ namespace Game.Entities
                 StopNavigation();
         }
 
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                        case OrientationChanged oc: OnOrientationChanged(oc); break;
+        case LocalityEntered le: OnLocalityEntered(le); break;
+        case EntityMoved em: OnEntityMoved(em); break;
+        case DoorManipulated dm: OnDoorManipulated(dm); break;
+        case StartObjectNavigation so: OnStartObjectNavigation(so); break;
+        case StopObjectNavigation sto: OnStopObjectNavigation(sto); break;
+        case GameReloaded gr: OnGameReloaded(); break;
+        case ObjectsCollided oc: OnCollision(oc); break;
+        case UseObject uo: OnUseObject(uo); break;
+                default: base.HandleMessage(message); break;
+            }
+        }
     }
 }

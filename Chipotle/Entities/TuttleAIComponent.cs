@@ -65,23 +65,28 @@ namespace Game.Entities
         {
             base.Start();
 
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>
-                {
-                [typeof(TuttleStateChanged)] = (message) => OnTuttleStateChanged((TuttleStateChanged)message),
-                    [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
-                    [typeof(CutsceneBegan)] = (message) => OnCutsceneBegan((CutsceneBegan)message),
-                    [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
-                    [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
-                    [typeof(CutsceneEnded)] = (m) => OnCutsceneEnded((CutsceneEnded)m)
-                }
-                );
-
             // Set position
             if (Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
                 _area = new Plane((Vector2)Program.Settings.TuttleTestStart);
             else _area = new Plane(new Vector2(1030, 1036));
             Owner.ReceiveMessage(new SetPosition(this, new Plane(_area), true));
+        }
+
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                                case TuttleStateChanged tsc:OnTuttleStateChanged(tsc); break;
+                    case ChipotlesCarMoved ccm:OnChipotlesCarMoved(ccm); break;
+                case CutsceneEnded ce: OnCutsceneEnded(ce); break;
+                    case CutsceneBegan cb:OnCutsceneBegan(cb); break;
+                case LocalityEntered le: OnLocalityEntered(le); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

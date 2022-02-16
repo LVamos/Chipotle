@@ -20,15 +20,20 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>
-                {
-                    [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
-                }
-                );
-
             Owner.ReceiveMessage(new SetPosition(this, new Plane("1792, 1127"), true));
+        }
+
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case CutsceneEnded ce: OnCutsceneEnded(ce); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

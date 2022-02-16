@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 using DavyKager;
 
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -21,6 +22,19 @@ namespace Game.Entities
     [Serializable]
     public class ChipotleInputComponent : InputComponent
     {
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case KeyReleased kr:  OnKeyUp(kr); break;
+                default: base.HandleMessage(message); break;
+            }
+    }
+
         /// <summary>
         /// Reports current position of the player in relative coordinates.
         /// </summary>
@@ -50,15 +64,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<Messaging.GameMessage>>
-                {
-                    [typeof(KeyReleased)] = (message) => OnKeyUp((KeyReleased)message)
-                }
-                );
-
-            RegisterShortcuts(
+RegisterShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands

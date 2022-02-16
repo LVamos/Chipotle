@@ -170,36 +170,46 @@ namespace Game.Entities
         /// </summary>
         public override void Start()
         {
+            base.Start();
             Move((Vector2)StartPosition, true);
                 _orientation = new Orientation2D(0, 1);
             Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>()
-                {
-                    [typeof(GameReloaded)] = (message) => OnGameReloaded((GameReloaded)message),
-                    [typeof(ExitNavigationStopped)] = (message) => OnExitNavigationStopped((ExitNavigationStopped)message),
-                    [typeof(ListExits)] = (message) => OnListExits((ListExits)message),
-                    [typeof(ObjectNavigationStopped)] = (message) => OnObjectNavigationStopped((ObjectNavigationStopped)message),
-                    [typeof(StopObjectNavigation)] = (message) => OnStopObjectNavigation((StopObjectNavigation)message),
-                    [typeof(ListObjects)] = (message) => OnListObjects((ListObjects)message),
-                    [typeof(SayExits)] = (message) => OnSayExits((SayExits)message),
-                    [typeof(StopWalk)] = (message) => OnStopWalk((StopWalk)message),
-                    [typeof(SayTerrain)] = (message) => OnSayTerrain((SayTerrain)message),
-                    [typeof(SayVisitedRegion)] = (message) => OnSayVisitedLocality((SayVisitedRegion)message),
-                    [typeof(ChipotlesCarMoved)] = (message) => OnChipotlesCarMoved((ChipotlesCarMoved)message),
-                    [typeof(CutsceneBegan)] = (m) => OnCutsceneBegan((CutsceneBegan)m),
-                    [typeof(CutsceneEnded)] = (message) => OnCutsceneEnded((CutsceneEnded)message),
-                    [typeof(SayObjects)] = (m) => OnSayObjects((SayObjects)m),
-                    [typeof(SayLocality)] = (m) => OnSayLocality((SayLocality)m),
-                    [typeof(StartWalk)] = (m) => OnStartWalk((StartWalk)m),
-                    [typeof(ChangeOrientation)] = (message) => OnChangeOrientation((ChangeOrientation)message),
-                    [typeof(UseObject)] = (message) => OnUseObject((UseObject)message)
-                }
-                );
         }
 
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                    case GameReloaded gr: OnGameReloaded(gr); break;
+                    case ExitNavigationStopped ens: OnExitNavigationStopped(ens); break;
+                    case ListExits lex: OnListExits(lex); break;
+                    case ObjectNavigationStopped ons: OnObjectNavigationStopped(ons); break;
+                    case StopObjectNavigation son: OnStopObjectNavigation(son); break;
+                    case ListObjects lob: OnListObjects(lob); break;
+                    case SayExits sex: OnSayExits(sex); break;
+                    case StopWalk sw: OnStopWalk(sw); break;
+                    case SayTerrain ste: OnSayTerrain(ste); break;
+                    case SayVisitedRegion sv: OnSayVisitedLocality(sv); break;
+                    case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
+                    case CutsceneEnded ce: OnCutsceneEnded(ce); break;
+            case CutsceneBegan cb:  OnCutsceneBegan(cb); break;
+            case SayObjects sob: OnSayObjects(sob); break;
+            case SayLocality sl:  OnSayLocality(sl); break;
+            case StartWalk staw:  OnStartWalk(staw); break;
+                    case ChangeOrientation cor: OnChangeOrientation(cor); break;
+                    case UseObject uo: OnUseObject(uo); break;
+                default: base.HandleMessage(message); break;
+            }
+        }
+
+        /// <summary>
+        /// Handles the GameReloaded message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
         private void OnGameReloaded(GameReloaded message)
         {
             Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
@@ -228,7 +238,7 @@ _navigatedExit = null;
                 return;
             }
 
-            StopNavigation(); // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
+            StopNavigation(); // If there's any navigation in progress,  it'll be stopped and this command will be cancelled.
             if (NavigationInProgress)
                 return;
 
@@ -414,7 +424,7 @@ _navigatedExit = null;
         /// </summary>
         private void SayExits()
         {
-            // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
+            // If there's any navigation in progress; break; it'll be stopped and this command will be cancelled.
             StopNavigation();
             if (NavigationInProgress)
                 return;
@@ -727,9 +737,8 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         {
             Orientation2D source = _orientation;
             _orientation.Rotate(message.Degrees);
-            OrientationChanged newMessage = new OrientationChanged(this, source, _orientation, message.Direction);
-            Owner.ReceiveMessage(newMessage);
-            _locality.ReceiveMessage(newMessage);
+            Owner.ReceiveMessage(new OrientationChanged(this, source, _orientation, message.Direction));
+            _locality.ReceiveMessage(new OrientationChanged(Owner, source, _orientation, message.Direction));
             _speed += Math.Abs(message.Degrees) * World.DeltaTime;
         }
 

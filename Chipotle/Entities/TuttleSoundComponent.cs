@@ -23,18 +23,16 @@ namespace Game.Entities
             => _walkingVolume = .2f;
 
         /// <summary>
-        /// Initializes the component and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-            new Dictionary<Type, Action<GameMessage>>()
+            switch (message)
             {
-                [typeof(PositionChanged)] = (message) => OnPositionChanged((PositionChanged)message),
+                case PositionChanged pc:  OnPositionChanged(pc); break;
+                default: base.HandleMessage(message); break;
             }
-            );
         }
 
         /// <summary>

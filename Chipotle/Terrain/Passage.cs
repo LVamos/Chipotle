@@ -5,6 +5,7 @@ using System.Linq;
 
 using DavyKager;
 
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 
@@ -281,19 +282,18 @@ namespace Game.Terrain
             => World.GetDistance(GetClosestPointToPlayer(), World.Player.Area.Center);
 
         /// <summary>
-        /// Initializes the passage and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<Messaging.GameMessage>>()
-                {
-                    [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message),
-                    [typeof(StartExitNavigation)] = (message) => OnStartExitNavigation((StartExitNavigation)message),
-                    [typeof(StopExitNavigation)] = (message) => OnStopExitNavigation((StopExitNavigation)message)
-                });
+            switch (message)
+            {
+                                    case EntityMoved em: OnEntityMoved(em); break;
+                    case StartExitNavigation sen: OnStartExitNavigation(sen); break;
+                    case StopExitNavigation stp: OnStopExitNavigation(stp); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

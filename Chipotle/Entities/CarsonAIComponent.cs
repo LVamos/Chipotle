@@ -34,15 +34,22 @@ namespace Game.Entities
         {
             base.Start();
 
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>
-                {
-                    [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
-                    [typeof(LocalityLeft)] = (m) => OnLocalityLeft((LocalityLeft)m)
-                }
-                );
             SetPosition message = new SetPosition(this, new Plane("1230, 1017"), true); // Sitting on a bench at a table
             Owner.ReceiveMessage(message);
+        }
+
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case LocalityLeft ll: OnLocalityLeft(ll); break;
+                case LocalityEntered le: OnLocalityEntered(le); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

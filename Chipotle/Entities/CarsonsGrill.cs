@@ -24,18 +24,16 @@ namespace Game.Entities
         { }
 
         /// <summary>
-        /// Initializes the object and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>
-                {
-                    [typeof(LocalityLeft)] = (message) => OnLocalityLeft((LocalityLeft)message)
-                }
-                );
+            switch (message)
+            {
+                    case LocalityLeft ll: OnLocalityLeft(ll); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

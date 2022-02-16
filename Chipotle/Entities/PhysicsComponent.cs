@@ -4,6 +4,7 @@ using System.Linq;
 
 using DavyKager;
 
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -192,18 +193,16 @@ namespace Game.Entities
         public Orientation2D Orientation => new Orientation2D(_orientation);
 
         /// <summary>
-        /// Initializes the component and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<Messaging.GameMessage>>
-                {
-                    [typeof(SetPosition)] = (m) => OnSetPosition((SetPosition)m),
-                }
-                );
+            switch (message)
+            {
+                case SetPosition sp: OnSetPosition(sp); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

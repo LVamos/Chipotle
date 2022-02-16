@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -78,19 +79,17 @@ namespace Game.Entities
                     .Select(o => World.GetObject(o) as DumpObject);
 
         /// <summary>
-        /// Initializes the object and starts its message loop.
+        /// Runs a message handler for the specified message.
         /// </summary>
-        public override void Start()
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
         {
-            base.Start();
-
-            RegisterMessages(
-                new Dictionary<System.Type, System.Action<Messaging.GameMessage>>
-                {
-                    [typeof(MoveChipotlesCar)] = (message) => OnMoveChipotlesCar((MoveChipotlesCar)message),
-                    [typeof(UnblockLocality)] = (message) => OnUnblockLocality((UnblockLocality)message)
-                }
-                );
+            switch (message)
+            {
+                case MoveChipotlesCar mc: OnMoveChipotlesCar(mc); break;
+                    case UnblockLocality ul: OnUnblockLocality(ul); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

@@ -21,24 +21,14 @@ namespace Game.Messaging
     public abstract class MessagingObject : DebugSO
     {
         /// <summary>
-        /// Maps messages to message handlers
-        /// </summary>
-        protected Dictionary<Type, Action<GameMessage>> _messageHandlers;
-
-        /// <summary>
         /// Stores the messages before they are processed.
         /// </summary>
-        protected Queue<GameMessage> _messages;
+      [NonSerialized] protected Queue<GameMessage> _messages = new Queue<GameMessage>();
 
         /// <summary>
         /// Starts or stops the messaging.
         /// </summary>
-        protected bool _messagingEnabled;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        protected MessagingObject() => _messageHandlers = new Dictionary<Type, Action<GameMessage>>();
+      protected bool _messagingEnabled;
 
         /// <summary>
         /// returns a hash code for the instance.
@@ -55,15 +45,33 @@ namespace Game.Messaging
         {
             Assert(message != null, nameof(message) + " was null.");
 
+            // Initialize the message queue if needed.
+            CheckQueue();
+
             if (_messagingEnabled)
                 if (message.Sender != this || (message.Sender == this && (message is CutsceneBegan || message is CutsceneEnded)))
                     EnqueueMessage(message);
         }
 
         /// <summary>
-        /// Initializes the object and starts the messaging.
+        /// INitializes the message queue if needed.
+        /// </summary>
+        protected void CheckQueue()
+        {
+            if (_messagingEnabled && _messages == null)
+                _messages = new Queue<GameMessage>();
+        }
+
+/// <summary>
+        /// Enables messaging and performs initial actions.
         /// </summary>
         public virtual void Start()
+=> EnableMessaging();
+
+        /// <summary>
+        /// Enables messaging and initializes the message queue.
+        /// </summary>
+        protected void EnableMessaging()
         {
             _messages = new Queue<GameMessage>();
             _messagingEnabled = true;
@@ -74,7 +82,7 @@ namespace Game.Messaging
         /// </summary>
         public virtual void Update()
         {
-            if (_messagingEnabled && !_messages.IsNullOrEmpty())
+            if(_messagingEnabled && !_messages.IsNullOrEmpty())
                 HandleMessage(DequeueMessage());
         }
 
@@ -97,17 +105,7 @@ namespace Game.Messaging
         /// </summary>
         /// <param name="message">The message to be handled</param>
         protected virtual void HandleMessage(GameMessage message)
-        {
-            if (_messageHandlers.TryGetValue(message.GetType(), out Action<GameMessage> handler))
-                handler(message);
-        }
-
-        /// <summary>
-        /// Registers messages and their handlers.
-        /// </summary>
-        /// <param name="handlers">Dictionary of the messages and their handlers to be registered</param>
-        protected void RegisterMessages(Dictionary<Type, Action<GameMessage>> handlers)
-                                => _messageHandlers = _messageHandlers.Concat(handlers).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+=> CheckQueue();
 
         /// <summary>
         /// Sends a message to another game object.

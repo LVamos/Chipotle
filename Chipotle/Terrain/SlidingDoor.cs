@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Game.Entities;
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 
@@ -47,7 +48,10 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the area the door occupies</param>
         /// <param name="localities">The localities connected by the door</param>
         public SlidingDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, PassageState.Closed, area, localities)
-=> _openingSound = _closingSound = "SlidingDoor";
+        {
+            _openable = false;
+            _openingSound = _closingSound = "SlidingDoor";
+        }
 
         /// <summary>
         /// Specifies the minimum distance between the entity and the door at which the door opens.
@@ -55,19 +59,24 @@ namespace Game.Terrain
         protected int _minDistance = 4;
 
         /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case EntityMoved em: OnEntityMoved(em); break;
+                default: base.HandleMessage(message); break;
+            }
+        }
+
+        /// <summary>
         /// Initializes the door and starts its message loop.
         /// </summary>
         public override void Start()
         {
             base.Start();
-
-            // Register and unregister messages message
-            _messageHandlers.Remove(typeof(UseObject)); // Can open only on its own.
-
-            RegisterMessages(new Dictionary<Type, Action<Messaging.GameMessage>>()
-            {
-                [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message)
-            });
         }
     }
 }

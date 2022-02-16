@@ -77,6 +77,21 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case LocalityChanged lcd: OnLocalityChanged(lcd); break;
+                case PositionChanged pcd: OnPositionChanged(pcd); break;
+                default: base.HandleMessage(message); break;
+            }
+
+        }
+
+        /// <summary>
         /// Returns the current orientation of the NPC in the game world.
         /// </summary>
         public Orientation2D Orientation => _physics.Orientation;
@@ -157,14 +172,6 @@ namespace Game.Entities
             _input?.Start();
             _physics?.Start();
             _ai?.Start();
-
-            RegisterMessages(
-                new Dictionary<System.Type, System.Action<GameMessage>>
-                {
-                    [typeof(LocalityChanged)] = (message) => OnLocalityChanged((LocalityChanged)message),
-                    [typeof(PositionChanged)] = (m) => OnPositionChanged((PositionChanged)m),
-                }
-                );
         }
 
         /// <summary>

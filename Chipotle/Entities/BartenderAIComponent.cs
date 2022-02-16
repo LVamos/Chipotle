@@ -47,15 +47,21 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-
-            RegisterMessages(
-                new Dictionary<Type, Action<GameMessage>>
-                {
-                    [typeof(LocalityEntered)] = (m) => OnLocalityEntered((LocalityEntered)m),
-                    [typeof(EntityMoved)] = (m) => OnEntityMoved((EntityMoved)m),
-                }
-                );
             Owner.ReceiveMessage(new SetPosition(this, new Plane("1577, 1037")));
+        }
+
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                                    case LocalityEntered le: OnLocalityEntered(le); break;
+                case EntityMoved em: OnEntityMoved(em); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>

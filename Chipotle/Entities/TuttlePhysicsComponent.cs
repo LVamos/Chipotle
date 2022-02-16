@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -88,20 +89,26 @@ namespace Game.Entities
         {
             _orientation = new Orientation2D(0, 1);
             _player = World.Player;
-
-            RegisterMessages(new Dictionary<Type, Action<Messaging.GameMessage>>
-            {
-                [typeof(TuttleStateChanged)] = (message) => OnTuttleStateChanged((TuttleStateChanged)message),
-                [typeof(Reveal)] = (message) => OnReveal((Reveal)message),
-                [typeof(Hide)] = (message) => OnHide((Hide)message),
-                [typeof(GotoPoint)] = (m) => OnGotoPoint((GotoPoint)m),
-                [typeof(StartFollowing)] = (m) => OnStartFollowing((StartFollowing)m),
-                [typeof(StopFollowing)] = (m) => OnStopFollowing((StopFollowing)m),
-                [typeof(EntityMoved)] = (message) => OnEntityMoved((EntityMoved)message)
-            }
-                );
-
             base.Start();
+        }
+
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(GameMessage message)
+        {
+            switch (message)
+            {
+                case TuttleStateChanged tsc: OnTuttleStateChanged(tsc); break;
+                case Reveal r: OnReveal(r); break;
+                case Hide h: OnHide(h); break;
+                case GotoPoint gp: OnGotoPoint(gp); break;
+                case StartFollowing sf: OnStartFollowing(sf); break;
+                case StopFollowing stf: OnStopFollowing(stf); break;
+                case EntityMoved em: OnEntityMoved(em); break;
+                default: base.HandleMessage(message); break;
+            }
         }
 
         /// <summary>
