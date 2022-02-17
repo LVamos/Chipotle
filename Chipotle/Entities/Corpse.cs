@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 
 using Game.Terrain;
 
@@ -12,7 +13,7 @@ namespace Game.Entities
     /// <remarks>
     /// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 locality.
     /// </remarks>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Corpse : DumpObject
     {
         /// <summary>

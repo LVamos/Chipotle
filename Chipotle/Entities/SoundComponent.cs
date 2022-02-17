@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Luky;
@@ -8,7 +9,9 @@ namespace Game.Entities
     /// <summary>
     /// Controls the sound output of an NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(ChipotleSoundComponent))]
+    [ProtoInclude(101, typeof(TuttleSoundComponent))]
     public class SoundComponent : EntityComponent
     {
         /// <summary>

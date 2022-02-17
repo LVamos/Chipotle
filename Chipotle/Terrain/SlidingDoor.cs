@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Entities;
@@ -15,7 +16,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a sliding door.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class SlidingDoor : Door
     {
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -17,7 +18,7 @@ namespace Game.Terrain
     /// <remarks>
     /// The region is defined by two points: <see cref="Plane.UpperLeftCorner"/> and <see cref="Plane.LowerRightCorner"/>.
     /// </remarks>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Plane : DebugSO
     {
         /// <summary>
@@ -29,6 +30,7 @@ namespace Game.Terrain
         /// <summary>
         /// Checks if the plane is a line.
         /// </summary>
+        [ProtoIgnore]
         public bool IsLine
             => Size > 1 && (Width == 1 || Height == 1);
 
@@ -36,6 +38,7 @@ namespace Game.Terrain
         /// Checks if the plane is a horizohntal rectangle.
         /// </summary>
         /// <returns>True if the plane is a horizontal rectangle</returns>
+        [ProtoIgnore]
         public bool Horizontal
             => Width > Height;
 
@@ -49,6 +52,7 @@ namespace Game.Terrain
         /// <summary>
         /// Checks if the plane is a square.
         /// </summary>
+        [ProtoIgnore]
         public bool IsSquare
             => Height == Width;
 
@@ -99,8 +103,8 @@ namespace Game.Terrain
         /// Copy constructor
         /// </summary>
         /// <param name="plane">Another plane to be copied</param>
-        public Plane(Plane plane) : this(plane.UpperLeftCorner, plane.LowerRightCorner)
-        {
+        public Plane(Plane plane) :     this(plane.UpperLeftCorner, plane.LowerRightCorner)
+        {   
             MinimumHeight = plane.MinimumHeight;
             MinimumWidth = plane.MinimumWidth;
         }
@@ -108,17 +112,20 @@ namespace Game.Terrain
         /// <summary>
         /// Returns coordinates of the center of the plane.
         /// </summary>
+        [ProtoIgnore]
         public Vector2 Center
             => Size == 1 ? UpperLeftCorner : new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);
 
         /// <summary>
         /// Height of the plane.
         /// </summary>
+        [ProtoIgnore]
         public float Height => 1 + UpperLeftCorner.Y - LowerRightCorner.Y;
 
         /// <summary>
         /// Returns coordinates of the lower left corner of the plane.
         /// </summary>
+        [ProtoIgnore]
         public Vector2 LowerLeftCorner
             => new Vector2(UpperLeftCorner.X, LowerRightCorner.Y);
 
@@ -140,6 +147,7 @@ namespace Game.Terrain
         /// <summary>
         /// Returns size of the plane.
         /// </summary>
+        [ProtoIgnore]
         public float Size
             => Height * Width;
 
@@ -151,6 +159,7 @@ namespace Game.Terrain
         /// <summary>
         /// Coordinates of the upper right corner of the plane.
         /// </summary>
+        [ProtoIgnore]
         public Vector2 UpperRightCorner => new Vector2(LowerRightCorner.X, UpperLeftCorner.Y);
 
         /// <summary>

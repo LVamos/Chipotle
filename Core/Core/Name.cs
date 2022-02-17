@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 namespace Luky
@@ -6,7 +7,7 @@ namespace Luky
     /// <summary>
     /// An immutable class to store unique names
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public sealed class Name : DebugSO
     {
         /// <summary>

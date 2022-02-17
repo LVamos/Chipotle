@@ -1,14 +1,17 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 
 using Game.Messaging.Commands;
 using Game.Terrain;
+
+using ProtoBuf;
 
 namespace Game.Entities
 {
     /// <summary>
     /// Controls behavior of the Paolo Mariotti NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class MariottiAIComponent : AIComponent
     {
         /// <summary>

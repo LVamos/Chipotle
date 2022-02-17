@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 
 using OpenTK;
 
@@ -9,7 +10,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents orientation of an NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public struct Orientation2D
     {
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 
 using Game.Terrain;
 
@@ -9,7 +10,9 @@ namespace Game.Entities
     /// <summary>
     /// A base class for all simple objects and NPCS
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(DumpObject))]
+    [ProtoInclude(101, typeof(Entity))]
     public class GameObject : MapElement
     {
         /// <summary>
@@ -46,21 +49,36 @@ namespace Game.Entities
             if (_area!= null)
             {
                 Appear();
-                Locality = _area.GetLocality();
+                _locality = _area.GetLocality();
             }
 
-            if (Locality != null)
+            if (_locality != null)
             {
                 if (this is DumpObject d)
-                    Locality.Register(d);
-                else Locality.Register(this as Entity);
+                    _locality.Register(d);
+                else _locality.Register(this as Entity);
             }
         }
 
         /// <summary>
         /// Locality which contains this object
         /// </summary>
-        public Locality Locality { get; protected set; }
+[ProtoIgnore]
+        public Locality Locality
+        {
+            get
+            {
+                if (_locality == null)
+                    _locality = _area.GetLocality();
+                return _locality;
+            }
+        }
+
+        /// <summary>
+        /// Backing field for Locality property.
+        /// </summary>
+[ProtoIgnore]
+        protected Locality _locality;
 
         /// <summary>
         /// Creates new instance of the pool (bazének w1) object in the Walsch's bathroom (koupelna
@@ -298,7 +316,7 @@ namespace Game.Entities
             Disappear();
             _area = targetArea;
             Locality sourceLocality = Locality;
-            Locality = _area.GetLocality();
+            _locality = _area.GetLocality();
             Appear();
 
             if (sourceLocality != Locality)

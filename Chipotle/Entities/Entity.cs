@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,43 +12,25 @@ using Luky;
 
 using OpenTK;
 
+using ProtoBuf;
+
 namespace Game.Entities
 {
     /// <summary>
     /// Represents an NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Entity : GameObject
     {
         /// <summary>
-        /// Reference to a component that controls behavior of the NPC
-        /// </summary>
-        protected AIComponent _ai;
-
-        /// <summary>
         /// List of all entity components
         /// </summary>
-        protected List<EntityComponent> _components;
-
-        /// <summary>
-        /// Reference to a component that processes input from the player
-        /// </summary>
-        protected InputComponent _input;
-
-        /// <summary>
-        /// Reference to a component that controls movement of the NPC
-        /// </summary>
-        protected PhysicsComponent _physics;
-
-        /// <summary>
-        /// Reference to a component that controls sound output of the NPC
-        /// </summary>
-        protected SoundComponent _sound;
+        protected EntityComponent[] _components;
 
         /// <summary>
         /// List of all localities visited by the NPC
         /// </summary>
-        protected HashSet<Locality> _visitedLocalities = new HashSet<Locality>();
+        protected HashSet<string> _visitedLocalities;
 
         /// <summary>
         /// constructor
@@ -60,19 +43,19 @@ namespace Game.Entities
         /// <param name="sound">Reference to an sound component</param>
         public Entity(Name name, string type, AIComponent ai, InputComponent input, PhysicsComponent physics, SoundComponent sound) : base(name, type, null)
         {
-            _physics = physics;
-            _sound = sound;
-            _ai = ai;
-            _input = input;
-            _components = (new EntityComponent[] { ai, input, sound, physics }).Where(c => c != null).ToList<EntityComponent>();
+            _components = 
+                new EntityComponent[] { ai, physics, input, sound }
+                .Where(c => c != null)
+                .ToArray<EntityComponent>();
 
-            _components.ForEach(c => c.Owner = this);
+            foreach (EntityComponent c in _components)
+                c.AssignToEntity(name.Indexed);
 
-            if (_physics.StartPosition.HasValue)
+            if (physics.StartPosition.HasValue)
             {
-                Vector2 position = (Vector2)_physics.StartPosition;
+                Vector2 position = (Vector2)physics.StartPosition;
                 _area = new Plane(position);
-                Locality = _area.GetLocality();
+                _locality = _area.GetLocality();
             }
         }
 
@@ -84,6 +67,7 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case OrientationChanged och: OnOrientationChanged(och); break;
                 case LocalityChanged lcd: OnLocalityChanged(lcd); break;
                 case PositionChanged pcd: OnPositionChanged(pcd); break;
                 default: base.HandleMessage(message); break;
@@ -92,14 +76,30 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Handles the OrienttationChanged message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        private void OnOrientationChanged(OrientationChanged message)
+            => Orientation = message.Target;
+
+        /// <summary>
         /// Returns the current orientation of the NPC in the game world.
         /// </summary>
-        public Orientation2D Orientation => _physics.Orientation;
+        public Orientation2D Orientation { get; private set; }
 
         /// <summary>
         /// List of all localities visited by the NPC
         /// </summary>
-        public IReadOnlyCollection<Locality> VisitedLocalities => _visitedLocalities;
+        public IEnumerable<Locality> VisitedLocalities
+        {
+            get
+            {
+                if (_visitedLocalities == null)
+                    _visitedLocalities = new HashSet<string>();
+
+                return _visitedLocalities.Select(l => World.GetLocality(l));
+            }
+        }
 
         /// <summary>
         /// Creates new instance of the Bartender NPC.
@@ -168,10 +168,18 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            _sound?.Start();
-            _input?.Start();
-            _physics?.Start();
-            _ai?.Start();
+
+            void startComponent(Type type)
+            {
+                EntityComponent c = _components.FirstOrDefault(cm => cm.GetType().IsSubclassOf(type));
+                if(c != null)
+                c.Start();
+            }
+
+            startComponent(typeof(SoundComponent));
+            startComponent(typeof(InputComponent));
+            startComponent(typeof(PhysicsComponent));
+            startComponent(typeof(AIComponent));
         }
 
         /// <summary>
@@ -179,7 +187,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnLocalityChanged(LocalityChanged message)
-=> Locality = message.Target;
+=> _locality = message.Target;
 
         /// <summary>
         /// Processes incoming messages.
@@ -187,7 +195,9 @@ namespace Game.Entities
         public override void Update()
         {
             base.Update();
-            _components.ForEach(c => c.Update());
+
+            foreach (EntityComponent c in _components)
+                c.Update();
         }
 
         /// <summary>
@@ -250,7 +260,7 @@ namespace Game.Entities
         protected void RecordLocality(Locality locality)
         {
             if (!VisitedLocalities.Contains(locality))
-                _visitedLocalities.Add(locality);
+                _visitedLocalities.Add(locality.Name.Indexed);
         }
 
         /// <summary>
@@ -259,12 +269,11 @@ namespace Game.Entities
         /// <param name="message">Message to redistribute</param>
         protected virtual void SendInnerMessage(GameMessage message)
         {
-            List<EntityComponent> targetComponents = new List<EntityComponent>();
-            targetComponents = _components.Where(c => c != message.Sender).ToList<EntityComponent>();
-            if (!IsInternal(message) && !(message is CutsceneBegan) && !(message is CutsceneEnded))
-                targetComponents.Remove(_sound);
-
-            targetComponents.Foreach(c => c.ReceiveMessage(message));
+            foreach(EntityComponent c in _components)
+            {
+                if (c != message.Sender || message is GameReloaded)
+                    c.ReceiveMessage(message);
+            }
         }
 
         /// <summary>

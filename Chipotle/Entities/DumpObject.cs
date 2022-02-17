@@ -14,12 +14,26 @@ using Luky;
 
 using OpenTK;
 
+using ProtoBuf;
+
 namespace Game.Entities
 {
     /// <summary>
     /// Base class for all simple game objects
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(CarsonsBench))]
+    [ProtoInclude(101, typeof(CarsonsGrill))]
+    [ProtoInclude(102, typeof(Corpse))]
+    [ProtoInclude(103, typeof(ChipotlesCar))]
+    [ProtoInclude(104, typeof(ChristinesBell))]
+    [ProtoInclude(105, typeof(IcecreamMachine))]
+    [ProtoInclude(106, typeof(KeyHanger))]
+    [ProtoInclude(107, typeof(KillersCar))]
+    [ProtoInclude(108, typeof(PoolsideBin))]
+    [ProtoInclude(109, typeof(PubTable))]
+    [ProtoInclude(110, typeof(SweeneysBell))]
+    [ProtoInclude(111, typeof(VanillaCrunchCar))]
     public class DumpObject : GameObject
     {
         /// <summary>
@@ -46,7 +60,7 @@ namespace Game.Entities
         /// <summary>
         /// Background sound effect handle. It expires after the sound is stopped.
         /// </summary>
-[NonSerialized]
+[ProtoIgnore]
         protected int _loopSoundId;
 
         /// <summary>

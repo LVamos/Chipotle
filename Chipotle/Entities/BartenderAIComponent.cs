@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,12 +8,14 @@ using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
+using ProtoBuf;
+
 namespace Game.Entities
 {
     /// <summary>
     /// Controls the behavior of Bartender NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class BartenderAIComponent : AIComponent
     {
         private readonly Locality BonitaStreet = World.GetLocality("ulice h1");

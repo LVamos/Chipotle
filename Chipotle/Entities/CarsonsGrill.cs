@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Messaging;
@@ -12,7 +13,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the grill object in the zahrada c1 locality.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class CarsonsGrill : DumpObject
     {
         /// <summary>

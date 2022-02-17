@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using DavyKager;
@@ -16,7 +17,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls the sound output of the Tuttle NPC
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class TuttleSoundComponent : SoundComponent
     {
         public TuttleSoundComponent(): base()

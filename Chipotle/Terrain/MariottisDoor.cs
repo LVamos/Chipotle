@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Entities;
@@ -13,7 +14,7 @@ namespace Game.Terrain
     /// Represents the door between the hall of the Vanilla crunch company and (hala v1) locality
     /// and the office of the Paolo Mariotti office (kancelář v1) locality.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class MariottisDoor : Door
     {
         /// <summary>

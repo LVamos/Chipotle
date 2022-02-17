@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Game.Entities
     /// <summary>
     /// Allows the player to scroll the entity using the keyboard.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class ChipotleInputComponent : InputComponent
     {
         /// <summary>
@@ -49,22 +50,11 @@ namespace Game.Entities
         /// <summary>
         /// Constructor
         /// </summary>
-        public ChipotleInputComponent() : base()
+        protected override void RegisterShortcuts()
         {
-        }
+            base.RegisterShortcuts();
 
-        /// <summary>
-        /// Lists navigable objects.
-        /// </summary>
-        protected void ListObjects() => Owner.ReceiveMessage(new ListObjects(this));
-
-        /// <summary>
-        /// Initializes the component and starts its message loop.
-        /// </summary>
-        public override void Start()
-        {
-            base.Start();
-RegisterShortcuts(
+            AddShortcuts(
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
@@ -101,7 +91,13 @@ RegisterShortcuts(
                 [new KeyShortcut(Keys.Return)] = Interact,
             }
             );
+
         }
+
+        /// <summary>
+        /// Lists navigable objects.
+        /// </summary>
+        protected void ListObjects() => Owner.ReceiveMessage(new ListObjects(this));
 
         /// <summary>
         /// Runs the game menu

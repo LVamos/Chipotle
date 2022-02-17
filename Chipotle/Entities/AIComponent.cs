@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Messaging;
@@ -10,7 +11,13 @@ namespace Game.Entities
     /// <summary>
     /// Controls the behavior of an NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(BartenderAIComponent))]
+    [ProtoInclude(101, typeof(CarsonAIComponent))]
+    [ProtoInclude(102, typeof(ChristineAIComponent))]
+    [ProtoInclude(103, typeof(MariottiAIComponent))]
+    [ProtoInclude(104, typeof(SweeneyAIComponent))]
+    [ProtoInclude(105, typeof(TuttleAIComponent))]
     public class AIComponent : EntityComponent
     {
         /// <summary>
@@ -21,6 +28,7 @@ namespace Game.Entities
         /// <summary>
         /// Instance of a path finder
         /// </summary>
+        [ProtoIgnore]
         protected PathFinder _finder = new PathFinder();
 
         /// <summary>

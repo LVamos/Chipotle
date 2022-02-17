@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 
 using Game.Messaging.Commands;
 using Game.Terrain;
@@ -11,7 +12,7 @@ namespace Game.Entities
     /// Represents the car of the Vanilla crunch company (auto v1) object standing in the garage of
     /// the company (garáž v1) locality.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class VanillaCrunchCar : DumpObject
     {
         /// <summary>

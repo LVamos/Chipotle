@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls the behavior of the Carson NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class CarsonAIComponent : AIComponent
     {
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Entities;
@@ -12,7 +13,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a door in the hall of the Vanilla crunch company (hala v1) locality.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class HallDoor : Door
     {
         /// <summary>

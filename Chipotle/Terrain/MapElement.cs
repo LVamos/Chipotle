@@ -1,17 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ProtoBuf;
+using System;
 
 using Game.Messaging;
 using Game.Messaging.Commands;
 
 using Luky;
+using Game.Entities;
 
 namespace Game.Terrain
 {
     /// <summary>
     /// Base class for all objects that can be displayed on the game map.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(GameObject))]
+    [ProtoInclude(101, typeof(Locality))]
+    [ProtoInclude(102, typeof(Passage))]
     public abstract class MapElement : MessagingObject
     {
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 
 using Game.Messaging.Commands;
 using Game.Terrain;
@@ -10,7 +11,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the Sweeney's bell (zvonek p1) in the Easterby street (ulice p1) locality.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class SweeneysBell : DumpObject
     {
         /// <summary>

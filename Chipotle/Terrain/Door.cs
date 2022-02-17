@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,11 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a door between two localities.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(HallDoor))]
+    [ProtoInclude(101, typeof(MariottisDoor))]
+    [ProtoInclude(102, typeof(SlidingDoor))]
+    [ProtoInclude(103, typeof(VanillaCrunchGarageDoor))]
     public class Door : Passage
     {
         /// <summary>

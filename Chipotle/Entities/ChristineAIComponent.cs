@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Messaging;
@@ -6,12 +7,14 @@ using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
+using ProtoBuf;
+
 namespace Game.Entities
 {
     /// <summary>
     /// Controls behavior of the Christine Pierce NPC
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class ChristineAIComponent : AIComponent
     {
         /// <summary>

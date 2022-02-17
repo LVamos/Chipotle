@@ -1,4 +1,5 @@
-﻿using Luky;
+﻿using ProtoBuf;
+using Luky;
 
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace Game.Terrain
     /// <summary>
     /// Represents one region on the game map (e.g. a room).
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Locality : MapElement
     {
         public IEnumerable<Locality> GetAccessibleLocalities()
@@ -149,21 +150,21 @@ namespace Game.Terrain
                 from p in a.GetPerimeterPoints()
                 let l = World.GetLocality(p)
                 where(l != null)
-                select l
-                ).Distinct().ToList<Locality>();
-
-            Neighbours = _neighbours.AsReadOnly();
+                select l.Name.Indexed
+                ).Distinct().ToList<string>();
         }
 
         /// <summary>
         /// List of adjecting localities
         /// </summary>
-        private List<Locality> _neighbours;
+        private List<string> _neighbours;
 
         /// <summary>
         /// List of adjecting localities
         /// </summary>
-        public IReadOnlyList<Locality> Neighbours { get; private set; }
+        [ProtoIgnore]
+        public IEnumerable<Locality> Neighbours => _neighbours.Select(n => World.GetLocality(n));
+
         /// <summary>
         /// Returns all open passages between this locality and the specified one..
         /// </summary>
@@ -210,7 +211,17 @@ namespace Game.Terrain
         /// <summary>
         /// All exits from the locality
         /// </summary>
-        public readonly IReadOnlyList<Passage> Passages;
+        [ProtoIgnore]
+        public IEnumerable<Passage> Passages
+        {
+            get
+            {
+                if (_passages == null)
+                    _passages = new List<string>();
+
+            return _passages.Select(p => World.GetPassage(p));
+            }
+        }
 
         /// <summary>
         /// Name of the locality in a shape that expresses a direction to the locality.
@@ -221,13 +232,6 @@ namespace Game.Terrain
         /// Specifies if the locality is outside or inside a building.
         /// </summary>
         public readonly LocalityType Type;
-
-        /// <summary>
-        /// Handle of a background sound played in loop when the Detective Chipotle NPC is inside
-        /// </summary>
-        protected int _backgroundSoundId;
-        private int _backgroundSoundIdTemp;
-        private bool _playerNearby;
 
         /// <summary>
         /// The minimum permitted Y dimension of the floor in this locality
@@ -247,17 +251,17 @@ namespace Game.Terrain
         /// <summary>
         /// List of NPCs present in this locality.
         /// </summary>
-        private readonly List<Entity> _entities;
+        private List<string> _entities;
 
         /// <summary>
         /// List of objects present in this locality.
         /// </summary>
-        private readonly List<DumpObject> _objects;
+        private List<string> _objects;
 
         /// <summary>
         /// List of exits from this locality
         /// </summary>
-        private readonly List<Passage> _passages;
+        private List<string> _passages;
 
         /// <summary>
         /// Constructor
@@ -277,12 +281,9 @@ namespace Game.Terrain
             Type = type;
             _ceiling = Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
             _ceiling = type == LocalityType.Outdoor ? 0 : ceiling;
-            _passages = new List<Passage>();
-            Passages = _passages.AsReadOnly();
-            _entities = new List<Entity>();
-            Entities = _entities.AsReadOnly();
-            _objects = new List<DumpObject>();
-            Objects = _objects.AsReadOnly();
+            _passages = new List<string>();
+            _entities = new List<string>();
+            _objects = new List<string>();
             DefaultTerrain = defaultTerrain;
             Area.MinimumHeight = MinimumHeight;
             Area.MinimumWidth = MinimumWidth;
@@ -296,31 +297,53 @@ namespace Game.Terrain
         /// <summary>
         /// Defines the lowest layer of terrain in the locality.
         /// </summary>
+        [ProtoIgnore]
         public TerrainType DefaultTerrain { get; }
 
         /// <summary>
         /// List of NPCs present in this locality.
         /// </summary>
-        public ReadOnlyCollection<Entity> Entities { get; }
+        [ProtoIgnore]
+        public IEnumerable<Entity> Entities
+        {
+            get
+            {
+                if (_entities == null)
+                    _entities = new List<string>();
+
+            return _entities.Select(e => World.GetEntity(e));
+            }
+        }
 
         /// <summary>
         /// List of objects present in this locality.
         /// </summary>
-        public ReadOnlyCollection<DumpObject> Objects { get; }
+        [ProtoIgnore]
+        public IEnumerable<DumpObject> Objects
+        {
+            get
+            {
+                if (_objects == null)
+                    _objects = new List<string>();
+
+                return _objects.Select(o => World.GetObject(o));
+            }
+        }
 
         /// <summary>
         /// Returns all adjecting localities to which it's possible to get from this locality.
         /// </summary>
         /// <returns>An enumeration of all adjecting accessible localities</returns>
         public IEnumerable<Locality> GetLocalitiesBehindDoor()
-            => _passages.Select(p => p.AnotherLocality(this));
+            => Passages.Select(p => p.AnotherLocality(this));
 
         /// <summary>
         /// Checks if the specified game object is present in this locality in the moment.
         /// </summary>
         /// <param name="o">The object to be checked</param>
         /// <returns>True if the object is present in the locality</returns>
-        public bool IsItHere(DumpObject o) => _objects.Contains(o);
+        public bool IsItHere(DumpObject o) 
+            => _objects.Contains(o.Name.Indexed);
 
         /// <summary>
         /// Checks if an entity is present in this locality in the moment.
@@ -335,7 +358,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="p">The passage to be checked</param>
         /// <returns>True if the passage lays in this locality</returns>
-        public bool IsItHere(Passage p) => _passages.Contains(p);
+        public bool IsItHere(Passage p) => Passages.Contains(p);
 
         /// <summary>
         /// Gets a message from another messaging object and stores it for processing.
@@ -358,7 +381,7 @@ namespace Game.Terrain
         {
             // Check if exit isn't already in list
             Assert(!IsItHere(p), "exit already registered");
-            _passages.Add(p);
+            _passages.Add(p.Name.Indexed);
         }
 
         /// <summary>
@@ -369,7 +392,7 @@ namespace Game.Terrain
         {
             Assert(!IsItHere(o), "Object already registered.");
 
-            _objects.Add(o as DumpObject);
+            _objects.Add(o.Name.Indexed);
         }
 
         /// <summary>
@@ -378,8 +401,8 @@ namespace Game.Terrain
         /// <param name="e">The entity to be added</param>
         public void Register(Entity e)
         {
-            Assert(!_entities.Contains(e), "Entity already registered.");
-            _entities.Add(e);
+            Assert(!_entities.Contains(e.Name.Indexed), "Entity already registered.");
+            _entities.Add(e.Name.Indexed);
         }
 
         /// <summary>
@@ -419,6 +442,7 @@ namespace Game.Terrain
         /// Indicates if the player is in the locality.
         /// </summary>
         /// <returns>True if the player is in the locality.</returns>
+        [ProtoIgnore]
         private bool _playerInHere;
 
         /// <summary>
@@ -426,14 +450,14 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="o"></param>
         public void Unregister(GameObject o)
-            => _objects.Remove(o as DumpObject);
+            => _objects.Remove(o.Name.Indexed);
 
         /// <summary>
         /// Immediately removes an entity from list of present entities.
         /// </summary>
         /// <param name="e">The entity to be removed</param>
         public void Unregister(Entity e)
-            => _entities.Remove(e);
+            => _entities.Remove(e.Name.Indexed);
 
         /// <summary>
         /// Removes a passage from the locality.
@@ -441,7 +465,8 @@ namespace Game.Terrain
         /// <param name="p">The passage to be removed</param>
         public void Unregister(Passage p)
         {
-            _passages.Remove(p);
+            Assert(Passages.Contains(p), "Unregistered passage");
+            _passages.Remove(p.Name.Indexed);
         }
 
         /// <summary>
@@ -458,14 +483,23 @@ namespace Game.Terrain
         /// </summary>
         protected override void Disappear()
         {
-            if (!_objects.IsNullOrEmpty())
-                new List<GameObject>(_objects).ForEach(o => World.Remove(o));
+            if (!Objects.IsNullOrEmpty())
+            {
+                foreach (DumpObject o in Objects.ToArray<DumpObject>())
+                    World.Remove(o);
+            }
 
-            if (!_passages.IsNullOrEmpty())
-                new List<Passage>(_passages).ForEach(p => World.Remove(p));
+            if (!Passages.IsNullOrEmpty())
+            {
+                foreach (Passage p in Passages.ToArray<Passage>())
+                    World.Remove(p);
+            }
 
-            if (!_entities.IsNullOrEmpty())
-                new List<Entity>(_entities).ForEach(e => World.Remove(e));
+            if (!Entities.IsNullOrEmpty())
+            {
+                foreach(Entity e in Entities.ToArray<Entity>())
+                World.Remove(e);
+            }
 
             Area.GetPoints().Foreach(p => World.Map[p] = null);
         }
@@ -476,7 +510,7 @@ namespace Game.Terrain
         /// <param name="message">The message to be sent</param>
         protected void MessageObjects(GameMessage message)
         {
-            foreach (DumpObject o in _objects)
+            foreach (DumpObject o in Objects)
             {
                 if (o != message.Sender)
                     o.ReceiveMessage(message);
@@ -485,7 +519,7 @@ namespace Game.Terrain
 
         private void MessageEntities(GameMessage message)
         {
-            foreach(Entity e in _entities)
+            foreach(Entity e in Entities)
             {
                 if (e != message.Sender)
                     e.ReceiveMessage(message);
@@ -525,7 +559,7 @@ namespace Game.Terrain
         /// <param name="message">The message to be sent</param>
         private void MessagePassages(GameMessage message)
         {
-            foreach (Passage p in _passages)
+            foreach (Passage p in Passages)
             {
                 if (p != message.Sender)
                     p.ReceiveMessage(message);
@@ -552,6 +586,7 @@ namespace Game.Terrain
         /// <summary>
         /// Handle of the stereo sound loop played when the player is inside the locality.
         /// </summary>
+        [ProtoIgnore]
         private int _loopID;
 
         /// <summary>
@@ -580,7 +615,7 @@ namespace Game.Terrain
         /// <summary>
         /// Stores the identifiers of location audio loops played in passages.
         /// </summary>
-[NonSerialized]
+[ProtoIgnore]
         private Dictionary<Passage, int> _passageLoops = new Dictionary<Passage, int>();
 
         /// <summary>

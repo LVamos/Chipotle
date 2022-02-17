@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Linq;
 
 using Game.Messaging.Commands;
@@ -11,7 +12,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents a bench object in the zahrada c1 locality.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class CarsonsBench : DumpObject
     {
         /// <summary>

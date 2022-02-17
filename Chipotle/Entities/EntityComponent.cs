@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Messaging;
@@ -11,13 +12,45 @@ namespace Game.Entities
     /// <summary>
     /// Base class for all NPC components
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(AIComponent))]
+    [ProtoInclude(101, typeof(PhysicsComponent))]
+    [ProtoInclude(102, typeof(SoundComponent))]
+    [ProtoInclude(103, typeof(InputComponent))]
     public abstract class EntityComponent : MessagingObject
     {
         /// <summary>
+        /// Indexed name of the owner fo this component.
+        /// </summary>
+        protected string _ownerName;
+
+        /// <summary>
+        /// Backing field for the Onwer property.
+        /// </summary>
+        [ProtoIgnore]
+        protected Entity _owner;
+
+        /// <summary>
         /// A reference to the parent NPC
         /// </summary>
-        public Entity Owner;
+        [ProtoIgnore]
+        public Entity Owner
+        {
+            get
+            {
+                if (_owner == null)
+                    _owner = World.GetEntity(_ownerName)
+                        ?? throw new InvalidOperationException(nameof(_ownerName));
+
+                return _owner;
+            }
+        }
+
+        public void AssignToEntity(string name)
+        {
+            _ownerName = name 
+                ?? throw new ArgumentException(nameof(name));
+        }
 
         /// <summary>
         /// Indicates if a cutscene is played in the moment.

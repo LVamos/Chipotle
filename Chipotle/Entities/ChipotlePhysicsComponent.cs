@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls movement of the Detective Chipotle NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
@@ -76,7 +77,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies if the NPC can walk.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         protected bool _blockWalk;
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace Game.Entities
         /// <summary>
         /// stores information about walk.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         private StartWalk _startWalkMessage;
 
         /// <summary>
@@ -144,7 +145,7 @@ namespace Game.Entities
         /// <summary>
         /// Indicates if the Chipotle NPC is currently walking.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         private bool _walking;
 
         /// <summary>
@@ -162,6 +163,7 @@ namespace Game.Entities
         /// <summary>
         /// Returns reference to the Tuttle NPC.
         /// </summary>
+        [ProtoIgnore]
         private Entity Tuttle
             => World.GetEntity("tuttle");
 
@@ -213,7 +215,7 @@ namespace Game.Entities
         private void OnGameReloaded(GameReloaded message)
         {
             Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
-            Owner.ReceiveMessage(new PositionChanged(this, _area, _area, _locality, _locality, ObstacleType.None, true));
+            Owner.ReceiveMessage(new PositionChanged(this, _area, _area, Locality, Locality, ObstacleType.None, true));
         }
 
         /// <summary>
@@ -266,7 +268,7 @@ _navigatedExit = null;
         /// <summary>
         /// An exit to which the NPC is navigated.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         protected Passage _navigatedExit;
         /// <summary>
         /// Processes the ObjectNavigationStopped message.
@@ -349,7 +351,7 @@ _navigatedExit = null;
         /// <summary>
         /// Objectt to which tthe NPC is currently navigated.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         protected DumpObject _navigatedObject;
 
         /// <summary>
@@ -458,7 +460,7 @@ _navigatedExit = null;
         /// <returns>A string array</returns>
         private (string[] descriptions, Passage[] exits) GetNavigableExits()
         {
-Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Passage>();
+Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Passage>();
 
             Vector2 me = _area.Center;
             string[] descriptions =
@@ -467,7 +469,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
     let point = e.Area.GetClosestPoint(_area.Center)
     let distance = GetDistanceDescription((int)World.GetDistance(me, point))
     let type = e is Door ? "dveře " : "průchod "
-    let to = e.AnotherLocality(_locality).To + " "
+    let to = e.AnotherLocality(Locality).To + " "
     let angle = Angle.GetDescription(GetAngle(point))
     select ($"{type} {to}: {distance} {angle}:")
     ).ToArray<string>();
@@ -554,12 +556,12 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// <summary>
         /// Computes amount of horizontal motion track regions for the current locality.
         /// </summary>
-        protected int MotionTrackWidth => (int)(_locality.Area.Width/ _motionTrackRadius + (_locality.Area.Width % _motionTrackRadius > 0 ? 1 : 0));
+        protected int MotionTrackWidth => (int)(Locality.Area.Width/ _motionTrackRadius + (Locality.Area.Width % _motionTrackRadius > 0 ? 1 : 0));
 
         /// <summary>
         /// Computes amount of vertical motion track regions for the current locality.
         /// </summary>
-        protected int MotionTrackHeight => (int)(_locality.Area.Height/ _motionTrackRadius + (_locality.Area.Height% _motionTrackRadius > 0 ? 1 : 0));
+        protected int MotionTrackHeight => (int)(Locality.Area.Height/ _motionTrackRadius + (Locality.Area.Height% _motionTrackRadius > 0 ? 1 : 0));
 
         protected int GetRegionIndex(Vector2 point)
         {
@@ -596,18 +598,18 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         /// <param name="point">Current position of the NPC</param>
         protected void RecordRegion(Vector2 point)
         {
-                if (!_motionTrack.ContainsKey(_locality))
-                _motionTrack[_locality] = new HashSet<int>();
+                if (!_motionTrack.ContainsKey(Locality))
+                _motionTrack[Locality] = new HashSet<int>();
 
             int regionIndex = GetRegionIndex(point);
 
             if (_currentRegion != regionIndex)
             {
                 _currentRegion = regionIndex;
-                _inVisitedRegion = _motionTrack[_locality].Contains(regionIndex);
+                _inVisitedRegion = _motionTrack[Locality].Contains(regionIndex);
 
                 if (!_inVisitedRegion)
-                    _motionTrack[_locality].Add(regionIndex);
+                    _motionTrack[Locality].Add(regionIndex);
             }
         }
 
@@ -650,7 +652,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
         protected (string[] descriptions, DumpObject[] objects) GetNavigableObjects()
         {
             Vector2 me = _area.Center;
-            DumpObject[] objects = _locality.GetSurroundingObjects(me, _navigableObjectsRadius).ToArray<DumpObject>();
+            DumpObject[] objects = Locality.GetSurroundingObjects(me, _navigableObjectsRadius).ToArray<DumpObject>();
 
             string[] descriptions =
                 (
@@ -738,7 +740,7 @@ Passage[] exits = _locality.GetNearestExits(_area.Center, _exitRadius).ToArray<P
             Orientation2D source = _orientation;
             _orientation.Rotate(message.Degrees);
             Owner.ReceiveMessage(new OrientationChanged(this, source, _orientation, message.Direction));
-            _locality.ReceiveMessage(new OrientationChanged(Owner, source, _orientation, message.Direction));
+            Locality.ReceiveMessage(new OrientationChanged(Owner, source, _orientation, message.Direction));
             _speed += Math.Abs(message.Degrees) * World.DeltaTime;
         }
 

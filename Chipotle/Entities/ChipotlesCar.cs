@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +16,7 @@ namespace Game.Entities
     /// <summary>
     /// Represents the car of the Detective Chipotle NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class ChipotlesCar : DumpObject
     {
         /// <summary>
@@ -24,9 +25,23 @@ namespace Game.Entities
         public bool Moved;
 
         /// <summary>
-        /// List of the localities the object can move to.
+        /// Returns enumeration of localities where the car can ride.
         /// </summary>
-        protected HashSet<Locality> _allowedDestinations = new HashSet<Locality>();
+        public IEnumerable<Locality> AllowedDestinations
+        {
+            get
+            {
+                if (_allowedDestinations == null)
+                    _allowedDestinations = new HashSet<string>();
+
+                return _allowedDestinations.Select(d => World.GetLocality(d));
+            }
+        }
+
+        /// <summary>
+        /// Backing field for AllowedDestinations.
+        /// </summary>
+        protected HashSet<string> _allowedDestinations;
 
         /// <summary>
         /// List of all localities visited by the object.
@@ -57,6 +72,7 @@ namespace Game.Entities
         /// <summary>
         /// Reference to the Detective Chipotle NPC
         /// </summary>
+        [ProtoIgnore]
         private Entity Player => World.Player;
 
         /// <summary>
@@ -67,6 +83,7 @@ namespace Game.Entities
         /// <summary>
         /// Reference to the Tuttle NPC
         /// </summary>
+        [ProtoIgnore]
         private Entity _tuttle
             => World.GetEntity("tuttle");
 
@@ -134,8 +151,8 @@ namespace Game.Entities
         /// <param name="destination">The locality to be allowed</param>
         private void AllowDestination(Locality destination)
         {
-            if (!_allowedDestinations.Contains(destination))
-                _allowedDestinations.Add(destination);
+            if (!AllowedDestinations.Any(d => d == destination))
+                _allowedDestinations.Add(destination.Name.Indexed);
         }
 
         /// <summary>
@@ -162,11 +179,14 @@ namespace Game.Entities
             if (string.IsNullOrEmpty(preferredCutscene))
                 cutscene = IsChipotleAlone() ? "cs37" : "cs36";
             else cutscene = preferredCutscene;
-            string[] innerNames = _allowedDestinations.Select(d => d.Name.Indexed).ToArray<string>();
 
             Dictionary<string, Locality> destinations = new Dictionary<string, Locality>();
-            _allowedDestinations.Where(d => d != _area.GetLocality())
-            .Foreach(d => destinations.Add(d.Name.Friendly, d));
+            foreach(string indexedName in _allowedDestinations.Where(d => d != Locality.Name.Indexed))
+            {
+                Locality l = World.GetLocality(indexedName);
+                destinations[l.Name.Friendly] = l;
+            }
+
             if (destinations.Count == 1)
             {
                 Move(destinations.First().Value, cutscene);
@@ -236,8 +256,8 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnUnblockLocality(UnblockLocality message)
         {
-            if (!_allowedDestinations.Contains(message.Locality))
-                _allowedDestinations.Add(message.Locality);
+            if (!_allowedDestinations.Contains(message.Locality.Name.Indexed))
+                _allowedDestinations.Add(message.Locality.Name.Indexed);
         }
 
         /// <summary>
@@ -245,7 +265,7 @@ namespace Game.Entities
         /// </summary>
         /// <returns>True if all the Walsch's area was explored</returns>
         private bool WalshAreaExplored()
-            => Player.VisitedLocalities.Count == 14
+            => Player.VisitedLocalities.Count() == 14
                     && Player.VisitedLocalities.All(l => l.Name.Indexed.ToLower().Contains("w1"));
 
         /// <summary>

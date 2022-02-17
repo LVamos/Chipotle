@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Linq;
 
 using Game.Messaging.Commands;
@@ -12,7 +13,7 @@ namespace Game.Entities
     /// Represents the icecream machine object (automat v1) )in the hall of the Vanilla crunch
     /// company (hala v1) locality.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class IcecreamMachine : DumpObject
     {
         /// <summary>

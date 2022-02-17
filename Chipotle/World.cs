@@ -19,6 +19,9 @@ using Luky;
 
 using OpenTK;
 
+using ProtoBuf;
+using ProtoBuf.Meta;
+
 namespace Game
 {
     /// <summary>
@@ -609,28 +612,33 @@ namespace Game
 
             // Load terrain, objects, NPCs, localities and passages.
             LoadTerrain();
-            FileStream stream;
-            BinaryFormatter formatter = new BinaryFormatter();
-            Serializer serializer;
+            FileStream stream = null;
+            SerializerHelper helper;
 
             using (stream = File.OpenRead(Program.SerializationPath))
             {
-                serializer = (Serializer)formatter.Deserialize(stream);
+                helper = Serializer.Deserialize<SerializerHelper>(stream);
             }
-            stream.Close();
+            stream?.Close();
 
-            _entities = serializer.Entities;
-            _objects = serializer.Objects;
-            _passages = serializer.Passages;
-            _localities = serializer.Localities;
+            _entities = helper.Entities;
+            _objects = helper.Objects;
+            _passages = helper.Passages;
+            _localities = helper.Localities;
             WindowHandler.Switch(new Game.UI.GameWindow());
             GameReloaded message = new GameReloaded();
-            Player.ReceiveMessage(message);
-            Player.Locality.ReceiveMessage(message);
-            Player.Locality.Neighbours.Foreach(n => n.ReceiveMessage(message));
+            _entities.Values.Foreach(e => e.ReceiveMessage(message));
+            _localities.Values.Foreach(l => l.ReceiveMessage(message));
             _objects.Values.Foreach(o => o.ReceiveMessage(message));
+            _passages.Values.Foreach(p => p.ReceiveMessage(message));
             Program.MainWindow.GameLoopEnabled = true;
         }
+
+        /// <summary>
+        /// Static constructor
+        /// </summary>
+        static World()
+                => RuntimeTypeModel.Default.Add(typeof(Vector2), false).Add("X", "Y");
 
         /// <summary>
         /// Loads the map from file.
@@ -800,15 +808,13 @@ lBackgroundInfo.volume
         /// </summary>
         public static void SaveGame()
         {
-            Serializer serializer = new Serializer(_entities, _objects, _passages, _localities);
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            FileStream stream;
+            SerializerHelper helper = new SerializerHelper(_entities, _objects, _passages, _localities);
+            FileStream stream = null;
             using (stream = File.Create(Program.SerializationPath))
             {
-                    formatter.Serialize(stream, serializer);
+                        Serializer.Serialize(stream, helper);
             }
-            stream.Close();
+            stream?.Close();
         }
 
         /// <summary>

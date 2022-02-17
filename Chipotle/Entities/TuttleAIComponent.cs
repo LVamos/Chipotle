@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 using Game.Messaging;
@@ -8,12 +9,14 @@ using Game.Terrain;
 
 using OpenTK;
 
+using ProtoBuf;
+
 namespace Game.Entities
 {
     /// <summary>
     /// Controls behavior of the Tuttle NPC
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class TuttleAIComponent : AIComponent
     {
 
@@ -41,7 +44,8 @@ namespace Game.Entities
         /// <summary>
         /// Reference to the Detective Chipotle NPC
         /// </summary>
-        private readonly Entity _player = World.Player;
+        [ProtoIgnore]
+        private Entity _player => World.Player;
 
         /// <summary>
         /// A delayed message of ChipotlesCarMoved type

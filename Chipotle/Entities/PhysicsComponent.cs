@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,9 @@ namespace Game.Entities
     /// <summary>
     /// Controls movement of an NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(ChipotlePhysicsComponent))]
+    [ProtoInclude(101, typeof(TuttlePhysicsComponent))]
     public class PhysicsComponent : EntityComponent
     {
         /// <summary>
@@ -55,13 +58,14 @@ namespace Game.Entities
         /// <summary>
         /// Stores the current shortest track towards the Detective Chipotle NPC.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         protected Queue<Vector2> _path;
 
         /// <summary>
         /// Reference to a path finder instance
         /// </summary>
-        protected readonly PathFinder _finder = new PathFinder();
+        [ProtoIgnore]
+        protected PathFinder _finder = new PathFinder();
 
         /// <summary>
         /// Solves a situation when the NPC encounters an obstacle.
@@ -82,7 +86,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies the length of one step in milliseconds.
         /// </summary>
-[NonSerialized]
+[ProtoIgnore]
         protected int _walkTimer;
 
         /// <summary>
@@ -106,12 +110,13 @@ namespace Game.Entities
         /// <summary>
         /// The goal that Tuttle is just going to.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         protected Vector2 _goal;
 
         /// <summary>
         /// Returns reference to the tile the NPC currently stands on.
         /// </summary>
+        [ProtoIgnore]
         protected (Vector2 position, Tile tile) CurrentTile
             => (_area.Center, World.Map[_area.Center]);
 
@@ -139,7 +144,7 @@ namespace Game.Entities
         /// </summary>
         /// <returns></returns>
         protected int GetTerrainSpeed()
-            => _speeds[CurrentTile.tile.Terrain];
+            =>  _speeds[CurrentTile.tile.Terrain];
 
         /// <summary>
         /// Contains walk speed settings for particullar terrain types.
@@ -174,6 +179,20 @@ namespace Game.Entities
         /// <summary>
         /// Stores reference to a locality in which the NPC is currently located.
         /// </summary>
+        public Locality Locality
+        {
+            get
+            {
+                if (_locality == null)
+                    _locality = _area.GetLocality();
+                return _locality;
+            }
+        }
+
+        /// <summary>
+        /// Backing field for Locality property.
+        /// </summary>
+[ProtoIgnore]
         protected Locality _locality;
 
         /// <summary>
@@ -184,7 +203,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies the length of one step.
         /// </summary>
-        [NonSerialized]
+        [ProtoIgnore]
         protected int _speed;
 
         /// <summary>
@@ -241,10 +260,10 @@ namespace Game.Entities
         {
             Locality sourceLocality = _area?.GetLocality();
             Locality targetLocality = target.GetLocality();
-            Plane sourcePosition = _area;
+            Plane sourcePosition = _area == null ? null  : new Plane(_area);
 
             _area = new Plane(target);
-                _locality = _area.GetLocality() ?? throw new ArgumentNullException(nameof(_locality));
+                _locality = _area.GetLocality() ?? throw new ArgumentNullException(nameof(Locality));
 
             // If it isn't the player detect obstacles between him and this NPC.
             Entity player = World.Player;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -20,7 +21,8 @@ namespace Game.Terrain
     /// <summary>
     /// Represents a passage between two localities.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(Door))]
     public class Passage : MapElement
     {
         /// <summary>
@@ -82,7 +84,8 @@ namespace Game.Terrain
         /// <summary>
         /// Localities connected by the passage
         /// </summary>
-        public readonly IReadOnlyList<Locality> Localities;
+        [ProtoIgnore]
+        public IReadOnlyList<Locality> Localities => _localities.AsReadOnly();
 
         /// <summary>
         /// Localities connected by the passage
@@ -102,7 +105,6 @@ namespace Game.Terrain
 
             Assert(localities != null && localities?.Count() == 2 && localities.First() != null && localities.Last() != null && localities.First() != localities.Last(), "Two different localities required");
             _localities = localities.ToList<Locality>();
-            Localities = _localities.AsReadOnly();
 
             // Validate passage location
             Assert(area.GetIntersectingObjects().IsNullOrEmpty() && area.GetIntersectingPassages().IsNullOrEmpty(), "No objects or nested passages allowed");
@@ -212,11 +214,13 @@ namespace Game.Terrain
         /// <summary>
         /// Handle of a sound used for navigation.
         /// </summary>
+        [ProtoIgnore]
         protected int _navigationSoundID;
 
         /// <summary>
         /// Indicates if sound navigation is in progress.
         /// </summary>
+        [ProtoIgnore]
         protected bool _navigating;
 
         /// <summary>
@@ -267,11 +271,13 @@ namespace Game.Terrain
         /// <summary>
         /// stores a locality in which the player is located after navigation start.
         /// </summary>
+        [ProtoIgnore]
         protected Locality _playersLocality;
 
         /// <summary>
         /// Indicates if the sound attenuation is enabled.
         /// </summary>
+        [ProtoIgnore]
         private bool _attenuate;
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,7 @@ namespace Game.Entities
     /// <summary>
     /// Controls movement of the Tuttle NPC.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class TuttlePhysicsComponent : PhysicsComponent
     {
         /// <summary>
@@ -59,6 +60,7 @@ namespace Game.Entities
         /// <summary>
         /// An instance of the Random number generator
         /// </summary>
+        [ProtoIgnore]
         private readonly Random _random = new Random();
 
         /// <summary>
@@ -74,7 +76,8 @@ namespace Game.Entities
         /// <summary>
         /// Reference to the Detective Chipotle NPC
         /// </summary>
-        private Entity _player;
+        [ProtoIgnore]
+        private Entity _player => World.Player;
 
         /// <summary>
         /// Specifies if Tuttle should start approaching to player when a new path is found after
@@ -88,7 +91,6 @@ namespace Game.Entities
         public override void Start()
         {
             _orientation = new Orientation2D(0, 1);
-            _player = World.Player;
             base.Start();
         }
 

@@ -1,29 +1,28 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Game.Messaging.Events;
 
 using Luky;
+using Game.Entities;
+using Game.Terrain;
 
 namespace Game.Messaging
 {
     /// <summary>
-    /// Delegate for all message handlers
-    /// </summary>
-    /// <param name="message"></param>
-    public delegate void MessageHandler(GameMessage message);
-
-    /// <summary>
     /// Base class for all objects used in the game; receives, sends and processes messages.
     /// </summary>
-    [Serializable]
+    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+    [ProtoInclude(100, typeof(EntityComponent))]
+    [ProtoInclude(101, typeof(MapElement))]
     public abstract class MessagingObject : DebugSO
     {
         /// <summary>
         /// Stores the messages before they are processed.
         /// </summary>
-      [NonSerialized] protected Queue<GameMessage> _messages = new Queue<GameMessage>();
+      [ProtoIgnore] protected Queue<GameMessage> _messages = new Queue<GameMessage>();
 
         /// <summary>
         /// Starts or stops the messaging.
