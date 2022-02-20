@@ -760,7 +760,7 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
                 e.ReceiveMessage(new UseObject(Owner, point));
             }
 
-            Use(World.GetNearestPassages(CurrentTile.position, true, 3).FirstOrDefault()); // Detect doors within a radius of 2 meters and use the nearest one.
+            Use(World.GetNearestPassages(CurrentTile.position, true, 1).FirstOrDefault()); // Detect doors within a radius of 2 meters and use the nearest one.
             Use(World.GetObject(GetNextTile(1).position)); // Detect object in front of Chipotle and use it.
         }
 
