@@ -125,7 +125,7 @@
     <Compile Include="Messaging\Events\TuttleStateChanged.cs" />
     <Compile Include="SerializerHelper.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
-    <Compile Include="Entities\PubTable.cs" />
+    <Compile Include="Entities\PubBench.cs" />
     <Compile Include="Entities\SweeneysBell.cs" />
     <Compile Include="Entities\VanillaCrunchCar.cs" />
     <Compile Include="Messaging\Commands\Destroy.cs" />

@@ -31,7 +31,7 @@ namespace Game.Entities
     [ProtoInclude(106, typeof(KeyHanger))]
     [ProtoInclude(107, typeof(KillersCar))]
     [ProtoInclude(108, typeof(PoolsideBin))]
-    [ProtoInclude(109, typeof(PubTable))]
+    [ProtoInclude(109, typeof(PubBench))]
     [ProtoInclude(110, typeof(SweeneysBell))]
     [ProtoInclude(111, typeof(VanillaCrunchCar))]
     public class DumpObject : GameObject

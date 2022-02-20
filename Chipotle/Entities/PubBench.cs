@@ -12,14 +12,14 @@ namespace Game.Entities
     /// Represents a table in the pub (výčep h1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class PubTable : DumpObject
+    public class PubBench : DumpObject
     {
         /// <summary>
         /// constructor
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public PubTable(Name name, Plane area, bool decorative) : base(name, area, "hospodský stůl", decorative)
+        public PubBench(Name name, Plane area, bool decorative) : base(name, area, "hospodská lavice", decorative)
         { }
 
         /// <summary>

@@ -215,7 +215,7 @@ namespace Game.Entities
                 case "zrcadlo u kristýny": return CreateChristinesMirror(name, area, decorative);
                 case "vražedné auto": return CreateKillersCar(name, area, decorative);
                 case "věšák na klíče": return CreateKeyHanger(name, area, decorative);
-                case "hospodský stůl": return CreatePubTable(name, area, decorative);
+                case "hospodská lavice": return CreatePubBench(name, area, decorative);
                 case "lavice u carsona": return CreateCarsonsBench(name, area, decorative);
                 case "trezor": return CreateSafe(name, area, decorative);
                 case "stůl u sweeneyho": return CreateSweeneysTable(name, area, decorative);
@@ -469,8 +469,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static PubTable CreatePubTable(Name name, Plane area, bool decorative)
-                        => new PubTable(name, area, decorative);
+        private static PubBench CreatePubBench(Name name, Plane area, bool decorative)
+                        => new PubBench(name, area, decorative);
 
         /// <summary>
         /// Creates new instance of the safe (trezor s1) object in the Sweeney's bed room (pokoj s1) locality.
