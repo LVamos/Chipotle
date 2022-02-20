@@ -820,6 +820,11 @@ _carMovement = message;
             if (_carMovement == null)
                 return;
 
+            // Fade master volume in
+            World.Sound.SetGroupVolume("master", 0);
+            World.Sound.FadeMaster(FadingType.In, .00001f, World.Sound.DefaultMasterVolume);
+
+            // Jump to target locality
             Vector2? target = _carMovement.Target.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");
             World.GetLocality((Vector2)target).ReceiveMessage(_carMovement);
