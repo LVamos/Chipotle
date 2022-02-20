@@ -533,7 +533,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateWallClock(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "hodiny", decorative, null, null, "WallClockLoop", null, false);
+        private static DumpObject CreateWallClock(Name name, Plane area, bool decorative)       
+        => new DumpObject(name, area, "hodiny", decorative, null, null, "WallClockLoop", null, false, false);
     }
 }
