@@ -91,7 +91,7 @@ namespace Game.Entities
         /// <remarks>
         /// The type parameter allows assigning objects with some special behavior to proper classes.
         /// </remarks>
-        public DumpObject(Name name, Plane area, string type, bool decorative, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls=true, float volume=1, bool stopWhenPlayerMoves = false) : base(name, type, area)
+        public DumpObject(Name name, Plane area, string type, bool decorative, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls=true, float volume=1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false) : base(name, type, area)
         {
             Decorative = decorative;
             _usableOnce = usableOnce;
@@ -100,6 +100,7 @@ namespace Game.Entities
             _audibleOverWalls = audibleOverWalls;
             _defaultVolume = volume;
             _stopWhenPlayerMoves = stopWhenPlayerMoves;
+            _quickActionsAllowed = quickActionsAllowed;
         }
 
         /// <summary>
@@ -262,6 +263,7 @@ namespace Game.Entities
         /// Enables or disables sound attenuation.
         /// </summary>
         protected bool _attenuate;
+        private bool _quickActionsAllowed;
 
         /// <summary>
         /// Destroys the object.
@@ -293,14 +295,15 @@ namespace Game.Entities
             if ((_usableOnce && Used) || (string.IsNullOrEmpty(_sounds.action) && string.IsNullOrEmpty(_cutscene)))
                 return;
 
-            World.Sound.GetDynamicInfo(_actionSoundID, out SoundState state, out int _);
-            if (state == SoundState.Playing)
-                return;
+            World.Sound.GetDynamicInfo(_actionSoundID, out SoundState state, out int sample);
 
+            if (state != SoundState.Playing || (state == SoundState.Playing && sample > 21000))
+            {
             if (!string.IsNullOrEmpty(_sounds.action))
                 _actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Point.AsOpenALVector(), true, _defaultVolume);
             else
                 World.PlayCutscene(this, _cutscene);
+            }
 
             UsedOnce = !Used;
 

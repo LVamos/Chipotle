@@ -278,7 +278,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreatePoolStairs(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "schůdky u bazénu", decorative, null, "snd3");
+        => new DumpObject(name, area, "schůdky u bazénu", decorative, null, "snd3", quickActionsAllowed: true);
 
         /// <summary>
         /// Returns the hash code for this object.
