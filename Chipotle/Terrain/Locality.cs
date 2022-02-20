@@ -25,7 +25,7 @@ namespace Game.Terrain
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Locality : MapElement
     {
-        public IEnumerable<Locality> GetAccessibleLocalities()
+public IEnumerable<Locality> GetAccessibleLocalities()
         {
             IEnumerable<IEnumerable<Locality>> all = GetLocalitiesBehindDoor().Select(l2 => l2.GetLocalitiesBehindDoor());
             return all.SelectMany(loc => loc);
@@ -364,6 +364,22 @@ namespace Game.Terrain
         /// Gets a message from another messaging object and stores it for processing.
         /// </summary>
         /// <param name="message">The message to be received</param>
+        /// <param name="routeToNeighbours">Specifies if the message should be distributed to the neighbours of this locality</param>
+        public void ReceiveMessage(GameMessage message, bool routeToNeighbours)
+        {
+            ReceiveMessage(message);
+
+            if (routeToNeighbours)
+            {
+                foreach (Locality neighbour in Neighbours)
+                    neighbour.ReceiveMessage(message);
+            }
+        }
+
+        /// <summary>
+        /// Gets a message from another messaging object and stores it for processing.
+        /// </summary>
+        /// <param name="message">The message to be received</param>
         public override void ReceiveMessage(GameMessage message)
         {
             base.ReceiveMessage(message);
@@ -422,6 +438,7 @@ namespace Game.Terrain
         {
             switch (message)
             {
+                case ChipotlesCarMoved ccmv: OnChipotlesCarMoved(ccmv); break;
                 case EntityMoved em: OnEntityMoved(em); break;
                     case DoorManipulated dm: OnDoorManipulated(dm); break;
                 case GameReloaded gr: OnGameReloaded(); break;
@@ -429,6 +446,16 @@ namespace Game.Terrain
                 case LocalityEntered le: OnLocalityEntered(le); break;
                 default: base.HandleMessage(message); break;
             }
+        }
+
+        /// <summary>
+        /// Handles the ChipotlesCarMoved message.
+        /// </summary>
+        /// <param name="message"The message to be handled></param>
+        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
+        {
+            if (message.Target.GetLocality() != this)
+            StopBackground(true);
         }
 
         /// <summary>
@@ -634,7 +661,7 @@ namespace Game.Terrain
             if (playerInHere)
             {
                 _loopID = World.Sound.Play(World.Sound.GetSoundStream(_loop), null, true, PositionType.None, Vector3.Zero, false, _defaultVolume);
-                return;
+                    return;
             }
 
             // Player is in a neighbour accessible locality 
@@ -700,14 +727,21 @@ namespace Game.Terrain
         /// <summary>
         /// Stops all isntances of background sound.
         /// </summary>
-        private void StopBackground()
+        /// <param name="fadeOut">Specifies if the loop is faded out</param>
+        private void StopBackground(bool fadeOut = false)
         {
-            World.Sound.FadeSource(_loopID, FadingType.Out, .0001f, 0);
+            if(fadeOut)
+            World.Sound.FadeSource(_loopID, FadingType.Out, .00001f, 0);
+          else World.Sound.FadeSource(_loopID, FadingType.Out, .0001f, 0);
 
             if (!_passageLoops.IsNullOrEmpty())
             {
                 foreach (int id in _passageLoops.Values)
-                    World.Sound.FadeSource(id, FadingType.Out, .0001f, 0);
+                {
+                    if(fadeOut)
+                    World.Sound.FadeSource(id, FadingType.Out, .00001f, 0);
+                    else World.Sound.FadeSource(id, FadingType.Out, .0001f, 0);
+                }
             }
 
             _passageLoops = new Dictionary<Passage, int>();

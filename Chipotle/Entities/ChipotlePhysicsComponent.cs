@@ -636,7 +636,10 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnChipotlesCarMoved(ChipotlesCarMoved message)
-=> _carMovement = message;
+        {
+_carMovement = message;
+            Locality.ReceiveMessage(message, true);
+        }
 
         /// <summary>
         /// Processes the SayLocality message.
@@ -819,6 +822,7 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
 
             Vector2? target = _carMovement.Target.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");
+            World.GetLocality((Vector2)target).ReceiveMessage(_carMovement);
             Move((Vector2)target, true);
             _carMovement = null;
         }

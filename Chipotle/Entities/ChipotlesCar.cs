@@ -10,6 +10,7 @@ using Game.Terrain;
 using Game.UI;
 
 using Luky;
+using OpenTK;
 
 namespace Game.Entities
 {
@@ -129,11 +130,16 @@ namespace Game.Entities
         {
             base.OnUseObject(message);
 
+            AllowDestination(World.GetLocality("ulice p1"));
+            DestinationMenu("cs20");
+            AllowDestination(World.GetLocality("příjezdová cesta w1"));
+            return;
+
             // When it's not allowed to use the car, play a knocking souund.
             if (
                             (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
             || (_area.GetLocality().Name.Indexed == "asfaltka c1" && !CarsonsBenchesUsed()))
-                _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.Point.AsOpenALVector(), true, 1, null, 1, 0, Playback.OpenAL);
+                _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.Point.AsOpenALVector(), true, _defaultVolume);
 
             // If player didn't leave Walsh area but used required objects and went through all area
             else if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())

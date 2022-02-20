@@ -73,7 +73,7 @@ namespace Game
             /// <summary>
             /// Enables or disables main menu at startup.
             /// </summary>
-            public static bool MainMenuAtStartup = true;
+            public static bool MainMenuAtStartup = false;
 
             /// <summary>
             /// Enables or disables game saving in each locality and after each interaction with a object or door.
