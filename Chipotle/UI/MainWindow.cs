@@ -144,6 +144,7 @@ namespace Game.UI
         /// </summary>
         private void OnShown(object sender, EventArgs e)
         {
+            Activate();
             Focus();
 
             if (!Program.Settings.MainMenuAtStartup)

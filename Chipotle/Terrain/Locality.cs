@@ -686,6 +686,7 @@ public IEnumerable<Locality> GetAccessibleLocalities()
                         Vector2? tmp = World.Player.Area.FindOppositePoint(p.Area);
                         if (tmp.HasValue)
                             position = (Vector2)tmp;
+                        else position = p.Area.GetClosestPoint(player);
                     }
 
                     // Make it quieter if the player is in a inadjecting locality behind a closed door.
