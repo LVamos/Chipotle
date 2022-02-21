@@ -130,11 +130,6 @@ namespace Game.Entities
         {
             base.OnUseObject(message);
 
-            AllowDestination(World.GetLocality("ulice p1"));
-            DestinationMenu("cs20");
-            AllowDestination(World.GetLocality("příjezdová cesta w1"));
-            return;
-
             // When it's not allowed to use the car, play a knocking souund.
             if (
                             (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))

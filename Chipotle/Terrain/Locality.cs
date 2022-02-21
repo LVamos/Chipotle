@@ -733,7 +733,7 @@ public IEnumerable<Locality> GetAccessibleLocalities()
         {
             if(fadeOut)
             World.Sound.FadeSource(_loopID, FadingType.Out, .00001f, 0);
-          else World.Sound.FadeSource(_loopID, FadingType.Out, .0001f, 0);
+          else World.Sound.FadeSource(_loopID, FadingType.Out, .001f, 0);
 
             if (!_passageLoops.IsNullOrEmpty())
             {
