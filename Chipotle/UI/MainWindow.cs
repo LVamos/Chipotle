@@ -144,6 +144,8 @@ namespace Game.UI
         /// </summary>
         private void OnShown(object sender, EventArgs e)
         {
+            Activate();
+            WindowState = FormWindowState.Maximized;
             Focus();
 
             if (!Program.Settings.MainMenuAtStartup)
