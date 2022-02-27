@@ -666,7 +666,7 @@ namespace Game
                 Locality locality = new Locality(
            new Name(A(l, "indexedname"), A(l, "friendlyname")),
            A(l, "to"),
-           A(l, "type").ToLocalityType(),
+           A(l, "type") == "indoor" ? Locality.LocalityType.Indoor : Locality.LocalityType.Outdoor,
            int.Parse(A(l, "height")),
            new Plane(A(l, "coordinates")),
            A(l, "defaultTerrain", false).ToTerrainType(),
@@ -696,7 +696,7 @@ lBackgroundInfo.volume
                 }
             }
 
-            // Place passages
+            // Load passages
             foreach (XElement p in xPassages)
             {
                 Name pIndexedName = new Name(A(p, "indexedname"));
@@ -705,9 +705,10 @@ lBackgroundInfo.volume
                 bool openable = A(p, "openable").ToBool();
                 Plane area = new Plane(A(p, "coordinates"));
                 List<Locality> localities = new List<Locality> { GetLocality(A(p, "from")), GetLocality(A(p, "to").PrepareForIndexing()) };
+                Door.DoorType dType = A(p, "type") == "door" ? Door.DoorType.Door : Door.DoorType.Gate;
 
                 // Create and register new passage
-                Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, state, openable));
+                Add(Passage.CreatePassage(pIndexedName, area, localities, isDoor, state, openable, dType));
             }
         }
 

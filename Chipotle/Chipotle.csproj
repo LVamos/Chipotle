@@ -173,7 +173,6 @@
     <Compile Include="Terrain\CardinalDirection.cs" />
     <Compile Include="Terrain\Door.cs" />
     <Compile Include="Terrain\HallDoor.cs" />
-    <Compile Include="Terrain\LocalityType.cs" />
     <Compile Include="Terrain\MapElement.cs" />
     <Compile Include="Terrain\ObstacleType.cs" />
     <Compile Include="Terrain\Orientation2D.cs" />

@@ -172,7 +172,14 @@ namespace Game.Entities
         {
             if (message.OccupiedPassage != null)
             {
-                string type = message.OccupiedPassage is Door ? " ve dveřích " : " v průchodu ";
+                string type = null;
+                switch (message.OccupiedPassage.ToString())
+                {
+                    case "průchod": type = "v průchodu"; break;
+                    case "dveře": type = "ve dveřích"; break;
+                    case "vrata": type = "ve vratech"; break;
+                }
+
                 string to = message.OccupiedPassage.AnotherLocality(Owner.Locality).To;
                 Tolk.Speak($"Stojíš {type}{to}", true);
                 return;

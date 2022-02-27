@@ -25,6 +25,20 @@ namespace Game.Terrain
     public class Door : Passage
     {
         /// <summary>
+        /// Describes type of a door.
+        /// </summary>
+        public enum DoorType
+        {
+            Door,
+            Gate
+        }
+
+        /// <summary>
+        /// Describes type of the door.
+        /// </summary>
+        public DoorType Type { get; protected set; }
+
+        /// <summary>
         /// Processes incoming messages.
         /// </summary>
         public override void Update()
@@ -73,10 +87,11 @@ namespace Game.Terrain
         /// <param name="area">Location of the door</param>
         /// <param name="localities">Two localities connected by the door</param>
         /// <param name="openable">Specifies whether the door can be opened by an NPC.</param>
-        public Door(Name name, PassageState state, Plane area, IEnumerable<Locality> localities, bool openable = true) : base(name, area, localities)
+        public Door(Name name, PassageState state, Plane area, IEnumerable<Locality> localities, bool openable = true, DoorType type = DoorType.Door) : base(name, area, localities)
         {
             State = state;
             _openable = openable;
+            Type = type;
         }
 
         /// <summary>
@@ -198,5 +213,12 @@ namespace Game.Terrain
             AnnounceManipulation();
             Play(_openingSound, sender as Entity, point);
         }
+
+        /// <summary>
+        /// Returns text description of the door.
+        /// </summary>
+        /// <returns>text description of the door</returns>
+        public override string ToString()
+            => Type == DoorType.Door ? "dveře" : "vrata";
     }
 }

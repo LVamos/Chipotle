@@ -456,7 +456,7 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
     from e in exits
     let point = e.Area.GetClosestPoint(_area.Center)
     let distance = GetDistanceDescription((int)World.GetDistance(me, point))
-    let type = e is Door ? "dveře " : "průchod "
+    let type = e.ToString()
     let to = e.AnotherLocality(Locality).To + " "
     let angle = Angle.GetDescription(GetAngle(point))
     select ($"{type} {to}: {distance} {angle}:")

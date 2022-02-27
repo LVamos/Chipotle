@@ -26,6 +26,13 @@ namespace Game.Terrain
     public class Passage : MapElement
     {
         /// <summary>
+        /// Returns text description of the passage.
+        /// </summary>
+        /// <returns>text description of the passage</returns>
+        public override string ToString()
+            => "průchod";
+
+        /// <summary>
         /// Checks if the specified point lays in front or behind the passage.
         /// </summary>
         /// <returns>True if the specified point lays in front or behind the passage</returns>
@@ -152,8 +159,10 @@ namespace Game.Terrain
         /// <param name="isDoor">Specifies if the passage is a door.</param>
         /// <param name="closed">Specifies if the passage is closed.</param>
         /// <param name="openable">Specifies if it can be opened by an NPC.</param>
+        /// <param name="state">State of a door</param>
+        /// <param name="type">Type of a door</param>
         /// <returns>A new instance of the passage</returns>
-        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, PassageState state, bool openable)
+        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, PassageState state, bool openable, Door.DoorType type)
         {
             switch (name.Indexed)
             {
@@ -161,7 +170,7 @@ namespace Game.Terrain
                 case "dcgv1": return CreateVanillaCrunchGarageDoor(name, area, localities);
                 case "dhkv1": return CreateMariottisDoor(name, area, localities);
                 case "d hala w1": return CreateHallDoor(name, area, localities);
-                default: return isDoor ? new Door(name, state, area, localities, openable) : new Passage(name, area, localities);
+                default: return isDoor ? new Door(name, state, area, localities, openable, type) : new Passage(name, area, localities);
             }
         }
 

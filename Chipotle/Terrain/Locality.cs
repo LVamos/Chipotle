@@ -25,7 +25,28 @@ namespace Game.Terrain
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Locality : MapElement
     {
-public IEnumerable<Locality> GetAccessibleLocalities()
+
+        /// <summary>
+        /// Indicates if a locality is inside a building or outside.
+        /// </summary>
+        public enum LocalityType
+        {
+            /// <summary>
+            /// A room or corridor in a building
+            /// </summary>
+            Indoor,
+
+            /// <summary>
+            /// An openair place like yard or meadow
+            /// </summary>
+            Outdoor
+        }
+
+        /// <summary>
+        /// Enumerates all accessible localities.
+        /// </summary>
+        /// <returns>All accessible localities</returns>
+        public IEnumerable<Locality> GetAccessibleLocalities()
         {
             IEnumerable<IEnumerable<Locality>> all = GetLocalitiesBehindDoor().Select(l2 => l2.GetLocalitiesBehindDoor());
             return all.SelectMany(loc => loc);
