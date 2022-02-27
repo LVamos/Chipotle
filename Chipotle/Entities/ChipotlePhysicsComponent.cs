@@ -52,12 +52,13 @@ namespace Game.Entities
 
             RecordRegion(target);
 
-            if (sourceLocality != null && sourceLocality != targetLocality)
-                SaveGame();
-
             // Watch important events
             WatchPuddle(target); // Check if player walked in a puddle
             WatchPhone();
+
+            // Save game if the game is in test mode.
+            if (Program.Settings.SaveGameInEachLocality && sourceLocality != null && sourceLocality != targetLocality)
+                SaveGame();
         }
 
 
@@ -186,7 +187,6 @@ namespace Game.Entities
         {
             switch (message)
             {
-                    case GameReloaded gr: OnGameReloaded(gr); break;
                     case ExitNavigationStopped ens: OnExitNavigationStopped(ens); break;
                     case ListExits lex: OnListExits(lex); break;
                     case ObjectNavigationStopped ons: OnObjectNavigationStopped(ons); break;
@@ -206,16 +206,6 @@ namespace Game.Entities
                     case UseObject uo: OnUseObject(uo); break;
                 default: base.HandleMessage(message); break;
             }
-        }
-
-        /// <summary>
-        /// Handles the GameReloaded message.
-        /// </summary>
-        /// <param name="message">The message to be handled</param>
-        private void OnGameReloaded(GameReloaded message)
-        {
-            Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
-            Owner.ReceiveMessage(new PositionChanged(this, _area, _area, Locality, Locality, ObstacleType.None, true));
         }
 
         /// <summary>
@@ -381,7 +371,6 @@ _navigatedExit = null;
             _currentRegion = -1;
             _inVisitedRegion = true;
 
-            if(Program.Settings.SaveGameInEachLocality)
             World.SaveGame();
 
             _currentRegion = temp;
@@ -395,7 +384,6 @@ _navigatedExit = null;
         protected override void OnCutsceneEnded(CutsceneEnded message)
         {
             base.OnCutsceneEnded(message);
-            SaveGame();
             WatchCar();
 
             switch (message.CutsceneName)

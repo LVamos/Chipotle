@@ -229,7 +229,8 @@ namespace Game.Entities
         /// allowed only if the specified locality is in the _allowedDestinations hash set.
         /// </remarks>
         /// <completionlist cref="_destinations"/>
-        private void Move(Locality locality) => Move(new Plane(_destinations[locality.Name.Indexed]));
+        private void Move(Locality locality) 
+            => Move(new Plane(_destinations[locality.Name.Indexed]));
 
         /// <summary>
         /// Moves the object to the specified locality.

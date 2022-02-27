@@ -617,8 +617,8 @@ namespace Game
 
             using (stream = File.OpenRead(Program.SerializationPath))
             {
-                helper = Serializer.Deserialize<SerializerHelper>(stream);
-            }
+                    helper = Serializer.Deserialize<SerializerHelper>(stream);
+            }   
             stream?.Close();
 
             _entities = helper.Entities;

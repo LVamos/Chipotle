@@ -73,22 +73,22 @@ namespace Game
             /// <summary>
             /// Enables or disables main menu at startup.
             /// </summary>
-            public static bool MainMenuAtStartup = false;
+            public static bool MainMenuAtStartup = true;
 
             /// <summary>
             /// Enables or disables game saving in each locality and after each interaction with a object or door.
             /// </summary>
-            public static bool SaveGameInEachLocality = true;
+            public static bool SaveGameInEachLocality = false;
 
             /// <summary>
             /// Enables or disables sending Tuttle to the pool locality at startup.
             /// </summary>
-            public static bool SendTuttleToPool = false;
+            public static bool SendTuttleToPool = true;
 
             /// <summary>
             /// Enables or disables Tuttle's Chipotle following.
             /// </summary>
-            public static bool LetTuttleFollowChipotle = false;
+            public static bool LetTuttleFollowChipotle = true;
         }
 
         /// <summary>
@@ -172,42 +172,42 @@ namespace Game
         /// <param name="ex">The exception</param>
         public static void OnError(Exception ex, string message = null)
         {
-                EnableJAWSKeyHook(); // Restore JAWS key hook
+            EnableJAWSKeyHook(); // Restore JAWS key hook
 
 
-                Action action = () =>
-                {
-                    // Ask for comment
-                    string comment = string.Empty;
+            Action action = () =>
+            {
+                // Ask for comment
+                string comment = string.Empty;
                 DialogResult result = MessageBox.Show(MainWindow, "Ta zkurvená hra spadla. Posílám Lukymu hlášení. Chceš k tomu přidat komentář?", "Chyba", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                    if(result == DialogResult.Yes)
+                if (result == DialogResult.Yes)
                     comment = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej popis chyby", "");
 
-                    // Prepare an error message
-                    StringBuilder text = new StringBuilder();
-                    text.AppendLine("Uživatel: " + Environment.UserName)
-                    .AppendLine(comment)
-                    .AppendLine("Verze: " + Version)
-                    .AppendLine("Datum a čas: " + DateTime.Now.ToString());
+                // Prepare an error message
+                StringBuilder text = new StringBuilder();
+                text.AppendLine("Uživatel: " + Environment.UserName)
+                .AppendLine(comment)
+                .AppendLine("Verze: " + Version)
+                .AppendLine("Datum a čas: " + DateTime.Now.ToString());
 
-                    if (World.Player != null)
-                        text.AppendLine("Aktuální pozice Chipotla: " + World.Player.Area.Center.ToString()).AppendLine();
+                if (World.Player != null)
+                    text.AppendLine("Aktuální pozice Chipotla: " + World.Player.Area.Center.ToString()).AppendLine();
 
-                    if (!string.IsNullOrEmpty(message))
-                        text.AppendLine("Zdroj výjimky: " + message);
+                if (!string.IsNullOrEmpty(message))
+                    text.AppendLine("Zdroj výjimky: " + message);
 
-                    text.AppendLine("Typ výjimky: " + ex.GetType().ToString()).AppendLine();
-                    text.AppendLine("Zpráva: " + ex.Message).AppendLine();
-                    text.AppendLine("Výpis stack trace" + ex.StackTrace);
+                text.AppendLine("Typ výjimky: " + ex.GetType().ToString()).AppendLine();
+                text.AppendLine("Zpráva: " + ex.Message).AppendLine();
+                text.AppendLine("Výpis stack trace" + ex.StackTrace);
 
-                    string report = text.ToString();
-                    bool ok = ReportError(report); // send e-mail with the error message to me.
-                    if (!ok)
-                        File.WriteAllText(_errorReportPath, report);
+                string report = text.ToString();
+                bool ok = ReportError(report); // send e-mail with the error message to me.
+                if (!ok)
+                    File.WriteAllText(_errorReportPath, report);
 
-                    report = ok ? "Už to má na mailu. Ten bude mít radost." : "Nepovedlo se to. Hlášení se odešle při příštím spuštění.";
-                    MessageBox.Show(MainWindow, report, "", MessageBoxButtons.OK);
-                };
+                report = ok ? "Už to má na mailu. Ten bude mít radost." : "Nepovedlo se to. Hlášení se odešle při příštím spuštění.";
+                MessageBox.Show(MainWindow, report, "", MessageBoxButtons.OK);
+            };
 
             if (Settings.ReportErrors)
             {
@@ -265,7 +265,7 @@ namespace Game
             }
 
             MainWindow = new MainWindow();
-                Application.Run(MainWindow);
+            Application.Run(MainWindow);
             EnableJAWSKeyHook();
         }
 
@@ -282,18 +282,18 @@ namespace Game
             if (!File.Exists(_errorReportPath))
                 return;
 
-                string message = null;
-                try
-                {
-                    message = File.ReadAllText(_errorReportPath);
-                }
-                catch (Exception e)
-                {
-                    return;
-                }
+            string message = null;
+            try
+            {
+                message = File.ReadAllText(_errorReportPath);
+            }
+            catch (Exception e)
+            {
+                return;
+            }
 
-                if (ReportError(message))
-                    File.Delete(_errorReportPath);
+            if (ReportError(message))
+                File.Delete(_errorReportPath);
         }
 
         /// <summary>
@@ -312,10 +312,10 @@ namespace Game
             if (_jaws != null)
                 return true;
 
-                _jaws = Type.GetTypeFromProgID("FreedomSci.JawsApi");
+            _jaws = Type.GetTypeFromProgID("FreedomSci.JawsApi");
 
-                if (_jaws == null)
-                    return false;
+            if (_jaws == null)
+                return false;
 
             _jawsObject = Activator.CreateInstance(_jaws);
             return true;
@@ -338,7 +338,7 @@ namespace Game
         public static void DisableJAWSKeyHook()
         {
             if (!Settings.DisableJawsKeyHook || !InitJAWS())
-return;
+                return;
 
             _jaws.InvokeMember("Disable", System.Reflection.BindingFlags.InvokeMethod, null, _jawsObject, null);
         }

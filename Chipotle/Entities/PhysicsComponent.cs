@@ -212,6 +212,16 @@ namespace Game.Entities
         public Orientation2D Orientation => new Orientation2D(_orientation);
 
         /// <summary>
+        /// Handles the GameReloaded message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        private void OnGameReloaded(GameReloaded message)
+        {
+            Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
+            Owner.ReceiveMessage(new PositionChanged(this, _area, _area, Locality, Locality, ObstacleType.None, true));
+        }
+
+        /// <summary>
         /// Runs a message handler for the specified message.
         /// </summary>
         /// <param name="message">The message to be handled</param>
@@ -219,6 +229,7 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case GameReloaded gr: OnGameReloaded(gr); break;
                 case SetPosition sp: OnSetPosition(sp); break;
                 default: base.HandleMessage(message); break;
             }

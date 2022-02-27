@@ -19,6 +19,11 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class TuttleAIComponent : AIComponent
     {
+        /// <summary>
+        /// Specifies if the NPC is just moving to another locality with the Chipotle's car.
+        /// </summary>
+[ProtoIgnore]
+        protected Locality _ridingTo;
 
         /// <summary>
         /// Handles the TuttleStateChanged message.
@@ -186,6 +191,9 @@ namespace Game.Entities
         {
             if (message.Target.GetLocality().Name.Indexed != "asfaltka c1")
                 _carMovement = message;
+
+            _ridingTo = _carMovement.Target.GetLocality();
+            Owner.ReceiveMessage(new StopFollowing(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new locality.
         }
 
         /// <summary>
@@ -230,6 +238,27 @@ namespace Game.Entities
             Assert(target.HasValue, "No walkable tile found.");
             Owner.ReceiveMessage(new SetPosition(this, new Plane((Vector2)target), true));
             _carMovement = null;
+        }
+
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+            WaitForChipotle();
+        }
+
+/// <summary>
+/// Restarts following the Chipotle NPC if they both arrived to a new locality by car.
+/// </summary>
+        private void WaitForChipotle()
+        {
+            if (_ridingTo != null && Owner.Locality == _ridingTo && World.Player.Locality == _ridingTo)
+            {
+                _ridingTo = null;
+                Owner.ReceiveMessage(new StartFollowing(this));
+            }
         }
     }
 }

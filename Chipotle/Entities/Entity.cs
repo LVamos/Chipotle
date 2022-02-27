@@ -216,9 +216,7 @@ namespace Game.Entities
         protected void OnPositionChanged(PositionChanged message)
         {
             _area = message.TargetPosition; // Set new position.
-
-            Locality sourceLocality = message.SourcePosition?.GetLocality();
-            Locality targetLocality = message.TargetPosition.GetLocality();
+            _locality = message.TargetLocality;
 
             // Record visited locality.
             if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
@@ -226,31 +224,33 @@ namespace Game.Entities
 
             // Inform all adjecting localities
             List<Locality> localities = new List<Locality>();
-            if (message.SourceLocality!= null)
+            if (message.SourceLocality!= null && message.SourceLocality != message.TargetLocality)
             {
                 localities.Add(message.SourceLocality);
                 localities.AddRange(message.SourceLocality.Neighbours);
             }
+
             if (message.TargetLocality!= null)
             {
                 localities.Add(message.TargetLocality);
                 localities.AddRange(message.TargetLocality.Neighbours);
             }
+
             IEnumerable<Locality> targetLocalities = localities.Distinct<Locality>();
 
             EntityMoved moved = new EntityMoved(this, message.SourcePosition, message.TargetPosition, message.SourceLocality, message.TargetLocality);
-            LocalityLeft left = new LocalityLeft(this, this, sourceLocality);
-            LocalityEntered entered = new LocalityEntered(this, this, targetLocality);
+            LocalityLeft left = new LocalityLeft(this, this, message.SourceLocality);
+            LocalityEntered entered = new LocalityEntered(this, this, message.TargetLocality);
 
             foreach (Locality l in targetLocalities)
             {
                 l.ReceiveMessage(moved);
 
-                if (targetLocality != sourceLocality)
-                {
+                    if(message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
                     l.ReceiveMessage(left);
+
+                    if(message.SourceLocality != message.TargetLocality)
                     l.ReceiveMessage(entered);
-                }
             }
         }
 

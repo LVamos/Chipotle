@@ -42,6 +42,9 @@ namespace Game.Entities
         protected Queue<Vector2> FindPath(Vector2 goal)
         {
             Vector2? start = _area.FindNearestWalkableTile(3);
+
+            if (_finder == null)
+                _finder = new PathFinder();
             return start.HasValue ? _finder.FindPath((Vector2)start, goal) : null;
         }
 
@@ -61,7 +64,7 @@ namespace Game.Entities
         /// An instance of the Random number generator
         /// </summary>
         [ProtoIgnore]
-        private readonly Random _random = new Random();
+        private Random _random = new Random();
 
         /// <summary>
         /// Specifies final distance from the Detective Chipotle when in process of approaching to it.
@@ -102,8 +105,9 @@ namespace Game.Entities
         {
             switch (message)
             {
-                case TuttleStateChanged tsc: OnTuttleStateChanged(tsc); break;
-                case Reveal r: OnReveal(r); break;
+                case GameReloaded m: OnGameReloaded(m); break;
+                case TuttleStateChanged m: OnTuttleStateChanged(m); break;
+                case Reveal m: OnReveal(m); break;
                 case Hide h: OnHide(h); break;
                 case GotoPoint gp: OnGotoPoint(gp); break;
                 case StartFollowing sf: OnStartFollowing(sf); break;
@@ -111,6 +115,17 @@ namespace Game.Entities
                 case EntityMoved em: OnEntityMoved(em); break;
                 default: base.HandleMessage(message); break;
             }
+        }
+
+        /// <summary>
+        /// Handles the GameReloaded message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        /// <exception cref="NotImplementedException"></exception>
+        private void OnGameReloaded(GameReloaded message)
+        {
+            if (_state == TuttleState.GoingToPlayer)
+                _restartApproaching = true;
         }
 
         /// <summary>
@@ -178,11 +193,13 @@ namespace Game.Entities
         /// </summary>
         private void GoToPlayer()
         {
-            // This is helpful in test mode if the Tuttle is set to follow the player right from the begining. If the Chiptoel isn't initialized yet Tuttle will keep trying to approach him.
+            // This is helpful in test mode if the Tuttle is set to follow the player right from the beginning. If the Chiptoel isn't initialized yet Tuttle will keep trying to approach him.
             if (Owner.Locality == null || World.Player == null)
                 return;
 
 
+            if (_random == null)
+                _random = new Random();
             _targetDistance = _random.Next(_minDistance, _maxDistance);
             Vector2? tmp = FindPlaceNearPlayer();
 
