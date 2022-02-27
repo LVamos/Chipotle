@@ -176,7 +176,7 @@ namespace Game.Entities
             base.Start();
             Move((Vector2)StartPosition, true);
                 _orientation = new Orientation2D(0, 1);
-            Owner.ReceiveMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
+            InnerMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ _navigatedExit = null;
 
             if (result.descriptions.IsNullOrEmpty()) // No objects near by
             {
-                Owner.ReceiveMessage(new SayExitsResult(this));
+                InnerMessage(new SayExitsResult(this));
                 return;
             }
 
@@ -252,7 +252,7 @@ _navigatedExit = null;
                 StopNavigation();
 
             _navigatedExit = target;
-            _navigatedExit.ReceiveMessage(new StartExitNavigation(Owner));
+            _navigatedExit.TakeMessage(new StartExitNavigation(Owner));
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ _navigatedExit = null;
 
             if (objects.objects.IsNullOrEmpty())
             {
-                Owner.ReceiveMessage(new SayObjectsResult(this, null));
+                InnerMessage(new SayObjectsResult(this, null));
                 return;
             }
 
@@ -317,7 +317,7 @@ _navigatedExit = null;
             //    StopNavigation();
 
             _navigatedObject = target;
-            _navigatedObject.ReceiveMessage(new StartObjectNavigation (Owner));
+            _navigatedObject.TakeMessage(new StartObjectNavigation (Owner));
         }
 
         /// <summary>
@@ -326,10 +326,10 @@ _navigatedExit = null;
         private void StopNavigation()
             {
             if (_navigatedObject != null)
-                _navigatedObject.ReceiveMessage(new StopObjectNavigation(Owner));
+                _navigatedObject.TakeMessage(new StopObjectNavigation(Owner));
 
             if (_navigatedExit!= null)
-                _navigatedExit.ReceiveMessage(new StopExitNavigation(Owner));
+                _navigatedExit.TakeMessage(new StopExitNavigation(Owner));
         }
 
         /// <summary>
@@ -422,8 +422,8 @@ _navigatedExit = null;
             // If the player stands in a passage inform him.
             Passage occupiedPassage = World.GetPassage(_area.Center);
             if (occupiedPassage != null)
-                Owner.ReceiveMessage(new SayExitsResult(this, occupiedPassage));
-            else Owner.ReceiveMessage(new SayExitsResult(this, GetNavigableExits().descriptions));
+                InnerMessage(new SayExitsResult(this, occupiedPassage));
+            else InnerMessage(new SayExitsResult(this, GetNavigableExits().descriptions));
         }
 
         /// <summary>
@@ -626,7 +626,7 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
         private void OnChipotlesCarMoved(ChipotlesCarMoved message)
         {
 _carMovement = message;
-            Locality.ReceiveMessage(message, true);
+            Locality.TakeMessage(message, true);
         }
 
         /// <summary>
@@ -673,7 +673,7 @@ _carMovement = message;
             // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             StopNavigation();
             if (!NavigationInProgress)
-                Owner.ReceiveMessage(new SayObjectsResult(this, GetNavigableObjects().descriptions));
+                InnerMessage(new SayObjectsResult(this, GetNavigableObjects().descriptions));
         }
 
         /// <summary>
@@ -688,7 +688,7 @@ _carMovement = message;
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnSayVisitedLocality(SayVisitedRegion message)
-            => Owner.ReceiveMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
+            => InnerMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
 
         /// <summary>
         /// Processes the MakeStep message.
@@ -730,8 +730,8 @@ _carMovement = message;
         {
             Orientation2D source = _orientation;
             _orientation.Rotate(message.Degrees);
-            Owner.ReceiveMessage(new OrientationChanged(this, source, _orientation, message.Direction));
-            Locality.ReceiveMessage(new OrientationChanged(Owner, source, _orientation, message.Direction));
+            InnerMessage(new OrientationChanged(this, source, _orientation, message.Direction));
+            Locality.TakeMessage(new OrientationChanged(Owner, source, _orientation, message.Direction));
             _speed += Math.Abs(message.Degrees) * World.DeltaTime;
         }
 
@@ -748,7 +748,7 @@ _carMovement = message;
 
                 Vector2? tmp = e.Area.FindOppositePoint(_area);
                 Vector2 point = tmp.HasValue ? (Vector2)tmp : e.Area.GetClosestPoint(CurrentTile.position);
-                e.ReceiveMessage(new UseObject(Owner, point));
+                e.TakeMessage(new UseObject(Owner, point));
             }
 
             Use(World.GetNearestPassages(CurrentTile.position, true, 1).FirstOrDefault()); // Detect doors within a radius of 2 meters and use the nearest one.
@@ -815,7 +815,7 @@ _carMovement = message;
             // Jump to target locality
             Vector2? target = _carMovement.Target.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");
-            World.GetLocality((Vector2)target).ReceiveMessage(_carMovement);
+            World.GetLocality((Vector2)target).TakeMessage(_carMovement);
             Move((Vector2)target, true);
             _carMovement = null;
         }
@@ -838,7 +838,7 @@ _carMovement = message;
             if (_phoneCountdown && _phoneDeltaTime >= _phoneInterval)
             {
                 _phoneCountdown = false;
-                World.GetObject("detektivovo auto").ReceiveMessage(new UnblockLocality(Owner, World.GetLocality("ulice s1")));
+                World.GetObject("detektivovo auto").TakeMessage(new UnblockLocality(Owner, World.GetLocality("ulice s1")));
                 World.PlayCutscene(Owner, "cs22");
             }
         }
@@ -878,7 +878,7 @@ _carMovement = message;
                 && World.GetObject("mobil s1").Used
                 )
             {
-                Car.ReceiveMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
+                Car.TakeMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
                 World.PlayCutscene(Owner, "cs19");
             }
         }
@@ -912,13 +912,13 @@ _carMovement = message;
             Passage p = World.GetPassage(obstacle);
 
             if (!t.Walkable)
-                Owner.ReceiveMessage(new TerrainCollided(this, obstacle));
+                InnerMessage(new TerrainCollided(this, obstacle));
             else if (o != null && o != Owner)
-                Owner.ReceiveMessage(new ObjectsCollided(this, o, obstacle));
+                InnerMessage(new ObjectsCollided(this, o, obstacle));
             else if (p != null && p.State == PassageState.Closed)
             {
-                p.ReceiveMessage(new DoorHit(Owner, p as Door, obstacle));
-                Owner.ReceiveMessage(new DoorHit(this, p as Door, obstacle));
+                p.TakeMessage(new DoorHit(Owner, p as Door, obstacle));
+                InnerMessage(new DoorHit(this, p as Door, obstacle));
             }
             else return false;
 

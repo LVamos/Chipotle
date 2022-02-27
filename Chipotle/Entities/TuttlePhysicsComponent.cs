@@ -26,7 +26,7 @@ namespace Game.Entities
         private void SetState(TuttleState state)
         {
             _state = state;
-            Owner.ReceiveMessage(new TuttleStateChanged(this, state));
+            InnerMessage(new TuttleStateChanged(this, state));
         }
 
         /// <summary>
@@ -352,7 +352,7 @@ namespace Game.Entities
             // If the obstacle is a door open it.
             Passage p = World.GetPassage(obstacle);
             if (p != null && p.State == PassageState.Closed)
-                p.ReceiveMessage(new UseObject(Owner, obstacle)); // Open the door and keep walking.
+                p.TakeMessage(new UseObject(Owner, obstacle)); // Open the door and keep walking.
 
             return false;
         }

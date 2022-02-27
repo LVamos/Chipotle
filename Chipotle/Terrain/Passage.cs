@@ -252,7 +252,7 @@ namespace Game.Terrain
         {
             World.Sound.ChangeLooping(_navigationSoundID, false);
             _navigating = false;
-            World.Player.ReceiveMessage(new ExitNavigationStopped(this));
+            World.Player.TakeMessage(new ExitNavigationStopped(this));
         }
 
         /// <summary>

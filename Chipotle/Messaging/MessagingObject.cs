@@ -40,7 +40,7 @@ namespace Game.Messaging
         /// Gets a message from another messaging object and stores it for processing.
         /// </summary>
         /// <param name="message">The message to be received</param>
-        public virtual void ReceiveMessage(GameMessage message)
+        public virtual void TakeMessage(GameMessage message)
         {
             Assert(message != null, nameof(message) + " was null.");
 
@@ -112,6 +112,6 @@ namespace Game.Messaging
         /// <param name="target">The receiving messaging object</param>
         /// <param name="message">The message to be distributed</param>
         protected virtual void SendMessage(MessagingObject target, GameMessage message)
-            => target.ReceiveMessage(message);
+            => target.TakeMessage(message);
     }
 }

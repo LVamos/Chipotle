@@ -154,9 +154,9 @@ namespace Game.Entities
         /// Takes an incoming message and saves it into the message queue.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        public override void ReceiveMessage(GameMessage message)
+        public override void TakeMessage(GameMessage message)
         {
-            base.ReceiveMessage(message);
+            base.TakeMessage(message);
 
             if (_messagingEnabled)
                 SendInnerMessage(message);
@@ -205,7 +205,7 @@ namespace Game.Entities
         /// </summary>
         protected override void Destroy()
         {
-            Locality.ReceiveMessage(new LocalityLeft(this, this, Locality));
+            Locality.TakeMessage(new LocalityLeft(this, this, Locality));
             World.Remove(this);
         }
 
@@ -244,13 +244,13 @@ namespace Game.Entities
 
             foreach (Locality l in targetLocalities)
             {
-                l.ReceiveMessage(moved);
+                l.TakeMessage(moved);
 
                     if(message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
-                    l.ReceiveMessage(left);
+                    l.TakeMessage(left);
 
                     if(message.SourceLocality != message.TargetLocality)
-                    l.ReceiveMessage(entered);
+                    l.TakeMessage(entered);
             }
         }
 
@@ -272,7 +272,7 @@ namespace Game.Entities
             foreach(EntityComponent c in _components)
             {
                 if (c != message.Sender || message is GameReloaded)
-                    c.ReceiveMessage(message);
+                    c.TakeMessage(message);
             }
         }
 

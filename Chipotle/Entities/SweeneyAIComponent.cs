@@ -23,7 +23,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            Owner.ReceiveMessage(new SetPosition(this, new Plane("1402, 960"), true));
+            InnerMessage(new SetPosition(this, new Plane("1402, 960"), true));
         }
 
         /// <summary>
@@ -58,6 +58,6 @@ namespace Game.Entities
         /// locality to the sweeney's hall (hala s1) locality.
         /// </summary>
         private void JumpToSweeneysRoom()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1407, 978"), true));
+            => InnerMessage(new SetPosition(this, new Plane("1407, 978"), true));
     }
 }

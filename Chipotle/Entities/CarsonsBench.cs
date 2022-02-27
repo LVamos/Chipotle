@@ -41,7 +41,7 @@ namespace Game.Entities
                 )
             {
                 base.OnUseObject(message);
-                Car.ReceiveMessage(new UnblockLocality(this, World.GetLocality("ulice v1")));
+                Car.TakeMessage(new UnblockLocality(this, World.GetLocality("ulice v1")));
             }
         }
     }

@@ -122,7 +122,7 @@ namespace Game.Terrain
             DoorManipulated message = new DoorManipulated(this);
             IEnumerable<Locality> accessibles = Localities[0].GetAccessibleLocalities().Concat(Localities[1].GetAccessibleLocalities()).Distinct();
             foreach (Locality l in accessibles)
-                l.ReceiveMessage(message);
+                l.TakeMessage(message);
         }
 
         /// <summary>

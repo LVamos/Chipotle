@@ -50,7 +50,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            Owner.ReceiveMessage(new SetPosition(this, new Plane("1577, 1037")));
+            InnerMessage(new SetPosition(this, new Plane("1577, 1037")));
         }
 
         /// <summary>

@@ -365,14 +365,14 @@ public IEnumerable<Locality> GetAccessibleLocalities()
         /// </summary>
         /// <param name="message">The message to be received</param>
         /// <param name="routeToNeighbours">Specifies if the message should be distributed to the neighbours of this locality</param>
-        public void ReceiveMessage(GameMessage message, bool routeToNeighbours)
+        public void TakeMessage(GameMessage message, bool routeToNeighbours)
         {
-            ReceiveMessage(message);
+            TakeMessage(message);
 
             if (routeToNeighbours)
             {
                 foreach (Locality neighbour in Neighbours)
-                    neighbour.ReceiveMessage(message);
+                    neighbour.TakeMessage(message);
             }
         }
 
@@ -380,9 +380,9 @@ public IEnumerable<Locality> GetAccessibleLocalities()
         /// Gets a message from another messaging object and stores it for processing.
         /// </summary>
         /// <param name="message">The message to be received</param>
-        public override void ReceiveMessage(GameMessage message)
+        public override void TakeMessage(GameMessage message)
         {
-            base.ReceiveMessage(message);
+            base.TakeMessage(message);
 
             MessageObjects(message);
             MessageEntities(message);
@@ -540,7 +540,7 @@ public IEnumerable<Locality> GetAccessibleLocalities()
             foreach (DumpObject o in Objects)
             {
                 if (o != message.Sender)
-                    o.ReceiveMessage(message);
+                    o.TakeMessage(message);
             }
         }
 
@@ -549,7 +549,7 @@ public IEnumerable<Locality> GetAccessibleLocalities()
             foreach(Entity e in Entities)
             {
                 if (e != message.Sender)
-                    e.ReceiveMessage(message);
+                    e.TakeMessage(message);
             }
         }
 
@@ -589,7 +589,7 @@ public IEnumerable<Locality> GetAccessibleLocalities()
             foreach (Passage p in Passages)
             {
                 if (p != message.Sender)
-                    p.ReceiveMessage(message);
+                    p.TakeMessage(message);
             }
         }
 

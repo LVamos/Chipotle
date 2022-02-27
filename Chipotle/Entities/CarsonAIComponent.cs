@@ -36,7 +36,7 @@ namespace Game.Entities
             base.Start();
 
             SetPosition message = new SetPosition(this, new Plane("1230, 1017"), true); // Sitting on a bench at a table
-            Owner.ReceiveMessage(message);
+            InnerMessage(message);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Game.Entities
             if (_saidGoodbyeToChipotle && !road.IsItHere(car)) // Chipotle left the area
             {
                 _messagingEnabled = false;
-                Owner.ReceiveMessage(new Destroy(this));
+                InnerMessage(new Destroy(this));
             }
         }
     }

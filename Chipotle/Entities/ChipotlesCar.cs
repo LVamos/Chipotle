@@ -118,8 +118,8 @@ namespace Game.Entities
         {
             base.Move(target);
             ChipotlesCarMoved message = new ChipotlesCarMoved(this, target);
-            Player.ReceiveMessage(message);
-            _tuttle.ReceiveMessage(message);
+            Player.TakeMessage(message);
+            _tuttle.TakeMessage(message);
         }
 
         /// <summary>

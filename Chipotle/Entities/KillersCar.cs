@@ -53,7 +53,7 @@ namespace Game.Entities
             else
             {
                 _cutscene = "cs8";
-                ChipotlesCar.ReceiveMessage(new MoveChipotlesCar(this, World.GetLocality("ullice h1")));
+                ChipotlesCar.TakeMessage(new MoveChipotlesCar(this, World.GetLocality("ullice h1")));
             }
 
             base.OnUseObject(message);

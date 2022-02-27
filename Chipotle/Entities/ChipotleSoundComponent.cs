@@ -193,7 +193,7 @@ namespace Game.Entities
 
                 string number;
                 if (count >= 2 && count <= 4)
-                    number = "Jsou tu " + (count == 2 ? "dva" : "3") + " východy: ";
+                    number = "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: ";
                 else number = "Je tu " + count.ToString() + " východů: ";
 
                 Tolk.Speak(number + FormatStringList(message.Exits, true) +".", true);

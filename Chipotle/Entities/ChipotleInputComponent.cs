@@ -40,7 +40,7 @@ namespace Game.Entities
         /// Reports current position of the player in relative coordinates.
         /// </summary>
         private void SayRelativeCoordinates()
-            => Owner.ReceiveMessage(new SayCoordinates(this));
+            => InnerMessage(new SayCoordinates(this));
 
         /// <summary>
         /// Determines how quickly the game reacts to movement commands. The speed is in milliseconds.
@@ -97,14 +97,14 @@ namespace Game.Entities
         /// <summary>
         /// Lists navigable objects.
         /// </summary>
-        protected void ListObjects() => Owner.ReceiveMessage(new ListObjects(this));
+        protected void ListObjects() => InnerMessage(new ListObjects(this));
 
         /// <summary>
         /// Runs the game menu
         /// </summary>
         private void GameMenu()
         {
-            Owner.ReceiveMessage(new StopWalk(this)); // Stop Chipotle if he's going somewhere.
+            InnerMessage(new StopWalk(this)); // Stop Chipotle if he's going somewhere.
 
             // Prepare the menu
             (string name, Action command)[] commands =
@@ -179,7 +179,7 @@ namespace Game.Entities
         /// Reports size of the locality in which the Chipotle NPC is currently located.
         /// </summary>
         private void SayLocalitySize()
-            => Owner.ReceiveMessage(new SayLocalitySize(this));
+            => InnerMessage(new SayLocalitySize(this));
 
         /// <summary>
         /// Test function to announce Tuttle's position
@@ -218,11 +218,11 @@ namespace Game.Entities
 
             Locality locality = World.GetLocality(items[item]);
             Vector2 point = locality.Area.GetWalkableTiles().First().position;
-            Owner.ReceiveMessage(new SetPosition(this, new Plane(point)));
+            InnerMessage(new SetPosition(this, new Plane(point)));
 
             // Move Tuttle
             point = locality.Area.GetWalkableTiles().First(t => t.position != point).position;
-            World.GetEntity("tuttle").ReceiveMessage(new SetPosition(null, new Plane(point)));
+            World.GetEntity("tuttle").TakeMessage(new SetPosition(null, new Plane(point)));
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace Game.Entities
             Vector2 coords = Owner.Area.Center;
             string result = Math.Round(coords.X).ToString() + ", " + Math.Round(coords.Y);
             Clipboard.SetText(result);
-            Owner.ReceiveMessage(new SayCoordinates(this, false));
+            InnerMessage(new SayCoordinates(this, false));
         }
 
 
@@ -259,14 +259,14 @@ namespace Game.Entities
                 return;
 
             Plane v = new Plane(Clipboard.GetText());
-            Owner.ReceiveMessage(new SetPosition(this, v));
+            InnerMessage(new SetPosition(this, v));
         }
 
         /// <summary>
         /// Lists exits from current locality.
         /// </summary>
         protected void ListExits()
-            => Owner.ReceiveMessage(new ListExits(this));
+            => InnerMessage(new ListExits(this));
 
         /// <summary>
         /// Processes the CutsceneBegan message.
@@ -309,56 +309,56 @@ namespace Game.Entities
         /// <summary>
         /// Reports list of all exits from current locality.
         /// </summary>
-        protected void SayExits() => Owner.ReceiveMessage(new SayExits(this));
+        protected void SayExits() => InnerMessage(new SayExits(this));
 
         /// <summary>
         /// Reports current orientation setting of the Chipotle NPC.
         /// </summary>
         protected void SayOrientation() 
-            => Owner.ReceiveMessage(new SayOrientation(this));
+            => InnerMessage(new SayOrientation(this));
 
         /// <summary>
         /// Allows the player to use a nearby object or door.
         /// </summary>
         private void Interact()
-=> Owner.ReceiveMessage(new UseObject(this));
+=> InnerMessage(new UseObject(this));
 
         /// <summary>
         /// Moves the NPC one step back.
         /// </summary>
         private void GoBack()
-            => Owner.ReceiveMessage(new StartWalk(this, TurnType.Around));
+            => InnerMessage(new StartWalk(this, TurnType.Around));
 
         /// <summary>
         /// Starts Moving the NPC forth.
         /// </summary>
         private void GoForward()
-            => Owner.ReceiveMessage(new StartWalk(this, TurnType.None));
+            => InnerMessage(new StartWalk(this, TurnType.None));
 
         /// <summary>
         /// Starts moving the NPC to the left.
         /// </summary>
         private void GoLeft()
-             => Owner.ReceiveMessage(new StartWalk(this, TurnType.SharplyLeft));
+             => InnerMessage(new StartWalk(this, TurnType.SharplyLeft));
 
         /// <summary>
         /// Moves the NPC one step to the right perpendicullar to current orientation.
         /// </summary>
         private void GoRight()
-            => Owner.ReceiveMessage(new StartWalk(this, TurnType.SharplyRight));
+            => InnerMessage(new StartWalk(this, TurnType.SharplyRight));
 
         /// <summary>
         /// Announces the public name of the locality where the NPC is currently located using a
         /// screen reader or a voice synthesizer.
         /// </summary>
         private void SayLocality()
-            => Owner.ReceiveMessage(new SayLocality(this));
+            => InnerMessage(new SayLocality(this));
 
         /// <summary>
         /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
         /// </summary>
         private void SayObjects()
-=> Owner.ReceiveMessage(new SayObjects(this));
+=> InnerMessage(new SayObjects(this));
 
         /// <summary>
         /// Stops the currently playing cutscene.
@@ -376,49 +376,49 @@ namespace Game.Entities
         /// Tells the physics to stop the Chipotle NPC.
         /// </summary>
         private void StopWalk()
-            => Owner.ReceiveMessage(new StopWalk(this));
+            => InnerMessage(new StopWalk(this));
 
         /// <summary>
         /// Reports the terrain on which the NPC is standing.
         /// </summary>
         private void TerrainInfo()
-            => Owner.ReceiveMessage(new SayTerrain(this));
+            => InnerMessage(new SayTerrain(this));
 
         /// <summary>
         /// Rotates the NPC around Z axis.
         /// </summary>
         private void TurnAround()
-            => Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.Around));
+            => InnerMessage(new ChangeOrientation(this, TurnType.Around));
 
         /// <summary>
         /// Rotates the NPC around Z axis 45 degrees to the left.
         /// </summary>
         private void TurnLeft()
-=> Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SlightlyLeft));
+=> InnerMessage(new ChangeOrientation(this, TurnType.SlightlyLeft));
 
         /// <summary>
         /// Rotates the NPC around Z axis 45 degrees to the right.
         /// </summary>
         private void TurnRight()
-=> Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SlightlyRight));
+=> InnerMessage(new ChangeOrientation(this, TurnType.SlightlyRight));
 
         /// <summary>
         /// Rotates the NPC around Z axis 90 degrees to the left.
         /// </summary>
         private void TurnSharplyLeft()
-                        => Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SharplyLeft));
+                        => InnerMessage(new ChangeOrientation(this, TurnType.SharplyLeft));
 
         /// <summary>
         /// Rotates the NPC around Z axis 90 degrees to the right.
         /// </summary>
         private void TurnSharplyRight()
-=> Owner.ReceiveMessage(new ChangeOrientation(this, TurnType.SharplyRight));
+=> InnerMessage(new ChangeOrientation(this, TurnType.SharplyRight));
 
         /// <summary>
         /// Reports if the player have already visited the current locality.
         /// </summary>
         private void SayVisitedRegion()
-            => Owner.ReceiveMessage(new SayVisitedRegion(this));
+            => InnerMessage(new SayVisitedRegion(this));
 
         /// <summary>
         /// Processes the KeyDown message.

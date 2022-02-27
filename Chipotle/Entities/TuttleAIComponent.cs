@@ -38,7 +38,7 @@ namespace Game.Entities
         private void SetState(TuttleState state)
         {
             _state = state;
-            Owner.ReceiveMessage(new TuttleStateChanged(this, state));
+            InnerMessage(new TuttleStateChanged(this, state));
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Game.Entities
             if (Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
                 _area = new Plane((Vector2)Program.Settings.TuttleTestStart);
             else _area = new Plane(new Vector2(1030, 1036));
-            Owner.ReceiveMessage(new SetPosition(this, new Plane(_area), true));
+            InnerMessage(new SetPosition(this, new Plane(_area), true));
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Game.Entities
                 return;
 
             Vector2 goal = new Vector2(1005, 1051);
-            Owner.ReceiveMessage(new GotoPoint(this, goal));
+            InnerMessage(new GotoPoint(this, goal));
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Game.Entities
         private void Hide()
         {
             _hidden = true;
-            Owner.ReceiveMessage(new Hide(this));
+            InnerMessage(new Hide(this));
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Game.Entities
         private void JumpToBelvedereStreet2()
         {
             SetPosition message = new SetPosition(this, new Plane("1806, 1121"), true);
-            Owner.ReceiveMessage(message);
+            InnerMessage(message);
         }
 
         /// <summary>
@@ -174,14 +174,14 @@ namespace Game.Entities
         /// locality to the Christine's hall (hala p1) locality.
         /// </summary>
         private void JumpToChristinesHall()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1791, 1124"), true));
+            => InnerMessage(new SetPosition(this, new Plane("1791, 1124"), true));
 
         /// <summary>
         /// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his
         /// room (pokoj s1) locality.
         /// </summary>
         private void JumpToSweeneysRoom()
-            => Owner.ReceiveMessage(new SetPosition(this, new Plane("1411, 974"), true));
+            => InnerMessage(new SetPosition(this, new Plane("1411, 974"), true));
 
         /// <summary>
         /// Processes the ChipotlesCarMoved message.
@@ -193,7 +193,7 @@ namespace Game.Entities
                 _carMovement = message;
 
             _ridingTo = _carMovement.Target.GetLocality();
-            Owner.ReceiveMessage(new StopFollowing(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new locality.
+            InnerMessage(new StopFollowing(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new locality.
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Game.Entities
                 _playerWasByPool = true;
 
                 if(Program.Settings.LetTuttleFollowChipotle)
-                Owner.ReceiveMessage(new StartFollowing(this));
+                InnerMessage(new StartFollowing(this));
             }
         }
 
@@ -221,7 +221,7 @@ namespace Game.Entities
             Assert(target.HasValue, "No walkable tile near player");
 
             _hidden = false;
-            Owner.ReceiveMessage(new Reveal(this, new Plane((Vector2)target)));
+            InnerMessage(new Reveal(this, new Plane((Vector2)target)));
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Game.Entities
             perimeter.Extend();
             Vector2? target = perimeter.FindRandomWalkableTile(1);
             Assert(target.HasValue, "No walkable tile found.");
-            Owner.ReceiveMessage(new SetPosition(this, new Plane((Vector2)target), true));
+            InnerMessage(new SetPosition(this, new Plane((Vector2)target), true));
             _carMovement = null;
         }
 
@@ -257,7 +257,7 @@ namespace Game.Entities
             if (_ridingTo != null && Owner.Locality == _ridingTo && World.Player.Locality == _ridingTo)
             {
                 _ridingTo = null;
-                Owner.ReceiveMessage(new StartFollowing(this));
+                InnerMessage(new StartFollowing(this));
             }
         }
     }

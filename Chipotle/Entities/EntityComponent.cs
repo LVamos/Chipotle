@@ -20,6 +20,13 @@ namespace Game.Entities
     public abstract class EntityComponent : MessagingObject
     {
         /// <summary>
+        /// Sends an inner message to the containing NPC.
+        /// </summary>
+        /// <param name="message">The message to be sent</param>
+        protected void InnerMessage(GameMessage message)
+            => Owner.TakeMessage(message);
+
+        /// <summary>
         /// Indexed name of the owner fo this component.
         /// </summary>
         protected string _ownerName;

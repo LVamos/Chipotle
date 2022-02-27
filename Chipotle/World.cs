@@ -627,10 +627,10 @@ namespace Game
             _localities = helper.Localities;
             WindowHandler.Switch(new Game.UI.GameWindow());
             GameReloaded message = new GameReloaded();
-            _entities.Values.Foreach(e => e.ReceiveMessage(message));
-            _localities.Values.Foreach(l => l.ReceiveMessage(message));
-            _objects.Values.Foreach(o => o.ReceiveMessage(message));
-            _passages.Values.Foreach(p => p.ReceiveMessage(message));
+            _entities.Values.Foreach(e => e.TakeMessage(message));
+            _localities.Values.Foreach(l => l.TakeMessage(message));
+            _objects.Values.Foreach(o => o.TakeMessage(message));
+            _passages.Values.Foreach(p => p.TakeMessage(message));
             Program.MainWindow.GameLoopEnabled = true;
         }
 
@@ -759,7 +759,7 @@ lBackgroundInfo.volume
 
             int id = Sound.Play(Sound.GetRandomSoundStream(cutscene), null, false, PositionType.None, Vector3.Zero, false, _cutsceneVolume);
             _cutscene.message = new CutsceneBegan(sender, cutscene, id);
-            ReceiveMessage(_cutscene.message);
+            TakeMessage(_cutscene.message);
         }
 
         /// <summary>
@@ -779,8 +779,8 @@ lBackgroundInfo.volume
         /// Sends a message to all NPCs.
         /// </summary>
         /// <param name="message">The message to be sent</param>
-        public static void ReceiveMessage(GameMessage message)
-            => _entities.Values.Foreach(e => e.ReceiveMessage(message));
+        public static void TakeMessage(GameMessage message)
+            => _entities.Values.Foreach(e => e.TakeMessage(message));
 
         /// <summary>
         /// Unregisters the specified locality.
@@ -869,7 +869,7 @@ lBackgroundInfo.volume
                 return;
 
             Sound.FadeSource(_cutscene.message.SoundID, FadingType.Out, .0001f, 0);
-            ReceiveMessage(new CutsceneEnded(_cutscene.message.Sender, _cutscene.message.CutsceneName, _cutscene.message.SoundID));
+            TakeMessage(new CutsceneEnded(_cutscene.message.Sender, _cutscene.message.CutsceneName, _cutscene.message.SoundID));
             _cutscene.message = null;
             _cutscene.paused = false;
         }
@@ -902,7 +902,7 @@ lBackgroundInfo.volume
 
                     if (sample == totalSamples && !_cutscene.paused)
                     {
-                        ReceiveMessage(new CutsceneEnded(_cutscene.message.Sender, _cutscene.message.CutsceneName, _cutscene.message.SoundID));
+                        TakeMessage(new CutsceneEnded(_cutscene.message.Sender, _cutscene.message.CutsceneName, _cutscene.message.SoundID));
                         _cutscene .message = null;
                     }
                 }

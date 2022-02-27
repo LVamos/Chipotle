@@ -214,7 +214,7 @@ namespace Game.Entities
         {
             World.Sound.ChangeLooping(_navigationSoundID, false);
             _navigating = false;
-            World.Player.ReceiveMessage(new ObjectNavigationStopped(this));
+            World.Player.TakeMessage(new ObjectNavigationStopped(this));
         }
 
 
