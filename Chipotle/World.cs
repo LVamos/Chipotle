@@ -21,6 +21,7 @@ using OpenTK;
 
 using ProtoBuf;
 using ProtoBuf.Meta;
+using System.Windows.Forms;
 
 namespace Game
 {
@@ -858,7 +859,18 @@ lBackgroundInfo.volume
 
             if (!Program.Settings.PlayCutscenes)
                 StopCutscene(null);
+            }
+
+        /// <summary>
+        /// A test mode method to copy friendly names of all objects to clipboard.
+        /// </summary>
+        private static void CopyObjectsToClipboard()
+        {
+            IEnumerable<string> objects = _objects.Values.OrderBy(o => o.Name.Friendly).Select(o => o.Name.Friendly).Distinct();
+            string text = string.Join(Environment.NewLine, objects.ToArray<string>());
+            Clipboard.SetText(text);
         }
+
 
         /// <summary>
         /// Stops an ongoing audio cutscene.
