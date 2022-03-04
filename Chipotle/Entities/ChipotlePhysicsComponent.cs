@@ -914,7 +914,10 @@ _carMovement = message;
             if (!t.Walkable)
                 InnerMessage(new TerrainCollided(this, obstacle));
             else if (o != null && o != Owner)
+            {
+                o.TakeMessage(new ObjectsCollided(Owner, o, obstacle));
                 InnerMessage(new ObjectsCollided(this, o, obstacle));
+            }
             else if (p != null && p.State == PassageState.Closed)
             {
                 p.TakeMessage(new DoorHit(Owner, p as Door, obstacle));

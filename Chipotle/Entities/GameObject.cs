@@ -201,6 +201,18 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "vana": return CreateTub(name, area, decorative);
+                case "toaleťák": return CreateToiletPaper(name, area, decorative);
+                case "police": return CreateShelf(name, area, decorative);
+                case "záchod": return CreateToiletBowl(name, area, decorative);
+                case "mikrovlnka": return CreateMicrowave(name, area, decorative);
+                case "elektrický gril": return CreateElectricGrill(name, area, decorative);
+                case "vysavač": return CreateVacuumCleaner(name, area, decorative);
+                case "dvířka": return CreateLittleDoor(name, area, decorative);
+                case "koš": return CreateTrashCan(name, area, decorative);
+                case "dřez": return CreateKitchenSink(name, area, decorative);
+                case "linka": return CreateKitchenCounter(name, area, decorative);
+                case "stůl": return CreateTable(name, area, decorative);
                 case "dálnice": return CreateHighway(name, area, decorative);
                 case "rozvodna": return CreateElectricalBox(name, area, decorative);
                 case "větrák": return CreateFan(name, area, decorative);
@@ -242,6 +254,114 @@ namespace Game.Entities
                 default: return new DumpObject(name, area, string.Empty, decorative);
             }
         }
+
+        /// <summary>
+        /// Creates new instance of a tub.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateTub(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "vana", decorative: decorative, collisionSound: "HitTub");
+
+        /// <summary>
+        /// Creates new instance of toilet paper.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateToiletPaper(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "mikrovlnka", decorative: decorative, collisionSound: "HitToiletPaper");
+
+        /// <summary>
+        /// Creates new instance of a shelf.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateShelf(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "police", decorative: decorative, collisionSound: "HitShelf");
+
+        /// <summary>
+        /// Creates new instance of a toilet bowl.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateToiletBowl(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "záchod", decorative: decorative, collisionSound: "HitToiletBowl", actionSound: "ActToiletBowl");
+
+        /// <summary>
+        /// Creates new instance of a microwave.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateMicrowave(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "mikrovlnka", decorative: decorative, collisionSound: "HitMicrowave", actionSound: "ActMicrowave");
+
+        /// <summary>
+        /// Creates new instance of a electric grill.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateElectricGrill(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "elektrický gril", decorative: decorative, collisionSound: "HitelectricGrill");
+
+        /// <summary>
+        /// Creates new instance of a kitchen sink.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateVacuumCleaner(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "vysavač", decorative: decorative, cutscene: "cs38");
+
+        /// <summary>
+        /// Creates new instance of a kitchen sink.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateLittleDoor(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "dvířka", decorative: decorative, collisionSound: "HitLittleDoor");
+
+        /// <summary>
+        /// Creates new instance of a trash can.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateTrashCan(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "koš", decorative: decorative, collisionSound: "HitTrashCan");
+
+        /// <summary>
+        /// Creates new instance of a kitchen sink.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateKitchenSink(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "dřez", decorative: decorative, collisionSound: "HitKitchenSink", actionSound: "ActKitchenSink", stopWhenPlayerMoves: true);
+
+        /// <summary>
+        /// Creates new instance of a kitchen counter.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateKitchenCounter(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "linka", decorative: decorative, collisionSound: "HitKitchenCounter", actionSound: "ActKitchenCounter", stopWhenPlayerMoves: true);
+
+        /// <summary>
+        /// Creates new instance of a table.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateTable(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "stůl", decorative: decorative, collisionSound: "HitTable");
 
         /// <summary>
         /// Creates new instance of the bench (lavička w1) object in the Walsch's pool (bazén w1) locality.
@@ -350,8 +470,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateDishwasher(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "myčka", decorative, null, "snd11");
+        public static DumpObject CreateDishwasher(Name name, Plane area, bool decorative)
+        => new DumpObject(name: name, area: area, type: "myčka", decorative: decorative, collisionSound: "HitDishWasher", actionSound: "ActDishwasher");
 
         /// <summary>
         /// Creates new instance of the fan (větrák p1) object in the Christine's bed room (ložnice
@@ -398,7 +518,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static DumpObject CreateChair(Name name, Plane area, bool decorative)
-        => new DumpObject(name, area, "židle", decorative, null, null, null, "snd12");
+        => new DumpObject(name: name, area: area, type: "židle", decorative: decorative, actionSound: "ActChair", collisionSound: "HitChair");
 
         /// <summary>
         /// Creates new instance of the Christine's door bell object in the Belvedere street (ulice

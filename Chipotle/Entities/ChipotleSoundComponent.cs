@@ -100,7 +100,7 @@ namespace Game.Entities
                 case OrientationChanged ocd: OnOrientationChanged(ocd); break;
                 case PositionChanged pcd:  OnPositionChanged(pcd); break;
                 case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
-                case TerrainCollided tcl:  OnInpermeableTerrainCollision(tcl); break;
+                case TerrainCollided tcl:  OnTerrainCollided(tcl); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -264,8 +264,8 @@ namespace Game.Entities
         /// Processes the TerrainCollided message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnInpermeableTerrainCollision(TerrainCollided message)
-             => PlayTerrain(World.Map[message.Position].Terrain);
+        private void OnTerrainCollided(TerrainCollided message)
+             => PlayTerrain(message.Position);
 
         /// <summary>
         /// Processes the LocalityChanged message.
@@ -287,7 +287,7 @@ namespace Game.Entities
             _sound.ListenerPosition = message.TargetPosition.Center.AsOpenALVector();
 
             if(!message.Silently)
-            PlayTerrain(World.Map[message.TargetPosition.Center].Terrain);
+            PlayTerrain(message.TargetPosition.Center);
 
             WatchCutscene();
         }
@@ -309,21 +309,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnObjectsCollided(ObjectsCollided message)
-        {
-            Vector2 position = message.Position;
-            Vector2 myOrientation = Owner.Orientation.UnitVector;
-            Vector2 myPosition = Owner.Area.Center;
-            Vector2 opposite = myOrientation.PerpendicularRight.PerpendicularRight +myPosition;
-            PositionType positionType = PositionType.Absolute;
-            if (position == opposite)
-            {
-                positionType = PositionType.Relative;
-                position = new Vector2(0, -3);
-            }
-
-            _sound.Play(_sound.GetRandomSoundStream("movhitwall"), null, looping: false, positionType, position.AsOpenALVector(), true);
-            Tolk.Speak(message.Object.Name.Friendly, true);
-        }
+            => Tolk.Speak(message.Object.Name.Friendly, true);
 
         /// <summary>
         /// Processes the TurnoverDone message.
@@ -357,13 +343,17 @@ namespace Game.Entities
         /// Plays a sound representation of a tile.
         /// </summary>
         /// <param name="tile">A tile to be announced</param>
-        private void PlayTerrain(TerrainType terrain)
+        private void PlayTerrain(Vector2 position)
         {
-            string soundName = "movstep" + Enum.GetName(terrain.GetType(), terrain);
-            _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, Vector3.Zero, true, _walkingVolume, null, 1f, 0, Playback.OpenAL);
+            TerrainType terrain = World.Map[position].Terrain;
 
             if (terrain == TerrainType.Wall)
-                Tolk.Speak("zeď", true);
+                _sound.Play(stream: _sound.GetRandomSoundStream("hitwall"), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, 1);
+            else
+            {
+                string soundName = "movstep" + Enum.GetName(terrain.GetType(), terrain);
+                _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, Vector3.Zero, true, _walkingVolume, null, 1f, 0, Playback.OpenAL);
+            }
         }
     }
 }

@@ -280,10 +280,10 @@ namespace Game.Entities
         /// Processes the Collision message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected void OnCollision(GameMessage message)
+        protected void OnObjectsCollided(ObjectsCollided message)
         {
             if (!string.IsNullOrEmpty(_sounds.collision))
-                World.Sound.Play(_sounds.collision, null, false, PositionType.Absolute, Area.Center);
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.collision), role: null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, _defaultVolume);
         }
 
         /// <summary>
@@ -464,7 +464,7 @@ namespace Game.Entities
         case StartObjectNavigation so: OnStartObjectNavigation(so); break;
         case StopObjectNavigation sto: OnStopObjectNavigation(sto); break;
         case GameReloaded gr: OnGameReloaded(); break;
-        case ObjectsCollided oc: OnCollision(oc); break;
+        case ObjectsCollided oc: OnObjectsCollided(oc); break;
         case UseObject uo: OnUseObject(uo); break;
                 default: base.HandleMessage(message); break;
             }
