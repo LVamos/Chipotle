@@ -527,7 +527,6 @@ namespace Luky
                 string[] nameParts = Regex.Split(fileName, @"\s");
                 string shortName = nameParts[0].ToLower();
                 Assert(Int32.TryParse(nameParts[1], out int variant), $"Missing file name: {path}.");
-                variant--;
                 Assert(variant >= 0, $"Missing file name: {path}.");
 
                 if (!_soundFiles.TryGetValue(shortName, out SoundFileInfo info))
