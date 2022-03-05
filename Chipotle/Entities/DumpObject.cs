@@ -297,7 +297,7 @@ namespace Game.Entities
 
             World.Sound.GetDynamicInfo(_actionSoundID, out SoundState state, out int sample);
 
-            if (state != SoundState.Playing || (state == SoundState.Playing && sample > 21000))
+            if (state != SoundState.Playing || (state == SoundState.Playing && sample > 20000 && _quickActionsAllowed))
             {
             if (!string.IsNullOrEmpty(_sounds.action))
                 _actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.Point.AsOpenALVector(), true, _defaultVolume);
