@@ -201,6 +201,7 @@ namespace Game.Entities
 
             switch (type)
             {
+                case "zapnutý sporák": return CreateWorkingOven(name, area, decorative);
                 case "vana": return CreateTub(name, area, decorative);
                 case "toaleťák": return CreateToiletPaper(name, area, decorative);
                 case "police": return CreateShelf(name, area, decorative);
@@ -254,6 +255,15 @@ namespace Game.Entities
                 default: return new DumpObject(name, area, string.Empty, decorative);
             }
         }
+
+        /// <summary>
+        /// Creates new instance of a oven turned on.
+        /// </summary>
+        /// <param name="name">Inner and public name of the object</param>
+        /// <param name="area">Coordinates of the area that the object occupies</param>
+        /// <returns>New instance of the object</returns>
+        public static DumpObject CreateWorkingOven(Name name, Plane area, bool decorative)
+                    => new DumpObject(name: name, area: area, type: "zapnutý sporák", decorative: decorative, loopSound: "LoopOven");
 
         /// <summary>
         /// Creates new instance of a tub.
