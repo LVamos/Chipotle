@@ -117,7 +117,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateCoffeemaker(Name name, Plane area, bool decorative)
-            => new DumpObject(name, area, "kávovar", decorative, null, "snd9", stopWhenPlayerMoves: true);
+            => new DumpObject(name, area, "kávovar", decorative, null, "ActCoffeeMaker", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the corpse (tělo w1) object in the poolside (bazén w1) locality.
