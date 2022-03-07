@@ -348,7 +348,10 @@ namespace Game.Entities
             TerrainType terrain = World.Map[position].Terrain;
 
             if (terrain == TerrainType.Wall)
+            {
                 _sound.Play(stream: _sound.GetRandomSoundStream("hitwall"), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, 1);
+                Tolk.Speak("zeď");
+            }
             else
             {
                 string soundName = "movstep" + Enum.GetName(terrain.GetType(), terrain);
