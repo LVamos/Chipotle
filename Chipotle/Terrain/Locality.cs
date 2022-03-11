@@ -240,7 +240,7 @@ namespace Game.Terrain
                 if (_passages == null)
                     _passages = new List<string>();
 
-            return _passages.Select(p => World.GetPassage(p));
+            return _passages.Select(p => World.GetPassage(p)).Where(p => p != null != null);
             }
         }
 
@@ -332,7 +332,7 @@ namespace Game.Terrain
                 if (_entities == null)
                     _entities = new List<string>();
 
-            return _entities.Select(e => World.GetEntity(e));
+            return _entities.Select(e => World.GetEntity(e)).Where(e => e != null);
             }
         }
 
@@ -347,7 +347,7 @@ namespace Game.Terrain
                 if (_objects == null)
                     _objects = new List<string>();
 
-                return _objects.Select(o => World.GetObject(o));
+                return _objects.Select(o => World.GetObject(o)).Where(o => o != null);
             }
         }
 
@@ -558,6 +558,9 @@ namespace Game.Terrain
         /// <param name="message">The message to be sent</param>
         protected void MessageObjects(GameMessage message)
         {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             foreach (DumpObject o in Objects)
             {
                 if (o != message.Sender)

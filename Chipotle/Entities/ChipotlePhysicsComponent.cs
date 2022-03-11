@@ -751,7 +751,14 @@ _carMovement = message;
                 e.TakeMessage(new UseObject(Owner, point));
             }
 
-            Use(World.GetNearestPassages(CurrentTile.position, true, 2).FirstOrDefault()); // Detect doors within a radius of 2 meters and use the nearest one.
+            IEnumerable<Passage> doors =
+                from d in World.GetNearestPassages(_area.Center, true, 3)
+                let obstacle = World.DetectObstacles(new Plane(d.Area.GetClosestPoint(_area.Center), _area.Center))
+                where d.IsInFrontOrBehind(_area.Center)
+                select d;
+            foreach (Passage d in doors)
+            Use(d);
+
             Use(World.GetObject(GetNextTile(1).position)); // Detect object in front of Chipotle and use it.
         }
 
