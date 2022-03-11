@@ -120,16 +120,14 @@ namespace Game.Entities
         protected (Vector2 position, Tile tile) CurrentTile
             => (_area.Center, World.Map[_area.Center]);
 
-        protected float GetDistanceCoefficient(float distance, float minSpeed = .5f, float maxSpeed = 2, float distanceInterval= 5, float minDistance = 10, float maxDistance = 80)
+        protected float GetDistanceCoefficient(float distance)
         {
-            if (distance > maxDistance)
-                return minSpeed;
-
-            if (distance < minDistance)
-                return maxSpeed;
-
-            float speedInterval = (maxSpeed - minSpeed) / ((maxDistance - minDistance) / distanceInterval);
-                return maxSpeed - (speedInterval * (distance / distanceInterval));
+            if (distance < 5)
+                return 2;
+            if(distance >= 5 && distance < 10)
+            if (distance >= 10 && distance < 30)
+                return .5f;
+                return .2f;
         }
 
         /// <summary>
@@ -137,7 +135,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="goal">Coordinates of the goal of an ongoing movement of the NPC</param>
         protected virtual int GetSpeed()
-            => (int) (GetTerrainSpeed() * GetDistanceCoefficient(World.GetDistance(_area.Center, _goal)));
+            => (int)(GetTerrainSpeed() * GetDistanceCoefficient(World.GetDistance(_area.Center, _goal)));
 
         /// <summary>
         /// Returns speed of the terrain on which the NPC stands.

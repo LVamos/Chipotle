@@ -57,7 +57,7 @@ namespace Game.Entities
             // Set attenuation parameters
             bool attenuate = obstacle != ObstacleType.None && obstacle != ObstacleType.IndirectPath; ;
             (float gain, float gainHF) lowpass = default;
-            float volume = _walkingVolume;
+            float volume = _walkingVolume *2;
 
             switch (obstacle)
             {

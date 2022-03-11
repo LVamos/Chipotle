@@ -320,6 +320,13 @@ namespace Game.Entities
             SetState(TuttleState.WatchingPlayer);
         }
 
+        protected override int GetSpeed()
+        {
+            if(_state == TuttleState.GoingToPlayer)
+            return base.GetSpeed();
+            return (int)GetTerrainSpeed();
+        }
+
         /// <summary>
         /// Performs one step in the direction given by the current orientation of the entity.
         /// </summary>
