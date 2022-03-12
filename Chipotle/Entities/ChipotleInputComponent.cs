@@ -134,8 +134,9 @@ namespace Game.Entities
 
             // Run the menu
             string[] items = commands.Select(c => c.name).ToArray<string>();
+            Program.MainWindow.GameLoopEnabled = false;
             int item = WindowHandler.Menu(items, "Menu");
-
+            Program.MainWindow.GameLoopEnabled = true;
             if (item > 0)
                 commands[item].command();
         }
