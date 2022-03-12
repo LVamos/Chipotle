@@ -128,6 +128,7 @@ namespace Game.Entities
                                                                                 ("Rozměry lokace: Er", SayLocalitySize),
                                                                                                 ("kompas: Es", SayOrientation),
                                                                                                                 ("souřadnice: Cé", SayAbsoluteCoordinates),
+                                                                                                                                ("Poslat zprávu autorovi: Kontrol zet", Program.SendFeedback),
                                                                                                                                 ("hlavní menu: Iskejp", World.QuitGame),
             };
 

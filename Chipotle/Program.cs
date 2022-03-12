@@ -1,10 +1,10 @@
-﻿using System.Net;
+﻿using System.Security.Principal;
+using Game.Entities;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Mail;
 using System;
 using System.IO;
-using System.Net.Mail;
-using System.Net;
-using System.Reflection;
 using System.Windows.Forms;
 
 using DavyKager;
@@ -15,6 +15,7 @@ using Luky;
 
 using OpenTK;
 using System.Text;
+using System.Linq;
 
 namespace Game
 {
@@ -91,10 +92,52 @@ namespace Game
             public static bool LetTuttleFollowChipotle = true;
         }
 
+
+        private static string GetUserInfo()
+        {
+            StringBuilder text = new StringBuilder();
+
+            if (World.Player != null)
+            {
+                Vector2 position = World.Player.Area.Center;
+                text.AppendLine("Verze: " + Version);
+                text.AppendLine("Pozice: " + position.ToString());
+                text.AppendLine("Lokace: " + World.Player.Locality.Name.Indexed);
+
+                // Get nearest objects
+                string[] objectList = World.GetNearestObjects(position).Where(o => o.Area.GetDistanceFrom(position) < 10).Select(o => o.Name.Indexed).ToArray<string>();
+                string objects = objectList.IsNullOrEmpty() ? "žádné" : string.Join(", ", objectList);
+                text.AppendLine("Okolní objekty: " + objects);
+            }
+                text.AppendLine("Datum a čas: " + DateTime.Now.ToString());
+
+            return text.ToString();
+        }
+
+        public static void SendFeedback()
+        {
+            Program.MainWindow.GameLoopEnabled = false;
+            string message = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej zprávu pro autora", "");
+            Program.MainWindow.GameLoopEnabled = true;
+
+            if (string.IsNullOrEmpty(message))
+            {
+                Tolk.Speak("Tak nic no");
+                return;
+            }
+
+            string subject = "Chipotle: " + System.DirectoryServices.AccountManagement.UserPrincipal.Current.DisplayName +" posílá připomínku";
+            string body ="Zpráva: " +message + Environment.NewLine + GetUserInfo();
+
+            if (!SendMeMail(subject, body))
+                Tolk.Speak("Zprávu se nepodařilo odeslat.");
+            else Tolk.Speak("Odesláno");
+        }
+
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.11";
+        public static string Version = "0.13";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
@@ -102,7 +145,7 @@ namespace Game
         /// <param name="subject">Subject for the message</param>
         /// <param name="body">Body of the message</param>
         /// <returns>True if the message is sent properly</returns>
-        private static bool SendMeMail(string subject, string body, Attachment attachment)
+        private static bool SendMeMail(string subject, string body, Attachment attachment = null)
         {
             var fromAddress = new MailAddress("lukas.vamos@gmail.com", Environment.UserName);
             var toAddress = new MailAddress("lukas.vamos@gmail.com", "Lukáš Vámoš");
@@ -134,18 +177,26 @@ namespace Game
                     smtp.Send(message);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                throw e;
                 return false;
             }
             return true;
         }
 
-        private static bool ReportError(string message)
+        /// <summary>
+        /// sends a critical error announcement to authzor's mail address.
+        /// </summary>
+        /// <param name="message">A description of the problem from an user</param>
+        /// <returns>True if it¨s successful</returns>
+        private static bool ReportError(string message, bool addUserInfo = true)
         {
             string path = @"data\game.sav";
             Attachment attachment = File.Exists(path) ? new Attachment(path) : null;
-            return SendMeMail("Chipotle - hlášení o chybě", message, attachment);
+            string subject = "Chipotle: " + System.DirectoryServices.AccountManagement.UserPrincipal.Current.DisplayName + " hlásí kritickou chybu";
+            string body = message + Environment.NewLine + GetUserInfo();
+            return SendMeMail(subject, body, attachment);
         }
 
         /// <summary>
@@ -177,28 +228,21 @@ namespace Game
 
             Action action = () =>
             {
-                // Ask for comment
-                string comment = string.Empty;
-                DialogResult result = MessageBox.Show(MainWindow, "Ta zkurvená hra spadla. Posílám Lukymu hlášení. Chceš k tomu přidat komentář?", "Chyba", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                if (result == DialogResult.Yes)
-                    comment = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej popis chyby", "");
+                // Ask for problem description
+                string description = Microsoft.VisualBasic.Interaction.InputBox("", "          Ta zkurvená hra spadla! Napiš Lukimu, co se stalo, než mu definitivně jebne.", "");
 
                 // Prepare an error message
-                StringBuilder text = new StringBuilder();
-                text.AppendLine("Uživatel: " + Environment.UserName)
-                .AppendLine(comment)
-                .AppendLine("Verze: " + Version)
-                .AppendLine("Datum a čas: " + DateTime.Now.ToString());
+                StringBuilder text = new StringBuilder(GetUserInfo());
 
-                if (World.Player != null)
-                    text.AppendLine("Aktuální pozice Chipotla: " + World.Player.Area.Center.ToString()).AppendLine();
+                if (!string.IsNullOrEmpty(description))
+                    text.AppendLine("Zpráva: " + description);
 
                 if (!string.IsNullOrEmpty(message))
                     text.AppendLine("Zdroj výjimky: " + message);
 
                 text.AppendLine("Typ výjimky: " + ex.GetType().ToString()).AppendLine();
-                text.AppendLine("Zpráva: " + ex.Message).AppendLine();
-                text.AppendLine("Výpis stack trace" + ex.StackTrace);
+                text.AppendLine(ex.Message).AppendLine();
+                text.AppendLine("Stack trace" +Environment.NewLine + ex.StackTrace);
 
                 string report = text.ToString();
                 bool ok = ReportError(report); // send e-mail with the error message to me.
@@ -246,7 +290,7 @@ namespace Game
         [STAThread]
         private static void Main()
         {
-            SendDelayedReport();
+            ResendErrorReport();
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             SerializationPath = Path.Combine(DataPath, "game.sav");
@@ -277,22 +321,23 @@ namespace Game
         /// <summary>
         /// Sends a delayed error report from previous execution if it's saved on the disc.
         /// </summary>
-        private static void SendDelayedReport()
+        private static void ResendErrorReport()
         {
             if (!File.Exists(_errorReportPath))
                 return;
 
-            string message = null;
+            string body = null;
             try
             {
-                message = File.ReadAllText(_errorReportPath);
+                body = File.ReadAllText(_errorReportPath);
             }
             catch (Exception e)
             {
                 return;
             }
 
-            if (ReportError(message))
+            string subject = "Chipotle: " + System.DirectoryServices.AccountManagement.UserPrincipal.Current.DisplayName + " hlásí kritickou chybu";
+            if (SendMeMail(subject, body))
                 File.Delete(_errorReportPath);
         }
 

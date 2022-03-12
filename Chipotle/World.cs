@@ -461,9 +461,8 @@ namespace Game
         /// <param name="point">A point whose surroundings are to be searched</param>
         /// <returns>Enumeration of game objects</returns>
         public static IEnumerable<GameObject> GetNearestObjects(Vector2 point)
-            => _objects.OrderBy(o => o.Value.Area.GetDistanceFrom(point))
-            .Where(o => o.Value.Name.Indexed != World.GetObject(point)?.Name.Indexed)
-            .Select(o => o.Value);
+            => _objects.Values.OrderBy(o => o.Area.GetDistanceFrom(point))
+            .Where(o => !o.Area.LaysOnPlane(point));
 
         /// <summary>
         /// Returns the passage closest to the specified point.

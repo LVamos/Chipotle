@@ -21,7 +21,8 @@ namespace Game.UI
         {
             Dictionary<KeyShortcut, Action> shortcuts = new Dictionary<KeyShortcut, Action>()
             {
-                [new KeyShortcut(Keys.Escape)] = QuitGame
+                [new KeyShortcut(Keys.Escape)] = QuitGame,
+                [new KeyShortcut(KeyShortcut.Modifiers.Control, Keys.Z)] = Program.SendFeedback
             };
 
             RegisterShortcuts(shortcuts);
