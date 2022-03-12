@@ -64,8 +64,8 @@ namespace Game.Terrain
         {
             // Tests if both upper left corner and lower left corner lay in different localities (faster than World.GetLocality)
             return
-            Localities[0].Area.LaysOnPlane(_area.UpperLeftCorner)
-            ^ Localities[0].Area.LaysOnPlane(_area.LowerLeftCorner);
+            Localities.First().Area.LaysOnPlane(_area.UpperLeftCorner)
+            ^ Localities.First().Area.LaysOnPlane(_area.LowerLeftCorner);
         }
 
         /// <summary>
@@ -92,12 +92,21 @@ namespace Game.Terrain
         /// Localities connected by the passage
         /// </summary>
         [ProtoIgnore]
-        public IReadOnlyList<Locality> Localities => _localities.AsReadOnly();
+        public IEnumerable<Locality> Localities
+        {
+            get
+            {
+                if (_localities == null)
+                    _localities = new string[2];
+
+                return _localities.Select(l => World.GetLocality(l)).Where(l => l != null);
+            }
+        }
 
         /// <summary>
         /// Localities connected by the passage
         /// </summary>
-        private readonly List<Locality> _localities;
+        private string[] _localities = new string[2];
 
         /// <summary>
         /// Constructor
@@ -105,13 +114,13 @@ namespace Game.Terrain
         /// <param name="name">Inner name of the passage</param>
         /// <param name="area">Coordinates of the are occupied by the passage</param>
         /// <param name="localities">Localities connected by the passage</param>
-        public Passage(Name name, Plane area, IEnumerable<Locality> localities) : base(name, area)
+        public Passage(Name name, Plane area, IEnumerable<string> localities) : base(name, area)
         {
             // Check if the passage occupies just one row or column.
             Assert(area.Height == 1 || area.Height == 2 || area.Width == 1 || area.Width == 2, "Passage must consist of two rows or two points.");
 
             Assert(localities != null && localities?.Count() == 2 && localities.First() != null && localities.Last() != null && localities.First() != localities.Last(), "Two different localities required");
-            _localities = localities.ToList<Locality>();
+            _localities = localities.ToArray<string>();
 
             // Validate passage location
             Assert(area.GetIntersectingObjects().IsNullOrEmpty() && area.GetIntersectingPassages().IsNullOrEmpty(), "No objects or nested passages allowed");
@@ -126,7 +135,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        public static SlidingDoor CreateSlidingDoor(Name name, Plane area, IEnumerable<Locality> localities)
+        public static SlidingDoor CreateSlidingDoor(Name name, Plane area, IEnumerable<string> localities)
 => new SlidingDoor(name, area, localities);
 
         /// <summary>
@@ -136,7 +145,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<Locality> localities)
+        public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<string> localities)
 => new HallDoor(name, area, localities);
 
         /// <summary>
@@ -147,7 +156,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        public static MariottisDoor CreateMariottisDoor(Name name, Plane area, IEnumerable<Locality> localities)
+        public static MariottisDoor CreateMariottisDoor(Name name, Plane area, IEnumerable<string> localities)
 => new MariottisDoor(name, area, localities);
 
         /// <summary>
@@ -162,7 +171,7 @@ namespace Game.Terrain
         /// <param name="state">State of a door</param>
         /// <param name="type">Type of a door</param>
         /// <returns>A new instance of the passage</returns>
-        public static Passage CreatePassage(Name name, Plane area, IEnumerable<Locality> localities, bool isDoor, PassageState state, bool openable, Door.DoorType type)
+        public static Passage CreatePassage(Name name, Plane area, IEnumerable<string> localities, bool isDoor, PassageState state, bool openable, Door.DoorType type)
         {
             switch (name.Indexed)
             {
@@ -180,9 +189,7 @@ namespace Game.Terrain
         /// <param name="comparedLocality">The locality to be compared</param>
         /// <returns>The other side of the passage than the specified one</returns>
         public Locality AnotherLocality(Locality comparedLocality)
-        {
-            return _localities.First(l => l != comparedLocality);
-        }
+            => Localities.First(l => l.Name.Indexed != comparedLocality.Name.Indexed);
 
         /// <summary>
         /// Displays the passage in the game world.
@@ -190,14 +197,18 @@ namespace Game.Terrain
         protected override void Appear()
         {
             Area.GetTiles().Foreach(t => t.tile.Register(World.GetLocality(t.position).DefaultTerrain));
-            _localities.Foreach(l => l.Register(this));
+            Localities.Foreach(l => l.Register(this));
         }
 
         /// <summary>
         /// Erases the passage from the game world.
         /// </summary>
         protected override void Disappear()
-            => _localities.ForEach(l => l.Unregister(this));
+        {
+            foreach(Locality l in Localities)
+            l.Unregister(this);
+
+        }
 
         /// <summary>
         /// Creates new instance of the garage door in the garage of the Vanilla crunch company
@@ -207,7 +218,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        private static Passage CreateVanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities)
+        private static Passage CreateVanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<string> localities)
             => new VanillaCrunchGarageDoor(name, area, localities);
 
 

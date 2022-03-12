@@ -87,7 +87,7 @@ namespace Game.Terrain
         /// <param name="area">Location of the door</param>
         /// <param name="localities">Two localities connected by the door</param>
         /// <param name="openable">Specifies whether the door can be opened by an NPC.</param>
-        public Door(Name name, PassageState state, Plane area, IEnumerable<Locality> localities, bool openable = true, DoorType type = DoorType.Door) : base(name, area, localities)
+        public Door(Name name, PassageState state, Plane area, IEnumerable<string> localities, bool openable = true, DoorType type = DoorType.Door) : base(name, area, localities)
         {
             State = state;
             _openable = openable;
@@ -135,7 +135,7 @@ namespace Game.Terrain
         private void AnnounceManipulation()
         {
             DoorManipulated message = new DoorManipulated(this);
-            IEnumerable<Locality> accessibles = Localities[0].GetAccessibleLocalities().Concat(Localities[1].GetAccessibleLocalities()).Distinct();
+            IEnumerable<Locality> accessibles = Localities.First().GetAccessibleLocalities().Concat(Localities.Last().GetAccessibleLocalities()).Distinct();
             foreach (Locality l in accessibles)
                 l.TakeMessage(message);
         }
@@ -155,7 +155,7 @@ namespace Game.Terrain
             if (obstacle == ObstacleType.Far)
             {
                 Locality l = World.Player.Locality;
-                if (Localities[0].IsBehindDoor(l) || Localities[1].IsBehindDoor(l)) // Can be heart from the adjecting locality
+                if (Localities.First().IsBehindDoor(l) || Localities.Last().IsBehindDoor(l)) // Can be heart from the adjecting locality
                     obstacle = ObstacleType.Wall;
                     else return; // Too far and inaudible
             }

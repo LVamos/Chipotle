@@ -704,7 +704,10 @@ lBackgroundInfo.volume
                 PassageState state = A(p, "closed").ToBool() ? PassageState.Closed : PassageState.Open;
                 bool openable = A(p, "openable").ToBool();
                 Plane area = new Plane(A(p, "coordinates"));
-                List<Locality> localities = new List<Locality> { GetLocality(A(p, "from")), GetLocality(A(p, "to").PrepareForIndexing()) };
+                string[] localities = new string[]
+                { A(p, "from"), 
+                    A(p, "to")
+                };
                 Door.DoorType dType = A(p, "type") == "door" ? Door.DoorType.Door : Door.DoorType.Gate;
 
                 // Create and register new passage

@@ -21,7 +21,7 @@ namespace Game.Terrain
         /// <param name="name">Inner name of the door</param>
         /// <param name="area">Coordinates of the area occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
-        public VanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<Locality> localities) : base(name, PassageState.Closed, area, localities, false) { }
+        public VanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<string> localities) : base(name, PassageState.Closed, area, localities, false) { }
 
         /// <summary>
         /// Runs a message handler for the specified message.
