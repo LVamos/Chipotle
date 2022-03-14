@@ -809,7 +809,7 @@ namespace Luky
         public void FadeAndStopAll(float volumeDelta)
         {
             foreach (Sound s in _sounds)
-                _fadings[s.ID] = new FadingRecord("", FadingType.Out, volumeDelta, 0);
+                _fadings[s.ID] = new FadingRecord(FadingType.Out, volumeDelta, 0);
         }
 
         /// <summary>
@@ -827,7 +827,7 @@ namespace Luky
         /// <param name="volumeDelta">Specifies how much the volume is changed in one step.</param>
         /// <param name="targetVolume">Specifies the final master volume</param>
         public void FadeMaster(FadingType type, float volumeDelta, float targetVolume)
-            => _masterFading = new FadingRecord("", type, volumeDelta, targetVolume);
+            => _masterFading = new FadingRecord(type, volumeDelta, targetVolume);
 
         /// <summary>
         /// Performs master fading
@@ -923,7 +923,7 @@ namespace Luky
         /// <param name="targetVolume">Specifies the final volume of the sound source</param>
         /// <param name="stop">Specifies if the sound should be stopped after it was muted.</param>
         public void FadeSource(int soundID, FadingType type, float volumeDelta, float targetVolume = 0, bool stop = true)
-            => RunCommand(() => _fadings[soundID] = new FadingRecord("", type, volumeDelta, targetVolume, stop));
+            => RunCommand(() => _fadings[soundID] = new FadingRecord(type, volumeDelta, targetVolume, stop));
 
         /// <summary>
         /// Stores records about sound fading.
@@ -1000,9 +1000,9 @@ namespace Luky
         {
             float product = sound.IndividualVolume;
 
-            foreach (Name gn in sound.GroupNames)
+            foreach (Name groupName in sound.GroupNames)
             {
-                if (_groupVolumes.TryGetValue(gn, out float modifier))
+                if (_groupVolumes.TryGetValue(groupName, out float modifier))
                     product *= modifier;
             }
             return product;

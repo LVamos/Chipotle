@@ -11,7 +11,6 @@ namespace Luky
     /// </summary>
     public class FadingRecord
     {
-        public string SoundName;
         /// <summary>
         /// Counts time from initialization.
         /// </summary>
@@ -44,9 +43,8 @@ namespace Luky
         /// <param name="volumeDelta">specifies how steep should the volume change be.</param>
         /// <param name="targetVolume">Specifies final volume of the specified sound.</param>
         /// <param name="stop">Specifies if the sound should be stopped after it was muted.</param>
-        public FadingRecord(string soundName, FadingType type, float volumeDelta, float targetVolume, bool stop=true)
+        public FadingRecord(FadingType type, float volumeDelta, float targetVolume, bool stop=true)
         {
-            this.SoundName = soundName;
             Type = type;
             TargetVolume = targetVolume;
             VolumeDelta = volumeDelta;

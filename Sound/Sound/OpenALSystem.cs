@@ -753,6 +753,6 @@ if(_table.TryGetValue(soundID, out Info info))
             /// Identifier of the sound
             /// </summary>
             public int SourceID;
-        } // cls
-    } // cls
+        }
+    }
 }
