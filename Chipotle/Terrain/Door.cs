@@ -123,7 +123,7 @@ namespace Game.Terrain
         /// </summary>
         protected void Close(object sender, Vector2 point)
         {
-            if (Area.GetTiles().All(t => World.IsWalkable(t.position)))
+            if (Area.Walkable())
             {
                 State = PassageState.Closed;
 
