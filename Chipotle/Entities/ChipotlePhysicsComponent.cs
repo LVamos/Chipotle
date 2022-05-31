@@ -361,6 +361,7 @@ _navigatedExit = null;
         protected override void OnCutsceneBegan(CutsceneBegan message)
         {
             StopWalk();
+            StopNavigation();
             CatchSitting(message);
         }
 
