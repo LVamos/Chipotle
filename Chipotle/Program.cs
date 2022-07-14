@@ -282,7 +282,12 @@ namespace Game
         /// Path to file used for serialization.
         /// </summary>
         public static string SerializationPath { get; private set; }
-
+		
+        /// <summary>
+        /// Path to the folder with predefined saves.
+        /// </summary>
+        public static string PredefinedSavesPath
+        { get => Path.Combine(DataPath, "Saves"); }
 
         /// <summary>
         /// An error handler
@@ -359,6 +364,8 @@ namespace Game
         {
             ResendErrorReport();
             Settings.SetDebugMode();
+
+
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             SerializationPath = Path.Combine(DataPath, "game.sav");

@@ -58,7 +58,10 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
-                [new KeyShortcut(Keys.C)] = SayRelativeCoordinates,
+				
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.F5)] = LoadPredefinedSave,
+                [new KeyShortcut(Keys.F5)] = CreatePredefinedSave,
+				[new KeyShortcut(Keys.C)] = SayRelativeCoordinates,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.T)] = SayTuttlesPosition,
                 [new KeyShortcut(Keys.F10)] = JumpToLocality,
                 [new KeyShortcut(Keys.F11)] = SaveStartPosition,
@@ -94,6 +97,17 @@ namespace Game.Entities
 
         }
 
+        /// <summary>
+        /// Creates a predefined save.
+        /// </summary>
+        private void LoadPredefinedSave()
+            => World.LoadPredefinedSave();
+
+        /// <summary>
+        /// Creates a predefined save.
+        /// </summary>
+        private void CreatePredefinedSave()
+=> World.CreatePredefinedSave();
         /// <summary>
         /// Lists navigable objects.
         /// </summary>
