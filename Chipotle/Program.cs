@@ -106,7 +106,7 @@ namespace Game
                 AllowPredefinedSaves = true;
 				DisableJawsKeyHook = false;
 				LetTuttleFollowChipotle = true;
-				MainMenuAtStartup = true;
+				MainMenuAtStartup = false;
 				PlayCutscenes = true;
 				PlayMenuLoop = true;
 				ReportErrors = false;

@@ -101,17 +101,24 @@ namespace Game.Entities
         /// Creates a predefined save.
         /// </summary>
         private void LoadPredefinedSave()
-            => World.LoadPredefinedSave();
+		{
+            if(Program.Settings.AllowPredefinedSaves)
+            InnerMessage(new LoadPredefinedSave(this));
+		}
 
-        /// <summary>
-        /// Creates a predefined save.
-        /// </summary>
-        private void CreatePredefinedSave()
-=> World.CreatePredefinedSave();
-        /// <summary>
-        /// Lists navigable objects.
-        /// </summary>
-        protected void ListObjects() => InnerMessage(new ListObjects(this));
+		/// <summary>
+		/// Creates a predefined save.
+		/// </summary>
+		private void CreatePredefinedSave()
+        {
+            if (Program.Settings.AllowPredefinedSaves)
+                InnerMessage(new CreatePredefinedSave(this));
+		}
+
+		/// <summary>
+		/// Lists navigable objects.
+		/// </summary>
+		protected void ListObjects() => InnerMessage(new ListObjects(this));
 
         /// <summary>
         /// Runs the game menu

@@ -23,6 +23,7 @@ using ProtoBuf;
 using ProtoBuf.Meta;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
+using Game.Messaging.Commands;
 
 namespace Game
 {

@@ -99,8 +99,10 @@
     <Compile Include="Entities\KeyHanger.cs" />
     <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Entities\TuttleState.cs" />
+    <Compile Include="Messaging\Commands\CreatePredefinedSave.cs" />
     <Compile Include="Messaging\Commands\ListExits.cs" />
     <Compile Include="Messaging\Commands\ListObjects.cs" />
+    <Compile Include="Messaging\Commands\LoadPredefinedSave.cs" />
     <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
     <Compile Include="Messaging\Commands\SayCoordinates.cs" />
     <Compile Include="Messaging\Commands\SayExits.cs" />

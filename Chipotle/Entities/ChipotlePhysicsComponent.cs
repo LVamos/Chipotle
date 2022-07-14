@@ -187,6 +187,8 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case CreatePredefinedSave c: OnCreatePredefinedSave(c); break;
+                    case LoadPredefinedSave l: OnLoadPredefinedSave(l); break;
                     case ExitNavigationStopped ens: OnExitNavigationStopped(ens); break;
                     case ListExits lex: OnListExits(lex); break;
                     case ObjectNavigationStopped ons: OnObjectNavigationStopped(ons); break;
@@ -206,6 +208,23 @@ namespace Game.Entities
                     case UseObject uo: OnUseObject(uo); break;
                 default: base.HandleMessage(message); break;
             }
+        }
+
+        /// <summary>
+        /// Handles the CreatePredefinedSave message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnCreatePredefinedSave(CreatePredefinedSave message)
+            => World.CreatePredefinedSave();
+
+		/// <summary>
+		/// Handles the LoadPredefinedSave message.
+		/// </summary>
+		/// <param name="message"></param>
+		private void OnLoadPredefinedSave(LoadPredefinedSave message)
+        {
+            StopNavigation();
+            World.LoadPredefinedSave();
         }
 
         /// <summary>
@@ -312,9 +331,6 @@ _navigatedExit = null;
                 return;
 
             DumpObject target = objects.objects[option];
-
-            //if (_navigatedObject!=null && target != _navigatedObject)
-            //    StopNavigation();
 
             _navigatedObject = target;
             _navigatedObject.TakeMessage(new StartObjectNavigation (Owner));
