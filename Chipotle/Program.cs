@@ -103,7 +103,7 @@ namespace Game
 			{
 				AllowTuttlesCustomPosition = false;
 				AllowCustomChipotlesStartPosition = false;
-                AllowPredefinedSaves = true;
+                AllowPredefinedSaves =          true;
 				DisableJawsKeyHook = false;
 				LetTuttleFollowChipotle = true;
 				MainMenuAtStartup = false;

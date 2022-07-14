@@ -283,7 +283,7 @@ namespace Game.Entities
         protected void OnObjectsCollided(ObjectsCollided message)
         {
             if (!string.IsNullOrEmpty(_sounds.collision))
-                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.collision), role: null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, _defaultVolume /2);
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.collision), role: null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, _defaultVolume);
         }
 
         /// <summary>
