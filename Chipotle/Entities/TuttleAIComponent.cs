@@ -76,7 +76,12 @@ namespace Game.Entities
 
             // Set position
             if (Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
+            {
                 _area = new Plane((Vector2)Program.Settings.TuttleTestStart);
+
+                if (Program.Settings.LetTuttleFollowChipotle)
+                    SetState(TuttleState.WatchingPlayer);
+            }
             else _area = new Plane(new Vector2(1030, 1036));
             InnerMessage(new SetPosition(this, new Plane(_area), true));
         }

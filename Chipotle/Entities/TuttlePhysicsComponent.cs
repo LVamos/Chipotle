@@ -235,6 +235,10 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnEntityMoved(EntityMoved message)
         {
+            // Test if the component has been initialized.
+            if (_area == null)
+                return;
+
             if (message.Sender == _player && _state == TuttleState.WatchingPlayer)
                 CheckDistance();
         }
@@ -305,7 +309,7 @@ namespace Game.Entities
                 StopWalk();
             else if (_restartApproaching)
                 FindNewPath();
-            else if (_state == TuttleState.WatchingPlayer)
+            else if (_state == TuttleState.WatchingPlayer && _area != null)
                 CheckDistance();
             else if (Walking && _walkTimer >= _speed)
                 MakeStep();
