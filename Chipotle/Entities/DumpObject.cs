@@ -213,6 +213,7 @@ namespace Game.Entities
         protected void StopNavigation()
         {
             World.Sound.ChangeLooping(_navigationSoundID, false);
+            _navigationSoundID = 0;
             _navigating = false;
             World.Player.TakeMessage(new ObjectNavigationStopped(this));
         }
