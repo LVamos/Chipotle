@@ -32,7 +32,7 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
-		private static readonly float _cutsceneVolume = .5f;
+		private static readonly float _cutsceneVolume = 1;
 
 		/// <summary>
 		/// Replays the last cutscene
