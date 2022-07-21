@@ -68,7 +68,10 @@ namespace Game.Entities
         {
             get
             {
-                if (_locality == null)
+				if (_area == null)
+					return null;
+
+				if (_locality == null)
                     _locality = _area.GetLocality();
                 return _locality;
             }
