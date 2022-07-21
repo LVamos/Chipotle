@@ -22,11 +22,14 @@ namespace Game.Terrain
 		/// <returns>
 		/// A list of points leading from start to the end or null if no possible path exists
 		/// </returns>
-		public Queue<Vector2> FindPath(Vector2 start, Vector2 end, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false)
+		public Queue<Vector2> FindPath(Vector2 start, Vector2 end, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool skipStart = false, int maxDistance = 300)
 		{
-			// Tests if a node is walkable.
+			// Tests if the specified node is walkable and in distance limit.
 			bool Inaccessible(Node n)
-						=> (!throughObjects && n.IsObjectOrEntity())
+						=> World.Map[n.Coords] == null
+						|| sameLocality && (World.GetLocality(start) != World.GetLocality(n.Coords))
+						|| n.Distance > maxDistance
+						|| (!throughObjects && n.IsObjectOrEntity())
 						|| (!throughClosedDoors && n.IsClosedDoor())
 						|| (!throughImpermeableTerrain && n.IsImpermeableTerrain());
 
@@ -38,8 +41,18 @@ namespace Game.Terrain
 				for (Node step = lastStep.Parent; step != null; step = step.Parent)
 					coords.Enqueue(step.Coords);
 
-				return new Queue<Vector2>(coords.Reverse());
+				Queue<Vector2> path = new Queue<Vector2>(coords.Reverse());
+
+				if (skipStart)
+					path.Dequeue();
+
+				return path;
 			}
+
+			// Detect irelevant requests
+			if (sameLocality &&
+				(World.GetLocality(start) != World.GetLocality(end)))
+				return null;
 
 			// Find the path.
 			// Začni výchozím uzlem.
@@ -54,8 +67,6 @@ namespace Game.Terrain
 			// Procházej seznam otevřených uzlů, dokud se nevyprázdní.
 			while (open.Any())
 			{
-				if (open.Count() >= 400)
-					System.Diagnostics.Debugger.Break();
 				// Z otevřených uzlů vyber ten nejlevnější.
 				Node node = open.OrderByDescending(n => n.Price).Last();
 
@@ -72,7 +83,7 @@ namespace Game.Terrain
 				{
 					// Pokud soused patří mezi uzavřené nebo je na něm nepovolená překážka, přeskoč ho.
 					if (
-						Inaccessible(neighbour)
+						(Inaccessible(neighbour) && neighbour.Coords != start && !skipStart)
 						|| closed.Any(c => c.Coords == neighbour.Coords)
 						)
 						continue;

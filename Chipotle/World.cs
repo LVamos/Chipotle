@@ -688,7 +688,7 @@ namespace Game
 			_objects.Values.Foreach(o => o.TakeMessage(message));
 			_passages.Values.Foreach(p => p.TakeMessage(message));
 			Program.MainWindow.GameLoopEnabled = true;
-		}
+}
 
 		/// <summary>
 		/// Static constructor
@@ -820,6 +820,10 @@ lBackgroundInfo.volume
 			int id = Sound.Play(Sound.GetRandomSoundStream(cutscene), null, false, PositionType.None, Vector3.Zero, false, _cutsceneVolume);
 			_cutscene.message = new CutsceneBegan(sender, cutscene, id);
 			TakeMessage(_cutscene.message);
+
+			// Stop it if cutscenes are forbidden for debugging purposes.
+			if (!Program.Settings.PlayCutscenes)
+				StopCutscene(null);
 		}
 
 		/// <summary>
@@ -964,6 +968,14 @@ lBackgroundInfo.volume
 			_objects.Foreach(v => v.Value.Update());
 			_entities.Foreach(v => v.Value.Update());
 			HandleCutscene();
+
+			return;
+			PathFinder f = new PathFinder();
+			Vector2 s = new Vector2(901, 1078);
+			Vector2 e = new Vector2(913, 1042);
+			Queue<Vector2> p = f.FindPath(s, e, false, false, false, true);
+			System.Diagnostics.Debugger.Break();
+
 		}
 
 		/// <summary>

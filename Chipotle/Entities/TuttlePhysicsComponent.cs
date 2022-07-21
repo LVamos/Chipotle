@@ -11,6 +11,7 @@ using Game.Terrain;
 using Luky;
 
 using OpenTK;
+using System.Drawing;
 
 namespace Game.Entities
 {
@@ -41,18 +42,19 @@ namespace Game.Entities
         /// <returns>Queue with nodes leading to the target</returns>
         protected Queue<Vector2> FindPath(Vector2 goal)
         {
-            Vector2? start = _area.FindNearestWalkableTile(3);
-
             if (_finder == null)
                 _finder = new PathFinder();
-            return start.HasValue ? _finder.FindPath((Vector2)start, goal) : null;
-        }
 
-        /// <summary>
-        /// Specifies the maximum allowed distance from the Detective Chipotle NPC.
-        /// </summary>
-        /// <remarks>Used when following the Detective Chipotle NPC</remarks>
-        private const int _maxDistance = 10;
+            bool sameLocality = World.GetLocality(_area.Center) == World.GetLocality(goal); // Don't go to another localities if the goal is in the same locality.
+			bool throughDoors = !sameLocality;
+			return _finder.FindPath(_area.Center, goal, false, throughDoors, false, sameLocality, true);
+		}
+
+		/// <summary>
+		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
+		/// </summary>
+		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
+		private const int _maxDistance = 10;
 
         /// <summary>
         /// Specifies the minimum allowed distance from the Detective Chipotle NPC.
@@ -193,8 +195,8 @@ namespace Game.Entities
         /// </summary>
         private void GoToPlayer()
         {
-            // This is helpful in test mode if the Tuttle is set to follow the player right from the beginning. If the Chiptoel isn't initialized yet Tuttle will keep trying to approach him.
-            if (Owner.Locality == null || World.Player == null)
+            // This is helpful in test mode if the Tuttle is set to follow the player right from the beginning. If the Chipotle isn't initialized yet Tuttle will keep trying to approach him.
+            if (_area == null || Owner.Locality == null || World.Player == null)
                 return;
 
 
@@ -223,7 +225,7 @@ namespace Game.Entities
         private void CheckDistance()
         {
             float distance = GetDistanceFromPlayer();
-            if (distance > _maxDistance && _state == TuttleState.WatchingPlayer)
+            if (distance > _maxDistance && _state == TuttleState.WatchingPlayer && _area != null)
                 GoToPlayer();
             else if (_state == TuttleState.GoingToPlayer && distance <= _targetDistance)
                 StopWalk();
@@ -237,6 +239,10 @@ namespace Game.Entities
         {
             // Test if the component has been initialized.
             if (_area == null)
+                return;
+
+            // Avoid too long paths.
+            if (GetDistanceFromPlayer() > 150)
                 return;
 
             if (message.Sender == _player && _state == TuttleState.WatchingPlayer)
@@ -383,7 +389,7 @@ namespace Game.Entities
         private void StopFollowing()
         {
             StopWalk();
-            SetState(TuttleState.Waiting);
+            SetState(TuttleState.Waiting    );
         }
 
         /// <summary>

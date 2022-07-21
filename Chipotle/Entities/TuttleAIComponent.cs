@@ -73,17 +73,18 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-
+			
             // Set position
-            if (Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
-            {
-                _area = new Plane((Vector2)Program.Settings.TuttleTestStart);
+            if(Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
+				_area = new Plane((Vector2)Program.Settings.TuttleTestStart);
+			else _area = new Plane(new Vector2(1030, 1036));
+			InnerMessage(new SetPosition(this, new Plane(_area), true));
 
-                if (Program.Settings.LetTuttleFollowChipotle)
+            // scenarios for debugging purposes
+            //if (Program.Settings.SendTuttleToPool && !Program.Settings.PlayCutscenes)
+            //    GoToPool();
+			if (!Program.Settings.SendTuttleToPool&& Program.Settings.LetTuttleFollowChipotle)
                     SetState(TuttleState.WatchingPlayer);
-            }
-            else _area = new Plane(new Vector2(1030, 1036));
-            InnerMessage(new SetPosition(this, new Plane(_area), true));
         }
 
         /// <summary>
