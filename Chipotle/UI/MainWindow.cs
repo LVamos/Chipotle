@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DavyKager;
+
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -131,7 +133,22 @@ namespace Game.UI
         /// Handler of the KeyDown event
         /// </summary>
         private void OnKeyDown(object sender, KeyEventArgs e)
-            => WindowHandler.OnKeyDown(new KeyEventParams(e));
+        {
+            InterruptSpeech();
+            WindowHandler.OnKeyDown(new KeyEventParams(e));
+}
+
+        /// <summary>
+        /// Interrupts an ongoing SAPI or screen reader utterance.
+        /// </summary>
+        /// <remarks>Works with SAPI and JAWS only. NVDA does this automatically.</remarks>
+        private void InterruptSpeech()
+        {
+            Tolk.Silence();
+
+            if (Tolk.DetectScreenReader() == "JAWS")
+                Tolk.Speak(String.Empty, true);
+        }
 
         /// <summary>
         /// Handler of the KeyUp event
