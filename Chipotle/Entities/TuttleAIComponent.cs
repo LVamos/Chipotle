@@ -77,7 +77,7 @@ namespace Game.Entities
             // Set position
             if(Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
 				_area = new Plane((Vector2)Program.Settings.TuttleTestStart);
-			else _area = new Plane(new Vector2(1030, 1036));
+			else _area = new Plane(new Vector2(1029, 1039));
 			InnerMessage(new SetPosition(this, new Plane(_area), true));
 
             // scenarios for debugging purposes
