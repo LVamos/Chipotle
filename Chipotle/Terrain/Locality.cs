@@ -25,6 +25,13 @@ namespace Game.Terrain
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Locality : MapElement
     {
+        /// <summary>
+        /// Enumerates all passages leading to the specified locality.
+        /// </summary>
+        /// <param name="l">The target locality</param>
+        /// <returns>enumaretion of passages</returns>
+        public IEnumerable<Passage> GetExitsTo(Locality l)
+            => Passages.Where(p => p.LeadsTo(l));
 
         /// <summary>
         /// Indicates if a locality is inside a building or outside.
@@ -656,7 +663,7 @@ namespace Game.Terrain
         /// <param name="playerMoved">Specifies if the player just moved from one locality to another one.</param>
         private void UpdateLoop()
         {
-            if (_playerInHere)
+			if (_playerInHere)
                 PlayLoop();
             else if (IsAccessible(World.Player.Locality) != null)
                 PlayLoop(false, true);
@@ -669,6 +676,7 @@ namespace Game.Terrain
 [ProtoIgnore]
         private Dictionary<Passage, int> _passageLoops = new Dictionary<Passage, int>();
 
+        private bool _reloaded;
         /// <summary>
         /// Plays soudn loop of the locality.
         /// </summary>
@@ -688,12 +696,12 @@ namespace Game.Terrain
                     return;
             }
 
-            // Player is in a neighbour accessible locality 
+            // Player is in a neighbour accessible locality and there's a passage between the player and this locality.
             if (accessible)
             {
-                // Find a passage to an accessible locality
-                Locality playersLocality = World.Player.Locality;
-                foreach (Passage p in Passages.Where(p => p.Localities.Any(l => l.IsBehindDoor(playersLocality))))
+                // Find passages leading to player.
+                IEnumerable<Passage> exitsToPlayer = GetExitsTo(World.Player.Locality);
+                foreach (Passage p in exitsToPlayer)
                 {
                     Vector2 position = default;
                   Vector2 player = World.Player.Area.Center;
@@ -714,8 +722,8 @@ namespace Game.Terrain
                     }
 
                     // Make it quieter if the player is in a inadjecting locality behind a closed door.
-                    Locality between = playersLocality.GetLocalitiesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
-                    bool doubleAttenuation = (between != null && playersLocality.GetApertures(between).IsNullOrEmpty());
+                    Locality between = World.Player.Locality.GetLocalitiesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
+                    bool doubleAttenuation = (between != null && World.Player.Locality.GetApertures(between).IsNullOrEmpty());
                     float volume = p.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
                     if (doubleAttenuation)
                         volume *= .01f;

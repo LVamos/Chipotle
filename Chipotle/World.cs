@@ -642,6 +642,7 @@ namespace Game
 			if (i == -1)
 				return false;
 
+			World.Sound.StopAll();
 			string path = Path.Combine(saves[i], "game.sav");
 			LoadGame(path);
 			return true;
