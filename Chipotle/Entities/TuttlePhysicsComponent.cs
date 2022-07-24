@@ -123,11 +123,13 @@ namespace Game.Entities
         /// Handles the GameReloaded message.
         /// </summary>
         /// <param name="message">The message to be handled</param>
-        /// <exception cref="NotImplementedException"></exception>
-        private void OnGameReloaded(GameReloaded message)
+        protected override void OnGameReloaded(GameReloaded message)
         {
-            if (_state == TuttleState.GoingToPlayer)
-                _restartApproaching = true;
+            base.OnGameReloaded(message);
+
+			// Try to find a new path to the player if necessary.
+			if (_state == TuttleState.GoingToPlayer)
+                FindNewPath();
         }
 
         /// <summary>

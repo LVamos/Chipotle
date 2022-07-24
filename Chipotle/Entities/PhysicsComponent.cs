@@ -213,7 +213,7 @@ namespace Game.Entities
         /// Handles the GameReloaded message.
         /// </summary>
         /// <param name="message">The message to be handled</param>
-        private void OnGameReloaded(GameReloaded message)
+        protected virtual void OnGameReloaded(GameReloaded message)
         {
             InnerMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
             InnerMessage(new PositionChanged(this, _area, _area, Locality, Locality, ObstacleType.None, true));
