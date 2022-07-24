@@ -227,7 +227,10 @@ namespace Game.Entities
         private void CheckDistance()
         {
             float distance = GetDistanceFromPlayer();
-            if (distance > _maxDistance && _state == TuttleState.WatchingPlayer && _area != null)
+            if (
+                (_state == TuttleState.WatchingPlayer && _area != null)
+&& (distance > _maxDistance || (distance <= _maxDistance && !_player.IsInSameLocality(Owner)))
+                )
                 GoToPlayer();
             else if (_state == TuttleState.GoingToPlayer && distance <= _targetDistance)
                 StopWalk();
