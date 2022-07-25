@@ -182,7 +182,7 @@ namespace Game.Terrain
         /// <summary>
         /// A time interval between opening and closing.
         /// </summary>
-        protected const int _timeLimit = 100 * World.DeltaTime;
+        protected const int _timeLimit = 80 * World.DeltaTime;
 
         /// <summary>
         /// Processes the UseObject message.
