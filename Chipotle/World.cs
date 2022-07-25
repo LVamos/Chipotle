@@ -391,6 +391,15 @@ namespace Game
 			return null;
 		}
 
+
+		/// <summary>
+		/// Enumerates all entities that intersect with the given plane.
+		/// </summary>
+		/// <param name="area">The plane to be checked.</param>
+		/// <returns>Enumeration of intersecting entities</returns>
+		public static IEnumerable<Entity> GetEntities(Plane area)
+						=> _entities.Values.Where(o =>  o.Area != null && o.Area.Intersects(area));
+		
 		/// <summary>
 		/// Returns an NPC found by its name.
 		/// </summary>

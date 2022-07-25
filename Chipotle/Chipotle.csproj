@@ -102,6 +102,8 @@
     <Compile Include="Entities\KeyHanger.cs" />
     <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Entities\TuttleState.cs" />
+    <Compile Include="Messaging\Commands\ReactToBeingPinchedInDoor.cs" />
+    <Compile Include="Messaging\Events\PinchedInDoor.cs" />
     <Compile Include="Messaging\Commands\CreatePredefinedSave.cs" />
     <Compile Include="Messaging\Commands\ListExits.cs" />
     <Compile Include="Messaging\Commands\ListObjects.cs" />
@@ -243,7 +245,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Game\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core\Core.csproj">
       <Project>{e4525846-a882-43d8-a581-5c39f0978855}</Project>

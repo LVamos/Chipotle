@@ -1,10 +1,8 @@
 ﻿using ProtoBuf;
 using System;
-using System.Collections.Generic;
-
-using DavyKager;
 
 using Game.Messaging;
+using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
@@ -20,6 +18,14 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class TuttleSoundComponent : SoundComponent
     {
+        protected const  string _doorPinchSound = "TuttleHitByDoor";
+		
+        /// <su mmary>
+        /// Handle of sound with Tuttle's speech that can move when Tuttle is walking.
+        /// </summary>
+        [ProtoBuf.ProtoIgnore]
+        protected int _movingSpeechHandle;
+
         public TuttleSoundComponent(): base()
             => _walkingVolume = .2f;
 
@@ -31,17 +37,32 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case ReactToPinchingInDoor r: OnReactToPinchingInDoor(r); break;
+
                 case PositionChanged pc:  OnPositionChanged(pc); break;
                 default: base.HandleMessage(message); break;
             }
         }
-
+		
         /// <summary>
-        /// Processes the message.
+        /// Handles the ReactOnPinchingInDoor message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnPositionChanged(PositionChanged message)
-            => PlayTerrain(message.TargetPosition.Center, World.Map[message.TargetPosition.Center], message.Silently ? ObstacleType.Far : message.Obstacle);
+        protected void OnReactToPinchingInDoor(ReactToPinchingInDoor message)
+			=> _movingSpeechHandle = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_doorPinchSound), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
+
+		/// <summary>
+		/// Processes the message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		private void OnPositionChanged(PositionChanged message)
+        {
+            PlayTerrain(message.TargetPosition.Center, World.Map[message.TargetPosition.Center], message.Silently ? ObstacleType.Far : message.Obstacle);
+
+            World.Sound.GetDynamicInfo(_movingSpeechHandle, out SoundState state, out var _);
+            if (state == SoundState.Playing)
+                World.Sound.SetSourcePosition(_movingSpeechHandle, message.TargetPosition.Center.AsOpenALVector());
+		}
 
         /// <summary>
         /// Plays a sound representation of a tile.

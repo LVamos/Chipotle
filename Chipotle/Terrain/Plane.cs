@@ -231,13 +231,17 @@ namespace Game.Terrain
             => UpperLeftCorner == p.UpperLeftCorner && LowerRightCorner == p.LowerRightCorner;
 
         /// <summary>
-        /// Extends the plane to all directions by one unit.
+        /// Extends the plane to all directions by the specified amount of units in all directions.
         /// </summary>
-        public void Extend()
+        /// <param name="units">Amount of the units by which the rectangle is extended</param>
+        public void Extend(int units = 1)
         {
+            for (int i = 0; i < units; i++)
+            {
             UpperLeftCorner += Direction.UpLeft.AsVector2();
             LowerRightCorner += Direction.DownRight.AsVector2();
         }
+            }
 
         /// <summary>
         /// Extends the plane in the specified direction by one unit.
@@ -314,10 +318,17 @@ namespace Game.Terrain
                             => unchecked(4112 * (8121 + UpperLeftCorner.GetHashCode()) * (6988 + LowerRightCorner.GetHashCode()));
 
         /// <summary>
-        /// Returns all game objects intersecting with the plane.
+        /// Enumerates entities intersecting with the plane.
         /// </summary>
-        /// <returns>List of intersecting objects</returns>
-        public IEnumerable<GameObject> GetIntersectingObjects()
+        /// <returns>Enumeration of intersecting entities</returns>
+        public IEnumerable<Entity> GetEntities()
+                    => World.GetEntities(this);
+
+		/// <summary>
+		/// Returns all game objects intersecting with the plane.
+		/// </summary>
+		/// <returns>List of intersecting objects</returns>
+		public IEnumerable<GameObject> GetIntersectingObjects()
             => World.GetObjects(this);
 
         /// <summary>

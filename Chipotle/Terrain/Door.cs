@@ -7,6 +7,7 @@ using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
+using Game.Terrain;
 
 using Luky;
 
@@ -44,20 +45,31 @@ namespace Game.Terrain
         public override void Update()
         {
             base.Update();
+			
+            // Watch timers.
+            if (_manipulationTimer < _manipulationTimeLimit)
+                _manipulationTimer += World.DeltaTime;
+			if (_pinchTimer< _pinchTimeLimit)
+				_pinchTimer+= World.DeltaTime;
 
-            if (_timer < _timeLimit)
-                _timer += World.DeltaTime;
-        }
+		}
 
-        /// <summary>
-        /// Conts time from last opening / closing.
-        /// </summary>
-        protected int _timer;
+		/// <summary>
+		/// Conts time from last opening / closing.
+		/// </summary>
+		[ProtoBuf.ProtoIgnore]
+		protected int _manipulationTimer;
 
-        /// <summary>
-        /// specifies if the door can be opened by an NPC.
-        /// </summary>
-        protected bool _openable;
+		/// <summary>
+		/// Conts time from last attempt to pinch an object or entity in the door.
+		/// </summary>
+		[ProtoBuf.ProtoIgnore]
+		protected int _pinchTimer;
+
+		/// <summary>
+		/// specifies if the door can be opened by an NPC.
+		/// </summary>
+		protected bool _openable;
 
         /// <summary>
         /// Sound of the door being opened
@@ -178,26 +190,84 @@ namespace Game.Terrain
                 if (attenuate)
                     World.Sound.ApplyLowpass(id, lowpass);
         }
-
+		
         /// <summary>
-        /// A time interval between opening and closing.
+        /// Enumerates objects and entities stand ing near the door.
         /// </summary>
-        protected const int _timeLimit = 80 * World.DeltaTime;
+        /// <returns>Enumeration of objects and entities</returns>
+        protected IEnumerable<GameObject> GetObstacles()
+		{
+            Plane surroundings = new Plane(_area);
+            surroundings.Extend();
+                            return surroundings.GetEntities().Union(_area.GetIntersectingObjects());
+		}
 
-        /// <summary>
-        /// Processes the UseObject message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        protected virtual void OnUseObject(UseObject message)
+		/// <summary>
+		/// A time interval in milliseconds between opening and closing.
+		/// </summary>
+		protected const int _manipulationTimeLimit = 800;
+
+		/// <summary>
+		/// A time interval in milliseconds between pinching an object or entity in the door.
+		/// </summary>
+		protected const int _pinchTimeLimit = 2500;
+
+		/// <summary>
+		/// Processes the UseObject message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected virtual void OnUseObject(UseObject message)
         {
-            if (!_openable || _timer < _timeLimit)
+            if (!_openable)
                 return;
-            _timer = 0;
 
-            if (State == PassageState.Closed)
+            if (State == PassageState.Closed && _manipulationTimer >= _manipulationTimeLimit)
+            {
+                _manipulationTimer = 0;
                 Open(message.Sender, message.Point);
-            else
+                return;
+            }
+			
+            // The door is open. Prevent closing it if player is standing in it.
+            if(_area.LaysOnPlane(World. Player.Area.Center))
+            {
+                if (_manipulationTimer >= _manipulationTimeLimit)
+                {
+                    _manipulationTimer = 0;
+				World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_hitSound), role: null, looping: false, PositionType.Absolute, message.Point.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+                }
+                return;
+			}
+
+			// The door is open. If there are some objects or entities blocking the door then inform them that they were slammed by the door and let the door open.
+			IEnumerable<GameObject> obstacles = GetObstacles().Where(o => o != World.Player)    ;
+            if (obstacles.IsNullOrEmpty()) // No obstacles, close the door.
+            {
+                if (_manipulationTimer >= _manipulationTimeLimit)
+                {
+                _manipulationTimer = 0;
                 Close(message.Sender, message.Point);
+                }
+                return;
+            }
+
+            // The door is blocked by some objects or entities. Pinch them if the time limit has expired.
+            if (_pinchTimer < _pinchTimeLimit)
+				return;
+
+			// Play a slamming sound at the nearest entity or object
+			_pinchTimer = 0;
+
+			Vector3 slamPoint = obstacles.OrderBy(o => o.Area.GetDistanceFrom(_area.Center)).First().Area.Center.AsOpenALVector();
+            World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_hitSound), role: null, looping: false, PositionType.Absolute, slamPoint, true, 1f, null, _defaultVolume, 0, Playback.OpenAL);
+			
+            // Inform the obstacles without closing the door.
+
+			foreach (GameObject o in obstacles)
+            {
+                PinchedInDoor pMessage = new PinchedInDoor(this, (Entity)message.Sender);
+                o.TakeMessage(pMessage);
+            }
         }
 
         /// <summary>

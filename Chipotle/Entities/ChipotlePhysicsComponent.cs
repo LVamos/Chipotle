@@ -768,13 +768,20 @@ _carMovement = message;
                 e.TakeMessage(new UseObject(Owner, point));
             }
 
-            IEnumerable<Passage> doors =
-                from d in World.GetNearestPassages(_area.Center, true, 3)
-                let obstacle = World.DetectObstacles(new Plane(d.Area.GetClosestPoint(_area.Center), _area.Center))
-                where d.IsInFrontOrBehind(_area.Center)
-                select d;
-            foreach (Passage d in doors)
-            Use(d);
+				// Find doors in radius of 2 meters that are in front or behind the player or door in which the player is standing.
+				Vector2 me = _area.Center;
+				IEnumerable<Passage> doors = World.GetNearestPassages(me, true, 2).Union(_area.GetIntersectingPassages().Where(p => p is Door));
+
+				IEnumerable <Passage> usable =
+                    from d in doors
+                    let obstacle = World.DetectObstacles(new Plane(d.Area.GetClosestPoint(me), me))
+                    //let playerInDoor = d.Area.LaysOnPlane(me)
+                    where d.IsInFrontOrBehind(me)
+                    select d;
+				
+                // Use the doors.
+                foreach (Passage d in usable)
+                    Use(d);
 
             Use(World.GetObject(GetNextTile(1).position)); // Detect object in front of Chipotle and use it.
         }

@@ -260,7 +260,6 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnGotoPoint(GotoPoint message)
         {
-            StopFollowing();
             _path = FindPath(message.Goal);
 
             if (_path == null) // No path exists
@@ -268,13 +267,14 @@ namespace Game.Entities
 
             _goal = message.Goal;
 
-            SetState(TuttleState.GoingToTarget);
+            TuttleState state = message.WatchPlayer ? TuttleState.GoingToTargetAndWatchingPlayer : TuttleState.GoingToTarget;
+            SetState(state);
         }
 
         /// <summary>
         /// Checks if the NPC is walking in the moment.
         /// </summary>
-        private bool Walking => _state == TuttleState.GoingToTarget || _state == TuttleState.GoingToPlayer;
+        protected bool Walking => _state == TuttleState.GoingToTarget || _state == TuttleState.GoingToTargetAndWatchingPlayer || _state == TuttleState.GoingToPlayer;
 
         /// <summary>
         /// Processes the Hide message.
@@ -405,7 +405,7 @@ namespace Game.Entities
             _path = null;
             _walkTimer = 0;
 
-            if (_state == TuttleState.GoingToPlayer)
+            if (_state == TuttleState.GoingToPlayer || _state == TuttleState.GoingToTargetAndWatchingPlayer)
                 SetState(TuttleState.WatchingPlayer);
             else SetState(TuttleState.Waiting);
         }

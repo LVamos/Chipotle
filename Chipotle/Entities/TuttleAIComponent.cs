@@ -1,6 +1,7 @@
 ﻿using ProtoBuf;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Game.Messaging;
 using Game.Messaging.Commands;
@@ -10,6 +11,7 @@ using Game.Terrain;
 using OpenTK;
 
 using ProtoBuf;
+using System.Net.NetworkInformation;
 
 namespace Game.Entities
 {
@@ -95,6 +97,7 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case PinchedInDoor h: OnPinchedInDoor(h); break;
                                 case TuttleStateChanged tsc:OnTuttleStateChanged(tsc); break;
                     case ChipotlesCarMoved ccm:OnChipotlesCarMoved(ccm); break;
                 case CutsceneEnded ce: OnCutsceneEnded(ce); break;
@@ -103,6 +106,39 @@ namespace Game.Entities
                 default: base.HandleMessage(message); break;
             }
         }
+
+        /// <summary>
+        /// Handles the HitByDoor message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnPinchedInDoor(PinchedInDoor message)
+		{
+InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
+
+            // Go away from the door. Find a random walkable tile near the player in the same locality where he's standing.
+            Plane aroundPlayer = new Plane(_player.Area);
+            aroundPlayer.Extend(4);
+
+            // Find walkable tiles around the player.
+            Vector2? walkable =
+ (from p in _player.Locality.Area.GetPoints()
+  where aroundPlayer.LaysOnPlane(p) && message.Sender.Area.GetDistanceFrom(p) >= 4 && World.IsWalkable(p)
+  orderby _player.Area.GetDistanceFrom(p)
+  select (Vector2?)p)
+            .FirstOrDefault();
+
+            if (walkable.HasValue)
+				GoToPoint((Vector2)walkable, true);
+		}
+		
+        /// <summary>
+        /// Sends Tuttle to the specified point.
+        /// </summary>
+        /// <param name="point">The target point</param>
+        /// <param name="watchPlayer">Specifies if Tuttle should stop following the player while leading to the target</param>
+        protected void GoToPoint(Vector2 point, bool watchPlayer = false)
+			=> InnerMessage(new GotoPoint(this, point, watchPlayer));
+
 
         /// <summary>
         /// Processes the CutsceneBegan message.
@@ -147,7 +183,7 @@ namespace Game.Entities
                 return;
 
             Vector2 goal = new Vector2(1005, 1051);
-            InnerMessage(new GotoPoint(this, goal));
+            GoToPoint(goal);
         }
 
         /// <summary>
