@@ -23,7 +23,7 @@ namespace Game.Terrain
 		/// A list of points leading from start to the end or null if no possible path exists
 		/// </returns>
 		public Queue<Vector2> FindPath(Vector2 start, Vector2 end, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool skipStart = false, int maxDistance = 300)
-		{
+			{
 			// Tests if the specified node is walkable and in distance limit.
 			bool Inaccessible(Node n)
 						=> World.Map[n.Coords] == null
@@ -38,10 +38,13 @@ namespace Game.Terrain
 			{
 				Queue<Vector2> coords = new Queue<Vector2>();
 
-				for (Node step = lastStep.Parent; step != null; step = step.Parent)
+				for (Node step = lastStep; step != null; step = step.Parent)
 					coords.Enqueue(step.Coords);
 
 				Queue<Vector2> path = new Queue<Vector2>(coords.Reverse());
+
+				if (path.Count() == 0 || (skipStart && path.Count() == 1))
+					return null;
 
 				if (skipStart)
 					path.Dequeue();
