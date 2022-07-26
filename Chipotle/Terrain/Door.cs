@@ -45,26 +45,29 @@ namespace Game.Terrain
         public override void Update()
         {
             base.Update();
-			
-            // Watch timers.
-            if (_manipulationTimer < _manipulationTimeLimit)
-                _manipulationTimer += World.DeltaTime;
-			if (_pinchTimer< _pinchTimeLimit)
-				_pinchTimer+= World.DeltaTime;
+            WatchTimers();
+		}
 
+        /// <summary>
+        /// Watches and manages timers for door manipulation.
+        /// </summary>
+        private void WatchTimers()
+        {
+			if (_manipulationTimer < _manipulationTimeLimit)
+				_manipulationTimer += World.DeltaTime;
+			if (_pinchTimer < _pinchTimeLimit)
+				_pinchTimer += World.DeltaTime;
 		}
 
 		/// <summary>
 		/// Conts time from last opening / closing.
 		/// </summary>
-		[ProtoBuf.ProtoIgnore]
-		protected int _manipulationTimer;
+		protected int _manipulationTimer = _manipulationTimeLimit;
 
 		/// <summary>
 		/// Conts time from last attempt to pinch an object or entity in the door.
 		/// </summary>
-		[ProtoBuf.ProtoIgnore]
-		protected int _pinchTimer;
+		protected int _pinchTimer = _pinchTimeLimit;
 
 		/// <summary>
 		/// specifies if the door can be opened by an NPC.
