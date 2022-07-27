@@ -18,23 +18,25 @@ namespace Game.Terrain
         /// <summary>
         /// Returns word description of the specified angle.
         /// </summary>
-        /// <param name="compassDegrees">The angle in compass degrees to be described</param>
+        /// <param name="degrees">The angle in compass degrees to be described</param>
         /// <returns>A word description in a string</returns>
-        public static string GetDescription(double compassDegrees)
+        public static string GetDescription(double degrees)
         {
-            // Possible sides
-            (int degrees1, int degrees2, string description)[] sides = 
-            {(315, 359, " před tebou"),
-                (0, 44, " před tebou"),
-                (45, 74, " vpravo před tebou"),
-                (75, 104, " napravo"),
-                (105, 164, " vpravo za tebou"),
-                (165, 194, " za tebou"),
-                (195, 254, " vlevo za tebou"),
-                (255, 284, " nalevo"),
-(285, 314, " vlevo před tebou")};
-
-            return sides.First(s => compassDegrees >= s.degrees1 && compassDegrees <= s.degrees2).description;
+            if (degrees == 0)
+                return " před tebou";
+            if (degrees > 0 && degrees < 90)
+                return " šikmo vpravo";
+            if (degrees == 90)
+                return " vpravo";
+            if (degrees > 90 && degrees < 180)
+                return " šikmo vpravo za tebou";
+            if (degrees == 180)
+                return " za tebou";
+            if (degrees > 180 && degrees < 270)
+                return " šikmo vlevo za tebou";
+            if (degrees == 270)
+                return " vlevo";
+            return " šikmo vlevo";
         }
 
 
