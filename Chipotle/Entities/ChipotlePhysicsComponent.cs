@@ -763,7 +763,7 @@ _carMovement = message;
                 if (e == null)
                     return;
 
-                Vector2? tmp = e.Area.FindOppositePoint(_area);
+                Vector2? tmp = _area.FindOppositePoint(e.Area);
                 Vector2 point = tmp.HasValue ? (Vector2)tmp : e.Area.GetClosestPoint(CurrentTile.position);
                 e.TakeMessage(new UseObject(Owner, point));
             }
