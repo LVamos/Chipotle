@@ -18,6 +18,9 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class TuttleSoundComponent : SoundComponent
     {
+        /// <summary>
+        /// A sound played when Tuttle gets pinched in a door by another NPC.
+        /// </summary>
         protected const  string _doorPinchSound = "TuttleHitByDoor";
 		
         /// <su mmary>
@@ -26,6 +29,43 @@ namespace Game.Entities
         [ProtoBuf.ProtoIgnore]
         protected int _movingSpeechHandle;
 
+		/// <summary>
+		/// Target position for current Tuttle's voice sliding.
+		/// </summary>
+		[ProtoBuf.ProtoIgnore]
+		protected Vector3 _voiceSlideTarget;
+
+		/// <summary>
+		/// Current position for Tuttle's voice sliding.
+		/// </summary>
+		protected Vector3 _voiceSlidePosition;
+
+		/// <summary>
+		/// Specifies how the current position of Tuttle's voice changes in one step when voice sliding is being performed.
+		/// </summary>
+		[ProtoBuf.ProtoIgnore]
+		protected Vector3 _voiceSlideDelta;
+		
+        /// <summary>
+        /// Specifies how much steps are needed to perform the voice slide.
+        /// </summary>
+        protected int _voiceSlideTicks => _voiceSlideInterval / World.DeltaTime;
+
+		/// <summary>
+		/// A counter used for voice sliding.
+		/// </summary>
+		[ProtoBuf.ProtoIgnore]
+		protected int _voiceSlideTimer = -1;
+
+		/// <summary>
+		/// Specifies how long it takes to slide position of Tuttle's voice from one tile to another one.
+		/// </summary>
+		[ProtoBuf.ProtoIgnore]
+		protected const int _voiceSlideInterval = 500;
+		
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public TuttleSoundComponent(): base()
             => _walkingVolume = .2f;
 
@@ -59,10 +99,17 @@ namespace Game.Entities
         {
             PlayTerrain(message.TargetPosition.Center, World.Map[message.TargetPosition.Center], message.Silently ? ObstacleType.Far : message.Obstacle);
 
-            World.Sound.GetDynamicInfo(_movingSpeechHandle, out SoundState state, out var _);
-            if (state == SoundState.Playing)
-                World.Sound.SetSourcePosition(_movingSpeechHandle, message.TargetPosition.Center.AsOpenALVector());
-		}
+            if (_movingSpeechHandle == 0)
+                return;
+
+            if (message.SourcePosition.Center == default) System.Diagnostics.Debugger.Break();
+
+            _voiceSlidePosition = message.SourcePosition.Center.AsOpenALVector();
+            _voiceSlideTarget = message.TargetPosition.Center.AsOpenALVector();
+            Vector3 difference = _voiceSlideTarget - _voiceSlidePosition;
+            _voiceSlideDelta = new Vector3(difference.X / _voiceSlideTicks, 0, difference.Z / _voiceSlideTicks);
+            _voiceSlideTimer = 0;
+        }
 
         /// <summary>
         /// Plays a sound representation of a tile.
@@ -94,5 +141,37 @@ namespace Game.Entities
             if (attenuate)
                 World.Sound.ApplyLowpass(id, lowpass);
         }
-    }
+
+		/// <summary>
+		/// Processes incoming messages.
+		/// </summary>
+		public override void Update()
+        {
+            base.Update();
+            DoVoiceSliding();
+        }
+		
+        /// <summary>
+        /// Performs sliding of Tuttle's voice during walk.
+        /// </summary>
+        private void DoVoiceSliding()
+        {
+            if (_movingSpeechHandle == 0)
+                return;
+
+			World.Sound.GetDynamicInfo(_movingSpeechHandle, out SoundState state, out var _);
+            if (_voiceSlideTimer == -1 || state != SoundState.Playing)
+                return;
+
+            _voiceSlidePosition += _voiceSlideDelta;
+
+            World.Sound.SetSourcePosition(_movingSpeechHandle, _voiceSlidePosition);
+			
+			if (++_voiceSlideTimer >= _voiceSlideTicks)
+            {
+                _voiceSlideTimer = -1;
+                _voiceSlideDelta = default;
+            }
+		}
+	}
 }

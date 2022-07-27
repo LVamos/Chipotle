@@ -704,8 +704,10 @@ namespace Game
 		/// Static constructor
 		/// </summary>
 		static World()
-				=> RuntimeTypeModel.Default.Add(typeof(Vector2), false).Add("X", "Y");
-
+		{
+			RuntimeTypeModel.Default.Add(typeof(Vector2), false).Add("X", "Y");
+			RuntimeTypeModel.Default.Add(typeof(Vector3), false).Add("X", "Y", "Z");
+		}
 		/// <summary>
 		/// Loads the map from file.
 		/// </summary>
