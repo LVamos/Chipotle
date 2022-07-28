@@ -124,9 +124,13 @@ namespace Game.Entities
         {
             if (distance < 5)
                 return 2;
-            if(distance >= 5 && distance < 10)
-            if (distance >= 10 && distance < 30)
+
+            if (distance < 10)
+                return 1;
+
+            if (distance < 30)
                 return .5f;
+
                 return .2f;
         }
 
