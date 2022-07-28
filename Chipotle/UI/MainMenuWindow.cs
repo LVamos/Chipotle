@@ -189,7 +189,13 @@ namespace Game.UI
         /// </summary>
         private void ExitGame()
         {
-            Program.EnableJAWSKeyHook();
+			// Stop speaker test if it's playing.
+			World.Sound.GetDynamicInfo(_speakerTestSoundID, out SoundState state, out int _);
+            if (state == SoundState.Playing)
+                World.Sound.Stop(_speakerTestSoundID);
+
+
+				Program.EnableJAWSKeyHook();
             StopLoop();
             Thread.Sleep(7000);
             Environment.Exit(0);
