@@ -401,7 +401,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreatePoolsidePlank(Name name, Plane area, bool decorative)
-                    => new DumpObject(name, area, "prkno u bazénu", decorative, null, null, null, "cs4", true);
+                    => new DumpObject(name, area, "prkno u bazénu", decorative, null, null, null, "cs4");
 
         /// <summary>
         /// Creates new instance of the pool steps (schůdky w1) object in the Walsch's pool (bazén
