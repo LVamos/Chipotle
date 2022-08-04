@@ -152,6 +152,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
             {
                 case "cs7": case "cs8": Reveal(); break;
                 case "cs19": Hide(); break;
+                case "cs21": InnerMessage(new StopFollowing(this)); ; break;
             }
         }
 
@@ -207,8 +208,9 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
         /// </summary>
         private void JumpToBelvedereStreet2()
         {
-            SetPosition message = new SetPosition(this, new Plane("1806, 1121"), true);
-            InnerMessage(message);
+            StopFollowing();
+            InnerMessage(new SetPosition(this, new Plane("1806, 1121"), true));
+            StartFollowing();
         }
 
         /// <summary>
@@ -216,14 +218,34 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
         /// locality to the Christine's hall (hala p1) locality.
         /// </summary>
         private void JumpToChristinesHall()
-            => InnerMessage(new SetPosition(this, new Plane("1791, 1124"), true));
+		{
+            StopFollowing();
+            InnerMessage(new SetPosition(this, new Plane("1791, 1124"), true));
+            StartFollowing();
+        }
+
+        /// <summary>
+        /// Starts following the player.
+        /// </summary>
+        private void StartFollowing()
+        => InnerMessage(new StartFollowing(this));
+
+        /// <summary>
+        /// Stops following the player.
+        /// </summary>
+        private void StopFollowing()
+            => InnerMessage(new StopFollowing(this));
 
         /// <summary>
         /// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his
         /// room (pokoj s1) locality.
         /// </summary>
         private void JumpToSweeneysRoom()
-            => InnerMessage(new SetPosition(this, new Plane("1411, 974"), true));
+        {
+            StopFollowing();
+            InnerMessage(new SetPosition(this, new Plane("1411, 974"), true));
+            StartFollowing();
+        }
 
         /// <summary>
         /// Processes the ChipotlesCarMoved message.

@@ -42,10 +42,13 @@ namespace Game.Entities
         /// <returns>Queue with nodes leading to the target</returns>
         protected Queue<Vector2> FindPath(Vector2 goal)
         {
+            if (_area == null)
+                return null;
+
             if (_finder == null)
                 _finder = new PathFinder();
 
-            bool sameLocality = World.GetLocality(_area.Center) == World.GetLocality(goal); // Don't go to another localities if the goal is in the same locality.
+                    bool sameLocality = World.GetLocality(_area.Center) == World.GetLocality(goal); // Don't go to another localities if the goal is in the same locality.
 			bool throughDoors = !sameLocality;
 			return _finder.FindPath(_area.Center, goal, false, throughDoors, false, sameLocality, true);
 		}

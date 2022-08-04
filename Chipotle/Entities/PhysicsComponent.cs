@@ -294,7 +294,7 @@ namespace Game.Entities
             /// Processes the SetPosition message.
             /// </summary>
             /// <param name="message">The message to be processed</param>
-            private void OnSetPosition(SetPosition message)
+            protected  virtual void OnSetPosition(SetPosition message)
             => Move(message.Target, message.Silently);
     }
 }

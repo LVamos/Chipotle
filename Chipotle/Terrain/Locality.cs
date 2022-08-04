@@ -412,6 +412,9 @@ namespace Game.Terrain
         {
             base.TakeMessage(message);
 
+            if (message is ChipotlesCarMoved)
+                return; // Don't send this to other objects and entities.
+
             MessageObjects(message);
             MessageEntities(message);
             MessagePassages(message);
