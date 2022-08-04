@@ -39,7 +39,7 @@ namespace Game.UI
             Cursor = Cursors.Default;
             Name = "MainWindow";
             ResumeLayout(false);
-            Text = "Chipotle";
+            Text = "Chipotle " +Program.Version;
             ShowIcon = false;
             MaximizeBox = false;
             MinimizeBox = false;
