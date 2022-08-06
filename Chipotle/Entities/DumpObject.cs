@@ -255,10 +255,11 @@ namespace Game.Entities
         /// </summary>
         protected int _navigationSoundID;
 
-        /// <summary>
-        /// Indicates if the sound navigation is enabled.
-        /// </summary>
-        protected bool _navigating;
+		/// <summary>
+		/// Indicates if the sound navigation is enabled.
+		/// </summary>
+		[ProtoIgnore]
+		protected bool _navigating;
         
         /// <summary>
         /// Enables or disables sound attenuation.
@@ -318,11 +319,7 @@ namespace Game.Entities
         /// Handles the game reloaded message.
         /// </summary>
         private void OnGameReloaded()
-        {
-            if (_loopSoundId != 0)
-                UpdateLoop();
-            else _loopSoundId = 0;
-        }
+            => UpdateLoop();
 
         /// <summary>
         /// Plays the sound loop of this object if there's any.
