@@ -63,7 +63,7 @@ namespace Game.Entities
         /// Specifies the minimum allowed distance from the Detective Chipotle NPC.
         /// </summary>
         /// <remarks>Used when following the Detective Chipotle NPC</remarks>
-        private const int _minDistance = 2;
+        private const int _minDistance = 6;
 
         /// <summary>
         /// An instance of the Random number generator
