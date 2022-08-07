@@ -208,11 +208,6 @@ namespace Game
 		};
 
 		/// <summary>
-		/// Path to a map file
-		/// </summary>
-		private static readonly string MapPath = Path.Combine(Program.DataPath, @"Map\chipotle.xml");
-
-		/// <summary>
 		/// Information about an ongoing cutscene
 		/// </summary>
 		private static (CutsceneBegan message, bool paused, int position) _cutscene;
@@ -619,7 +614,10 @@ namespace Game
 			string name =
 				Interaction.InputBox(String.Empty, "Zadej název sejvu");
 			if (string.IsNullOrEmpty(name))
+			{
+				Tolk.Speak("Tak nic");
 				return false;
+			}
 
 			if (!Directory.Exists(Program.PredefinedSavesPath))
 				Directory.CreateDirectory(Program.PredefinedSavesPath);
@@ -629,6 +627,7 @@ namespace Game
 
 			path = Path.Combine(path, "game.sav");
 			SaveGame(path);
+			Tolk.Speak("uloženo");
 			return true;
 		}
 
@@ -645,15 +644,24 @@ namespace Game
 			string[] items =
 				saves.Select(s => Path.GetFileName(s))
 				.ToArray<string>();
+			if (items.IsNullOrEmpty())
+			{
+				Tolk.Speak("Žádný sejvy tady nevidim.");
+				return false;
+			}
 
 			int i = 
 				WindowHandler.Menu(items, "Kterej sejv chceš načíst?", true);
 			if (i == -1)
+			{
+				Tolk.Speak("Tak nic");
 				return false;
+			}
 
 			World.Sound.StopAll();
 			string path = Path.Combine(saves[i], "game.sav");
 			LoadGame(path);
+			Tolk.Speak("Načteno.");
 			return true;
 		}
 
@@ -676,16 +684,29 @@ namespace Game
 				SoundInit(Program.TolkDelegate);
 			}
 
-			// Load terrain, objects, NPCs, localities and passages.
-			LoadTerrain();
-			FileStream stream = null;
-			SerializerHelper helper;
+			SerializerHelper helper = null;
 
-			using (stream = File.OpenRead(path))
+			try
 			{
-				helper = Serializer.Deserialize<SerializerHelper>(stream);
+				if(!File.Exists(path))
+					Program.Terminate($"Nevidím soubor {Program.SerializationPath}. Že ty ses v tom hrabal?");
+
+				// Load terrain, objects, NPCs, localities and passages.
+				LoadTerrain();
+				FileStream stream = null;
+
+				using (stream = File.OpenRead(path))
+				{
+					helper = Serializer.Deserialize<SerializerHelper>(stream);
+				}
+				stream?.Close();
 			}
-			stream?.Close();
+			catch (Exception e)
+			{
+				if (e is ProtoBuf.ProtoException)
+					Program.Terminate($"Nepodařilo se načíst hru. Soubor {Program.SerializationPath} je v nesprávném formátu.");
+				else throw new InvalidOperationException("Nepodařilo se načíst mapu ze souboru game.sav");
+			}
 
 			_entities = helper.Entities;
 			_objects = helper.Objects;
@@ -716,7 +737,18 @@ namespace Game
 			string A(XElement element, string attribute, bool prepareForIndexing = true)
 				=> prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
-			XDocument xDocument = XDocument.Load(MapPath);
+			XDocument xDocument = null;
+			try
+			{
+				xDocument = XDocument.Load(Program.MapPath);
+			}
+			catch (Exception e)
+			{
+				if (!File.Exists(Program.MapPath))
+					Program.Terminate($"Soubor {Program.MapPath} nebyl nalezen.");
+				else Program.Terminate("Nepodařilo se načíst mapu.");
+			}
+
 			XElement root = xDocument.Root;
 			IEnumerable<XElement> xLocalities = root.Element("localities").Elements("locality");
 			IEnumerable<XElement> xPassages = root.Element("passages").Elements("passage");
@@ -724,7 +756,7 @@ namespace Game
 			Initialize(); // Prepare data structures for objects, entities, localities etc.
 
 			// Create map
-			Map = new TileMap(MapPath);
+			Map = new TileMap(Program.MapPath);
 
 			// Load localities
 			foreach (XElement l in xLocalities)
@@ -788,11 +820,11 @@ lBackgroundInfo.volume
 			string Attribute(XElement element, string attribute, bool prepareForIndexing = true)
 	=> prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
-			XElement root = XDocument.Load(MapPath).Root;
+			XElement root = XDocument.Load(Program.MapPath).Root;
 			IEnumerable<XElement> xLocalities = root.Element("localities").Elements("locality");
 
 			// Create map
-			Map = new TileMap(MapPath);
+			Map = new TileMap(Program.MapPath);
 
 			// Load localities
 			foreach (XElement l in xLocalities)
