@@ -16,6 +16,7 @@ using Luky;
 using OpenTK;
 using System.Text;
 using System.Linq;
+using Microsoft.VisualBasic;
 
 namespace Game
 {
@@ -106,7 +107,7 @@ namespace Game
                 AllowPredefinedSaves =          true;
 				DisableJawsKeyHook = true;
 				LetTuttleFollowChipotle = true;
-				MainMenuAtStartup = false;
+				MainMenuAtStartup = true;
 				PlayCutscenes = true;
 				PlayMenuLoop = true;
 				ReportErrors = false;
@@ -159,8 +160,13 @@ namespace Game
 
         }
 
+        /// <summary>
+        /// Path to a map file
+        /// </summary>
+        public static string MapPath => Path.Combine(Program.DataPath, @"Map\chipotle.xml");
 
-        private static string GetUserInfo()
+
+		private static string GetUserInfo()
         {
             StringBuilder text = new StringBuilder();
 
@@ -204,7 +210,7 @@ namespace Game
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.14";
+        public static string Version = "0.15";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
@@ -281,12 +287,12 @@ namespace Game
         /// <summary>
         /// Path to file used for serialization.
         /// </summary>
-        public static string SerializationPath { get; private set; }
-		
-        /// <summary>
-        /// Path to the folder with predefined saves.
-        /// </summary>
-        public static string PredefinedSavesPath
+        public static string SerializationPath => Path.Combine(DataPath, "game.sav");
+
+		/// <summary>
+		/// Path to the folder with predefined saves.
+		/// </summary>
+		public static string PredefinedSavesPath
         { get => Path.Combine(DataPath, "Saves"); }
 
         /// <summary>
@@ -363,12 +369,11 @@ namespace Game
         private static void Main()
         {
             ResendErrorReport();
-            Settings.SetDebugMode();
+            Settings.SetTestMode();
 
 
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            SerializationPath = Path.Combine(DataPath, "game.sav");
 
             try
             {
@@ -461,6 +466,19 @@ namespace Game
                 return;
 
             _jaws.InvokeMember("Disable", System.Reflection.BindingFlags.InvokeMethod, null, _jawsObject, null);
+        }
+
+        /// <summary>
+        /// Displays an error announcement and terminates the program.
+        /// </summary>
+        /// <param name="prompt">The prompt to be shown</param>
+        public static void Terminate(string prompt)
+{
+            World.Sound.StopAll();
+            string message = string.IsNullOrEmpty(prompt) ? "Došlo k neznámé chybě. Hra bude ukončena." : prompt;
+                Interaction.MsgBox(prompt, MsgBoxStyle.Critical, "Chyba");
+            EnableJAWSKeyHook();
+            Environment.Exit(0);
         }
     }
 }
