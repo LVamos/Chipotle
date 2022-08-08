@@ -308,10 +308,6 @@ namespace Game.Entities
             }
 
             UsedOnce = !Used;
-
-            if (!Used && Program.Settings.SaveGameInEachLocality)
-                World.SaveGame();
-
             Used = true;
         }
 

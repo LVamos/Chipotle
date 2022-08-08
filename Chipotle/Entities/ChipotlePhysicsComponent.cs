@@ -55,10 +55,6 @@ namespace Game.Entities
             // Watch important events
             WatchPuddle(target); // Check if player walked in a puddle
             WatchPhone();
-
-            // Save game if the game is in test mode.
-            if (Program.Settings.SaveGameInEachLocality && sourceLocality != null && sourceLocality != targetLocality)
-                SaveGame();
         }
 
 

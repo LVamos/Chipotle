@@ -83,11 +83,6 @@ namespace Game
             public static bool MainMenuAtStartup;
 
             /// <summary>
-            /// Enables or disables game saving in each locality and after each interaction with a object or door.
-            /// </summary>
-            public static bool SaveGameInEachLocality;
-
-            /// <summary>
             /// Enables or disables sending Tuttle to the pool locality at startup.
             /// </summary>
             public static bool SendTuttleToPool;
@@ -109,9 +104,8 @@ namespace Game
 				LetTuttleFollowChipotle = true;
 				MainMenuAtStartup = true;
 				PlayCutscenes = true;
-				PlayMenuLoop = true;
+				PlayMenuLoop = false;
 				ReportErrors = false;
-				SaveGameInEachLocality = true;
 				SendTuttleToPool = true;
 				TestCommandsEnabled = true;
 				ThrowExceptions = true;
@@ -131,7 +125,6 @@ namespace Game
 				PlayCutscenes = true;
 				PlayMenuLoop = true;
 				ReportErrors = true;
-				SaveGameInEachLocality = false;
 				SendTuttleToPool = true;
 				TestCommandsEnabled = false;
 				ThrowExceptions = false;
@@ -151,7 +144,6 @@ namespace Game
                 PlayCutscenes = true;
                 PlayMenuLoop = true;
                 ReportErrors = true;
-				SaveGameInEachLocality = true;
                 SendTuttleToPool = true;
 				TestCommandsEnabled = false;
 				ThrowExceptions = false;
@@ -189,9 +181,9 @@ namespace Game
 
         public static void SendFeedback()
         {
-            Program.MainWindow.GameLoopEnabled = false;
+            Program.MainWindow.GameInProgress = false;
             string message = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej zprávu pro autora", "");
-            Program.MainWindow.GameLoopEnabled = true;
+            Program.MainWindow.GameInProgress = true;
 
             if (string.IsNullOrEmpty(message))
             {
