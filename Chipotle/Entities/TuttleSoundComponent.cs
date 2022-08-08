@@ -136,7 +136,7 @@ namespace Game.Entities
 
             // Play the sound
             string soundName = "movstep" + Enum.GetName(tile.Terrain.GetType(), tile.Terrain);
-            int id = _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, volume);
+            int id = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, volume);
 
             if (attenuate)
                 World.Sound.ApplyLowpass(id, lowpass);

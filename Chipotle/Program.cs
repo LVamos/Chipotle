@@ -210,7 +210,7 @@ namespace Game
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.15";
+        public static string Version = "0.16";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
@@ -369,7 +369,7 @@ namespace Game
         private static void Main()
         {
             ResendErrorReport();
-            Settings.SetTestMode();
+            Settings.SetDebugMode();
 
 
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);

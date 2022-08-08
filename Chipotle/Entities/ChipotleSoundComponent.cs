@@ -110,7 +110,6 @@ namespace Game.Entities
         /// </summary>
         public override void Start()
         {
-            _sound.ListenerOrientationUp = new Vector3(0, -1, 0);
             _listenerOrientation.steps = -1;
             base.Start();
         }
@@ -160,7 +159,7 @@ namespace Game.Entities
 
             switch (message.CutsceneName)
             {
-                case "cs7": case "cs8": case "cs10": _sound.ApplyEaxReverbPreset("carpettedhallway", 0); break;
+                case "cs7": case "cs8": case "cs10": World.Sound.ApplyEaxReverbPreset("carpettedhallway", 0); break;
             }
         }
 
@@ -250,7 +249,7 @@ namespace Game.Entities
                 _listenerOrientation.steps = -1;
             }
 
-            _sound.ListenerOrientationFacing = _listenerOrientation.current.UnitVector.AsOpenALVector(); // Apply changes
+            World.Sound.ListenerOrientationFacing = _listenerOrientation.current.UnitVector.AsOpenALVector(); // Apply changes
         }
 
         /// <summary>
@@ -275,7 +274,7 @@ namespace Game.Entities
         {
             string targetLocality = message.Target.Name.Indexed.ToLower();
             (string name, float gain) = _reverbPresets[targetLocality];
-            _sound.ApplyEaxReverbPreset(name, gain);
+			World.Sound.ApplyEaxReverbPreset(name, gain);
         }
 
 /// <summary>
@@ -284,7 +283,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnPositionChanged(PositionChanged message)
         {
-            _sound.ListenerPosition = message.TargetPosition.Center.AsOpenALVector();
+			World.Sound.ListenerPosition = message.TargetPosition.Center.AsOpenALVector();
 
             if(!message.Silently)
             PlayTerrain(message.TargetPosition.Center);
@@ -320,7 +319,7 @@ namespace Game.Entities
             // Immediate change
             if (message.Immediately)
             {
-                _sound.ListenerOrientationFacing = message.Target.UnitVector.AsOpenALVector();
+				World.Sound.ListenerOrientationFacing = message.Target.UnitVector.AsOpenALVector();
                 return;
             }
 
@@ -349,13 +348,13 @@ namespace Game.Entities
 
             if (terrain == TerrainType.Wall)
             {
-                _sound.Play(stream: _sound.GetRandomSoundStream("hitwall"), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, 1);
+				World.Sound.Play(stream: World.Sound.GetRandomSoundStream("hitwall"), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, 1);
                 Tolk.Speak("zeď");
             }
             else
             {
                 string soundName = "movstep" + Enum.GetName(terrain.GetType(), terrain);
-                _sound.Play(stream: _sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, Vector3.Zero, true, _walkingVolume, null, 1f, 0, Playback.OpenAL);
+				World.Sound.Play(stream: World.Sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, Vector3.Zero, true, _walkingVolume, null, 1f, 0, Playback.OpenAL);
             }
         }
     }

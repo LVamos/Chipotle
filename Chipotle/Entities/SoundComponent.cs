@@ -23,10 +23,6 @@ namespace Game.Entities
         /// Default volume for sound output
         /// </summary>
         protected float _defaultVolume = 1;
-        /// <summary>
-        /// Reference to the sound player
-        /// </summary>
-        protected SoundThread _sound => World.Sound;
 
         /// <summary>
         /// Converts a string list to a CSV string.

@@ -678,12 +678,6 @@ namespace Game
 		/// <remarks>Used just for testing purposes. Allows opening predefined saves.</remarks>
 		public static void LoadGame(string path)
 		{
-			if (Sound == null)
-			{
-				Tolk.Load();
-				SoundInit(Program.TolkDelegate);
-			}
-
 			SerializerHelper helper = null;
 
 			try
@@ -939,9 +933,15 @@ lBackgroundInfo.volume
 		/// <param name="say">A delegate for text output</param>
 		public static void SoundInit(Action<string> say)
 		{
+			if (Sound != null)
+				return;
+
+			Tolk.Load();
+
 			Sound = SoundThread.CreateAndStartThread(Path.Combine(Program.DataPath, "Sounds"), Program.OnError, say);
 			Sound.LoadSounds();
 			Sound.SetGroupVolume("master", Sound.DefaultMasterVolume);
+			Sound.ListenerOrientationUp = new Vector3(0, -1, 0);
 		}
 
 		/// <summary>
@@ -949,7 +949,6 @@ lBackgroundInfo.volume
 		/// </summary>
 		public static void StartGame()
 		{
-			Sound.SetGroupVolume("master", Sound.DefaultMasterVolume);
 			LoadMap();
 			Add(Entity.CreateChipotle());
 			_localities.Foreach(p => p.Value.Start());
