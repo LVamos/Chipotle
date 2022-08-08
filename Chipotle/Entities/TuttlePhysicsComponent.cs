@@ -45,6 +45,10 @@ namespace Game.Entities
             if (_area == null)
                 return null;
 
+            float distance = World.GetDistance(_area.Center, goal);
+			if (distance > _maxPathFindingDistance)
+                return null;
+
             if (_finder == null)
                 _finder = new PathFinder();
 
@@ -57,7 +61,7 @@ namespace Game.Entities
 		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		private const int _maxDistance = 10;
+		private const int _maxDistanceFromPlayer = 10;
 
         /// <summary>
         /// Specifies the minimum allowed distance from the Detective Chipotle NPC.
@@ -92,6 +96,11 @@ namespace Game.Entities
         /// walk was interrupted.
         /// </summary>
         private bool _restartApproaching;
+
+        /// <summary>
+        /// Specifies the maximum distance allowed for path finding.
+        /// </summary>
+        private const float _maxPathFindingDistance = 100;
 
         /// <summary>
         /// Initializes the component and starts its message loop.
@@ -170,7 +179,7 @@ namespace Game.Entities
         private Vector2? FindPlaceNearPlayer()
         {
             // Find possible goals. Try select a goal from the current locality of the player.
-            Vector2? farther = _player.Area.FindNearestWalkableTile(_maxDistance);
+            Vector2? farther = _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
 
             if (Owner.IsInSameLocality(_player))
                 return farther;
@@ -207,7 +216,7 @@ namespace Game.Entities
 
             if (_random == null)
                 _random = new Random();
-            _targetDistance = _random.Next(_minDistance, _maxDistance);
+            _targetDistance = _random.Next(_minDistance, _maxDistanceFromPlayer);
             Vector2? tmp = FindPlaceNearPlayer();
 
             if (!tmp.HasValue)
@@ -232,7 +241,7 @@ namespace Game.Entities
             float distance = GetDistanceFromPlayer();
             if (
                 (_state == TuttleState.WatchingPlayer && _area != null)
-&& (distance > _maxDistance || (distance <= _maxDistance && !_player.IsInSameLocality(Owner)))
+&& (distance > _maxDistanceFromPlayer || (distance <= _maxDistanceFromPlayer && !_player.IsInSameLocality(Owner)))
                 )
                 GoToPlayer();
             else if (_state == TuttleState.GoingToPlayer && distance <= _targetDistance)

@@ -712,7 +712,7 @@ namespace Game
 			_localities.Values.Foreach(l => l.TakeMessage(message));
 			_objects.Values.Foreach(o => o.TakeMessage(message));
 			_passages.Values.Foreach(p => p.TakeMessage(message));
-			Program.MainWindow.GameLoopEnabled = true;
+			Program.MainWindow.GameInProgress = true;
 }
 
 		/// <summary>
@@ -869,7 +869,7 @@ lBackgroundInfo.volume
 		/// </summary>
 		public static void QuitGame()
 		{
-			Program.MainWindow.GameLoopEnabled = false;
+			Program.MainWindow.GameInProgress = false;
 			_cutscene.message = null;
 			Sound.FadeAndStopAll(.0002f);
 			SaveGame();
@@ -965,7 +965,7 @@ lBackgroundInfo.volume
 			foreach (Entity e in _entities.Values)
 				e.Start();
 
-			Program.MainWindow.GameLoopEnabled = true;
+			Program.MainWindow.GameInProgress = true;
 
 			// Play the first cutscene
 			PlayCutscene(null, "cs6");

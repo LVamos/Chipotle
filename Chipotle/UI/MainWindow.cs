@@ -102,22 +102,16 @@ namespace Game.UI
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
-            e.Cancel = true;
-            World.Sound.FadeMasterOut(.0009f, 0);
-            Program.EnableJAWSKeyHook();
-            System.Threading.Tasks.Task.Run(() => 
-            {
-                System.Threading.Thread.Sleep(1100);
-                Environment.Exit(0);
+            if(GameInProgress)
+            World.SaveGame();
 
-            }
-            );
+            Program.EnableJAWSKeyHook();
         }
 
         /// <summary>
         /// starts or stops the game loop.
         /// </summary>
-        public bool GameLoopEnabled
+        public bool GameInProgress
         {
             get => _gameLoopEnabled;
             set => _gameLoopEnabled = _tmrGameLoop.Enabled = value;
