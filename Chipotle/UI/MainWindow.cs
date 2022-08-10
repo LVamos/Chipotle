@@ -102,12 +102,11 @@ namespace Game.UI
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
-            World.Sound.StopAll();
+            e.Cancel = true;
             if(GameInProgress)
             World.SaveGame();
 
             Program.EnableJAWSKeyHook();
-            Environment.Exit(0);
         }
 
         /// <summary>
