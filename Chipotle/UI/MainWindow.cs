@@ -102,6 +102,7 @@ namespace Game.UI
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
+            e.Cancel = true;
             if(GameInProgress)
             World.SaveGame();
 
