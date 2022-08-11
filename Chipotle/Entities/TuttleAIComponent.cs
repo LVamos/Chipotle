@@ -21,10 +21,22 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class TuttleAIComponent : AIComponent
     {
-        /// <summary>
-        /// Specifies if the NPC is just moving to another locality with the Chipotle's car.
-        /// </summary>
-[ProtoIgnore]
+		/// <summary>
+		/// Specifies the minimum allowed distance from the Detective Chipotle NPC.
+		/// </summary>
+		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
+		private const int _minDistanceFromPlayer = 6;
+
+		/// <summary>
+		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
+		/// </summary>
+		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
+		private const int _maxDistanceFromPlayer = 10;
+
+		/// <summary>
+		/// Specifies if the NPC is just moving to another locality with the Chipotle's car.
+		/// </summary>
+		[ProtoIgnore]
         protected Locality _ridingTo;
 
         /// <summary>
@@ -281,7 +293,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
         /// </summary>
         private void Reveal()
         {
-            Vector2? target = _player.Area.FindNearestWalkableTile(10);
+            Vector2? target = World.GetRandomWalkablePoint(_player, _minDistanceFromPlayer, _maxDistanceFromPlayer);
             Assert(target.HasValue, "No walkable tile near player");
 
             _hidden = false;
@@ -296,9 +308,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
             if (_hidden || _carMovement == null)
                 return;
 
-            Plane perimeter = new Plane(_carMovement.Target);
-            perimeter.Extend();
-            Vector2? target = perimeter.FindRandomWalkableTile(1);
+            Vector2? target = World.GetRandomWalkablePoint(_carMovement.Target, 1, 2);
             Assert(target.HasValue, "No walkable tile found.");
             InnerMessage(new SetPosition(this, new Plane((Vector2)target), true));
             _carMovement = null;

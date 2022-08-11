@@ -67,7 +67,7 @@ namespace Game.Entities
         /// Specifies the minimum allowed distance from the Detective Chipotle NPC.
         /// </summary>
         /// <remarks>Used when following the Detective Chipotle NPC</remarks>
-        private const int _minDistance = 6;
+        private const int _minDistanceFromPlayer = 6;
 
         /// <summary>
         /// An instance of the Random number generator
@@ -177,18 +177,7 @@ namespace Game.Entities
         /// </summary>
         /// <returns>Coordinates of tthe target tile</returns>
         private Vector2? FindPlaceNearPlayer()
-        {
-            // Find possible goals. Try select a goal from the current locality of the player.
-            Vector2? farther = _player.Area.FindNearestWalkableTile(_maxDistanceFromPlayer);
-
-            if (Owner.IsInSameLocality(_player))
-                return farther;
-
-            Vector2? closer = _player.Area.FindNearestWalkableTile(_minDistance);
-            if (closer.HasValue && _player.Locality.Area.LaysOnPlane((Vector2)closer))
-                return closer;
-            return farther;
-        }
+            => World.GetRandomWalkablePoint(_player, _minDistanceFromPlayer, _maxDistanceFromPlayer);
 
         /// <summary>
         /// Computes distance between the NPC and the Detective Chipotle NPC.
@@ -213,16 +202,12 @@ namespace Game.Entities
             if (_area == null || Owner.Locality == null || World.Player == null)
                 return;
 
-
-            if (_random == null)
-                _random = new Random();
-            _targetDistance = _random.Next(_minDistance, _maxDistanceFromPlayer);
             Vector2? tmp = FindPlaceNearPlayer();
 
             if (!tmp.HasValue)
                 return;
 
-            Vector2 goal = (Vector2)tmp;
+            Vector2 goal = tmp.Value;
             _path = FindPath(goal);
 
             if (_path == null)
@@ -347,7 +332,10 @@ namespace Game.Entities
             SetState(TuttleState.WatchingPlayer);
         }
 
-        protected override int GetSpeed()
+		/// <summary>
+		/// Computes length of the next step of the NPC.
+		/// </summary>
+		protected override int GetSpeed()
         {
             if(_state == TuttleState.GoingToPlayer)
             return base.GetSpeed();

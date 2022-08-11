@@ -32,6 +32,85 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
+		/// <summary>
+		/// Searches nearest surrounding of the specified map element and selects a random walkable tile.
+		/// </summary>
+		/// <param name="element">Specifies the map element around which to search</param>
+		/// <param name="minDistance">Specifies minimum distance oif the points from the surroundings.</param>
+		/// <param name="maxDistance">Specifies maximum distance fo the points in the surroundings.</param>
+		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
+		public static Vector2? GetRandomWalkablePoint(MapElement element, int minDistance, int maxDistance)
+			=> GetRandomWalkablePoint(element.Area, minDistance, maxDistance);
+
+		/// <summary>
+		/// Searches nearest surrounding of the specified point and selects a random walkable tile.
+		/// </summary>
+		/// <param name="point">Specifies the point around which to search</param>
+		/// <param name="minDistance">Specifies minimum distance oif the points from the surroundings.</param>
+		/// <param name="maxDistance">Specifies maximum distance fo the points in the surroundings.</param>
+		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
+		public static Vector2? GetRandomWalkablePoint(Vector2 point, int minDistance, int maxDistance)
+			=> GetRandomWalkablePoint(new Plane(point), minDistance, maxDistance);
+
+
+		/// <summary>
+		/// Searches nearest surrounding of plane and selects a random walkable tile.
+		/// </summary>
+		/// <param name="maxDistance">Specifies width of the searched perimeter around the plane</param>
+		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
+		public static Vector2? GetRandomWalkablePoint(Plane area, int minDistance, int maxDistance)
+		{
+			IEnumerable<Vector2> walkables = 
+				area.GetWalkableSurroudningPoints(minDistance, maxDistance);
+
+
+			if (walkables.IsNullOrEmpty())
+				return null;
+
+			// Select a random point.
+			int index = (new Random())
+				.Next(walkables.Count());
+
+			return (Vector2?)walkables.ElementAt(index);
+		}
+
+		/// <summary>
+		/// Finds the nearest walkable tile in surroundings of this plane.
+		/// </summary>
+		/// <param name="element">The map element around which to search.</param>
+		/// <param name="minDistance">Minimum distance from center</param>
+		/// <param name="maxDistance">Maximum distance from center</param>
+		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
+		public static Vector2? GetNearestWalkableTile(MapElement element, int minDistance, int maxDistance)
+			=> GetNearestWalkableTile(element.Area, minDistance, maxDistance);
+
+		/// <summary>
+		/// Finds the nearest walkable tile in surroundings of this plane.
+		/// </summary>
+		/// <param name="point">The point around which to search.</param>
+		/// <param name="minDistance">Minimum distance from center</param>
+		/// <param name="maxDistance">Maximum distance from center</param>
+		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
+		public static Vector2? GetNearestWalkableTile(Vector2 point, int minDistance, int maxDistance) 
+			=> GetNearestWalkableTile(new Plane(point), minDistance, maxDistance);
+
+		/// <summary>
+		/// Finds the nearest walkable tile in surroundings of this plane.
+		/// </summary>
+		/// <param name="area">The plane around which to search.</param>
+		/// <param name="minDistance">Minimum distance from center</param>
+		/// <param name="maxDistance">Maximum distance from center</param>
+		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
+		public static Vector2? GetNearestWalkableTile(Plane area, int minDistance, int maxDistance)
+		{
+			return
+			(from p in area.GetWalkableSurroudningPoints(minDistance, maxDistance)
+			 let distance = GetDistance(area.GetClosestPoint(p), p)
+			 orderby distance
+			 select p)
+			 .FirstOrDefault();
+		}
+
 		private static readonly float _cutsceneVolume = 1;
 
 		/// <summary>
@@ -336,7 +415,7 @@ namespace Game
 				wallCoordinates = area.GetPerimeterPoints(directions);
 			}
 
-			wallCoordinates.Foreach(c => World.Map[c].Register(TerrainType.Wall, false));
+			wallCoordinates.Foreach(c => Map[c].Register(TerrainType.Wall, false));
 		}
 
 		/// <summary>
@@ -658,7 +737,7 @@ namespace Game
 				return false;
 			}
 
-			World.Sound.StopAll();
+			Sound.StopAll();
 			string path = Path.Combine(saves[i], "game.sav");
 			LoadGame(path);
 			Tolk.Speak("Načteno.");

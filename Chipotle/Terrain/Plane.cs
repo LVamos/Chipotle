@@ -22,6 +22,16 @@ namespace Game.Terrain
     public class Plane : DebugSO
     {
         /// <summary>
+        /// Enumerates all walkable points in a distance range around this plane.
+        /// </summary>
+        /// <param name="minDistance"Minimum distance of the surrounding pint from the plane></param>
+        /// <param name="maxDistance">Maximum distance of the surroudning points from the plane</param>
+        /// <returns>Enumeration of points</returns>
+        public IEnumerable<Vector2> GetWalkableSurroudningPoints(int minDistance, int maxDistance)
+                => GetSurroundingPoints(minDistance, maxDistance)
+                .Where(p => World.IsWalkable(p));
+
+        /// <summary>
         /// Checks if all the plane is walkable.
         /// </summary>
         public bool Walkable()
@@ -236,7 +246,7 @@ namespace Game.Terrain
         /// <param name="units">Amount of the units by which the rectangle is extended</param>
         public void Extend(int units = 1)
         {
-            for (int i = 0; i < units; i++)
+            for (int i = 1; i <= units; i++)
             {
             UpperLeftCorner += Direction.UpLeft.AsVector2();
             LowerRightCorner += Direction.DownRight.AsVector2();
@@ -254,44 +264,6 @@ namespace Game.Terrain
                 UpperLeftCorner += step;
             else if (direction == Direction.Right || direction == Direction.Down)
                 LowerRightCorner += step;
-        }
-
-        /// <summary>
-        /// Finds the nearest walkable tile in surroundings of this plane.
-        /// </summary>
-        /// <param name="maxDistance">Maximum distance of searched tiles</param>
-        /// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-        public Vector2? FindNearestWalkableTile(int maxDistance)
-        {
-            Plane around = new Plane(this);
-            for (int i = 0; i <= maxDistance; i++)
-            {
-                around.Extend();
-                (Vector2 position, Tile tile) walkable = around.GetPerimeterTiles().FirstOrDefault(t => World.IsWalkable(t.position));
-
-                if (walkable.tile != null)
-                    return (Vector2?)walkable.position;
-            }
-            return (Vector2?)null;
-        }
-
-        /// <summary>
-        /// Searches nearest surrounding of plane and selects a random walkable tile.
-        /// </summary>
-        /// <param name="maxDistance">Specifies width of the searched perimeter around the plane</param>
-        /// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-        public Vector2? FindRandomWalkableTile(int maxDistance)
-        {
-            Plane around = new Plane(
-                new Vector2(UpperLeftCorner.X - maxDistance, UpperLeftCorner.Y + maxDistance),
-                new Vector2(LowerRightCorner.X + maxDistance, LowerRightCorner.Y - maxDistance));
-            IEnumerable<(Vector2 position, Tile tile)> walkables = around.GetWalkableTiles();
-
-            if (walkables.IsNullOrEmpty())
-                return (Vector2?)null;
-
-            int index = (new Random()).Next(walkables.Count());
-            return (Vector2?)walkables.ElementAt(index).position;
         }
 
         /// <summary>
@@ -502,21 +474,22 @@ namespace Game.Terrain
             }
         }
 
-        /// <summary>
-        /// Enumerates all closest points from surroundings of this plane.
-        /// </summary>
-        /// <returns>all closest points from surroundings of this plane</returns>
-        public IEnumerable<Vector2> GetSurroundingPoints()
+		/// <summary>
+		/// Enumerates all closest points from surroundings of this plane.
+		/// </summary>
+		/// <param name="minDistance">Specifies minimum distance of the surrounding points from edges of the specified plane.</param>
+		/// <param name="maxDistance">Specifies maximum distance of the surrounding points from edges of the specified plane.</param>
+		/// <returns>all closest points from surroundings of this plane</returns>
+		public IEnumerable<Vector2> GetSurroundingPoints(int minDistance, int maxDistance)
         {
-            Vector2 largerUpperLeft = UpperLeftCorner + Direction.UpLeft.AsVector2();
-            Vector2 largerLowerRight = LowerRightCorner + Direction.DownRight.AsVector2();
+            Plane surroundings = new Plane(this);
+            surroundings.Extend(maxDistance);
 
-            Vector2 point;
-            for (point.X = largerUpperLeft.X; point.X <= largerLowerRight.X; point.X++)
-            {
-                for (point.Y = largerLowerRight.Y; point.Y < largerUpperLeft.Y; point.Y++)
-                    yield return point;
-            }
+            return
+                (from p in surroundings.GetPoints()
+                 let distance = World.GetDistance(GetClosestPoint(p), p)
+                 where distance >= minDistance && distance <= maxDistance
+                 select p);
         }
 
         /// <summary>
@@ -559,9 +532,11 @@ namespace Game.Terrain
         /// <summary>
         /// Enumerates all closest tiles from surroundings of this plane.
         /// </summary>
+        /// <param name="minDistance">Minimum distance of the surrounding points from the plane</param>
+        /// <param name="maxDistance">Maximum distance of the surrounding tiles from the plane</param>
         /// <returns>all closest tiles from surroundings of this plane</returns>
-        public IEnumerable<Tile> GetSurroundingTiles()
-            => GetSurroundingPoints().Select(p => World.Map[p]).Where(t => t != null);
+        public IEnumerable<Tile> GetSurroundingTiles(int minDistance, int maxDistance)
+            => GetSurroundingPoints(minDistance, maxDistance).Select(p => World.Map[p]).Where(t => t != null);
 
         /// <summary>
         /// Enumerates all tiles intersecting with the plane.

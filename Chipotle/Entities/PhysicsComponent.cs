@@ -135,9 +135,8 @@ namespace Game.Entities
         /// <summary>
         /// Computes length of the next step of the NPC.
         /// </summary>
-        /// <param name="goal">Coordinates of the goal of an ongoing movement of the NPC</param>
         protected virtual int GetSpeed()
-            => (int)(GetTerrainSpeed() * GetDistanceCoefficient(World.GetDistance(_area.Center, _goal)));
+            => (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count));
 
         /// <summary>
         /// Returns speed of the terrain on which the NPC stands.
