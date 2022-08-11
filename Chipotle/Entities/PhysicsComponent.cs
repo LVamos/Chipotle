@@ -58,7 +58,6 @@ namespace Game.Entities
         /// <summary>
         /// Stores the current shortest track towards the Detective Chipotle NPC.
         /// </summary>
-        //[ProtoIgnore]
         protected Queue<Vector2> _path;
 
         /// <summary>
@@ -110,7 +109,6 @@ namespace Game.Entities
         /// <summary>
         /// The goal that Tuttle is just going to.
         /// </summary>
-        //[ProtoIgnore]
         protected Vector2 _goal;
 
         /// <summary>
