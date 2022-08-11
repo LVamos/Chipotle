@@ -106,7 +106,9 @@ namespace Game.UI
             if(GameInProgress)
             World.SaveGame();
 
+            World.Sound.StopAll();
             Program.EnableJAWSKeyHook();
+            Environment.Exit(0);
         }
 
         /// <summary>
