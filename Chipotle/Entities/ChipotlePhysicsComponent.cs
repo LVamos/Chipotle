@@ -517,7 +517,7 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
             Random r = new Random();
             _phoneInterval = r.Next(30000, 120000);
             _phoneDeltaTime = 0;
-            Move(1805, 1121, true);
+            Move(1813, 1126, true);
         }
 
         /// <summary>

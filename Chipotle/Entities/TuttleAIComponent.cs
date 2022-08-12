@@ -163,6 +163,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
             switch (message.CutsceneName)
             {
                 case "cs7": case "cs8": Reveal(); break;
+                case "cs14": StopFollowing(); break;
                 case "cs19": Hide(); break;
                 case "cs21": case "cs23": StopFollowing(); break;
             }
@@ -221,8 +222,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
         /// </summary>
         private void JumpToBelvedereStreet2()
         {
-            StopFollowing();
-            InnerMessage(new SetPosition(this, new Plane("1806, 1121"), true));
+            InnerMessage(new SetPosition(this, new Plane("1801, 1124"), true));
             StartFollowing();
         }
 

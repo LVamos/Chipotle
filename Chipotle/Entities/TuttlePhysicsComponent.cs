@@ -176,14 +176,18 @@ namespace Game.Entities
         /// finds a walkable tile near the Detective Chipotle NPC. Prefers the locality in which the player is located.
         /// </summary>
         /// <returns>Coordinates of tthe target tile</returns>
-        private Vector2? FindPlaceNearPlayer()
-            => World.GetRandomWalkablePoint(_player, _minDistanceFromPlayer, _maxDistanceFromPlayer);
+        private Vector2? GetSpotByPlayer()
+                => (from p in _player.Area.GetWalkableSurroudningPoints(_minDistanceFromPlayer, _maxDistanceFromPlayer)
+                 let distance = World.GetDistance(_area.Center, p)
+                 orderby distance
+                 select p)
+                 .FirstOrDefault();
 
-        /// <summary>
-        /// Computes distance between the NPC and the Detective Chipotle NPC.
-        /// </summary>
-        /// <returns>Distance between the NPC and the Detective Chipotle NPC</returns>
-        private float GetDistanceFromPlayer()
+		/// <summary>
+		/// Computes distance between the NPC and the Detective Chipotle NPC.
+		/// </summary>
+		/// <returns>Distance between the NPC and the Detective Chipotle NPC</returns>
+		private float GetDistanceFromPlayer()
 => World.GetDistance(_area.Center, _player.Area.Center);
 
         /// <summary>
@@ -202,7 +206,7 @@ namespace Game.Entities
             if (_area == null || Owner.Locality == null || World.Player == null)
                 return;
 
-            Vector2? tmp = FindPlaceNearPlayer();
+            Vector2? tmp = GetSpotByPlayer();
 
             if (!tmp.HasValue)
                 return;
