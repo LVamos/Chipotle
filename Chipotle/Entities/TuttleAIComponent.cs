@@ -232,6 +232,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
         private void JumpToChristinesHall()
 		{
             StopFollowing();
+            World.PlayCutscene(Owner, "cs38");
             InnerMessage(new SetPosition(this, new Plane("1791, 1124"), true));
             StartFollowing();
         }
