@@ -25,7 +25,7 @@ namespace Game.Entities
         /// <summary>
         /// Reverb presets for individual localities
         /// </summary>
-        private readonly Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
+        private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
         {
             ["obývák s1"] = ("livingroom", .9f),
             ["asfaltka c1"] = ("plain", .1f),
@@ -74,11 +74,6 @@ namespace Game.Entities
             ["kancelář v1"] = ("paddedcell", .2f),
             ["ulice v1"] = ("prefabouthouse", .3f)
         };
-
-        /// <summary>
-        /// Stores a position the player was located on when the last cutscene started.
-        /// </summary>
-        private Vector2? _cutsceneStartPosition;
 
         /// <summary>
         /// Runs a message handler for the specified message.
@@ -155,7 +150,6 @@ namespace Game.Entities
         protected override void OnCutsceneBegan(CutsceneBegan message)
         {
             base.OnCutsceneBegan(message);
-            _cutsceneStartPosition = Owner.Area.Center;
 
             switch (message.CutsceneName)
             {
@@ -287,20 +281,6 @@ namespace Game.Entities
 
             if(!message.Silently)
             PlayTerrain(message.TargetPosition.Center);
-
-            WatchCutscene();
-        }
-
-        /// <summary>
-        /// Stops an ongoing cutscene if the player moved 10 steps away from the initial position he was locayted on when the cutscene started.
-        /// </summary>
-        private void WatchCutscene()
-        {
-            if (_cutsceneStartPosition.HasValue && World.GetDistance((Vector2)_cutsceneStartPosition, Owner.Area.Center) > 5)
-            {
-                _cutsceneStartPosition = null;
-                World.StopCutscene(Owner);
-            }
         }
 
         /// <summary>
