@@ -164,7 +164,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
             {
                 case "cs7": case "cs8": Reveal(); break;
                 case "cs19": Hide(); break;
-                case "cs21": InnerMessage(new StopFollowing(this)); ; break;
+                case "cs21": case "cs23": StopFollowing(); break;
             }
         }
 
@@ -183,7 +183,8 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
                 case "cs14": JumpToBelvedereStreet2(); break;
                 case "cs21": JumpToChristinesHall(); break;
                 case "cs23": JumpToSweeneysRoom(); break;
-            }
+                case "cs38": StartFollowing(); break;
+			}
         }
 
         /// <summary>
@@ -230,12 +231,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
         /// locality to the Christine's hall (hala p1) locality.
         /// </summary>
         private void JumpToChristinesHall()
-		{
-            StopFollowing();
-            World.PlayCutscene(Owner, "cs38");
-            InnerMessage(new SetPosition(this, new Plane("1791, 1124"), true));
-            StartFollowing();
-        }
+            => InnerMessage(new SetPosition(this, new Plane("1791, 1124"), true));
 
         /// <summary>
         /// Starts following the player.
@@ -254,11 +250,7 @@ InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
         /// room (pokoj s1) locality.
         /// </summary>
         private void JumpToSweeneysRoom()
-        {
-            StopFollowing();
-            InnerMessage(new SetPosition(this, new Plane("1411, 974"), true));
-            StartFollowing();
-        }
+            => InnerMessage(new SetPosition(this, new Plane("1411, 974"), true));
 
         /// <summary>
         /// Processes the ChipotlesCarMoved message.

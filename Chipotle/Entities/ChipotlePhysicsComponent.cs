@@ -525,13 +525,16 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
         /// locality to the Christine's hall (hala p1) locality.
         /// </summary>
         private void JumpToChristinesHall()
-            => Move(1797, 1125, true);
+        {
+            Move(1797, 1125, true);
+			World.PlayCutscene(Owner, "cs38");
+		}
 
-        /// <summary>
-        /// Relocates the NPC from the hall in Vanilla crunch company (hala v1) into the Mariotti's
-        /// office (kancelář v1) locality.
-        /// </summary>
-        private void JumpToMariottisOffice()
+		/// <summary>
+		/// Relocates the NPC from the hall in Vanilla crunch company (hala v1) into the Mariotti's
+		/// office (kancelář v1) locality.
+		/// </summary>
+		private void JumpToMariottisOffice()
             => Move(2018, 1123, true);
 
         /// <summary>
@@ -539,13 +542,16 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
         /// Sweeney's hall (hala s1) locality.
         /// </summary>
         private void JumpToSweeneysHall()
-            => Move(1405, 965, true);
+        {
+            Move(1405, 965, true);
+			World.PlayCutscene(Owner, "cs41");
+		}
 
-        /// <summary>
-        /// Relocates the NPC from the Mariotti's office (kancelář v1) into the garage of the
-        /// vanilla crunch company (garáž v1) locality.
-        /// </summary>
-        private void JumpToVanillaCrunchGarage()
+		/// <summary>
+		/// Relocates the NPC from the Mariotti's office (kancelář v1) into the garage of the
+		/// vanilla crunch company (garáž v1) locality.
+		/// </summary>
+		private void JumpToVanillaCrunchGarage()
             => Move(2006, 1166, true);
 
         /// <summary>
