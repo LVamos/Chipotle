@@ -54,6 +54,7 @@ namespace Game.Entities
 
                     bool sameLocality = World.GetLocality(_area.Center) == World.GetLocality(goal); // Don't go to another localities if the goal is in the same locality.
 			bool throughDoors = !sameLocality;
+
 			return _finder.FindPath(_area.Center, goal, false, throughDoors, false, sameLocality, true);
 		}
 
@@ -100,7 +101,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies the maximum distance allowed for path finding.
         /// </summary>
-        private const float _maxPathFindingDistance = 100;
+        private const int _maxPathFindingDistance = 60;
 
         /// <summary>
         /// Initializes the component and starts its message loop.
@@ -244,14 +245,26 @@ namespace Game.Entities
         private void OnEntityMoved(EntityMoved message)
         {
             // Test if the component has been initialized.
-            if (_area == null)
+            if (_area == null || _state != TuttleState.WatchingPlayer || message.Sender != _player)
                 return;
 
             // Avoid too long paths.
-            if (GetDistanceFromPlayer() > 150)
-                return;
+            if (GetDistanceFromPlayer() > _maxPathFindingDistance)
+            {
+                // Simply jump nearer.
+                Vector2? nearerSpot =
+                    (from p in _player.Area.GetWalkableSurroudningPoints(_maxDistanceFromPlayer, _maxPathFindingDistance)
+                     let distance = World.GetDistance(_area.Center, p)
+                     orderby distance
+                     select p)
+                     .FirstOrDefault();
 
-            if (message.Sender == _player && _state == TuttleState.WatchingPlayer)
+                if (nearerSpot.HasValue)
+                    Move(nearerSpot.Value);
+                else throw new InvalidOperationException("Tuttle couldn't get tu Chipotle.");
+                return;
+            }
+
                 CheckDistance();
         }
 
@@ -317,13 +330,12 @@ namespace Game.Entities
         {
             base.PerformWalk();
 
-            if (Walking && _path.IsNullOrEmpty())
+            if (!Walking)
+                return;
+
+            if (_path.IsNullOrEmpty())
                 StopWalk();
-            else if (_restartApproaching)
-                FindNewPath();
-            else if (_state == TuttleState.WatchingPlayer && _area != null)
-                CheckDistance();
-            else if (Walking && _walkTimer >= _speed)
+            else if (_walkTimer >= _speed)
                 MakeStep();
         }
 

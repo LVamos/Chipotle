@@ -757,6 +757,11 @@ namespace Game
 		/// <remarks>Used just for testing purposes. Allows opening predefined saves.</remarks>
 		public static void LoadGame(string path)
 		{
+			// Pause game if in progress.
+			bool resumeGame = Program.MainWindow.GameInProgress;
+			Program.MainWindow.GameInProgress = false;
+
+			// Deserialize data from file
 			SerializerHelper helper = null;
 
 			try
@@ -791,7 +796,10 @@ namespace Game
 			_localities.Values.Foreach(l => l.TakeMessage(message));
 			_objects.Values.Foreach(o => o.TakeMessage(message));
 			_passages.Values.Foreach(p => p.TakeMessage(message));
-			Program.MainWindow.GameInProgress = true;
+
+			// Resume the game
+			if (resumeGame)
+				Program.MainWindow.GameInProgress = true;
 }
 
 		/// <summary>
