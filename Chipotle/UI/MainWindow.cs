@@ -17,11 +17,6 @@ namespace Game.UI
         private readonly Timer _tmrGameLoop;
 
         /// <summary>
-        /// Indicates if the game loop runs.
-        /// </summary>
-        private bool _gameLoopEnabled = false;
-
-        /// <summary>
         /// Indicates if the master volume is muted.
         /// </summary>
         private bool _muted;
@@ -116,8 +111,8 @@ namespace Game.UI
         /// </summary>
         public bool GameInProgress
         {
-            get => _gameLoopEnabled;
-            set => _gameLoopEnabled = _tmrGameLoop.Enabled = value;
+            get => _tmrGameLoop != null ? _tmrGameLoop.Enabled : false;
+            set => _tmrGameLoop.Enabled = value;
         }
 
         /// <summary>
