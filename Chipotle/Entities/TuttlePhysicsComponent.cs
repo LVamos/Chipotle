@@ -113,16 +113,83 @@ namespace Game.Entities
 		{
 			switch (message)
 			{
-				case GameReloaded m: OnGameReloaded(m); break;
-				case TuttleStateChanged m: OnTuttleStateChanged(m); break;
-				case Reveal m: OnReveal(m); break;
-				case Hide h: OnHide(h); break;
-				case GotoPoint gp: OnGotoPoint(gp); break;
-				case StartFollowing sf: OnStartFollowing(sf); break;
-				case StopFollowing stf: OnStopFollowing(stf); break;
-				case EntityMoved em: OnEntityMoved(em); break;
-				default: base.HandleMessage(message); break;
+				case TryGoTo m:
+					OnTryGoTo(m);
+					break;
+
+				case FollowPath m:
+					OnFollowPath(m);
+					break;
+
+				case GameReloaded m:
+					OnGameReloaded(m);
+					break;
+
+				case TuttleStateChanged m:
+					OnTuttleStateChanged(m);
+					break;
+
+				case Reveal m:
+					OnReveal(m);
+					break;
+
+				case Hide h:
+					OnHide(h);
+					break;
+
+				case GotoPoint gp:
+					OnGotoPoint(gp);
+					break;
+
+				case StartFollowing sf:
+					OnStartFollowing(sf);
+					break;
+
+				case StopFollowing stf:
+					OnStopFollowing(stf);
+					break;
+
+				case EntityMoved em:
+					OnEntityMoved(em);
+					break;
+
+				default:
+					base.HandleMessage(message);
+					break;
 			}
+		}
+
+		/// <summary>
+		/// Handles the TryGoTo message.
+		/// </summary>
+		/// <param name="m"><The message to be processed/param>
+		private void OnTryGoTo(TryGoTo m)
+		{
+			if (!(m.Sender is EntityComponent))
+				throw new InvalidOperationException("Message of type TryGoTo was sent to inappropriate object.");
+
+			foreach (Vector2 point in m.Points)
+			{
+				Queue<Vector2> path = FindPath(point);
+				if (path != null)
+				{
+					_path = path;
+					_goal = point;
+					SetState(m.WatchPlayer ? TuttleState.GoingToTargetAndWatchingPlayer : TuttleState.GoingToTarget);
+					break;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Handles the FollowPath message.
+		/// </summary>
+		/// <param name="m">The message to be processed</param>
+		private void OnFollowPath(FollowPath m)
+		{
+			_path = m.Path;
+			_goal = _path.Last();
+			SetState(TuttleState.GoingToTarget);
 		}
 
 		/// <summary>

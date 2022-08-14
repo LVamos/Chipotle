@@ -45,7 +45,7 @@ namespace Game
             /// <summary>
             /// Custom initial position for Tuttle
             /// </summary>
-            public static Vector2? TuttleTestStart = new Vector2(1005, 1048);
+            public static Vector2? TuttleTestStart;
 
             /// <summary>
             /// Enables or disables a custom initial posiiton for Tuttle.
@@ -97,6 +97,7 @@ namespace Game
 			/// </summary>
 			public static void SetDebugMode()
 			{
+                TuttleTestStart = new Vector2(1023, 1030);
 				AllowTuttlesCustomPosition = true;
 				AllowCustomChipotlesStartPosition = true;
                 AllowPredefinedSaves =          true;

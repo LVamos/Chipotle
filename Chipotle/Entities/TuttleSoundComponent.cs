@@ -57,10 +57,15 @@ namespace Game.Entities
 		[ProtoBuf.ProtoIgnore]
 		protected int _voiceSlideTimer = -1;
 
-		/// <summary>
-		/// Specifies how long it takes to slide position of Tuttle's voice from one tile to another one.
-		/// </summary>
-		[ProtoBuf.ProtoIgnore]
+        /// <summary>
+        /// Sound with reaction on collision with Chipotle.
+        /// </summary>
+        private const string _chipotleCollisionSound = "TuttleHitByDoor";
+
+        /// <summary>
+        /// Specifies how long it takes to slide position of Tuttle's voice from one tile to another one.
+        /// </summary>
+        [ProtoBuf.ProtoIgnore]
 		protected const int _voiceSlideInterval = 500;
 		
         /// <summary>
@@ -78,17 +83,27 @@ namespace Game.Entities
             switch (message)
             {
                 case ReactToPinchingInDoor r: OnReactToPinchingInDoor(r); break;
-
+                case ReactToCollision m: OnReactToCollision(m); break;
                 case PositionChanged pc:  OnPositionChanged(pc); break;
                 default: base.HandleMessage(message); break;
             }
         }
-		
-        /// <summary>
-        /// Handles the ReactOnPinchingInDoor message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        protected void OnReactToPinchingInDoor(ReactToPinchingInDoor message)
+
+		/// <summary>
+		/// Handles the ReactToCollision message.
+		/// </summary>
+		/// <param name="m">The message to be handled.</param>
+		private void OnReactToCollision(ReactToCollision m)
+        {
+			World.Sound.Play(stream: World.Sound.GetRandomSoundStream("movcrashdefault"), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
+			_movingSpeechHandle = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_chipotleCollisionSound), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
+        }
+
+		/// <summary>
+		/// Handles the ReactOnPinchingInDoor message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnReactToPinchingInDoor(ReactToPinchingInDoor message)
 			=> _movingSpeechHandle = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_doorPinchSound), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
 
 		/// <summary>
