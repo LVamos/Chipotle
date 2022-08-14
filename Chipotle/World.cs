@@ -33,6 +33,29 @@ namespace Game
 	public static class World
 	{
 		/// <summary>
+		/// Constructs the shortest possible path between two points.
+		/// </summary>
+		/// <param name="start">The initial point fo path finding.</param>
+		/// <param name="goal">The goal of the path finding</param>
+		/// <param name="throughObjects">Specifies if tiles with objects should be included.</param>
+		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
+		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
+		/// <param name="sameLocality">Specifies if different localities than locality of the initial point should be included</param>
+		/// <param name="throughStart">Specifies if the start point should be considered walkable.</param>
+		/// <param name="throughGoal">Specifies if the goal should be considered walkable</param>
+		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
+		/// <returns>
+		/// A list of points leading from start to the end or null if no possible path exists
+		/// </returns>
+		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false, int maxDistance = 300)
+			=> _finder.FindPath(start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance);
+
+			/// <summary>
+			/// A tool for path finding.
+			/// </summary>
+			private static PathFinder _finder = new PathFinder();
+
+		/// <summary>
 		/// Searches nearest surrounding of the specified map element and selects a random walkable tile.
 		/// </summary>
 		/// <param name="element">Specifies the map element around which to search</param>
@@ -1051,7 +1074,6 @@ lBackgroundInfo.volume
 			// start entities
 			foreach (Entity e in _entities.Values)
 				e.Start();
-
 			Program.MainWindow.GameInProgress = true;
 
 			// Play the first cutscene

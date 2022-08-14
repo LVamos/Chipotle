@@ -488,8 +488,10 @@ namespace Game.Terrain
             return
                 (from p in surroundings.GetPoints()
                  let distance = World.GetDistance(GetClosestPoint(p), p)
-                 where distance >= minDistance && distance <= maxDistance
+                 where !LaysOnPlane(p) && distance >= minDistance && distance <= maxDistance
                  select p);
+
+            return null;
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Game.Entities;
+using Game.Messaging.Commands;
 
 using OpenTK;
 
@@ -12,55 +13,96 @@ namespace Game.Terrain
 	/// Implementation of A* algorithm
 	/// </summary>
 	[Serializable]
-	public class PathFinder
+	public partial class PathFinder
 	{
+		/// <summary>
+		/// Reconstructs a path from the last node.
+		/// </summary>
+		/// <param name="lastPoint">The last point of the path</param>
+		/// <param name="throughStart">Specifies if the first point shoudl be included</param>
+		/// <param name="throughGoal">Specifies if the last poitn should be included.</param>
+		/// <returns></returns>
+		public Queue<Vector2> GetPath(Node lastPoint, bool throughStart, bool throughGoal)
+		{
+			Queue<Vector2> coords = new Queue<Vector2>();
+
+			for (Node step = lastPoint; step != null; step = step.Parent)
+				coords.Enqueue(step.Coords);
+
+			Queue<Vector2> path = new Queue<Vector2>(coords.Reverse());
+
+			int count = path.Count;
+			if (
+				count == 0 
+				|| ((throughStart ^ throughGoal) && count == 1)
+				|| (throughStart&& throughGoal&& count == 2)
+				)
+				return null;
+
+			if (throughStart)
+				path.Dequeue();
+
+			return path;
+		}
+
+		/// <summary>
+		/// Tests if the specified node is walkable and in distance limit.
+		/// </summary>
+		/// <param name="node">The node to be checked</param>
+		/// <param name="start">The initial point fo path finding.</param>
+		/// <param name="goal">The goal of the path finding</param>
+		/// <param name="throughObjects">Specifies if tiles with objects should be included.</param>
+		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
+		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
+		/// <param name="sameLocality">Specifies if different localities than locality of the initial point should be included</param>
+		/// <param name="throughStart">Specifies if the start point should be considered walkable.</param>
+		/// <param name="throughGoal">Specifies if the goal should be considered walkable</param>
+		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
+		/// <returns>True if the tile is walkable</returns>
+		public bool Walkable(Node node, Vector2 start, Vector2 goal, bool throughObjects, bool throughClosedDoors, bool throughImpermeableTerrain, bool sameLocality, bool throughStart, bool throughGoal, int maxDistance)
+		{
+			if (
+					(throughStart && node.Coords == start)
+					|| (throughGoal && node.Coords == goal)
+					)
+				return true;
+
+			return
+				World.Map[node.Coords] != null
+						&& (!sameLocality || (sameLocality && World.GetLocality(start) == World.GetLocality(node.Coords)))
+						&& node.Distance <= maxDistance
+						&& (throughObjects || (!throughObjects && !node.IsObjectOrEntity()))
+					&& (throughClosedDoors || (!throughClosedDoors && !node.IsClosedDoor()))
+						&& (throughImpermeableTerrain || (!throughImpermeableTerrain && !node.IsImpermeableTerrain()));
+		}
+
+
 		/// <summary>
 		/// Constructs the shortest possible path between two points.
 		/// </summary>
-		/// <param name="start">First point</param>
-		/// <param name="end">Second point</param>
+		/// <param name="start">The initial point fo path finding.</param>
+		/// <param name="goal">The goal of the path finding</param>
+		/// <param name="throughObjects">Specifies if tiles with objects should be included.</param>
+		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
+		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
+		/// <param name="sameLocality">Specifies if different localities than locality of the initial point should be included</param>
+		/// <param name="throughStart">Specifies if the start point should be considered walkable.</param>
+		/// <param name="throughGoal">Specifies if the goal should be considered walkable</param>
+		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
 		/// <returns>
 		/// A list of points leading from start to the end or null if no possible path exists
 		/// </returns>
-		public Queue<Vector2> FindPath(Vector2 start, Vector2 end, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool skipStart = false, int maxDistance = 300)
+		public Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false, int maxDistance = 300)
 			{
-			// Tests if the specified node is walkable and in distance limit.
-			bool Inaccessible(Node n)
-						=> World.Map[n.Coords] == null
-						|| sameLocality && (World.GetLocality(start) != World.GetLocality(n.Coords))
-						|| n.Distance > maxDistance
-						|| (!throughObjects && n.IsObjectOrEntity())
-						|| (!throughClosedDoors && n.IsClosedDoor())
-						|| (!throughImpermeableTerrain && n.IsImpermeableTerrain());
-
-			// Reconstructs the path.
-			Queue<Vector2> GetPath(Node lastStep)
-			{
-				Queue<Vector2> coords = new Queue<Vector2>();
-
-				for (Node step = lastStep; step != null; step = step.Parent)
-					coords.Enqueue(step.Coords);
-
-				Queue<Vector2> path = new Queue<Vector2>(coords.Reverse());
-
-				if (path.Count() == 0 || (skipStart && path.Count() == 1))
-					return null;
-
-				if (skipStart)
-					path.Dequeue();
-
-				return path;
-			}
-
-			// Detect irelevant requests
+			// Detect irrelevant requests
 			if (sameLocality &&
-				(World.GetLocality(start) != World.GetLocality(end)))
+				(World.GetLocality(start) != World.GetLocality(goal)))
 				return null;
 
 			// Find the path.
 			// Začni výchozím uzlem.
 			Node first = new Node(start);
-			Node last = new Node(end);
+			Node last = new Node(goal);
 			first.ComputeDistance(last.Coords);
 
 			// Přidej výchozí uzel do seznamu otevřených uzlů.
@@ -75,19 +117,19 @@ namespace Game.Terrain
 
 				// Pokud už jsme v cíli, skonči.
 				if (node.Coords == last.Coords)
-					return GetPath(node);
+					return GetPath(node, throughStart, throughGoal);
 
 				// Jinak přesuň uzel z otevřených do uzavřených.
 				closed.Add(node);
 				open.Remove(node);
 
 				// Projdi sousedy
-				foreach (Node neighbour in GetNeighbours(node, last))
+				foreach (Node neighbour in GetNeighbours(node, start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance))
 				{
 					// Pokud soused patří mezi uzavřené nebo je na něm nepovolená překážka, přeskoč ho.
 					if (
-						(Inaccessible(neighbour) && neighbour.Coords != start && !skipStart)
-						|| closed.Any(c => c.Coords == neighbour.Coords)
+						(!Walkable(neighbour, start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance))
+						|| closed.Any(c => c.Coords == neighbour.Coords)						
 						)
 						continue;
 
@@ -109,84 +151,18 @@ namespace Game.Terrain
 		/// <param name="parent">The default tile</param>
 		/// <param name="goal">The target tile</param>
 		/// <returns>Enumeration of all adjacent neighbours</returns>
-		private IEnumerable<Node> GetNeighbours(Node parent, Node goal)
-					=> World.Map.GetNeighbours4(parent.Coords)
-					.Where(t => t.tile.Walkable && !World.IsOccupied(t.position))
-					.Select(t => { Node n = new Node(t.position, parent.Cost + 1, parent); n.ComputeDistance(goal.Coords); return n; });
-
-		/// <summary>
-		/// Reprezents one node in a graph corresponding to a tile on a tile map.
-		/// </summary>
-		private class Node
+		private IEnumerable<Node> GetNeighbours(Node parent, Vector2 start, Vector2 goal, bool throughObjects, bool throughClosedDoors, bool throughImpermeableTerrain, bool sameLocality, bool throughStart, bool throughGoal, int maxDistance)
 		{
-			/// <summary>
-			/// Checks if there's a closed door on this node.
-			/// </summary>
-			/// <returns>True if there's a closed door on the node</returns>
-			public bool IsClosedDoor()
+			IEnumerable<Node> neighbours=
+				from neighbour in World.Map.GetNeighbours4(parent.Coords)
+			select new Node(neighbour.position, parent.Cost + 1, parent);
+
+			foreach (Node n in neighbours)
 			{
-				Passage p = World.GetPassage(Coords);
-				return p != null && p.State == PassageState.Closed;
+				n.ComputeDistance(goal);
+				if(Walkable(n, start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance))
+				yield return n;
 			}
-
-			/// <summary>
-			/// Checks if there's an object or entity on this node.
-			/// </summary>
-			/// <returns>True if there's an object or entity on the node</returns>
-			public bool IsObjectOrEntity()
-				=> World.IsOccupied(Coords);
-
-			/// <summary>
-			/// Checks if there's an impermeable terrain on this node.
-			/// </summary>
-			/// <returns>True if there's an object or entity on the node</returns>
-			public bool IsImpermeableTerrain()
-				=> !World.Map[Coords].Walkable;
-
-			/// <summary>
-			/// constructor
-			/// </summary>
-			/// <param name="coords">Coordinates of the node</param>
-			/// <param name="cost">Distance from current node</param>
-			/// <param name="parent">The parent node</param>
-			public Node(Vector2 coords, int cost = 0, Node parent = null)
-			{
-				Coords = coords;
-				Cost = cost;
-				Parent = parent;
-			}
-
-			/// <summary>
-			/// Coordinates of the node
-			/// </summary>
-			public Vector2 Coords { get; private set; }
-
-			/// <summary>
-			/// Heuristic function determining number of steps taken from the first node to this node.
-			/// </summary>
-			public int Cost { get; private set; }
-
-			/// <summary>
-			/// Heuristic function expressing distance between this node and the goal node.
-			/// </summary>
-			public int Distance { get; private set; }
-
-			/// <summary>
-			/// The parrent of this node
-			/// </summary>
-			public Node Parent { get; private set; }
-
-			/// <summary>
-			/// A heuristic function expressing length of potential path from the start to the goal across this node.
-			/// </summary>
-			public int Price => Cost + Distance;
-
-			/// <summary>
-			/// Calculates distance between this node and the lastnode
-			/// </summary>
-			/// <param name="goal">The last point of requested path</param>
-			public void ComputeDistance(Vector2 goal)
-				=> Distance = (int)(Math.Abs(goal.X - Coords.X) + Math.Abs(goal.Y - Coords.Y));
 		}
 	}
 }

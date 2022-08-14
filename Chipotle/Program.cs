@@ -45,7 +45,7 @@ namespace Game
             /// <summary>
             /// Custom initial position for Tuttle
             /// </summary>
-            public static Vector2? TuttleTestStart;
+            public static Vector2? TuttleTestStart = new Vector2(1005, 1048);
 
             /// <summary>
             /// Enables or disables a custom initial posiiton for Tuttle.
@@ -97,16 +97,16 @@ namespace Game
 			/// </summary>
 			public static void SetDebugMode()
 			{
-				AllowTuttlesCustomPosition = false;
-				AllowCustomChipotlesStartPosition = false;
+				AllowTuttlesCustomPosition = true;
+				AllowCustomChipotlesStartPosition = true;
                 AllowPredefinedSaves =          true;
-				DisableJawsKeyHook = true;
+				DisableJawsKeyHook = false;
 				LetTuttleFollowChipotle = true;
-				MainMenuAtStartup = true;
-				PlayCutscenes = true;
+				MainMenuAtStartup = false;
+				PlayCutscenes = false;
 				PlayMenuLoop = false;
 				ReportErrors = false;
-				SendTuttleToPool = true;
+				SendTuttleToPool = false;
 				TestCommandsEnabled = true;
 				ThrowExceptions = true;
 			}
@@ -202,7 +202,7 @@ namespace Game
         /// <summary>
         /// Current version of the game
         /// </summary>
-        public static string Version = "0.16";
+        public static string Version = "0.17";
 
         /// <summary>
         /// Sends an e-mail message to my Gmail account.
