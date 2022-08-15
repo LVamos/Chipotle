@@ -429,7 +429,8 @@ namespace Game.Entities
 			// Stop if distance from player is in allowed range.
 			if (_state == TuttleState.GoingToPlayer)
 			{
-				if (GetDistanceFromPlayer() <= _targetDistance)
+				float distance = GetDistanceFromPlayer();
+				if (distance <= _targetDistance && _player.IsInSameLocality(Owner))
 					StopWalk();
 			}
 
