@@ -199,6 +199,7 @@ namespace Game.Entities
 		protected override void OnGameReloaded(GameReloaded message)
 		{
 			base.OnGameReloaded(message);
+			_random = new Random();
 
 			// Try to find a new path to the player if necessary.
 			if (_state == TuttleState.GoingToPlayer)

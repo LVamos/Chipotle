@@ -50,10 +50,10 @@ namespace Game
 		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false, int maxDistance = 300)
 			=> _finder.FindPath(start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance);
 
-			/// <summary>
-			/// A tool for path finding.
-			/// </summary>
-			private static PathFinder _finder = new PathFinder();
+		/// <summary>
+		/// A tool for path finding.
+		/// </summary>
+		private static PathFinder _finder = new PathFinder();
 
 		/// <summary>
 		/// Searches nearest surrounding of the specified map element and selects a random walkable tile.
@@ -83,7 +83,7 @@ namespace Game
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
 		public static Vector2? GetRandomWalkablePoint(Plane area, int minDistance, int maxDistance)
 		{
-			IEnumerable<Vector2> walkables = 
+			IEnumerable<Vector2> walkables =
 				area.GetWalkableSurroudningPoints(minDistance, maxDistance);
 
 
@@ -114,7 +114,7 @@ namespace Game
 		/// <param name="minDistance">Minimum distance from center</param>
 		/// <param name="maxDistance">Maximum distance from center</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetNearestWalkableTile(Vector2 point, int minDistance, int maxDistance) 
+		public static Vector2? GetNearestWalkableTile(Vector2 point, int minDistance, int maxDistance)
 			=> GetNearestWalkableTile(new Plane(point), minDistance, maxDistance);
 
 		/// <summary>
@@ -194,8 +194,8 @@ namespace Game
 			bool accessible = otherLocality.IsAccessible(playersLocality);
 
 			// Are the regions in inadjecting localities?
-			if (GetDistance(area.Center, Player.Area.Center) > 100 ||
-				(playersLocality != otherLocality && (!neighbour || (neighbour && !accessible))))
+			if (GetDistance(area.Center, Player.Area.Center) > 100
+				|| (playersLocality != otherLocality && (!neighbour || (neighbour && !accessible))))
 				return ObstacleType.Far;  // Inaudible
 
 			// Adjecting localities
@@ -495,8 +495,8 @@ namespace Game
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting entities</returns>
 		public static IEnumerable<Entity> GetEntities(Plane area)
-						=> _entities.Values.Where(o =>  o.Area != null && o.Area.Intersects(area));
-		
+						=> _entities.Values.Where(o => o.Area != null && o.Area.Intersects(area));
+
 		/// <summary>
 		/// Returns an NPC found by its name.
 		/// </summary>
@@ -706,7 +706,7 @@ namespace Game
 				t != null && t.Walkable && !IsOccupied(point)
 				&& (p == null || (p != null && p.State == PassageState.Open));
 		}
-		
+
 		/// <summary>
 		/// Creates a predefined game state save. Asks for its name.
 		/// </summary>
@@ -752,7 +752,7 @@ namespace Game
 				return false;
 			}
 
-			int i = 
+			int i =
 				WindowHandler.Menu(items, "Kterej sejv chceš načíst?", true);
 			if (i == -1)
 			{
@@ -789,7 +789,7 @@ namespace Game
 
 			try
 			{
-				if(!File.Exists(path))
+				if (!File.Exists(path))
 					Program.Terminate($"Nevidím soubor {Program.SerializationPath}. Že ty ses v tom hrabal?");
 
 				// Load terrain, objects, NPCs, localities and passages.
@@ -823,7 +823,7 @@ namespace Game
 			// Resume the game
 			if (resumeGame)
 				Program.MainWindow.GameInProgress = true;
-}
+		}
 
 		/// <summary>
 		/// Static constructor
