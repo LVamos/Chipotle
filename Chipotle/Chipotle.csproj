@@ -105,6 +105,7 @@
     <Compile Include="Messaging\Commands\FollowPath.cs" />
     <Compile Include="Messaging\Commands\ReactToBeingPinchedInDoor.cs" />
     <Compile Include="Messaging\Commands\ReactToCollision.cs" />
+    <Compile Include="Messaging\Commands\ReportPosition.cs" />
     <Compile Include="Messaging\Commands\TryGoTo.cs" />
     <Compile Include="Messaging\Events\PinchedInDoor.cs" />
     <Compile Include="Messaging\Commands\CreatePredefinedSave.cs" />

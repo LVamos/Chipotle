@@ -568,9 +568,25 @@ namespace Game
 		/// </summary>
 		/// <param name="point">A point whose surroundings are to be searched</param>
 		/// <returns>Enumeration of game objects</returns>
-		public static IEnumerable<GameObject> GetNearestObjects(Vector2 point)
+		public static IEnumerable<DumpObject> GetNearestObjects(Vector2 point)
 			=> _objects.Values.OrderBy(o => o.Area.GetDistanceFrom(point))
 			.Where(o => !o.Area.LaysOnPlane(point));
+
+
+		/// <summary>
+		/// Enumerates all game objects around a point sorted by distance in the specified radius.
+		/// </summary>
+		/// <param name="point">A point whose surroundings are to be searched</param>
+		/// <param name="radius">specifies maximum distance between the objects and the specified point.</param>
+		/// <param name="includeDecoaration">Specifies if decorative objects should be included</param>
+		/// <returns>Enumeration of game objects</returns>
+		public static IEnumerable<DumpObject> GetNearestObjects(Vector2 point, int radius, bool includeDecoaration = true)
+			=> (from o in _objects.Values
+				let distance = o.Area.GetDistanceFrom(point)
+				orderby distance
+				where o.Decorative == includeDecoaration && !o.Area.LaysOnPlane(point) && distance <= radius
+				select o)
+			.Distinct();
 
 		/// <summary>
 		/// Returns the passage closest to the specified point.

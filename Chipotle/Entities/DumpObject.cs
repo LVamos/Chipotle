@@ -181,7 +181,7 @@ namespace Game.Entities
             if (message.Sender != World.Player)
                 return;
 
-                UpdateNavigatingSound();
+			UpdateNavigatingSound();
             UpdateLoop();
             WatchPlayersMovement();
         }
@@ -245,15 +245,22 @@ namespace Game.Entities
         /// </summary>
         private void StartNavigation()
         {
-            _navigationSoundID = World.Sound.Play(_navigationSound, null, true, PositionType.Absolute, GetClosestPointToPlayer(), true);
+            ReportPosition(true);
             _navigating = true;
             UpdateNavigatingSound();
         }
 
         /// <summary>
-        /// Handle of a soound used for navigation
+        /// Plays a navigation sound on position of the object.
         /// </summary>
-        protected int _navigationSoundID;
+        /// <param name="loop">Specifies if the navigating soudn should be played in loop</param>
+        protected virtual void ReportPosition(bool loop = false)
+			=> _navigationSoundID = World.Sound.Play(_navigationSound, null, loop, PositionType.Absolute, GetClosestPointToPlayer().AsOpenALVector(), true);
+
+		/// <summary>
+		/// Handle of a soound used for navigation
+		/// </summary>
+		protected int _navigationSoundID;
 
 		/// <summary>
 		/// Indicates if the sound navigation is enabled.
@@ -396,8 +403,8 @@ namespace Game.Entities
             if (!_navigating)
                 return;
 
-                // To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player.
-                World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
+            // To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player.
+				World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
 
             // Find opposite point
             Vector2? opposite = World.Player.Area.FindOppositePoint(_area);
@@ -451,6 +458,7 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case ReportPosition m: OnReportPosition(m); break;
                         case OrientationChanged oc: OnOrientationChanged(oc); break;
         case LocalityEntered le: OnLocalityEntered(le); break;
         case EntityMoved em: OnEntityMoved(em); break;
@@ -463,5 +471,12 @@ namespace Game.Entities
                 default: base.HandleMessage(message); break;
             }
         }
+
+        /// <summary>
+        /// Handles the ReportPosition message.
+        /// </summary>
+        /// <param name="m">The message to be handled</param>
+        private void OnReportPosition(ReportPosition m)
+=> ReportPosition();    
     }
 }

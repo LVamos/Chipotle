@@ -219,13 +219,13 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point in whose surroundings the objects should be listed.</param>
 		/// <param name="radius">Max distance from the speciifed <paramref name="point"/></param>
-		/// <param name="decorative">Specifies if the method lists decorative objects such as fences or rails.</param>
+		/// <param name="includeDecoration">Specifies if the method lists decorative objects such as fences or rails.</param>
 		/// <returns>Enumeration of dump objectts</returns>
-		public IEnumerable<DumpObject> GetSurroundingObjects(Vector2 point, int radius, bool decorative = false)
+		public IEnumerable<DumpObject> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
 		{
 			return
 				from o in Objects
-				where (o.Decorative == decorative && o.Area.GetDistanceFrom(point) <= radius)
+				where (o.Decorative == includeDecoration && o.Area.GetDistanceFrom(point) <= radius)
 				orderby o.Area.GetDistanceFrom(point)
 				select o;
 		}

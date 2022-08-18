@@ -636,7 +636,47 @@ Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Pa
             // Move if the terrain is occupable.
             if (!SolveObstacle(target))
             Move(target);
+
+            ReportObjects();
         }
+
+        /// <summary>
+        /// Announces each object in specified radius.
+        /// </summary>
+        protected void ReportObjects()
+        {
+            HashSet<string> nearObjects = 
+                (from o in _locality.GetNearByObjects(_area.Center, _nearObjectRadius, false)
+                 select o.Name.Indexed)
+                 .ToHashSet<string>();
+
+            foreach (string o in nearObjects)
+            {
+                if (_navigatedObject != null && _navigatedObject.Name.Indexed == o)
+                    continue;
+
+                // Announce new objects.
+                if (!_nearObjects.Contains(o) && nearObjects.Contains(o))
+				{
+                    ReportPosition message = new ReportPosition(Owner);
+                    DumpObject theObject = World.GetObject(o);
+					theObject.TakeMessage(message);
+                    Tolk.Speak(theObject.Name.Friendly);
+                }
+            }
+
+            _nearObjects = nearObjects;
+        }
+
+        /// <summary>
+        /// Specifies a radius for near object announcements.
+        /// </summary>
+        protected const int _nearObjectRadius = 6;
+
+        /// <summary>
+        /// Lists near objects that have been already announced.
+        /// </summary>
+        protected HashSet<string> _nearObjects = new HashSet<string>();
 
         /// <summary>
         /// Processes the ChipotlesCarMoved message.
@@ -662,7 +702,7 @@ _carMovement = message;
         protected (string[] descriptions, DumpObject[] objects) GetNavigableObjects()
         {
             Vector2 me = _area.Center;
-            DumpObject[] objects = Locality.GetSurroundingObjects(me, _navigableObjectsRadius).ToArray<DumpObject>();
+            DumpObject[] objects = Locality.GetNearByObjects(me, _navigableObjectsRadius).ToArray<DumpObject>();
 
             string[] descriptions =
                 (
