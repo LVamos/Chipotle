@@ -23,6 +23,25 @@ namespace Game.Entities
     public class Entity : GameObject
     {
         /// <summary>
+        /// Represents the inventory of the entity.
+        /// </summary>
+		public IEnumerable<DumpObject> Inventory
+		{
+			get
+			{
+				if (_inventory== null)
+					_visitedLocalities = new HashSet<string>();
+
+				return _inventory.Select(o => World.GetObject(o));
+			}
+		}
+
+		/// <summary>
+		/// Represents the inventory. The objects are stored as indexed names.
+		/// </summary>
+		protected HashSet<string> _inventory = new HashSet<string>();
+
+        /// <summary>
         /// List of all entity components
         /// </summary>
         protected EntityComponent[] _components;
@@ -54,7 +73,7 @@ namespace Game.Entities
             if (physics.StartPosition.HasValue)
             {
                 Vector2 position = (Vector2)physics.StartPosition;
-                _area = new Plane(position);
+                Area = new Plane(position);
                 _locality = _area.GetLocality();
             }
         }
@@ -67,12 +86,23 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case PickUpObjectResult m: OnPickUpObjectResult(m); break;
                 case OrientationChanged och: OnOrientationChanged(och); break;
                 case LocalityChanged lcd: OnLocalityChanged(lcd); break;
                 case PositionChanged pcd: OnPositionChanged(pcd); break;
                 default: base.HandleMessage(message); break;
             }
 
+        }
+
+        /// <summary>
+        /// Handles the PickUpObjectResult message.
+        /// </summary>
+        /// <param name="m">The message to be processed</param>
+        private void OnPickUpObjectResult(PickUpObjectResult m)
+        {
+            if (m.Result == PickUpObjectResult.ResultType.Success)
+                _inventory.Add(m.Object.Name.Indexed);
         }
 
         /// <summary>
@@ -215,7 +245,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         protected void OnPositionChanged(PositionChanged message)
         {
-            _area = message.TargetPosition; // Set new position.
+            Area = message.TargetPosition; // Set new position.
             _locality = message.TargetLocality;
 
             // Record visited locality.

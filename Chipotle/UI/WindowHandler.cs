@@ -84,7 +84,7 @@ namespace Game.UI
             {
                 Thread.Sleep(5);
                 Application.DoEvents();
-            }//wh
+            }
             _activeWindow = PreviousWindow;
             {
             }

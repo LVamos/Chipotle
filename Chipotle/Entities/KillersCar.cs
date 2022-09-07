@@ -19,7 +19,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public KillersCar(Name name, Plane area, bool decorative) : base(name, area, "vražedné auto v1", decorative) { }
+        public KillersCar(Name name, Plane area, bool decorative, bool pickable) : base(name, area, "vražedné auto v1", decorative, pickable) { }
 
         /// <summary>
         /// Indicates if the Detective Chipotle NPC had icecream from the icecream machine (automat

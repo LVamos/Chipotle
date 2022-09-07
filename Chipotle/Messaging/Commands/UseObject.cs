@@ -19,18 +19,18 @@ namespace Game.Messaging.Commands
         /// <summary>
         /// A point of the object at which it's used
         /// </summary>
-        public readonly Vector2 Point;
+        public readonly Vector2 ManipulationPoint;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        /// <param name="position">A point of the object at which it's used</param>
+        /// <param name="manipulationPoint">A point of the object at which it's used</param>
         /// <param name="tile">A tile with the object</param>
         /// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
-        public UseObject(object sender, Vector2 position = default) : base(sender)
+        public UseObject(object sender, Vector2 manipulationPoint = default) : base(sender)
         {
-            Point = position;
+            ManipulationPoint = manipulationPoint;
         }
     }
 }

@@ -14,6 +14,7 @@ using Game.Terrain;
 using Game.UI;
 
 using OpenTK;
+using Luky;
 
 namespace Game.Entities
 {
@@ -69,7 +70,9 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
 
                 // Other commands
-                [new KeyShortcut(Keys.Tab)] = GameMenu,
+                [new KeyShortcut(Keys.I)] = RunInventoryMenu,
+                [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Return)] = PickUpObject,
+				[new KeyShortcut(Keys.Tab)] = GameMenu,
                 [new KeyShortcut(Keys.R)] = SayLocalitySize,
                 [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
                 [new KeyShortcut(false, true, false, Keys.O)] = ListObjects,
@@ -96,6 +99,11 @@ namespace Game.Entities
             );
 
         }
+
+        /// <summary>
+        /// Performs the command to pick up an object off the ground.
+        /// </summary>
+        private void PickUpObject() => InnerMessage(new PickUpObject(this));
 
         /// <summary>
         /// Creates a predefined save.
@@ -130,7 +138,9 @@ namespace Game.Entities
             // Prepare the menu
             (string name, Action command)[] commands =
             {
-                                ("použít objekt nebo otevřít dveře: entr", Interact),
+                                ("inventář: I", RunInventoryMenu),
+                                ("použít objekt nebo dveře: entr", Interact),
+                                ("Vzít objekt: šift entr", PickUpObject),
                 ("krok dopředu: horní šipka", StepForward),
                 ("krok zpět: dolní šipka", StepBack),
                 ("krok doleva: šift levá šipka", StepLeft),
@@ -161,6 +171,12 @@ namespace Game.Entities
             if (item > 0)
                 commands[item].command();
         }
+
+        /// <summary>
+        /// Runs the inventory menu.
+        /// </summary>
+        protected void RunInventoryMenu()
+            => InnerMessage(new RunInventoryMenu(this));
 
         /// <summary>
         /// Moves the NPC one step to the right.

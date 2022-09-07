@@ -199,7 +199,7 @@ namespace Game.Terrain
 		/// <returns>Enumeration of objects and entities</returns>
 		protected IEnumerable<GameObject> GetObstacles()
 		{
-			Plane surroundings = new Plane(_area);
+			Plane surroundings = Area; // Just copied
 			surroundings.Extend();
 			return surroundings.GetEntities().Union(_area.GetIntersectingObjects());
 		}
@@ -226,7 +226,7 @@ namespace Game.Terrain
 			if (State == PassageState.Closed && _manipulationTimer >= _manipulationTimeLimit)
 			{
 				_manipulationTimer = 0;
-				Open(message.Sender, message.Point);
+				Open(message.Sender, message.ManipulationPoint);
 				return;
 			}
 
@@ -236,7 +236,7 @@ namespace Game.Terrain
 				if (_manipulationTimer >= _manipulationTimeLimit)
 				{
 					_manipulationTimer = 0;
-					World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_hitSound), role: null, looping: false, PositionType.Absolute, message.Point.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
+					World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_hitSound), role: null, looping: false, PositionType.Absolute, message.ManipulationPoint.AsOpenALVector(), true, 1f, null, 1f, 0, Playback.OpenAL);
 				}
 				return;
 			}
@@ -248,7 +248,7 @@ namespace Game.Terrain
 				if (_manipulationTimer >= _manipulationTimeLimit)
 				{
 					_manipulationTimer = 0;
-					Close(message.Sender, message.Point);
+					Close(message.Sender, message.ManipulationPoint);
 				}
 				return;
 			}

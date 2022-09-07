@@ -95,7 +95,12 @@ namespace Game.UI
         /// <summary>
         /// Registers shotcuts and corresponding actions.
         /// </summary>
+        /// <remarks>If a shortcut is already registered it'll be overriden.</remarks>
         /// <param name="shortcuts">Set of shortcuts to be registered</param>
-        protected void RegisterShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+        protected void RegisterShortcuts(params (KeyShortcut shortcut, Action action)[] shortcuts)
+        {
+            foreach ((KeyShortcut shortcut, Action action) shortcut in shortcuts)
+                _shortcuts[shortcut.shortcut] = shortcut.action;
+        }
     }
 }

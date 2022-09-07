@@ -33,7 +33,7 @@ namespace Game.UI
         /// <summary>
         /// List of the menu items
         /// </summary>
-        private readonly string[] _items;
+        protected string[] _items;
 
         /// <summary>
         /// Name of a sound played when cursor reaches last item of the menu
@@ -94,7 +94,6 @@ namespace Game.UI
         public MenuWindow(string[] items, string introText, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
         {
             _items = items;
-            Assert(items != null, nameof(items));
             _introText = introText;
             _wrappingAllowed = wrappingAllowed;
             _introSound = introSound;
@@ -106,19 +105,15 @@ namespace Game.UI
             _lowerEdgeSound = lowerEdgeSound;
 
             RegisterShortcuts(
-    new Dictionary<KeyShortcut, Action>
-    {
-
-        [new KeyShortcut(Keys.End)] = LastItem,
-        [new KeyShortcut(Keys.Home)] = FirstItem,
-        [new KeyShortcut(Keys.Up)] = PreviousItem,
-        [new KeyShortcut(Keys.Left)] = PreviousItem,
-        [new KeyShortcut(Keys.Down)] = NextItem,
-        [new KeyShortcut(Keys.Right)] = NextItem,
-        [new KeyShortcut(Keys.Return)] = ActivateItem,
-        [new KeyShortcut(Keys.Escape)] = Quit,
-        [new KeyShortcut(Keys.Tab)] = Quit
-    }
+        (new KeyShortcut(Keys.End), LastItem),
+        (new KeyShortcut(Keys.Home), FirstItem),
+        (new KeyShortcut(Keys.Up), PreviousItem),
+        (new KeyShortcut(Keys.Left), PreviousItem),
+        (new KeyShortcut(Keys.Down), NextItem),
+        (new KeyShortcut(Keys.Right), NextItem),
+        (new KeyShortcut(Keys.Return), ActivateItem),
+        (new KeyShortcut(Keys.Escape), Quit),
+        (new KeyShortcut(Keys.Tab), Quit)
     );
         }
 
@@ -184,7 +179,7 @@ namespace Game.UI
         /// <summary>
         /// Performs an action assigned to the selected item.
         /// </summary>
-        private void ActivateItem()
+        protected virtual void ActivateItem()
         {
             if (!CursorOffEdge())
                 Close();
@@ -193,7 +188,7 @@ namespace Game.UI
         /// <summary>
         /// Checks if cursor got out of range
         /// </summary>
-        private bool CursorOffEdge()
+        protected bool CursorOffEdge()
             => (Cursor < 0 || Cursor > _lastItem);
 
         /// <summary>
@@ -262,7 +257,7 @@ namespace Game.UI
         /// <summary>
         /// Quits the menu
         /// </summary>
-        private void Quit()
+        protected virtual  void Quit()
         {
             Cursor = -1;
             Close();

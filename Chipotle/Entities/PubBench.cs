@@ -19,7 +19,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public PubBench(Name name, Plane area, bool decorative) : base(name, area, "hospodská lavice", decorative)
+        public PubBench(Name name, Plane area, bool decorative, bool pickable) : base(name, area, "hospodská lavice", decorative, pickable)
         { }
 
         /// <summary>

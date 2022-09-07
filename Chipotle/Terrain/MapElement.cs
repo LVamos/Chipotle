@@ -19,9 +19,14 @@ namespace Game.Terrain
     public abstract class MapElement : MessagingObject
     {
         /// <summary>
-        /// Default volume for the sound loop if there's any.
+        /// Dimensions of the map element.
         /// </summary>
-        protected float _defaultVolume = 1;
+        public (float width, float height) Dimensions { get; protected set; }
+
+		/// <summary>
+		/// Default volume for the sound loop if there's any.
+		/// </summary>
+		protected float _defaultVolume = 1;
 
         /// <summary>
         /// Volume used with sound attenuation.
@@ -43,7 +48,7 @@ namespace Game.Terrain
         public readonly Name Name;
 
         /// <summary>
-        /// The area occupied by the element
+        /// A backing field for Area.
         /// </summary>
         protected Plane _area;
 
@@ -55,14 +60,22 @@ namespace Game.Terrain
         public MapElement(Name name, Plane area) : base()
         {
             Name = name ?? throw new ArgumentException(nameof(name));
-            _area = area;
+            Area = area;
         }
 
         /// <summary>
         /// Returns copy of the area occupied by the element
         /// </summary>
         public Plane Area
-            =>_area == null ? null : new Plane(_area);
+        {
+            get => _area ==null ? null : new Plane(_area);
+            protected set
+            {
+                _area = value;
+                if (value != null)
+                    Dimensions = (_area.Width, _area.Height);
+            }
+		}
 
         /// <summary>
         /// Returns the public name of the element.
@@ -88,8 +101,7 @@ namespace Game.Terrain
         /// <summary>
         /// Erases the element from the game World.
         /// </summary>
-        protected virtual void Disappear()
-        { }
+        protected virtual void Disappear() => Area = null;
 
         /// <summary>
         /// Processes the Destroy message.

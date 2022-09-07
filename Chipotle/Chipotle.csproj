@@ -103,10 +103,15 @@
     <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Entities\TuttleState.cs" />
     <Compile Include="Messaging\Commands\FollowPath.cs" />
+    <Compile Include="Messaging\Commands\PickUpObject.cs" />
+    <Compile Include="Messaging\Commands\PutObject.cs" />
     <Compile Include="Messaging\Commands\ReactToBeingPinchedInDoor.cs" />
     <Compile Include="Messaging\Commands\ReactToCollision.cs" />
     <Compile Include="Messaging\Commands\ReportPosition.cs" />
+    <Compile Include="Messaging\Commands\RunInventoryMenu.cs" />
     <Compile Include="Messaging\Commands\TryGoTo.cs" />
+    <Compile Include="Messaging\Events\EmptyInventory.cs" />
+    <Compile Include="Messaging\Events\PickUpObjectResult.cs" />
     <Compile Include="Messaging\Events\PinchedInDoor.cs" />
     <Compile Include="Messaging\Commands\CreatePredefinedSave.cs" />
     <Compile Include="Messaging\Commands\ListExits.cs" />
@@ -125,6 +130,7 @@
     <Compile Include="Messaging\Events\DoorManipulated.cs" />
     <Compile Include="Messaging\Events\ExitNavigationStopped.cs" />
     <Compile Include="Messaging\Events\ObjectNavigationStopped.cs" />
+    <Compile Include="Messaging\Events\PutObjectResult.cs" />
     <Compile Include="Messaging\Events\SayExitsResult.cs" />
     <Compile Include="Messaging\Events\SayObjectsResult.cs" />
     <Compile Include="Messaging\Events\SayVisitedLocalityResult.cs" />
@@ -207,6 +213,7 @@
     <Compile Include="Messaging\Events\OrientationChanged.cs" />
     <Compile Include="Terrain\VanillaCrunchGarageDoor.cs" />
     <Compile Include="UI\GameWindow.cs" />
+    <Compile Include="UI\InventoryMenu.cs" />
     <Compile Include="UI\KeyEventParams.cs" />
     <Compile Include="UI\KeyShortcut.cs" />
     <Compile Include="UI\MainMenuWindow.cs" />

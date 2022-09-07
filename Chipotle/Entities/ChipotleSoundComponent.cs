@@ -83,6 +83,9 @@ namespace Game.Entities
         {
             switch (message)
             {
+                case PutObjectResult m: OnPutObjectResult(m); break;
+                case EmptyInventory m: OnEmptyInventory(m); break;
+                case PickUpObjectResult m: OnPickUpObjectResult(m); break;
                 case SayCoordinates sc:  OnSayCoordinates(sc); break;
                 case SayLocalitySize sl:  OnSayLocalitySize(sl); break;
                 case SayVisitedLocalityResult svl:  OnSayVisitedLocality(svl); break;
@@ -97,6 +100,47 @@ namespace Game.Entities
                 case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
                 case TerrainCollided tcl:  OnTerrainCollided(tcl); break;
                 default: base.HandleMessage(message); break;
+            }
+        }
+
+        /// <summary>
+        /// Handles a message.
+        /// </summary>
+        /// <param name="m">Source of the message</param>
+        private void OnPutObjectResult(PutObjectResult m)
+        {
+            if (m.Success)
+                Tolk.Speak($"Položil si {m.Sender.Name.Friendly}");
+            else Tolk.Speak("Sem se to nevejde");
+        }
+
+        /// <summary>
+        /// Handles a message.
+        /// </summary>
+        /// <param name="m">The message to be handled</param>
+        protected void OnEmptyInventory(EmptyInventory m)
+=> Tolk.Speak("Nic u sebe nemáš");
+
+        /// <summary>
+        /// Handles the PickUpObjectResult message.
+        /// </summary>
+        /// <param name="m">The message to be processed</param>
+        protected void OnPickUpObjectResult(PickUpObjectResult m)
+        {
+            switch (m.Result)
+            {
+                case PickUpObjectResult.ResultType.Success:
+                    Tolk.Speak($"Sebral si {m.Object.Name.Friendly}");
+                    break;
+                case PickUpObjectResult.ResultType.FullInventory:
+                    Tolk.Speak("Víc toho nepobereš.");
+                    break;
+                case PickUpObjectResult.ResultType.NoObject:
+                    Tolk.Speak("Před tebou nic není");
+                    break;
+                default:
+                    Tolk.Speak($"{m.Object.Name.Friendly} nejde odnést");
+                    break;
             }
         }
 

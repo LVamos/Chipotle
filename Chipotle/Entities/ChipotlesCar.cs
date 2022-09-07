@@ -67,7 +67,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public ChipotlesCar(Name name, Plane area, bool decorative) : base(name: name, area: area, type: "detektivovo auto", decorative: decorative, stopWhenPlayerMoves: true)
+        public ChipotlesCar(Name name, Plane area, bool decorative, bool pickable) : base(name: name, area: area, type: "detektivovo auto", decorative: decorative, pickable: pickable, stopWhenPlayerMoves: true)
         { }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Game.Entities
             if (
                             (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
             || (_area.GetLocality().Name.Indexed == "asfaltka c1" && !CarsonsBenchesUsed()))
-                _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.Point.AsOpenALVector(), true, _defaultVolume);
+                _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.ManipulationPoint.AsOpenALVector(), true, _defaultVolume);
 
             // If player didn't leave Walsh area but used required objects and went through all area
             else if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())

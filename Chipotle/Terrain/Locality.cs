@@ -225,7 +225,7 @@ namespace Game.Terrain
 		{
 			return
 				from o in Objects
-				where (o.Decorative == includeDecoration && o.Area.GetDistanceFrom(point) <= radius)
+				where o.Area != null && o.Decorative == includeDecoration && o.Area.GetDistanceFrom(point) <= radius
 				orderby o.Area.GetDistanceFrom(point)
 				select o;
 		}

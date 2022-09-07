@@ -188,6 +188,8 @@ namespace Game
 		/// <returns>The corresponding obstacle type</returns>
 		public static ObstacleType DetectAcousticObstacles(Plane area)
 		{
+			// If it's an object that is held by an 
+
 			Locality playersLocality = Player.Locality;
 			Locality otherLocality = area.GetLocality();
 			bool neighbour = playersLocality.IsNeighbour(otherLocality);
@@ -483,11 +485,17 @@ namespace Game
 		/// <returns>Reference to the entity if there's any</returns>
 		public static Entity GetEntity(Vector2 point)
 		{
-			if (GetObject(point) is Entity entity)
-				return entity;
-			return null;
-		}
+			Locality locality = GetLocality(point);
+			if (locality == null)
+				return null;
 
+			return
+				(
+				from e in locality.Entities
+				where e.Area != null && e.Area.LaysOnPlane(point)
+				select e)
+				.FirstOrDefault();
+		}
 
 		/// <summary>
 		/// Enumerates all entities that intersect with the given plane.
@@ -543,9 +551,14 @@ namespace Game
 		/// <param name="point">The point whose surroundings should be explored</param>
 		/// <returns>Enumeration of the found localities</returns>
 		public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
-		   => _localities.OrderBy(p => p.Value.Area.GetDistanceFrom(point))
-			.Where(p => p.Value != GetLocality(point))
-			.Select(p => p.Value);
+		{
+			return
+				(from l in _localities.Values
+				 where l != GetLocality(point)
+				 orderby l.Area.GetDistanceFrom(point)
+				 select l)
+				.Distinct();
+		}
 
 		/// <summary>
 		/// Returns the locality nearest from the specified point.
@@ -569,8 +582,14 @@ namespace Game
 		/// <param name="point">A point whose surroundings are to be searched</param>
 		/// <returns>Enumeration of game objects</returns>
 		public static IEnumerable<DumpObject> GetNearestObjects(Vector2 point)
-			=> _objects.Values.OrderBy(o => o.Area.GetDistanceFrom(point))
-			.Where(o => !o.Area.LaysOnPlane(point));
+		{
+			return
+				(from o in _objects.Values
+				where o.Area != null && !o.Area.LaysOnPlane(point)
+				orderby o.Area.GetDistanceFrom(point)
+				select o)
+				.Distinct();
+		}
 
 
 		/// <summary>
@@ -581,12 +600,15 @@ namespace Game
 		/// <param name="includeDecoaration">Specifies if decorative objects should be included</param>
 		/// <returns>Enumeration of game objects</returns>
 		public static IEnumerable<DumpObject> GetNearestObjects(Vector2 point, int radius, bool includeDecoaration = true)
-			=> (from o in _objects.Values
+		{
+			return
+				(from o in _objects.Values
 				let distance = o.Area.GetDistanceFrom(point)
 				orderby distance
-				where o.Decorative == includeDecoaration && !o.Area.LaysOnPlane(point) && distance <= radius
+				where o.Area != null && o.Decorative == includeDecoaration && !o.Area.LaysOnPlane(point) && distance <= radius
 				select o)
-			.Distinct();
+				.Distinct();
+		}
 
 		/// <summary>
 		/// Returns the passage closest to the specified point.
@@ -605,12 +627,13 @@ namespace Game
 		public static IEnumerable<Passage> GetNearestPassages(Vector2 point, bool doors = false)
 		{
 			return
-				   from p in _passages.Values
+				   (from p in _passages.Values
 				   let d = p.Area.GetDistanceFrom(point)
 				   orderby d
 				   where !p.Area.LaysOnPlane(point) &&
 							   ((doors && p is Door) || (!doors && p is Passage))
-				   select p;
+				   select p)
+				   .Distinct();
 		}
 
 		/// <summary>
@@ -633,18 +656,17 @@ namespace Game
 		/// <summary>
 		/// Returns an NPC or game object the tile intersects.
 		/// </summary>
-		public static GameObject GetObject(Vector2 point)
+		public static DumpObject GetObject(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
 			if (locality == null)
 				return null;
 
-			DumpObject obj = locality.Objects.FirstOrDefault(o => o.Area.LaysOnPlane(point));
-			if (obj != null)
-				return obj;
-
-			Entity entity = locality.Entities.FirstOrDefault(e => e.Area.LaysOnPlane(point));
-			return entity;
+			return
+				(from o in locality.Objects
+				 where o.Area != null && o.Area.LaysOnPlane(point) 
+				 select o)
+				 .FirstOrDefault();
 		}
 
 		/// <summary>
@@ -653,7 +675,12 @@ namespace Game
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting objects</returns>
 		public static IEnumerable<DumpObject> GetObjects(Plane area)
-			=> _objects.Values.Where(o => o.Area.Intersects(area));
+		{
+			return
+				from o in _objects.Values
+				where o.Area != null && o.Area.Intersects(area)
+				select o;
+		}
 
 		/// <summary>
 		/// Enumerates all simple game objects of the specified type
@@ -911,7 +938,8 @@ lBackgroundInfo.volume
 						new Name(A(o, "indexedname"), A(o, "friendlyname")),
 						new Plane(A(o, "coordinates")).ToAbsolute(locality.Area),
 						A(o, "type"),
-						A(o, "decorative").ToBool()
+						A(o, "decorative").ToBool(),
+						A(o, "pickable").ToBool()
 						));
 				}
 			}
