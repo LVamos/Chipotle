@@ -14,13 +14,13 @@ namespace Game.Messaging.Commands
 		/// <summary>
 		/// Source of the message.
 		/// </summary>
-		public new readonly EntityComponent Sender;
+		public new readonly CharacterComponent Sender;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public RunInventoryMenu(EntityComponent sender) : base(sender) => Sender = sender ?? throw new ArgumentNullException(nameof(sender));
+		public RunInventoryMenu(CharacterComponent sender) : base(sender) => Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 	}
 }

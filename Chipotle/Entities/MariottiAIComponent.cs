@@ -20,7 +20,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            InnerMessage(new SetPosition(this, new Plane("2018, 1131"), true));
+            InnerMessage(new SetPosition(this, new Rectangle("2018, 1131"), true));
         }
     }
 }

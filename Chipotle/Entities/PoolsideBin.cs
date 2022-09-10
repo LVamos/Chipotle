@@ -21,7 +21,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public PoolsideBin(Name name, Plane area, bool decorative, bool pickable) : base(name, area, "popelnice u bazénu", decorative, pickable, null, null, null, "cs3", true)
+        public PoolsideBin(Name name, Rectangle area, bool decorative, bool pickable) : base(name, area, "popelnice u bazénu", decorative, pickable, null, null, null, "cs3", true)
         { }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Game.Entities
 
             if (UsedOnce)
             {
-                Move(new Plane(new Vector2(911, 1042)));
+                Move(new Rectangle(new Vector2(911, 1042)));
             }
         }
     }

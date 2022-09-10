@@ -50,14 +50,14 @@ namespace Game.Terrain
         /// <summary>
         /// A backing field for Area.
         /// </summary>
-        protected Plane _area;
+        protected Rectangle _area;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Inner and public name of the element</param>
         /// <param name="area">Coordinates of the area the element occupies</param>
-        public MapElement(Name name, Plane area) : base()
+        public MapElement(Name name, Rectangle area) : base()
         {
             Name = name ?? throw new ArgumentException(nameof(name));
             Area = area;
@@ -66,42 +66,34 @@ namespace Game.Terrain
         /// <summary>
         /// Returns copy of the area occupied by the element
         /// </summary>
-        public Plane Area
+        public Rectangle Area
         {
-            get => _area ==null ? null : new Plane(_area);
-            protected set
-            {
-                _area = value;
-                if (value != null)
-                    Dimensions = (_area.Width, _area.Height);
-            }
+            get => _area ==null ? null : new Rectangle(_area);
+            protected set => SetArea(value);
 		}
 
         /// <summary>
-        /// Returns the public name of the element.
+        /// Sets value of the Area property.
         /// </summary>
-        /// <returns>Public name of the element</returns>
-        public override string ToString()
-=> Name.Friendly;
+        /// <param name="value">A value assigned to the property</param>
+        protected virtual void SetArea(Rectangle value)
+		{
+			_area = value;
+			if (value != null)
+				Dimensions = (_area.Width, _area.Height);
+		}
 
-        /// <summary>
-        /// Displays the element in the game World.
-        /// </summary>
-        protected virtual void Appear() { }
+		/// <summary>
+		/// Returns the public name of the element.
+		/// </summary>
+		/// <returns>Public name of the element</returns>
+		public override string ToString()
+=> Name.Friendly;
 
         /// <summary>
         /// Destroys the element.
         /// </summary>
-        protected virtual void Destroy()
-        {
-            _messagingEnabled = false;
-            Disappear();
-        }
-
-        /// <summary>
-        /// Erases the element from the game World.
-        /// </summary>
-        protected virtual void Disappear() => Area = null;
+        protected virtual void Destroy() => _messagingEnabled = false;
 
         /// <summary>
         /// Processes the Destroy message.

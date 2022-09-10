@@ -10,7 +10,7 @@ namespace Game.Messaging.Events
     /// <summary>
     /// Indicates collision between an NPC and an object.
     /// </summary>
-    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.CharacterComponent"/> class.</remarks>
     [Serializable]
     public class ObjectsCollided : GameMessage
     {

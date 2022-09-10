@@ -21,7 +21,7 @@ namespace Game.Terrain
         /// <param name="name">Inner name of the door</param>
         /// <param name="area">Coordinates of the area occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
-        public VanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<string> localities) : base(name, PassageState.Closed, area, localities, false) { }
+        public VanillaCrunchGarageDoor(Name name, Rectangle area, IEnumerable<string> localities) : base(name, PassageState.Closed, area, localities, false) { }
 
         /// <summary>
         /// Runs a message handler for the specified message.
@@ -31,7 +31,7 @@ namespace Game.Terrain
         {
             switch (message)
             {
-                case LocalityEntered le: OnLocalityEntered(le); break;
+                case CharacterCameToLocality le: OnLocalityEntered(le); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -40,9 +40,9 @@ namespace Game.Terrain
         /// Processes the LocalityEntered message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnLocalityEntered(LocalityEntered message)
+        private void OnLocalityEntered(CharacterCameToLocality message)
         {
-if(message.Locality == World.GetLocality("garáž v1") && message.Entity == World.Player)
+if(message.Locality == World.GetLocality("garáž v1") && message.Character == World.Player)
             State = PassageState.Closed;
         }
     }

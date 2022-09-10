@@ -8,8 +8,8 @@ namespace Game.Messaging.Commands
     /// Tells an NPC to immediately relocate to the specified coordinates.
     /// </summary>
     /// <remarks>
-    /// Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the
-    /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
+    /// Applies to the <see cref="Game.Entities.Character"/> class. Can be sent only from inside the
+    /// NPC from a descendant of the <see cref="Game.Entities.CharacterComponent"/> class.
     /// </remarks>
     [Serializable]
     public class SetPosition : GameMessage
@@ -22,7 +22,7 @@ namespace Game.Messaging.Commands
         /// <summary>
         /// The location to which the NPC moves
         /// </summary>
-        public readonly Plane Target;
+        public readonly Rectangle Target;
 
         /// <summary>
         /// Constructor
@@ -30,7 +30,7 @@ namespace Game.Messaging.Commands
         /// <param name="sender">source of the message</param>
         /// <param name="target">The location to which the NPC moves</param>
         /// <param name="silently">Specifies if some walk sounds should be played.</param>
-        public SetPosition(object sender, Plane target, bool silently = false) : base(sender)
+        public SetPosition(object sender, Rectangle target, bool silently = false) : base(sender)
         {
             Target = target;
             Silently = silently;

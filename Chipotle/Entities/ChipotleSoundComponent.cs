@@ -13,6 +13,7 @@ using Game.Terrain;
 using Luky;
 
 using OpenTK;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace Game.Entities
 {
@@ -23,9 +24,17 @@ namespace Game.Entities
     public class ChipotleSoundComponent : SoundComponent
     {
         /// <summary>
-        /// Reverb presets for individual localities
+        /// Processes the SayLocality message.
         /// </summary>
-        private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
+        /// <param name="message">The message to be processed</param>
+		protected void OnSayLocality(SayLocality message)
+=> Tolk.Speak(Owner.Locality.Name.Friendly, true);
+
+
+		/// <summary>
+		/// Reverb presets for individual localities
+		/// </summary>
+		private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
         {
             ["obývák s1"] = ("livingroom", .9f),
             ["asfaltka c1"] = ("plain", .1f),
@@ -83,7 +92,8 @@ namespace Game.Entities
         {
             switch (message)
             {
-                case PutObjectResult m: OnPutObjectResult(m); break;
+				case SayLocality m: OnSayLocality(m); break;
+				case PutObjectResult m: OnPutObjectResult(m); break;
                 case EmptyInventory m: OnEmptyInventory(m); break;
                 case PickUpObjectResult m: OnPickUpObjectResult(m); break;
                 case SayCoordinates sc:  OnSayCoordinates(sc); break;
@@ -171,7 +181,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnSayLocalitySize(SayLocalitySize message)
         {
-            Plane a = Owner.Locality.Area;
+            Rectangle a = Owner.Locality.Area;
             Tolk.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
         }
 

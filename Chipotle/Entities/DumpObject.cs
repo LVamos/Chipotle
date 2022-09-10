@@ -13,6 +13,7 @@ using Game.Terrain;
 using Luky;
 
 using OpenTK;
+using OpenTK.Graphics.ES20;
 
 using ProtoBuf;
 
@@ -37,9 +38,70 @@ namespace Game.Entities
 	public class DumpObject : GameObject
 	{
 		/// <summary>
+		/// Backing field for Localities property.
+		/// </summary>
+		protected HashSet<string> _localities = new HashSet<string>();
+
+		/// <summary>
+		/// Localities intersecting with this object.
+		/// </summary>
+		[ProtoIgnore]
+		public IEnumerable<Locality> Localities
+		{
+			get
+			{
+				return
+					from name in _localities
+					select World.GetLocality(name);
+			}
+		}
+
+		/// <summary>
+		/// Finds all localities the object or the NPC intersects with and saves their names into _localities.
+		/// </summary>
+		protected void FindLocalities()
+		{
+			if (_area == null)
+				return;
+
+			_localities =
+			(from l in World.GetLocalities(_area)
+			 select l.Name.Indexed)
+			.ToHashSet<string>();
+		}
+
+
+		/// <summary>
+		/// Sets value of the Area property.
+		/// </summary>
+		/// <param name="value">A value assigned to the property</param>
+		protected override void SetArea(Rectangle value)
+		{
+			base.SetArea(value);
+
+			// Find out which localities the object now intersects, then sends the appropriate messages to the concerning localities.
+			Locality[] backup = Localities.ToArray<Locality>();
+			FindLocalities();
+
+			// Inform concerning localities that the object disappeared.
+			foreach (Locality l in backup)
+			{
+				if (!Localities.Contains(l))
+					l.TakeMessage(new ObjectDisappearedFromLocality(this, this, l));
+			}
+
+			// Inform concerning localities that the object appeared.
+			foreach (Locality l in Localities)
+			{
+				if (!backup.Contains(l))
+					l.TakeMessage(new ObjectAppearedInLocality(this, this, l));
+			}
+		}
+
+		/// <summary>
 		/// Specifies if the object is held by an entity.
 		/// </summary>
-		public Entity HeldBy { get; protected set; }
+		public Character HeldBy { get; protected set; }
 
 		/// <summary>
 		/// Checks if the object can be picked up off the ground in the moment.
@@ -102,8 +164,10 @@ namespace Game.Entities
 		/// <remarks>
 		/// The type parameter allows assigning objects with some special behavior to proper classes.
 		/// </remarks>
-		public DumpObject(Name name, Plane area, string type, bool decorative, bool pickable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false) : base(name, type, area)
+		public DumpObject(Name name, Rectangle area, string type, bool decorative, bool pickable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false) : base(name, type, area)
 		{
+			Area = area;
+
 			Decorative = decorative;
 			_pickable = pickable;
 			_usableOnce = usableOnce;
@@ -131,6 +195,11 @@ namespace Game.Entities
 		public override void Start()
 		{
 			base.Start();
+
+			// Add the object to intersecting localities
+			foreach (Locality l in Localities)
+				l.TakeMessage(new ObjectAppearedInLocality(this, this, l));
+
 			// Play loop sound if any and if the player can hear it.
 			UpdateLoop();
 		}
@@ -141,7 +210,7 @@ namespace Game.Entities
 		/// <param name="message">The message to be processed</param>
 		private void OnOrientationChanged(OrientationChanged message)
 => WatchPlayersMovement();
-		protected virtual void OnLocalityEntered(LocalityEntered message)
+		protected virtual void OnLocalityEntered(CharacterCameToLocality message)
 			=> UpdateLoop();
 
 		/// <summary>
@@ -152,7 +221,7 @@ namespace Game.Entities
 		{
 			Vector2 player = World.Player.Area.Center;
 			Vector2 me = _area.GetClosestPoint(player);
-			Plane path = new Plane(me, player);
+			Rectangle path = new Rectangle(me, player);
 
 			return World.DetectObstacles(path);
 		}
@@ -188,7 +257,7 @@ namespace Game.Entities
 		/// Processes the EntityMoved message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnEntityMoved(EntityMoved message)
+		protected void OnEntityMoved(CharacterMoved message)
 		{
 			if (message.Sender != World.Player)
 				return;
@@ -300,6 +369,10 @@ namespace Game.Entities
 
 			if (_loopSoundId != 0)
 				World.Sound.Stop(_loopSoundId);
+
+			// Inform localities that the object disappeared.
+			foreach (Locality l in Localities)
+				l.TakeMessage(new ObjectDisappearedFromLocality(this, this, l));
 		}
 
 		/// <summary>
@@ -429,7 +502,7 @@ namespace Game.Entities
 				return; // Sound isn't blocked, play it normally.
 
 			// Detect potentional acoustic obstacles and set up attenuate parameters
-			ObstacleType obstacle = World.DetectAcousticObstacles(new Plane((Vector2)opposite));
+			ObstacleType obstacle = World.DetectAcousticObstacles(new Rectangle((Vector2)opposite));
 			float volume;
 			(float gain, float gainHF) lowpass;
 			bool attenuate = obstacle == ObstacleType.Wall || obstacle == ObstacleType.Object;
@@ -463,7 +536,7 @@ namespace Game.Entities
 				return;
 
 			float distance = GetDistanceFromPlayer();
-			if (distance <= 1 | distance >= 50 || !Locality.IsItHere(World.Player))
+			if (distance <= 1 | distance >= 50 || !SameLocality(World.Player))
 				StopNavigation();
 		}
 
@@ -479,8 +552,8 @@ namespace Game.Entities
 				case PickUpObject m: OnPickUpObject(m); break;
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
-				case LocalityEntered le: OnLocalityEntered(le); break;
-				case EntityMoved em: OnEntityMoved(em); break;
+				case CharacterCameToLocality le: OnLocalityEntered(le); break;
+				case CharacterMoved em: OnEntityMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
 				case StartObjectNavigation so: OnStartObjectNavigation(so); break;
 				case StopObjectNavigation sto: OnStopObjectNavigation(sto); break;
@@ -497,9 +570,7 @@ namespace Game.Entities
 		/// <param name="m">Source of the message</param>
 		private void OnPutObject(PutObject m)
 		{
-			System.Diagnostics.Debugger.Break();
-
-			Plane newPosition = FindVacancy(m.Position);
+			Rectangle newPosition = FindVacancy(m.Position);
 			if(newPosition == null)
 				m.Sender.TakeMessage(new PutObjectResult(this));
 else
@@ -510,9 +581,9 @@ else
 			}
 		}
 
-		protected Plane FindVacancy(Vector2 point)
+		protected Rectangle FindVacancy(Vector2 point)
 		{
-			Plane area = new Plane(point);
+			Rectangle area = new Rectangle(point);
 			bool intersects() => World.Player.Area.Intersects(area);
 			(float width, float height)[] testDimensions = new[] 
 			{
@@ -543,7 +614,7 @@ else
 					area.Extend(Direction.Right);
 
 				if ((area.Height, area.Width) == d)
-					return new Plane(area);
+					return new Rectangle(area);
 			}
 
 			return null;
@@ -559,14 +630,14 @@ else
 
 			if (result == PickUpObjectResult.ResultType.Success)
 			{
-				HeldBy = (Entity)m.Sender;
-				Disappear();
+				HeldBy = (Character)m.Sender;
+				Area = null;
 			}
 
 			// Report the result.
 			m.Sender.TakeMessage(new PickUpObjectResult(this, this, result));
 
-				PickingAttempt((Entity)m.Sender, result);
+				PickingAttempt((Character)m.Sender, result);
 		}
 
 /// <summary>
@@ -574,7 +645,7 @@ else
 /// </summary>
 /// <param name="entity">The entity that tried to pick this object up off the ground</param>
 /// <param name="result">Specifies if the object was picked up off the ground or not.</param>
-		protected virtual void PickingAttempt(Entity entity, PickUpObjectResult.ResultType result)
+		protected virtual void PickingAttempt(Character entity, PickUpObjectResult.ResultType result)
 		{
 		}
 

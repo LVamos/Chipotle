@@ -111,6 +111,8 @@
     <Compile Include="Messaging\Commands\RunInventoryMenu.cs" />
     <Compile Include="Messaging\Commands\TryGoTo.cs" />
     <Compile Include="Messaging\Events\EmptyInventory.cs" />
+    <Compile Include="Messaging\Events\ObjectAppearedInLocality.cs" />
+    <Compile Include="Messaging\Events\ObjectDisappearedFromLocality.cs" />
     <Compile Include="Messaging\Events\PickUpObjectResult.cs" />
     <Compile Include="Messaging\Events\PinchedInDoor.cs" />
     <Compile Include="Messaging\Commands\CreatePredefinedSave.cs" />
@@ -167,7 +169,7 @@
     <Compile Include="Entities\ChristineAIComponent.cs" />
     <Compile Include="Entities\DumpObject.cs" />
     <Compile Include="Entities\EntityComponent.cs" />
-    <Compile Include="Entities\Entity.cs" />
+    <Compile Include="Entities\Character.cs" />
     <Compile Include="Entities\GameObject.cs" />
     <Compile Include="Entities\InputComponent.cs" />
     <Compile Include="Entities\MariottiAIComponent.cs" />
@@ -175,8 +177,8 @@
     <Compile Include="Entities\TuttleAIComponent.cs" />
     <Compile Include="Entities\TuttlePhysicsComponent.cs" />
     <Compile Include="Entities\TuttleSoundComponent.cs" />
-    <Compile Include="Messaging\Events\LocalityLeft.cs" />
-    <Compile Include="Messaging\Events\LocalityEntered.cs" />
+    <Compile Include="Messaging\Events\CharacterLeftLocality.cs" />
+    <Compile Include="Messaging\Events\CharacterCameToLocality.cs" />
     <Compile Include="Messaging\Commands\SayObjects.cs" />
     <Compile Include="Messaging\Commands\SayLocality.cs" />
     <Compile Include="Messaging\Events\PositionChanged.cs" />

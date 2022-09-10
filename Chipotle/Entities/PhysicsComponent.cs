@@ -20,7 +20,7 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     [ProtoInclude(100, typeof(ChipotlePhysicsComponent))]
     [ProtoInclude(101, typeof(TuttlePhysicsComponent))]
-    public class PhysicsComponent : EntityComponent
+    public class PhysicsComponent : CharacterComponent
     {
         /// <summary>
         /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
@@ -48,7 +48,7 @@ namespace Game.Entities
         /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
         protected (Vector2 position, Tile tile) GetNextTile(Orientation2D direction, int step)
         {
-            Plane target = new Plane(_area);
+            Rectangle target = new Rectangle(_area);
             target.Move(direction, step);
             Vector2 result = target.Center;
             result = new Vector2((float)Math.Round(result.X), (float)Math.Round(result.Y));
@@ -173,7 +173,7 @@ namespace Game.Entities
         /// <summary>
         /// Coordinates of the area currently occupied by the NPC
         /// </summary>
-        protected Plane _area;
+        protected Rectangle _area;
 
         /// <summary>
         /// Stores reference to a locality in which the NPC is currently located.
@@ -182,17 +182,9 @@ namespace Game.Entities
         {
             get
             {
-                if (_locality == null)
-                    _locality = _area.GetLocality();
-                return _locality;
+                return _area == null ? null : Owner.Locality;
             }
         }
-
-        /// <summary>
-        /// Backing field for Locality property.
-        /// </summary>
-[ProtoIgnore]
-        protected Locality _locality;
 
         /// <summary>
         /// Current orientation of the NPC
@@ -259,24 +251,23 @@ namespace Game.Entities
         /// <param name="target">Coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
         protected virtual void Move(Vector2 target, bool silently = false)
-            => Move(new Plane(target), silently);
+            => Move(new Rectangle(target), silently);
 
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
         /// <param name="target">coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void Move(Plane target, bool silently = false)
+        protected void Move(Rectangle target, bool silently = false)
         {
-            Locality sourceLocality = _area?.GetLocality();
-            Locality targetLocality = target.GetLocality();
-            Plane sourcePosition = _area == null ? null  : new Plane(_area);
+            Locality sourceLocality = Locality;
+            Locality targetLocality = target.GetLocalities().First();
+            Rectangle sourcePosition = _area == null ? null  : new Rectangle(_area);
 
-            _area = new Plane(target);
-                _locality = _area.GetLocality() ?? throw new ArgumentNullException(nameof(Locality));
+            _area = new Rectangle(target);
 
             // If it isn't the player detect obstacles between him and this NPC.
-            Entity player = World.Player;
+            Character player = World.Player;
             ObstacleType obstacle = Owner != player ? World.DetectAcousticObstacles(_area) : ObstacleType.None;
 
             // Announce changes

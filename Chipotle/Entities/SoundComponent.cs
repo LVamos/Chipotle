@@ -12,7 +12,7 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     [ProtoInclude(100, typeof(ChipotleSoundComponent))]
     [ProtoInclude(101, typeof(TuttleSoundComponent))]
-    public class SoundComponent : EntityComponent
+    public class SoundComponent : CharacterComponent
     {
         /// <summary>
         /// Volume for foot steps

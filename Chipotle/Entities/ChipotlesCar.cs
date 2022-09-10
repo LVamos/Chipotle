@@ -67,14 +67,14 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public ChipotlesCar(Name name, Plane area, bool decorative, bool pickable) : base(name: name, area: area, type: "detektivovo auto", decorative: decorative, pickable: pickable, stopWhenPlayerMoves: true)
+        public ChipotlesCar(Name name, Rectangle area, bool decorative, bool pickable) : base(name: name, area: area, type: "detektivovo auto", decorative: decorative, pickable: pickable, stopWhenPlayerMoves: true)
         { }
 
         /// <summary>
         /// Reference to the Detective Chipotle NPC
         /// </summary>
         [ProtoIgnore]
-        private Entity Player => World.Player;
+        private Character Player => World.Player;
 
         /// <summary>
         /// List of all localities visited by the object
@@ -85,8 +85,8 @@ namespace Game.Entities
         /// Reference to the Tuttle NPC
         /// </summary>
         [ProtoIgnore]
-        private Entity _tuttle
-            => World.GetEntity("tuttle");
+        private Character _tuttle
+            => World.GetCharacter("tuttle");
 
         /// <summary>
         /// List of all crutial object in the Walsch's area
@@ -114,7 +114,7 @@ namespace Game.Entities
         /// Moves the object to the specified position.
         /// </summary>
         /// <param name="target">Coordinates of the target location</param>
-        protected override void Move(Plane target)
+        protected override void Move(Rectangle target)
         {
             base.Move(target);
             ChipotlesCarMoved message = new ChipotlesCarMoved(this, target);
@@ -132,8 +132,8 @@ namespace Game.Entities
 
             // When it's not allowed to use the car, play a knocking souund.
             if (
-                            (_area.GetLocality().Name.Indexed == "příjezdová cesta w1" && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
-            || (_area.GetLocality().Name.Indexed == "asfaltka c1" && !CarsonsBenchesUsed()))
+                            (_localities.Contains("příjezdová cesta w1") && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
+            || (Localities.Any(l => l.Name.Indexed  == "asfaltka c1") && !CarsonsBenchesUsed()))
                 _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.ManipulationPoint.AsOpenALVector(), true, _defaultVolume);
 
             // If player didn't leave Walsh area but used required objects and went through all area
@@ -182,7 +182,7 @@ namespace Game.Entities
             else cutscene = preferredCutscene;
 
             Dictionary<string, Locality> destinations = new Dictionary<string, Locality>();
-            foreach(string indexedName in _allowedDestinations.Where(d => d != Locality.Name.Indexed))
+            foreach(string indexedName in _allowedDestinations.Where(d => !_localities.Contains(d)))
             {
                 Locality l = World.GetLocality(indexedName);
                 destinations[l.Name.Friendly] = l;
@@ -206,14 +206,14 @@ namespace Game.Entities
         /// </summary>
         /// <returns>True if the Detective Chipotle and Tuttle NPC are in the same locality</returns>
         private bool IsChipotleAlone()
-                    => !_area.GetLocality().IsItHere(_tuttle);
+                    => !SameLocality(_tuttle);
 
         /// <summary>
         /// Moves the object to the specified position and plays a cutscene.
         /// </summary>
         /// <param name="target">Coordinate sof the target location</param>
         /// <param name="cutscene">Name of the cutscene to be played</param>
-        private void Move(Plane target, string cutscene)
+        private void Move(Rectangle target, string cutscene)
         {
             World.PlayCutscene(this, cutscene);
             Move(target);
@@ -230,7 +230,7 @@ namespace Game.Entities
         /// </remarks>
         /// <completionlist cref="_destinations"/>
         private void Move(Locality locality) 
-            => Move(new Plane(_destinations[locality.Name.Indexed]));
+            => Move(new Rectangle(_destinations[locality.Name.Indexed]));
 
         /// <summary>
         /// Moves the object to the specified locality.
@@ -243,7 +243,7 @@ namespace Game.Entities
         /// cutscene is defined then a predefined alternative is played.
         /// </remarks>
         private void Move(Locality locality, string cutscene)
-            => Move(new Plane(_destinations[locality.Name.Indexed]), cutscene);
+            => Move(new Rectangle(_destinations[locality.Name.Indexed]), cutscene);
 
         /// <summary>
         /// Processes the MoveChipotlesCar message.

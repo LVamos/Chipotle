@@ -33,6 +33,21 @@ namespace Game
 	public static class World
 	{
 		/// <summary>
+		/// Enumerates all localities in an area specified by the area code.
+		/// </summary>
+		/// <param name="areaCode">Part of locality indexed name that specifies the containing area</param>
+		/// <returns>enumeration of localities</returns>
+		public static   IEnumerable<Locality> GetLocalitiesInArea(string areaCode)
+		{
+			return
+			from l in GetLocalities()
+			let name = l.Name.Indexed
+			let position = name.Length - 2
+			where name.Substring(position, 1).ToLower() == "h"
+			select l;
+		}
+
+		/// <summary>
 		/// Constructs the shortest possible path between two points.
 		/// </summary>
 		/// <param name="start">The initial point fo path finding.</param>
@@ -73,7 +88,7 @@ namespace Game
 		/// <param name="maxDistance">Specifies maximum distance fo the points in the surroundings.</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
 		public static Vector2? GetRandomWalkablePoint(Vector2 point, int minDistance, int maxDistance)
-			=> GetRandomWalkablePoint(new Plane(point), minDistance, maxDistance);
+			=> GetRandomWalkablePoint(new Rectangle(point), minDistance, maxDistance);
 
 
 		/// <summary>
@@ -81,10 +96,10 @@ namespace Game
 		/// </summary>
 		/// <param name="maxDistance">Specifies width of the searched perimeter around the plane</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetRandomWalkablePoint(Plane area, int minDistance, int maxDistance)
+		public static Vector2? GetRandomWalkablePoint(Rectangle area, int minDistance, int maxDistance)
 		{
 			IEnumerable<Vector2> walkables =
-				area.GetWalkableSurroudningPoints(minDistance, maxDistance);
+				area.GetWalkableSurroundingPoints(minDistance, maxDistance);
 
 
 			if (walkables.IsNullOrEmpty())
@@ -115,7 +130,7 @@ namespace Game
 		/// <param name="maxDistance">Maximum distance from center</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
 		public static Vector2? GetNearestWalkableTile(Vector2 point, int minDistance, int maxDistance)
-			=> GetNearestWalkableTile(new Plane(point), minDistance, maxDistance);
+			=> GetNearestWalkableTile(new Rectangle(point), minDistance, maxDistance);
 
 		/// <summary>
 		/// Finds the nearest walkable tile in surroundings of this plane.
@@ -124,10 +139,10 @@ namespace Game
 		/// <param name="minDistance">Minimum distance from center</param>
 		/// <param name="maxDistance">Maximum distance from center</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetNearestWalkableTile(Plane area, int minDistance, int maxDistance)
+		public static Vector2? GetNearestWalkableTile(Rectangle area, int minDistance, int maxDistance)
 		{
 			return
-			(from p in area.GetWalkableSurroudningPoints(minDistance, maxDistance)
+			(from p in area.GetWalkableSurroundingPoints(minDistance, maxDistance)
 			 let distance = GetDistance(area.GetClosestPoint(p), p)
 			 orderby distance
 			 select p)
@@ -186,12 +201,13 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The map element to be checked</param>
 		/// <returns>The corresponding obstacle type</returns>
-		public static ObstacleType DetectAcousticObstacles(Plane area)
+		public static ObstacleType DetectAcousticObstacles(Rectangle area)
 		{
 			// If it's an object that is held by an 
 
 			Locality playersLocality = Player.Locality;
-			Locality otherLocality = area.GetLocality();
+			Vector2 closest = area.GetClosestPoint(World.Player.Area.Center);
+			Locality otherLocality = World.GetLocality(closest);
 			bool neighbour = playersLocality.IsNeighbour(otherLocality);
 			bool accessible = otherLocality.IsAccessible(playersLocality);
 
@@ -201,7 +217,7 @@ namespace Game
 				return ObstacleType.Far;  // Inaudible
 
 			// Adjecting localities
-			Plane path = new Plane(area.GetClosestPoint(Player.Area.Center), Player.Area.Center);
+			Rectangle path = new Rectangle(area.GetClosestPoint(Player.Area.Center), Player.Area.Center);
 			ObstacleType obstacle = DetectObstacles(path);
 
 			if (neighbour && accessible)
@@ -229,10 +245,10 @@ namespace Game
 		/// <param name="p1">First point</param>
 		/// <param name="p2">Second point</param>
 		/// <returns>ObstacleType</returns>
-		public static ObstacleType DetectObstacles(Plane path)
+		public static ObstacleType DetectObstacles(Rectangle path)
 		{
-			bool Intersects(Plane area)
-				=> area.LaysOnPlane(path.UpperLeftCorner) || area.LaysOnPlane(path.LowerRightCorner);
+			bool Intersects(Rectangle area)
+				=> area.Intersects(path.UpperLeftCorner) || area.Intersects(path.LowerRightCorner);
 
 			// Is it a line?
 			if (!path.IsLine)
@@ -240,21 +256,21 @@ namespace Game
 
 			// Detect doors.
 			if (
-			path.GetIntersectingPassages()
+			path.GetPassages()
 			.Any(p => !Intersects(p.Area) && p.State == PassageState.Closed))
 				return ObstacleType.Door;
 
 			// Detect walls
 			if (
 				path.GetTiles()
-				.Where(t => !Intersects(new Plane(t.position)))
+				.Where(t => !Intersects(new Rectangle(t.position)))
 				.Any(t => t.tile.Terrain == TerrainType.Wall)
-				|| path.GetIntersectingObjects().Any(o => !Intersects(o.Area) && (o.Type == "zeď" || o.Name.Friendly == "zeď"))
+				|| path.GetObjects().Any(o => !Intersects(o.Area) && (o.Type == "zeď" || o.Name.Friendly == "zeď"))
 				)
 				return ObstacleType.Wall;
 
 			// Detect objects
-			if (path.GetIntersectingObjects().Any(o => !Intersects(o.Area)))
+			if (path.GetObjects().Any(o => !Intersects(o.Area)))
 				return ObstacleType.Object;
 
 			return ObstacleType.None;
@@ -265,7 +281,21 @@ namespace Game
 		/// </summary>
 		/// <returns>Enumeration of all localities</returns>
 		public static IEnumerable<Locality> GetLocalities()
-=> _localities.Values;
+=> _localities.Values.AsEnumerable();
+
+		/// <summary>
+		/// Enumerates all localities intersecting with the speciifed area.
+		/// </summary>
+		/// <param name="area">The area the localities should intersect with</param>
+		/// <returns>enumeration of localities</returns>
+		public static IEnumerable<Locality> GetLocalities(Rectangle area)
+		{
+			return
+				from l in GetLocalities()
+				where l.Area.Intersects(area)
+				select l;
+		}
+
 		/// <summary>
 		/// Interval between game loop ticks
 		/// </summary>
@@ -319,7 +349,7 @@ namespace Game
 		/// <summary>
 		/// List of all NPCs
 		/// </summary>
-		private static Dictionary<string, Entity> _entities;
+		private static Dictionary<string, Character> _entities;
 
 		/// <summary>
 		/// List of all localities
@@ -344,14 +374,14 @@ namespace Game
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC (the main NPC)
 		/// </summary>
-		public static Entity Player
-=> GetEntity("Chipotle");
+		public static Character Player
+=> GetCharacter("Chipotle");
 
 		/// <summary>
 		/// Registers an entity.
 		/// </summary>
 		/// <param name="e">The entity to be registered</param>
-		public static void Add(Entity e)
+		public static void Add(Character e)
 		{
 			// Do a null check and look if entity isn't already registered.
 			if (e == null)
@@ -415,7 +445,7 @@ namespace Game
 		/// Builds walls around the given region.
 		/// </summary>
 		/// <param name="walls">Specifies on which sides of the region the walls are to be built.</param>
-		public static void DrawWalls(Plane area, string walls)
+		public static void DrawWalls(Rectangle area, string walls)
 		{
 			IEnumerable<Vector2> wallCoordinates;
 
@@ -483,7 +513,7 @@ namespace Game
 		/// </summary>
 		/// <param name="point"></param>
 		/// <returns>Reference to the entity if there's any</returns>
-		public static Entity GetEntity(Vector2 point)
+		public static Character GetEntity(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
 			if (locality == null)
@@ -491,8 +521,8 @@ namespace Game
 
 			return
 				(
-				from e in locality.Entities
-				where e.Area != null && e.Area.LaysOnPlane(point)
+				from e in locality.Characters
+				where e.Area != null && e.Area.Intersects(point)
 				select e)
 				.FirstOrDefault();
 		}
@@ -502,7 +532,7 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting entities</returns>
-		public static IEnumerable<Entity> GetEntities(Plane area)
+		public static IEnumerable<Character> GetEntities(Rectangle area)
 						=> _entities.Values.Where(o => o.Area != null && o.Area.Intersects(area));
 
 		/// <summary>
@@ -510,9 +540,9 @@ namespace Game
 		/// </summary>
 		/// <param name="name">Inner name of the required NPC</param>
 		/// <returns>The found NPC or null if nothing was found</returns>
-		public static Entity GetEntity(string name)
+		public static Character GetCharacter(string name)
 		{
-			if (_entities != null && _entities.TryGetValue(name.ToLower(), out Entity e))
+			if (_entities != null && _entities.TryGetValue(name.ToLower(), out Character e))
 				return e;
 			return null;
 		}
@@ -533,7 +563,7 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The point tto be checked</param>
 		/// <returns>The intersecting locality</returns>
-		public static Locality GetLocality(Plane area)
+		public static Locality GetLocality(Rectangle area)
 			=> _localities.Values.FirstOrDefault(l => l.Area.Contains(area));
 
 		/// <summary>
@@ -543,7 +573,7 @@ namespace Game
 		/// <returns>The intersecting locality</returns>
 		public static Locality GetLocality(Vector2 point)
 			=> _localities.Values
-			.FirstOrDefault(l => l.Area.LaysOnPlane(point));
+			.FirstOrDefault(l => l.Area.Intersects(point));
 
 		/// <summary>
 		/// Enumerates all localities sorted by distance from the specified point.
@@ -585,7 +615,7 @@ namespace Game
 		{
 			return
 				(from o in _objects.Values
-				where o.Area != null && !o.Area.LaysOnPlane(point)
+				where o.Area != null && !o.Area.Intersects(point)
 				orderby o.Area.GetDistanceFrom(point)
 				select o)
 				.Distinct();
@@ -605,7 +635,7 @@ namespace Game
 				(from o in _objects.Values
 				let distance = o.Area.GetDistanceFrom(point)
 				orderby distance
-				where o.Area != null && o.Decorative == includeDecoaration && !o.Area.LaysOnPlane(point) && distance <= radius
+				where o.Area != null && o.Decorative == includeDecoaration && !o.Area.Intersects(point) && distance <= radius
 				select o)
 				.Distinct();
 		}
@@ -630,7 +660,7 @@ namespace Game
 				   (from p in _passages.Values
 				   let d = p.Area.GetDistanceFrom(point)
 				   orderby d
-				   where !p.Area.LaysOnPlane(point) &&
+				   where !p.Area.Intersects(point) &&
 							   ((doors && p is Door) || (!doors && p is Passage))
 				   select p)
 				   .Distinct();
@@ -664,7 +694,7 @@ namespace Game
 
 			return
 				(from o in locality.Objects
-				 where o.Area != null && o.Area.LaysOnPlane(point) 
+				 where o.Area != null && o.Area.Intersects(point) 
 				 select o)
 				 .FirstOrDefault();
 		}
@@ -674,7 +704,7 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting objects</returns>
-		public static IEnumerable<DumpObject> GetObjects(Plane area)
+		public static IEnumerable<DumpObject> GetObjects(Rectangle area)
 		{
 			return
 				from o in _objects.Values
@@ -698,7 +728,7 @@ namespace Game
 		public static Passage GetPassage(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
-			return locality?.Passages.FirstOrDefault(p => p.Area.LaysOnPlane(point));
+			return locality?.Passages.FirstOrDefault(p => p.Area.Intersects(point));
 		}
 
 		/// <summary>
@@ -715,7 +745,7 @@ namespace Game
 		/// <summary>
 		/// Returns all passages intersecting with the plane.
 		/// </summary>
-		public static IEnumerable<Passage> GetPassages(Plane area)
+		public static IEnumerable<Passage> GetPassages(Rectangle area)
 					=> _passages.Values.Where(p => p.Area.Intersects(area));
 
 		/// <summary>
@@ -725,7 +755,7 @@ namespace Game
 		{
 			_objects = new Dictionary<string, DumpObject>();
 			_localities = new Dictionary<string, Locality>();
-			_entities = new Dictionary<string, Entity>();
+			_entities = new Dictionary<string, Character>();
 			_passages = new Dictionary<string, Passage>();
 		}
 
@@ -915,7 +945,7 @@ namespace Game
 		   A(l, "to"),
 		   A(l, "type") == "indoor" ? Locality.LocalityType.Indoor : Locality.LocalityType.Outdoor,
 		   int.Parse(A(l, "height")),
-		   new Plane(A(l, "coordinates")),
+		   new Rectangle(A(l, "coordinates")),
 		   A(l, "defaultTerrain", false).ToTerrainType(),
 lBackgroundInfo.sound,
 lBackgroundInfo.volume
@@ -936,7 +966,7 @@ lBackgroundInfo.volume
 				{
 					Add(GameObject.CreateObject(
 						new Name(A(o, "indexedname"), A(o, "friendlyname")),
-						new Plane(A(o, "coordinates")).ToAbsolute(locality.Area),
+						new Rectangle(A(o, "coordinates")).ToAbsolute(locality.Area),
 						A(o, "type"),
 						A(o, "decorative").ToBool(),
 						A(o, "pickable").ToBool()
@@ -951,7 +981,7 @@ lBackgroundInfo.volume
 				bool isDoor = A(p, "door").ToBool();
 				PassageState state = A(p, "closed").ToBool() ? PassageState.Closed : PassageState.Open;
 				bool openable = A(p, "openable").ToBool();
-				Plane area = new Plane(A(p, "coordinates"));
+				Rectangle area = new Rectangle(A(p, "coordinates"));
 				string[] localities = new string[]
 				{ A(p, "from"),
 					A(p, "to")
@@ -977,7 +1007,7 @@ lBackgroundInfo.volume
 			// Load localities
 			foreach (XElement l in xLocalities)
 			{
-				Plane area = new Plane(Attribute(l, "coordinates"));
+				Rectangle area = new Rectangle(Attribute(l, "coordinates"));
 
 				// Draw terrain
 				TerrainType terrain = Attribute(l, "defaultTerrain", false).ToTerrainType();
@@ -1104,19 +1134,19 @@ lBackgroundInfo.volume
 		public static void StartGame()
 		{
 			LoadMap();
-			Add(Entity.CreateChipotle());
+			Add(Character.CreateChipotle());
 			_localities.Foreach(p => p.Value.Start());
 			_passages.Foreach(p => p.Value.Start());
 			_objects.Foreach(p => p.Value.Start());
-			Add(Entity.CreateTuttle());
-			Add(Entity.CreateCarson());
-			Add(Entity.CreateBartender());
-			Add(Entity.CreateChristine());
-			Add(Entity.CreateSweeney());
-			Add(Entity.CreateMariotti());
+			Add(Character.CreateTuttle());
+			Add(Character.CreateCarson());
+			Add(Character.CreateBartender());
+			Add(Character.CreateChristine());
+			Add(Character.CreateSweeney());
+			Add(Character.CreateMariotti());
 
 			// start entities
-			foreach (Entity e in _entities.Values)
+			foreach (Character e in _entities.Values)
 				e.Start();
 			Program.MainWindow.GameInProgress = true;
 

@@ -21,7 +21,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public IcecreamMachine(Name name, Plane area, bool decorative, bool pickable) : base(name, area, "automat na zmrzlinu", decorative, pickable, null, null, "VendingMachineLoop")
+        public IcecreamMachine(Name name, Rectangle area, bool decorative, bool pickable) : base(name, area, "automat na zmrzlinu", decorative, pickable, null, null, "VendingMachineLoop")
         { }
 
         /// <summary>
@@ -30,10 +30,10 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         protected override void OnUseObject(UseObject message)
         {
-            Entity tuttle = World.GetEntity("tuttle");
+            Character tuttle = World.GetCharacter("tuttle");
             Locality garage = World.GetLocality("garáž v1");
             if (
-                Locality.IsItHere(tuttle)
+                SameLocality(tuttle)
                 && tuttle.VisitedLocalities.Contains(garage)
                 && World.Player.VisitedLocalities.Contains(garage)
                 )

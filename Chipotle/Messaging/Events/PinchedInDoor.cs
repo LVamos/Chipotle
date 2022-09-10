@@ -9,9 +9,9 @@ namespace Game.Messaging.Events
 	public class PinchedInDoor: GameMessage
 	{
 		public new Door Sender;
-		public Entity Entity;
+		public Character Entity;
 
-		public PinchedInDoor(Door sender, Entity entity):base(sender)
+		public PinchedInDoor(Door sender, Character entity):base(sender)
 		{
 			Sender = sender;
 			Entity = entity;

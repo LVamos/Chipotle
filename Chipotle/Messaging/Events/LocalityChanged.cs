@@ -7,7 +7,7 @@ namespace Game.Messaging.Events
     /// <summary>
     /// Indicates that an NPC moved from one locality to another one.
     /// </summary>
-    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.CharacterComponent"/> class.</remarks>
     [Serializable]
     public class LocalityChanged : GameMessage
     {

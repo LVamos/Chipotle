@@ -228,7 +228,7 @@ namespace Game.Entities
             if (!Program.Settings.TestCommandsEnabled)
                 return;
 
-            Entity tuttle = World.GetEntity("tuttle");
+            Character tuttle = World.GetCharacter("tuttle");
             string distance = World.GetDistance(tuttle.Area.Center, Owner.Area.Center).ToString();
             string position = tuttle.Area.Center.ToString();
             string locality = tuttle.Locality.Name.Indexed;
@@ -257,11 +257,11 @@ namespace Game.Entities
 
             Locality locality = World.GetLocality(items[item]);
             Vector2 point = locality.Area.GetWalkableTiles().First().position;
-            InnerMessage(new SetPosition(this, new Plane(point)));
+            InnerMessage(new SetPosition(this, new Rectangle(point)));
 
             // Move Tuttle
             point = locality.Area.GetWalkableTiles().First(t => t.position != point).position;
-            World.GetEntity("tuttle").TakeMessage(new SetPosition(null, new Plane(point)));
+            World.GetCharacter("tuttle").TakeMessage(new SetPosition(null, new Rectangle(point)));
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Game.Entities
             if (!Program.Settings.TestCommandsEnabled)
                 return;
 
-            Plane v = new Plane(Clipboard.GetText());
+            Rectangle v = new Rectangle(Clipboard.GetText());
             InnerMessage(new SetPosition(this, v));
         }
 

@@ -16,14 +16,14 @@ namespace Game.Messaging.Events
         /// <summary>
         /// The location to which the car moved
         /// </summary>
-        public readonly Plane Target;
+        public readonly Rectangle Target;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="target">The location to which the car moved</param>
-        public ChipotlesCarMoved(ChipotlesCar sender, Plane target) : base(sender)
+        public ChipotlesCarMoved(ChipotlesCar sender, Rectangle target) : base(sender)
             => Target = target;
     }
 }

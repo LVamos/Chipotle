@@ -17,7 +17,7 @@ namespace Game.Entities
     [ProtoInclude(101, typeof(PhysicsComponent))]
     [ProtoInclude(102, typeof(SoundComponent))]
     [ProtoInclude(103, typeof(InputComponent))]
-    public abstract class EntityComponent : MessagingObject
+    public abstract class CharacterComponent : MessagingObject
     {
         /// <summary>
         /// Sends an inner message to the containing NPC.
@@ -35,18 +35,18 @@ namespace Game.Entities
         /// Backing field for the Onwer property.
         /// </summary>
         [ProtoIgnore]
-        protected Entity _owner;
+        protected Character _owner;
 
         /// <summary>
         /// A reference to the parent NPC
         /// </summary>
         [ProtoIgnore]
-        public Entity Owner
+        public Character Owner
         {
             get
             {
                 if (_owner == null)
-                    _owner = World.GetEntity(_ownerName)
+                    _owner = World.GetCharacter(_ownerName)
                         ?? throw new InvalidOperationException(nameof(_ownerName));
 
                 return _owner;

@@ -35,7 +35,7 @@ namespace Game.Entities
         {
             base.Start();
 
-            SetPosition message = new SetPosition(this, new Plane("1230, 1017"), true); // Sitting on a bench at a table
+            SetPosition message = new SetPosition(this, new Rectangle("1230, 1017"), true); // Sitting on a bench at a table
             InnerMessage(message);
         }
 
@@ -47,8 +47,8 @@ namespace Game.Entities
         {
             switch (message)
             {
-                case LocalityLeft ll: OnLocalityLeft(ll); break;
-                case LocalityEntered le: OnLocalityEntered(le); break;
+                case CharacterLeftLocality ll: OnLocalityLeft(ll); break;
+                case CharacterCameToLocality le: OnLocalityEntered(le); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -70,9 +70,9 @@ namespace Game.Entities
         /// Processes the LocalityEntered message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnLocalityEntered(LocalityEntered message)
+        private void OnLocalityEntered(CharacterCameToLocality message)
         {
-            if (message.Entity!= World.Player || message.Locality != Owner.Locality)
+            if (message.Character!= World.Player || message.Locality != Owner.Locality)
                 return;
 
             // This happens just once.
@@ -87,9 +87,9 @@ namespace Game.Entities
         /// Processes the LocalityLeft message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnLocalityLeft(LocalityLeft message)
+        private void OnLocalityLeft(CharacterLeftLocality message)
         {
-            if (message.Locality != Owner.Locality || message.Entity!= World.Player)
+            if (message.Locality != Owner.Locality || message.Character!= World.Player)
                 return;
 
             bool benchUsed = World.GetObjectsByType("lavice u carsona").Any(o => o.Used);

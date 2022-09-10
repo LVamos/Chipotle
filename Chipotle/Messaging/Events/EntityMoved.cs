@@ -10,9 +10,9 @@ namespace Game.Messaging.Events
     /// <summary>
     /// Indicates that an NPC changed its position.
     /// </summary>
-    /// <remarks>sent from the <see cref="Game.Entities.Entity"/> class.</remarks>
+    /// <remarks>sent from the <see cref="Game.Entities.Character"/> class.</remarks>
     [Serializable]
-    public class EntityMoved : GameMessage
+    public class CharacterMoved : GameMessage
     {
         /// <summary>
         /// The locality in which the NPC was originally located.
@@ -27,12 +27,12 @@ namespace Game.Messaging.Events
         /// <summary>
         /// Original position of the NPC
         /// </summary>
-        public readonly Plane SourcePosition;
+        public readonly Rectangle SourcePosition;
 
         /// <summary>
         /// New position of the NPC
         /// </summary>
-        public readonly Plane TargetPosition;
+        public readonly Rectangle TargetPosition;
 
         /// <summary>
         /// Constructor
@@ -42,7 +42,7 @@ namespace Game.Messaging.Events
         /// <param name="targetPosition">Target position of the NPC</param>
         /// <param name="sourceLocality">Source locality of the NPC</param>
         /// <param name="targetLocality">Target locality of the NPC</param>
-        public EntityMoved(object sender, Plane sourcePosition, Plane targetPosition, Locality sourceLocality, Locality targetLocality) : base(sender)
+        public CharacterMoved(object sender, Rectangle sourcePosition, Rectangle targetPosition, Locality sourceLocality, Locality targetLocality) : base(sender)
         {
             SourcePosition = sourcePosition;
             TargetPosition = targetPosition;

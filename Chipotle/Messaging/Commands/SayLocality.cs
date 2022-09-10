@@ -9,8 +9,8 @@ namespace Game.Messaging.Commands
         /// Instructs the NPC to report the name of the locality in which it is currently located.
         /// </summary>
         /// <remarks>
-        /// Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside
-        /// the NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
+        /// Applies to the <see cref="Game.Entities.Character"/> class. Can be sent only from inside
+        /// the NPC from a descendant of the <see cref="Game.Entities.CharacterComponent"/> class.
         /// </remarks>
         public SayLocality(object sender) : base(sender)
         {

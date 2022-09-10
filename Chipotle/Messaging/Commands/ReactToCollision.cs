@@ -16,13 +16,13 @@ namespace Game.Messaging.Commands
 		/// <summary>
 		/// The entity that bumped to this entity.
 		/// </summary>
-		public readonly Entity entity;
+		public readonly Character entity;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="entity">The entity that bumped to this entity</param>
-		public ReactToCollision(object sender, Entity entity): base(sender) { }
+		public ReactToCollision(object sender, Character entity): base(sender) { }
 	}
 }

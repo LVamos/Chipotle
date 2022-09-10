@@ -76,7 +76,7 @@ namespace Game.Entities
 		/// Reference to the Detective Chipotle NPC
 		/// </summary>
 		[ProtoIgnore]
-		private Entity _player => World.Player;
+		private Character _player => World.Player;
 
 		/// <summary>
 		/// A delayed message of ChipotlesCarMoved type
@@ -102,9 +102,9 @@ namespace Game.Entities
 
 			// Set position
 			if (Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
-				_area = new Plane((Vector2)Program.Settings.TuttleTestStart);
-			else _area = new Plane(new Vector2(1029, 1039));
-			InnerMessage(new SetPosition(this, new Plane(_area), true));
+				_area = new Rectangle((Vector2)Program.Settings.TuttleTestStart);
+			else _area = new Rectangle(new Vector2(1029, 1039));
+			InnerMessage(new SetPosition(this, new Rectangle(_area), true));
 
 			// scenarios for debugging purposes
 			//if (Program.Settings.SendTuttleToPool && !Program.Settings.PlayCutscenes)
@@ -127,7 +127,7 @@ namespace Game.Entities
 				case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
-				case LocalityEntered le: OnLocalityEntered(le); break;
+				case CharacterCameToLocality le: OnLocalityEntered(le); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -160,17 +160,17 @@ namespace Game.Entities
 		/// <summary>
 		/// Tuttle makes few random steps in the current locality.
 		/// </summary>
-		protected void GoAwayFrom(Plane area, int minDistance = 4, int maxDistance = 10)
+		protected void GoAwayFrom(Rectangle area, int minDistance = 4, int maxDistance = 10)
 		{
 			// Go away from the door. Find a random walkable tile near the player in the same locality where he's standing.
-			Plane aroundPlayer = new Plane(_player.Area);
+			Rectangle aroundPlayer = new Rectangle(_player.Area);
 			aroundPlayer.Extend(4);
 
 			// Find walkable tiles around the player.
 			Vector2[] walkables =
- (from p in _player.Area.GetWalkableSurroudningPoints(minDistance, maxDistance)
+ (from p in _player.Area.GetWalkableSurroundingPoints(minDistance, maxDistance)
   let distance = area.GetDistanceFrom(p)
-  where _player.Locality.Area.LaysOnPlane(p) && distance >= minDistance && distance <= maxDistance
+  where _player.Locality.Area.Intersects(p) && distance >= minDistance && distance <= maxDistance
   orderby _player.Area.GetDistanceFrom(p)
   select p)
   .Take(20)
@@ -268,7 +268,7 @@ namespace Game.Entities
 		/// </summary>
 		private void JumpToBelvedereStreet2()
 		{
-			InnerMessage(new SetPosition(this, new Plane("1801, 1124"), true));
+			InnerMessage(new SetPosition(this, new Rectangle("1801, 1124"), true));
 			StartFollowing();
 		}
 
@@ -277,7 +277,7 @@ namespace Game.Entities
 		/// locality to the Christine's hall (hala p1) locality.
 		/// </summary>
 		private void JumpToChristinesHall()
-			=> InnerMessage(new SetPosition(this, new Plane("1791, 1124"), true));
+			=> InnerMessage(new SetPosition(this, new Rectangle("1791, 1124"), true));
 
 		/// <summary>
 		/// Starts following the player.
@@ -296,18 +296,20 @@ namespace Game.Entities
 		/// room (pokoj s1) locality.
 		/// </summary>
 		private void JumpToSweeneysRoom()
-			=> InnerMessage(new SetPosition(this, new Plane("1411, 974"), true));
+			=> InnerMessage(new SetPosition(this, new Rectangle("1411, 974"), true));
 
 		/// <summary>
 		/// Processes the ChipotlesCarMoved message.
 		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		private void OnChipotlesCarMoved(ChipotlesCarMoved message)
+		/// <param name="m">The message to be processed</param>
+		private void OnChipotlesCarMoved(ChipotlesCarMoved m)
 		{
-			if (message.Target.GetLocality().Name.Indexed != "asfaltka c1")
-				_carMovement = message;
+			Locality  locality = m.Target.GetLocalities().First();
 
-			_ridingTo = _carMovement.Target.GetLocality();
+			if (locality.Name.Indexed != "asfaltka c1")
+				_carMovement = m;
+
+			_ridingTo = _carMovement.Target.GetLocalities().First();
 			InnerMessage(new StopFollowing(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new locality.
 		}
 
@@ -315,10 +317,10 @@ namespace Game.Entities
 		/// Processes the LocalityEntered message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnLocalityEntered(LocalityEntered message)
+		private void OnLocalityEntered(CharacterCameToLocality message)
 		{
 			// When the player first time enters the loclaity start following him.
-			if (message.Entity == _player && Owner.Locality.Name.Indexed == "bazén w1" && !_playerWasByPool)
+			if (message.Character == _player && Owner.Locality.Name.Indexed == "bazén w1" && !_playerWasByPool)
 			{
 				_playerWasByPool = true;
 
@@ -336,7 +338,7 @@ namespace Game.Entities
 			Assert(target.HasValue, "No walkable tile near player");
 
 			_hidden = false;
-			InnerMessage(new Reveal(this, new Plane((Vector2)target)));
+			InnerMessage(new Reveal(this, new Rectangle((Vector2)target)));
 		}
 
 		/// <summary>
@@ -349,7 +351,7 @@ namespace Game.Entities
 
 			Vector2? target = World.GetRandomWalkablePoint(_carMovement.Target, 1, 2);
 			Assert(target.HasValue, "No walkable tile found.");
-			InnerMessage(new SetPosition(this, new Plane((Vector2)target), true));
+			InnerMessage(new SetPosition(this, new Rectangle((Vector2)target), true));
 			_carMovement = null;
 		}
 
@@ -377,7 +379,7 @@ namespace Game.Entities
 		/// </summary>
 		private void WaitForChipotle()
 		{
-			if (_ridingTo != null && Owner.Locality == _ridingTo && World.Player.Locality == _ridingTo)
+			if (_ridingTo != null && Owner.Locality== _ridingTo && World.Player.Locality == _ridingTo)
 			{
 				_ridingTo = null;
 				InnerMessage(new StartFollowing(this));

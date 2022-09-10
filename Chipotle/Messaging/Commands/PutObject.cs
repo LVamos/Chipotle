@@ -17,7 +17,7 @@ namespace Game.Messaging.Commands
 		/// <summary>
 		/// Source of the message.
 		/// </summary>
-		public new readonly Entity Sender;
+		public new readonly Character Sender;
 
 		/// <summary>
 		/// The object that should be put on the ground.
@@ -36,7 +36,7 @@ namespace Game.Messaging.Commands
 		/// <param name="object">The object that should be put on the ground</param>
 		/// <param name="position">A point near which the object should be placed</param>
 		/// <exception cref="ArgumentNullException">Throws an exception if one of the required parameters are null.</exception>
-		public PutObject(Entity sender, DumpObject @object, Vector2 position): base(sender)
+		public PutObject(Character sender, DumpObject @object, Vector2 position): base(sender)
 		{
 			Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 			Object = @object ?? throw new ArgumentNullException(nameof(@object));

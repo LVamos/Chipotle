@@ -19,7 +19,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public SweeneysBell(Name name, Plane area, bool decorative, bool pickable) : base(name, area, "Sweeneyho zvonek", decorative, pickable) { }
+        public SweeneysBell(Name name, Rectangle area, bool decorative, bool pickable) : base(name, area, "Sweeneyho zvonek", decorative, pickable) { }
 
         /// <summary>
         /// Processes the UseObject message.

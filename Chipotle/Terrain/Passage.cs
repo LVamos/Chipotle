@@ -54,7 +54,7 @@ namespace Game.Terrain
             /// <param name="point">The point to be checked</param>
             /// <returns>True if the specified point lays in one of the localities connected by the passage</returns>
         public bool IsInRelatedLocality(Vector2 point)
-            => Localities.Any(l => l.Area.LaysOnPlane(point));
+            => Localities.Any(l => l.Area.Intersects(point));
 
         /// <summary>
         /// Checks if the passage is horizontal.
@@ -64,8 +64,8 @@ namespace Game.Terrain
         {
             // Tests if both upper left corner and lower left corner lay in different localities (faster than World.GetLocality)
             return
-            Localities.First().Area.LaysOnPlane(_area.UpperLeftCorner)
-            ^ Localities.First().Area.LaysOnPlane(_area.LowerLeftCorner);
+            Localities.First().Area.Intersects(_area.UpperLeftCorner)
+            ^ Localities.First().Area.Intersects(_area.LowerLeftCorner);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Game.Terrain
         /// <param name="name">Inner name of the passage</param>
         /// <param name="area">Coordinates of the are occupied by the passage</param>
         /// <param name="localities">Localities connected by the passage</param>
-        public Passage(Name name, Plane area, IEnumerable<string> localities) : base(name, area)
+        public Passage(Name name, Rectangle area, IEnumerable<string> localities) : base(name, area)
         {
             // Check if the passage occupies just one row or column.
             Assert(area.Height == 1 || area.Height == 2 || area.Width == 1 || area.Width == 2, "Passage must consist of two rows or two points.");
@@ -123,7 +123,7 @@ namespace Game.Terrain
             _localities = localities.ToArray<string>();
 
             // Validate passage location
-            Assert(area.GetIntersectingObjects().IsNullOrEmpty() && area.GetIntersectingPassages().IsNullOrEmpty(), "No objects or nested passages allowed");
+            Assert(area.GetObjects().IsNullOrEmpty() && area.GetPassages().IsNullOrEmpty(), "No objects or nested passages allowed");
 
             Appear();
         }
@@ -135,7 +135,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        public static SlidingDoor CreateSlidingDoor(Name name, Plane area, IEnumerable<string> localities)
+        public static SlidingDoor CreateSlidingDoor(Name name, Rectangle area, IEnumerable<string> localities)
 => new SlidingDoor(name, area, localities);
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        public static HallDoor CreateHallDoor(Name name, Plane area, IEnumerable<string> localities)
+        public static HallDoor CreateHallDoor(Name name, Rectangle area, IEnumerable<string> localities)
 => new HallDoor(name, area, localities);
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        public static MariottisDoor CreateMariottisDoor(Name name, Plane area, IEnumerable<string> localities)
+        public static MariottisDoor CreateMariottisDoor(Name name, Rectangle area, IEnumerable<string> localities)
 => new MariottisDoor(name, area, localities);
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Game.Terrain
         /// <param name="state">State of a door</param>
         /// <param name="type">Type of a door</param>
         /// <returns>A new instance of the passage</returns>
-        public static Passage CreatePassage(Name name, Plane area, IEnumerable<string> localities, bool isDoor, PassageState state, bool openable, Door.DoorType type)
+        public static Passage CreatePassage(Name name, Rectangle area, IEnumerable<string> localities, bool isDoor, PassageState state, bool openable, Door.DoorType type)
         {
             switch (name.Indexed)
             {
@@ -194,7 +194,7 @@ namespace Game.Terrain
         /// <summary>
         /// Displays the passage in the game world.
         /// </summary>
-        protected override void Appear()
+        protected void Appear()
         {
             Area.GetTiles().Foreach(t => t.tile.Register(World.GetLocality(t.position).DefaultTerrain));
             Localities.Foreach(l => l.Register(this));
@@ -203,11 +203,10 @@ namespace Game.Terrain
         /// <summary>
         /// Erases the passage from the game world.
         /// </summary>
-        protected override void Disappear()
+        protected void Disappear()
         {
             foreach(Locality l in Localities)
             l.Unregister(this);
-
         }
 
         /// <summary>
@@ -218,7 +217,7 @@ namespace Game.Terrain
         /// <param name="area">Coordinates of the are occupied by the door</param>
         /// <param name="localities">Localities connected by the door</param>
         /// <returns>A new instance of the door</returns>
-        private static Passage CreateVanillaCrunchGarageDoor(Name name, Plane area, IEnumerable<string> localities)
+        private static Passage CreateVanillaCrunchGarageDoor(Name name, Rectangle area, IEnumerable<string> localities)
             => new VanillaCrunchGarageDoor(name, area, localities);
 
 
@@ -248,7 +247,7 @@ namespace Game.Terrain
         /// </summary>
         protected void StartNavigation()
         {
-            _playersLocality = World.Player.Area.GetLocality();
+            _playersLocality = World.Player.Locality;
             _navigationSoundID = World.Sound.Play(_navigationSound, null, true, PositionType.Absolute, GetClosestPointToPlayer(), true);
             _navigating = true;
             UpdateNavigatingSound();
@@ -315,7 +314,7 @@ namespace Game.Terrain
         {
             switch (message)
             {
-                                    case EntityMoved em: OnEntityMoved(em); break;
+                                    case CharacterMoved em: OnEntityMoved(em); break;
                     case StartExitNavigation sen: OnStartExitNavigation(sen); break;
                     case StopExitNavigation stp: OnStopExitNavigation(stp); break;
                 default: base.HandleMessage(message); break;
@@ -326,7 +325,7 @@ namespace Game.Terrain
         /// Processes the EntityMoved message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected virtual void OnEntityMoved(EntityMoved message)
+        protected virtual void OnEntityMoved(CharacterMoved message)
         {
             if (!_navigating || message.Sender != World.Player)
                 return;
@@ -343,11 +342,11 @@ namespace Game.Terrain
             World.Sound.SetSourcePosition(_navigationSoundID, GetClosestPointToPlayer().AsOpenALVector());
 
             // Get side of the are that lays in the same locality as the player.
-            Plane side =
+            Rectangle side =
             (
             from d in DirectionExtension.BasicDirections
             let s = Area.GetSide(d)
-            where (s.GetLocality() == World.Player.Locality)
+            where (s.GetLocalities() == World.Player.Locality)
             select s
                 ).FirstOrDefault();
             if (side == null)
@@ -359,7 +358,7 @@ namespace Game.Terrain
                 return; // Sound isn't blocked, play it normally.
 
             // Detect potentional acoustic obstacles and set up attenuate parameters
-            ObstacleType obstacle = World.DetectAcousticObstacles(new Plane((Vector2)opposite));
+            ObstacleType obstacle = World.DetectAcousticObstacles(new Rectangle((Vector2)opposite));
             float volume;
             (float gain, float gainHF) lowpass;
             bool attenuate = obstacle == ObstacleType.Wall || obstacle == ObstacleType.Object;

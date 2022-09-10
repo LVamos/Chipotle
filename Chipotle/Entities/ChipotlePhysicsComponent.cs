@@ -67,11 +67,8 @@ namespace Game.Entities
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
 		protected override void Move(Vector2 target, bool silently = false)
 		{
-			Locality sourceLocality = _area?.GetLocality();
-			Locality targetLocality = World.GetLocality(target);
 			base.Move(target, silently);
-
-			RecordRegion(target);
+			RecordRegion(target); // Record visited region
 
 			// Watch important events
 			WatchPuddle(target); // Check if player walked in a puddle
@@ -86,7 +83,7 @@ namespace Game.Entities
 		{
 			// set initial position.&
 			if (Program.Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
-				StartPosition = (Vector2?)new Plane(File.ReadAllText("initpos.txt")).Center;
+				StartPosition = (Vector2?)new Rectangle(File.ReadAllText("initpos.txt")).Center;
 			else
 				StartPosition = (Vector2?)(new Vector2(1028, 1034));
 
@@ -182,8 +179,8 @@ namespace Game.Entities
 		/// Returns reference to the Tuttle NPC.
 		/// </summary>
 		[ProtoIgnore]
-		private Entity Tuttle
-			=> World.GetEntity("tuttle");
+		private Character Tuttle
+			=> World.GetCharacter("tuttle");
 
 		/// <summary>
 		/// Initializes the component and starts its message loop.
@@ -222,7 +219,6 @@ namespace Game.Entities
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
 				case SayObjects sob: OnSayObjects(sob); break;
-				case SayLocality sl: OnSayLocality(sl); break;
 				case StartWalk staw: OnStartWalk(staw); break;
 				case ChangeOrientation cor: OnChangeOrientation(cor); break;
 				case UseObject uo: OnUseObject(uo); break;
@@ -574,7 +570,7 @@ namespace Game.Entities
 		/// </summary>
 		/// <returns>True if Tuttle and Chipotle NPCs are in the same locality</returns>
 		private bool IsTuttleNearBy()
-=> _area.GetLocality().IsItHere(World.GetEntity("tuttle"));
+=> Owner.SameLocality(Tuttle);
 
 		/// <summary>
 		/// Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdoivá cesta w1)
@@ -641,7 +637,7 @@ namespace Game.Entities
 
 		protected int GetRegionIndex(Vector2 point)
 		{
-			Vector2 relative = Plane.GetRelativeCoordinates(point);
+			Vector2 relative = Rectangle.GetRelativeCoordinates(point);
 
 			int rX = (int)(relative.X / _motionTrackRadius + (relative.X % _motionTrackRadius > 0 ? 1 : 0));
 			int rY = (int)(relative.Y / _motionTrackRadius + (relative.Y % _motionTrackRadius > 0 ? 1 : 0));
@@ -715,9 +711,9 @@ namespace Game.Entities
 		protected void ReportObjects()
 		{
 			HashSet<string> nearObjects =
-				(from o in _locality.GetNearByObjects(_area.Center, _nearObjectRadius, false)
+				(from o in Locality.GetNearByObjects(_area.Center, _nearObjectRadius, false)
 				 select o.Name.Indexed)
-				 .ToHashSet<string>();
+				 .ToHashSet();
 
 			foreach (string o in nearObjects)
 			{
@@ -756,13 +752,6 @@ namespace Game.Entities
 			_carMovement = message;
 			Locality.TakeMessage(message, true);
 		}
-
-		/// <summary>
-		/// Processes the SayLocality message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		private void OnSayLocality(SayLocality message)
-=> Tolk.Speak(_area.GetLocality().Name.Friendly, true);
 
 		/// <summary>
 		/// Returns information about all navigable objects from current locality in the specified radius around the NPC.
@@ -884,11 +873,11 @@ namespace Game.Entities
 
 			// Find doors in radius of 2 meters that are in front or behind the player or door in which the player is standing.
 			Vector2 me = _area.Center;
-			IEnumerable<Passage> doors = World.GetNearestPassages(me, true, 2).Union(_area.GetIntersectingPassages().Where(p => p is Door));
+			IEnumerable<Passage> doors = World.GetNearestPassages(me, true, 2).Union(_area.GetPassages().Where(p => p is Door));
 
 			IEnumerable<Passage> usable =
 				from d in doors
-				let obstacle = World.DetectObstacles(new Plane(d.Area.GetClosestPoint(me), me))
+				let obstacle = World.DetectObstacles(new Rectangle(d.Area.GetClosestPoint(me), me))
 				where d.IsInFrontOrBehind(me)
 				select d;
 
@@ -999,8 +988,8 @@ namespace Game.Entities
 			if (_steppedIntoPuddle)
 				return;
 
-			Plane puddle = new Plane("937, 1081, 941, 1065");
-			if (puddle.LaysOnPlane(point))
+			Rectangle puddle = new Rectangle("937, 1081, 941, 1065");
+			if (puddle.Intersects(point))
 			{
 				_steppedIntoPuddle = true;
 				World.PlayCutscene(Owner, "cs2");

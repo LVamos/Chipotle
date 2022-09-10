@@ -9,6 +9,7 @@ using Game.Messaging.Events;
 using Game.Terrain;
 
 using ProtoBuf;
+using Luky;
 
 namespace Game.Entities
 {
@@ -50,7 +51,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            InnerMessage(new SetPosition(this, new Plane("1577, 1037")));
+            InnerMessage(new SetPosition(this, new Rectangle("1577, 1037")));
         }
 
         /// <summary>
@@ -61,8 +62,8 @@ namespace Game.Entities
         {
             switch (message)
             {
-                                    case LocalityEntered le: OnLocalityEntered(le); break;
-                case EntityMoved em: OnEntityMoved(em); break;
+                                    case CharacterCameToLocality le: OnLocalityEntered(le); break;
+                case CharacterMoved em: OnEntityMoved(em); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -83,11 +84,10 @@ namespace Game.Entities
         /// <returns>True if Tuttle NPC is in the same locality as Detective Chipotle NPC</returns>
         private bool IsChipotleAlone()
         {
-            Locality street = World.GetLocality("ulice h1");
-            Locality here = _area.GetLocality();
-            Entity tuttle = World.GetEntity("tuttle");
+            Character tuttle = World.GetCharacter("tuttle");
+            IEnumerable<Locality> nearPub = World.GetLocalitiesInArea("h");
 
-            return !here.IsItHere(tuttle) && !street.IsItHere(tuttle);
+            return !nearPub.Any(l => l.IsItHere(tuttle));
         }
 
         /// <summary>
@@ -101,19 +101,19 @@ namespace Game.Entities
         /// Processes the EntityMoved message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnEntityMoved(EntityMoved message)
+        private void OnEntityMoved(CharacterMoved message)
         {
             if (message.Sender != World.Player)
                 return;
 
-            Entity player = World.Player;
+            Character player = World.Player;
             Passage door = World.GetPassage("duvh1");
             bool tableUsed = World.GetObjectsByType("hospodský stůl").Any(o => o.Used);
 
             if (
                 _sayGoodbyeToChipotle
                 && tableUsed
-              && _area.GetLocality().IsItHere(player)
+              && player.SameLocality(Owner)
               && door.Area.GetDistanceFrom(player.Area.Center) == 1
                 )
             {
@@ -126,9 +126,9 @@ namespace Game.Entities
         /// Processes the LocalityEntered message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        private void OnLocalityEntered(LocalityEntered message)
+        private void OnLocalityEntered(CharacterCameToLocality message)
         {
-            if (message.Entity!= World.Player || message.Locality != Owner.Locality)
+            if (message.Character!= World.Player || message.Locality != Owner.Locality)
                 return;
 
             if (_velcomeChipotle)

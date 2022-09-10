@@ -15,7 +15,7 @@ namespace Game.Messaging
     /// Base class for all objects used in the game; receives, sends and processes messages.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    [ProtoInclude(100, typeof(EntityComponent))]
+    [ProtoInclude(100, typeof(CharacterComponent))]
     [ProtoInclude(101, typeof(MapElement))]
     public abstract class MessagingObject : DebugSO
     {

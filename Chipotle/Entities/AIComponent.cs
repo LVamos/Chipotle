@@ -18,12 +18,12 @@ namespace Game.Entities
     [ProtoInclude(103, typeof(MariottiAIComponent))]
     [ProtoInclude(104, typeof(SweeneyAIComponent))]
     [ProtoInclude(105, typeof(TuttleAIComponent))]
-    public class AIComponent : EntityComponent
+    public class AIComponent : CharacterComponent
     {
         /// <summary>
         /// Area occupied by the NPC
         /// </summary>
-        protected Plane _area;
+        protected Rectangle _area;
 
         /// <summary>
         /// Instance of a path finder

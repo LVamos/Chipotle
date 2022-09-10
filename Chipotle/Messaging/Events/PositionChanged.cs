@@ -8,9 +8,9 @@ namespace Game.Messaging.Events
     /// <summary>
     /// Indicates that an NPC changed its position.
     /// </summary>
-    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.</remarks>
+    /// <remarks>Sent from a descendant of the <see cref="Game.Entities.CharacterComponent"/> class.</remarks>
     [Serializable]
-    public class PositionChanged : EntityMoved
+    public class PositionChanged : CharacterMoved
     {
         /// <summary>
         /// Describes type of obstacle between the entity and the player if any.
@@ -32,7 +32,7 @@ namespace Game.Messaging.Events
         /// <param name="targetLocality">Target locality of the NPC</param>
         /// <param name="obstacle">Describes type of obstacle between the entity and the player if any</param>
         /// <param name="silently">Determines if the fott steps of the NPC should be audible</param>
-        public PositionChanged(object sender, Plane sourcePosition, Plane targetPosition, Locality sourceLocality, Locality targetLocality, ObstacleType obstacle = ObstacleType.None, bool silently = false) : base(sender, sourcePosition, targetPosition, sourceLocality, targetLocality)
+        public PositionChanged(object sender, Rectangle sourcePosition, Rectangle targetPosition, Locality sourceLocality, Locality targetLocality, ObstacleType obstacle = ObstacleType.None, bool silently = false) : base(sender, sourcePosition, targetPosition, sourceLocality, targetLocality)
         {
             Obstacle = obstacle;
             Silently = silently;

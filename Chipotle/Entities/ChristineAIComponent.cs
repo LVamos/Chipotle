@@ -23,7 +23,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            InnerMessage(new SetPosition(this, new Plane("1792, 1127"), true));
+            InnerMessage(new SetPosition(this, new Rectangle("1792, 1127"), true));
         }
 
         /// <summary>
@@ -57,6 +57,6 @@ namespace Game.Entities
         /// Moves the NPC to the Christine's bed room (ložnice p1) locality.
         /// </summary>
         private void JumpToBedroom()
-            => InnerMessage(new SetPosition(this, new Plane("1744, 1123"), true));
+            => InnerMessage(new SetPosition(this, new Rectangle("1744, 1123"), true));
     }
 }

@@ -6,8 +6,8 @@ namespace Game.Messaging.Commands
     /// Hides an NPC.
     /// </summary>
     /// <remarks>
-    /// Applies to the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the
-    /// NPC from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
+    /// Applies to the <see cref="Game.Entities.Character"/> class. Can be sent only from inside the
+    /// NPC from a descendant of the <see cref="Game.Entities.CharacterComponent"/> class.
     /// </remarks>
     [Serializable]
     public class Hide : GameMessage

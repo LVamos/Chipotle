@@ -10,19 +10,19 @@ namespace Game.Messaging.Commands
 		/// <summary>
 		/// A component of an entity that sent the message.
 		/// </summary>
-		public new EntityComponent Sender;
+		public new CharacterComponent Sender;
 		
 		/// <summary>
 		/// An entity that tried to close the door.
 		/// </summary>
-		public Entity Entity;
+		public Character Entity;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">A component of an entity that sent the message.</param>
 		/// <param name="entity">An entity that tried to close the door.</param>
-		public ReactToPinchingInDoor(EntityComponent sender, Entity entity) : base(sender)
+		public ReactToPinchingInDoor(CharacterComponent sender, Character entity) : base(sender)
 		{
 			Sender = sender;
 			Entity = entity;

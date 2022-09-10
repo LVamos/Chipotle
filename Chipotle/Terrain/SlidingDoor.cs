@@ -24,11 +24,11 @@ namespace Game.Terrain
         /// Processes the EntityMoved message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnEntityMoved(EntityMoved message)
+        protected override void OnEntityMoved(CharacterMoved message)
         {
             base.OnEntityMoved(message);
 
-            Entity entity = message.Sender as Entity;
+            Character entity = message.Sender as Character;
             bool opposite = IsInFrontOrBehind(entity.Area.Center);
             bool near = _area.GetDistanceFrom(entity.Area.Center)<= _minDistance;
 
@@ -48,7 +48,7 @@ namespace Game.Terrain
         /// <param name="name">Inner name of the door</param>
         /// <param name="area">Coordinates of the area the door occupies</param>
         /// <param name="localities">The localities connected by the door</param>
-        public SlidingDoor(Name name, Plane area, IEnumerable<string> localities) : base(name, PassageState.Closed, area, localities)
+        public SlidingDoor(Name name, Rectangle area, IEnumerable<string> localities) : base(name, PassageState.Closed, area, localities)
         {
             _openable = false;
             _openingSound = _closingSound = "SlidingDoor";
@@ -67,7 +67,7 @@ namespace Game.Terrain
         {
             switch (message)
             {
-                case EntityMoved em: OnEntityMoved(em); break;
+                case CharacterMoved em: OnEntityMoved(em); break;
                 default: base.HandleMessage(message); break;
             }
         }

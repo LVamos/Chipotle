@@ -55,7 +55,7 @@ namespace Game.Terrain
         /// Specifies if the terrain should be accessible to NPCs and game objects.
         /// </param>
         /// <param name="locality">A locality to be registered</param>
-        public void DrawTerrain(Plane area, TerrainType terrain, bool permeable)
+        public void DrawTerrain(Rectangle area, TerrainType terrain, bool permeable)
         {
             foreach (Vector2 point in area.GetPoints())
             {
@@ -75,8 +75,8 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="xPanel">A terrain panel defined in an XML node</param>
         /// <param name="area">A loclaity the terrain panel intersects</param>
-        public void DrawTerrain(XElement xPanel, Plane area)
-                    => DrawTerrain(new Plane(xPanel.Attribute("coordinates").Value).ToAbsolute(area), xPanel.Attribute("terrain").Value.ToTerrainType(), xPanel.Attribute("canBeOccupied").Value.ToBool());
+        public void DrawTerrain(XElement xPanel, Rectangle area)
+                    => DrawTerrain(new Rectangle(xPanel.Attribute("coordinates").Value).ToAbsolute(area), xPanel.Attribute("terrain").Value.ToTerrainType(), xPanel.Attribute("canBeOccupied").Value.ToBool());
 
         /// <summary>
         /// Returns an adjacent tile in the specified direction.

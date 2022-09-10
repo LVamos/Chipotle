@@ -83,7 +83,7 @@ namespace Game.Entities
 		/// Reference to the Detective Chipotle NPC
 		/// </summary>
 		[ProtoIgnore]
-		private Entity _player => World.Player;
+		private Character _player => World.Player;
 
 		/// <summary>
 		/// Specifies if Tuttle should start approaching to player when a new path is found after
@@ -149,7 +149,7 @@ namespace Game.Entities
 					OnStopFollowing(stf);
 					break;
 
-				case EntityMoved em:
+				case CharacterMoved em:
 					OnEntityMoved(em);
 					break;
 
@@ -165,7 +165,7 @@ namespace Game.Entities
 		/// <param name="m"><The message to be processed/param>
 		private void OnTryGoTo(TryGoTo m)
 		{
-			if (!(m.Sender is EntityComponent))
+			if (!(m.Sender is CharacterComponent))
 				throw new InvalidOperationException("Message of type TryGoTo was sent to inappropriate object.");
 
 			foreach (Vector2 point in m.Points)
@@ -239,7 +239,7 @@ namespace Game.Entities
 		/// </summary>
 		/// <returns>Coordinates of tthe target tile</returns>
 		private Vector2? GetSpotByPlayer()
-							=> (from p in _player.Area.GetWalkableSurroudningPoints(_minDistanceFromPlayer, _maxDistanceFromPlayer)
+							=> (from p in _player.Area.GetWalkableSurroundingPoints(_minDistanceFromPlayer, _maxDistanceFromPlayer)
 								let distance = World.GetDistance(_area.Center, p)
 								orderby distance
 								select p)
@@ -287,7 +287,7 @@ namespace Game.Entities
 			float distance = GetDistanceFromPlayer();
 			if (
 				(_state == TuttleState.WatchingPlayer && _area != null)
-&& (distance > _maxDistanceFromPlayer || (distance <= _maxDistanceFromPlayer && !_player.IsInSameLocality(Owner)))
+&& (distance > _maxDistanceFromPlayer || (distance <= _maxDistanceFromPlayer && !_player.SameLocality(Owner)))
 				)
 				GoToPlayer();
 			else if (_state == TuttleState.GoingToPlayer && distance <= _targetDistance)
@@ -298,7 +298,7 @@ namespace Game.Entities
 		/// Processes the EntityMoved message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnEntityMoved(EntityMoved message)
+		private void OnEntityMoved(CharacterMoved message)
 		{
 			// Test if the component has been initialized.
 			if (_area == null || _state != TuttleState.WatchingPlayer || message.Sender != _player)
@@ -309,7 +309,7 @@ namespace Game.Entities
 			{
 				// Simply jump nearer.
 				Vector2? nearerSpot =
-					(from p in _player.Area.GetWalkableSurroudningPoints(_maxDistanceFromPlayer, _maxPathFindingDistance)
+					(from p in _player.Area.GetWalkableSurroundingPoints(_maxDistanceFromPlayer, _maxPathFindingDistance)
 					 let distance = World.GetDistance(_area.Center, p)
 					 orderby distance
 					 select p)
@@ -430,7 +430,7 @@ namespace Game.Entities
 			if (_state == TuttleState.GoingToPlayer)
 			{
 				float distance = GetDistanceFromPlayer();
-				if (distance <= _targetDistance && _player.IsInSameLocality(Owner))
+				if (distance <= _targetDistance && _player.SameLocality(Owner))
 					StopWalk();
 			}
 

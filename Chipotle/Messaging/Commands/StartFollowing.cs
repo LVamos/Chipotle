@@ -6,7 +6,7 @@ namespace Game.Messaging.Commands
     /// Tells the Tuttle NPC to follow the Detective Chipotle NPC.
     /// </summary>
     /// <remarks>
-    /// Can be sent only from inside the NPC from <see cref="Game.Entities.EntityComponent"/> class.
+    /// Can be sent only from inside the NPC from <see cref="Game.Entities.CharacterComponent"/> class.
     /// </remarks>
     [Serializable]
     public class StartFollowing : GameMessage

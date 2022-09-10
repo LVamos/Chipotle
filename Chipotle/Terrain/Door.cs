@@ -102,7 +102,7 @@ namespace Game.Terrain
 		/// <param name="area">Location of the door</param>
 		/// <param name="localities">Two localities connected by the door</param>
 		/// <param name="openable">Specifies whether the door can be opened by an NPC.</param>
-		public Door(Name name, PassageState state, Plane area, IEnumerable<string> localities, bool openable = true, DoorType type = DoorType.Door) : base(name, area, localities)
+		public Door(Name name, PassageState state, Rectangle area, IEnumerable<string> localities, bool openable = true, DoorType type = DoorType.Door) : base(name, area, localities)
 		{
 			State = state;
 			_openable = openable;
@@ -143,7 +143,7 @@ namespace Game.Terrain
 				State = PassageState.Closed;
 
 				AnnounceManipulation();
-				Play(_closingSound, sender as Entity, point);
+				Play(_closingSound, sender as Character, point);
 			}
 		}
 
@@ -161,14 +161,14 @@ namespace Game.Terrain
 		/// <param name="sound">Name of the sound to be played</param>
 		/// <param name="position"></param>
 		/// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
-		protected void Play(string sound, Entity entity, Vector2 point)
+		protected void Play(string sound, Character entity, Vector2 point)
 		{
 			// Set attenuation parameters
 			ObstacleType obstacle = entity != World.Player ? World.DetectAcousticObstacles(entity.Area) : ObstacleType.None;
 
 			if (obstacle == ObstacleType.Far)
 			{
-				Locality l = World.Player.Locality;
+				Locality l = World.Player.	Locality;
 				if (Localities.First().IsBehindDoor(l) || Localities.Last().IsBehindDoor(l)) // Can be heart from the adjecting locality
 					obstacle = ObstacleType.Wall;
 				else return; // Too far and inaudible
@@ -199,9 +199,9 @@ namespace Game.Terrain
 		/// <returns>Enumeration of objects and entities</returns>
 		protected IEnumerable<GameObject> GetObstacles()
 		{
-			Plane surroundings = Area; // Just copied
+			Rectangle surroundings = Area; // Just copied
 			surroundings.Extend();
-			return surroundings.GetEntities().Union(_area.GetIntersectingObjects());
+			return surroundings.GetEntities().Union(_area.GetObjects());
 		}
 
 		/// <summary>
@@ -231,7 +231,7 @@ namespace Game.Terrain
 			}
 
 			// The door is open. Prevent closing it if player is standing in it.
-			if (_area.LaysOnPlane(World.Player.Area.Center))
+			if (_area.Intersects(World.Player.Area.Center))
 			{
 				if (_manipulationTimer >= _manipulationTimeLimit)
 				{
@@ -267,7 +267,7 @@ namespace Game.Terrain
 
 			foreach (GameObject o in obstacles)
 			{
-				PinchedInDoor pMessage = new PinchedInDoor(this, (Entity)message.Sender);
+				PinchedInDoor pMessage = new PinchedInDoor(this, (Character)message.Sender);
 				o.TakeMessage(pMessage);
 			}
 		}
@@ -283,7 +283,7 @@ namespace Game.Terrain
 			State = PassageState.Open;
 
 			AnnounceManipulation();
-			Play(_openingSound, sender as Entity, point);
+			Play(_openingSound, sender as Character, point);
 		}
 
 		/// <summary>

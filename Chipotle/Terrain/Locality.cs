@@ -62,7 +62,7 @@ namespace Game.Terrain
 		/// Handles the EntityMoved message.
 		/// </summary>
 		/// <param name="message">The mesage to be handled</param>
-		private void OnEntityMoved(EntityMoved message)
+		private void OnCharacterMoved(CharacterMoved message)
 		{
 			if (message.Sender == World.Player)
 				UpdatePassageLoops();
@@ -81,7 +81,7 @@ namespace Game.Terrain
 				Vector2 player = World.Player.Area.Center;
 
 				// If the palyer is standing right in the passage locate the sound right on his position.
-				if (p.Area.LaysOnPlane(player))
+				if (p.Area.Intersects(player))
 				{
 					Locality other = p.AnotherLocality(World.Player.Locality);
 					World.Sound.SetSourcePosition(_passageLoops[p], other.Area.GetClosestPoint(player).AsOpenALVector());
@@ -106,7 +106,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInNeighbourLocality(Entity e)
+		public Locality IsInNeighbourLocality(Character e)
 			=> Neighbours.FirstOrDefault(l => l.IsItHere(e));
 
 		/// <summary>
@@ -122,7 +122,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInAccessibleLocality(Entity e)
+		public Locality IsInAccessibleLocality(Character e)
 			=> GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
 
 		/// <summary>
@@ -170,7 +170,7 @@ namespace Game.Terrain
 		/// </summary>
 		private void FindNeighbours()
 		{
-			Plane a = Area;
+			Rectangle a = Area;
 			a.Extend();
 			_neighbours =
 				(
@@ -209,7 +209,7 @@ namespace Game.Terrain
 		{
 			return
 				from e in Passages
-				where (!e.Area.LaysOnPlane(point) && World.GetDistance(e.Area.GetClosestPoint(point), point) <= radius)
+				where (!e.Area.Intersects(point) && World.GetDistance(e.Area.GetClosestPoint(point), point) <= radius)
 				orderby e.Area.GetDistanceFrom(point)
 				select e;
 		}
@@ -244,7 +244,7 @@ namespace Game.Terrain
 			get
 			{
 				if (_passages == null)
-					_passages = new List<string>();
+					_passages = new HashSet<string>();
 
 				return _passages.Select(p => World.GetPassage(p)).Where(p => p != null != null);
 			}
@@ -278,17 +278,17 @@ namespace Game.Terrain
 		/// <summary>
 		/// List of NPCs present in this locality.
 		/// </summary>
-		private List<string> _entities;
+		private HashSet<string> _characters = new HashSet<string>();
 
 		/// <summary>
 		/// List of objects present in this locality.
 		/// </summary>
-		private List<string> _objects;
+		private HashSet<string> _objects = new HashSet<string>();
 
 		/// <summary>
 		/// List of exits from this locality
 		/// </summary>
-		private List<string> _passages;
+		private HashSet<string> _passages = new HashSet<string>();
 
 		/// <summary>
 		/// Constructor
@@ -302,15 +302,12 @@ namespace Game.Terrain
 		/// <param name="area">Coordinates of the area occupied by the locality</param>
 		/// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
 		/// <param name="backgroundInfo">A background sound played in loop</param>
-		public Locality(Name name, string to, LocalityType type, int ceiling, Plane area, TerrainType defaultTerrain, string loop, float volume) : base(name, area)
+		public Locality(Name name, string to, LocalityType type, int ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume) : base(name, area)
 		{
 			To = to;
 			Type = type;
 			_ceiling = Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
 			_ceiling = type == LocalityType.Outdoor ? 0 : ceiling;
-			_passages = new List<string>();
-			_entities = new List<string>();
-			_objects = new List<string>();
 			DefaultTerrain = defaultTerrain;
 			Area.MinimumHeight = MinimumHeight;
 			Area.MinimumWidth = MinimumWidth;
@@ -331,16 +328,7 @@ namespace Game.Terrain
 		/// List of NPCs present in this locality.
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Entity> Entities
-		{
-			get
-			{
-				if (_entities == null)
-					_entities = new List<string>();
-
-				return _entities.Select(e => World.GetEntity(e)).Where(e => e != null);
-			}
-		}
+		public IEnumerable<Character> Characters => _characters.Select(c => World.GetCharacter(c));
 
 		/// <summary>
 		/// List of objects present in this locality.
@@ -351,7 +339,7 @@ namespace Game.Terrain
 			get
 			{
 				if (_objects == null)
-					_objects = new List<string>();
+					_objects = new HashSet<string>();
 
 				return _objects.Select(o => World.GetObject(o)).Where(o => o != null);
 			}
@@ -377,8 +365,8 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
 		/// <returns>True if the entity is here</returns>
-		public bool IsItHere(Entity e)
-			=> e.Locality == this;
+		public bool IsItHere(Character e)
+			=> Characters.Contains(e);
 
 		/// <summary>
 		/// Checks if a passage lays in the locality.
@@ -434,21 +422,15 @@ namespace Game.Terrain
 		/// Adds a game object to list of present objects.
 		/// </summary>
 		/// <param name="o">The object ot be added</param>
-		public void Register(DumpObject o)
-		{
-			Assert(!IsItHere(o), "Object already registered.");
-
-			_objects.Add(o.Name.Indexed);
-		}
+		private void Register(DumpObject o) => _objects.Add(o.Name.Indexed);
 
 		/// <summary>
 		/// Adds an entity to locality.
 		/// </summary>
-		/// <param name="e">The entity to be added</param>
-		public void Register(Entity e)
+		/// <param name="c">The entity to be added</param>
+		public void Register(Character c)
 		{
-			Assert(!_entities.Contains(e.Name.Indexed), "Entity already registered.");
-			_entities.Add(e.Name.Indexed);
+			_characters.Add(c.Name.Indexed);
 		}
 
 		/// <summary>
@@ -468,15 +450,29 @@ namespace Game.Terrain
 		{
 			switch (message)
 			{
+				case ObjectDisappearedFromLocality m: OnObjectDisappearedFromLocality(m); break;
+				case ObjectAppearedInLocality m: OnObjectAppearedInLocality(m); break;
 				case ChipotlesCarMoved ccmv: OnChipotlesCarMoved(ccmv); break;
-				case EntityMoved em: OnEntityMoved(em); break;
+				case CharacterMoved em: OnCharacterMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
 				case GameReloaded gr: OnGameReloaded(); break;
-				case LocalityLeft ll: OnLocalityLeft(ll); break;
-				case LocalityEntered le: OnLocalityEntered(le); break;
+				case CharacterLeftLocality ll: OnCharacterLeftLocality(ll); break;
+				case CharacterCameToLocality le: OnCharacterCameToLocality(le); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
+
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		private void OnObjectDisappearedFromLocality(ObjectDisappearedFromLocality m) => Unregister(m.Object);
+
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		private void OnObjectAppearedInLocality(ObjectAppearedInLocality m) => Register(m.Object);
 
 		/// <summary>
 		/// Handles the ChipotlesCarMoved message.
@@ -484,7 +480,7 @@ namespace Game.Terrain
 		/// <param name="message"The message to be handled></param>
 		private void OnChipotlesCarMoved(ChipotlesCarMoved message)
 		{
-			if (message.Target.GetLocality() != this)
+			if (message.Target.GetLocalities() != this)
 				StopBackground(true);
 		}
 
@@ -506,15 +502,15 @@ namespace Game.Terrain
 		/// Immediately removes a game object from list of present objects.
 		/// </summary>
 		/// <param name="o"></param>
-		public void Unregister(GameObject o)
+		private void Unregister(GameObject o)
 			=> _objects.Remove(o.Name.Indexed);
 
 		/// <summary>
 		/// Immediately removes an entity from list of present entities.
 		/// </summary>
 		/// <param name="e">The entity to be removed</param>
-		public void Unregister(Entity e)
-			=> _entities.Remove(e.Name.Indexed);
+		public void Unregister(Character e)
+			=> _characters.Remove(e.Name.Indexed);
 
 		/// <summary>
 		/// Removes a passage from the locality.
@@ -529,36 +525,36 @@ namespace Game.Terrain
 		/// <summary>
 		/// Displays the locality in game world.
 		/// </summary>
-		protected override void Appear()
+		protected void Appear()
 		{
 			foreach (Vector2 point in Area.GetPoints())
-				World.Map[point] = World.Map[point] == null ? new Tile(DefaultTerrain) : throw new InvalidOperationException("Tile must be empty");
+			{
+				if (World.Map[point] == null)
+					World.Map[point] = new Tile(DefaultTerrain);
+				else throw new InvalidOperationException("Tile must be empty");
+			}
 		}
 
 		/// <summary>
 		/// Erases the locality from game world.
 		/// </summary>
-		protected override void Disappear()
+		protected void Disappear()
 		{
-			if (!Objects.IsNullOrEmpty())
-			{
-				foreach (DumpObject o in Objects.ToArray<DumpObject>())
-					World.Remove(o);
-			}
+			// Delete objects.
+			foreach (DumpObject o in Objects)
+				World.Remove(o);
 
-			if (!Passages.IsNullOrEmpty())
-			{
-				foreach (Passage p in Passages.ToArray<Passage>())
-					World.Remove(p);
-			}
+			// Delete passages.
+			foreach (Passage p in Passages)
+				World.Remove(p);
 
-			if (!Entities.IsNullOrEmpty())
-			{
-				foreach (Entity e in Entities.ToArray<Entity>())
-					World.Remove(e);
-			}
+			// Delete character.
+			foreach (Character e in Characters)
+				World.Remove(e);
 
-			Area.GetPoints().Foreach(p => World.Map[p] = null);
+			// Delete locality from the map.
+			foreach (Vector2 p in _area.GetPoints())
+				World.Map[p] = null;
 		}
 
 		/// <summary>
@@ -579,7 +575,7 @@ namespace Game.Terrain
 
 		private void MessageEntities(GameMessage message)
 		{
-			foreach (Entity e in Entities)
+			foreach (Character e in Characters)
 			{
 				if (e != message.Sender)
 					e.TakeMessage(message);
@@ -600,12 +596,12 @@ namespace Game.Terrain
 		/// Handles the LocalityEntered message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		private void OnLocalityEntered(LocalityEntered message)
+		private void OnCharacterCameToLocality(CharacterCameToLocality message)
 		{
 			if (message.Locality == this)
-				Register(message.Sender as Entity);
+				Register(message.Character);
 
-			if (message.Entity == World.Player)
+			if (message.Character == World.Player)
 			{
 				if (message.Locality == this)
 					_playerInHere = true;
@@ -631,12 +627,12 @@ namespace Game.Terrain
 		/// Handles the LocalityLeft message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		private void OnLocalityLeft(LocalityLeft message)
+		private void OnCharacterLeftLocality(CharacterLeftLocality message)
 		{
 			if (message.Locality == this)
-				Unregister(message.Sender as Entity);
+				Unregister(message.Sender as Character);
 
-			if (message.Entity == World.Player)
+			if (message.Character == World.Player)
 			{
 				if (message.Locality == this)
 					_playerInHere = false;
@@ -709,7 +705,7 @@ namespace Game.Terrain
 					Vector2 player = World.Player.Area.Center;
 
 					// Player stands in the passage
-					if (p.Area.LaysOnPlane(player))
+					if (p.Area.Intersects(player))
 					{
 						Locality other = p.AnotherLocality(World.Player.Locality);
 						position = other.Area.GetClosestPoint(player);

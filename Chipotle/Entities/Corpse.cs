@@ -21,7 +21,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name for the object</param>
         /// <param name="area">The coordinates of the area that the object occupies</param>
-        public Corpse(Name name, Plane area, bool decorative, bool pickable) : base(name, area, "mrtvola", decorative, pickable, null, null, null, "cs5", true) { }
+        public Corpse(Name name, Rectangle area, bool decorative, bool pickable) : base(name, area, "mrtvola", decorative, pickable, null, null, null, "cs5", true) { }
 
         /// <summary>
         /// Returns a reference to the Chipotle's car object.

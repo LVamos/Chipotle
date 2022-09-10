@@ -10,8 +10,8 @@ namespace Game.Messaging.Events
     /// Indicates that an NPC collided with a door object.
     /// </summary>
     /// <remarks>
-    /// Sent from the <see cref="Game.Entities.Entity"/> class. Can be sent only from inside the NPC
-    /// from a descendant of the <see cref="Game.Entities.EntityComponent"/> class.
+    /// Sent from the <see cref="Game.Entities.Character"/> class. Can be sent only from inside the NPC
+    /// from a descendant of the <see cref="Game.Entities.CharacterComponent"/> class.
     /// </remarks>
     [Serializable]
     public class DoorHit : GameMessage

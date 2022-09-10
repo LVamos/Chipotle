@@ -14,7 +14,7 @@ namespace Game.Entities
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     [ProtoInclude(100, typeof(ChipotleInputComponent))]
-    public abstract class InputComponent : EntityComponent
+    public abstract class InputComponent : CharacterComponent
     {
         /// <summary>
         /// Constructor

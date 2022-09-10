@@ -21,7 +21,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name for the object</param>
         /// <param name="area">The coordinates of the area that the object occupies</param>
-        public CarsonsGrill(Name name, Plane area, bool decorative, bool pickable) : base(name, area, "gril u Carsona", decorative, pickable, null, null, "snd17", volume: .05f)
+        public CarsonsGrill(Name name, Rectangle area, bool decorative, bool pickable) : base(name, area, "gril u Carsona", decorative, pickable, null, null, "snd17", volume: .05f)
         { }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Game.Entities
         {
             switch (message)
             {
-                    case LocalityLeft ll: OnLocalityLeft(ll); break;
+                    case CharacterLeftLocality ll: OnLocalityLeft(ll); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -41,9 +41,9 @@ namespace Game.Entities
         /// Handles the LocalityLeft message.
         /// </summary>
         /// <param name="message">The message to be handled</param>
-        private void OnLocalityLeft(LocalityLeft message)
+        private void OnLocalityLeft(CharacterLeftLocality message)
         {
-            if (message.Sender == World.GetEntity("carson"))
+            if (message.Sender == World.GetCharacter("carson"))
                 StopLoop();
         }
     }
