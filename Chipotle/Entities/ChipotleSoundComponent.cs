@@ -27,7 +27,7 @@ namespace Game.Entities
         /// Processes the SayLocality message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-		protected void OnSayLocality(SayLocality message)
+		protected void OnSayLocalityName(SayLocalityName message)
 => Tolk.Speak(Owner.Locality.Name.Friendly, true);
 
 
@@ -92,7 +92,8 @@ namespace Game.Entities
         {
             switch (message)
             {
-				case SayLocality m: OnSayLocality(m); break;
+                case SayLocalityDescription m: OnSayLocalityDescription(m); break;
+				case SayLocalityName m: OnSayLocalityName(m); break;
 				case PlaceObjectResult m: OnPutObjectResult(m); break;
                 case EmptyInventory m: OnEmptyInventory(m); break;
                 case PickUpObjectResult m: OnPickUpObjectResult(m); break;
@@ -111,6 +112,15 @@ namespace Game.Entities
                 case TerrainCollided tcl:  OnTerrainCollided(tcl); break;
                 default: base.HandleMessage(message); break;
             }
+        }
+
+        /// <summary>
+        /// Handles a message.
+        /// </summary>
+        /// <param name="m">The message to be handled</param>
+        private void OnSayLocalityDescription(SayLocalityDescription m)
+        {
+            Tolk.Speak(Owner.Locality.Description);
         }
 
         /// <summary>

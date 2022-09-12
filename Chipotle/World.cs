@@ -940,8 +940,9 @@ namespace Game
 			{
 				(string sound, float volume) lBackgroundInfo;
 				_localityLoops.TryGetValue(A(l, "indexedname"), out lBackgroundInfo);
-				Locality locality = new Locality(
+				var locality = new Locality(
 		   new Name(A(l, "indexedname"), A(l, "friendlyname")),
+		   A(l, "description"),
 		   A(l, "to"),
 		   A(l, "type") == "indoor" ? Locality.LocalityType.Indoor : Locality.LocalityType.Outdoor,
 		   int.Parse(A(l, "height")),

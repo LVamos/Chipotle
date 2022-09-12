@@ -109,6 +109,7 @@
     <Compile Include="Messaging\Commands\ReactToCollision.cs" />
     <Compile Include="Messaging\Commands\ReportPosition.cs" />
     <Compile Include="Messaging\Commands\RunInventoryMenu.cs" />
+    <Compile Include="Messaging\Commands\SayLocalityDescription.cs" />
     <Compile Include="Messaging\Commands\TryGoTo.cs" />
     <Compile Include="Messaging\Events\EmptyInventory.cs" />
     <Compile Include="Messaging\Events\ObjectAppearedInLocality.cs" />
@@ -180,7 +181,7 @@
     <Compile Include="Messaging\Events\CharacterLeftLocality.cs" />
     <Compile Include="Messaging\Events\CharacterCameToLocality.cs" />
     <Compile Include="Messaging\Commands\SayObjects.cs" />
-    <Compile Include="Messaging\Commands\SayLocality.cs" />
+    <Compile Include="Messaging\Commands\SayLocalityName.cs" />
     <Compile Include="Messaging\Events\PositionChanged.cs" />
     <Compile Include="Messaging\Events\TerrainCollided.cs" />
     <Compile Include="Messaging\Commands\UseObject.cs" />

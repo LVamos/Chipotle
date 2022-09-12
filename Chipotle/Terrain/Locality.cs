@@ -251,6 +251,11 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
+		/// Text description of the locality
+		/// </summary>
+		public string Description { get; private set; }
+
+		/// <summary>
 		/// Name of the locality in a shape that expresses a direction to the locality.
 		/// </summary>
 		public readonly string To;
@@ -302,8 +307,9 @@ namespace Game.Terrain
 		/// <param name="area">Coordinates of the area occupied by the locality</param>
 		/// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
 		/// <param name="backgroundInfo">A background sound played in loop</param>
-		public Locality(Name name, string to, LocalityType type, int ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume) : base(name, area)
+		public Locality(Name name, string description, string to, LocalityType type, int ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume) : base(name, area)
 		{
+			Description = description;
 			To = to;
 			Type = type;
 			_ceiling = Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;

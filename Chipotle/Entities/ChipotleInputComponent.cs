@@ -70,6 +70,7 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
 
                 // Other commands
+                [new KeyShortcut(Keys.K)] = SayLocalityDescription,
                 [new KeyShortcut(Keys.I)] = RunInventoryMenu,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Return)] = PickUpObject,
 				[new KeyShortcut(Keys.Tab)] = GameMenu,
@@ -86,7 +87,7 @@ namespace Game.Entities
 
                 // Other shortcuts
                 [new KeyShortcut(Keys.O)] = SayObjects,
-                [new KeyShortcut(Keys.L)] = SayLocality,
+                [new KeyShortcut(Keys.L)] = SayLocalityName,
                 [new KeyShortcut(Keys.Up)] = GoForward,
                 [new KeyShortcut(Keys.Down)] = GoBack,
                 [new KeyShortcut(Keys.Left)] = TurnLeft,
@@ -99,6 +100,8 @@ namespace Game.Entities
             );
 
         }
+
+        private void SayLocalityDescription() => InnerMessage(new SayLocalityDescription(this));
 
         /// <summary>
         /// Performs the command to pick up an object off the ground.
@@ -138,6 +141,7 @@ namespace Game.Entities
             // Prepare the menu
             (string name, Action command)[] commands =
             {
+                ("Kde jsem", SayLocalityDescription),
                                 ("inventář: I", RunInventoryMenu),
                                 ("použít objekt nebo dveře: entr", Interact),
                                 ("Vzít objekt: šift entr", PickUpObject),
@@ -154,7 +158,7 @@ namespace Game.Entities
                 ("navigovat k objektu: šift O", ListObjects),
                 ("východy: Vé", SayExits),
                                 ("navigovat k východu: šift vé", ListExits),
-                                                ("kde jsem: El", SayLocality),
+                                                ("kde jsem: El", SayLocalityName),
                                                                 ("Byl jsem tu: En", SayVisitedRegion),
                                                                                 ("Rozměry lokace: Er", SayLocalitySize),
                                                                                                 ("kompas: Es", SayOrientation),
@@ -390,8 +394,8 @@ namespace Game.Entities
         /// Announces the public name of the locality where the NPC is currently located using a
         /// screen reader or a voice synthesizer.
         /// </summary>
-        private void SayLocality()
-            => InnerMessage(new SayLocality(this));
+        private void SayLocalityName()
+            => InnerMessage(new SayLocalityName(this));
 
         /// <summary>
         /// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
