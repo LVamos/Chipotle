@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Game.Messaging.Events
 {
-	public class PutObjectResult: GameMessage
+	public class PlaceObjectResult: GameMessage
 	{
 		/// <summary>
 		/// Result of placing an object to the ground
@@ -26,7 +26,7 @@ namespace Game.Messaging.Events
 		/// <param name="sender">Source of the message</param>
 		/// <param name="result">Result of the operation</param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public PutObjectResult(DumpObject sender, bool success = false): base(sender)
+		public PlaceObjectResult(DumpObject sender, bool success = false): base(sender)
 		{
 			Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 			Success = success;

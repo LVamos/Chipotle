@@ -12,7 +12,7 @@ namespace Game.Messaging.Commands
 	/// <summary>
 	/// Represents a command that causes that NPC puts an object on the ground.
 	/// </summary>
-	public class PutObject: GameMessage
+	public class PlaceObject: GameMessage
 	{
 		/// <summary>
 		/// Source of the message.
@@ -36,7 +36,7 @@ namespace Game.Messaging.Commands
 		/// <param name="object">The object that should be put on the ground</param>
 		/// <param name="position">A point near which the object should be placed</param>
 		/// <exception cref="ArgumentNullException">Throws an exception if one of the required parameters are null.</exception>
-		public PutObject(Character sender, DumpObject @object, Vector2 position): base(sender)
+		public PlaceObject(Character sender, DumpObject @object, Vector2 position): base(sender)
 		{
 			Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 			Object = @object ?? throw new ArgumentNullException(nameof(@object));

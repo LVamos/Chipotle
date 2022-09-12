@@ -54,7 +54,7 @@ namespace Game.UI
         {
             MenuWindow menu = new MenuWindow(items, introText, wrappingAllowed, introSound, outroSound, selectionSound, wrapDownSound, wrapUpSound, upperEdgeSound, lowerEdgeSound);
             OpenModalWindow(menu);
-            return menu.Cursor;
+            return menu.Index;
         }
 
         /// <summary>

@@ -35,7 +35,11 @@ namespace Game.Terrain
         /// Checks if all the plane is walkable.
         /// </summary>
         public bool Walkable()
-            => GetPoints().All(p => World.IsWalkable(p));
+        {
+            return
+                GetPoints()
+                .All(p => World.IsWalkable(p));
+        }
 
         /// <summary>
         /// Checks if the plane is a line.

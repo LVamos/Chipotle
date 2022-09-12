@@ -93,7 +93,7 @@ namespace Game.Entities
             switch (message)
             {
 				case SayLocality m: OnSayLocality(m); break;
-				case PutObjectResult m: OnPutObjectResult(m); break;
+				case PlaceObjectResult m: OnPutObjectResult(m); break;
                 case EmptyInventory m: OnEmptyInventory(m); break;
                 case PickUpObjectResult m: OnPickUpObjectResult(m); break;
                 case SayCoordinates sc:  OnSayCoordinates(sc); break;
@@ -117,10 +117,10 @@ namespace Game.Entities
         /// Handles a message.
         /// </summary>
         /// <param name="m">Source of the message</param>
-        private void OnPutObjectResult(PutObjectResult m)
+        private void OnPutObjectResult(PlaceObjectResult m)
         {
             if (m.Success)
-                Tolk.Speak($"Položil si {m.Sender.Name.Friendly}");
+                Tolk.Speak("Položeno");
             else Tolk.Speak("Sem se to nevejde");
         }
 
@@ -140,7 +140,7 @@ namespace Game.Entities
             switch (m.Result)
             {
                 case PickUpObjectResult.ResultType.Success:
-                    Tolk.Speak($"Sebral si {m.Object.Name.Friendly}");
+                    Tolk.Speak("sebráno");
                     break;
                 case PickUpObjectResult.ResultType.FullInventory:
                     Tolk.Speak("Víc toho nepobereš.");
@@ -149,7 +149,7 @@ namespace Game.Entities
                     Tolk.Speak("Před tebou nic není");
                     break;
                 default:
-                    Tolk.Speak($"{m.Object.Name.Friendly} nejde odnést");
+                    Tolk.Speak("tohle nejde odnést");
                     break;
             }
         }

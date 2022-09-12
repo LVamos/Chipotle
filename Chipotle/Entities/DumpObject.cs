@@ -38,6 +38,11 @@ namespace Game.Entities
 	public class DumpObject : GameObject
 	{
 		/// <summary>
+		/// React on placing on the ground.
+		/// </summary>
+		protected void Placed() => Play(_sounds.placing);
+
+		/// <summary>
 		/// Backing field for Localities property.
 		/// </summary>
 		protected HashSet<string> _localities = new HashSet<string>();
@@ -123,6 +128,7 @@ namespace Game.Entities
 		/// <summary>
 		/// Action sound effect handle. It expires after the sound is played.
 		/// </summary>
+		[ProtoIgnore]
 		protected int _actionSoundID;
 
 		/// <summary>
@@ -139,7 +145,7 @@ namespace Game.Entities
 		/// <summary>
 		/// Names of sound effect files used by the object
 		/// </summary>
-		protected (string collision, string action, string loop) _sounds = ("MovCrashDefault", null, null);
+		protected (string collision, string action, string loop, string picking, string placing) _sounds = ("MovCrashDefault", null, null, null, null);
 
 		/// <summary>
 		/// Determines if the object shall be used just once
@@ -161,17 +167,22 @@ namespace Game.Entities
 		/// Cutscene that should be played when the object is used by an entity
 		/// </param>
 		/// <param name="usableOnce">Determines if the object shall be used just once</param>
+		/// <param name="audibleOverWalls"></param>
+		/// <param name="decorative">Determines if the object is just a decoration</param>
+		/// <param name="pickable">Determines if the object can be picked by a character</param>
+		/// <param name="pickingSound">A sound played when the object is picked by a character</param>
+		/// <param name="placingSound">A sound played when the object is placed by a character</param>
 		/// <remarks>
 		/// The type parameter allows assigning objects with some special behavior to proper classes.
 		/// </remarks>
-		public DumpObject(Name name, Rectangle area, string type, bool decorative, bool pickable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false) : base(name, type, area)
+		public DumpObject(Name name, Rectangle area, string type, bool decorative, bool pickable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null) : base(name, type, area)
 		{
 			Area = area;
 
 			Decorative = decorative;
 			_pickable = pickable;
 			_usableOnce = usableOnce;
-			_sounds = (collisionSound ?? _sounds.collision, actionSound ?? _sounds.action, loopSound ?? _sounds.loop); // Modify sounds of the object.
+			_sounds = (collisionSound ?? _sounds.collision, actionSound ?? _sounds.action, loopSound ?? _sounds.loop, pickingSound ?? _sounds.picking, placingSound ?? _sounds.placing); // Modify sounds of the object.
 			_cutscene = cutscene;
 			_audibleOverWalls = audibleOverWalls;
 			_defaultVolume = volume;
@@ -246,12 +257,6 @@ namespace Game.Entities
 		/// Determines if the object should be heart over walls and closed doors in other localities.
 		/// </summary>
 		protected readonly bool _audibleOverWalls;
-
-		/// <summary>
-		/// Returns pooint that belongs to this object and is tho most close to tthe player.
-		/// </summary>
-		protected Vector2 GetClosestPointToPlayer()
-			=> _area.GetClosestPoint(World.Player.Area.Center);
 
 		/// <summary>
 		/// Processes the EntityMoved message.
@@ -336,7 +341,7 @@ namespace Game.Entities
 		/// </summary>
 		/// <param name="loop">Specifies if the navigating soudn should be played in loop</param>
 		protected virtual void ReportPosition(bool loop = false)
-			=> _navigationSoundID = World.Sound.Play(_navigationSound, null, loop, PositionType.Absolute, GetClosestPointToPlayer().AsOpenALVector(), true);
+			=> _navigationSoundID = Play(_navigationSound, loop);
 
 		/// <summary>
 		/// Handle of a soound used for navigation
@@ -379,11 +384,7 @@ namespace Game.Entities
 		/// Processes the Collision message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnObjectsCollided(ObjectsCollided message)
-		{
-			if (!string.IsNullOrEmpty(_sounds.collision))
-				World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.collision), role: null, false, PositionType.Absolute, message.Position.AsOpenALVector(), true, _defaultVolume);
-		}
+		protected virtual void OnObjectsCollided(ObjectsCollided message) => Play(_sounds.collision, message.Position);
 
 		/// <summary>
 		/// Processes the UseObject message.
@@ -399,7 +400,7 @@ namespace Game.Entities
 			if (state != SoundState.Playing || (state == SoundState.Playing && sample > 20000 && _quickActionsAllowed))
 			{
 				if (!string.IsNullOrEmpty(_sounds.action))
-					_actionSoundID = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_sounds.action), null, false, PositionType.Absolute, message.ManipulationPoint.AsOpenALVector(), true, _defaultVolume);
+					_actionSoundID = Play(_sounds.action, message.ManipulationPoint);
 				else
 					World.PlayCutscene(this, _cutscene);
 			}
@@ -437,7 +438,7 @@ namespace Game.Entities
 		{
 			// Start the loop if not playing.
 			if (_loopSoundId == 0)
-				_loopSoundId = World.Sound.Play(_sounds.loop, null, true, PositionType.Absolute, _area.Center, true, _defaultVolume);
+				_loopSoundId = Play(_sounds.loop, _area.Center, true);
 
 			// Start the sound attenuation if needed.
 			bool attenuate = obstacle != ObstacleType.None && obstacle != ObstacleType.IndirectPath; ;
@@ -548,7 +549,7 @@ namespace Game.Entities
 		{
 			switch (message)
 			{
-				case PutObject m: OnPutObject(m); break;
+				case PlaceObject m: OnPlaceObject(m); break;
 				case PickUpObject m: OnPickUpObject(m); break;
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
@@ -568,23 +569,29 @@ namespace Game.Entities
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">Source of the message</param>
-		private void OnPutObject(PutObject m)
+		private void OnPlaceObject(PlaceObject m)
 		{
-			Rectangle newPosition = FindVacancy(m.Position);
-			if(newPosition == null)
-				m.Sender.TakeMessage(new PutObjectResult(this));
-else
+			Rectangle vacancy = FindVacancy(m.Position);
+			bool success = vacancy != null;
+
+			if (success)
 			{
 				HeldBy = null;
-				Area = newPosition;
-				m.Sender.TakeMessage(new PutObjectResult(this, true));
+				Area = vacancy;
+				Placed();
 			}
+
+			m.Sender.TakeMessage(new PlaceObjectResult(this, success));
 		}
 
+		/// <summary>
+		/// Tries to find a free spot on the ground to place the object on.
+		/// </summary>
+		/// <param name="point">A point that should intersect with the placed object</param>
+		/// <returns>An area the object could be placed on</returns>
 		protected Rectangle FindVacancy(Vector2 point)
 		{
 			Rectangle area = new Rectangle(point);
-			bool intersects() => World.Player.Area.Intersects(area);
 			(float width, float height)[] testDimensions = new[] 
 			{
 			(Dimensions.height, Dimensions.width),
@@ -598,19 +605,19 @@ else
 			foreach ((float height, float width) d in testDimensions)
 			{
 				// Extend it upward
-				while (!intersects() && area.Height < d.height)
+				while (area.Walkable() && area.Height < d.height)
 					area.Extend(Direction.Up);
 
 				// Extend it downward if necessary.
-				while (!intersects() && area.Height < d.height)
+				while (area.Walkable() && area.Height < d.height)
 					area.Extend(Direction.Down);
 
 				// Extend it to the left
-				while (!intersects()&& area.Width < d.width)
+				while (area.Walkable() && area.Width < d.width)
 					area.Extend(Direction.Left);
 
 				// Extend it to the right if necessary.
-				while (!intersects() && area.Width < d.width)
+				while (area.Walkable() && area.Width < d.width)
 					area.Extend(Direction.Right);
 
 				if ((area.Height, area.Width) == d)
@@ -630,24 +637,19 @@ else
 
 			if (result == PickUpObjectResult.ResultType.Success)
 			{
+				Picked();
 				HeldBy = (Character)m.Sender;
 				Area = null;
 			}
 
 			// Report the result.
 			m.Sender.TakeMessage(new PickUpObjectResult(this, this, result));
-
-				PickingAttempt((Character)m.Sender, result);
 		}
 
-/// <summary>
-/// Reacts on an attempt to pick this object up off the ground.
-/// </summary>
-/// <param name="entity">The entity that tried to pick this object up off the ground</param>
-/// <param name="result">Specifies if the object was picked up off the ground or not.</param>
-		protected virtual void PickingAttempt(Character entity, PickUpObjectResult.ResultType result)
-		{
-		}
+		/// <summary>
+		/// Reacts on picking off the ground.
+		/// </summary>
+		protected virtual void Picked() => Play(_sounds.picking);
 
 		/// <summary>
 		/// Handles the ReportPosition message.

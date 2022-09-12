@@ -1,4 +1,8 @@
-﻿using Game.Entities;
+﻿using DavyKager;
+
+using Game.Entities;
+
+using OpenTK.Graphics.OpenGL;
 
 using System;
 using System.Collections.Generic;
@@ -12,6 +16,8 @@ namespace Game.UI
 {
 	public class InventoryMenu: MenuWindow
 	{
+
+
 
 		/// <summary>
 		/// The inventory from which the player selects an object.
@@ -62,11 +68,11 @@ namespace Game.UI
 		/// </summary>
 		public InventoryMenu(DumpObject[] inventory): base(null, "inventář", false)
 		{
-			// Prepare the menu items. 
+			// Prepare the menu items and sort them by picking time.
 			_inventory = inventory;
 			_items =
-				(from o in inventory
-				 select o.Name.Friendly)
+				 _inventory.Select(o => o.Name.Indexed)
+				 .Reverse()
 				.ToArray<string>();
 
 			// Add new key shortcuts
@@ -74,7 +80,6 @@ namespace Game.UI
 (new KeyShortcut (Keys.Return), UseObject),
 	(new KeyShortcut(KeyShortcut.Modifiers.Control, Keys.Return), PutObject)
 );
-
 		}
 
 		/// <summary>
@@ -105,19 +110,41 @@ namespace Game.UI
 			Action = ActionType.None;
 		}
 
+		/// <summary>
+		/// Uses the selected object.
+		/// </summary>
 		protected override void ActivateItem()
 		{
-			if (CursorOffEdge())
+			if (IndexOffEdge())
 				return;
 
-			// Identify the selected object.
-			SelectedObject = 
-			(from o in _inventory
-			 where o.Name.Friendly == _items[Cursor]
-			 select o)
-				 .First();
-
 			base.ActivateItem();
+		}
+
+		/// <summary>
+		/// A setter for the Index property.
+		/// </summary>
+		/// <param name="value"></param>
+		protected override void SetIndex(int value)
+		{
+			base.SetIndex(value);
+
+			if (!IndexOffEdge())
+				AssignSelectedObject();
+		}
+
+		/// <summary>
+		/// Identifies the currently selected object and assigns it to the SelectedObject property.
+		/// </summary>
+		protected void AssignSelectedObject() => SelectedObject = _inventory.First(o => o.Name.Indexed == _items[_index]);
+
+		/// <summary>
+		/// Announces selected item using a screen reader or voice synthesizer
+		/// </summary>
+		protected override void SayItem()
+		{
+			Play(_selectionSound);
+			Tolk.Speak(SelectedObject.Name.Friendly);
 		}
 	}
 }

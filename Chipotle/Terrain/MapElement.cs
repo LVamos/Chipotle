@@ -6,6 +6,7 @@ using Game.Messaging.Commands;
 
 using Luky;
 using Game.Entities;
+using OpenTK;
 
 namespace Game.Terrain
 {
@@ -18,6 +19,35 @@ namespace Game.Terrain
     [ProtoInclude(102, typeof(Passage))]
     public abstract class MapElement : MessagingObject
     {
+        /// <summary>
+        /// Plays a sound at the specified position.
+        /// </summary>
+        /// <param name="soundName">Name of the sound to be played</param>
+        /// <param name="position">Position at which the sound should be played</param>
+		protected int Play(string soundName, Vector2 position) => string.IsNullOrEmpty(soundName) ? 0 : World.Sound.Play(World.Sound.GetRandomSoundStream(soundName), null, false, PositionType.Absolute, position.AsOpenALVector(), true, _defaultVolume);
+
+        /// <summary>
+        /// Plays a sound at the specified position.
+        /// </summary>
+        /// <param name="soundName">Name of the sound to be played</param>
+        /// <param name="position">Position of the sound</param>
+        /// <param name="loop">determines if the soudn should be played in loop.</param>
+        /// <returns>Handle of the sound</returns>
+		protected int Play(string soundName, Vector2 position, bool loop) => World.Sound.Play(World.Sound.GetRandomSoundStream(soundName), null, loop, PositionType.Absolute, position.AsOpenALVector(), true, _defaultVolume);
+
+		/// <summary>
+		/// Returns pooint that belongs to this object and is tho most close to tthe player.
+		/// </summary>
+		protected Vector2 GetClosestPointToPlayer()
+			=> _area.GetClosestPoint(World.Player.Area.Center);
+
+        /// <summary>
+        /// Plays a sound at the position closest to the player.
+        /// </summary>
+        /// <param name="soundName">Name of the sound to be played</param>
+        /// <param name="loop">Determines if the soudn should be played in loop</param>
+		protected int Play(string soundName, bool loop = false) => string.IsNullOrEmpty(soundName) ? 0 : Play(soundName, GetClosestPointToPlayer(), loop);
+
         /// <summary>
         /// Dimensions of the map element.
         /// </summary>

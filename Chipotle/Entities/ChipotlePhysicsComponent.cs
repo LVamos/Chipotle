@@ -252,7 +252,7 @@ namespace Game.Entities
 			}
 			else if (result.a == InventoryMenu.ActionType.Put)
 			{
-				var putMessage = new PutObject(Owner, result.o, GetNextTile(_orientation, 1).position);
+				var putMessage = new PlaceObject(Owner, result.o, GetNextTile(_orientation, 1).position);
 				result.o.TakeMessage(putMessage);
 			}
 		}

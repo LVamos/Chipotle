@@ -18,17 +18,17 @@ namespace Game.UI
         /// <summary>
         /// Index of the first item of the menu
         /// </summary>
-        private const int _firstItem = 0;
+        protected const int _firstItem = 0;
 
         /// <summary>
         /// Name of a sound played after the menu is opened
         /// </summary>
-        private readonly string _introSound;
+        protected readonly string _introSound;
 
         /// <summary>
         /// A text uttered by a screen reader or voice synthesizer after the menu is opened
         /// </summary>
-        private readonly string _introText;
+        protected readonly string _introText;
 
         /// <summary>
         /// List of the menu items
@@ -38,37 +38,37 @@ namespace Game.UI
         /// <summary>
         /// Name of a sound played when cursor reaches last item of the menu
         /// </summary>
-        private readonly string _lowerEdgeSound;
+        protected readonly string _lowerEdgeSound;
 
         /// <summary>
         /// Name of a sound played when the menu is closed
         /// </summary>
-        private readonly string _outroSound;
+        protected readonly string _outroSound;
 
         /// <summary>
         /// Name of a sound played when an item is selected
         /// </summary>
-        private readonly string _selectionSound;
+        protected readonly string _selectionSound;
 
         /// <summary>
         /// Name of a sound played when cursor reaches first item of the menu
         /// </summary>
-        private readonly string _upperEdgeSound;
+        protected readonly string _upperEdgeSound;
 
         /// <summary>
         /// Name of a sound played when the menu wraps down
         /// </summary>
-        private readonly string _wrapDownSound;
+        protected readonly string _wrapDownSound;
 
         /// <summary>
         /// Indicates if wrapping is allowed.
         /// </summary>
-        private readonly bool _wrappingAllowed;
+        protected readonly bool _wrappingAllowed;
 
         /// <summary>
         /// Name of a sound played when the menu wraps up
         /// </summary>
-        private readonly string _wrapUpSound;
+        protected readonly string _wrapUpSound;
 
         /// <summary>
         /// Constructor
@@ -120,30 +120,41 @@ namespace Game.UI
         /// <summary>
         /// Sets the cursor to the last item and announces it.
         /// </summary>
-        private void LastItem()
+        protected void LastItem()
         {
-            Cursor = _lastItem;
+            Index = _lastItem;
             SayItem();
         }
 
         /// <summary>
         /// Sets the cursor to the first item and announces it.
         /// </summary>
-        private void FirstItem()
+        protected void FirstItem()
         {
-            Cursor = _firstItem;
+            Index = _firstItem;
             SayItem();
         }
 
         /// <summary>
-        /// Index of currently selected item
+        /// A backing field for Index.
         /// </summary>
-        public int Cursor { get; private set; } = -1;
+        protected int _index = -1;
+
+        /// <summary>
+        /// Index of the currently selected item
+        /// </summary>
+        public int Index { get => _index; protected set => SetIndex(value); }
+
+        /// <summary>
+        /// A setter for the Index property.
+        /// </summary>
+        /// <param name="value"></param>
+        protected virtual void SetIndex(int value) => _index = value;
 
         /// <summary>
         /// Index of last item
         /// </summary>
-        private int _lastItem
+        protected int _lastItem
             => _items.Length - 1;
 
         /// <summary>
@@ -170,9 +181,9 @@ namespace Game.UI
         /// <summary>
         /// Wraps menu to upper edge
         /// </summary>
-        private void _wrapUp()
+        protected void _wrapUp()
         {
-            Cursor = _firstItem;
+            Index = _firstItem;
             Play(_wrapUpSound);
         }
 
@@ -181,42 +192,42 @@ namespace Game.UI
         /// </summary>
         protected virtual void ActivateItem()
         {
-            if (!CursorOffEdge())
+            if (!IndexOffEdge())
                 Close();
         }
 
         /// <summary>
         /// Checks if cursor got out of range
         /// </summary>
-        protected bool CursorOffEdge()
-            => (Cursor < 0 || Cursor > _lastItem);
+        protected bool IndexOffEdge()
+            => (Index < 0 || Index > _lastItem);
 
         /// <summary>
         /// Jumps to last item.
         /// </summary>
-        private void JumpToLowerEdge()
+        protected void JumpToLowerEdge()
         {
-            Cursor = _lastItem;
+            Index = _lastItem;
             Play(_lowerEdgeSound);
         }
 
         /// <summary>
         /// Jumps to first item
         /// </summary>
-        private void JumpToUpperEdge()
+        protected void JumpToUpperEdge()
         {
-            Cursor = _firstItem;
+            Index = _firstItem;
             Play(_upperEdgeSound);
         }
 
         /// <summary>
         /// Sets cursor to next item
         /// </summary>
-        private void NextItem()
+        protected void NextItem()
         {
-            Cursor++;
+            Index++;
 
-            if (CursorOffEdge())
+            if (IndexOffEdge())
             {
                 if (_wrappingAllowed)
                     _wrapUp();
@@ -229,7 +240,7 @@ namespace Game.UI
         /// Plays a sound.
         /// </summary>
         /// <param name="name">Name of the sound to be played</param>
-        private void Play(string name)
+        protected void Play(string name)
         {
             if (!string.IsNullOrEmpty(name))
                 World.Sound.Play(name);
@@ -238,14 +249,14 @@ namespace Game.UI
         /// <summary>
         /// Sets cursor to previous item
         /// </summary>
-        private void PreviousItem()
+        protected void PreviousItem()
         {
             // If user haven't selected anything yet then just announce first item.
-            if (CursorOffEdge())
-                Cursor = 0;
-            else Cursor--;
+            if (IndexOffEdge())
+                Index = 0;
+            else Index--;
 
-            if (CursorOffEdge())
+            if (IndexOffEdge())
             {
                 if (_wrappingAllowed)
                     WrapDown();
@@ -259,25 +270,25 @@ namespace Game.UI
         /// </summary>
         protected virtual  void Quit()
         {
-            Cursor = -1;
+            Index = -1;
             Close();
         }
 
         /// <summary>
         /// Announces selected item using a screen reader or voice synthesizer
         /// </summary>
-        private void SayItem()
+        protected virtual void SayItem()
         {
             Play(_selectionSound);
-            Tolk.Speak(_items[Cursor], true);
+            Tolk.Speak(_items[Index], true);
         }
 
         /// <summary>
         /// Wraps menu to lower edge
         /// </summary>
-        private void WrapDown()
+        protected void WrapDown()
         {
-            Cursor = _lastItem;
+            Index = _lastItem;
             Play(_wrapDownSound);
         }
 
@@ -309,7 +320,7 @@ namespace Game.UI
 
             if (result != -1)
             {
-                Cursor = result;
+                Index = result;
                 SayItem();
             }
         }
