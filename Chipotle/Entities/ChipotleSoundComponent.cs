@@ -23,10 +23,21 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class ChipotleSoundComponent : SoundComponent
     {
-        /// <summary>
-        /// Processes the SayLocality message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		protected void OnSayObjectDescription(SayObjectDescription m)
+		{
+            if (m.Object == null)
+                Tolk.Speak("Před tebou nci není");
+            else Tolk.Speak(m.Object.Description);
+		}
+
+		/// <summary>
+		/// Processes the SayLocality message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
 		protected void OnSayLocalityName(SayLocalityName message)
 => Tolk.Speak(Owner.Locality.Name.Friendly, true);
 
@@ -92,6 +103,7 @@ namespace Game.Entities
         {
             switch (message)
             {
+				case SayObjectDescription m: OnSayObjectDescription(m); break;
                 case SayLocalityDescription m: OnSayLocalityDescription(m); break;
 				case SayLocalityName m: OnSayLocalityName(m); break;
 				case PlaceObjectResult m: OnPutObjectResult(m); break;

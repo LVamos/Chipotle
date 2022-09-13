@@ -19,7 +19,15 @@ namespace Game.Entities
     [ProtoInclude(101, typeof(Character))]
     public class GameObject : MapElement
     {
+        /// <summary>
+        /// Stores ID of the current description of the object.
+        /// </summary>
+        protected int _descriptionID;
 
+        /// <summary>
+        /// Returns current description of the object.
+        /// </summary>
+        public string Description => World.GetObjectDescription(this, _descriptionID);
 		/// <summary>
 		/// Checks if the specified object and this object are at least partially in the same locality.
 		/// </summary>
@@ -160,6 +168,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <param name="type">Type of the object</param>
         /// <param name="decorative">Specifies if the object works as a decorator.</param>
+        /// <param name="pickable">Determines if the object can be picked up by a character</param>
         /// <returns>New instance of the object</returns>
         public static DumpObject CreateObject(Name name, Rectangle area, string type, bool decorative = false, bool pickable = false)
         {

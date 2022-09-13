@@ -28,6 +28,20 @@ namespace Game.Entities
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		protected void OnResearchObject(ResearchObject m)
+		{
+			GameObject @object = CharacterBefore();
+			if (@object == null)
+				@object = ObjectBefore();
+
+			@object?.TakeMessage(new ObjectResearched(Owner)); // Announce the object or character that it was researched.
+			InnerMessage(new SayObjectDescription(this, @object)); // Let description of the object or character be spoken.
+		}
+
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
 		/// <param name="m">Source of the message</param>
 		protected void OnPickUpObjectResult(PickUpObjectResult m)
 		{
@@ -201,6 +215,7 @@ namespace Game.Entities
 		{
 			switch (message)
 			{
+				case ResearchObject m: OnResearchObject(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case RunInventoryMenu m: OnRunInventoryMenu(m); break;
 				case PickUpObject m: OnPickUpObject(m); break;

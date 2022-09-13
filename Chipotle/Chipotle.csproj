@@ -110,10 +110,13 @@
     <Compile Include="Messaging\Commands\ReportPosition.cs" />
     <Compile Include="Messaging\Commands\RunInventoryMenu.cs" />
     <Compile Include="Messaging\Commands\SayLocalityDescription.cs" />
+    <Compile Include="Messaging\Commands\SayObjectDescription.cs" />
+    <Compile Include="Messaging\Commands\ResearchObject.cs" />
     <Compile Include="Messaging\Commands\TryGoTo.cs" />
     <Compile Include="Messaging\Events\EmptyInventory.cs" />
     <Compile Include="Messaging\Events\ObjectAppearedInLocality.cs" />
     <Compile Include="Messaging\Events\ObjectDisappearedFromLocality.cs" />
+    <Compile Include="Messaging\Events\ObjectResearched.cs" />
     <Compile Include="Messaging\Events\PickUpObjectResult.cs" />
     <Compile Include="Messaging\Events\PinchedInDoor.cs" />
     <Compile Include="Messaging\Commands\CreatePredefinedSave.cs" />

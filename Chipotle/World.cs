@@ -24,6 +24,7 @@ using ProtoBuf.Meta;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using Game.Messaging.Commands;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Game
 {
@@ -32,6 +33,23 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
+		/// <summary>
+		/// Returns a text description for the specified object.
+		/// </summary>
+		/// <param name="object">A character or object</param>
+		/// <param name="id">Numeric identifier of the requested caption</param>
+		/// <returns>A string containing the requested description</returns>
+		public static string GetObjectDescription(GameObject @object, int id)
+		{
+			if(_objectDescriptions.ContainsKey(@object.Type))
+			return _objectDescriptions[@object.Type][id];
+			return "popis chybí";
+		}
+
+		/// <summary>
+		/// Contains descriptions for object templates.
+		/// </summary>
+		private static Dictionary<string, string[]> _objectDescriptions = new Dictionary<string, string[]>();
 		/// <summary>
 		/// Enumerates all localities in an area specified by the area code.
 		/// </summary>
@@ -513,7 +531,7 @@ namespace Game
 		/// </summary>
 		/// <param name="point"></param>
 		/// <returns>Reference to the entity if there's any</returns>
-		public static Character GetEntity(Vector2 point)
+		public static Character GetCharacter(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
 			if (locality == null)
@@ -765,7 +783,7 @@ namespace Game
 		/// <param name="point"></param>
 		/// <returns>True if there's an object or NPC on the specified position</returns>
 		public static bool IsOccupied(Vector2 point)
-			=> GetObject(point) != null || GetEntity(point) != null;
+			=> GetObject(point) != null || GetCharacter(point) != null;
 
 		/// <summary>
 		/// Checks if the tile is walkable for NPCs.
@@ -919,7 +937,7 @@ namespace Game
 			{
 				xDocument = XDocument.Load(Program.MapPath);
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				if (!File.Exists(Program.MapPath))
 					Program.Terminate($"Soubor {Program.MapPath} nebyl nalezen.");
@@ -927,7 +945,6 @@ namespace Game
 			}
 
 			XElement root = xDocument.Root;
-			IEnumerable<XElement> xLocalities = root.Element("localities").Elements("locality");
 			IEnumerable<XElement> xPassages = root.Element("passages").Elements("passage");
 
 			Initialize(); // Prepare data structures for objects, entities, localities etc.
@@ -935,8 +952,16 @@ namespace Game
 			// Create map
 			Map = new TileMap(Program.MapPath);
 
+			// Load descriptions for objects and characters.
+			foreach (XElement e in root.Element("objectdescriptions").Elements("object"))
+			{
+				string descriptions = A(e, "descriptions");
+				_objectDescriptions[A(e, "type")] = descriptions.Split(new char[] {'|' });
+
+			}
+
 			// Load localities
-			foreach (XElement l in xLocalities)
+			foreach (XElement l in root.Element("localities").Elements("locality"))
 			{
 				(string sound, float volume) lBackgroundInfo;
 				_localityLoops.TryGetValue(A(l, "indexedname"), out lBackgroundInfo);
@@ -962,7 +987,7 @@ lBackgroundInfo.volume
 				// Draw terrain
 				l.Elements("panel").Foreach(p => Map.DrawTerrain(p, locality.Area));
 
-				// Load game objects
+				//Load objects.
 				foreach (XElement o in l.Elements("object"))
 				{
 					Add(GameObject.CreateObject(

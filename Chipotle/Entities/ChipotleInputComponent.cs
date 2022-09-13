@@ -70,24 +70,23 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.F12)] = GoToClipboardCoords,
 
                 // Other commands
-                [new KeyShortcut(Keys.K)] = SayLocalityDescription,
+                [new KeyShortcut(Keys.P)] = ResearchObject,
+                [new KeyShortcut(Keys.R)] = SayLocalityDescription,
                 [new KeyShortcut(Keys.I)] = RunInventoryMenu,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Return)] = PickUpObject,
 				[new KeyShortcut(Keys.Tab)] = GameMenu,
-                [new KeyShortcut(Keys.R)] = SayLocalitySize,
+                [new KeyShortcut(Keys.L)] = SayLocalitySize,
                 [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
                 [new KeyShortcut(false, true, false, Keys.O)] = ListObjects,
                 [new KeyShortcut(Keys.S)] = SayOrientation,
                 [new KeyShortcut(Keys.V)] = SayExits,
                 [new KeyShortcut(Keys.Space)] = StopCutscene,
                 [new KeyShortcut(Keys.T)] = TerrainInfo,
-                [new KeyShortcut(Keys.N)] = SayVisitedRegion,
+                [new KeyShortcut(Keys.B)] = SayVisitedRegion,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Left)] = GoLeft,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Right)] = GoRight,
-
-                // Other shortcuts
                 [new KeyShortcut(Keys.O)] = SayObjects,
-                [new KeyShortcut(Keys.L)] = SayLocalityName,
+                [new KeyShortcut(Keys.K)] = SayLocalityName,
                 [new KeyShortcut(Keys.Up)] = GoForward,
                 [new KeyShortcut(Keys.Down)] = GoBack,
                 [new KeyShortcut(Keys.Left)] = TurnLeft,
@@ -100,6 +99,11 @@ namespace Game.Entities
             );
 
         }
+
+        /// <summary>
+        /// Instruucts the sound component to read description of the current locality.
+        /// </summary>
+        private void ResearchObject() => InnerMessage(new ResearchObject(this));
 
         private void SayLocalityDescription() => InnerMessage(new SayLocalityDescription(this));
 
@@ -141,26 +145,27 @@ namespace Game.Entities
             // Prepare the menu
             (string name, Action command)[] commands =
             {
-                ("Kde jsem", SayLocalityDescription),
+                ("Prozkoumej objekt: pé", ResearchObject),
+                ("Rozhlédni se: r", SayLocalityDescription),
                                 ("inventář: I", RunInventoryMenu),
-                                ("použít objekt nebo dveře: entr", Interact),
-                                ("Vzít objekt: šift entr", PickUpObject),
-                ("krok dopředu: horní šipka", StepForward),
-                ("krok zpět: dolní šipka", StepBack),
-                ("krok doleva: šift levá šipka", StepLeft),
-                ("krok doprava: šift pravá šipka", StepRight),
-                ("zahnout trochu doleva: levá šipka", TurnLeft),
-                ("zahnout trochu doprava: pravá šipka", TurnRight),
-                ("zahnout ostře doleva: kontrol levá šipka", TurnSharplyLeft),
-                ("zahnout ostře doprava: kontrol pravá šipka", TurnSharplyRight),
-                ("čelem vzad: kontrol dolní šipka", TurnAround),
+                                ("použij objekt nebo dveře: entr", Interact),
+                                ("Vezmi objekt: šift entr", PickUpObject),
+                ("Jdi dopředu: horní šipka", StepForward),
+                ("Jdi dozadu: dolní šipka", StepBack),
+                ("Jdi doleva: šift levá šipka", StepLeft),
+                ("Jdi doprava: šift pravá šipka", StepRight),
+                ("Otoč se trochu doleva: levá šipka", TurnLeft),
+                ("Otoč se trochu doprava: pravá šipka", TurnRight),
+                ("Otoč se ostře doleva: kontrol levá šipka", TurnSharplyLeft),
+                ("Otoč se ostře doprava: kontrol pravá šipka", TurnSharplyRight),
+                ("Otoč se čelem vzad: kontrol dolní šipka", TurnAround),
                 ("okolní objekty: O", SayObjects),
-                ("navigovat k objektu: šift O", ListObjects),
-                ("východy: Vé", SayExits),
-                                ("navigovat k východu: šift vé", ListExits),
-                                                ("kde jsem: El", SayLocalityName),
-                                                                ("Byl jsem tu: En", SayVisitedRegion),
-                                                                                ("Rozměry lokace: Er", SayLocalitySize),
+                ("Naveď mě k objektu: šift O", ListObjects),
+                ("východy z lokace: Vé", SayExits),
+                                ("Naveď mě k východu: šift vé", ListExits),
+                                                ("kde jsem: ká", SayLocalityName),
+                                                                ("Byl jsem tu: bé", SayVisitedRegion),
+                                                                                ("Rozměry lokace: el", SayLocalitySize),
                                                                                                 ("kompas: Es", SayOrientation),
                                                                                                                 ("souřadnice: Cé", SayAbsoluteCoordinates),
                                                                                                                                 ("Poslat zprávu autorovi: Kontrol zet", Program.SendFeedback),

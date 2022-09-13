@@ -22,13 +22,25 @@ namespace Game.Entities
     [ProtoInclude(101, typeof(TuttlePhysicsComponent))]
     public class PhysicsComponent : CharacterComponent
     {
-        /// <summary>
-        /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
-        /// </summary>
-        /// <param name="step">The distance between the NPC and the required tile</param>
-        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
-        /// <see cref="PhysicsComponent.Orientation"/>
-        protected virtual Vector2 GetNextTile()
+		/// <summary>
+		/// Checks if there's an character standing before the character and returns it.
+		/// </summary>
+		/// <returns>The character standing before the character or null</returns>
+		protected Character CharacterBefore() => World.GetCharacter(GetNextTile(1).position);
+
+		/// <summary>
+		/// Checks if there's an object standing before the character and returns it.
+		/// </summary>
+		/// <returns>The object standing before the character or null</returns>
+		protected DumpObject ObjectBefore() => World.GetObject(GetNextTile(1).position);
+
+		/// <summary>
+		/// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
+		/// </summary>
+		/// <param name="step">The distance between the NPC and the required tile</param>
+		/// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+		/// <see cref="PhysicsComponent.Orientation"/>
+		protected virtual Vector2 GetNextTile()
             => _path.Dequeue();
 
         /// <summary>
