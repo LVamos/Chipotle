@@ -21,14 +21,14 @@ namespace Game.Messaging.Commands
 		/// <summary>
 		/// The object that should be picked.
 		/// </summary>
-		public readonly DumpObject Object;
+		public readonly Item Object;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message (Entity or EntityComponent)</param>
 		/// <param name="object">The object that should be picked</param>
-		public PickUpObject(MessagingObject sender, DumpObject @object = null) : base(sender)
+		public PickUpObject(MessagingObject sender, Item @object = null) : base(sender)
 		{
 			Sender = sender;
 			Object = @object;

@@ -31,10 +31,7 @@ namespace Game.Entities
 		/// <param name="m">The message to be handled</param>
 		protected void OnResearchObject(ResearchObject m)
 		{
-			GameObject @object = CharacterBefore();
-			if (@object == null)
-				@object = ObjectBefore();
-
+			GameObject @object = SomethingBefore();
 			@object?.TakeMessage(new ObjectResearched(Owner)); // Announce the object or character that it was researched.
 			InnerMessage(new SayObjectDescription(this, @object)); // Let description of the object or character be spoken.
 		}
@@ -236,7 +233,7 @@ namespace Game.Entities
 				case SayObjects sob: OnSayObjects(sob); break;
 				case StartWalk staw: OnStartWalk(staw); break;
 				case ChangeOrientation cor: OnChangeOrientation(cor); break;
-				case UseObject uo: OnUseObject(uo); break;
+				case Interact m: OnInteract(m); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -255,20 +252,26 @@ namespace Game.Entities
 				}
 
 				// Run the menu
-				(InventoryMenu.ActionType a, DumpObject o) result = InventoryMenu.Run(Owner.Inventory.ToArray<DumpObject>());
+				(InventoryMenu.ActionType a, Item o) result = InventoryMenu.Run(Owner.Inventory.ToArray<Item>());
 
-			// Use the selected object
 			if (result.a == InventoryMenu.ActionType.Use)
 			{
-				// Because it's held by the NPC use position of the NPC as a manipulation point.
-				Vector2 manipulationPoint = _area.Center;
-				var message = new UseObject(Owner, manipulationPoint);
-				result.o.TakeMessage(message);
+				// If there's another item or character standing before the player use it through the item held by the player.
+				GameObject another = SomethingBefore();
+
+				// If there's no other item or character standing before this character use position of the NPC as a manipulation point. Otherwise use nearest point before this character.
+				Vector2 manipulationPoint = another != null ? GetNextTile(1).position : _area.Center;
+
+				var useMessage = new UseObjects(Owner, manipulationPoint, result.o, another);
+				result.o.TakeMessage(useMessage);
+				another?.TakeMessage(useMessage);
+				return;
 			}
-			else if (result.a == InventoryMenu.ActionType.Put)
+
+			if (result.a == InventoryMenu.ActionType.Place)
 			{
-				var putMessage = new PlaceObject(Owner, result.o, GetNextTile(_orientation, 1).position);
-				result.o.TakeMessage(putMessage);
+					var placeMessage = new PlaceObject(Owner, result.o, GetNextTile(_orientation, 1).position);
+					result.o.TakeMessage(placeMessage);
 			}
 		}
 
@@ -278,7 +281,7 @@ namespace Game.Entities
 		/// <param name="m">The message to be processed.
 		protected void OnPickUpObject(PickUpObject m)
 		{
-			DumpObject @object = World.GetObject(GetNextTile(1).position);
+			Item @object = World.GetObject(GetNextTile(1).position);
 			if (@object == null)
 				InnerMessage(new PickUpObjectResult(this)); // Nothing picked
 			else if (_inventory.Count >= _inventoryLimit)
@@ -393,7 +396,7 @@ namespace Game.Entities
 			if (NavigationInProgress)
 				return;
 
-			(string[] descriptions, DumpObject[] objects) objects = GetNavigableObjects();
+			(string[] descriptions, Item[] objects) objects = GetNavigableObjects();
 
 			if (objects.objects.IsNullOrEmpty())
 			{
@@ -406,7 +409,7 @@ namespace Game.Entities
 			if (option == -1)
 				return;
 
-			DumpObject target = objects.objects[option];
+			Item target = objects.objects[option];
 
 			_navigatedObject = target;
 			_navigatedObject.TakeMessage(new StartObjectNavigation(Owner));
@@ -434,7 +437,7 @@ namespace Game.Entities
 		/// Objectt to which tthe NPC is currently navigated.
 		/// </summary>
 		[ProtoIgnore]
-		protected DumpObject _navigatedObject;
+		protected Item _navigatedObject;
 
 		/// <summary>
 		/// Processes incoming messages.
@@ -739,7 +742,7 @@ namespace Game.Entities
 				if (!_nearObjects.Contains(o) && nearObjects.Contains(o))
 				{
 					ReportPosition message = new ReportPosition(Owner);
-					DumpObject theObject = World.GetObject(o);
+					Item theObject = World.GetObject(o);
 					theObject.TakeMessage(message);
 					Tolk.Speak(theObject.Name.Friendly);
 				}
@@ -772,10 +775,10 @@ namespace Game.Entities
 		/// Returns information about all navigable objects from current locality in the specified radius around the NPC.
 		/// </summary>
 		/// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
-		protected (string[] descriptions, DumpObject[] objects) GetNavigableObjects()
+		protected (string[] descriptions, Item[] objects) GetNavigableObjects()
 		{
 			Vector2 me = _area.Center;
-			DumpObject[] objects = Locality.GetNearByObjects(me, _navigableObjectsRadius).ToArray<DumpObject>();
+			Item[] objects = Locality.GetNearByObjects(me, _navigableObjectsRadius).ToArray<Item>();
 
 			string[] descriptions =
 				(
@@ -870,8 +873,8 @@ namespace Game.Entities
 		/// <summary>
 		/// Processes the UseObject message.
 		/// </summary>
+		protected void OnInteract(Interact message)
 		/// <param name="message">The message to be processed</param>
-		protected void OnUseObject(UseObject message)
 		{
 			void Use(MapElement e)
 			{
@@ -883,7 +886,9 @@ namespace Game.Entities
 				Vector2? opposite = _area.FindOppositePoint(e.Area);
 					point = opposite.HasValue ? opposite.Value : e.Area.GetClosestPoint(CurrentTile.position);
 
-				e.TakeMessage(new UseObject(Owner, point));
+				if (e is Door)
+					e.TakeMessage(new UseDoor(Owner, point));
+				else e.TakeMessage(new UseObjects(Owner, point, e as Item));
 			}
 
 			// Find doors in radius of 2 meters that are in front or behind the player or door in which the player is standing.

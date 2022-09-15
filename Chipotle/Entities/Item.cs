@@ -35,7 +35,7 @@ namespace Game.Entities
 	[ProtoInclude(109, typeof(PubBench))]
 	[ProtoInclude(110, typeof(SweeneysBell))]
 	[ProtoInclude(111, typeof(VanillaCrunchCar))]
-	public class DumpObject : GameObject
+	public class Item : GameObject
 	{
 		/// <summary>
 		/// React on placing on the ground.
@@ -172,10 +172,13 @@ namespace Game.Entities
 		/// <param name="pickable">Determines if the object can be picked by a character</param>
 		/// <param name="pickingSound">A sound played when the object is picked by a character</param>
 		/// <param name="placingSound">A sound played when the object is placed by a character</param>
+		/// <param name="quickActionsAllowed">Specifies if the item can be used in rapid succession.</param>
+		/// <param name="stopWhenPlayerMoves">Specifies if an ongoing action sound stops when the player moves.</param>
+		/// <param name="volume">Specifies individual volume for sounds made by the object.</param>
 		/// <remarks>
 		/// The type parameter allows assigning objects with some special behavior to proper classes.
 		/// </remarks>
-		public DumpObject(Name name, Rectangle area, string type, bool decorative, bool pickable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null) : base(name, type, area)
+		public Item(Name name, Rectangle area, string type, bool decorative, bool pickable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null) : base(name, type, area)
 		{
 			Area = area;
 
@@ -390,7 +393,7 @@ namespace Game.Entities
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnUseObject(UseObject message)
+		protected virtual void OnUseObjects(UseObjects message)
 		{
 			if ((_usableOnce && Used) || (string.IsNullOrEmpty(_sounds.action) && string.IsNullOrEmpty(_cutscene)))
 				return;
@@ -560,7 +563,7 @@ namespace Game.Entities
 				case StopObjectNavigation sto: OnStopObjectNavigation(sto); break;
 				case GameReloaded gr: OnGameReloaded(); break;
 				case ObjectsCollided oc: OnObjectsCollided(oc); break;
-				case UseObject uo: OnUseObject(uo); break;
+				case UseObjects uo: OnUseObjects(uo); break;
 				default: base.HandleMessage(message); break;
 			}
 		}

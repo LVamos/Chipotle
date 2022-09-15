@@ -12,7 +12,7 @@ namespace Game.Entities
     /// Represents the Christine's bell (zvonek p1) in the Belvedere street (ulice p1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class ChristinesBell : DumpObject
+    public class ChristinesBell : Item
     {
         /// <summary>
         /// constructor
@@ -25,13 +25,13 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
             if (!Used)
                 _cutscene = "cs21";
             else _sounds.action = "snd25";
 
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
         }
     }
 }

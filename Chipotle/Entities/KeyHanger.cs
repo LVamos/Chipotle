@@ -12,7 +12,7 @@ namespace Game.Entities
     /// Represents the key hanger object in the garage in Vanilla crunch company (garáž v1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class KeyHanger : DumpObject
+    public class KeyHanger : Item
     {
         /// <summary>
         /// constructor
@@ -30,11 +30,11 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
             _sounds.action = KeysHanging ? "snd6" : "snd5";
             KeysHanging = !KeysHanging;
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
         }
     }
 }

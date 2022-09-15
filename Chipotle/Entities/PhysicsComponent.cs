@@ -23,16 +23,26 @@ namespace Game.Entities
     public class PhysicsComponent : CharacterComponent
     {
 		/// <summary>
+		/// Checks if there's an character or item standing before the character and returns it.
+		/// </summary>
+		/// <returns>The character or item standing before the this character or null</returns>
+		protected GameObject SomethingBefore()
+        {
+            GameObject i = ItemBefore();
+            return i ?? CharacterBefore();
+        }
+
+		/// <summary>
 		/// Checks if there's an character standing before the character and returns it.
 		/// </summary>
 		/// <returns>The character standing before the character or null</returns>
 		protected Character CharacterBefore() => World.GetCharacter(GetNextTile(1).position);
 
 		/// <summary>
-		/// Checks if there's an object standing before the character and returns it.
+		/// Checks if there's an item standing before the character and returns it.
 		/// </summary>
-		/// <returns>The object standing before the character or null</returns>
-		protected DumpObject ObjectBefore() => World.GetObject(GetNextTile(1).position);
+		/// <returns>The item standing before the character or null</returns>
+		protected Item ItemBefore() => World.GetObject(GetNextTile(1).position);
 
 		/// <summary>
 		/// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.

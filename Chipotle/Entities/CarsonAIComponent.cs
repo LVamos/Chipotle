@@ -108,7 +108,7 @@ namespace Game.Entities
         private void WatchChipotlesCar()
         {
             Locality road = World.GetLocality("asfaltka c1");
-            DumpObject car = World.GetObject("detektivovo auto");
+            Item car = World.GetObject("detektivovo auto");
             if (_saidGoodbyeToChipotle && !road.IsItHere(car)) // Chipotle left the area
             {
                 _messagingEnabled = false;

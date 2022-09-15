@@ -15,7 +15,7 @@ namespace Game.Entities
     /// A base class for all simple objects and NPCS
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    [ProtoInclude(100, typeof(DumpObject))]
+    [ProtoInclude(100, typeof(Item))]
     [ProtoInclude(101, typeof(Character))]
     public class GameObject : MapElement
     {
@@ -62,8 +62,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateBathroomPool(Name name, Rectangle area, bool decorative, bool pickable)
-            => new DumpObject(name, area, "bazének", decorative, pickable: pickable, null, "snd7", stopWhenPlayerMoves: true);
+        public static Item CreateBathroomPool(Name name, Rectangle area, bool decorative, bool pickable)
+            => new Item(name, area, "bazének", decorative, pickable: pickable, null, "snd7", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the sink (umyvadlo w1) object in the Walsch's bathroom (koupelna
@@ -72,8 +72,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateBathroomSink(Name name, Rectangle area, bool decorative, bool pickable)
-                        => new DumpObject(name, area, "umyvadlo", decorative, pickable: pickable, null, "snd8", stopWhenPlayerMoves: true);
+        public static Item CreateBathroomSink(Name name, Rectangle area, bool decorative, bool pickable)
+                        => new Item(name, area, "umyvadlo", decorative, pickable: pickable, null, "snd8", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the bench (lavička c1) object in the Carson's garden (zahrada
@@ -82,7 +82,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateCarsonsBench(Name name, Rectangle area, bool decorative, bool pickable)
+        public static Item CreateCarsonsBench(Name name, Rectangle area, bool decorative, bool pickable)
                     => new CarsonsBench(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -91,8 +91,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateCoffeemaker(Name name, Rectangle area, bool decorative, bool pickable)
-            => new DumpObject(name, area, "kávovar", decorative, pickable: pickable, null, "ActCoffeeMaker", stopWhenPlayerMoves: true);
+        public static Item CreateCoffeemaker(Name name, Rectangle area, bool decorative, bool pickable)
+            => new Item(name, area, "kávovar", decorative, pickable: pickable, null, "ActCoffeeMaker", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the corpse (tělo w1) object in the poolside (bazén w1) locality.
@@ -100,7 +100,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateCorpse(Name name, Rectangle area, bool decorative, bool pickable)
+        public static Item CreateCorpse(Name name, Rectangle area, bool decorative, bool pickable)
             => new Corpse(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -110,8 +110,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateElectricalBox(Name name, Rectangle area, bool decorative, bool pickable)
-=> new DumpObject(name, area, "rozvodna", decorative, pickable: pickable, null, null, "ElectricalBoxLoop", volume: .5f);
+        public static Item CreateElectricalBox(Name name, Rectangle area, bool decorative, bool pickable)
+=> new Item(name, area, "rozvodna", decorative, pickable: pickable, null, null, "ElectricalBoxLoop", volume: .5f);
 
         /// <summary>
         /// Creates new instance of the fish tank (akvárko w1) object in the basement (sklep w1) locality.
@@ -119,8 +119,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateFishTank(Name name, Rectangle area, bool decorative, bool pickable)
-=> new DumpObject(name, area, "akvárko", decorative, pickable: pickable, null, null, "FishTankLoop");
+        public static Item CreateFishTank(Name name, Rectangle area, bool decorative, bool pickable)
+=> new Item(name, area, "akvárko", decorative, pickable: pickable, null, null, "FishTankLoop");
 
         /// <summary>
         /// Creates new instance of the garden grill (gril c1) object in the Sweeney's garden
@@ -129,7 +129,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateGardenGril(Name name, Rectangle area, bool decorative, bool pickable)
+        public static Item CreateGardenGril(Name name, Rectangle area, bool decorative, bool pickable)
         => new CarsonsGrill(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -139,8 +139,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateGardenHose(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name, area, "zahradní hadice", decorative, pickable: pickable, null, "snd1", null, stopWhenPlayerMoves: true);
+        public static Item CreateGardenHose(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name, area, "zahradní hadice", decorative, pickable: pickable, null, "snd1", null, stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of a high way (dálnice w1) object.
@@ -148,8 +148,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateHighway(Name name, Rectangle area, bool decorative, bool pickable)
-=> new DumpObject(name, area, "dálnice", decorative, pickable: pickable, null, null, "HighwayLoop");
+        public static Item CreateHighway(Name name, Rectangle area, bool decorative, bool pickable)
+=> new Item(name, area, "dálnice", decorative, pickable: pickable, null, null, "HighwayLoop");
 
         /// <summary>
         /// Creates new instance of the Detective Chipotle's car (detektivovo auto) object in the
@@ -170,7 +170,7 @@ namespace Game.Entities
         /// <param name="decorative">Specifies if the object works as a decorator.</param>
         /// <param name="pickable">Determines if the object can be picked up by a character</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateObject(Name name, Rectangle area, string type, bool decorative = false, bool pickable = false)
+        public static Item CreateObject(Name name, Rectangle area, string type, bool decorative = false, bool pickable = false)
         {
             if (string.IsNullOrEmpty(name.Indexed))
                 throw new ArgumentException(nameof(name));
@@ -228,7 +228,7 @@ namespace Game.Entities
                 case "gril u carsona": return CreateGardenGril(name, area, decorative, pickable);
                 case "zahradní hadice": return CreateGardenHose(name, area, decorative, pickable);
 
-                default: return new DumpObject(name, area, string.Empty, decorative, pickable);
+                default: return new Item(name, area, string.Empty, decorative, pickable);
             }
         }
 
@@ -238,8 +238,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateWorkingOven(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "zapnutý sporák", decorative: decorative, pickable: pickable, loopSound: "LoopOven");
+        public static Item CreateWorkingOven(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "zapnutý sporák", decorative: decorative, pickable: pickable, loopSound: "LoopOven");
 
         /// <summary>
         /// Creates new instance of a tub.
@@ -247,8 +247,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateTub(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "vana", decorative: decorative, pickable: pickable, collisionSound: "HitTub");
+        public static Item CreateTub(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "vana", decorative: decorative, pickable: pickable, collisionSound: "HitTub");
 
         /// <summary>
         /// Creates new instance of toilet paper.
@@ -256,8 +256,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateToiletPaper(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "mikrovlnka", decorative: decorative, pickable: pickable, collisionSound: "HitToiletPaper");
+        public static Item CreateToiletPaper(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "mikrovlnka", decorative: decorative, pickable: pickable, collisionSound: "HitToiletPaper");
 
         /// <summary>
         /// Creates new instance of a shelf.
@@ -265,8 +265,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateShelf(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "police", decorative: decorative, pickable: pickable, collisionSound: "HitShelf");
+        public static Item CreateShelf(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "police", decorative: decorative, pickable: pickable, collisionSound: "HitShelf");
 
         /// <summary>
         /// Creates new instance of a toilet bowl.
@@ -274,8 +274,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateToiletBowl(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "záchod", decorative: decorative, pickable: pickable, collisionSound: "HitToiletBowl", actionSound: "ActToiletBowl");
+        public static Item CreateToiletBowl(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "záchod", decorative: decorative, pickable: pickable, collisionSound: "HitToiletBowl", actionSound: "ActToiletBowl");
 
         /// <summary>
         /// Creates new instance of a microwave.
@@ -283,8 +283,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateMicrowave(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "mikrovlnka", decorative: decorative, pickable: pickable, collisionSound: "HitMicrowave", actionSound: "ActMicrowave");
+        public static Item CreateMicrowave(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "mikrovlnka", decorative: decorative, pickable: pickable, collisionSound: "HitMicrowave", actionSound: "ActMicrowave");
 
         /// <summary>
         /// Creates new instance of a electric grill.
@@ -292,8 +292,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateElectricGrill(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "elektrický gril", decorative: decorative, pickable: pickable, collisionSound: "HitelectricGrill");
+        public static Item CreateElectricGrill(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "elektrický gril", decorative: decorative, pickable: pickable, collisionSound: "HitelectricGrill");
 
         /// <summary>
         /// Creates new instance of a kitchen sink.
@@ -301,8 +301,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateVacuumCleaner(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "vysavač", decorative: decorative, pickable: pickable, cutscene: "cs38");
+        public static Item CreateVacuumCleaner(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "vysavač", decorative: decorative, pickable: pickable, cutscene: "cs38");
 
         /// <summary>
         /// Creates new instance of a kitchen sink.
@@ -310,8 +310,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateLittleDoor(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "dvířka", decorative: decorative, pickable: pickable, collisionSound: "HitLittleDoor");
+        public static Item CreateLittleDoor(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "dvířka", decorative: decorative, pickable: pickable, collisionSound: "HitLittleDoor");
 
         /// <summary>
         /// Creates new instance of a trash can.
@@ -319,8 +319,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateTrashCan(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "koš", decorative: decorative, pickable: pickable, collisionSound: "HitTrashCan");
+        public static Item CreateTrashCan(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "koš", decorative: decorative, pickable: pickable, collisionSound: "HitTrashCan");
 
         /// <summary>
         /// Creates new instance of a kitchen sink.
@@ -328,8 +328,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateKitchenSink(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "dřez", decorative: decorative, pickable: pickable, collisionSound: "HitKitchenSink", actionSound: "ActKitchenSink", stopWhenPlayerMoves: true);
+        public static Item CreateKitchenSink(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "dřez", decorative: decorative, pickable: pickable, collisionSound: "HitKitchenSink", actionSound: "ActKitchenSink", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of a kitchen counter.
@@ -337,8 +337,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateKitchenCounter(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "linka", decorative: decorative, pickable: pickable, collisionSound: "HitKitchenCounter", actionSound: "ActKitchenCounter", stopWhenPlayerMoves: true);
+        public static Item CreateKitchenCounter(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "linka", decorative: decorative, pickable: pickable, collisionSound: "HitKitchenCounter", actionSound: "ActKitchenCounter", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of a table.
@@ -346,8 +346,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateTable(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name: name, area: area, type: "stůl", decorative: decorative, pickable: pickable, collisionSound: "HitTable");
+        public static Item CreateTable(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name: name, area: area, type: "stůl", decorative: decorative, pickable: pickable, collisionSound: "HitTable");
 
         /// <summary>
         /// Creates new instance of the bench (lavička w1) object in the Walsch's pool (bazén w1) locality.
@@ -355,8 +355,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreatePoolsideBench(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name, area, "lavička u bazénu", decorative, pickable: pickable, null, null, null, "cs1", true);
+        public static Item CreatePoolsideBench(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name, area, "lavička u bazénu", decorative, pickable: pickable, null, null, null, "cs1", true);
 
         /// <summary>
         /// Creates new instance of the bin (popelnice w1) object in the Walsch's pool (bazén w1) locality.
@@ -364,7 +364,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreatePoolsideBin(Name name, Rectangle area, bool decorative, bool pickable)
+        public static Item CreatePoolsideBin(Name name, Rectangle area, bool decorative, bool pickable)
         => new PoolsideBin(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -373,8 +373,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreatePoolsidePlank(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name, area, "prkno u bazénu", decorative, pickable: pickable, null, null, null, "cs4");
+        public static Item CreatePoolsidePlank(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name, area, "prkno u bazénu", decorative, pickable: pickable, null, null, null, "cs4");
 
         /// <summary>
         /// Creates new instance of the pool steps (schůdky w1) object in the Walsch's pool (bazén
@@ -383,8 +383,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreatePoolStairs(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name, area, "schůdky u bazénu", decorative, pickable: pickable, null, "snd3", quickActionsAllowed: true);
+        public static Item CreatePoolStairs(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name, area, "schůdky u bazénu", decorative, pickable: pickable, null, "snd3", quickActionsAllowed: true);
 
         /// <summary>
         /// Returns the hash code for this object.
@@ -418,8 +418,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateCuckooClock(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name, area, "kukačkové hodiny", decorative, pickable: pickable, null, null, "CuckooClockLoop",null,false, volume: .5f);
+        private static Item CreateCuckooClock(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name, area, "kukačkové hodiny", decorative, pickable: pickable, null, null, "CuckooClockLoop",null,false, volume: .5f);
 
         /// <summary>
         /// Creates new instance of the dish washer (myčka) object.
@@ -427,8 +427,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        public static DumpObject CreateDishwasher(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name: name, area: area, type: "myčka", decorative: decorative, pickable: pickable, collisionSound: "HitDishWasher", actionSound: "ActDishwasher");
+        public static Item CreateDishwasher(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name: name, area: area, type: "myčka", decorative: decorative, pickable: pickable, collisionSound: "HitDishWasher", actionSound: "ActDishwasher");
 
         /// <summary>
         /// Creates new instance of the fan (větrák p1) object in the Christine's bed room (ložnice
@@ -437,8 +437,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateFan(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name, area, "větrák", decorative, pickable: pickable, null, null, "FanLoop", volume: 1);
+        private static Item CreateFan(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name, area, "větrák", decorative, pickable: pickable, null, null, "FanLoop", volume: 1);
 
         /// <summary>
         /// Creates new instance of the fire place (krb) object.
@@ -446,8 +446,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateFireplace(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name, area, "krb", decorative, pickable: pickable, null, null, "FirePlaceLoop");
+        private static Item CreateFireplace(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name, area, "krb", decorative, pickable: pickable, null, null, "FirePlaceLoop");
 
         /// <summary>
         /// Creates new instance of the freezer (mrazák v1) object in the Mariotti!s office
@@ -456,8 +456,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateFreezer(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name, area, "mrazák", decorative, pickable: pickable, null, null, "FreezerLoop");
+        private static Item CreateFreezer(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name, area, "mrazák", decorative, pickable: pickable, null, null, "FreezerLoop");
 
         /// <summary>
         /// Creates new instance of the fridge (lednice) object.
@@ -465,8 +465,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateFridge(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name, area, "lednice", decorative, pickable: pickable, null, "snd10", "FridgeLoop", volume: .5f, stopWhenPlayerMoves: true);
+        private static Item CreateFridge(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name, area, "lednice", decorative, pickable: pickable, null, "snd10", "FridgeLoop", volume: .5f, stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the chair (židle) object.
@@ -474,15 +474,15 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateChair(Name name, Rectangle area, bool decorative, bool pickable)
-        => new DumpObject(name: name, area: area, type: "židle", decorative, pickable: pickable, actionSound: "ActChair", collisionSound: "HitChair");
+        private static Item CreateChair(Name name, Rectangle area, bool decorative, bool pickable)
+        => new Item(name: name, area: area, type: "židle", decorative, pickable: pickable, actionSound: "ActChair", collisionSound: "HitChair");
 
         /// <summary>
         /// Creates new instance of the Christine's door bell object in the Belvedere street (ulice
         /// p1) locality.
         /// </summary>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateChristinesBell(Name name, Rectangle area, bool decorative, bool pickable)
+        private static Item CreateChristinesBell(Name name, Rectangle area, bool decorative, bool pickable)
             => new ChristinesBell(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -492,8 +492,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateChristinesMirror(Name name, Rectangle area, bool decorative, bool pickable)
-                    => new DumpObject(name, area, "zrcadlo u Kristýny", decorative, pickable: pickable, null, null, null, "cs14", true);
+        private static Item CreateChristinesMirror(Name name, Rectangle area, bool decorative, bool pickable)
+                    => new Item(name, area, "zrcadlo u Kristýny", decorative, pickable: pickable, null, null, null, "cs14", true);
 
         /// <summary>
         /// Creates new instance of the icecream machine (automat v1) object in the hall of Vanilla
@@ -502,7 +502,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateIcecreamMachine(Name name, Rectangle area, bool decorative, bool pickable)
+        private static Item CreateIcecreamMachine(Name name, Rectangle area, bool decorative, bool pickable)
                     => new IcecreamMachine(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -512,7 +512,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateKeyHanger(Name name, Rectangle area, bool decorative, bool pickable) 
+        private static Item CreateKeyHanger(Name name, Rectangle area, bool decorative, bool pickable) 
             => new KeyHanger(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -528,8 +528,8 @@ namespace Game.Entities
         /// Creates new instance of the Mariotti's chair (křeslo v1) object in the kancelář v1 locality.
         /// </summary>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateMariottisChair(Name name, Rectangle area, bool decorative, bool pickable)
-            => new DumpObject(name, area, "křeslo u Mariottiho", decorative, pickable: pickable, null, null, null, "cs12", true);
+        private static Item CreateMariottisChair(Name name, Rectangle area, bool decorative, bool pickable)
+            => new Item(name, area, "křeslo u Mariottiho", decorative, pickable: pickable, null, null, null, "cs12", true);
 
         /// <summary>
         /// Creates new instance of the pinball table (pinball h1) object in the pub (výčep h1) locality.
@@ -537,8 +537,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreatePinball(Name name, Rectangle area, bool decorative, bool pickable)
-            => new DumpObject(name, area, "pinball", decorative, pickable: pickable, null, "snd15", stopWhenPlayerMoves: true);
+        private static Item CreatePinball(Name name, Rectangle area, bool decorative, bool pickable)
+            => new Item(name, area, "pinball", decorative, pickable: pickable, null, "snd15", stopWhenPlayerMoves: true);
 
         /// <summary>
         /// Creates new instance of the table (stůl) object in the pub (výčep h1) locality.
@@ -555,14 +555,14 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateSafe(Name name, Rectangle area, bool decorative, bool pickable)
-                        => new DumpObject(name, area, "trezor", decorative, pickable: pickable, null, null, null, "cs18", true);
+        private static Item CreateSafe(Name name, Rectangle area, bool decorative, bool pickable)
+                        => new Item(name, area, "trezor", decorative, pickable: pickable, null, null, null, "cs18", true);
 
         /// <summary>
         /// Creates new instance of the Sweeney's door bell object in the Easterby street (ulice s1) locality.
         /// </summary>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateSweeneysBell(Name name, Rectangle area, bool decorative, bool pickable)
+        private static Item CreateSweeneysBell(Name name, Rectangle area, bool decorative, bool pickable)
             => new SweeneysBell(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -572,8 +572,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateSweeneysComputer(Name name, Rectangle area, bool decorative, bool pickable)
-                => new DumpObject(name, area, "počítač u sweeneyho", decorative, pickable: pickable, null, null, "ComputerLoop", "cs16", true);
+        private static Item CreateSweeneysComputer(Name name, Rectangle area, bool decorative, bool pickable)
+                => new Item(name, area, "počítač u sweeneyho", decorative, pickable: pickable, null, null, "ComputerLoop", "cs16", true);
 
         /// <summary>
         /// Creates new instance of the cell phone (mobil s1) object in the Sweeney's bed room
@@ -582,8 +582,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateSweeneysPhone(Name name, Rectangle area, bool decorative, bool pickable)
-                => new DumpObject(name, area, "mobil u Sweeneyho", decorative, pickable: pickable, null, null, null, "cs15");
+        private static Item CreateSweeneysPhone(Name name, Rectangle area, bool decorative, bool pickable)
+                => new Item(name, area, "mobil u Sweeneyho", decorative, pickable: pickable, null, null, null, "cs15");
 
         /// <summary>
         /// Creates new instance of the table (stůl) object in the Sweeney's bed room (pokoj s1) locality.
@@ -591,8 +591,8 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateSweeneysTable(Name name, Rectangle area, bool decorative, bool pickable)
-                                => new DumpObject(name, area, "stůl u sweeneyho", decorative, pickable: pickable, null, null, null, "cs17", true);
+        private static Item CreateSweeneysTable(Name name, Rectangle area, bool decorative, bool pickable)
+                                => new Item(name, area, "stůl u sweeneyho", decorative, pickable: pickable, null, null, null, "cs17", true);
 
         /// <summary>
         /// Creates new instance of the car (auto) object in the garage of Vanilla crunch company
@@ -601,7 +601,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateVanillaCrunchCar(Name name, Rectangle area, bool decorative, bool pickable)
+        private static Item CreateVanillaCrunchCar(Name name, Rectangle area, bool decorative, bool pickable)
 => new VanillaCrunchCar(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -610,7 +610,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static DumpObject CreateWallClock(Name name, Rectangle area, bool decorative, bool pickable)       
-        => new DumpObject(name, area, "hodiny", decorative, pickable: pickable, null, null, "WallClockLoop", null, false, false);
+        private static Item CreateWallClock(Name name, Rectangle area, bool decorative, bool pickable)       
+        => new Item(name, area, "hodiny", decorative, pickable: pickable, null, null, "WallClockLoop", null, false, false);
     }
 }

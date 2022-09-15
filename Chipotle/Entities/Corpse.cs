@@ -14,7 +14,7 @@ namespace Game.Entities
     /// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 locality.
     /// </remarks>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class Corpse : DumpObject
+    public class Corpse : Item
     {
         /// <summary>
         /// Constructor

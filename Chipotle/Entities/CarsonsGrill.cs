@@ -14,7 +14,7 @@ namespace Game.Entities
     /// Represents the grill object in the zahrada c1 locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class CarsonsGrill : DumpObject
+    public class CarsonsGrill : Item
     {
         /// <summary>
         /// Constructor

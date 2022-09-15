@@ -7,6 +7,7 @@ using Game.Terrain;
 using Luky;
 
 using OpenTK;
+using DavyKager;
 
 namespace Game.Entities
 {
@@ -14,7 +15,7 @@ namespace Game.Entities
     /// Represents the bin object in the Walsch's pool (bazén w1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class PoolsideBin : DumpObject
+    public class PoolsideBin : Item
     {
         /// <summary>
         /// constructor
@@ -28,9 +29,9 @@ namespace Game.Entities
         /// Processes the message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
 
             if (UsedOnce)
             {

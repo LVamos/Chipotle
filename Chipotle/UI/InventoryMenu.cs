@@ -22,15 +22,15 @@ namespace Game.UI
 		/// <summary>
 		/// The inventory from which the player selects an object.
 		/// </summary>
-		private DumpObject[] _inventory;
+		private Item[] _inventory;
 
 		/// <summary>
 		/// The object selected for maniuplation.
 		/// </summary>
-		public DumpObject SelectedObject { get; private set; }
+		public Item SelectedObject { get; private set; }
 
 
-		public static (ActionType a, DumpObject o) Run(DumpObject[] inventory)
+		public static (ActionType a, Item o) Run(Item[] inventory)
 		{
 			InventoryMenu menu = new InventoryMenu(inventory);
 			WindowHandler.OpenModalWindow(menu);
@@ -50,7 +50,7 @@ namespace Game.UI
 			/// <summary>
 			/// Puts an object on the ground.
 			/// </summary>
-			Put,
+			Place,
 
 			/// <summary>
 			/// Uses an object.
@@ -66,7 +66,7 @@ namespace Game.UI
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public InventoryMenu(DumpObject[] inventory): base(null, "inventář", false)
+		public InventoryMenu(Item[] inventory): base(null, "inventář", false)
 		{
 			// Prepare the menu items and sort them by picking time.
 			_inventory = inventory;
@@ -87,7 +87,7 @@ namespace Game.UI
 		/// </summary>
 		private void PutObject()
 		{
-			Action = ActionType.Put;
+			Action = ActionType.Place;
 			ActivateItem();
 		}
 

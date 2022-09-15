@@ -12,7 +12,7 @@ namespace Game.Entities
     /// Represents the Sweeney's bell (zvonek p1) in the Easterby street (ulice p1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class SweeneysBell : DumpObject
+    public class SweeneysBell : Item
     {
         /// <summary>
         /// constructor
@@ -25,13 +25,13 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
             if (!Used)
                 _cutscene = "cs23";
             else _sounds.action = "snd25";
 
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
         }
     }
 }

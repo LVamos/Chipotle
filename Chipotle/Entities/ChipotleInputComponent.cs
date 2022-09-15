@@ -369,7 +369,7 @@ namespace Game.Entities
         /// Allows the player to use a nearby object or door.
         /// </summary>
         private void Interact()
-=> InnerMessage(new UseObject(this));
+=> InnerMessage(new Interact(this));
 
         /// <summary>
         /// Moves the NPC one step back.

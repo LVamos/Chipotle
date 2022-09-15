@@ -12,7 +12,7 @@ namespace Game.Entities
     /// Represents the killer's car object in the garage of Vanilla crunch (garáž v1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class KillersCar : DumpObject
+    public class KillersCar : Item
     {
         /// <summary>
         /// constructor
@@ -44,7 +44,7 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
             if (KeysOnHanger)
                 _sounds.action = "snd14";
@@ -56,7 +56,7 @@ namespace Game.Entities
                 ChipotlesCar.TakeMessage(new MoveChipotlesCar(this, World.GetLocality("ullice h1")));
             }
 
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
         }
     }
 }

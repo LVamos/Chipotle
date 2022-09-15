@@ -455,8 +455,8 @@ namespace Game.Entities
 
 			// If the obstacle is a door open it.
 			Passage p = World.GetPassage(obstacle);
-			if (p != null && p.State == PassageState.Closed)
-				p.TakeMessage(new UseObject(Owner, obstacle)); // Open the door and keep walking.
+			if (p != null && p is Door && p.State == PassageState.Closed)
+				p.TakeMessage(new UseDoor(Owner, obstacle)); // Open the door and keep walking.
 
 			return false;
 		}

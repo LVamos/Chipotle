@@ -53,7 +53,7 @@ namespace Game.Messaging.Events
 		/// <summary>
 		/// The manipulated object
 		/// </summary>
-		public readonly DumpObject Object;
+		public readonly Item Object;
 
 		/// <summary>
 		/// Constructor
@@ -61,7 +61,7 @@ namespace Game.Messaging.Events
 		/// <param name="sender">Source of the message</param>
 		/// <param name="object">The manipulated object</param>
 		/// <param name="success">Specifies if the object was picked up off the ground or not.</param>
-		public PickUpObjectResult(MessagingObject sender, DumpObject @object = null, ResultType result = ResultType.NoObject) : base(sender)
+		public PickUpObjectResult(MessagingObject sender, Item @object = null, ResultType result = ResultType.NoObject) : base(sender)
 		{
 			Sender = sender;
 			Object = @object;

@@ -18,7 +18,7 @@ namespace Game.Messaging.Events
 		/// <summary>
 		/// Soruce fo the message.
 		/// </summary>
-		public new readonly DumpObject Sender;
+		public new readonly Item Sender;
 
 		/// <summary>
 		/// Constructor
@@ -26,7 +26,7 @@ namespace Game.Messaging.Events
 		/// <param name="sender">Source of the message</param>
 		/// <param name="result">Result of the operation</param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public PlaceObjectResult(DumpObject sender, bool success = false): base(sender)
+		public PlaceObjectResult(Item sender, bool success = false): base(sender)
 		{
 			Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 			Success = success;

@@ -18,7 +18,7 @@ namespace Game.Entities
     /// Represents the car of the Detective Chipotle NPC.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class ChipotlesCar : DumpObject
+    public class ChipotlesCar : Item
     {
         /// <summary>
         /// Indicates if the object has moved at least once.
@@ -91,10 +91,10 @@ namespace Game.Entities
         /// <summary>
         /// List of all crutial object in the Walsch's area
         /// </summary>
-        private IEnumerable<DumpObject> WalshAreaObjects =>
+        private IEnumerable<Item> WalshAreaObjects =>
                     (new string[]
         {"tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w1"})
-                    .Select(o => World.GetObject(o) as DumpObject);
+                    .Select(o => World.GetObject(o) as Item);
 
         /// <summary>
         /// Runs a message handler for the specified message.
@@ -126,9 +126,9 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
 
             // When it's not allowed to use the car, play a knocking souund.
             if (

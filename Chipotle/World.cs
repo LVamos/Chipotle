@@ -377,7 +377,7 @@ namespace Game
 		/// <summary>
 		/// List of all simple game objects
 		/// </summary>
-		private static Dictionary<string, DumpObject> _objects;
+		private static Dictionary<string, Item> _objects;
 
 		/// <summary>
 		/// List of all passages
@@ -415,7 +415,7 @@ namespace Game
 		/// Registers a game object.
 		/// </summary>
 		/// <param name="o">The game object to be added</param>
-		public static void Add(DumpObject o)
+		public static void Add(Item o)
 		{
 			// Do a null check and look if object isn't already registered.
 			if (o == null)
@@ -629,7 +629,7 @@ namespace Game
 		/// </summary>
 		/// <param name="point">A point whose surroundings are to be searched</param>
 		/// <returns>Enumeration of game objects</returns>
-		public static IEnumerable<DumpObject> GetNearestObjects(Vector2 point)
+		public static IEnumerable<Item> GetNearestObjects(Vector2 point)
 		{
 			return
 				(from o in _objects.Values
@@ -647,7 +647,7 @@ namespace Game
 		/// <param name="radius">specifies maximum distance between the objects and the specified point.</param>
 		/// <param name="includeDecoaration">Specifies if decorative objects should be included</param>
 		/// <returns>Enumeration of game objects</returns>
-		public static IEnumerable<DumpObject> GetNearestObjects(Vector2 point, int radius, bool includeDecoaration = true)
+		public static IEnumerable<Item> GetNearestObjects(Vector2 point, int radius, bool includeDecoaration = true)
 		{
 			return
 				(from o in _objects.Values
@@ -698,13 +698,13 @@ namespace Game
 		/// </summary>
 		/// <param name="name">Inner name of the required object</param>
 		/// <returns>The found game object or null if nothing was found</returns>
-		public static DumpObject GetObject(string name)
-=> _objects.TryGetValue(name, out DumpObject o) ? o : null;
+		public static Item GetObject(string name)
+=> _objects.TryGetValue(name, out Item o) ? o : null;
 
 		/// <summary>
 		/// Returns an NPC or game object the tile intersects.
 		/// </summary>
-		public static DumpObject GetObject(Vector2 point)
+		public static Item GetObject(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
 			if (locality == null)
@@ -722,7 +722,7 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting objects</returns>
-		public static IEnumerable<DumpObject> GetObjects(Rectangle area)
+		public static IEnumerable<Item> GetObjects(Rectangle area)
 		{
 			return
 				from o in _objects.Values
@@ -735,7 +735,7 @@ namespace Game
 		/// </summary>
 		/// <param name="type">Type of requested game objects</param>
 		/// <returns>Enumeration of game objects</returns>
-		public static IEnumerable<DumpObject> GetObjectsByType(string type)
+		public static IEnumerable<Item> GetObjectsByType(string type)
 			=> _objects.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower(CultureInfo.CurrentCulture) == type.ToLower(CultureInfo.CurrentCulture));
 
 		/// <summary>
@@ -771,7 +771,7 @@ namespace Game
 		/// </summary>
 		public static void Initialize()
 		{
-			_objects = new Dictionary<string, DumpObject>();
+			_objects = new Dictionary<string, Item>();
 			_localities = new Dictionary<string, Locality>();
 			_entities = new Dictionary<string, Character>();
 			_passages = new Dictionary<string, Passage>();

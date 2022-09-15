@@ -20,6 +20,6 @@ namespace Game.Messaging.Events
 		/// <param name="sender">Source of the message</param>
 		/// <param name="object">The object that disappeared from the locality</param>
 		/// <param name="locality">The locality the object dissapeared from</param>
-		public ObjectDisappearedFromLocality(object sender, DumpObject @object, Locality locality):base(sender, @object, locality) {}
+		public ObjectDisappearedFromLocality(object sender, Item @object, Locality locality):base(sender, @object, locality) {}
 	}
 }

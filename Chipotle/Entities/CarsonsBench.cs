@@ -13,7 +13,7 @@ namespace Game.Entities
     /// Represents a bench object in the zahrada c1 locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class CarsonsBench : DumpObject
+    public class CarsonsBench : Item
     {
         /// <summary>
         /// Constructor
@@ -33,14 +33,14 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
             if (
                 !World.GetObjectsByType("lavice u Carsona")
                 .Any(o => o.Used)
                 )
             {
-                base.OnUseObject(message);
+                base.OnUseObjects(message);
                 Car.TakeMessage(new UnblockLocality(this, World.GetLocality("ulice v1")));
             }
         }

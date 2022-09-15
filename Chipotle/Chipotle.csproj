@@ -103,6 +103,7 @@
     <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Entities\TuttleState.cs" />
     <Compile Include="Messaging\Commands\FollowPath.cs" />
+    <Compile Include="Messaging\Commands\Interact.cs" />
     <Compile Include="Messaging\Commands\PickUpObject.cs" />
     <Compile Include="Messaging\Commands\PutObject.cs" />
     <Compile Include="Messaging\Commands\ReactToBeingPinchedInDoor.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Messaging\Commands\SayObjectDescription.cs" />
     <Compile Include="Messaging\Commands\ResearchObject.cs" />
     <Compile Include="Messaging\Commands\TryGoTo.cs" />
+    <Compile Include="Messaging\Commands\UseDoor.cs" />
     <Compile Include="Messaging\Events\EmptyInventory.cs" />
     <Compile Include="Messaging\Events\ObjectAppearedInLocality.cs" />
     <Compile Include="Messaging\Events\ObjectDisappearedFromLocality.cs" />
@@ -171,7 +173,7 @@
     <Compile Include="Entities\ChipotlePhysicsComponent.cs" />
     <Compile Include="Entities\ChipotleSoundComponent.cs" />
     <Compile Include="Entities\ChristineAIComponent.cs" />
-    <Compile Include="Entities\DumpObject.cs" />
+    <Compile Include="Entities\Item.cs" />
     <Compile Include="Entities\EntityComponent.cs" />
     <Compile Include="Entities\Character.cs" />
     <Compile Include="Entities\GameObject.cs" />
@@ -187,7 +189,7 @@
     <Compile Include="Messaging\Commands\SayLocalityName.cs" />
     <Compile Include="Messaging\Events\PositionChanged.cs" />
     <Compile Include="Messaging\Events\TerrainCollided.cs" />
-    <Compile Include="Messaging\Commands\UseObject.cs" />
+    <Compile Include="Messaging\Commands\UseObjects.cs" />
     <Compile Include="Messaging\Events\KeyPressed.cs" />
     <Compile Include="Messaging\MessagingObject.cs" />
     <Compile Include="Messaging\Commands\StartWalk.cs" />

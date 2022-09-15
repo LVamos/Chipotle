@@ -118,7 +118,7 @@ namespace Game.Terrain
 			switch (message)
 			{
 				case DoorHit dh: OnDoorHit(dh); break;
-				case UseObject uo: OnUseObject(uo); break;
+				case UseDoor m: OnUseDoor(m); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -218,7 +218,7 @@ namespace Game.Terrain
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnUseObject(UseObject message)
+		protected virtual void OnUseDoor(UseDoor message)
 		{
 			if (!_openable)
 				return;

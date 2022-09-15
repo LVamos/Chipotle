@@ -114,7 +114,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInNeighbourLocality(DumpObject o)
+		public Locality IsInNeighbourLocality(Item o)
 			=> Neighbours.FirstOrDefault(l => l.IsItHere(o));
 
 		/// <summary>
@@ -130,7 +130,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInAccessibleLocality(DumpObject o)
+		public Locality IsInAccessibleLocality(Item o)
 			=> GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
 
 		/// <summary>
@@ -221,7 +221,7 @@ namespace Game.Terrain
 		/// <param name="radius">Max distance from the speciifed <paramref name="point"/></param>
 		/// <param name="includeDecoration">Specifies if the method lists decorative objects such as fences or rails.</param>
 		/// <returns>Enumeration of dump objectts</returns>
-		public IEnumerable<DumpObject> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
+		public IEnumerable<Item> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
 		{
 			return
 				from o in Objects
@@ -340,7 +340,7 @@ namespace Game.Terrain
 		/// List of objects present in this locality.
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<DumpObject> Objects
+		public IEnumerable<Item> Objects
 		{
 			get
 			{
@@ -363,7 +363,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
 		/// <returns>True if the object is present in the locality</returns>
-		public bool IsItHere(DumpObject o)
+		public bool IsItHere(Item o)
 			=> _objects.Contains(o.Name.Indexed);
 
 		/// <summary>
@@ -428,7 +428,7 @@ namespace Game.Terrain
 		/// Adds a game object to list of present objects.
 		/// </summary>
 		/// <param name="o">The object ot be added</param>
-		private void Register(DumpObject o) => _objects.Add(o.Name.Indexed);
+		private void Register(Item o) => _objects.Add(o.Name.Indexed);
 
 		/// <summary>
 		/// Adds an entity to locality.
@@ -547,7 +547,7 @@ namespace Game.Terrain
 		protected void Disappear()
 		{
 			// Delete objects.
-			foreach (DumpObject o in Objects)
+			foreach (Item o in Objects)
 				World.Remove(o);
 
 			// Delete passages.
@@ -572,7 +572,7 @@ namespace Game.Terrain
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 
-			foreach (DumpObject o in Objects)
+			foreach (Item o in Objects)
 			{
 				if (o != message.Sender)
 					o.TakeMessage(message);

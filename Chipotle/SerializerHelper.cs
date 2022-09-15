@@ -26,7 +26,7 @@ namespace Game
         /// <summary>
         /// stores all game objects.
         /// </summary>
-        public readonly Dictionary<string, DumpObject> Objects;
+        public readonly Dictionary<string, Item> Objects;
 
         /// <summary>
         /// stores all passages.
@@ -40,7 +40,7 @@ namespace Game
         /// <param name="entities">All entities to be serialized</param>
         /// <param name="objects">All objects to be serialized</param>
         /// <param name="passages">All passages to be serialized</param>
-        public SerializerHelper(Dictionary<string, Character> entities, Dictionary<string, DumpObject> objects, Dictionary<string, Passage> passages, Dictionary<string, Locality> localities)
+        public SerializerHelper(Dictionary<string, Character> entities, Dictionary<string, Item> objects, Dictionary<string, Passage> passages, Dictionary<string, Locality> localities)
         {
             Entities = entities;
             Objects = objects;

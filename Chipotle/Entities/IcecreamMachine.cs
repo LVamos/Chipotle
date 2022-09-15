@@ -14,7 +14,7 @@ namespace Game.Entities
     /// company (hala v1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class IcecreamMachine : DumpObject
+    public class IcecreamMachine : Item
     {
         /// <summary>
         /// constructor
@@ -28,7 +28,7 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
             Character tuttle = World.GetCharacter("tuttle");
             Locality garage = World.GetLocality("garáž v1");
@@ -41,7 +41,7 @@ namespace Game.Entities
             else
                 _cutscene = "cs9";
 
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
         }
     }
 }

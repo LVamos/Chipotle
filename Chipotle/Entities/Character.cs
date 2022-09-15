@@ -51,7 +51,7 @@ namespace Game.Entities
         /// <summary>
         /// Represents the inventory of the entity.
         /// </summary>
-        public IEnumerable<DumpObject> Inventory
+        public IEnumerable<Item> Inventory
 		{
 			get
 			{

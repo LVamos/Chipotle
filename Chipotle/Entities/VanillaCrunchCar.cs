@@ -13,7 +13,7 @@ namespace Game.Entities
     /// the company (garáž v1) locality.
     /// </summary>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class VanillaCrunchCar : DumpObject
+    public class VanillaCrunchCar : Item
     {
         /// <summary>
         /// constructor
@@ -33,10 +33,10 @@ namespace Game.Entities
         /// Processes the UseObject message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected override void OnUseObject(UseObject message)
+        protected override void OnUseObjects(UseObjects message)
         {
             _sounds.action = KeyHanger.KeysHanging ? "snd14" : "snd4";
-            base.OnUseObject(message);
+            base.OnUseObjects(message);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Game.Messaging.Events
 		/// <summary>
 		/// The object that appeared in the locality.
 		/// </summary>
-		public readonly DumpObject Object;
+		public readonly Item Object;
 
 		/// <summary>
 		/// The locality the object apeared in
@@ -30,7 +30,7 @@ namespace Game.Messaging.Events
 		/// <param name="sender">Source of the message</param>
 		/// <param name="object">The object that appeared in the locality</param>
 		/// <param name="locality">The concerning locality</param>
-		public ObjectAppearedInLocality(object sender, DumpObject @object, Locality locality) : base(sender)
+		public ObjectAppearedInLocality(object sender, Item @object, Locality locality) : base(sender)
 		{
 			Object = @object;
 			Locality = locality;
