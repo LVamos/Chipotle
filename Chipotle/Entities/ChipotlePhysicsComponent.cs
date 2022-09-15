@@ -644,6 +644,11 @@ namespace Game.Entities
 		protected readonly Dictionary<Locality, HashSet<int>> _motionTrack = new Dictionary<Locality, HashSet<int>>();
 
 		/// <summary>
+		/// Determines the maximum distance from the pool at which stepping into a puddle will trigger a cutscene.
+		/// </summary>
+		protected const float _puddleRadius = 10;
+
+		/// <summary>
 		/// Computes amount of horizontal motion track regions for the current locality.
 		/// </summary>
 		protected int MotionTrackWidth => (int)(Locality.Area.Width / _motionTrackRadius + (Locality.Area.Width % _motionTrackRadius > 0 ? 1 : 0));
@@ -1005,11 +1010,9 @@ namespace Game.Entities
 		/// </param>
 		private void WatchPuddle(Vector2 point)
 		{
-			if (_steppedIntoPuddle)
-				return;
-
-			Rectangle puddle = new Rectangle("937, 1081, 941, 1065");
-			if (puddle.Intersects(point))
+			if (!_steppedIntoPuddle 
+				&& CurrentTile.tile.Terrain == TerrainType.Puddle
+				&& World.GetObject("bazén w1").Area.GetDistanceFrom(CurrentTile.position) <= _puddleRadius)
 			{
 				_steppedIntoPuddle = true;
 				World.PlayCutscene(Owner, "cs2");

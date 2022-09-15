@@ -174,7 +174,7 @@
     <Compile Include="Entities\ChipotleSoundComponent.cs" />
     <Compile Include="Entities\ChristineAIComponent.cs" />
     <Compile Include="Entities\Item.cs" />
-    <Compile Include="Entities\EntityComponent.cs" />
+    <Compile Include="Entities\CharacterComponent.cs" />
     <Compile Include="Entities\Character.cs" />
     <Compile Include="Entities\GameObject.cs" />
     <Compile Include="Entities\InputComponent.cs" />
@@ -210,7 +210,7 @@
     <Compile Include="Terrain\PassageState.cs" />
     <Compile Include="Terrain\PathFinder.cs" />
     <Compile Include="Terrain\PathFinder.Node.cs" />
-    <Compile Include="Terrain\Plane.cs" />
+    <Compile Include="Terrain\Rectangle.cs" />
     <Compile Include="Terrain\Locality.cs" />
     <Compile Include="Terrain\SlidingDoor.cs" />
     <Compile Include="Terrain\TerrainType.cs" />
