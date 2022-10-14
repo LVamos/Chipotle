@@ -1,22 +1,20 @@
-﻿using System.Security.Principal;
-using Game.Entities;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Mail;
-using System;
-using System.IO;
-using System.Windows.Forms;
-
-using DavyKager;
+﻿using DavyKager;
 
 using Game.UI;
 
 using Luky;
 
-using OpenTK;
-using System.Text;
-using System.Linq;
 using Microsoft.VisualBasic;
+
+using OpenTK;
+
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
+using System.Windows.Forms;
 
 namespace Game
 {
@@ -56,7 +54,7 @@ namespace Game
             /// Enables or disables a custom initial position for Chipotle.
             /// </summary>
             public static bool AllowCustomChipotlesStartPosition;
-			
+
             /// <summary>
             /// Enables or disables commands for loading and creating predefined saves.
             /// </summary>
@@ -92,64 +90,64 @@ namespace Game
             /// </summary>
             public static bool LetTuttleFollowChipotle;
 
-			/// <summary>
-			/// Switches the game to debug mode.
-			/// </summary>
-			public static void SetDebugMode()
-			{
+            /// <summary>
+            /// Switches the game to debug mode.
+            /// </summary>
+            public static void SetDebugMode()
+            {
                 TuttleTestStart = new Vector2(1023, 1030);
-				AllowTuttlesCustomPosition = true;
-				AllowCustomChipotlesStartPosition = true;
-                AllowPredefinedSaves =          true;
-				DisableJawsKeyHook = false;
-				LetTuttleFollowChipotle = true;
-				MainMenuAtStartup = false;
-				PlayCutscenes = true;
-				PlayMenuLoop = false;
-				ReportErrors = false;
-				SendTuttleToPool = false;
-				TestCommandsEnabled = true;
-				ThrowExceptions = true;
-			}
+                AllowTuttlesCustomPosition = true;
+                AllowCustomChipotlesStartPosition = true;
+                AllowPredefinedSaves = true;
+                DisableJawsKeyHook = false;
+                LetTuttleFollowChipotle = true;
+                MainMenuAtStartup = false;
+                PlayCutscenes = true;
+                PlayMenuLoop = false;
+                ReportErrors = false;
+                SendTuttleToPool = false;
+                TestCommandsEnabled = true;
+                ThrowExceptions = true;
+            }
 
-			/// <summary>
-			/// Prepares the game for release.
-			/// </summary>
-			public static void SetReleaseMode()
-			{
-				AllowTuttlesCustomPosition = false;
-				AllowCustomChipotlesStartPosition = false;
-                AllowPredefinedSaves = false;
-				DisableJawsKeyHook = true;
-				LetTuttleFollowChipotle = true;
-				MainMenuAtStartup = true;
-				PlayCutscenes = true;
-				PlayMenuLoop = true;
-				ReportErrors = true;
-				SendTuttleToPool = true;
-				TestCommandsEnabled = false;
-				ThrowExceptions = false;
-			}
-
-			/// <summary>
-			/// Prepares the game for testing purposes.
-			/// </summary>
-			public static void SetTestMode()
+            /// <summary>
+            /// Prepares the game for release.
+            /// </summary>
+            public static void SetReleaseMode()
             {
                 AllowTuttlesCustomPosition = false;
                 AllowCustomChipotlesStartPosition = false;
-                AllowPredefinedSaves = true;
-				DisableJawsKeyHook = true;
+                AllowPredefinedSaves = false;
+                DisableJawsKeyHook = true;
                 LetTuttleFollowChipotle = true;
                 MainMenuAtStartup = true;
                 PlayCutscenes = true;
                 PlayMenuLoop = true;
                 ReportErrors = true;
                 SendTuttleToPool = true;
-				TestCommandsEnabled = false;
-				ThrowExceptions = false;
-			}
-			
+                TestCommandsEnabled = false;
+                ThrowExceptions = false;
+            }
+
+            /// <summary>
+            /// Prepares the game for testing purposes.
+            /// </summary>
+            public static void SetTestMode()
+            {
+                AllowTuttlesCustomPosition = false;
+                AllowCustomChipotlesStartPosition = false;
+                AllowPredefinedSaves = true;
+                DisableJawsKeyHook = true;
+                LetTuttleFollowChipotle = true;
+                MainMenuAtStartup = true;
+                PlayCutscenes = true;
+                PlayMenuLoop = true;
+                ReportErrors = true;
+                SendTuttleToPool = true;
+                TestCommandsEnabled = false;
+                ThrowExceptions = false;
+            }
+
 
         }
 
@@ -159,7 +157,7 @@ namespace Game
         public static string MapPath => Path.Combine(Program.DataPath, @"Map\chipotle.xml");
 
 
-		private static string GetUserInfo()
+        private static string GetUserInfo()
         {
             StringBuilder text = new StringBuilder();
 
@@ -175,7 +173,7 @@ namespace Game
                 string objects = objectList.IsNullOrEmpty() ? "žádné" : string.Join(", ", objectList);
                 text.AppendLine("Okolní objekty: " + objects);
             }
-                text.AppendLine("Datum a čas: " + DateTime.Now.ToString());
+            text.AppendLine("Datum a čas: " + DateTime.Now.ToString());
 
             return text.ToString();
         }
@@ -192,8 +190,8 @@ namespace Game
                 return;
             }
 
-            string subject = "Chipotle: " + System.DirectoryServices.AccountManagement.UserPrincipal.Current.DisplayName +" posílá připomínku";
-            string body ="Zpráva: " +message + Environment.NewLine + GetUserInfo();
+            string subject = "Chipotle: " + System.DirectoryServices.AccountManagement.UserPrincipal.Current.DisplayName + " posílá připomínku";
+            string body = "Zpráva: " + message + Environment.NewLine + GetUserInfo();
 
             if (!SendMeMail(subject, body))
                 Tolk.Speak("Zprávu se nepodařilo odeslat.");
@@ -282,10 +280,10 @@ namespace Game
         /// </summary>
         public static string SerializationPath => Path.Combine(DataPath, "game.sav");
 
-		/// <summary>
-		/// Path to the folder with predefined saves.
-		/// </summary>
-		public static string PredefinedSavesPath
+        /// <summary>
+        /// Path to the folder with predefined saves.
+        /// </summary>
+        public static string PredefinedSavesPath
         { get => Path.Combine(DataPath, "Saves"); }
 
         /// <summary>
@@ -313,7 +311,7 @@ namespace Game
 
                 text.AppendLine("Typ výjimky: " + ex.GetType().ToString()).AppendLine();
                 text.AppendLine(ex.Message).AppendLine();
-                text.AppendLine("Stack trace" +Environment.NewLine + ex.StackTrace);
+                text.AppendLine("Stack trace" + Environment.NewLine + ex.StackTrace);
 
                 string report = text.ToString();
                 bool ok = ReportError(report); // send e-mail with the error message to me.
@@ -466,10 +464,10 @@ namespace Game
         /// </summary>
         /// <param name="prompt">The prompt to be shown</param>
         public static void Terminate(string prompt)
-{
+        {
             World.Sound.StopAll();
             string message = string.IsNullOrEmpty(prompt) ? "Došlo k neznámé chybě. Hra bude ukončena." : prompt;
-                Interaction.MsgBox(prompt, MsgBoxStyle.Critical, "Chyba");
+            Interaction.MsgBox(prompt, MsgBoxStyle.Critical, "Chyba");
             EnableJAWSKeyHook();
             Environment.Exit(0);
         }

@@ -1,7 +1,5 @@
 ﻿using System;
 
-using OpenTK;
-
 namespace Game.Messaging.Events
 {
     /// <summary>

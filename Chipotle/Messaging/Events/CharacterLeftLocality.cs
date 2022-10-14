@@ -1,7 +1,7 @@
-﻿using System;
-
-using Game.Entities;
+﻿using Game.Entities;
 using Game.Terrain;
+
+using System;
 
 namespace Game.Messaging.Events
 {
@@ -13,13 +13,13 @@ namespace Game.Messaging.Events
     [Serializable]
     public class CharacterLeftLocality : CharacterCameToLocality
     {
-/// <summary>
-/// Constructor
-/// </summary>
-/// <param name="sender">The object that sent this message</param>
-/// <param name="entity">The NPC that left the locality</param>
-/// <param name="locality">The locality left by the NPC</param>
-        public CharacterLeftLocality(object sender, Character entity, Locality locality): base(sender, entity, locality)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="sender">The object that sent this message</param>
+        /// <param name="entity">The NPC that left the locality</param>
+        /// <param name="locality">The locality left by the NPC</param>
+        public CharacterLeftLocality(object sender, Character entity, Locality locality) : base(sender, entity, locality)
         { }
-           }
+    }
 }

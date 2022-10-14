@@ -1,11 +1,4 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows.Forms;
-
-using DavyKager;
+﻿using DavyKager;
 
 using Game.Messaging;
 using Game.Messaging.Commands;
@@ -14,7 +7,14 @@ using Game.Terrain;
 using Game.UI;
 
 using OpenTK;
-using Luky;
+
+using ProtoBuf;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace Game.Entities
 {
@@ -32,10 +32,10 @@ namespace Game.Entities
         {
             switch (message)
             {
-                case KeyReleased kr:  OnKeyUp(kr); break;
+                case KeyReleased kr: OnKeyUp(kr); break;
                 default: base.HandleMessage(message); break;
             }
-    }
+        }
 
         /// <summary>
         /// Reports current position of the player in relative coordinates.
@@ -59,10 +59,10 @@ namespace Game.Entities
             new Dictionary<KeyShortcut, Action>()
             {
                 // Test commands
-				
+
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.F5)] = LoadPredefinedSave,
                 [new KeyShortcut(Keys.F5)] = CreatePredefinedSave,
-				[new KeyShortcut(Keys.C)] = SayRelativeCoordinates,
+                [new KeyShortcut(Keys.C)] = SayRelativeCoordinates,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.T)] = SayTuttlesPosition,
                 [new KeyShortcut(Keys.F10)] = JumpToLocality,
                 [new KeyShortcut(Keys.F11)] = SaveStartPosition,
@@ -74,7 +74,7 @@ namespace Game.Entities
                 [new KeyShortcut(Keys.R)] = SayLocalityDescription,
                 [new KeyShortcut(Keys.I)] = RunInventoryMenu,
                 [new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.Return)] = PickUpObject,
-				[new KeyShortcut(Keys.Tab)] = GameMenu,
+                [new KeyShortcut(Keys.Tab)] = GameMenu,
                 [new KeyShortcut(Keys.L)] = SayLocalitySize,
                 [new KeyShortcut(false, true, false, Keys.V)] = ListExits,
                 [new KeyShortcut(false, true, false, Keys.O)] = ListObjects,
@@ -116,24 +116,24 @@ namespace Game.Entities
         /// Creates a predefined save.
         /// </summary>
         private void LoadPredefinedSave()
-		{
-            if(Program.Settings.AllowPredefinedSaves)
-            InnerMessage(new LoadPredefinedSave(this));
-		}
+        {
+            if (Program.Settings.AllowPredefinedSaves)
+                InnerMessage(new LoadPredefinedSave(this));
+        }
 
-		/// <summary>
-		/// Creates a predefined save.
-		/// </summary>
-		private void CreatePredefinedSave()
+        /// <summary>
+        /// Creates a predefined save.
+        /// </summary>
+        private void CreatePredefinedSave()
         {
             if (Program.Settings.AllowPredefinedSaves)
                 InnerMessage(new CreatePredefinedSave(this));
-		}
+        }
 
-		/// <summary>
-		/// Lists navigable objects.
-		/// </summary>
-		protected void ListObjects() => InnerMessage(new ListObjects(this));
+        /// <summary>
+        /// Lists navigable objects.
+        /// </summary>
+        protected void ListObjects() => InnerMessage(new ListObjects(this));
 
         /// <summary>
         /// Runs the game menu
@@ -174,9 +174,9 @@ namespace Game.Entities
 
             // Run the menu
             string[] items = commands.Select(c => c.name).ToArray<string>();
-            Program.MainWindow.GameInProgress= false;
+            Program.MainWindow.GameInProgress = false;
             int item = WindowHandler.Menu(items, "Menu");
-            Program.MainWindow.GameInProgress= true;
+            Program.MainWindow.GameInProgress = true;
             if (item > 0)
                 commands[item].command();
         }
@@ -241,7 +241,7 @@ namespace Game.Entities
             string distance = World.GetDistance(tuttle.Area.Center, Owner.Area.Center).ToString();
             string position = tuttle.Area.Center.ToString();
             string locality = tuttle.Locality.Name.Indexed;
-            Tolk.Speak(distance +Environment.NewLine +locality+" " +position, true);
+            Tolk.Speak(distance + Environment.NewLine + locality + " " + position, true);
         }
 
         /// <summary>
@@ -324,7 +324,7 @@ namespace Game.Entities
         {
             base.OnCutsceneBegan(message);
 
-            if(message.CutsceneName == "cs7" || message.CutsceneName == "cs10")
+            if (message.CutsceneName == "cs7" || message.CutsceneName == "cs10")
                 _messagingEnabled = false;
         }
 
@@ -362,7 +362,7 @@ namespace Game.Entities
         /// <summary>
         /// Reports current orientation setting of the Chipotle NPC.
         /// </summary>
-        protected void SayOrientation() 
+        protected void SayOrientation()
             => InnerMessage(new SayOrientation(this));
 
         /// <summary>

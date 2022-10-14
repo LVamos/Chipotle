@@ -1,25 +1,19 @@
 ﻿using Game.Entities;
 using Game.Terrain;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Game.Messaging.Events
 {
-	/// <summary>
-	/// Informs that a object disappeared from a locality.
-	/// </summary>
-	public class ObjectDisappearedFromLocality: ObjectAppearedInLocality
-	{
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="sender">Source of the message</param>
-		/// <param name="object">The object that disappeared from the locality</param>
-		/// <param name="locality">The locality the object dissapeared from</param>
-		public ObjectDisappearedFromLocality(object sender, Item @object, Locality locality):base(sender, @object, locality) {}
-	}
+    /// <summary>
+    /// Informs that a object disappeared from a locality.
+    /// </summary>
+    public class ObjectDisappearedFromLocality : ObjectAppearedInLocality
+    {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="sender">Source of the message</param>
+        /// <param name="object">The object that disappeared from the locality</param>
+        /// <param name="locality">The locality the object dissapeared from</param>
+        public ObjectDisappearedFromLocality(object sender, Item @object, Locality locality) : base(sender, @object, locality) { }
+    }
 }

@@ -34,7 +34,7 @@ namespace Game.UI
             Cursor = Cursors.Default;
             Name = "MainWindow";
             ResumeLayout(false);
-            Text = "Chipotle " +Program.Version;
+            Text = "Chipotle " + Program.Version;
             ShowIcon = false;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -78,7 +78,7 @@ namespace Game.UI
 
             if (World.Sound.Muted)
             {
-            World.ResumeCutscene();
+                World.ResumeCutscene();
                 World.Sound.Unmute();
             }
         }
@@ -98,8 +98,8 @@ namespace Game.UI
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
-            if(GameInProgress)
-            World.SaveGame();
+            if (GameInProgress)
+                World.SaveGame();
 
             World.Sound.StopAll();
             Program.EnableJAWSKeyHook();
@@ -128,7 +128,7 @@ namespace Game.UI
         {
             InterruptSpeech();
             WindowHandler.OnKeyDown(new KeyEventParams(e));
-}
+        }
 
         /// <summary>
         /// Interrupts an ongoing SAPI or screen reader utterance.

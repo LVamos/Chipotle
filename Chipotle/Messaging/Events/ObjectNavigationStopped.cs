@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Game.Entities;
 
 namespace Game.Messaging.Events
 {
-[Serializable]
-    public class ObjectNavigationStopped: GameMessage
+    [Serializable]
+    public class ObjectNavigationStopped : GameMessage
     {
         /// <summary>
         /// Constructor

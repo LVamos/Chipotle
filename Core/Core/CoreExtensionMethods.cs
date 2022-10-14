@@ -1,9 +1,9 @@
+using OpenTK;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-
-using OpenTK;
 
 namespace Luky
 {
@@ -35,8 +35,8 @@ namespace Luky
         /// </summary>
         /// <param name="s">The string to modify</param>
         /// <returns>The string converted to lowercase without leading and trailing spaces</returns>
-            public static string PrepareForIndexing(this string s)
-    => s?.Trim(new char[] { ' ' }).ToLower();
+        public static string PrepareForIndexing(this string s)
+=> s?.Trim(new char[] { ' ' }).ToLower();
 
         /// <summary>
         /// Calls predicate on each element in list and removes first matching one.

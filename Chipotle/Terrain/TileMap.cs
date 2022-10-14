@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Luky;
+
+using OpenTK;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-
-using Luky;
-
-using OpenTK;
 
 namespace Game.Terrain
 {

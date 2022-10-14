@@ -1,10 +1,8 @@
-﻿using System;
-using System.Runtime.Remoting.Channels;
-
-using Game.Entities;
-using Game.Terrain;
+﻿using Game.Entities;
 
 using OpenTK;
+
+using System;
 
 namespace Game.Messaging.Commands
 {
@@ -33,19 +31,19 @@ namespace Game.Messaging.Commands
         /// </summary>
         public readonly Item UsedObject;
 
-		/// <summary>
-		/// The other item used by a character through another object
-		/// </summary>
-		public readonly GameObject OtherObject;
+        /// <summary>
+        /// The other item used by a character through another object
+        /// </summary>
+        public readonly GameObject OtherObject;
 
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="sender">A character using the objects</param>
-		/// <param name="manipulationPoint">A point of the object at which it's used</param>
-		/// <param name="usedObject">The item directly used by the character</param>
-		/// <param name="otherObject">The other item or character used by a character through another object</param>
-		public UseObjects(Character sender, Vector2 manipulationPoint, Item usedObject, GameObject otherObject = null) : base(sender)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="sender">A character using the objects</param>
+        /// <param name="manipulationPoint">A point of the object at which it's used</param>
+        /// <param name="usedObject">The item directly used by the character</param>
+        /// <param name="otherObject">The other item or character used by a character through another object</param>
+        public UseObjects(Character sender, Vector2 manipulationPoint, Item usedObject, GameObject otherObject = null) : base(sender)
         {
             Sender = sender;
             ManipulationPoint = manipulationPoint;

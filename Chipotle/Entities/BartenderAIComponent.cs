@@ -1,15 +1,12 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using ProtoBuf;
-using Luky;
+
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -62,7 +59,7 @@ namespace Game.Entities
         {
             switch (message)
             {
-                                    case CharacterCameToLocality le: OnLocalityEntered(le); break;
+                case CharacterCameToLocality le: OnLocalityEntered(le); break;
                 case CharacterMoved em: OnEntityMoved(em); break;
                 default: base.HandleMessage(message); break;
             }
@@ -128,7 +125,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(CharacterCameToLocality message)
         {
-            if (message.Character!= World.Player || message.Locality != Owner.Locality)
+            if (message.Character != World.Player || message.Locality != Owner.Locality)
                 return;
 
             if (_velcomeChipotle)

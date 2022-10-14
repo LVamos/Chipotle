@@ -16,10 +16,10 @@ namespace Game.Messaging.Events
     [Serializable]
     public class DoorHit : GameMessage
     {
-            /// <summary>
-            /// The door to which an NPC bumped.
-            /// </summary>
-            public readonly Door Door;
+        /// <summary>
+        /// The door to which an NPC bumped.
+        /// </summary>
+        public readonly Door Door;
 
         /// <summary>
         /// The point at which the door was hit.

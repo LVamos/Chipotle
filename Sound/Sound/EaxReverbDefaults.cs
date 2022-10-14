@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using OpenTK;
 
-using OpenTK;
+using System.Collections.Generic;
+using System.Linq;
 
 using EaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb;
 using EfxEaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EfxEaxReverb;

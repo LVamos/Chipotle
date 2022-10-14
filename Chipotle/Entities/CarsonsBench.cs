@@ -1,11 +1,11 @@
-﻿using ProtoBuf;
-using System;
-using System.Linq;
-
-using Game.Messaging.Commands;
+﻿using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
+
+using ProtoBuf;
+
+using System.Linq;
 
 namespace Game.Entities
 {

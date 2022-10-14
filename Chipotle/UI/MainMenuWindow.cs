@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
-using System.IO;
-
-using DavyKager;
+﻿using DavyKager;
 
 using Luky;
+
 using OpenTK;
+
+using System;
+using System.IO;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace Game.UI
 {
@@ -83,10 +81,10 @@ namespace Game.UI
                 "Konec"
             };
 
-    /// <summary>
-    /// Name of the sound with the speaker test.
-    /// </summary>
-    private const string _speakerTestSound= "SpeakerTest";
+        /// <summary>
+        /// Name of the sound with the speaker test.
+        /// </summary>
+        private const string _speakerTestSound = "SpeakerTest";
 
         /// <summary>
         /// Name of the sound played when the application is being closed
@@ -103,7 +101,7 @@ namespace Game.UI
         /// </summary>
         public void RunMainMenu()
         {
-            string intro =_menuLoopID == 0 ? "Hlavní menu" : String.Empty;
+            string intro = _menuLoopID == 0 ? "Hlavní menu" : String.Empty;
             PlayLoop();
 
             string[] items = GameStateSaved() ? _itemsWithLoadGame : _items;
@@ -140,7 +138,7 @@ namespace Game.UI
         /// </summary>
         private void StartGame()
         {
-            StopLoop(); 
+            StopLoop();
             WindowHandler.StartGame();
         }
 
@@ -178,7 +176,7 @@ namespace Game.UI
         {
             World.Sound.GetDynamicInfo(_speakerTestSoundID, out SoundState state, out int _);
 
-            if(state != SoundState.Playing)
+            if (state != SoundState.Playing)
                 _speakerTestSoundID = World.Sound.Play(_speakerTestSound);
             _loopInProgress = true;
             RunMainMenu();
@@ -189,13 +187,13 @@ namespace Game.UI
         /// </summary>
         private void ExitGame()
         {
-			// Stop speaker test if it's playing.
-			World.Sound.GetDynamicInfo(_speakerTestSoundID, out SoundState state, out int _);
+            // Stop speaker test if it's playing.
+            World.Sound.GetDynamicInfo(_speakerTestSoundID, out SoundState state, out int _);
             if (state == SoundState.Playing)
                 World.Sound.Stop(_speakerTestSoundID);
 
 
-				Program.EnableJAWSKeyHook();
+            Program.EnableJAWSKeyHook();
             StopLoop();
             Thread.Sleep(7000);
             Environment.Exit(0);
@@ -220,7 +218,7 @@ namespace Game.UI
             if (s == SoundState.Playing)
                 World.Sound.Stop(_speakerTestSoundID);
 
-             base.OnKeyDown(e);
+            base.OnKeyDown(e);
         }
 
     }

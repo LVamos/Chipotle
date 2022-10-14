@@ -1,9 +1,8 @@
-﻿using System;
-
-using Game.Entities;
-using Game.Terrain;
+﻿using Game.Entities;
 
 using OpenTK;
+
+using System;
 
 namespace Game.Messaging.Events
 {

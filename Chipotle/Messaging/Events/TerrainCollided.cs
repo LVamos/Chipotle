@@ -1,8 +1,6 @@
-﻿using System;
+﻿using OpenTK;
 
-using Game.Terrain;
-
-using OpenTK;
+using System;
 
 namespace Game.Messaging.Events
 {

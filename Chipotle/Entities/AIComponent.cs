@@ -1,10 +1,8 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Events;
 using Game.Terrain;
+
+using ProtoBuf;
 
 namespace Game.Entities
 {
@@ -42,7 +40,7 @@ namespace Game.Entities
                 case PositionChanged pc: OnPositionChanged(pc); break;
                 default: base.HandleMessage(message); break;
             }
-    }
+        }
 
         /// <summary>
         /// Processes the PositionChanged message.

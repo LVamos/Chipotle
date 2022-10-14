@@ -1,9 +1,4 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using DavyKager;
+﻿using DavyKager;
 
 using Game.Messaging;
 using Game.Messaging.Commands;
@@ -13,7 +8,11 @@ using Game.Terrain;
 using Luky;
 
 using OpenTK;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
+
+using ProtoBuf;
+
+using System;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -23,29 +22,29 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class ChipotleSoundComponent : SoundComponent
     {
-		/// <summary>
-		/// Handles a message.
-		/// </summary>
-		/// <param name="m">The message to be handled</param>
-		protected void OnSayObjectDescription(SayObjectDescription m)
-		{
+        /// <summary>
+        /// Handles a message.
+        /// </summary>
+        /// <param name="m">The message to be handled</param>
+        protected void OnSayObjectDescription(SayObjectDescription m)
+        {
             if (m.Object == null)
                 Tolk.Speak("Před tebou nci není");
             else Tolk.Speak(m.Object.Description);
-		}
+        }
 
-		/// <summary>
-		/// Processes the SayLocality message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		protected void OnSayLocalityName(SayLocalityName message)
+        /// <summary>
+        /// Processes the SayLocality message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnSayLocalityName(SayLocalityName message)
 => Tolk.Speak(Owner.Locality.Name.Friendly, true);
 
 
-		/// <summary>
-		/// Reverb presets for individual localities
-		/// </summary>
-		private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
+        /// <summary>
+        /// Reverb presets for individual localities
+        /// </summary>
+        private Dictionary<string, (string name, float gain)> _reverbPresets = new Dictionary<string, (string name, float gain)>
         {
             ["obývák s1"] = ("livingroom", .9f),
             ["asfaltka c1"] = ("plain", .1f),
@@ -103,25 +102,25 @@ namespace Game.Entities
         {
             switch (message)
             {
-				case SayObjectDescription m: OnSayObjectDescription(m); break;
+                case SayObjectDescription m: OnSayObjectDescription(m); break;
                 case SayLocalityDescription m: OnSayLocalityDescription(m); break;
-				case SayLocalityName m: OnSayLocalityName(m); break;
-				case PlaceObjectResult m: OnPutObjectResult(m); break;
+                case SayLocalityName m: OnSayLocalityName(m); break;
+                case PlaceObjectResult m: OnPutObjectResult(m); break;
                 case EmptyInventory m: OnEmptyInventory(m); break;
                 case PickUpObjectResult m: OnPickUpObjectResult(m); break;
-                case SayCoordinates sc:  OnSayCoordinates(sc); break;
-                case SayLocalitySize sl:  OnSayLocalitySize(sl); break;
-                case SayVisitedLocalityResult svl:  OnSayVisitedLocality(svl); break;
-                case SayOrientation sor:  OnSayOrientation(sor); break;
-                case SayExitsResult ser:  OnSayExitsResult(ser); break;
-                case SayObjectsResult sor:  OnSayObjectsResult(sor); break;
-                case CutsceneBegan cb:  OnCutsceneBegan(cb); break;
+                case SayCoordinates sc: OnSayCoordinates(sc); break;
+                case SayLocalitySize sl: OnSayLocalitySize(sl); break;
+                case SayVisitedLocalityResult svl: OnSayVisitedLocality(svl); break;
+                case SayOrientation sor: OnSayOrientation(sor); break;
+                case SayExitsResult ser: OnSayExitsResult(ser); break;
+                case SayObjectsResult sor: OnSayObjectsResult(sor); break;
+                case CutsceneBegan cb: OnCutsceneBegan(cb); break;
                 case LocalityChanged lcd: OnLocalityChanged(lcd); break;
                 case DoorHit dh: OnEntityHitDoor(dh); break;
                 case OrientationChanged ocd: OnOrientationChanged(ocd); break;
-                case PositionChanged pcd:  OnPositionChanged(pcd); break;
+                case PositionChanged pcd: OnPositionChanged(pcd); break;
                 case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
-                case TerrainCollided tcl:  OnTerrainCollided(tcl); break;
+                case TerrainCollided tcl: OnTerrainCollided(tcl); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -192,7 +191,7 @@ namespace Game.Entities
         private void OnSayCoordinates(SayCoordinates message)
         {
             Vector2 coords = message.Relative ? Owner.Area.ToRelative().Center : Owner.Area.Center;
-            string result = Math.Round(coords.X).ToString() +(message.Relative ? " " : ", ") + Math.Round(coords.Y).ToString();
+            string result = Math.Round(coords.X).ToString() + (message.Relative ? " " : ", ") + Math.Round(coords.Y).ToString();
             Tolk.Speak(result, true);
         }
 
@@ -261,18 +260,18 @@ namespace Game.Entities
             }
 
             int count = message.Exits.Length;
-                if (count == 1)
-                {
-                    Tolk.Speak(message.Exits[0], true);
-                    return;
-                }
+            if (count == 1)
+            {
+                Tolk.Speak(message.Exits[0], true);
+                return;
+            }
 
-                string number;
-                if (count >= 2 && count <= 4)
-                    number = "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: ";
-                else number = "Je tu " + count.ToString() + " východů: ";
+            string number;
+            if (count >= 2 && count <= 4)
+                number = "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: ";
+            else number = "Je tu " + count.ToString() + " východů: ";
 
-                Tolk.Speak(number + FormatStringList(message.Exits, true) +".", true);
+            Tolk.Speak(number + FormatStringList(message.Exits, true) + ".", true);
         }
 
         /// <summary>
@@ -283,14 +282,14 @@ namespace Game.Entities
         {
             if (message.Objects.IsNullOrEmpty())
                 Tolk.Speak("Nic tu není", true);
-                else Tolk.Speak(FormatStringList(message.Objects), true);
+            else Tolk.Speak(FormatStringList(message.Objects), true);
         }
 
         /// <summary>
         /// Processes the CutsceneBegan message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
-        protected void OnSayOrientation(SayOrientation message) 
+        protected void OnSayOrientation(SayOrientation message)
             => SayOrientation();
 
         /// <summary>
@@ -344,19 +343,19 @@ namespace Game.Entities
         {
             string targetLocality = message.Target.Name.Indexed.ToLower();
             (string name, float gain) = _reverbPresets[targetLocality];
-			World.Sound.ApplyEaxReverbPreset(name, gain);
+            World.Sound.ApplyEaxReverbPreset(name, gain);
         }
 
-/// <summary>
+        /// <summary>
         /// Processes the MovementDone message.
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnPositionChanged(PositionChanged message)
         {
-			World.Sound.ListenerPosition = message.TargetPosition.Center.AsOpenALVector();
+            World.Sound.ListenerPosition = message.TargetPosition.Center.AsOpenALVector();
 
-            if(!message.Silently)
-            PlayTerrain(message.TargetPosition.Center);
+            if (!message.Silently)
+                PlayTerrain(message.TargetPosition.Center);
         }
 
         /// <summary>
@@ -375,7 +374,7 @@ namespace Game.Entities
             // Immediate change
             if (message.Immediately)
             {
-				World.Sound.ListenerOrientationFacing = message.Target.UnitVector.AsOpenALVector();
+                World.Sound.ListenerOrientationFacing = message.Target.UnitVector.AsOpenALVector();
                 return;
             }
 
@@ -385,7 +384,7 @@ namespace Game.Entities
             _listenerOrientation.step = 2 * (message.Degrees / Math.Abs(message.Degrees));
             _listenerOrientation.steps = message.Degrees / _listenerOrientation.step;
             _listenerOrientation.current = message.Source;
-            _listenerOrientation.final= message.Target;
+            _listenerOrientation.final = message.Target;
         }
 
         /// <summary>
@@ -404,13 +403,13 @@ namespace Game.Entities
 
             if (terrain == TerrainType.Wall)
             {
-				World.Sound.Play(stream: World.Sound.GetRandomSoundStream("hitwall"), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, 1);
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream("hitwall"), role: null, looping: false, PositionType.Absolute, position.AsOpenALVector(), true, 1);
                 Tolk.Speak("zeď");
             }
             else
             {
                 string soundName = "movstep" + Enum.GetName(terrain.GetType(), terrain);
-				World.Sound.Play(stream: World.Sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, Vector3.Zero, true, _walkingVolume, null, 1f, 0, Playback.OpenAL);
+                World.Sound.Play(stream: World.Sound.GetRandomSoundStream(soundName), role: null, looping: false, PositionType.Relative, Vector3.Zero, true, _walkingVolume, null, 1f, 0, Playback.OpenAL);
             }
         }
     }

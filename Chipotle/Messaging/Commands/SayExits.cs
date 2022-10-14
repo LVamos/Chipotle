@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Game.Messaging.Commands
+﻿namespace Game.Messaging.Commands
 {
     public class SayExits : GameMessage
     {

@@ -1,12 +1,14 @@
-﻿using ProtoBuf;
-using System;
-
+﻿using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Commands;
 
 using Luky;
-using Game.Entities;
+
 using OpenTK;
+
+using ProtoBuf;
+
+using System;
 
 namespace Game.Terrain
 {
@@ -35,11 +37,11 @@ namespace Game.Terrain
         /// <returns>Handle of the sound</returns>
 		protected int Play(string soundName, Vector2 position, bool loop) => World.Sound.Play(World.Sound.GetRandomSoundStream(soundName), null, loop, PositionType.Absolute, position.AsOpenALVector(), true, _defaultVolume);
 
-		/// <summary>
-		/// Returns pooint that belongs to this object and is tho most close to tthe player.
-		/// </summary>
-		protected Vector2 GetClosestPointToPlayer()
-			=> _area.GetClosestPoint(World.Player.Area.Center);
+        /// <summary>
+        /// Returns pooint that belongs to this object and is tho most close to tthe player.
+        /// </summary>
+        protected Vector2 GetClosestPointToPlayer()
+            => _area.GetClosestPoint(World.Player.Area.Center);
 
         /// <summary>
         /// Plays a sound at the position closest to the player.
@@ -53,10 +55,10 @@ namespace Game.Terrain
         /// </summary>
         public (float width, float height) Dimensions { get; protected set; }
 
-		/// <summary>
-		/// Default volume for the sound loop if there's any.
-		/// </summary>
-		protected float _defaultVolume = 1;
+        /// <summary>
+        /// Default volume for the sound loop if there's any.
+        /// </summary>
+        protected float _defaultVolume = 1;
 
         /// <summary>
         /// Volume used with sound attenuation.
@@ -98,26 +100,26 @@ namespace Game.Terrain
         /// </summary>
         public Rectangle Area
         {
-            get => _area ==null ? null : new Rectangle(_area);
+            get => _area == null ? null : new Rectangle(_area);
             protected set => SetArea(value);
-		}
+        }
 
         /// <summary>
         /// Sets value of the Area property.
         /// </summary>
         /// <param name="value">A value assigned to the property</param>
         protected virtual void SetArea(Rectangle value)
-		{
-			_area = value;
-			if (value != null)
-				Dimensions = (_area.Width, _area.Height);
-		}
+        {
+            _area = value;
+            if (value != null)
+                Dimensions = (_area.Width, _area.Height);
+        }
 
-		/// <summary>
-		/// Returns the public name of the element.
-		/// </summary>
-		/// <returns>Public name of the element</returns>
-		public override string ToString()
+        /// <summary>
+        /// Returns the public name of the element.
+        /// </summary>
+        /// <returns>Public name of the element</returns>
+        public override string ToString()
 => Name.Friendly;
 
         /// <summary>

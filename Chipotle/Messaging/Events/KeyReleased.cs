@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Game.UI;
 
-using Game.UI;
+using System;
 
 namespace Game.Messaging.Events
 {

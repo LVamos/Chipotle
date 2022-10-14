@@ -1,16 +1,15 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using DavyKager;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using OpenTK;
+
+using ProtoBuf;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -22,35 +21,35 @@ namespace Game.Entities
     [ProtoInclude(101, typeof(TuttlePhysicsComponent))]
     public class PhysicsComponent : CharacterComponent
     {
-		/// <summary>
-		/// Checks if there's an character or item standing before the character and returns it.
-		/// </summary>
-		/// <returns>The character or item standing before the this character or null</returns>
-		protected GameObject SomethingBefore()
+        /// <summary>
+        /// Checks if there's an character or item standing before the character and returns it.
+        /// </summary>
+        /// <returns>The character or item standing before the this character or null</returns>
+        protected GameObject SomethingBefore()
         {
             GameObject i = ItemBefore();
             return i ?? CharacterBefore();
         }
 
-		/// <summary>
-		/// Checks if there's an character standing before the character and returns it.
-		/// </summary>
-		/// <returns>The character standing before the character or null</returns>
-		protected Character CharacterBefore() => World.GetCharacter(GetNextTile(1).position);
+        /// <summary>
+        /// Checks if there's an character standing before the character and returns it.
+        /// </summary>
+        /// <returns>The character standing before the character or null</returns>
+        protected Character CharacterBefore() => World.GetCharacter(GetNextTile(1).position);
 
-		/// <summary>
-		/// Checks if there's an item standing before the character and returns it.
-		/// </summary>
-		/// <returns>The item standing before the character or null</returns>
-		protected Item ItemBefore() => World.GetObject(GetNextTile(1).position);
+        /// <summary>
+        /// Checks if there's an item standing before the character and returns it.
+        /// </summary>
+        /// <returns>The item standing before the character or null</returns>
+        protected Item ItemBefore() => World.GetObject(GetNextTile(1).position);
 
-		/// <summary>
-		/// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
-		/// </summary>
-		/// <param name="step">The distance between the NPC and the required tile</param>
-		/// <returns>A reference to an tile that lays in the specified distance and direction</returns>
-		/// <see cref="PhysicsComponent.Orientation"/>
-		protected virtual Vector2 GetNextTile()
+        /// <summary>
+        /// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
+        /// </summary>
+        /// <param name="step">The distance between the NPC and the required tile</param>
+        /// <returns>A reference to an tile that lays in the specified distance and direction</returns>
+        /// <see cref="PhysicsComponent.Orientation"/>
+        protected virtual Vector2 GetNextTile()
             => _path.Dequeue();
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace Game.Entities
         /// <summary>
         /// Performs one step in direction specified in the _startWalkMessage field.
         /// </summary>
-        protected virtual void MakeStep() 
+        protected virtual void MakeStep()
         {
             _speed = GetSpeed();
             _walkTimer = 0;
@@ -107,7 +106,7 @@ namespace Game.Entities
         /// <summary>
         /// Specifies the length of one step in milliseconds.
         /// </summary>
-[ProtoIgnore]
+        [ProtoIgnore]
         protected int _walkTimer;
 
         /// <summary>
@@ -151,7 +150,7 @@ namespace Game.Entities
             if (distance < 30)
                 return .5f;
 
-                return .2f;
+            return .2f;
         }
 
         /// <summary>
@@ -165,7 +164,7 @@ namespace Game.Entities
         /// </summary>
         /// <returns></returns>
         protected int GetTerrainSpeed()
-            =>  _speeds[CurrentTile.tile.Terrain];
+            => _speeds[CurrentTile.tile.Terrain];
 
         /// <summary>
         /// Contains walk speed settings for particullar terrain types.
@@ -284,7 +283,7 @@ namespace Game.Entities
         {
             Locality sourceLocality = Locality;
             Locality targetLocality = target.GetLocalities().First();
-            Rectangle sourcePosition = _area == null ? null  : new Rectangle(_area);
+            Rectangle sourcePosition = _area == null ? null : new Rectangle(_area);
 
             _area = new Rectangle(target);
 
@@ -298,13 +297,13 @@ namespace Game.Entities
 
             if (targetLocality != sourceLocality)
                 InnerMessage(new LocalityChanged(this, sourceLocality, targetLocality));
-            }
+        }
 
-            /// <summary>
-            /// Processes the SetPosition message.
-            /// </summary>
-            /// <param name="message">The message to be processed</param>
-            protected  virtual void OnSetPosition(SetPosition message)
-            => Move(message.Target, message.Silently);
+        /// <summary>
+        /// Processes the SetPosition message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected virtual void OnSetPosition(SetPosition message)
+        => Move(message.Target, message.Silently);
     }
 }

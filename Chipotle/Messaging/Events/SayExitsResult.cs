@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Game.Terrain;
+﻿using Game.Terrain;
 
 namespace Game.Messaging.Events
 {
-    public class SayExitsResult: GameMessage
+    public class SayExitsResult : GameMessage
     {
         /// <summary>
         /// Information about the exits including description of their location.
@@ -34,7 +27,7 @@ namespace Game.Messaging.Events
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="occupiedPassage">An exit the NPC stands in</param>
-        public SayExitsResult(object sender, Passage occupiedPassage):base(sender)
+        public SayExitsResult(object sender, Passage occupiedPassage) : base(sender)
         {
             OccupiedPassage = occupiedPassage;
             Exits = null;
@@ -44,6 +37,6 @@ namespace Game.Messaging.Events
         /// constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public SayExitsResult(object sender): base(sender) { }
+        public SayExitsResult(object sender) : base(sender) { }
     }
 }

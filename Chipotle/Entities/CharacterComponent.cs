@@ -1,11 +1,11 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Events;
 
 using Luky;
+
+using ProtoBuf;
+
+using System;
 
 namespace Game.Entities
 {
@@ -55,7 +55,7 @@ namespace Game.Entities
 
         public void AssignToEntity(string name)
         {
-            _ownerName = name 
+            _ownerName = name
                 ?? throw new ArgumentException(nameof(name));
         }
 
@@ -77,7 +77,7 @@ namespace Game.Entities
         {
             switch (message)
             {
-                    case CutsceneEnded ce: OnCutsceneEnded(ce); break;
+                case CutsceneEnded ce: OnCutsceneEnded(ce); break;
                 case CutsceneBegan cb: OnCutsceneBegan(cb); break;
                 default: base.HandleMessage(message); break;
             }

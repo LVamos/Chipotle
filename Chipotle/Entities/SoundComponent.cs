@@ -1,8 +1,6 @@
 ﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
 
-using Luky;
+using System;
 
 namespace Game.Entities
 {

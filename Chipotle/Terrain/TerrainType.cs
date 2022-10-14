@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Luky;
 
-using Luky;
+using System;
 
 namespace Game.Terrain
 {

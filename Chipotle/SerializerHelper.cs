@@ -1,9 +1,9 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Entities;
+﻿using Game.Entities;
 using Game.Terrain;
+
+using ProtoBuf;
+
+using System.Collections.Generic;
 
 namespace Game
 {

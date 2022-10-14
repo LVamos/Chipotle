@@ -1,11 +1,12 @@
-﻿using ProtoBuf;
+﻿using Game.Messaging;
+using Game.Messaging.Events;
+using Game.UI;
+
+using ProtoBuf;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using Game.Messaging;
-using Game.Messaging.Events;
-using Game.UI;
 
 namespace Game.Entities
 {

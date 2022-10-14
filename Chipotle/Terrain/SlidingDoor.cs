@@ -1,15 +1,14 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Entities;
+﻿using Game.Entities;
 using Game.Messaging;
-using Game.Messaging.Commands;
 using Game.Messaging.Events;
 
 using Luky;
 
 using OpenTK;
+
+using ProtoBuf;
+
+using System.Collections.Generic;
 
 namespace Game.Terrain
 {
@@ -30,7 +29,7 @@ namespace Game.Terrain
 
             Character entity = message.Sender as Character;
             bool opposite = IsInFrontOrBehind(entity.Area.Center);
-            bool near = _area.GetDistanceFrom(entity.Area.Center)<= _minDistance;
+            bool near = _area.GetDistanceFrom(entity.Area.Center) <= _minDistance;
 
             // Find point from which the door sound should be heart.
             Vector2? tmp = _area.FindOppositePoint(entity.Area);

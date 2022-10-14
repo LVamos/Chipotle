@@ -20,10 +20,10 @@
         /// </summary>
         GoingToTarget,
 
-		/// <summary>
-		/// In process of walking to a concrete point. Tuttle will then watch the player when arrives to the target.
-		/// </summary>
-		GoingToTargetAndWatchingPlayer,
+        /// <summary>
+        /// In process of walking to a concrete point. Tuttle will then watch the player when arrives to the target.
+        /// </summary>
+        GoingToTargetAndWatchingPlayer,
 
         /// <summary>
         /// Ready to go to the player as soon as he leaves

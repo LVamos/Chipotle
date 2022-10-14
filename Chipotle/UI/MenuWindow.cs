@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-using DavyKager;
+﻿using DavyKager;
 
 using Luky;
 
+using System.Windows.Forms;
+
 namespace Game.UI
 {
-/// <summary>
+    /// <summary>
     /// a virtual window for voice menus
     /// </summary>
     public class MenuWindow : VirtualWindow
@@ -166,7 +162,7 @@ namespace Game.UI
             Play(_introSound);
 
             if (!string.IsNullOrEmpty(_introText))
-                    Tolk.Speak(_introText, true);
+                Tolk.Speak(_introText, true);
         }
 
         /// <summary>
@@ -268,7 +264,7 @@ namespace Game.UI
         /// <summary>
         /// Quits the menu
         /// </summary>
-        protected virtual  void Quit()
+        protected virtual void Quit()
         {
             Index = -1;
             Close();

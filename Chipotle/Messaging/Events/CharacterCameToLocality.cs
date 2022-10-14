@@ -1,6 +1,4 @@
-﻿using System;
-
-using Game.Entities;
+﻿using Game.Entities;
 using Game.Terrain;
 
 namespace Game.Messaging.Events
@@ -30,7 +28,7 @@ namespace Game.Messaging.Events
         /// <param name="locality">The concerning locality</param>
         public CharacterCameToLocality(object sender, Character entity, Locality locality) : base(sender)
         {
-             Character = entity;
+            Character = entity;
             this.Locality = locality;
         }
     }

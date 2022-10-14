@@ -1,12 +1,10 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Events;
 using Game.Terrain;
 
 using Luky;
+
+using ProtoBuf;
 
 namespace Game.Entities
 {
@@ -32,7 +30,7 @@ namespace Game.Entities
         {
             switch (message)
             {
-                    case CharacterLeftLocality ll: OnLocalityLeft(ll); break;
+                case CharacterLeftLocality ll: OnLocalityLeft(ll); break;
                 default: base.HandleMessage(message); break;
             }
         }
