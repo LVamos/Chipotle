@@ -1,14 +1,15 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-
-using Game.Entities;
+﻿using Game.Entities;
 
 using Luky;
 
 using OpenTK;
+
+using ProtoBuf;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Game.Terrain
 {
@@ -117,8 +118,8 @@ namespace Game.Terrain
         /// Copy constructor
         /// </summary>
         /// <param name="plane">Another plane to be copied</param>
-        public Rectangle(Rectangle plane) :     this(plane.UpperLeftCorner, plane.LowerRightCorner)
-        {   
+        public Rectangle(Rectangle plane) : this(plane.UpperLeftCorner, plane.LowerRightCorner)
+        {
             MinimumHeight = plane.MinimumHeight;
             MinimumWidth = plane.MinimumWidth;
         }
@@ -252,10 +253,10 @@ namespace Game.Terrain
         {
             for (int i = 1; i <= units; i++)
             {
-            UpperLeftCorner += Direction.UpLeft.AsVector2();
-            LowerRightCorner += Direction.DownRight.AsVector2();
-        }
+                UpperLeftCorner += Direction.UpLeft.AsVector2();
+                LowerRightCorner += Direction.DownRight.AsVector2();
             }
+        }
 
         /// <summary>
         /// Extends the plane in the specified direction by one unit.
@@ -300,11 +301,11 @@ namespace Game.Terrain
         public IEnumerable<Character> GetEntities()
                     => World.GetEntities(this);
 
-		/// <summary>
-		/// Returns all game objects intersecting with the plane.
-		/// </summary>
-		/// <returns>List of intersecting objects</returns>
-		public IEnumerable<GameObject> GetObjects()
+        /// <summary>
+        /// Returns all game objects intersecting with the plane.
+        /// </summary>
+        /// <returns>List of intersecting objects</returns>
+        public IEnumerable<GameObject> GetObjects()
             => World.GetObjects(this);
 
         /// <summary>
@@ -477,13 +478,13 @@ namespace Game.Terrain
             }
         }
 
-		/// <summary>
-		/// Enumerates all closest points from surroundings of this plane.
-		/// </summary>
-		/// <param name="minDistance">Specifies minimum distance of the surrounding points from edges of the specified plane.</param>
-		/// <param name="maxDistance">Specifies maximum distance of the surrounding points from edges of the specified plane.</param>
-		/// <returns>all closest points from surroundings of this plane</returns>
-		public IEnumerable<Vector2> GetSurroundingPoints(int minDistance, int maxDistance)
+        /// <summary>
+        /// Enumerates all closest points from surroundings of this plane.
+        /// </summary>
+        /// <param name="minDistance">Specifies minimum distance of the surrounding points from edges of the specified plane.</param>
+        /// <param name="maxDistance">Specifies maximum distance of the surrounding points from edges of the specified plane.</param>
+        /// <returns>all closest points from surroundings of this plane</returns>
+        public IEnumerable<Vector2> GetSurroundingPoints(int minDistance, int maxDistance)
         {
             Rectangle surroundings = new Rectangle(this);
             surroundings.Extend(maxDistance);
@@ -508,7 +509,7 @@ namespace Game.Terrain
             !Intersects(point)
             && ((point.X >= UpperLeftCorner.X && point.X <= UpperRightCorner.X)
             || (point.Y >= LowerLeftCorner.Y && point.Y <= UpperLeftCorner.Y));
-                }
+        }
 
         /// <summary>
         /// Checks if the specified plane is opposite to this plane.

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Game.Messaging.Commands
+﻿namespace Game.Messaging.Commands
 {
-    public class ListObjects: GameMessage
+    public class ListObjects : GameMessage
     {
         /// <summary>
         /// Constructor

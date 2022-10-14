@@ -1,13 +1,12 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
+﻿using Game.Entities;
 using Game.Messaging.Events;
+using Game.Terrain;
 
 using Luky;
-using Game.Entities;
-using Game.Terrain;
+
+using ProtoBuf;
+
+using System.Collections.Generic;
 
 namespace Game.Messaging
 {
@@ -22,12 +21,12 @@ namespace Game.Messaging
         /// <summary>
         /// Stores the messages before they are processed.
         /// </summary>
-      [ProtoIgnore] protected Queue<GameMessage> _messages = new Queue<GameMessage>();
+        [ProtoIgnore] protected Queue<GameMessage> _messages = new Queue<GameMessage>();
 
         /// <summary>
         /// Starts or stops the messaging.
         /// </summary>
-      protected bool _messagingEnabled;
+        protected bool _messagingEnabled;
 
         /// <summary>
         /// returns a hash code for the instance.
@@ -61,7 +60,7 @@ namespace Game.Messaging
                 _messages = new Queue<GameMessage>();
         }
 
-/// <summary>
+        /// <summary>
         /// Enables messaging and performs initial actions.
         /// </summary>
         public virtual void Start()
@@ -81,7 +80,7 @@ namespace Game.Messaging
         /// </summary>
         public virtual void Update()
         {
-            if(_messagingEnabled && !_messages.IsNullOrEmpty())
+            if (_messagingEnabled && !_messages.IsNullOrEmpty())
                 HandleMessage(DequeueMessage());
         }
 

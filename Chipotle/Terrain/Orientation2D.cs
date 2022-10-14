@@ -1,7 +1,6 @@
-﻿using ProtoBuf;
-using System;
+﻿using OpenTK;
 
-using OpenTK;
+using ProtoBuf;
 
 using static System.Math;
 

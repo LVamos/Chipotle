@@ -1,12 +1,4 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-
-using DavyKager;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 
@@ -14,7 +6,11 @@ using Luky;
 
 using OpenTK;
 
-using static Game.Terrain.Door;
+using ProtoBuf;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Terrain
 {
@@ -48,11 +44,11 @@ namespace Game.Terrain
             );
         }
 
-            /// <summary>
-            /// Chekcs if the specified point lays in one of the localities connected by the passage.
-            /// </summary>
-            /// <param name="point">The point to be checked</param>
-            /// <returns>True if the specified point lays in one of the localities connected by the passage</returns>
+        /// <summary>
+        /// Chekcs if the specified point lays in one of the localities connected by the passage.
+        /// </summary>
+        /// <param name="point">The point to be checked</param>
+        /// <returns>True if the specified point lays in one of the localities connected by the passage</returns>
         public bool IsInRelatedLocality(Vector2 point)
             => Localities.Any(l => l.Area.Intersects(point));
 
@@ -205,8 +201,8 @@ namespace Game.Terrain
         /// </summary>
         protected void Disappear()
         {
-            foreach(Locality l in Localities)
-            l.Unregister(this);
+            foreach (Locality l in Localities)
+                l.Unregister(this);
         }
 
         /// <summary>
@@ -314,9 +310,9 @@ namespace Game.Terrain
         {
             switch (message)
             {
-                                    case CharacterMoved em: OnEntityMoved(em); break;
-                    case StartExitNavigation sen: OnStartExitNavigation(sen); break;
-                    case StopExitNavigation stp: OnStopExitNavigation(stp); break;
+                case CharacterMoved em: OnEntityMoved(em); break;
+                case StartExitNavigation sen: OnStartExitNavigation(sen); break;
+                case StopExitNavigation stp: OnStopExitNavigation(stp); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -367,7 +363,7 @@ namespace Game.Terrain
                 World.Sound.ApplyLowpass(_navigationSoundID, World.Sound.OverWallLowpass);
                 World.Sound.SetSourceVolume(_navigationSoundID, OverWallVolume);
             }
-                else if (obstacle == ObstacleType.Object)
+            else if (obstacle == ObstacleType.Object)
             {
                 World.Sound.ApplyLowpass(_navigationSoundID, World.Sound.OverObjectLowpass);
                 World.Sound.SetSourceVolume(_navigationSoundID, OverObjectVolume);

@@ -1,11 +1,11 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Events;
 
 using Luky;
+
+using ProtoBuf;
+
+using System.Collections.Generic;
 
 namespace Game.Terrain
 {
@@ -42,8 +42,8 @@ namespace Game.Terrain
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(CharacterCameToLocality message)
         {
-if(message.Locality == World.GetLocality("garáž v1") && message.Character == World.Player)
-            State = PassageState.Closed;
+            if (message.Locality == World.GetLocality("garáž v1") && message.Character == World.Player)
+                State = PassageState.Closed;
         }
     }
 }

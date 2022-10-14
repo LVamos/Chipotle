@@ -1,9 +1,6 @@
-﻿
-using Game.Entities;
-
-namespace Game.Messaging.Events
+﻿namespace Game.Messaging.Events
 {
-    public class SayObjectsResult: GameMessage
+    public class SayObjectsResult : GameMessage
     {
         /// <summary>
         /// Information about the nearest objects

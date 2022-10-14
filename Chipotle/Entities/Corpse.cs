@@ -1,9 +1,8 @@
-﻿using ProtoBuf;
-using System;
-
-using Game.Terrain;
+﻿using Game.Terrain;
 
 using Luky;
+
+using ProtoBuf;
 
 namespace Game.Entities
 {

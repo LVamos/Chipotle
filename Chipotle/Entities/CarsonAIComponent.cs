@@ -1,12 +1,11 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
+
+using ProtoBuf;
+
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -72,7 +71,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityEntered(CharacterCameToLocality message)
         {
-            if (message.Character!= World.Player || message.Locality != Owner.Locality)
+            if (message.Character != World.Player || message.Locality != Owner.Locality)
                 return;
 
             // This happens just once.
@@ -89,7 +88,7 @@ namespace Game.Entities
         /// <param name="message">The message to be processed</param>
         private void OnLocalityLeft(CharacterLeftLocality message)
         {
-            if (message.Locality != Owner.Locality || message.Character!= World.Player)
+            if (message.Locality != Owner.Locality || message.Character != World.Player)
                 return;
 
             bool benchUsed = World.GetObjectsByType("lavice u carsona").Any(o => o.Used);

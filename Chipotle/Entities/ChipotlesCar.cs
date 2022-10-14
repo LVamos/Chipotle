@@ -1,16 +1,15 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
 using Game.UI;
 
 using Luky;
-using OpenTK;
+
+using ProtoBuf;
+
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -105,7 +104,7 @@ namespace Game.Entities
             switch (message)
             {
                 case MoveChipotlesCar mc: OnMoveChipotlesCar(mc); break;
-                    case UnblockLocality ul: OnUnblockLocality(ul); break;
+                case UnblockLocality ul: OnUnblockLocality(ul); break;
                 default: base.HandleMessage(message); break;
             }
         }
@@ -133,7 +132,7 @@ namespace Game.Entities
             // When it's not allowed to use the car, play a knocking souund.
             if (
                             (_localities.Contains("příjezdová cesta w1") && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored()))
-            || (Localities.Any(l => l.Name.Indexed  == "asfaltka c1") && !CarsonsBenchesUsed()))
+            || (Localities.Any(l => l.Name.Indexed == "asfaltka c1") && !CarsonsBenchesUsed()))
                 _actionSoundID = World.Sound.Play(World.Sound.GetRandomSoundStream("snd14"), null, false, PositionType.Absolute, message.ManipulationPoint.AsOpenALVector(), true, _defaultVolume);
 
             // If player didn't leave Walsh area but used required objects and went through all area
@@ -182,7 +181,7 @@ namespace Game.Entities
             else cutscene = preferredCutscene;
 
             Dictionary<string, Locality> destinations = new Dictionary<string, Locality>();
-            foreach(string indexedName in _allowedDestinations.Where(d => !_localities.Contains(d)))
+            foreach (string indexedName in _allowedDestinations.Where(d => !_localities.Contains(d)))
             {
                 Locality l = World.GetLocality(indexedName);
                 destinations[l.Name.Friendly] = l;
@@ -229,7 +228,7 @@ namespace Game.Entities
         /// allowed only if the specified locality is in the _allowedDestinations hash set.
         /// </remarks>
         /// <completionlist cref="_destinations"/>
-        private void Move(Locality locality) 
+        private void Move(Locality locality)
             => Move(new Rectangle(_destinations[locality.Name.Indexed]));
 
         /// <summary>

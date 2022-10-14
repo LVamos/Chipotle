@@ -1,8 +1,7 @@
-﻿using ProtoBuf;
-using System;
-
-using Game.Entities;
+﻿using Game.Entities;
 using Game.Terrain;
+
+using ProtoBuf;
 
 namespace Game.Messaging.Events
 {

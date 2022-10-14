@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text.RegularExpressions;
-using System.Threading;
-
-using NAudio.CoreAudioApi;
-
-using OpenTK;
-using OpenTK.Audio.OpenAL;
+﻿using OpenTK;
 
 using Sound;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 using EaxReverb = OpenTK.Audio.OpenAL.EffectsExtension.EaxReverb;
 
@@ -26,13 +21,13 @@ namespace Luky
         /// <summary>             /// <summary>
         /// Volume used with sound attenuation.
         /// </summary>
-        public float GetOverWallVolume(float defaultVolume) 
+        public float GetOverWallVolume(float defaultVolume)
             => defaultVolume * .4f;
 
         /// <summary>
         /// Volume used with sound attenuation.
         /// </summary>
-        public float GetOverDoorVolume(float defaultVolume) 
+        public float GetOverDoorVolume(float defaultVolume)
             => defaultVolume * .5f;
 
         /// <summary>
@@ -115,7 +110,7 @@ namespace Luky
         {
             if (!Muted)
                 return;
-                Muted = false;
+            Muted = false;
 
             FadeMasterIn(.0003f, _masterVolumeBackup);
             _masterVolumeBackup = 0;
@@ -491,7 +486,7 @@ namespace Luky
                        return;
 
                    _opusFileDecoder.ChangeForceMono(soundID, forceMono, out int channels, out int sampleRate);
-                       _OpenAL.ReconfigureSound(soundID, channels, sampleRate);
+                   _OpenAL.ReconfigureSound(soundID, channels, sampleRate);
                });
         }
         /// <summary>
@@ -738,8 +733,8 @@ namespace Luky
                                            // Stop the sound.
                                            IPlayback playback = GetPlayback(sound);
 
-                                           if(playback.IsPlaying(sound.ID))
-                                           playback.Stop(sound.ID);
+                                           if (playback.IsPlaying(sound.ID))
+                                               playback.Stop(sound.ID);
                                            DisposeSound(sound);
                                        });
 
@@ -837,16 +832,16 @@ namespace Luky
             if (_masterFading == null)
                 return;
 
-                if (
-                    (_masterFading.Type == FadingType.In && _groupVolumes["master"] >= _masterFading.TargetVolume)
-                    || (_masterFading.Type == FadingType.Out && _groupVolumes["master"] <= _masterFading.TargetVolume + _masterFading.VolumeDelta)
-                    )
-                {
-                    SetGroupVolume("master", _masterFading.TargetVolume);
-                    _masterFading = null;
-                }
-                else
-                    SetGroupVolume("master", _groupVolumes["master"] + (_masterFading.Type == FadingType.In ? _masterFading.VolumeDelta : -_masterFading.VolumeDelta));
+            if (
+                (_masterFading.Type == FadingType.In && _groupVolumes["master"] >= _masterFading.TargetVolume)
+                || (_masterFading.Type == FadingType.Out && _groupVolumes["master"] <= _masterFading.TargetVolume + _masterFading.VolumeDelta)
+                )
+            {
+                SetGroupVolume("master", _masterFading.TargetVolume);
+                _masterFading = null;
+            }
+            else
+                SetGroupVolume("master", _groupVolumes["master"] + (_masterFading.Type == FadingType.In ? _masterFading.VolumeDelta : -_masterFading.VolumeDelta));
         }
 
         /// <summary>
@@ -865,7 +860,7 @@ namespace Luky
             }
 
             // Change pending fadings to active if the corresponding sounds are playing.
-            foreach (int id in  _fadings.Keys.ToArray<int>())
+            foreach (int id in _fadings.Keys.ToArray<int>())
             {
                 // Ensure the sound hasn't expired.
                 fading = _fadings[id];
@@ -891,23 +886,23 @@ namespace Luky
                 // Fade the sound.
                 if (
                     (fading.Type == FadingType.In && sound.IndividualVolume >= fading.TargetVolume)
-                    || (fading.Type == FadingType.Out && sound.IndividualVolume<=fading.TargetVolume +fading.VolumeDelta)
+                    || (fading.Type == FadingType.Out && sound.IndividualVolume <= fading.TargetVolume + fading.VolumeDelta)
                     )
                     _inactiveFadings.Add(id);
-                    else Apply(id, fading.Type == FadingType.In ? sound.IndividualVolume + fading.VolumeDelta : sound.IndividualVolume - fading.VolumeDelta);
+                else Apply(id, fading.Type == FadingType.In ? sound.IndividualVolume + fading.VolumeDelta : sound.IndividualVolume - fading.VolumeDelta);
             }
 
             // Delete unused fadings
             foreach (int id in _inactiveFadings)
             {
                 FadingRecord f = _fadings[id];
-                if(f.Type == FadingType.Out && f.Stop)
-                                Stop(id);
+                if (f.Type == FadingType.Out && f.Stop)
+                    Stop(id);
 
                 _fadings.Remove(id);
             }
             _inactiveFadings = new List<int>();
-            }
+        }
 
         /// <summary>
         /// Stores handles of sounds with finsihed or cancelled fadings.
@@ -1186,27 +1181,27 @@ namespace Luky
             {
                 //try
                 //{
-                    // init logic
-                    _OpenAL = OpenALSystem.CreateAndBindToThisThread(Say);
-                    _lSFDecoder = new LSFDecoder();
-                    _opusFileDecoder = new OpusFileDecoder();
-                    _nAudioDecoder = new NAudioDecoder();
+                // init logic
+                _OpenAL = OpenALSystem.CreateAndBindToThisThread(Say);
+                _lSFDecoder = new LSFDecoder();
+                _opusFileDecoder = new OpusFileDecoder();
+                _nAudioDecoder = new NAudioDecoder();
 
-                    // Start thread loop
-                    ProcessMessages(_millisecondsPerTick);
+                // Start thread loop
+                ProcessMessages(_millisecondsPerTick);
                 //}
                 //catch (Exception ex)
                 //{ 
-                    //_onError(ex); 
+                //_onError(ex); 
                 //}
                 //finally
                 //{
-                    // cleanup logic The one downside to performing cleanup here is that exceptions
-                    // thrown during cleanup are discarded.
-                    //_openALSystem.Dispose();
-                    //_opusFileDecoder.Dispose();
-                    //_lSFDecoder.Dispose();
-                    //_nAudioDecoder.Dispose();
+                // cleanup logic The one downside to performing cleanup here is that exceptions
+                // thrown during cleanup are discarded.
+                //_openALSystem.Dispose();
+                //_opusFileDecoder.Dispose();
+                //_lSFDecoder.Dispose();
+                //_nAudioDecoder.Dispose();
                 //}
             });
 

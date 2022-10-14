@@ -1,12 +1,10 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Entities;
-
-using Luky;
+﻿using Luky;
 
 using OpenTK;
+
+using ProtoBuf;
+
+using System.Collections.Generic;
 
 namespace Game.Terrain
 {

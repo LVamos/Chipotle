@@ -1,6 +1,6 @@
-﻿using System;
+﻿using OpenTK;
 
-using OpenTK;
+using System;
 
 using static System.Math;
 

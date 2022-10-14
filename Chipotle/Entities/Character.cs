@@ -1,9 +1,4 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -13,6 +8,10 @@ using Luky;
 using OpenTK;
 
 using ProtoBuf;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -28,8 +27,8 @@ namespace Game.Entities
         protected override void Destroy()
         {
             World.Remove(this);
-			Locality.TakeMessage(new CharacterLeftLocality(this, this, Locality));
-		}
+            Locality.TakeMessage(new CharacterLeftLocality(this, this, Locality));
+        }
 
         /// <summary>
         /// A backing field for Locality property.
@@ -52,20 +51,20 @@ namespace Game.Entities
         /// Represents the inventory of the entity.
         /// </summary>
         public IEnumerable<Item> Inventory
-		{
-			get
-			{
-				if (_inventory== null)
-					_visitedLocalities = new HashSet<string>();
+        {
+            get
+            {
+                if (_inventory == null)
+                    _visitedLocalities = new HashSet<string>();
 
-				return _inventory.Select(o => World.GetObject(o));
-			}
-		}
+                return _inventory.Select(o => World.GetObject(o));
+            }
+        }
 
-		/// <summary>
-		/// Represents the inventory. The objects are stored as indexed names.
-		/// </summary>
-		protected HashSet<string> _inventory = new HashSet<string>();
+        /// <summary>
+        /// Represents the inventory. The objects are stored as indexed names.
+        /// </summary>
+        protected HashSet<string> _inventory = new HashSet<string>();
 
         /// <summary>
         /// List of all entity components
@@ -88,7 +87,7 @@ namespace Game.Entities
         /// <param name="sound">Reference to an sound component</param>
         public Character(Name name, string type, AIComponent ai, InputComponent input, PhysicsComponent physics, SoundComponent sound) : base(name, type, null)
         {
-            _components = 
+            _components =
                 new CharacterComponent[] { ai, physics, input, sound }
                 .Where(c => c != null)
                 .ToArray<CharacterComponent>();
@@ -231,8 +230,8 @@ namespace Game.Entities
             void startComponent(Type type)
             {
                 CharacterComponent c = _components.FirstOrDefault(cm => cm.GetType().IsSubclassOf(type));
-                if(c != null)
-                c.Start();
+                if (c != null)
+                    c.Start();
             }
 
             startComponent(typeof(SoundComponent));
@@ -246,7 +245,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         private void OnLocalityChanged(LocalityChanged message)
-=> _locality= message.Target.Name.Indexed;
+=> _locality = message.Target.Name.Indexed;
 
         /// <summary>
         /// Processes incoming messages.
@@ -274,13 +273,13 @@ namespace Game.Entities
 
             // Inform all adjecting localities
             List<Locality> localities = new List<Locality>();
-            if (message.SourceLocality!= null && message.SourceLocality != message.TargetLocality)
+            if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
             {
                 localities.Add(message.SourceLocality);
                 localities.AddRange(message.SourceLocality.Neighbours);
             }
 
-            if (message.TargetLocality!= null)
+            if (message.TargetLocality != null)
             {
                 localities.Add(message.TargetLocality);
                 localities.AddRange(message.TargetLocality.Neighbours);
@@ -297,10 +296,10 @@ namespace Game.Entities
             {
                 l.TakeMessage(moved);
 
-                    if(message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
+                if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
                     l.TakeMessage(left);
 
-                    if(message.SourceLocality != message.TargetLocality)
+                if (message.SourceLocality != message.TargetLocality)
                     l.TakeMessage(came);
             }
         }
@@ -320,7 +319,7 @@ namespace Game.Entities
         /// <param name="message">Message to redistribute</param>
         protected virtual void SendInnerMessage(GameMessage message)
         {
-            foreach(CharacterComponent c in _components)
+            foreach (CharacterComponent c in _components)
             {
                 if (c != message.Sender || message is GameReloaded)
                     c.TakeMessage(message);

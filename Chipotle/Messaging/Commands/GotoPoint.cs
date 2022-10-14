@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using OpenTK;
 
-using OpenTK;
+using System;
 
 namespace Game.Messaging.Commands
 {
@@ -17,10 +16,10 @@ namespace Game.Messaging.Commands
         /// </summary>
         public readonly Vector2 Goal;
 
-		/// <summary>
-		/// Specifies if Tuttle should stop following the player while leading to the target.
-		/// </summary>
-		public readonly bool WatchPlayer;
+        /// <summary>
+        /// Specifies if Tuttle should stop following the player while leading to the target.
+        /// </summary>
+        public readonly bool WatchPlayer;
 
         /// <summary>
         /// constructor

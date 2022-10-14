@@ -14,7 +14,7 @@ namespace Game.Messaging.Events
         /// Constructor
         /// </summary>
         /// <param name="sender">Source of the message</param>
-        public DoorManipulated(Door sender):base(sender)
+        public DoorManipulated(Door sender) : base(sender)
         {
             Sender = sender;
         }

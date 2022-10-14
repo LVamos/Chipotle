@@ -1,5 +1,6 @@
-﻿using System;
-using Game.Entities;
+﻿using Game.Entities;
+
+using System;
 
 namespace Game.Messaging.Events
 {
@@ -7,7 +8,7 @@ namespace Game.Messaging.Events
     /// Indicates that state of the Tuttle NPC was changed.
     /// </summary>
     [Serializable]
-    public class TuttleStateChanged: GameMessage
+    public class TuttleStateChanged : GameMessage
     {
         /// <summary>
         /// New state of the Tuttle NPC

@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Game.Terrain;
 
-using Game.Entities;
-using Game.Terrain;
+using System;
 
 namespace Game.Messaging.Events
 {

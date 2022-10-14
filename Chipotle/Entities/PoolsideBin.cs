@@ -1,13 +1,11 @@
-﻿using ProtoBuf;
-using System;
-
-using Game.Messaging.Commands;
+﻿using Game.Messaging.Commands;
 using Game.Terrain;
 
 using Luky;
 
 using OpenTK;
-using DavyKager;
+
+using ProtoBuf;
 
 namespace Game.Entities
 {

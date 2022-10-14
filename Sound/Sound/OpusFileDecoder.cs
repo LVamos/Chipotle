@@ -1,9 +1,9 @@
-﻿using System;
+﻿using OpusfileSharp;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-using OpusfileSharp;
 
 namespace Luky
 {

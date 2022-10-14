@@ -1,8 +1,4 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -34,7 +30,7 @@ namespace Game.Entities
         {
             switch (message)
             {
-                case CutsceneEnded ce:  OnCutsceneEnded(ce); break;
+                case CutsceneEnded ce: OnCutsceneEnded(ce); break;
                 default: base.HandleMessage(message); break;
             }
         }

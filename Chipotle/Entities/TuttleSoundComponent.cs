@@ -1,7 +1,4 @@
-﻿using ProtoBuf;
-using System;
-
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Events;
 using Game.Terrain;
@@ -9,6 +6,10 @@ using Game.Terrain;
 using Luky;
 
 using OpenTK;
+
+using ProtoBuf;
+
+using System;
 
 namespace Game.Entities
 {
@@ -21,41 +22,41 @@ namespace Game.Entities
         /// <summary>
         /// A sound played when Tuttle gets pinched in a door by another NPC.
         /// </summary>
-        protected const  string _doorPinchSound = "TuttleHitByDoor";
-		
+        protected const string _doorPinchSound = "TuttleHitByDoor";
+
         /// <su mmary>
         /// Handle of sound with Tuttle's speech that can move when Tuttle is walking.
         /// </summary>
         [ProtoBuf.ProtoIgnore]
         protected int _movingSpeechHandle;
 
-		/// <summary>
-		/// Target position for current Tuttle's voice sliding.
-		/// </summary>
-		[ProtoBuf.ProtoIgnore]
-		protected Vector3 _voiceSlideTarget;
+        /// <summary>
+        /// Target position for current Tuttle's voice sliding.
+        /// </summary>
+        [ProtoBuf.ProtoIgnore]
+        protected Vector3 _voiceSlideTarget;
 
-		/// <summary>
-		/// Current position for Tuttle's voice sliding.
-		/// </summary>
-		protected Vector3 _voiceSlidePosition;
+        /// <summary>
+        /// Current position for Tuttle's voice sliding.
+        /// </summary>
+        protected Vector3 _voiceSlidePosition;
 
-		/// <summary>
-		/// Specifies how the current position of Tuttle's voice changes in one step when voice sliding is being performed.
-		/// </summary>
-		[ProtoBuf.ProtoIgnore]
-		protected Vector3 _voiceSlideDelta;
-		
+        /// <summary>
+        /// Specifies how the current position of Tuttle's voice changes in one step when voice sliding is being performed.
+        /// </summary>
+        [ProtoBuf.ProtoIgnore]
+        protected Vector3 _voiceSlideDelta;
+
         /// <summary>
         /// Specifies how much steps are needed to perform the voice slide.
         /// </summary>
         protected int _voiceSlideTicks => _voiceSlideInterval / World.DeltaTime;
 
-		/// <summary>
-		/// A counter used for voice sliding.
-		/// </summary>
-		[ProtoBuf.ProtoIgnore]
-		protected int _voiceSlideTimer = -1;
+        /// <summary>
+        /// A counter used for voice sliding.
+        /// </summary>
+        [ProtoBuf.ProtoIgnore]
+        protected int _voiceSlideTimer = -1;
 
         /// <summary>
         /// Sound with reaction on collision with Chipotle.
@@ -66,12 +67,12 @@ namespace Game.Entities
         /// Specifies how long it takes to slide position of Tuttle's voice from one tile to another one.
         /// </summary>
         [ProtoBuf.ProtoIgnore]
-		protected const int _voiceSlideInterval = 500;
-		
+        protected const int _voiceSlideInterval = 500;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public TuttleSoundComponent(): base()
+        public TuttleSoundComponent() : base()
             => _walkingVolume = .2f;
 
         /// <summary>
@@ -84,33 +85,33 @@ namespace Game.Entities
             {
                 case ReactToPinchingInDoor r: OnReactToPinchingInDoor(r); break;
                 case ReactToCollision m: OnReactToCollision(m); break;
-                case PositionChanged pc:  OnPositionChanged(pc); break;
+                case PositionChanged pc: OnPositionChanged(pc); break;
                 default: base.HandleMessage(message); break;
             }
         }
 
-		/// <summary>
-		/// Handles the ReactToCollision message.
-		/// </summary>
-		/// <param name="m">The message to be handled.</param>
-		private void OnReactToCollision(ReactToCollision m)
+        /// <summary>
+        /// Handles the ReactToCollision message.
+        /// </summary>
+        /// <param name="m">The message to be handled.</param>
+        private void OnReactToCollision(ReactToCollision m)
         {
-			World.Sound.Play(stream: World.Sound.GetRandomSoundStream("movcrashdefault"), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
-			_movingSpeechHandle = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_chipotleCollisionSound), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
+            World.Sound.Play(stream: World.Sound.GetRandomSoundStream("movcrashdefault"), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
+            _movingSpeechHandle = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_chipotleCollisionSound), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
         }
 
-		/// <summary>
-		/// Handles the ReactOnPinchingInDoor message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		protected void OnReactToPinchingInDoor(ReactToPinchingInDoor message)
-			=> _movingSpeechHandle = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_doorPinchSound), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
+        /// <summary>
+        /// Handles the ReactOnPinchingInDoor message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected void OnReactToPinchingInDoor(ReactToPinchingInDoor message)
+            => _movingSpeechHandle = World.Sound.Play(stream: World.Sound.GetRandomSoundStream(_doorPinchSound), role: null, false, PositionType.Absolute, Owner.Area.Center.AsOpenALVector(), true, _defaultVolume);
 
-		/// <summary>
-		/// Processes the message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		private void OnPositionChanged(PositionChanged message)
+        /// <summary>
+        /// Processes the message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        private void OnPositionChanged(PositionChanged message)
         {
             PlayTerrain(message.TargetPosition.Center, World.Map[message.TargetPosition.Center], message.Silently ? ObstacleType.Far : message.Obstacle);
 
@@ -140,7 +141,7 @@ namespace Game.Entities
             // Set attenuation parameters
             bool attenuate = obstacle != ObstacleType.None && obstacle != ObstacleType.IndirectPath; ;
             (float gain, float gainHF) lowpass = default;
-            float volume = _walkingVolume *2;
+            float volume = _walkingVolume * 2;
 
             switch (obstacle)
             {
@@ -157,15 +158,15 @@ namespace Game.Entities
                 World.Sound.ApplyLowpass(id, lowpass);
         }
 
-		/// <summary>
-		/// Processes incoming messages.
-		/// </summary>
-		public override void Update()
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void Update()
         {
             base.Update();
             DoVoiceSliding();
         }
-		
+
         /// <summary>
         /// Performs sliding of Tuttle's voice during walk.
         /// </summary>
@@ -174,19 +175,19 @@ namespace Game.Entities
             if (_movingSpeechHandle == 0)
                 return;
 
-			World.Sound.GetDynamicInfo(_movingSpeechHandle, out SoundState state, out var _);
+            World.Sound.GetDynamicInfo(_movingSpeechHandle, out SoundState state, out var _);
             if (_voiceSlideTimer == -1 || state != SoundState.Playing)
                 return;
 
             _voiceSlidePosition += _voiceSlideDelta;
 
             World.Sound.SetSourcePosition(_movingSpeechHandle, _voiceSlidePosition);
-			
-			if (++_voiceSlideTimer >= _voiceSlideTicks)
+
+            if (++_voiceSlideTimer >= _voiceSlideTicks)
             {
                 _voiceSlideTimer = -1;
                 _voiceSlideDelta = default;
             }
-		}
-	}
+        }
+    }
 }

@@ -1,13 +1,12 @@
-﻿using ProtoBuf;
-using System;
-
-using Game.Terrain;
+﻿using Game.Terrain;
 
 using Luky;
+
+using ProtoBuf;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using Game.Messaging.Events;
 
 namespace Game.Entities
 {
@@ -28,23 +27,23 @@ namespace Game.Entities
         /// Returns current description of the object.
         /// </summary>
         public string Description => World.GetObjectDescription(this, _descriptionID);
-		/// <summary>
-		/// Checks if the specified object and this object are at least partially in the same locality.
-		/// </summary>
-		/// <param name="o">The character or object to be checked</param>
-		/// <returns>True if the specified object or character and this object or character are at least partially in the same locality.</returns>
-		public bool SameLocality(GameObject o)
+        /// <summary>
+        /// Checks if the specified object and this object are at least partially in the same locality.
+        /// </summary>
+        /// <param name="o">The character or object to be checked</param>
+        /// <returns>True if the specified object or character and this object or character are at least partially in the same locality.</returns>
+        public bool SameLocality(GameObject o)
         {
             IEnumerable<Locality> mine = _area.GetLocalities();
-			IEnumerable<Locality> its = o.Area.GetLocalities();
+            IEnumerable<Locality> its = o.Area.GetLocalities();
 
             return mine.Any(l => its.Contains(l));
-		}
+        }
 
-		/// <summary>
-		/// Type of the object; it allows grouping objects with tha same behavior.
-		/// </summary>
-		public readonly string Type;
+        /// <summary>
+        /// Type of the object; it allows grouping objects with tha same behavior.
+        /// </summary>
+        public readonly string Type;
 
         /// <summary>
         /// Constructor
@@ -181,7 +180,7 @@ namespace Game.Entities
                 case "vana": return CreateTub(name, area, decorative, pickable);
                 case "toaleťák": return CreateToiletPaper(name, area, decorative, pickable: pickable);
                 case "police": return CreateShelf(name, area, decorative, pickable);
-                case "záchod": return CreateToiletBowl(name, area, decorative   , pickable);
+                case "záchod": return CreateToiletBowl(name, area, decorative, pickable);
                 case "mikrovlnka": return CreateMicrowave(name, area, decorative, pickable);
                 case "elektrický gril": return CreateElectricGrill(name, area, decorative, pickable);
                 case "vysavač": return CreateVacuumCleaner(name, area, decorative, pickable);
@@ -419,7 +418,7 @@ namespace Game.Entities
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
         private static Item CreateCuckooClock(Name name, Rectangle area, bool decorative, bool pickable)
-        => new Item(name, area, "kukačkové hodiny", decorative, pickable: pickable, null, null, "CuckooClockLoop",null,false, volume: .5f);
+        => new Item(name, area, "kukačkové hodiny", decorative, pickable: pickable, null, null, "CuckooClockLoop", null, false, volume: .5f);
 
         /// <summary>
         /// Creates new instance of the dish washer (myčka) object.
@@ -512,7 +511,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static Item CreateKeyHanger(Name name, Rectangle area, bool decorative, bool pickable) 
+        private static Item CreateKeyHanger(Name name, Rectangle area, bool decorative, bool pickable)
             => new KeyHanger(name, area, decorative, pickable: pickable);
 
         /// <summary>
@@ -610,7 +609,7 @@ namespace Game.Entities
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
         /// <returns>New instance of the object</returns>
-        private static Item CreateWallClock(Name name, Rectangle area, bool decorative, bool pickable)       
+        private static Item CreateWallClock(Name name, Rectangle area, bool decorative, bool pickable)
         => new Item(name, area, "hodiny", decorative, pickable: pickable, null, null, "WallClockLoop", null, false, false);
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
+
+using System;
+using System.Collections.Generic;
 
 using static Sound.EaxReverbDefaults;
 
@@ -26,7 +26,7 @@ namespace Luky
             int id = _table[sourceID].SourceID;
             AL.Source(id, ALSourcei.EfxDirectFilter, 0);
             ALAnnounceError("Cancelling lowpass filter ona source");
-    }
+        }
 
         /// <summary>
         /// Applies the lowpass filter effect on the specified source.
@@ -41,8 +41,8 @@ namespace Luky
                 return;
             int id = i.SourceID;
 
-            if (_lowpassFilter==0)
-            _lowpassFilter = _efx.GenFilter();
+            if (_lowpassFilter == 0)
+                _lowpassFilter = _efx.GenFilter();
             ALAnnounceError("Creating lowpass filter");
 
             if (!_efx.IsFilter(_lowpassFilter))
@@ -262,8 +262,8 @@ namespace Luky
         /// <returns>True if the sound is playing</returns>
         public bool IsPlaying(int soundID)
         {
-            if(_table.TryGetValue(soundID, out Info info))
-            return AlGetState(info.SourceID) == ALSourceState.Playing;
+            if (_table.TryGetValue(soundID, out Info info))
+                return AlGetState(info.SourceID) == ALSourceState.Playing;
             return false;
         }
 
@@ -535,7 +535,7 @@ namespace Luky
         {
             Info info = _table[soundID];
 
-                    AL.Source(info.SourceID, ALSourceb.SourceRelative, type == PositionType.Relative);
+            AL.Source(info.SourceID, ALSourceb.SourceRelative, type == PositionType.Relative);
             ALSetPosition(info.SourceID, position);
         }
 
@@ -546,8 +546,8 @@ namespace Luky
         /// <param name="volume">The new volume</param>
         public void SetVolume(int soundID, float volume)
         {
-if(_table.TryGetValue(soundID, out Info info))
-            ALSetVolume(info.SourceID, volume);
+            if (_table.TryGetValue(soundID, out Info info))
+                ALSetVolume(info.SourceID, volume);
         }
 
         /// <summary>
@@ -596,7 +596,7 @@ if(_table.TryGetValue(soundID, out Info info))
                 else
                     text = prefix + " " + text;
 
-                                        throw new InvalidOperationException(text);
+                throw new InvalidOperationException(text);
             }
         }
 

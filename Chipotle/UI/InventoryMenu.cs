@@ -2,149 +2,143 @@
 
 using Game.Entities;
 
-using OpenTK.Graphics.OpenGL;
-
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Game.UI
 {
-	public class InventoryMenu: MenuWindow
-	{
+    public class InventoryMenu : MenuWindow
+    {
 
 
 
-		/// <summary>
-		/// The inventory from which the player selects an object.
-		/// </summary>
-		private Item[] _inventory;
+        /// <summary>
+        /// The inventory from which the player selects an object.
+        /// </summary>
+        private Item[] _inventory;
 
-		/// <summary>
-		/// The object selected for maniuplation.
-		/// </summary>
-		public Item SelectedObject { get; private set; }
+        /// <summary>
+        /// The object selected for maniuplation.
+        /// </summary>
+        public Item SelectedObject { get; private set; }
 
 
-		public static (ActionType a, Item o) Run(Item[] inventory)
-		{
-			InventoryMenu menu = new InventoryMenu(inventory);
-			WindowHandler.OpenModalWindow(menu);
-			return (menu.Action, menu.SelectedObject);
-		}
+        public static (ActionType a, Item o) Run(Item[] inventory)
+        {
+            InventoryMenu menu = new InventoryMenu(inventory);
+            WindowHandler.OpenModalWindow(menu);
+            return (menu.Action, menu.SelectedObject);
+        }
 
-		/// <summary>
-		/// Defines possible actions
-		/// </summary>
-		public enum ActionType
-		{
-			/// <summary>
-			/// No action selected
-			/// </summary>
-			None = 0,
+        /// <summary>
+        /// Defines possible actions
+        /// </summary>
+        public enum ActionType
+        {
+            /// <summary>
+            /// No action selected
+            /// </summary>
+            None = 0,
 
-			/// <summary>
-			/// Puts an object on the ground.
-			/// </summary>
-			Place,
+            /// <summary>
+            /// Puts an object on the ground.
+            /// </summary>
+            Place,
 
-			/// <summary>
-			/// Uses an object.
-			/// </summary>
-			Use
-		}
+            /// <summary>
+            /// Uses an object.
+            /// </summary>
+            Use
+        }
 
-		/// <summary>
-		/// The action selected by the player
-		/// </summary>
-		public ActionType Action { get; protected set; }
+        /// <summary>
+        /// The action selected by the player
+        /// </summary>
+        public ActionType Action { get; protected set; }
 
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		public InventoryMenu(Item[] inventory): base(null, "inventář", false)
-		{
-			// Prepare the menu items and sort them by picking time.
-			_inventory = inventory;
-			_items =
-				 _inventory.Select(o => o.Name.Indexed)
-				 .Reverse()
-				.ToArray<string>();
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public InventoryMenu(Item[] inventory) : base(null, "inventář", false)
+        {
+            // Prepare the menu items and sort them by picking time.
+            _inventory = inventory;
+            _items =
+                 _inventory.Select(o => o.Name.Indexed)
+                 .Reverse()
+                .ToArray<string>();
 
-			// Add new key shortcuts
-			RegisterShortcuts(
-(new KeyShortcut (Keys.Return), UseObject),
-	(new KeyShortcut(KeyShortcut.Modifiers.Control, Keys.Return), PutObject)
+            // Add new key shortcuts
+            RegisterShortcuts(
+(new KeyShortcut(Keys.Return), UseObject),
+    (new KeyShortcut(KeyShortcut.Modifiers.Control, Keys.Return), PutObject)
 );
-		}
+        }
 
-		/// <summary>
-		/// Selects the current item as an object that should be put and quits the menu.
-		/// </summary>
-		private void PutObject()
-		{
-			Action = ActionType.Place;
-			ActivateItem();
-		}
+        /// <summary>
+        /// Selects the current item as an object that should be put and quits the menu.
+        /// </summary>
+        private void PutObject()
+        {
+            Action = ActionType.Place;
+            ActivateItem();
+        }
 
-		/// <summary>
-		/// Selects the current item as an object that should be used and quits the menu.
-		/// </summary>
-		private void UseObject()
-		{
-			Action = ActionType.Use;
+        /// <summary>
+        /// Selects the current item as an object that should be used and quits the menu.
+        /// </summary>
+        private void UseObject()
+        {
+            Action = ActionType.Use;
 
-			ActivateItem();
-		}
+            ActivateItem();
+        }
 
-		/// <summary>
-		/// Quits the menu
-		/// </summary>
-		protected override void Quit()
-		{
-			base.Quit();
-			Action = ActionType.None;
-		}
+        /// <summary>
+        /// Quits the menu
+        /// </summary>
+        protected override void Quit()
+        {
+            base.Quit();
+            Action = ActionType.None;
+        }
 
-		/// <summary>
-		/// Uses the selected object.
-		/// </summary>
-		protected override void ActivateItem()
-		{
-			if (IndexOffEdge())
-				return;
+        /// <summary>
+        /// Uses the selected object.
+        /// </summary>
+        protected override void ActivateItem()
+        {
+            if (IndexOffEdge())
+                return;
 
-			base.ActivateItem();
-		}
+            base.ActivateItem();
+        }
 
-		/// <summary>
-		/// A setter for the Index property.
-		/// </summary>
-		/// <param name="value"></param>
-		protected override void SetIndex(int value)
-		{
-			base.SetIndex(value);
+        /// <summary>
+        /// A setter for the Index property.
+        /// </summary>
+        /// <param name="value"></param>
+        protected override void SetIndex(int value)
+        {
+            base.SetIndex(value);
 
-			if (!IndexOffEdge())
-				AssignSelectedObject();
-		}
+            if (!IndexOffEdge())
+                AssignSelectedObject();
+        }
 
-		/// <summary>
-		/// Identifies the currently selected object and assigns it to the SelectedObject property.
-		/// </summary>
-		protected void AssignSelectedObject() => SelectedObject = _inventory.First(o => o.Name.Indexed == _items[_index]);
+        /// <summary>
+        /// Identifies the currently selected object and assigns it to the SelectedObject property.
+        /// </summary>
+        protected void AssignSelectedObject() => SelectedObject = _inventory.First(o => o.Name.Indexed == _items[_index]);
 
-		/// <summary>
-		/// Announces selected item using a screen reader or voice synthesizer
-		/// </summary>
-		protected override void SayItem()
-		{
-			Play(_selectionSound);
-			Tolk.Speak(SelectedObject.Name.Friendly);
-		}
-	}
+        /// <summary>
+        /// Announces selected item using a screen reader or voice synthesizer
+        /// </summary>
+        protected override void SayItem()
+        {
+            Play(_selectionSound);
+            Tolk.Speak(SelectedObject.Name.Friendly);
+        }
+    }
 }

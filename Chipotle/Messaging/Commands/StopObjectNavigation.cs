@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Game.Messaging.Commands
 {
     /// <summary>
     /// Tells a dump object to stop ongoing sound navigation.
     /// </summary>
-[Serializable]
+    [Serializable]
     public class StopObjectNavigation : GameMessage
     {
         /// <summary>
