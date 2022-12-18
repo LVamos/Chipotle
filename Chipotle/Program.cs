@@ -360,7 +360,7 @@ namespace Game
         private static void Main()
         {
             ResendErrorReport();
-            Settings.SetDebugMode();
+            Settings.SetTestMode();
 
 
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);

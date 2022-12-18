@@ -108,8 +108,7 @@ namespace Game.UI
         (new KeyShortcut(Keys.Down), NextItem),
         (new KeyShortcut(Keys.Right), NextItem),
         (new KeyShortcut(Keys.Return), ActivateItem),
-        (new KeyShortcut(Keys.Escape), Quit),
-        (new KeyShortcut(Keys.Tab), Quit)
+        (new KeyShortcut(Keys.Escape), Quit)
     );
         }
 
@@ -295,7 +294,6 @@ namespace Game.UI
         public override void OnKeyPress(char letter)
         {
             base.OnKeyPress(letter);
-
             Navigate(letter);
         }
 
