@@ -96,7 +96,7 @@ namespace Game
             public static void SetDebugMode()
             {
                 TuttleTestStart = new Vector2(1023, 1030);
-                AllowTuttlesCustomPosition = true;
+                AllowTuttlesCustomPosition = false;
                 AllowCustomChipotlesStartPosition = true;
                 AllowPredefinedSaves = true;
                 DisableJawsKeyHook = false;
@@ -360,7 +360,7 @@ namespace Game
         private static void Main()
         {
             ResendErrorReport();
-            Settings.SetTestMode();
+            Settings.SetDebugMode();
 
 
             Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);

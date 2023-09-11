@@ -928,7 +928,7 @@ namespace Game
         public static void LoadMap()
         {
             string A(XElement element, string attribute, bool prepareForIndexing = true)
-                => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+                =>  prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
             XDocument xDocument = null;
             try

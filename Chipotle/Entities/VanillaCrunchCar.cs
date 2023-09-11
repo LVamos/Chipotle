@@ -19,7 +19,7 @@ namespace Game.Entities
         /// </summary>
         /// <param name="name">Inner and public name of the object</param>
         /// <param name="area">Coordinates of the area that the object occupies</param>
-        public VanillaCrunchCar(Name name, Rectangle area, bool decorative, bool pickable) : base(name, area, "auto Vanilla crunch", decorative, pickable) { }
+        public VanillaCrunchCar(Name name, Rectangle area, bool decorative, bool pickable, string type) : base(name, area, type, decorative, pickable) { }
 
         /// <summary>
         /// A reference to the key hanger (věšák v1) object in the garage of the Vanilla crunch

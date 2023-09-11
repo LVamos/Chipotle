@@ -1067,9 +1067,7 @@ namespace Game.Entities
             GameObject o = World.GetObject(obstacle);
             Passage p = World.GetPassage(obstacle);
 
-            if (!t.Walkable)
-                InnerMessage(new TerrainCollided(this, obstacle));
-            else if (o != null && o != Owner)
+            if (o != null && o != Owner)
             {
                 o.TakeMessage(new ObjectsCollided(Owner, o, obstacle));
                 InnerMessage(new ObjectsCollided(this, o, obstacle));
@@ -1079,7 +1077,9 @@ namespace Game.Entities
                 p.TakeMessage(new DoorHit(Owner, p as Door, obstacle));
                 InnerMessage(new DoorHit(this, p as Door, obstacle));
             }
-            else return false;
+			else if (!t.Walkable)
+				InnerMessage(new TerrainCollided(this, obstacle));
+			else return false;
 
             _walking = false;
             _startWalkMessage = null;
