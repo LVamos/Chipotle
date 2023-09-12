@@ -67,20 +67,20 @@ namespace Game.Entities
 		    return new Item(name, area, "bazének", decorative, pickable, null, "snd7", stopWhenPlayerMoves: true);
 	    }
 
-		public static Item CreateBathroomSinkSweeney(Name name, Rectangle area, bool decorative, bool pickable)
+	    public static Item CreateBathroomSinkSweeney(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "umyvadlo koupelna s", decorative, pickable, null, "snd8",
 				stopWhenPlayerMoves: true);
 		}
 
-		public static Item CreateBathroomSinkPub(Name name, Rectangle area, bool decorative, bool pickable)
+	    public static Item CreateBathroomSinkPub(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "umyvadlo záchod h", decorative, pickable, null, "snd8",
 				stopWhenPlayerMoves: true);
 		}
 
 
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of the sink (umyvadlo w1) object in the Walsch's bathroom (koupelna
 		/// w1) locality.
 		/// </summary>
@@ -93,14 +93,14 @@ namespace Game.Entities
 			    stopWhenPlayerMoves: true);
 	    }
 
-		public static Item CreateBathroomSinkPierce(Name name, Rectangle area, bool decorative, bool pickable)
+	    public static Item CreateBathroomSinkPierce(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "umyvadlo koupelna p", decorative, pickable, null, "snd8",
 				stopWhenPlayerMoves: true);
 		}
 
 
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of the bench (lavička c1) object in the Carson's garden (zahrada
 		/// c1) locality.
 		/// </summary>
@@ -546,7 +546,7 @@ namespace Game.Entities
 			    stopWhenPlayerMoves: true);
 	    }
 
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of a table.
 		/// </summary>
 		/// <param name="name">Inner and public name of the object</param>
@@ -557,7 +557,7 @@ namespace Game.Entities
 			return new Item(name, area, "stůl u mariottiho", decorative, pickable, "HitTable");
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of a table.
 		/// </summary>
 		/// <param name="name">Inner and public name of the object</param>
@@ -569,8 +569,7 @@ namespace Game.Entities
 		}
 
 
-
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of a table.
 		/// </summary>
 		/// <param name="name">Inner and public name of the object</param>
@@ -582,17 +581,17 @@ namespace Game.Entities
 	    }
 
 
-		public static Item CreateTablePub(Name name, Rectangle area, bool decorative, bool pickable)
+	    public static Item CreateTablePub(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "stůl hospodský", decorative, pickable, "HitTable");
 		}
 
-		public static Item CreateGardenTableSweeney(Name name, Rectangle area, bool decorative, bool pickable)
+	    public static Item CreateGardenTableSweeney(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "stůl zahradní c", decorative, pickable, "HitTable");
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of the bench (lavička w1) object in the Walsch's pool (bazén w1) locality.
 		/// </summary>
 		/// <param name="name">Inner and public name of the object</param>
@@ -634,8 +633,7 @@ namespace Game.Entities
         /// <returns>New instance of the object</returns>
         public static Item CreatePoolStairs(Name name, Rectangle area, bool decorative, bool pickable)
 	    {
-		    return new Item(name, area, "schůdky u bazénu", decorative, pickable, null, "snd3",
-			    quickActionsAllowed: true);
+		    return new Item(name, area, "schůdky u bazénu", decorative, pickable, "snd3");
 	    }
 
 	    /// <summary>
@@ -743,35 +741,35 @@ namespace Game.Entities
 		    return new Item(name, area, "lednice p", decorative, pickable, null, "snd10", "FridgeLoop", volume: .5f,
 			    stopWhenPlayerMoves: true);
 	    }
-        private static Item CreateFridgeSweeney(Name name, Rectangle area, bool decorative, bool pickable)
+
+	    private static Item CreateFridgeSweeney(Name name, Rectangle area, bool decorative, bool pickable)
 	    {
 		    return new Item(name, area, "lednice s", decorative, pickable, null, "snd10", "FridgeLoop", volume: .5f,
 			    stopWhenPlayerMoves: true);
 	    }
 
-		private static Item CreateFridgeWalsch(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateFridgeWalsch(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "lednice w", decorative, pickable, null, "snd10", "FridgeLoop", volume: .5f,
 				stopWhenPlayerMoves: true);
 		}
 
 
-		private static Item CreateKitchenChairWalsch(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateKitchenChairWalsch(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "židle kuchyň w", decorative, pickable, actionSound: "ActChair",
 				collisionSound: "HitChair");
 		}
 
 
-		private static Item CreateSalonChairWalsch(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateSalonChairWalsch(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "židle salon w", decorative, pickable, actionSound: "ActChair",
 				collisionSound: "HitChair");
 		}
 
 
-
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of the chair (židle) object.
 		/// </summary>
 		/// <param name="name">Inner and public name of the object</param>
@@ -783,29 +781,27 @@ namespace Game.Entities
 			    collisionSound: "HitChair");
 	    }
 
-		private static Item CreateDiningRoomChairWalsch(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateDiningRoomChairWalsch(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "židle v jídelně w", decorative, pickable, actionSound: "ActChair",
 				collisionSound: "HitChair");
 		}
 
 
-
-		private static Item CreateChairSweeney(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateChairSweeney(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "židle s", decorative, pickable, actionSound: "ActChair",
 				collisionSound: "HitChair");
 		}
 
-		private static Item CreateKitchenChairSweeney(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateKitchenChairSweeney(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "židle kuchyňská s", decorative, pickable, actionSound: "ActChair",
 				collisionSound: "HitChair");
 		}
 
 
-
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of the Christine's door bell object in the Belvedere street (ulice
 		/// p1) locality.
 		/// </summary>
@@ -947,15 +943,15 @@ namespace Game.Entities
         /// <returns>New instance of the object</returns>
         private static Item CreateComputerTableSweeney(Name name, Rectangle area, bool decorative, bool pickable)
 	    {
-		    return new Item(name, area, "stůl u sweeneyho", decorative, pickable: pickable, "HitTable", null, null, "cs17", true);
+		    return new Item(name, area, "stůl u sweeneyho", decorative, pickable, "HitTable", null, null, "cs17", true);
 		}
 
-		private static Item CreateDiningTableSweeney(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateDiningTableSweeney(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new Item(name, area, "stůl kuchyňský s", decorative, pickable, "HitTable", null, null, "cs17", true);
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of the car (auto) object in the garage of Vanilla crunch company
 		/// (garáž v1) locality.
 		/// </summary>
@@ -967,53 +963,48 @@ namespace Game.Entities
 		    return new VanillaCrunchCar(name, area, decorative, pickable, "auto s delfínem");
 	    }
 
-		private static Item CreateVanillaCrunchCatCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchCatCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto s kočkou");
 		}
 
-		private static Item CreateVanillaCrunchMoleCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchMoleCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto s krtkem");
 		}
 
-		private static Item CreateVanillaCrunchButterflyCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchButterflyCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto s motýlem");
 		}
 
-		private static Item CreateVanillaCrunchWalrusCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchWalrusCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto s mrožem");
 		}
 
-		private static Item CreateVanillaCrunchSeagullCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchSeagullCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto s rackem");
 		}
 
-		private static Item CreateVanillaCrunchPenguinCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchPenguinCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto s tučňákem");
 		}
 
-		private static Item CreateVanillaCrunchDogCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchDogCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto se psem");
 		}
 
-		private static Item CreateVanillaCrunchSnowmanCar(Name name, Rectangle area, bool decorative, bool pickable)
+	    private static Item CreateVanillaCrunchSnowmanCar(Name name, Rectangle area, bool decorative, bool pickable)
 		{
 			return new VanillaCrunchCar(name, area, decorative, pickable, "auto se sněhulákem");
 		}
 
 
-
-
-
-
-
-		/// <summary>
+	    /// <summary>
 		/// Creates new instance of the wall clock (hodiny) object.
 		/// </summary>
 		/// <param name="name">Inner and public name of the object</param>
