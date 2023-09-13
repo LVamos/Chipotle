@@ -120,8 +120,7 @@ namespace Game.Entities
         /// <returns>New instance of the object</returns>
         public static Item CreateCoffeemaker(Name name, Rectangle area, bool decorative, bool pickable)
 	    {
-		    return new Item(name, area, "kávovar", decorative, pickable, null, "ActCoffeeMaker",
-			    stopWhenPlayerMoves: true);
+		    return new Item(name, area, "kávovar", decorative, pickable, null, null, null, "ActCoffeeMaker");
 	    }
 
 	    /// <summary>
