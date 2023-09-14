@@ -332,7 +332,7 @@ namespace Game.Entities
             if (NavigationInProgress)
                 return;
 
-            (string[] descriptions, Passage[] exits) result = GetNavigableExits();
+            (List<List<string>> descriptions, Passage[] exits) result = GetNavigableExits();
 
             if (result.descriptions.IsNullOrEmpty()) // No objects near by
             {
@@ -340,8 +340,8 @@ namespace Game.Entities
                 return;
             }
 
-            // Run the menu
-            int option = WindowHandler.Menu(result.descriptions, "Východy", false);
+						// Run the menu
+						int option = WindowHandler.Menu(result.descriptions, "Východy", " ", 2, false);
             if (option == -1)
                 return;
 
@@ -404,7 +404,10 @@ namespace Game.Entities
                 return;
             }
 
-            int option = WindowHandler.Menu(objects.descriptions, "Okolní objekty", false);
+			List<List<string>> descriptions =
+objects.descriptions.Select(d => new List<string> { d }).ToList();
+
+			int option = WindowHandler.Menu(descriptions, "Okolní objekty", " ", 0, false);
 
             if (option == -1)
                 return;
@@ -542,21 +545,25 @@ namespace Game.Entities
         /// Returns text descriptions of the specified exits including distance and position.
         /// </summary>
         /// <returns>A string array</returns>
-        private (string[] descriptions, Passage[] exits) GetNavigableExits()
+        private (List<List<string>> descriptions, Passage[] exits) GetNavigableExits()
         {
             Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Passage>();
 
             Vector2 me = _area.Center;
-            string[] descriptions =
+			List<List<string>> descriptions =
     (
     from e in exits
     let point = e.Area.GetClosestPoint(_area.Center)
     let distance = GetDistanceDescription((int)World.GetDistance(me, point))
     let type = e.ToString()
     let to = e.AnotherLocality(Locality).To + " "
+let index = to.IndexOf(' ')
+	let to1 = to.Substring(0, index)
+	let to2 = to.Substring(index+1)
+
     let angle = Angle.GetDescription(GetAngle(point))
-    select ($"{type} {to}: {distance} {angle}:")
-    ).ToArray<string>();
+    select new List<string> { type, to1, to2, distance, angle }
+    ).ToList();
 
             return (descriptions, exits);
         }

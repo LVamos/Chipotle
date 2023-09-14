@@ -173,7 +173,7 @@ namespace Game.Entities
             };
 
             // Run the menu
-            string[] items = commands.Select(c => c.name).ToArray<string>();
+            List<List<string>> items = commands.Select(c => new List<string>() { c.name }).ToList();
             Program.MainWindow.GameInProgress = false;
             int item = WindowHandler.Menu(items, "Menu");
             Program.MainWindow.GameInProgress = true;
@@ -253,18 +253,18 @@ namespace Game.Entities
                 return;
 
             Vector2 me = Owner.Area.Center;
-            string[] items =
+			List<List<string>> items =
                 (
                 from l in World.GetLocalities()
                 orderby l.Name.Indexed
-                select (l.Name.Indexed)
-                ).ToArray<string>();
+                select (new List<string> { l.Name.Indexed })
+                ).ToList();
 
             int item = WindowHandler.Menu(items, "Vyber lokaci");
             if (item == -1)
                 return;
 
-            Locality locality = World.GetLocality(items[item]);
+            Locality locality = World.GetLocality(items[item][0]);
             Vector2 point = locality.Area.GetWalkableTiles().First().position;
             InnerMessage(new SetPosition(this, new Rectangle(point)));
 

@@ -2,6 +2,8 @@
 
 using Luky;
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Game.UI
@@ -25,11 +27,13 @@ namespace Game.UI
         /// A text uttered by a screen reader or voice synthesizer after the menu is opened
         /// </summary>
         protected readonly string _introText;
+		private string _divider;
+		private int _searchIndex;
 
-        /// <summary>
-        /// List of the menu items
-        /// </summary>
-        protected string[] _items;
+		/// <summary>
+		/// List of the menu items
+		/// </summary>
+		protected List<List<string>> _items;
 
         /// <summary>
         /// Name of a sound played when cursor reaches last item of the menu
@@ -87,10 +91,12 @@ namespace Game.UI
         /// <param name="lowerEdgeSound">
         /// Name of a sound to be played when cursor gets to lower edge of the menu
         /// </param>
-        public MenuWindow(string[] items, string introText, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
+        public MenuWindow(List<List<string>> items, string introText, string divider = " ", int searchIndex = 0, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
         {
             _items = items;
             _introText = introText;
+            _divider = divider;
+            _searchIndex = searchIndex;
             _wrappingAllowed = wrappingAllowed;
             _introSound = introSound;
             _outroSound = outroSound;
@@ -150,7 +156,7 @@ namespace Game.UI
         /// Index of last item
         /// </summary>
         protected int _lastItem
-            => _items.Length - 1;
+            => _items.Count- 1;
 
         /// <summary>
         /// Action performed when the menu is activated
@@ -275,7 +281,8 @@ namespace Game.UI
         protected virtual void SayItem()
         {
             Play(_selectionSound);
-            Tolk.Speak(_items[Index], true);
+            string text = string.Join(_divider,_items[Index]);
+            Tolk.Speak(text);
         }
 
         /// <summary>
@@ -304,9 +311,9 @@ namespace Game.UI
         protected void Navigate(char letter)
         {
             int result = -1;
-            for (int i = 0; i < _items.Length && result == -1; i++)
+            for (int i = 0; i < _items.Count&& result == -1; i++)
             {
-                string item = _items[i].PrepareForIndexing();
+                string item = _items[i][_searchIndex].PrepareForIndexing();
 
                 if (item[0] == letter)
                     result = i;

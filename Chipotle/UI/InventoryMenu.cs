@@ -3,6 +3,7 @@
 using Game.Entities;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -60,14 +61,14 @@ namespace Game.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        public InventoryMenu(Item[] inventory) : base(null, "inventář", false)
+        public InventoryMenu(Item[] inventory) : base(null, "inventář", " ", 0, false)
         {
             // Prepare the menu items and sort them by picking time.
             _inventory = inventory;
             _items =
-                 _inventory.Select(o => o.Name.Indexed)
+                 _inventory.Select(o => new List<string> { o.Name.Indexed })
                  .Reverse()
-                .ToArray<string>();
+                .ToList();
 
             // Add new key shortcuts
             RegisterShortcuts(
@@ -130,7 +131,7 @@ namespace Game.UI
         /// <summary>
         /// Identifies the currently selected object and assigns it to the SelectedObject property.
         /// </summary>
-        protected void AssignSelectedObject() => SelectedObject = _inventory.First(o => o.Name.Indexed == _items[_index]);
+        protected void AssignSelectedObject() => SelectedObject = _inventory.First(o => o.Name.Indexed == _items[_index][0]);
 
         /// <summary>
         /// Announces selected item using a screen reader or voice synthesizer

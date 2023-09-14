@@ -193,11 +193,15 @@ namespace Game.Entities
                 return;
             }
 
-            string[] items = destinations.Keys.ToArray<string>();//_allowedDestinations.Select(d => d.Name.Friendly).ToArray<string>();
+            List<List<string>> items = 
+destinations.Keys.ToArray()
+.Select(k=>new List<string>() { k})
+.ToList();
+//_allowedDestinations.Select(d => d.Name.Friendly).ToList();
             int item = WindowHandler.Menu(items, "Kam chceš jet?");
 
             if (item >= 0)
-                Move(destinations[items[item]], cutscene);
+                Move(destinations[items[item][0]], cutscene);
         }
 
         /// <summary>

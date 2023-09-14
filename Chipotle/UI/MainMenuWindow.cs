@@ -5,6 +5,7 @@ using Luky;
 using OpenTK;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -56,12 +57,12 @@ namespace Game.UI
         /// <summary>
         /// Default menu items
         /// </summary>
-        private string[] _items = new string[]
-                {
-                "Nová hra",
-                "Test sluchátek",
-                "Návod",
-                "Konec"
+        private List<List<string>> _items = new List<List<string>>
+				{
+                new List < string > { "Nová hra" },
+                new List < string > { "Test sluchátek" },
+                new List < string > { "Návod" },
+                new List < string > { "Konec" }
                 };
 
         /// <summary>
@@ -72,13 +73,13 @@ namespace Game.UI
         /// <summary>
         /// Items including the Load game command
         /// </summary>
-        private readonly string[] _itemsWithLoadGame = new string[]
+        private readonly List<List<string>> _itemsWithLoadGame = new List<List<string>>
             {
-                "Nová hra",
-                "Pokračovat ve hře",
-                "Test sluchátek",
-                "Návod",
-                "Konec"
+                new List<string>{"Nová hra" },
+				new List<string>{"Pokračovat ve hře" },
+				new List<string>{"Test sluchátek" },
+				new List<string>{"Návod" },
+				new List<string>{"Konec}" }
             };
 
         /// <summary>
@@ -104,10 +105,10 @@ namespace Game.UI
             string intro = _menuLoopID == 0 ? "Hlavní menu" : String.Empty;
             PlayLoop();
 
-            string[] items = GameStateSaved() ? _itemsWithLoadGame : _items;
-            int choice = WindowHandler.Menu(items, intro, true);
-            choice = choice == -1 ? items.Length - 1 : choice;
-            switch (items[choice])
+            List<List<string>> items = GameStateSaved() ? _itemsWithLoadGame : _items;
+            int choice = WindowHandler.Menu(items, intro);
+            choice = choice == -1 ? items.Count- 1 : choice;
+            switch (items[choice][0])
             {
                 case "Nová hra": StartGame(); break;
                 case "Pokračovat ve hře": LoadGame(); break;

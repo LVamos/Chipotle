@@ -13,6 +13,7 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -260,10 +261,10 @@ namespace Game.Entities
                 return;
             }
 
-            int count = message.Exits.Length;
+            int count = message.Exits.Count;
             if (count == 1)
             {
-                Tolk.Speak(message.Exits[0], true);
+                Tolk.Speak(message.Exits[0][0], true);
                 return;
             }
 
@@ -272,7 +273,8 @@ namespace Game.Entities
                 number = "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: ";
             else number = "Je tu " + count.ToString() + " východů: ";
 
-            Tolk.Speak(number + FormatStringList(message.Exits, true) + ".", true);
+            string[] exits = message.Exits.Select(e => string.Join(", ", e)).ToArray();
+            Tolk.Speak(number + FormatStringList(exits, true) + ".", true);
         }
 
         /// <summary>

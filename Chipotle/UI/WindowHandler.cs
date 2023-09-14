@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Game.UI
@@ -49,9 +50,9 @@ namespace Game.UI
         /// <param name="upperEdgeSound">Name of a sound to be played when cursor gets to upper edge of the menu</param>
         /// <param name="lowerEdgeSound">Name of a sound to be played when cursor gets to lower edge of the menu</param>
         /// <returns>Tuple with index of selected item and value of selected item</returns>
-        public static int Menu(string[] items, string introText, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
+        public static int Menu(List<List<string>> items, string introText, string divider=" ", int searchIndex=0, bool wrappingAllowed = true, string introSound = null, string outroSound = null, string selectionSound = null, string wrapDownSound = null, string wrapUpSound = null, string upperEdgeSound = null, string lowerEdgeSound = null)
         {
-            MenuWindow menu = new MenuWindow(items, introText, wrappingAllowed, introSound, outroSound, selectionSound, wrapDownSound, wrapUpSound, upperEdgeSound, lowerEdgeSound);
+            MenuWindow menu = new MenuWindow(items, introText, divider, searchIndex, wrappingAllowed, introSound, outroSound, selectionSound, wrapDownSound, wrapUpSound, upperEdgeSound, lowerEdgeSound);
             OpenModalWindow(menu);
             return menu.Index;
         }

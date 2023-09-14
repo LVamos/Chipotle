@@ -829,20 +829,26 @@ namespace Game
         /// <remarks>for testing purposes only.</remarks>
         public static bool LoadPredefinedSave()
         {
-            string[] saves =
-                Directory.GetDirectories(Program.PredefinedSavesPath);
+            string[] saves = null;
 
-            string[] items =
-                saves.Select(s => Path.GetFileName(s))
-                .ToArray<string>();
-            if (items.IsNullOrEmpty())
+			if (Directory.Exists(Program.PredefinedSavesPath))
             {
-                Tolk.Speak("Žádný sejvy tady nevidim.");
-                return false;
+                saves =
+                    Directory.GetDirectories(Program.PredefinedSavesPath);
             }
 
+			if (saves.IsNullOrEmpty())
+			{
+				Tolk.Speak("Žádný sejvy tady nevidim.");
+				return false;
+			}
+
+			List<List<string>> items =
+                saves.Select(s => new List<string> { Path.GetFileName(s) })
+                .ToList();
+
             int i =
-                WindowHandler.Menu(items, "Kterej sejv chceš načíst?", true);
+                WindowHandler.Menu(items, "Kterej sejv chceš načíst?");
             if (i == -1)
             {
                 Tolk.Speak("Tak nic");

@@ -1,5 +1,7 @@
 ﻿using Game.Terrain;
 
+using System.Collections.Generic;
+
 namespace Game.Messaging.Events
 {
     public class SayExitsResult : GameMessage
@@ -7,7 +9,7 @@ namespace Game.Messaging.Events
         /// <summary>
         /// Information about the exits including description of their location.
         /// </summary>
-        public readonly string[] Exits;
+        public readonly List<List<string>> Exits;
 
         /// <summary>
         /// An exit the NPC stands in.
@@ -19,7 +21,7 @@ namespace Game.Messaging.Events
         /// </summary>
         /// <param name="sender">Source of the message</param>
         /// <param name="exitInfo">Information about the exits</param>
-        public SayExitsResult(object sender, string[] exits) : base(sender)
+        public SayExitsResult(object sender, List<List<string>> exits) : base(sender)
             => Exits = exits;
 
         /// <summary>
