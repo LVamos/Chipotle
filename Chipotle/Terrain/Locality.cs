@@ -11,6 +11,7 @@ using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace Game.Terrain
 {
@@ -20,6 +21,14 @@ namespace Game.Terrain
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Locality : MapElement
     {
+public IEnumerable<Door> Doors(PassageState state)
+        {
+return
+            Passages
+.Where(p => p is Door d && d.State == state)
+.Select(d => d as Door);
+        }
+
         /// <summary>
         /// Enumerates all passages leading to the specified locality.
         /// </summary>

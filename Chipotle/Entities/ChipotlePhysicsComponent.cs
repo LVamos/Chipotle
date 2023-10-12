@@ -9,11 +9,14 @@ using Game.UI;
 using Luky;
 
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
+using System.Configuration.Assemblies;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -726,13 +729,23 @@ let index = to.IndexOf(' ')
 
             base.MakeStep();
 
-            Vector2 target = GetNextTile(); // Get target coordinates
-
             // Move if the terrain is occupable.
-            if (!SolveObstacle(target))
-                Move(target);
+            Parallelogram trajectory = GetStepTrajectory();
+            Rectangle table = World.GetObject("stůl w4").Area;
+            Rectangle target = new Rectangle(_area);
+            target.Move(_orientation, _stepLength);
+            Vector2 end = target.Center;
+            Debug.WriteLine($"Počátek: {_area.Center}");
+            Debug.WriteLine($"Cíl: {end.X}, {end.Y}");
+            Debug.WriteLine($"dráha: {trajectory}");
+            Debug.WriteLine($"Stůl: {table}");
+            if (!DetectCollisions(trajectory))
+            {
+                Debug.WriteLine("pelášim");
+                Move();
+            }
 
-            ReportObjects();
+            //ReportObjects();
         }
 
         /// <summary>
@@ -1061,36 +1074,67 @@ let index = to.IndexOf(' ')
             return (int)(GetTerrainSpeed() * coefficient);
         }
 
-        /// <summary>
-        /// Solves a situation when the NPC encounters an obstacle.
-        /// </summary>
-        /// <param name="obstacle">Nearest point of the obstacle</param>
-        protected override bool SolveObstacle(Vector2 obstacle)
+/// <summary>
+/// Detects collisions on given trajectory and announces collisions.
+/// </summary>
+/// <param name="trajectory">The rectangle-shaped trajectory to be checked</param>
+/// <returns>True when collisions detected</returns>
+        protected override bool DetectCollisions(IShape trajectory)
         {
-            Tile t = World.Map[obstacle];
-            if (t == null) // Off the map
-                return true;
-
-            GameObject o = World.GetObject(obstacle);
-            Passage p = World.GetPassage(obstacle);
-
-            if (o != null && o != Owner)
-            {
-                o.TakeMessage(new ObjectsCollided(Owner, o, obstacle));
-                InnerMessage(new ObjectsCollided(this, o, obstacle));
-            }
-            else if (p != null && p.State == PassageState.Closed)
-            {
-                p.TakeMessage(new DoorHit(Owner, p as Door, obstacle));
-                InnerMessage(new DoorHit(this, p as Door, obstacle));
-            }
-			else if (!t.Walkable)
-				InnerMessage(new TerrainCollided(this, obstacle));
-			else return false;
-
             _walking = false;
             _startWalkMessage = null;
-            return true;
+
+            // Detect collisions with objects
+            IEnumerable<GameObject> objects =
+            Locality.Objects
+            .Where(obj => trajectory.Intersects(obj.Area));
+
+            if (objects.Any())
+            {
+                foreach (GameObject obj in objects)
+                {
+                    Vector2 intersection = obj.Area.GetClosestPoint(_area.Center);
+                    obj.TakeMessage(new ObjectsCollided(Owner, obj, intersection));
+                    InnerMessage(new ObjectsCollided(this, obj, intersection));
+                }
+                return true;
+            }
+
+            // Detect passages
+            IEnumerable<Passage> passages =
+            Locality.Passages
+.Where(p=> p is Door d && d.State == PassageState.Closed)
+            .Where(p => trajectory.Intersects(p.Area));
+
+            if (passages.Any())
+            {
+                foreach (Passage p in passages)
+                {
+                    Vector2 intersection = p.Area.GetIntersection(_area).Center;
+                    p.TakeMessage(new DoorHit(Owner, p as Door, intersection));
+                    InnerMessage(new DoorHit(this, p as Door, intersection));
+                }
+                return true;
+            }
+
+            // Detect nonwalkable tiles.
+            IEnumerable<(Vector2 position, Tile tile)> nonwalkables = trajectory.GetTiles().Where(t => !t.tile.Walkable);
+if (nonwalkables.Any())
+            {
+                HashSet<TerrainType> uniqueTerrains = new HashSet<TerrainType>();
+
+foreach ((Vector2 position, Tile tile) tile in nonwalkables)
+                {
+                    if (uniqueTerrains.Contains(tile.tile.Terrain))
+                        continue;
+
+                    InnerMessage(new TerrainCollided(this, tile.position));
+                    uniqueTerrains.Add(tile.tile.Terrain);
+                }
+                return true;
+            }
+
+            return false;
         }
     }
 }

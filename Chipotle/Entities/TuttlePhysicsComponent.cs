@@ -422,9 +422,8 @@ namespace Game.Entities
             base.MakeStep();
 
             // Move if there are no obstacles.
-            Vector2 target = GetNextTile();
-            if (!SolveObstacle(target))
-                Move(target);  // The road is clear! Move!
+            if (!DetectCollisions(GetStepTrajectory()))
+                Move();  // The road is clear! Move!
 
             // Stop if distance from player is in allowed range.
             if (_state == TuttleState.GoingToPlayer)
@@ -437,26 +436,21 @@ namespace Game.Entities
 
         }
 
+
         /// <summary>
-        /// Avoids an obstacle or walks through a door if any.
+        /// Detects collisions on given trajectory and announces collisions.
         /// </summary>
-        /// <param name="obstacle">The target coordinates</param>
-        protected override bool SolveObstacle(Vector2 obstacle)
+        /// <param name="trajectory">The rectangle-shaped trajectory to be checked</param>
+        /// <returns>True when collisions detected</returns>
+        protected override bool DetectCollisions(IShape trajectory)
         {
-            // Temporaryly solve a weird error that causes that the NPC bumps to it self.
-            GameObject o = World.GetObject(obstacle);
-            if (o != null && o != Owner)
-            {
-                if (_state == TuttleState.GoingToPlayer)
-                    _restartApproaching = true;
-
-                return true;
-            }
-
-            // If the obstacle is a door open it.
-            Passage p = World.GetPassage(obstacle);
-            if (p != null && p is Door && p.State == PassageState.Closed)
-                p.TakeMessage(new UseDoor(Owner, obstacle)); // Open the door and keep walking.
+            // If there's a door on the way, open it.
+                foreach (Door door in Locality.Doors(PassageState.Closed))
+                {
+                    Vector2 intersection = door.Area.GetIntersection(_area).Center;
+                    door.TakeMessage(new DoorHit(Owner, door as Door, intersection));
+                    InnerMessage(new DoorHit(this, door as Door, intersection));
+                }
 
             return false;
         }

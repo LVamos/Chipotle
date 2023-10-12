@@ -102,7 +102,7 @@ namespace Game
                 DisableJawsKeyHook = false;
                 LetTuttleFollowChipotle = true;
                 MainMenuAtStartup = false;
-                PlayCutscenes = true;
+                PlayCutscenes = false;
                 PlayMenuLoop = false;
                 ReportErrors = false;
                 SendTuttleToPool = false;

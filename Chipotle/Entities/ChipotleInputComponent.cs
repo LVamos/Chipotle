@@ -292,7 +292,7 @@ namespace Game.Entities
                 return;
 
             Vector2 coords = Owner.Area.Center;
-            string result = Math.Round(coords.X).ToString() + ", " + Math.Round(coords.Y);
+            string result = $"{coords.X}, {coords.Y}";
             Clipboard.SetText(result);
             InnerMessage(new SayCoordinates(this, false));
         }

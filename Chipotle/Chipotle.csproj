@@ -150,6 +150,7 @@
     <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
     <Compile Include="Messaging\Events\TuttleStateChanged.cs" />
     <Compile Include="SerializerHelper.cs" />
+    <Compile Include="Terrain\IShape.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
     <Compile Include="Entities\PubBench.cs" />
     <Compile Include="Entities\SweeneysBell.cs" />
@@ -202,6 +203,7 @@
     <Compile Include="Terrain\MapElement.cs" />
     <Compile Include="Terrain\ObstacleType.cs" />
     <Compile Include="Terrain\Orientation2D.cs" />
+    <Compile Include="Terrain\Parallelogram.cs" />
     <Compile Include="Terrain\Passage.cs" />
     <Compile Include="Entities\PhysicsComponent.cs" />
     <Compile Include="Entities\SoundComponent.cs" />

@@ -119,7 +119,9 @@ namespace Game.Terrain
             _localities = localities.ToArray<string>();
 
             // Validate passage location
-            Assert(area.GetObjects().IsNullOrEmpty() && area.GetPassages().IsNullOrEmpty(), "No objects or nested passages allowed");
+            IEnumerable<Entities.GameObject> objs = area.GetObjects();
+            IEnumerable<Passage> passes = area.GetPassages();
+            Assert(objs.IsNullOrEmpty() && passes.IsNullOrEmpty(), "No objects or nested passages allowed");
 
             Appear();
         }

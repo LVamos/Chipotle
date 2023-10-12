@@ -9,6 +9,7 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Game.Entities
@@ -21,6 +22,45 @@ namespace Game.Entities
     [ProtoInclude(101, typeof(TuttlePhysicsComponent))]
     public class PhysicsComponent : CharacterComponent
     {
+        /// <summary>
+        /// Immediately moves position of the NPC by distance specified in _stepLength.
+        /// </summary>
+        /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
+        protected virtual void Move(bool silently = false)
+        {
+            Rectangle target = new Rectangle(_area);
+            target.Move(_orientation, _stepLength);
+            Move(new Rectangle(target), silently);
+        }
+
+        protected Parallelogram GetStepTrajectory()
+        {
+            Vector2 direction = _orientation.UnitVector;
+            Vector2 normal = new Vector2(-direction.Y, direction.X);
+            normal.Normalize();
+
+            // Calculation of shifted vertices according to tunnel width.
+            float width = _area.Width;
+            Vector2 offset = normal * (width * 0.5f);
+
+            Vector2 startA = _area.UpperLeftCorner;
+            Vector2 startB = _area.UpperRightCorner;
+            Vector2 startC = _area.LowerRightCorner;
+            Vector2 startD = _area.LowerLeftCorner;
+
+            Vector2 endA = startA + direction * _stepLength + offset;
+            Vector2 endB = startB + direction * _stepLength + offset;
+            Vector2 endC = startC + direction * _stepLength- offset;
+            Vector2 endD = startD + direction* _stepLength - offset;
+
+            return new Parallelogram(startA, endB, endC, startD);
+        }
+
+        /// <summary>
+        /// Step length in meters.
+        /// </summary>
+        protected float _stepLength=0.7f;
+
         /// <summary>
         /// Checks if there's an character or item standing before the character and returns it.
         /// </summary>
@@ -88,10 +128,11 @@ namespace Game.Entities
         protected PathFinder _finder = new PathFinder();
 
         /// <summary>
-        /// Solves a situation when the NPC encounters an obstacle.
+        /// Detects collisions on given trajectory and announces collisions.
         /// </summary>
-        /// <param name="obstacle">Nearest point of the obstacle</param>
-        protected virtual bool SolveObstacle(Vector2 obstacle)
+        /// <param name="trajectory">The rectangle-shaped trajectory to be checked</param>
+        /// <returns>True when collisions detected</returns>
+        protected virtual bool DetectCollisions(IShape trajectory)
             => true;
 
         /// <summary>
@@ -164,7 +205,14 @@ namespace Game.Entities
         /// </summary>
         /// <returns></returns>
         protected int GetTerrainSpeed()
-            => _speeds[CurrentTile.tile.Terrain];
+        {
+            IEnumerable<TerrainType> terrains = _area.GetTiles().Where(t=> t.tile.Walkable).Select(t=>t.tile.Terrain);
+
+            foreach (TerrainType terrain in terrains)
+                if (!_speeds.ContainsKey(terrain)) Debugger.Break();
+
+            return terrains.Max(t => _speeds[t]);
+        }
 
         /// <summary>
         /// Contains walk speed settings for particullar terrain types.

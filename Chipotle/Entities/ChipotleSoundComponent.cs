@@ -193,7 +193,7 @@ namespace Game.Entities
         private void OnSayCoordinates(SayCoordinates message)
         {
             Vector2 coords = message.Relative ? Owner.Area.ToRelative().Center : Owner.Area.Center;
-            string result = Math.Round(coords.X).ToString() + (message.Relative ? " " : ", ") + Math.Round(coords.Y).ToString();
+            string result = $"{coords.X}, {coords.Y}";
             Tolk.Speak(result, true);
         }
 

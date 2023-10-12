@@ -20,7 +20,7 @@ namespace Game.Terrain
     /// The region is defined by two points: <see cref="Rectangle.UpperLeftCorner"/> and <see cref="Rectangle.LowerRightCorner"/>.
     /// </remarks>
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class Rectangle : DebugSO
+    public class Rectangle : DebugSO, IShape
     {
         /// <summary>
         /// Enumerates all walkable points in a distance range around this plane.
@@ -429,9 +429,9 @@ namespace Game.Terrain
         public IEnumerable<Vector2> GetPoints()
         {
             Vector2 position;
-            for (position.X = UpperLeftCorner.X; position.X <= LowerRightCorner.X; position.X++)
+            for (position.X = (float)Math.Floor(UpperLeftCorner.X); position.X <= (float)Math.Ceiling(LowerRightCorner.X); position.X++)
             {
-                for (position.Y = LowerRightCorner.Y; position.Y <= UpperLeftCorner.Y; position.Y++)
+                for (position.Y = (float)Math.Floor(LowerRightCorner.Y); position.Y <= (float)Math.Ceiling(UpperLeftCorner.Y); position.Y++)
                     yield return position;
             }
         }
@@ -572,21 +572,40 @@ namespace Game.Terrain
         public IEnumerable<(Vector2 position, Tile tile)> GetWalkableTiles()
             => GetTiles().Where(t => World.IsWalkable(t.position));
 
+
+        public IEnumerable<(Vector2 position, Tile tile)> GetNonwalkableTiles()
+            => GetTiles().Where(t => !World.IsWalkable(t.position));
+
         /// <summary>
         /// Checks if this plane intersects with the specified plane.
         /// </summary>
-        /// <param name="plane">The plane to be compared</param>
+        /// <param name="rectangle">The plane to be compared</param>
         /// <returns>True if the planes intersect with each other</returns>
-        public bool Intersects(Rectangle plane)
+        public bool Intersects(Rectangle rectangle)
         {
-            foreach (Vector2 c in GetPoints())
-            {
-                if (plane.Intersects(c))
-                {
-                    return true;
-                }
-            }
-            return false;
+            // Check if one rectangle is to the left or right of the other
+            if (UpperLeftCorner.X > rectangle.LowerRightCorner.X || rectangle.UpperLeftCorner.X > LowerRightCorner.X)
+                return false;
+
+            // Check if one rectangle is above or below the other
+            if (UpperLeftCorner.Y < rectangle.LowerRightCorner.Y || rectangle.UpperLeftCorner.Y < LowerRightCorner.Y)
+                return false;
+
+            return true;
+        }
+
+        public Rectangle GetIntersection(
+            Rectangle rectangle)
+        {
+            float leftX = Math.Max(rectangle.UpperLeftCorner.X, UpperLeftCorner.X);
+            float rightX = Math.Min(rectangle.LowerRightCorner.X, LowerRightCorner.X);
+            float topY = Math.Max(rectangle.UpperLeftCorner.Y, UpperLeftCorner.Y);
+            float bottomY = Math.Min(rectangle.LowerRightCorner.Y, LowerRightCorner.Y);
+
+            if (leftX < rightX && topY < bottomY)
+                return new Rectangle(new Vector2(leftX, topY), new Vector2(rightX, bottomY));
+
+            return null;
         }
 
         /// <summary>
@@ -708,6 +727,6 @@ namespace Game.Terrain
         /// </summary>
         /// <returns>coordinates of the plane as a comma separated string</returns>
         public override string ToString()
-=> $"{UpperLeftCorner}, {LowerRightCorner}";
+=> $"{UpperLeftCorner.X}, {UpperLeftCorner.Y}, {LowerRightCorner.X}, {LowerRightCorner.Y}";
     }
 }
