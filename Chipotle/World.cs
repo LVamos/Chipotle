@@ -17,9 +17,13 @@ using ProtoBuf.Meta;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -31,6 +35,87 @@ namespace Game
     /// </summary>
     public static class World
     {
+        public const int CollisionDetectionSteps = 10;
+
+        /// <summary>
+        /// Detects collisions on the given track area in the specified direction for the given length.
+        /// </summary>
+        /// <param name="area">The rectangle representing the track area.</param>
+        /// <param name="direction">The direction in which to detect collisions.</param>
+        /// <param name="length">The length for which to detect collisions in meters</param>
+        /// <returns>A list of MapElements representing the obstacles detected on the track or null</returns>
+        /// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting localities for collision. The search ends at the position where collisions were detected.</remarks>
+        public static List<object> DetectCollisionsOnTrack(MapElement element, Vector2 direction, float length)
+        {
+            float step = (float)length/CollisionDetectionSteps;
+
+                Rectangle position = new Rectangle(element.Area);
+            List<Rectangle> positions = new List<Rectangle>();
+            for (int i = 0; i < CollisionDetectionSteps + 1; i++)
+                positions.Add(position.Move(direction, step));
+
+            Rectangle target = new Rectangle(element.Area);
+            target.Move(direction, length);
+            positions.Add(target);
+
+            foreach(Rectangle p in positions)
+{
+                List<object> obstacles = DetectCollisions(element,p);
+                if (obstacles != null)
+                    return obstacles;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Detects collisions between the specified map element and other map elements.
+        /// </summary>
+        /// <param name="element">The element to be moved.</param>
+        /// <param name="area">The map element to detect collisions for.</param>
+        /// <returns>List of MapElements or null</returns>
+        public static List<object> DetectCollisions(MapElement element, Rectangle area)
+        {
+            List<object> obstacles = new List<object>();
+            List<Locality> localities = area.GetLocalities().ToList();
+
+            // Verify area isn't off the map.
+            IEnumerable<Vector2> pointsOutsideMap = area.GetPointsOutsideMap();
+if (pointsOutsideMap.Any())
+            {
+                obstacles.Add((Tile)null);
+                return obstacles;
+            }
+
+            IEnumerable<(Vector2 position, Tile tile)> inaccessibleTiles = area.GetTiles()
+            .Where(t => !t.tile.Walkable)
+.Distinct().ToList();
+
+            if (inaccessibleTiles.Any())
+            {
+                List<object> collection = inaccessibleTiles.Select(t => (object)t).ToList();
+                obstacles.AddRange(collection);
+            }
+
+            // Check all objects, passages and characters in localities the given element intersects. Skip the given element.
+            foreach (Locality locality in localities)
+            {
+                void DetectCollision(IEnumerable<MapElement> elements)
+                {
+                    MapElement obstacle = elements
+.Where(e=> e!=element)
+.FirstOrDefault(o => o.Area.Intersects(area) || o.Area.Contains(area) || area.Contains(o.Area));
+                    if (obstacle != null)
+                        obstacles.Add(obstacle);
+                }
+
+                DetectCollision(locality.Objects);
+                DetectCollision(locality.Characters);
+                DetectCollision(locality.Passages.Where(p=> p is Door d && d.State== PassageState.Closed));
+            }
+
+            return obstacles.Any() ? obstacles : null;
+        }
+
         /// <summary>
         /// Returns a text description for the specified object.
         /// </summary>
@@ -84,7 +169,8 @@ namespace Game
         /// <summary>
         /// A tool for path finding.
         /// </summary>
-        private static PathFinder _finder = new PathFinder();
+        private static 
+PathFinder _finder = new PathFinder();
 
         /// <summary>
         /// Searches nearest surrounding of the specified map element and selects a random walkable tile.

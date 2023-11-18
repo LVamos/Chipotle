@@ -30,7 +30,7 @@ namespace Game.Entities
         protected void OnSayObjectDescription(SayObjectDescription m)
         {
             if (m.Object == null)
-                Tolk.Speak("Před tebou nci není");
+                Tolk.Speak("Před tebou nic není");
             else Tolk.Speak(m.Object.Description);
         }
 
@@ -193,7 +193,11 @@ namespace Game.Entities
         private void OnSayCoordinates(SayCoordinates message)
         {
             Vector2 coords = message.Relative ? Owner.Area.ToRelative().Center : Owner.Area.Center;
-            string result = Math.Round(coords.X).ToString() + (message.Relative ? " " : ", ") + Math.Round(coords.Y).ToString();
+            int intX = (int)coords.X;
+            string x = coords.X == intX ? intX.ToString() : coords.X.ToString("0.0");
+            int intY = (int)coords.Y;
+            string y = coords.Y == intY ? intY.ToString() : coords.Y.ToString("0.0");
+            string result = x + (message.Relative ? " " : ", ") + y;
             Tolk.Speak(result, true);
         }
 

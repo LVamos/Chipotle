@@ -8,6 +8,7 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -95,20 +96,22 @@ namespace Game.Terrain
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="coordinates">A string with four coordinates separated by comma</param>
-        public Rectangle(string coordinates)
+        /// <param name="coordinateString">A string with four coordinates separated by comma</param>
+        public Rectangle(string coordinateString)
         {
             // Null check
-            Assert(!string.IsNullOrEmpty(coordinates), $"{nameof(coordinates)} cann't be null.");
+            Assert(!string.IsNullOrEmpty(coordinateString), $"{nameof(coordinateString)} cann't be null.");
 
             // Parse the values
-            List<int> coordinateList = new List<int>();
-            coordinates = coordinates.Trim();
-            foreach (string coordinate in Regex.Split(coordinates, @"\D+"))
-                coordinateList.Add(int.Parse(coordinate));
+            List<float> coordinateList = new List<float>();
+            coordinateString = coordinateString.Trim();
+
+            string[] coordinates = coordinateString.Split(',');
+            foreach (string coordinate in coordinates)
+                coordinateList.Add(float.Parse(coordinate.Trim(), CultureInfo.InvariantCulture));
 
             // Check format
-            Assert(coordinateList.Count == 4 || coordinateList.Count == 2, $"{nameof(coordinates)} in invalid format");
+            Assert(coordinateList.Count == 4 || coordinateList.Count == 2, $"{nameof(coordinateString)} in invalid format");
 
             UpperLeftCorner = new Vector2(coordinateList[0], coordinateList[1]);
             LowerRightCorner = coordinateList.Count == 2 ? UpperLeftCorner : new Vector2(coordinateList[2], coordinateList[3]);
@@ -545,6 +548,17 @@ namespace Game.Terrain
             => GetSurroundingPoints(minDistance, maxDistance).Select(p => World.Map[p]).Where(t => t != null);
 
         /// <summary>
+        /// Retrieves all the points that are located outside the map.
+        /// </summary>
+        /// <returns>An enumerable collection of Vector2 points.</returns>
+        public IEnumerable<Vector2> GetPointsOutsideMap()
+        {
+            return GetPoints()
+            .Where(p => World.Map[p] == null);
+        }
+
+
+        /// <summary>
         /// Enumerates all tiles intersecting with the plane.
         /// </summary>
         /// <returns>all tiles intersecting with the plane</returns>
@@ -579,14 +593,13 @@ namespace Game.Terrain
         /// <returns>True if the planes intersect with each other</returns>
         public bool Intersects(Rectangle plane)
         {
-            foreach (Vector2 c in GetPoints())
-            {
-                if (plane.Intersects(c))
-                {
-                    return true;
-                }
-            }
-            return false;
+            bool horizontalOverlap = LowerRightCorner.X >= plane.UpperLeftCorner.X &&
+                                     plane.LowerRightCorner.X >= UpperLeftCorner.X;
+
+            bool verticalOverlap = LowerRightCorner.Y <= plane.UpperLeftCorner.Y &&
+                                   plane.LowerRightCorner.Y <= UpperLeftCorner.Y;
+
+            return horizontalOverlap && verticalOverlap;
         }
 
         /// <summary>

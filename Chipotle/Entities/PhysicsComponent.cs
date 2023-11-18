@@ -91,7 +91,7 @@ namespace Game.Entities
         /// Solves a situation when the NPC encounters an obstacle.
         /// </summary>
         /// <param name="obstacle">Nearest point of the obstacle</param>
-        protected virtual bool SolveObstacle(Vector2 obstacle)
+        protected virtual bool DetectCollisions(Vector2 obstacle)
             => true;
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Game.Entities
         /// <returns></returns>
         protected int GetTerrainSpeed()
             => _speeds[CurrentTile.tile.Terrain];
-
+    
         /// <summary>
         /// Contains walk speed settings for particullar terrain types.
         /// </summary>
@@ -217,6 +217,11 @@ namespace Game.Entities
         /// </summary>
         [ProtoIgnore]
         protected int _speed;
+
+        /// <summary>
+        /// Length of Character's steps.
+        /// </summary>
+        protected float _stepLength = .7f;
 
         /// <summary>
         /// Current orientation of the NPC
@@ -282,7 +287,7 @@ namespace Game.Entities
         protected void Move(Rectangle target, bool silently = false)
         {
             Locality sourceLocality = Locality;
-            Locality targetLocality = target.GetLocalities().First();
+                Locality targetLocality = target.GetLocalities().First();
             Rectangle sourcePosition = _area == null ? null : new Rectangle(_area);
 
             _area = new Rectangle(target);

@@ -423,7 +423,7 @@ namespace Game.Entities
 
             // Move if there are no obstacles.
             Vector2 target = GetNextTile();
-            if (!SolveObstacle(target))
+            if (!DetectCollisions(target))
                 Move(target);  // The road is clear! Move!
 
             // Stop if distance from player is in allowed range.
@@ -441,7 +441,7 @@ namespace Game.Entities
         /// Avoids an obstacle or walks through a door if any.
         /// </summary>
         /// <param name="obstacle">The target coordinates</param>
-        protected override bool SolveObstacle(Vector2 obstacle)
+        protected override bool DetectCollisions(Vector2 obstacle)
         {
             // Temporaryly solve a weird error that causes that the NPC bumps to it self.
             GameObject o = World.GetObject(obstacle);

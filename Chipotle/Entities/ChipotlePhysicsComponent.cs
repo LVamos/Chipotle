@@ -14,6 +14,8 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing.Design;
 using System.IO;
 using System.Linq;
 
@@ -65,10 +67,16 @@ namespace Game.Entities
         /// <see cref="PhysicsComponent.Orientation"/>
         protected override Vector2 GetNextTile()
         {
+            Orientation2D finalOrientation = GetStepDirection();
+            return GetNextTile(finalOrientation, 1).position;
+        }
+
+        private Vector2 GetStepDirection()
+        {
             Orientation2D finalOrientation = _orientation;
             if (_startWalkMessage.Direction != TurnType.None)
                 finalOrientation.Rotate(_startWalkMessage.Direction);
-            return GetNextTile(finalOrientation, 1).position;
+            return finalOrientation.UnitVector;
         }
 
         /// <summary>
@@ -94,7 +102,7 @@ namespace Game.Entities
         {
             // set initial position.&
             if (Program.Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
-                StartPosition = (Vector2?)new Rectangle(File.ReadAllText("initpos.txt")).Center;
+                StartPosition = (Vector2?)new Terrain.Rectangle(File.ReadAllText("initpos.txt")).Center;
             else
                 StartPosition = (Vector2?)(new Vector2(1028, 1034));
 
@@ -396,7 +404,7 @@ namespace Game.Entities
             if (NavigationInProgress)
                 return;
 
-            (string[] descriptions, Item[] objects) objects = GetNavigableObjects();
+            (string[] descriptions, Item[] objects) objects = GetNavigableItems();
 
             if (objects.objects.IsNullOrEmpty())
             {
@@ -530,15 +538,29 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
         /// </summary>
         /// <param name="distance">The distance in meters to be described</param>
         /// <returns>The text representation of the specified distance</returns>
-        private string GetDistanceDescription(int distance)
+        private string GetDistanceDescription(float distance)
         {
-            string d = distance.ToString();
+            // Round the distance so that its value corresponds to a multiple of 0.5.
+            int meters = (int)distance;
+            float centimeters = (float)(distance - meters);
+            if (centimeters < .3f || centimeters >= .8f)
+                centimeters = 0;
+            else if ((centimeters >= .3f && centimeters < .5f) || (centimeters >= .5f && centimeters < .8f))
+                centimeters = .5f;
+            float roundedDistance = meters + centimeters;
 
-            if (distance == 1)
+// Compose output
+            if (distance <= _stepLength)
                 return string.Empty;
-            if (distance >= 2 && distance <= 4)
-                return $" {d} metry ";
-            return $" {d} metrů ";
+            if (roundedDistance==1)
+                return " metr ";
+            if (roundedDistance >= 2 && roundedDistance<= 4)
+                return $" {meters} metry ";
+            if (roundedDistance == 1.5f)
+                return " metr a půl ";
+            else if (centimeters == .5f)
+                return $" {meters} a půl metrů ";
+            return $" {meters} metrů ";
         }
 
         /// <summary>
@@ -667,7 +689,7 @@ let index = to.IndexOf(' ')
 
         protected int GetRegionIndex(Vector2 point)
         {
-            Vector2 relative = Rectangle.GetRelativeCoordinates(point);
+            Vector2 relative = Terrain.Rectangle.GetRelativeCoordinates(point);
 
             int rX = (int)(relative.X / _motionTrackRadius + (relative.X % _motionTrackRadius > 0 ? 1 : 0));
             int rY = (int)(relative.Y / _motionTrackRadius + (relative.Y % _motionTrackRadius > 0 ? 1 : 0));
@@ -726,13 +748,43 @@ let index = to.IndexOf(' ')
 
             base.MakeStep();
 
-            Vector2 target = GetNextTile(); // Get target coordinates
-
             // Move if the terrain is occupable.
-            if (!SolveObstacle(target))
-                Move(target);
+            Vector2 direction = GetStepDirection();
 
-            ReportObjects();
+            if (!DetectCollisions(direction))
+                Move(_area.Center+direction*_stepLength);
+            //ReportObjects();
+        }
+
+        private void AnnounceCollisions(List<object> elements)
+        {
+foreach (object obj in elements) 
+{
+                Vector2 contactPoint = Vector2.Zero;
+if(obj is MapElement element)
+contactPoint=element.Area.GetClosestPoint(_area.Center);
+
+                if (obj is ValueTuple<Vector2, Tile> terrainInfo)
+                    InnerMessage(new TerrainCollided(this, terrainInfo.Item1));
+
+                else if (obj is GameObject g)
+                {
+                    g.TakeMessage(new ObjectsCollided(Owner, g, contactPoint));
+                    InnerMessage(new ObjectsCollided(this, g, contactPoint));
+                }
+
+                else if (obj is Character c)
+                {
+                    c.TakeMessage(new ObjectsCollided(Owner, c, contactPoint));
+                    InnerMessage(new ObjectsCollided(this, c, contactPoint));
+                }
+
+                else if (obj is Door d)
+                {
+                    d.TakeMessage(new DoorHit(Owner, d, contactPoint));
+                    InnerMessage(new DoorHit(this, d, contactPoint));
+                }
+            }
         }
 
         /// <summary>
@@ -787,22 +839,24 @@ let index = to.IndexOf(' ')
         /// Returns information about all navigable objects from current locality in the specified radius around the NPC.
         /// </summary>
         /// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
-        protected (string[] descriptions, Item[] objects) GetNavigableObjects()
+        protected (string[] descriptions, Item[] objects) GetNavigableItems()
         {
             Vector2 me = _area.Center;
-            Item[] objects = Locality.GetNearByObjects(me, _navigableObjectsRadius).ToArray<Item>();
+            Item[] items = Locality.GetNearByObjects(me, _navigableObjectsRadius).ToArray<Item>();
 
-            string[] descriptions =
-                (
-                from o in objects
-                let point = o.Area.GetClosestPoint(me)
-                let name = o.Name.Friendly
-                let distance = GetDistanceDescription((int)World.GetDistance(me, point))
-                let angle = Angle.GetDescription(GetAngle(point))
-                select ($"{name}: {distance} {angle}: ")
-                ).ToArray<string>();
+            List<string> descriptions = new List<string>();
+foreach(Item item in items)
+{
+                Vector2 point = item.Area.GetClosestPoint(me);
+                string name = item.Name.Friendly;
+                float distance = World.GetDistance(me, point);
+                string distanceDescription = GetDistanceDescription(distance);
+                string angle = Angle.GetDescription(GetAngle(point));
 
-            return (descriptions, objects);
+                descriptions.Add($"{name}: {distanceDescription} {angle}: ");
+            }
+
+            return (descriptions.ToArray(), items);
         }
 
         /// <summary>
@@ -820,7 +874,7 @@ let index = to.IndexOf(' ')
             // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
             StopNavigation();
             if (!NavigationInProgress)
-                InnerMessage(new SayObjectsResult(this, GetNavigableObjects().descriptions));
+                InnerMessage(new SayObjectsResult(this, GetNavigableItems().descriptions));
         }
 
         /// <summary>
@@ -1064,32 +1118,21 @@ let index = to.IndexOf(' ')
         /// <summary>
         /// Solves a situation when the NPC encounters an obstacle.
         /// </summary>
-        /// <param name="obstacle">Nearest point of the obstacle</param>
-        protected override bool SolveObstacle(Vector2 obstacle)
+        /// <param name="direction">Direction of the trajectory</param>
+        /// <returns>True if collisions were detected</returns>
+        protected bool DetectCollisions(Vector2 direction)
         {
-            Tile t = World.Map[obstacle];
-            if (t == null) // Off the map
-                return true;
+            List<object> obstacles = World.DetectCollisionsOnTrack(Owner, direction, _stepLength);
+if (obstacles==null)
+return false;
 
-            GameObject o = World.GetObject(obstacle);
-            Passage p = World.GetPassage(obstacle);
+            // Stop walking.
+            StopWalk();
 
-            if (o != null && o != Owner)
-            {
-                o.TakeMessage(new ObjectsCollided(Owner, o, obstacle));
-                InnerMessage(new ObjectsCollided(this, o, obstacle));
-            }
-            else if (p != null && p.State == PassageState.Closed)
-            {
-                p.TakeMessage(new DoorHit(Owner, p as Door, obstacle));
-                InnerMessage(new DoorHit(this, p as Door, obstacle));
-            }
-			else if (!t.Walkable)
-				InnerMessage(new TerrainCollided(this, obstacle));
-			else return false;
+// If the track doesn't lead off the map, announce collisions.
+if(!obstacles.Contains((Tile)null))
+                AnnounceCollisions(obstacles);
 
-            _walking = false;
-            _startWalkMessage = null;
             return true;
         }
     }
