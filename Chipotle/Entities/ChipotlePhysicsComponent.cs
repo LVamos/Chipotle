@@ -14,8 +14,6 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing.Design;
 using System.IO;
 using System.Linq;
 
@@ -348,8 +346,8 @@ namespace Game.Entities
                 return;
             }
 
-						// Run the menu
-						int option = WindowHandler.Menu(result.descriptions, "Východy", " ", 2, false);
+            // Run the menu
+            int option = WindowHandler.Menu(result.descriptions, "Východy", " ", 2, false);
             if (option == -1)
                 return;
 
@@ -412,10 +410,10 @@ namespace Game.Entities
                 return;
             }
 
-			List<List<string>> descriptions =
+            List<List<string>> descriptions =
 objects.descriptions.Select(d => new List<string> { d }).ToList();
 
-			int option = WindowHandler.Menu(descriptions, "Okolní objekty", " ", 0, false);
+            int option = WindowHandler.Menu(descriptions, "Okolní objekty", " ", 0, false);
 
             if (option == -1)
                 return;
@@ -549,12 +547,12 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
                 centimeters = .5f;
             float roundedDistance = meters + centimeters;
 
-// Compose output
+            // Compose output
             if (distance <= _stepLength)
                 return string.Empty;
-            if (roundedDistance==1)
+            if (roundedDistance == 1)
                 return " metr ";
-            if (roundedDistance >= 2 && roundedDistance<= 4)
+            if (roundedDistance >= 2 && roundedDistance <= 4)
                 return $" {meters} metry ";
             if (roundedDistance == 1.5f)
                 return " metr a půl ";
@@ -572,16 +570,16 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             Passage[] exits = Locality.GetNearestExits(_area.Center, _exitRadius).ToArray<Passage>();
 
             Vector2 me = _area.Center;
-			List<List<string>> descriptions =
+            List<List<string>> descriptions =
     (
     from e in exits
     let point = e.Area.GetClosestPoint(_area.Center)
     let distance = GetDistanceDescription((int)World.GetDistance(me, point))
     let type = e.ToString()
     let to = e.AnotherLocality(Locality).To + " "
-let index = to.IndexOf(' ')
-	let to1 = to.Substring(0, index)
-	let to2 = to.Substring(index+1)
+    let index = to.IndexOf(' ')
+    let to1 = to.Substring(0, index)
+    let to2 = to.Substring(index + 1)
 
     let angle = Angle.GetDescription(GetAngle(point))
     select new List<string> { type, to1, to2, distance, angle }
@@ -752,17 +750,17 @@ let index = to.IndexOf(' ')
             Vector2 direction = GetStepDirection();
 
             if (!DetectCollisions(direction))
-                Move(_area.Center+direction*_stepLength);
+                Move(_area.Center + direction * _stepLength);
             //ReportObjects();
         }
 
         private void AnnounceCollisions(List<object> elements)
         {
-foreach (object obj in elements) 
-{
+            foreach (object obj in elements)
+            {
                 Vector2 contactPoint = Vector2.Zero;
-if(obj is MapElement element)
-contactPoint=element.Area.GetClosestPoint(_area.Center);
+                if (obj is MapElement element)
+                    contactPoint = element.Area.GetClosestPoint(_area.Center);
 
                 if (obj is ValueTuple<Vector2, Tile> terrainInfo)
                     InnerMessage(new TerrainCollided(this, terrainInfo.Item1));
@@ -845,8 +843,8 @@ contactPoint=element.Area.GetClosestPoint(_area.Center);
             Item[] items = Locality.GetNearByObjects(me, _navigableObjectsRadius).ToArray<Item>();
 
             List<string> descriptions = new List<string>();
-foreach(Item item in items)
-{
+            foreach (Item item in items)
+            {
                 Vector2 point = item.Area.GetClosestPoint(me);
                 string name = item.Name.Friendly;
                 float distance = World.GetDistance(me, point);
@@ -1122,17 +1120,17 @@ foreach(Item item in items)
         /// <returns>True if collisions were detected</returns>
         protected bool DetectCollisions(Vector2 direction)
         {
-            List<object> obstacles = World.DetectCollisionsOnTrack(Owner, direction, _stepLength);
-if (obstacles==null)
-return false;
+            (List<object> obstacles, bool outOfMap) collisions = World.DetectCollisionsOnTrack(Owner, direction, _stepLength);
+            if (collisions == default)
+                return false;
 
             // Stop walking.
-            StopWalk();
+            _walking = false;
+            _startWalkMessage = null;
 
-// If the track doesn't lead off the map, announce collisions.
-if(!obstacles.Contains((Tile)null))
-                AnnounceCollisions(obstacles);
-
+            // If the track doesn't lead off the map, announce collisions.
+            if (collisions.obstacles != null)
+                AnnounceCollisions(collisions.obstacles);
             return true;
         }
     }

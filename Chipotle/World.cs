@@ -17,13 +17,9 @@ using ProtoBuf.Meta;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -45,26 +41,29 @@ namespace Game
         /// <param name="length">The length for which to detect collisions in meters</param>
         /// <returns>A list of MapElements representing the obstacles detected on the track or null</returns>
         /// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting localities for collision. The search ends at the position where collisions were detected.</remarks>
-        public static List<object> DetectCollisionsOnTrack(MapElement element, Vector2 direction, float length)
+        public static (List<object> obstacles, bool outOfMap) DetectCollisionsOnTrack(MapElement element, Vector2 direction, float length)
         {
-            float step = (float)length/CollisionDetectionSteps;
+            float step = (float)length / CollisionDetectionSteps;
 
-                Rectangle position = new Rectangle(element.Area);
+            Rectangle position = new Rectangle(element.Area);
             List<Rectangle> positions = new List<Rectangle>();
             for (int i = 0; i < CollisionDetectionSteps + 1; i++)
-                positions.Add(position.Move(direction, step));
+            {
+                position.Move(direction, step);
+                positions.Add(new Rectangle(position));
+            }
 
             Rectangle target = new Rectangle(element.Area);
             target.Move(direction, length);
             positions.Add(target);
 
-            foreach(Rectangle p in positions)
-{
-                List<object> obstacles = DetectCollisions(element,p);
-                if (obstacles != null)
-                    return obstacles;
+            foreach (Rectangle p in positions)
+            {
+                (List<object> obstacles, bool outOfMap) result = DetectCollisions(element, p);
+                if (result.obstacles != null || result.outOfMap)
+                    return result;
             }
-            return null;
+            return default;
         }
 
         /// <summary>
@@ -73,20 +72,14 @@ namespace Game
         /// <param name="element">The element to be moved.</param>
         /// <param name="area">The map element to detect collisions for.</param>
         /// <returns>List of MapElements or null</returns>
-        public static List<object> DetectCollisions(MapElement element, Rectangle area)
+        public static (List<object> obstacles, bool outOfMap) DetectCollisions(MapElement element, Rectangle area)
         {
             List<object> obstacles = new List<object>();
             List<Locality> localities = area.GetLocalities().ToList();
 
-            // Verify area isn't off the map.
-            IEnumerable<Vector2> pointsOutsideMap = area.GetPointsOutsideMap();
-if (pointsOutsideMap.Any())
-            {
-                obstacles.Add((Tile)null);
-                return obstacles;
-            }
-
-            IEnumerable<(Vector2 position, Tile tile)> inaccessibleTiles = area.GetTiles()
+            // Detect inaccesible terrain.
+            IEnumerable<(Vector2 position, Tile tile)> enumerable = area.GetTiles();
+            IEnumerable<(Vector2 position, Tile tile)> inaccessibleTiles = enumerable
             .Where(t => !t.tile.Walkable)
 .Distinct().ToList();
 
@@ -102,18 +95,19 @@ if (pointsOutsideMap.Any())
                 void DetectCollision(IEnumerable<MapElement> elements)
                 {
                     MapElement obstacle = elements
-.Where(e=> e!=element)
-.FirstOrDefault(o => o.Area.Intersects(area) || o.Area.Contains(area) || area.Contains(o.Area));
+.Where(e => e != element)
+.FirstOrDefault(e => e.Area.Intersects(area) || e.Area.Contains(area) || area.Contains(e.Area));
                     if (obstacle != null)
                         obstacles.Add(obstacle);
                 }
 
                 DetectCollision(locality.Objects);
                 DetectCollision(locality.Characters);
-                DetectCollision(locality.Passages.Where(p=> p is Door d && d.State== PassageState.Closed));
+                DetectCollision(locality.Passages.Where(p => p is Door d && d.State == PassageState.Closed));
             }
 
-            return obstacles.Any() ? obstacles : null;
+            bool outOfMap = area.IsOutOfMap();
+            return (obstacles.Any() ? obstacles : null, outOfMap);
         }
 
         /// <summary>
@@ -169,7 +163,7 @@ if (pointsOutsideMap.Any())
         /// <summary>
         /// A tool for path finding.
         /// </summary>
-        private static 
+        private static
 PathFinder _finder = new PathFinder();
 
         /// <summary>
@@ -917,19 +911,19 @@ PathFinder _finder = new PathFinder();
         {
             string[] saves = null;
 
-			if (Directory.Exists(Program.PredefinedSavesPath))
+            if (Directory.Exists(Program.PredefinedSavesPath))
             {
                 saves =
                     Directory.GetDirectories(Program.PredefinedSavesPath);
             }
 
-			if (saves.IsNullOrEmpty())
-			{
-				Tolk.Speak("Žádný sejvy tady nevidim.");
-				return false;
-			}
+            if (saves.IsNullOrEmpty())
+            {
+                Tolk.Speak("Žádný sejvy tady nevidim.");
+                return false;
+            }
 
-			List<List<string>> items =
+            List<List<string>> items =
                 saves.Select(s => new List<string> { Path.GetFileName(s) })
                 .ToList();
 
@@ -1020,7 +1014,7 @@ PathFinder _finder = new PathFinder();
         public static void LoadMap()
         {
             string A(XElement element, string attribute, bool prepareForIndexing = true)
-                =>  prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+                => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
             XDocument xDocument = null;
             try

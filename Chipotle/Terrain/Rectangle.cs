@@ -8,6 +8,7 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,6 +24,23 @@ namespace Game.Terrain
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Rectangle : DebugSO
     {
+public IEnumerable<Vector2> Corners
+{
+get{
+                yield return UpperLeftCorner;
+                yield return UpperRightCorner;
+                yield return LowerLeftCorner;
+                yield return LowerRightCorner;
+            }
+        }
+
+        /// <summary>
+        /// Checks if any points are outside of the map.
+        /// </summary>
+        /// <returns>True if any points are outside of the map, otherwise false.</returns>
+        public bool IsOutOfMap()
+            =>Corners.Any(p => World.GetLocality(p) == null);
+
         /// <summary>
         /// Enumerates all walkable points in a distance range around this plane.
         /// </summary>
@@ -429,12 +447,12 @@ namespace Game.Terrain
         /// Enumerates all points of the plane.
         /// </summary>
         /// <returns>all points of the plane</returns>
-        public IEnumerable<Vector2> GetPoints()
+        public IEnumerable<Vector2> GetPoints(float resolution=1)
         {
             Vector2 position;
-            for (position.X = UpperLeftCorner.X; position.X <= LowerRightCorner.X; position.X++)
+            for (position.X = UpperLeftCorner.X; position.X <= LowerRightCorner.X; position.X+=resolution)
             {
-                for (position.Y = LowerRightCorner.Y; position.Y <= UpperLeftCorner.Y; position.Y++)
+                for (position.Y = LowerRightCorner.Y; position.Y <= UpperLeftCorner.Y; position.Y+=resolution)
                     yield return position;
             }
         }

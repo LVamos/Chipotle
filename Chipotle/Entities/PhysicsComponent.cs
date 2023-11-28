@@ -287,7 +287,7 @@ namespace Game.Entities
         protected void Move(Rectangle target, bool silently = false)
         {
             Locality sourceLocality = Locality;
-                Locality targetLocality = target.GetLocalities().First();
+                    Locality targetLocality = target.GetLocalities().First();
             Rectangle sourcePosition = _area == null ? null : new Rectangle(_area);
 
             _area = new Rectangle(target);
