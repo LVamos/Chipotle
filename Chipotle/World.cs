@@ -44,9 +44,9 @@ namespace Game
         public static (List<object> obstacles, bool outOfMap) DetectCollisionsOnTrack(MapElement element, Vector2 direction, float length)
         {
             float step = (float)length / CollisionDetectionSteps;
-
             Rectangle position = new Rectangle(element.Area);
             List<Rectangle> positions = new List<Rectangle>();
+
             for (int i = 0; i < CollisionDetectionSteps + 1; i++)
             {
                 position.Move(direction, step);

@@ -165,7 +165,7 @@ namespace Game.Entities
         /// <returns></returns>
         protected int GetTerrainSpeed()
             => _speeds[CurrentTile.tile.Terrain];
-    
+
         /// <summary>
         /// Contains walk speed settings for particullar terrain types.
         /// </summary>
@@ -189,7 +189,7 @@ namespace Game.Entities
         /// <summary>
         /// Defines start position of the NPC.
         /// </summary>
-        public Vector2? StartPosition { get; protected set; }
+        public Rectangle StartPosition { get; protected set; }
 
         /// <summary>
         /// Coordinates of the area currently occupied by the NPC
@@ -227,6 +227,16 @@ namespace Game.Entities
         /// Current orientation of the NPC
         /// </summary>
         public Orientation2D Orientation => new Orientation2D(_orientation);
+
+        /// <summary>
+        /// Gets or sets the width of the character.
+        /// </summary>
+        public float Width { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets the height of the character.
+        /// </summary>
+        public float Height { get; protected set; }
 
         /// <summary>
         /// Handles the GameReloaded message.
@@ -268,26 +278,38 @@ namespace Game.Entities
         /// <param name="x">X coordinate of the target position</param>
         /// <param name="y">Y coordinate of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void Move(float x, float y, bool silently = false)
-            => Move(new Vector2(x, y), silently);
+        protected void JumpTo(float x, float y, bool silently = false)
+            => JumpTo(new Vector2(x, y), silently);
+
+        /// <summary>
+        /// Moves the character in the specified direction by distance defined in <see cref="_stepLength"/>.
+        /// </summary>
+        /// <param name="direction">The direction in which to move the object.</param>
+        /// <param name="silently">Optional. Determines whether to move silently or not. Defaults to false.</param>
+        public void Move(Vector2 direction, bool silently = false)
+        {
+            Rectangle target = new Rectangle(_area);
+            target.Move(direction * _stepLength);
+            JumpTo(target);
+        }
 
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
         /// <param name="target">Coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected virtual void Move(Vector2 target, bool silently = false)
-            => Move(new Rectangle(target), silently);
+        protected virtual void JumpTo(Vector2 target, bool silently = false)
+            => JumpTo(new Rectangle(target, Width, Height), silently);
 
         /// <summary>
         /// Immediately changes position of the NPC.
         /// </summary>
         /// <param name="target">coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected void Move(Rectangle target, bool silently = false)
+        protected void JumpTo(Rectangle target, bool silently = false)
         {
             Locality sourceLocality = Locality;
-                    Locality targetLocality = target.GetLocalities().First();
+            Locality targetLocality = target.GetLocalities().First();
             Rectangle sourcePosition = _area == null ? null : new Rectangle(_area);
 
             _area = new Rectangle(target);
@@ -309,6 +331,6 @@ namespace Game.Entities
         /// </summary>
         /// <param name="message">The message to be processed</param>
         protected virtual void OnSetPosition(SetPosition message)
-        => Move(message.Target, message.Silently);
+        => JumpTo(message.Target, message.Silently);
     }
 }

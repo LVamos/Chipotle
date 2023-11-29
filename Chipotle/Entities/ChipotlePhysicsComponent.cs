@@ -82,9 +82,9 @@ namespace Game.Entities
         /// </summary>
         /// <param name="target">Coordinates of the target position</param>
         /// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-        protected override void Move(Vector2 target, bool silently = false)
+        protected override void JumpTo(Vector2 target, bool silently = false)
         {
-            base.Move(target, silently);
+            base.JumpTo(target, silently);
             RecordRegion(target); // Record visited region
 
             // Watch important events
@@ -100,9 +100,9 @@ namespace Game.Entities
         {
             // set initial position.&
             if (Program.Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
-                StartPosition = (Vector2?)new Terrain.Rectangle(File.ReadAllText("initpos.txt")).Center;
+                StartPosition = new Rectangle(File.ReadAllText("initpos.txt"));
             else
-                StartPosition = (Vector2?)(new Vector2(1028, 1034));
+                StartPosition = new Rectangle(new Vector2(1028, 1034), new Vector2(1028.5f, 1033.5f));
 
         }
 
@@ -205,7 +205,7 @@ namespace Game.Entities
         public override void Start()
         {
             base.Start();
-            Move((Vector2)StartPosition, true);
+            JumpTo(StartPosition, true);
             _orientation = new Orientation2D(0, 1);
             InnerMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
         }
@@ -627,7 +627,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             Random r = new Random();
             _phoneInterval = r.Next(30000, 120000);
             _phoneDeltaTime = 0;
-            Move(1813, 1126, true);
+            JumpTo(1813, 1126, true);
         }
 
         /// <summary>
@@ -636,7 +636,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
         /// </summary>
         private void JumpToChristinesHall()
         {
-            Move(1797, 1125, true);
+            JumpTo(1797, 1125, true);
             World.PlayCutscene(Owner, "cs38");
         }
 
@@ -645,7 +645,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
         /// office (kancelář v1) locality.
         /// </summary>
         private void JumpToMariottisOffice()
-            => Move(2018, 1123, true);
+            => JumpTo(2018, 1123, true);
 
         /// <summary>
         /// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) locality to the
@@ -653,7 +653,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
         /// </summary>
         private void JumpToSweeneysHall()
         {
-            Move(1405, 965, true);
+            JumpTo(1405, 965, true);
             World.PlayCutscene(Owner, "cs41");
         }
 
@@ -662,7 +662,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
         /// vanilla crunch company (garáž v1) locality.
         /// </summary>
         private void JumpToVanillaCrunchGarage()
-            => Move(2006, 1166, true);
+            => JumpTo(2006, 1166, true);
 
         /// <summary>
         /// Stores indexes of regions visited by the NPC.
@@ -750,7 +750,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             Vector2 direction = GetStepDirection();
 
             if (!DetectCollisions(direction))
-                Move(_area.Center + direction * _stepLength);
+                Move(direction);
             //ReportObjects();
         }
 
@@ -1033,7 +1033,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             Vector2? target = World.GetRandomWalkablePoint(_carMovement.Target, 1, 2);
             Assert(target.HasValue, "No walkable tile found.");
             World.GetLocality((Vector2)target).TakeMessage(_carMovement);
-            Move((Vector2)target, true);
+            JumpTo((Vector2)target, true);//todo předělat na Rectangle
             _carMovement = null;
         }
 

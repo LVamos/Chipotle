@@ -316,7 +316,7 @@ namespace Game.Entities
                      .FirstOrDefault();
 
                 if (nearerSpot.HasValue)
-                    Move(nearerSpot.Value);
+                    JumpTo(nearerSpot.Value);
                 else throw new InvalidOperationException("Tuttle couldn't get tu Chipotle.");
                 return;
             }
@@ -424,7 +424,7 @@ namespace Game.Entities
             // Move if there are no obstacles.
             Vector2 target = GetNextTile();
             if (!DetectCollisions(target))
-                Move(target);  // The road is clear! Move!
+                JumpTo(target);  // The road is clear! Move!
 
             // Stop if distance from player is in allowed range.
             if (_state == TuttleState.GoingToPlayer)

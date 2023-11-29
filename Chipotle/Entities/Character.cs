@@ -5,8 +5,6 @@ using Game.Terrain;
 
 using Luky;
 
-using OpenTK;
-
 using ProtoBuf;
 
 using System;
@@ -95,11 +93,8 @@ namespace Game.Entities
             foreach (CharacterComponent c in _components)
                 c.AssignToEntity(name.Indexed);
 
-            if (physics.StartPosition.HasValue)
-            {
-                Vector2 position = (Vector2)physics.StartPosition;
-                Area = new Rectangle(position);
-            }
+            if (physics.StartPosition != null)
+                Area = new Rectangle(physics.StartPosition);
 
             // Find intersecting locality
             if (_area != null)
