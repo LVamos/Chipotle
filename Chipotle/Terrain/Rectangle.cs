@@ -306,7 +306,11 @@ namespace Game.Terrain
         /// <param name="point">Coordinates of the point whose surroundings are to be explored</param>
         /// <returns>The point closest to the default point toward this plane</returns>
         public Vector2 GetClosestPoint(Vector2 point)
-            => GetPointsByDistance(point).First();
+        {
+            float clampedX = Math.Max(UpperLeftCorner.X, Math.Min(point.X, LowerRightCorner.X));
+            float clampedY = Math.Max(LowerRightCorner.Y, Math.Min(point.Y, UpperLeftCorner.Y));
+            return new Vector2(clampedX, clampedY);
+        }
 
         /// <summary>
         /// Returns distance between the plane and the default point.
@@ -314,7 +318,16 @@ namespace Game.Terrain
         /// <param name="point">The point from which the distance is to be calculated</param>
         /// <returns>The distance between the default point and the plane</returns>
         public float GetDistanceFrom(Vector2 point)
-            => World.GetDistance(point, GetClosestPoint(point));
+        {
+            // Calculation of "clamped" x and y values
+            float clampedX = Math.Max(UpperLeftCorner.X, Math.Min(point.X, LowerRightCorner.X));
+            float clampedY = Math.Max(LowerRightCorner.Y, Math.Min(point.Y, UpperLeftCorner.Y));
+
+            // Create a new point on the edge of the rectangle, closest to the specified point
+            Vector2 closestPoint = new Vector2(clampedX, clampedY);
+
+            return (closestPoint - point).Length;
+        }
 
         /// <summary>
         /// Returns hash code of this instance.

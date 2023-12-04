@@ -95,7 +95,7 @@ namespace Game
                 void DetectCollision(IEnumerable<MapElement> elements)
                 {
                     MapElement obstacle = elements
-.Where(e => e != element)
+.Where(e => e != element && e.Area != null)
 .FirstOrDefault(e => e.Area.Intersects(area) || e.Area.Contains(area) || area.Contains(e.Area));
                     if (obstacle != null)
                         obstacles.Add(obstacle);

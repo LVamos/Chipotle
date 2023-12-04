@@ -98,7 +98,9 @@ namespace Game.Entities
         /// </summary>
         public ChipotlePhysicsComponent() : base()
         {
-            // set initial position.&
+            // set initial position.
+            Width = 0.5f;
+            Height = 0.5f;
             if (Program.Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
                 StartPosition = new Rectangle(File.ReadAllText("initpos.txt"));
             else
@@ -548,7 +550,7 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             float roundedDistance = meters + centimeters;
 
             // Compose output
-            if (distance <= _stepLength)
+            if (Math.Abs(distance - _stepLength) <= .5f)
                 return string.Empty;
             if (roundedDistance == 1)
                 return " metr ";

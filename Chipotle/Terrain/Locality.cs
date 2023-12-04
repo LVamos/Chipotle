@@ -218,6 +218,13 @@ namespace Game.Terrain
         /// <returns>Enumeration of dump objectts</returns>
         public IEnumerable<Item> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
         {
+            var objs = Objects.Where(o => o.Area != null && o.Decorative == includeDecoration);
+            foreach (Item i in objs)
+            {
+                if (i.Area.GetDistanceFrom(point) <= radius)
+                    break;
+            }
+
             return
                 from o in Objects
                 where o.Area != null && o.Decorative == includeDecoration && o.Area.GetDistanceFrom(point) <= radius
