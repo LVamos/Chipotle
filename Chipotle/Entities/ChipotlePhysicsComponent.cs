@@ -72,7 +72,7 @@ namespace Game.Entities
         private Vector2 GetStepDirection()
         {
             Orientation2D finalOrientation = _orientation;
-            if (_startWalkMessage.Direction != TurnType.None)
+            if (_startWalkMessage != null && _startWalkMessage.Direction != TurnType.None)
                 finalOrientation.Rotate(_startWalkMessage.Direction);
             return finalOrientation.UnitVector;
         }
@@ -278,7 +278,8 @@ namespace Game.Entities
 
             if (result.a == InventoryMenu.ActionType.Place)
             {
-                var placeMessage = new PlaceObject(Owner, result.o, GetNextTile(_orientation, 1).position);
+                Vector2 point = _area.UpperLeftCorner + _orientation.UnitVector * .2f;
+                var placeMessage = new PlaceObject(Owner, result.o, point);
                 result.o.TakeMessage(placeMessage);
             }
         }
@@ -286,15 +287,28 @@ namespace Game.Entities
         /// <summary>
         /// Handles the PickUpObject message.
         /// </summary>
-        /// <param name="m">The message to be processed.
-        protected void OnPickUpObject(PickUpObject m)
+        /// <param name="message">The message to be processed.
+        protected void OnPickUpObject(PickUpObject message)
         {
-            Item @object = World.GetObject(GetNextTile(1).position);
-            if (@object == null)
-                InnerMessage(new PickUpObjectResult(this)); // Nothing picked
+            (List<object> obstacles, bool outOfMap) result = World.DetectCollisionsOnTrack(Owner, GetStepDirection(), _stepLength);
+            Item item = null;
+            if (result.obstacles != null)
+            {
+                item = result.obstacles
+                .FirstOrDefault(o => o is Item) as Item;
+            }
+
+            if (item == null)
+            {
+                InnerMessage(new PickUpObjectResult(this));
+                return;
+            }
+
+            if (!item.CanBePicked())
+                InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.Unpickable));
             else if (_inventory.Count >= _inventoryLimit)
                 InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.FullInventory));
-            else @object.TakeMessage(new PickUpObject(Owner, @object));
+            else item.TakeMessage(new PickUpObject(Owner, item));
         }
 
         /// <summary>
