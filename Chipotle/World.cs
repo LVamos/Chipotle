@@ -41,10 +41,10 @@ namespace Game
         /// <param name="length">The length for which to detect collisions in meters</param>
         /// <returns>A list of MapElements representing the obstacles detected on the track or null</returns>
         /// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting localities for collision. The search ends at the position where collisions were detected.</remarks>
-        public static (List<object> obstacles, bool outOfMap) DetectCollisionsOnTrack(MapElement element, Vector2 direction, float length)
+        public static (List<object> obstacles, bool outOfMap) DetectCollisionsOnTrack(MapElement ignoredElement, Vector2 direction, float length)
         {
             float step = (float)length / CollisionDetectionSteps;
-            Rectangle position = new Rectangle(element.Area);
+            Rectangle position = new Rectangle(ignoredElement.Area);
             List<Rectangle> positions = new List<Rectangle>();
 
             for (int i = 0; i < CollisionDetectionSteps + 1; i++)
@@ -52,14 +52,13 @@ namespace Game
                 position.Move(direction, step);
                 positions.Add(new Rectangle(position));
             }
-
-            Rectangle target = new Rectangle(element.Area);
+            Rectangle target = new Rectangle(ignoredElement.Area);
             target.Move(direction, length);
             positions.Add(target);
 
             foreach (Rectangle p in positions)
             {
-                (List<object> obstacles, bool outOfMap) result = DetectCollisions(element, p);
+                (List<object> obstacles, bool outOfMap) result = DetectCollisions(ignoredElement, p);
                 if (result.obstacles != null || result.outOfMap)
                     return result;
             }

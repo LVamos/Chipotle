@@ -25,6 +25,58 @@ namespace Game.Entities
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class ChipotlePhysicsComponent : PhysicsComponent
     {
+        public float CalculateAngleBetweenPlayerAndItem(Item item)
+        {
+            // Bod na obvodu obdélníku hráče ve směru orientace
+            Vector2 playerReferencePoint = _area.PointOnPerimeter(_orientation.UnitVector);
+
+            // Nejbližší bod na objektu k referenčnímu bodu hráče
+            Vector2 nearestPointOnItem = item.Area.GetClosestPoint(playerReferencePoint);
+
+            // Vektor směru od hráče k objektu
+            Vector2 directionToItem = nearestPointOnItem - playerReferencePoint;
+
+            // Normalizace orientace hráče a vektoru směru
+            Vector2 normalizedPlayerOrientation = _orientation.UnitVector.Normalized();
+            Vector2 normalizedDirection = directionToItem.Normalized();
+
+            // Výpočet úhlu
+            float dotProduct = Vector2.Dot(normalizedPlayerOrientation, normalizedDirection);
+            float angleInRadians = (float)Math.Acos(dotProduct);
+
+            // Převod úhlu z radiánů na stupně
+            float angleInDegrees = OpenTK.MathHelper.RadiansToDegrees(angleInRadians);
+
+            // Převod na kompasové stupně (předpokládá, že hráč je orientován na sever)
+            float compassAngle = (360 - angleInDegrees) % 360;
+
+            // If the item is closer than length of player's step, return nearest multiplication of 90.
+            float distance = item.Area.GetDistanceFrom(playerReferencePoint);
+            if (Math.Abs(distance - _stepLength) < 1)
+                return RoundToNearest90(compassAngle);
+
+            return compassAngle; // Vrátí úhel v kompasových stupních
+        }
+
+        /// <summary>
+        /// Rounds the given number to the nearest 90.
+        /// </summary>
+        /// <param name="n">The number to round.</param>
+        /// <returns>The rounded number.</returns>
+        protected int RoundToNearest90(float n)
+        {
+            if (n >= 315 || n < 45)
+                return 0;
+
+            if (n < 135)
+                return 90;
+
+            if (n < 225)
+                return 180;
+
+            return 270;
+        }
+
         /// <summary>
         /// Handles a message.
         /// </summary>
@@ -72,7 +124,7 @@ namespace Game.Entities
         private Vector2 GetStepDirection()
         {
             Orientation2D finalOrientation = _orientation;
-            if (_startWalkMessage.Direction != TurnType.None)
+            if (_startWalkMessage != null && _startWalkMessage.Direction != TurnType.None)
                 finalOrientation.Rotate(_startWalkMessage.Direction);
             return finalOrientation.UnitVector;
         }
@@ -278,7 +330,8 @@ namespace Game.Entities
 
             if (result.a == InventoryMenu.ActionType.Place)
             {
-                var placeMessage = new PlaceObject(Owner, result.o, GetNextTile(_orientation, 1).position);
+                Vector2 point = _area.UpperLeftCorner + _orientation.UnitVector * .2f;
+                var placeMessage = new PlaceObject(Owner, result.o, point);
                 result.o.TakeMessage(placeMessage);
             }
         }
@@ -286,15 +339,28 @@ namespace Game.Entities
         /// <summary>
         /// Handles the PickUpObject message.
         /// </summary>
-        /// <param name="m">The message to be processed.
-        protected void OnPickUpObject(PickUpObject m)
+        /// <param name="message">The message to be processed.
+        protected void OnPickUpObject(PickUpObject message)
         {
-            Item @object = World.GetObject(GetNextTile(1).position);
-            if (@object == null)
-                InnerMessage(new PickUpObjectResult(this)); // Nothing picked
+            (List<object> obstacles, bool outOfMap) result = World.DetectCollisionsOnTrack(Owner, GetStepDirection(), _stepLength);
+            Item item = null;
+            if (result.obstacles != null)
+            {
+                item = result.obstacles
+                .FirstOrDefault(o => o is Item) as Item;
+            }
+
+            if (item == null)
+            {
+                InnerMessage(new PickUpObjectResult(this));
+                return;
+            }
+
+            if (!item.CanBePicked())
+                InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.Unpickable));
             else if (_inventory.Count >= _inventoryLimit)
                 InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.FullInventory));
-            else @object.TakeMessage(new PickUpObject(Owner, @object));
+            else item.TakeMessage(new PickUpObject(Owner, item));
         }
 
         /// <summary>
@@ -543,9 +609,9 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             // Round the distance so that its value corresponds to a multiple of 0.5.
             int meters = (int)distance;
             float centimeters = (float)(distance - meters);
-            if (centimeters < .3f || centimeters >= .8f)
+            if (centimeters <= .25f || centimeters >= .75f)
                 centimeters = 0;
-            else if ((centimeters >= .3f && centimeters < .5f) || (centimeters >= .5f && centimeters < .8f))
+            else if ((centimeters > .25f && centimeters <= .5f) || (centimeters > .5f && centimeters < .75f))
                 centimeters = .5f;
             float roundedDistance = meters + centimeters;
 
@@ -835,13 +901,16 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             Locality.TakeMessage(message, true);
         }
 
+
+
         /// <summary>
         /// Returns information about all navigable objects from current locality in the specified radius around the NPC.
         /// </summary>
         /// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
         protected (string[] descriptions, Item[] objects) GetNavigableItems()
         {
-            Vector2 me = _area.Center;
+            Vector2 me = _area.PointOnPerimeter(_orientation.UnitVector);
+
             Item[] items = Locality.GetNearByObjects(me, _navigableObjectsRadius).ToArray<Item>();
 
             List<string> descriptions = new List<string>();
@@ -849,11 +918,12 @@ objects.descriptions.Select(d => new List<string> { d }).ToList();
             {
                 Vector2 point = item.Area.GetClosestPoint(me);
                 string name = item.Name.Friendly;
-                float distance = World.GetDistance(me, point);
+                float distance = item.Area.GetDistanceFrom(me);
                 string distanceDescription = GetDistanceDescription(distance);
-                string angle = Angle.GetDescription(GetAngle(point));
+                float compassDegrees = CalculateAngleBetweenPlayerAndItem(item);
+                string angleDescription = Angle.GetDescription(compassDegrees);
 
-                descriptions.Add($"{name}: {distanceDescription} {angle}: ");
+                descriptions.Add($"{name}: {distanceDescription} {angleDescription}: ");
             }
 
             return (descriptions.ToArray(), items);

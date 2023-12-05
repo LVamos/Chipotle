@@ -22,6 +22,137 @@ namespace Game.Terrain
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public class Rectangle : DebugSO
     {
+        /// <summary>
+        /// Finds the nearest point on a rectangle to a given point.
+        /// </summary>
+        /// <param name="point">The point to calculate the nearest point on the rectangle.</param>
+        /// <returns>The nearest point on the rectangle to the given point.</returns>
+        public Vector2 GetClosestPoint(Vector2 point)
+        {
+            // Upnutí X souřadnice bodu do rozsahu X souřadnic obdélníku
+            float clampedX = Clamp(point.X, UpperLeftCorner.X, LowerRightCorner.X);
+
+            // Upnutí Y souřadnice bodu do rozsahu Y souřadnic obdélníku
+            float clampedY = Clamp(point.Y, UpperLeftCorner.Y, LowerRightCorner.Y);
+
+            if (point.X >= LowerLeftCorner.X && point.X <= LowerRightCorner.X)
+            {
+                if (point.Y <= LowerRightCorner.Y)
+                    return new Vector2(point.X, LowerRightCorner.Y);
+                return new Vector2(point.X, UpperRightCorner.Y);
+            }
+
+            if (point.Y >= LowerLeftCorner.Y && point.Y <= UpperLeftCorner.Y)
+            {
+                if (point.X <= LowerLeftCorner.X)
+                    return new Vector2(LowerLeftCorner.X, point.Y);
+                return new Vector2(LowerRightCorner.X, point.Y);
+            }
+
+            // Vypočítání vzdáleností od každé hrany
+            float distanceToLeft = point.X - UpperLeftCorner.X;
+            float distanceToRight = LowerRightCorner.X - point.X;
+            float distanceToTop = UpperLeftCorner.Y - point.Y;
+            float distanceToBottom = point.Y - LowerRightCorner.Y;
+
+            // Určení nejbližší hrany
+            float minDistance = Math.Min(Math.Min(distanceToLeft, distanceToRight), Math.Min(distanceToTop, distanceToBottom));
+
+            if (minDistance == distanceToLeft)
+            {
+                return new Vector2(UpperLeftCorner.X, clampedY);
+            }
+
+            if (minDistance == distanceToRight)
+            {
+                return new Vector2(LowerRightCorner.X, clampedY);
+            }
+
+            if (minDistance == distanceToTop)
+            {
+                return new Vector2(clampedX, UpperLeftCorner.Y);
+            }
+
+            if (minDistance == distanceToBottom)
+            {
+                return new Vector2(clampedX, LowerRightCorner.Y);
+            }
+
+            // Pokud bod leží přesně v rohu, vrátíme upnutý bod
+            return new Vector2(clampedX, clampedY);
+        }
+
+        /// <summary>
+        /// Clamps the specified value between the specified minimum and maximum values.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value to clamp to.</param>
+        /// <param name="max">The maximum value to clamp to.</param>
+        /// <returns>The clamped value.</returns>
+        private float Clamp(float value, float min, float max)
+        => Math.Max(min, Math.Min(max, value));
+
+        /// <summary>
+        /// Calculating a point on the perimeter of the rectangle in the given direction
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns>A point on perimeter</returns>
+        public Vector2 PointOnPerimeter(Vector2 direction)
+        {
+            // Normalize the direction vector
+            Vector2 normalizedDirection = direction.Normalized();
+
+            // Ratio of height and width of the rectangle.
+            float aspectRatio = (LowerRightCorner.X - UpperLeftCorner.X) /
+                                (LowerRightCorner.Y - UpperLeftCorner.Y);
+
+            // Point on the perimeter
+            float x, y;
+
+            if (Math.Abs(normalizedDirection.Y) > Math.Abs(normalizedDirection.X * aspectRatio)) // Top or bottom side
+            {
+                y = normalizedDirection.Y > 0 ? LowerRightCorner.Y : UpperLeftCorner.Y;
+                x = Center.X + normalizedDirection.X / Math.Abs(normalizedDirection.Y) * (LowerRightCorner.Y - UpperLeftCorner.Y) / 2;
+            }
+            else
+            {
+                x = normalizedDirection.X > 0 ? LowerRightCorner.X : UpperLeftCorner.X; // Left or right side
+                y = Center.Y + normalizedDirection.Y / Math.Abs(normalizedDirection.X) * (LowerRightCorner.X - UpperLeftCorner.X) / 2;
+            }
+
+            return new Vector2(x, y);
+        }
+
+        public Vector2 GetPointOnRectangleEdge(Vector2 direction)
+        {
+            // Normalize the direction vector
+            Vector2 normalizedDirection = direction.Normalized();
+
+            // Calculate intersections with the rectangle
+            Vector2[] edgePoints = new Vector2[4];
+            edgePoints[0] = new Vector2(Center.X, UpperLeftCorner.Y); // top
+            edgePoints[1] = new Vector2(Center.X, LowerRightCorner.Y); // bottom
+            edgePoints[2] = new Vector2(UpperLeftCorner.X, Center.Y); // left
+            edgePoints[3] = new Vector2(LowerRightCorner.X, Center.Y); // right
+
+            // Find the point that is in the direction of the vector and closest to the center
+            Vector2 closestPoint = edgePoints[0];
+            float maxDot = float.NegativeInfinity;
+
+            foreach (var point in edgePoints)
+            {
+                Vector2 toPoint = point - Center;
+                float dot = Vector2.Dot(normalizedDirection, toPoint.Normalized());
+                if (dot > maxDot)
+                {
+                    maxDot = dot;
+                    closestPoint = point;
+                }
+            }
+
+            return closestPoint;
+        }
+
         public IEnumerable<Vector2> Corners
         {
             get
@@ -158,7 +289,7 @@ namespace Game.Terrain
         /// </summary>
         [ProtoIgnore]
         public Vector2 Center
-            => Size == 1 ? UpperLeftCorner : new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);
+            => new Vector2((UpperLeftCorner.X + LowerRightCorner.X) / 2, (UpperLeftCorner.Y + LowerRightCorner.Y) / 2);
 
         /// <summary>
         /// Height of the plane.
@@ -174,7 +305,7 @@ namespace Game.Terrain
             => new Vector2(UpperLeftCorner.X, LowerRightCorner.Y);
 
         /// <summary>
-        /// Gets or sets the lower right corner of the plane.
+        /// Gets or sets the lower right corner of the Rectangle.
         /// </summary>
         public Vector2 LowerRightCorner { get; set; }
 
@@ -301,18 +432,6 @@ namespace Game.Terrain
         }
 
         /// <summary>
-        /// Returns the point of this plane closest to the default point.
-        /// </summary>
-        /// <param name="point">Coordinates of the point whose surroundings are to be explored</param>
-        /// <returns>The point closest to the default point toward this plane</returns>
-        public Vector2 GetClosestPoint(Vector2 point)
-        {
-            float clampedX = Math.Max(UpperLeftCorner.X, Math.Min(point.X, LowerRightCorner.X));
-            float clampedY = Math.Max(LowerRightCorner.Y, Math.Min(point.Y, UpperLeftCorner.Y));
-            return new Vector2(clampedX, clampedY);
-        }
-
-        /// <summary>
         /// Returns distance between the plane and the default point.
         /// </summary>
         /// <param name="point">The point from which the distance is to be calculated</param>
@@ -326,7 +445,7 @@ namespace Game.Terrain
             // Create a new point on the edge of the rectangle, closest to the specified point
             Vector2 closestPoint = new Vector2(clampedX, clampedY);
 
-            return (closestPoint - point).Length;
+            return (GetClosestPoint(point) - point).Length;
         }
 
         /// <summary>

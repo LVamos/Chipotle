@@ -108,7 +108,7 @@ namespace Game.Entities
         /// Checks if the object can be picked up off the ground in the moment.
         /// </summary>
         /// <returns>True if the object can be picked up off the ground.</returns>
-        protected virtual bool CanBePicked() => _pickable && HeldBy == null;
+        public virtual bool CanBePicked() => _pickable && HeldBy == null;
 
         /// <summary>
         /// Indicates if the object stops playing its action sound when the player moves or turns.
@@ -503,8 +503,6 @@ namespace Game.Entities
 
             // Detect potentional acoustic obstacles and set up attenuate parameters
             ObstacleType obstacle = World.DetectAcousticObstacles(new Rectangle((Vector2)opposite));
-            float volume;
-            (float gain, float gainHF) lowpass;
             bool attenuate = obstacle == ObstacleType.Wall || obstacle == ObstacleType.Object;
 
             if (obstacle == ObstacleType.Wall)
@@ -567,10 +565,10 @@ namespace Game.Entities
         /// <summary>
         /// Handles a message.
         /// </summary>
-        /// <param name="m">Source of the message</param>
-        private void OnPlaceObject(PlaceObject m)
+        /// <param name="message">Source of the message</param>
+        private void OnPlaceObject(PlaceObject message)
         {
-            Rectangle vacancy = FindVacancy(m.Position);
+            Rectangle vacancy = FindVacancy(message.Position);
             bool success = vacancy != null;
 
             if (success)
@@ -580,47 +578,39 @@ namespace Game.Entities
                 Placed();
             }
 
-            m.Sender.TakeMessage(new PlaceObjectResult(this, success));
+            message.Sender.TakeMessage(new PlaceObjectResult(this, success));
         }
 
         /// <summary>
         /// Tries to find a free spot on the ground to place the object on.
         /// </summary>
-        /// <param name="point">A point that should intersect with the placed object</param>
+        /// <param name="lowerLeftCorner">A point that should intersect with the placed object</param>
         /// <returns>An area the object could be placed on</returns>
-        protected Rectangle FindVacancy(Vector2 point)
+        protected Rectangle FindVacancy(Vector2 lowerLeftCorner)
         {
-            Rectangle area = new Rectangle(point);
-            (float width, float height)[] testDimensions = new[]
+            // Try horizontal and vertical position.
+            List<Rectangle> positions = new List<Rectangle>();
+            positions.Add(new Rectangle(
+new Vector2(lowerLeftCorner.X, lowerLeftCorner.Y + Dimensions.height),
+Dimensions.height,
+Dimensions.width
+));
+
+            if (Dimensions.height != Dimensions.width)
             {
-            (Dimensions.height, Dimensions.width),
-            (Dimensions.width, Dimensions.height)
-            };
+                positions.Add(new Rectangle(
+    new Vector2(lowerLeftCorner.X, lowerLeftCorner.Y + Dimensions.width),
+Dimensions.height,
+Dimensions.width
+    ));
+            }
 
-            /*
-			 * Create a test rectangle that only occupies the specified point. 
-			 * Then systematically expand the rectangle in all directions until it intersects the player or its dimensions correspond to the dimensions of the object placed on the ground.
-			 */
-            foreach ((float height, float width) d in testDimensions)
+            // Detect collisions
+            foreach (Rectangle position in positions)
             {
-                // Extend it upward
-                while (area.Walkable() && area.Height < d.height)
-                    area.Extend(Direction.Up);
-
-                // Extend it downward if necessary.
-                while (area.Walkable() && area.Height < d.height)
-                    area.Extend(Direction.Down);
-
-                // Extend it to the left
-                while (area.Walkable() && area.Width < d.width)
-                    area.Extend(Direction.Left);
-
-                // Extend it to the right if necessary.
-                while (area.Walkable() && area.Width < d.width)
-                    area.Extend(Direction.Right);
-
-                if ((area.Height, area.Width) == d)
-                    return new Rectangle(area);
+                (List<object> obstacles, bool outOfMap) result = World.DetectCollisions(World.Player, position);
+                if (result.outOfMap || result.obstacles != null)
+                    return position;
             }
 
             return null;
