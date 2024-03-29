@@ -117,7 +117,7 @@ namespace Game.Entities
         /// </summary>
         private void LoadPredefinedSave()
         {
-            if (Program.Settings.AllowPredefinedSaves)
+            if (Settings.AllowPredefinedSaves)
                 InnerMessage(new LoadPredefinedSave(this));
         }
 
@@ -126,7 +126,7 @@ namespace Game.Entities
         /// </summary>
         private void CreatePredefinedSave()
         {
-            if (Program.Settings.AllowPredefinedSaves)
+            if (Settings.AllowPredefinedSaves)
                 InnerMessage(new CreatePredefinedSave(this));
         }
 
@@ -234,7 +234,7 @@ namespace Game.Entities
         /// </summary>
         private void SayTuttlesPosition()
         {
-            if (!Program.Settings.TestCommandsEnabled)
+            if (!Settings.TestCommandsEnabled)
                 return;
 
             Character tuttle = World.GetCharacter("tuttle");
@@ -249,7 +249,7 @@ namespace Game.Entities
         /// </summary>
         private void JumpToLocality()
         {
-            if (!Program.Settings.TestCommandsEnabled)
+            if (!Settings.TestCommandsEnabled)
                 return;
 
             Vector2 me = Owner.Area.Center;
@@ -278,7 +278,7 @@ namespace Game.Entities
         /// </summary>
         private void SaveStartPosition()
         {
-            if (!Program.Settings.TestCommandsEnabled)
+            if (!Settings.TestCommandsEnabled)
                 return;
 
             string pos = Owner.Area.Center.X.ToString() + ", " + Owner.Area.Center.Y.ToString();
@@ -288,7 +288,7 @@ namespace Game.Entities
 
         private void SayAbsoluteCoordinates()
         {
-            if (!Program.Settings.TestCommandsEnabled)
+            if (!Settings.TestCommandsEnabled)
                 return;
 
             Vector2 coords = Owner.Area.Center;
@@ -303,7 +303,7 @@ namespace Game.Entities
         /// </summary>
         private void GoToClipboardCoords()
         {
-            if (!Program.Settings.TestCommandsEnabled)
+            if (!Settings.TestCommandsEnabled)
                 return;
 
             Rectangle v = new Rectangle(Clipboard.GetText());

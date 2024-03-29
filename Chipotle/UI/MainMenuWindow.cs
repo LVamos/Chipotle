@@ -151,7 +151,7 @@ namespace Game.UI
         {
             _voicingEnabled = false;
 
-            if (!Program.Settings.PlayMenuLoop)
+            if (!Settings.PlayMenuLoop)
                 return;
 
             World.Sound.FadeSource(_menuLoopID, FadingType.Out, .1f, 0);
@@ -163,7 +163,7 @@ namespace Game.UI
         /// </summary>
         private void PlayLoop()
         {
-            if (!Program.Settings.PlayMenuLoop)
+            if (!Settings.PlayMenuLoop)
                 return;
 
             if (_menuLoopID == 0)

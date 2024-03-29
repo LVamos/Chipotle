@@ -150,6 +150,7 @@
     <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
     <Compile Include="Messaging\Events\TuttleStateChanged.cs" />
     <Compile Include="SerializerHelper.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
     <Compile Include="Entities\PubBench.cs" />
     <Compile Include="Entities\SweeneysBell.cs" />

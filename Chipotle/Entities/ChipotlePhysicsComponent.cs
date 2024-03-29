@@ -153,7 +153,7 @@ namespace Game.Entities
             // set initial position.
             Width = 0.5f;
             Height = 0.5f;
-            if (Program.Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
+            if (Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
                 StartPosition = new Rectangle(File.ReadAllText("initpos.txt"));
             else
                 StartPosition = new Rectangle(new Vector2(1028, 1034), new Vector2(1028.5f, 1033.5f));

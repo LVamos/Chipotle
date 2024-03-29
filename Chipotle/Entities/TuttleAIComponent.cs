@@ -96,15 +96,15 @@ namespace Game.Entities
             base.Start();
 
             // Set position
-            if (Program.Settings.AllowTuttlesCustomPosition && Program.Settings.TuttleTestStart.HasValue)
-                _area = new Rectangle((Vector2)Program.Settings.TuttleTestStart);
+            if (Settings.AllowTuttlesCustomPosition && Settings.TuttleTestStart.HasValue)
+                _area = new Rectangle((Vector2)Settings.TuttleTestStart);
             else _area = new Rectangle(new Vector2(1029, 1039));
             InnerMessage(new SetPosition(this, new Rectangle(_area), true));
 
             // scenarios for debugging purposes
-            //if (Program.Settings.SendTuttleToPool && !Program.Settings.PlayCutscenes)
+            //if (Settings.SendTuttleToPool && !Settings.PlayCutscenes)
             //    GoToPool();
-            if (!Program.Settings.SendTuttleToPool && Program.Settings.LetTuttleFollowChipotle)
+            if (!Settings.SendTuttleToPool && Settings.LetTuttleFollowChipotle)
                 SetState(TuttleState.WatchingPlayer);
         }
 
@@ -235,7 +235,7 @@ namespace Game.Entities
         /// </summary>
         private void GoToPool()
         {
-            if (!Program.Settings.SendTuttleToPool)
+            if (!Settings.SendTuttleToPool)
                 return;
 
             Vector2 goal = new Vector2(1005, 1051);
@@ -319,7 +319,7 @@ namespace Game.Entities
             {
                 _playerWasByPool = true;
 
-                if (Program.Settings.LetTuttleFollowChipotle)
+                if (Settings.LetTuttleFollowChipotle)
                     InnerMessage(new StartFollowing(this));
             }
         }

@@ -1153,7 +1153,7 @@ lBackgroundInfo.volume
             TakeMessage(_cutscene.message);
 
             // Stop it if cutscenes are forbidden for debugging purposes.
-            if (!Program.Settings.PlayCutscenes)
+            if (!Settings.PlayCutscenes)
                 StopCutscene(null);
         }
 
@@ -1262,7 +1262,7 @@ lBackgroundInfo.volume
             // Play the first cutscene
             PlayCutscene(null, "cs6");
 
-            if (!Program.Settings.PlayCutscenes)
+            if (!Settings.PlayCutscenes)
                 StopCutscene(null);
         }
 

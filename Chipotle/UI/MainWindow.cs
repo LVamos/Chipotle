@@ -157,7 +157,7 @@ namespace Game.UI
             WindowState = FormWindowState.Maximized;
             Focus();
 
-            if (!Program.Settings.MainMenuAtStartup)
+            if (!Settings.MainMenuAtStartup)
                 WindowHandler.StartGame();
             else
                 WindowHandler.MainMenu();
