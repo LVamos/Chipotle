@@ -1,9 +1,73 @@
 ﻿using OpenTK;
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+
 namespace Game
 {
 	public static class Settings
 	{
+		/// <summary>
+		/// Loads a YAML configuration file and applies settings.
+		/// </summary>
+		/// <param name="configurationName">Name of a YAML file without extension</param>
+		public static void LoadSettings()
+		{
+			var deserializer = new DeserializerBuilder()
+				.WithNamingConvention(PascalCaseNamingConvention.Instance)
+				.Build();
+
+			string path = Path.Combine(Program.ConfigPath, "config.dat");
+			string configName = File.ReadAllText(path);
+			path = Path.Combine(Program.ConfigPath, configName) + ".yaml";
+			string yamlContent = File.ReadAllText(path);
+			var settingsDictionary = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
+
+			// Using reflection to set static properties
+			FieldInfo[] fields = typeof(Settings).GetFields();
+			foreach (System.Reflection.FieldInfo field in fields)
+			{
+				if (!settingsDictionary.ContainsKey(field.Name))
+					continue;
+
+				object value = settingsDictionary[field.Name];
+
+				// Special case for Vector2? because YamlDotNet may not correctly deserialize complex types
+				if (field.FieldType != typeof(Vector2?))
+				{
+					field.SetValue(null, Convert.ChangeType(value, field.FieldType));
+					continue;
+				}
+
+				Dictionary<object, object> vectorDict = value as Dictionary<object, object>;
+				if (vectorDict == null)
+					field.SetValue(null, null);
+				else
+				{
+					float x = float.Parse(vectorDict["X"].ToString());
+					float y = float.Parse(vectorDict["Y"].ToString());
+					field.SetValue(null, new Vector2?(new Vector2(x, y)));
+				}
+			}
+
+			Configuration = configName;
+		}
+
+		/// <summary>
+		/// Name of currently loaded configuration file.
+		/// </summary>
+		public static string Configuration { get; private set; }
+
+		/// <summary>
+		/// Name of a XML map file without extension to be loaded
+		/// </summary>
+		public static string MapName;
+
 		/// <summary>
 		/// Specifies if the JAWS key hook should be disabled.
 		/// </summary>
@@ -68,65 +132,5 @@ namespace Game
 		/// Enables or disables Tuttle's Chipotle following.
 		/// </summary>
 		public static bool LetTuttleFollowChipotle;
-
-		/// <summary>
-		/// Switches the game to debug mode.
-		/// </summary>
-		public static void SetDebugMode()
-		{
-			TuttleTestStart = new Vector2(1023, 1030);
-			AllowTuttlesCustomPosition = false;
-			AllowCustomChipotlesStartPosition = true;
-			AllowPredefinedSaves = true;
-			DisableJawsKeyHook = false;
-			LetTuttleFollowChipotle = true;
-			MainMenuAtStartup = false;
-			PlayCutscenes = false;
-			PlayMenuLoop = false;
-			ReportErrors = false;
-			SendTuttleToPool = false;
-			TestCommandsEnabled = true;
-			ThrowExceptions = true;
-		}
-
-		/// <summary>
-		/// Prepares the game for release.
-		/// </summary>
-		public static void SetReleaseMode()
-		{
-			AllowTuttlesCustomPosition = false;
-			AllowCustomChipotlesStartPosition = false;
-			AllowPredefinedSaves = false;
-			DisableJawsKeyHook = true;
-			LetTuttleFollowChipotle = true;
-			MainMenuAtStartup = true;
-			PlayCutscenes = true;
-			PlayMenuLoop = true;
-			ReportErrors = true;
-			SendTuttleToPool = true;
-			TestCommandsEnabled = false;
-			ThrowExceptions = false;
-		}
-
-		/// <summary>
-		/// Prepares the game for testing purposes.
-		/// </summary>
-		public static void SetTestMode()
-		{
-			AllowTuttlesCustomPosition = false;
-			AllowCustomChipotlesStartPosition = false;
-			AllowPredefinedSaves = true;
-			DisableJawsKeyHook = true;
-			LetTuttleFollowChipotle = true;
-			MainMenuAtStartup = true;
-			PlayCutscenes = true;
-			PlayMenuLoop = true;
-			ReportErrors = true;
-			SendTuttleToPool = true;
-			TestCommandsEnabled = false;
-			ThrowExceptions = false;
-		}
-
-
 	}
 }

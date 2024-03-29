@@ -91,6 +91,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\lib\Tolk\TolkDotNet.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet, Version=15.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.15.1.2\lib\net47\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\CarsonsBench.cs" />

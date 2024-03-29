@@ -27,8 +27,12 @@ namespace Game
 		/// <summary>
 		/// Path to a map file
 		/// </summary>
-		public static string MapPath => Path.Combine(Program.DataPath, @"Map\chipotle.xml");
+		public static string MapPath => Path.Combine(Program.DataPath, "Map");
 
+		/// <summary>
+		/// Path to config folder.
+		/// </summary>
+		public static string ConfigPath => Path.Combine(Program.DataPath, "Config");
 
 		private static string GetUserInfo()
 		{
@@ -233,8 +237,7 @@ namespace Game
 		private static void Main()
 		{
 			ResendErrorReport();
-			Settings.SetDebugMode();
-
+			Settings.LoadSettings();
 
 			Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
