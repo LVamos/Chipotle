@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 
@@ -12,6 +13,29 @@ namespace Game
 {
 	public static class Settings
 	{
+		/// <summary>
+		/// Saves the settings into a YAML file specified in <see cref="ConfigurationFileName"/>.
+		/// </summary>
+		public static void SaveSettings()
+		{
+			var serializer = new SerializerBuilder()
+				.WithNamingConvention(PascalCaseNamingConvention.Instance)
+				.Build();
+
+			var settings = new Dictionary<string, object>();
+
+			// Using reflection to get static properties
+			FieldInfo[] fields = typeof(Settings).GetFields();
+			foreach (FieldInfo field in fields)
+			{
+				object value = field.GetValue(null);
+				settings.Add(field.Name, value);
+			}
+
+			string content = serializer.Serialize(settings);
+			File.WriteAllText(ConfigurationFileName, content);
+		}
+
 		/// <summary>
 		/// Loads a YAML configuration file and applies settings.
 		/// </summary>
@@ -49,19 +73,25 @@ namespace Game
 					field.SetValue(null, null);
 				else
 				{
-					float x = float.Parse(vectorDict["X"].ToString());
-					float y = float.Parse(vectorDict["Y"].ToString());
+					float x = float.Parse(vectorDict["X"].ToString(), CultureInfo.InvariantCulture);
+					float y = float.Parse(vectorDict["Y"].ToString(), CultureInfo.InvariantCulture);
 					field.SetValue(null, new Vector2?(new Vector2(x, y)));
 				}
 			}
 
 			Configuration = configName;
+			ConfigurationFileName = path;
 		}
 
 		/// <summary>
 		/// Name of currently loaded configuration file.
 		/// </summary>
 		public static string Configuration { get; private set; }
+
+		/// <summary>
+		/// Gets or sets the name of the configuration file.
+		/// </summary>
+		private static string ConfigurationFileName;
 
 		/// <summary>
 		/// Name of a XML map file without extension to be loaded
@@ -94,9 +124,9 @@ namespace Game
 		public static bool AllowTuttlesCustomPosition;
 
 		/// <summary>
-		/// Enables or disables a custom initial position for Chipotle.
+		/// Temporary start position of Chipotle character
 		/// </summary>
-		public static bool AllowCustomChipotlesStartPosition;
+		public static Vector2? TestChipotleStartPosition;
 
 		/// <summary>
 		/// Enables or disables commands for loading and creating predefined saves.

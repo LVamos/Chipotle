@@ -15,7 +15,6 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Game.Entities
@@ -154,8 +153,14 @@ namespace Game.Entities
 			// set initial position.
 			Width = 0.5f;
 			Height = 0.5f;
-			if (Settings.AllowCustomChipotlesStartPosition && File.Exists("initpos.txt"))
-				StartPosition = new Rectangle(File.ReadAllText("initpos.txt"));
+			if (Settings.TestChipotleStartPosition.HasValue)
+			{
+				Vector2 position = Settings.TestChipotleStartPosition.Value;
+				StartPosition = new Rectangle(
+					position,
+					new Vector2(position.X + Width, position.Y - Height)
+					);
+			}
 			else
 				StartPosition = new Rectangle(new Vector2(1028, 1034), new Vector2(1028.5f, 1033.5f));
 
