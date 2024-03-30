@@ -152,6 +152,7 @@
     <Compile Include="Messaging\Commands\Reveal.cs" />
     <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
     <Compile Include="Messaging\Events\TuttleStateChanged.cs" />
+    <Compile Include="Models\NavigableItemsModel.cs" />
     <Compile Include="SerializerHelper.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Terrain\MariottisDoor.cs" />
@@ -269,9 +270,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Game\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Core\Core\Core.csproj">
       <Project>{e4525846-a882-43d8-a581-5c39f0978855}</Project>
