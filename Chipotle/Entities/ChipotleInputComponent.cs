@@ -58,7 +58,7 @@ namespace Game.Entities
 			new Dictionary<KeyShortcut, Action>()
 			{
 				// Test commands
-
+				[new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.S)] = SayItemSize,
 				[new KeyShortcut(KeyShortcut.Modifiers.Shift, Keys.F5)] = LoadPredefinedSave,
 				[new KeyShortcut(Keys.F5)] = CreatePredefinedSave,
 				[new KeyShortcut(Keys.C)] = SayRelativeCoordinates,
@@ -97,6 +97,12 @@ namespace Game.Entities
 			}
 			);
 
+		}
+
+		private void SayItemSize()
+		{
+			if (Settings.TestCommandsEnabled)
+				InnerMessage(new SayItemSize(this));
 		}
 
 		/// <summary>

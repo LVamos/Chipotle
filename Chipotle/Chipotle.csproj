@@ -105,6 +105,7 @@
     <Compile Include="Entities\KeyHanger.cs" />
     <Compile Include="Entities\KillersCar.cs" />
     <Compile Include="Entities\TuttleState.cs" />
+    <Compile Include="FloatExtensions.cs" />
     <Compile Include="Messaging\Commands\FollowPath.cs" />
     <Compile Include="Messaging\Commands\Interact.cs" />
     <Compile Include="Messaging\Commands\PickUpObject.cs" />
@@ -113,6 +114,8 @@
     <Compile Include="Messaging\Commands\ReactToCollision.cs" />
     <Compile Include="Messaging\Commands\ReportPosition.cs" />
     <Compile Include="Messaging\Commands\RunInventoryMenu.cs" />
+    <Compile Include="Messaging\Commands\SayItemSize.cs" />
+    <Compile Include="Messaging\Commands\SaySize.cs" />
     <Compile Include="Messaging\Commands\SayLocalityDescription.cs" />
     <Compile Include="Messaging\Commands\SayObjectDescription.cs" />
     <Compile Include="Messaging\Commands\ResearchObject.cs" />

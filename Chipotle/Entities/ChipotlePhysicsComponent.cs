@@ -25,6 +25,13 @@ namespace Game.Entities
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotlePhysicsComponent : PhysicsComponent
 	{
+		public void OnSayItemSize(SayItemSize message)
+		{
+			Item item = World.GetNearestObjects(_area.Center).FirstOrDefault();
+			if (item != null)
+				InnerMessage(new SaySize(this, item.Area));
+		}
+
 		public float CalculateAngleBetweenPlayerAndItem(Item item)
 		{
 			// Bod na obvodu obdélníku hráče ve směru orientace
@@ -278,6 +285,7 @@ namespace Game.Entities
 		{
 			switch (message)
 			{
+				case SayItemSize m: OnSayItemSize(m); break;
 				case ResearchObject m: OnResearchObject(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case RunInventoryMenu m: OnRunInventoryMenu(m); break;
@@ -1036,20 +1044,35 @@ objects.Descriptions
 			}
 
 			// Find doors in radius of 2 meters that are in front or behind the player or door in which the player is standing.
+			IEnumerable<Passage> usable = GetUsableDoors();
+
+			// Use the doors.
+			foreach (Passage d in usable)
+				Use(d);
+
+			Item item = GetItemInFront();
+			Use(item); // Detect object in front of Chipotle and use it.
+		}
+
+		private IEnumerable<Passage> GetUsableDoors()
+		{
 			Vector2 me = _area.Center;
-			IEnumerable<Passage> doors = World.GetNearestPassages(me, true, 2).Union(_area.GetPassages().Where(p => p is Door));
+			IEnumerable<Passage> doors = World.GetNearestPassages(me, true, 2)
+				.Union(_area.GetPassages().Where(p => p is Door));
 
 			IEnumerable<Passage> usable =
 				from d in doors
 				let obstacle = World.DetectObstacles(new Rectangle(d.Area.GetClosestPoint(me), me))
 				where d.IsInFrontOrBehind(me)
 				select d;
+			return usable;
+		}
 
-			// Use the doors.
-			foreach (Passage d in usable)
-				Use(d);
-
-			Use(World.GetObject(GetNextTile(1).position)); // Detect object in front of Chipotle and use it.
+		private Item GetItemInFront()
+		{
+			Vector2 itemPosition = GetNextTile(1).position;
+			Item item = World.GetObject(itemPosition);
+			return item;
 		}
 
 		/// <summary>

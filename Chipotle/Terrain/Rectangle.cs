@@ -295,7 +295,8 @@ namespace Game.Terrain
 		/// Height of the plane.
 		/// </summary>
 		[ProtoIgnore]
-		public float Height => UpperLeftCorner.Y - LowerRightCorner.Y;
+		public float Height
+			=> (UpperLeftCorner.Y - LowerRightCorner.Y).Round();
 
 		/// <summary>
 		/// Returns coordinates of the lower left corner of the plane.
@@ -341,7 +342,7 @@ namespace Game.Terrain
 		/// Returns width of the plane.
 		/// </summary>
 		public float Width
-			=> LowerRightCorner.X - UpperLeftCorner.X;
+			=> (LowerRightCorner.X - UpperLeftCorner.X).Round();
 
 		/// <summary>
 		/// Converts relative coordinates to absolute coordinates.
