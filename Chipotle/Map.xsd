@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:simpleType name="terrainType">
+    <xs:restriction base="xs:string" >
+      <xs:enumeration value="Grass" />
+      <xs:enumeration value="Linoleum" />
+      <xs:enumeration value="Carpet" />
+      <xs:enumeration value="Gravel" />
+      <xs:enumeration value="Asfalt" />
+      <xs:enumeration value="Cobblestones" />
+      <xs:enumeration value="Tiles" />
+      <xs:enumeration value="Wood" />
+      <xs:enumeration value="Mud" />
+      <xs:enumeration value="Puddle" />
+      <xs:enumeration value="Concrete" />
+      <xs:enumeration value="Clay" />
+      <xs:enumeration value="Wall" />
+      <xs:enumeration value="Bush" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  <xs:simpleType name="localityType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Indoor" />
+      <xs:enumeration value="Outdoor" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="fourCoordinates">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="\d+, +\d+, +\d+, +\d+" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="twoCoordinates">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="\d+, +\d+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="perimeterWalls">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="All" />
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Left" />
+      <xs:enumeration value="Front" />
+      <xs:enumeration value="Right" />
+      <xs:enumeration value="Back" />
+      <xs:enumeration value="Left, Front" />
+      <xs:enumeration value="Left, Right" />
+      <xs:enumeration value="Left, Back" />
+      <xs:enumeration value="Left, Front, Right" />
+      <xs:enumeration value="Left, Front, Back" />
+      <xs:enumeration value="Front, Right" />
+      <xs:enumeration value="Front, Right, Back" />
+      <xs:enumeration value="Right, Back" />
+      <xs:enumeration value="Front, Back" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:element name="map" >
+    <xs:complexType>
+      <xs:sequence>
+        
+        <xs:element name="passages" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              
+              <xs:element name="passage" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="indexedname" type="xs:string" use="required" />
+                  <xs:attribute name="from" type="xs:string" use="required" />
+                  <xs:attribute name="to" type="xs:string" use="required" />
+                  <xs:attribute name="door" type="xs:boolean" default="true"  />
+                  <xs:attribute name="closed" type="xs:boolean" default="true"  />
+                  <xs:attribute name="coordinates" type="fourCoordinates" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        
+        <xs:element name="localities" minOccurs="1"   maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              
+              <xs:element name="locality" maxOccurs="unbounded" >
+                <xs:complexType>
+
+                  <xs:sequence>
+                    <xs:sequence>
+
+                      <xs:element name="panel" minOccurs="0"  maxOccurs="unbounded" >
+                        <xs:complexType>
+
+                          <xs:attribute name="coordinates" type="fourCoordinates" use="required" />
+                          <xs:attribute name="terrain" type="terrainType" default="Grass"  />
+                          <xs:attribute name="canBeOccupied" type="xs:boolean" default="true"  />
+
+                        </xs:complexType>
+                      </xs:element>
+
+                    </xs:sequence>
+
+                    <xs:sequence>
+
+                      <xs:element name="object" minOccurs="0"  maxOccurs="unbounded" >
+                      <xs:complexType>
+                        <xs:attribute name="indexedname" type="xs:string" use="required" />
+                        <xs:attribute name="type" type="xs:string" use="required" />
+                        <xs:attribute name="friendlyname" type="xs:string" use="required" />
+                        <xs:attribute name="coordinates" type="fourCoordinates" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  </xs:sequence>
+
+                  <xs:attribute name="indexedname" type="xs:string" use="required" />
+                  <xs:attribute name="friendlyname" type="xs:string" use="required" />
+                  <xs:attribute name="type" type="localityType" default="Outdoor"  />
+                  <xs:attribute name="coordinates" type="fourCoordinates" use="required" />
+                  <xs:attribute name="height" type="xs:unsignedByte" default="0"  />
+                  <xs:attribute name="defaultTerrain" type="terrainType" default="Concrete"  />
+                  <xs:attribute name="walls" type="perimeterWalls" default="None"  />
+
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,4 @@
+C:\Users\lukas\source\repos\Chipotle\Hra\Chipotle\Chipotle\obj\Debug\Chipotle.csproj.AssemblyReference.cache
+C:\Users\lukas\source\repos\Chipotle\Hra\Chipotle\Chipotle\obj\Debug\Game.Properties.Resources.resources
+C:\Users\lukas\source\repos\Chipotle\Hra\Chipotle\Chipotle\obj\Debug\Chipotle.csproj.GenerateResource.cache
+C:\Users\lukas\source\repos\Chipotle\Hra\Chipotle\Chipotle\obj\Debug\Chipotle.csproj.CoreCompileInputs.cache

@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BDFAA4F3-4E00-411D-8166-E1A93AC5C468}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Game</RootNamespace>
+    <AssemblyName>Chipotle</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Debug\Chipotle.xml</DocumentationFile>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Chipotle.xml</DocumentationFile>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="OpenTK, Version=3.3.2.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.3.2\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net, Version=3.0.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\packages\protobuf-net.3.0.101\lib\net461\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\packages\protobuf-net.Core.3.0.101\lib\net461\protobuf-net.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TolkDotNet, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\lib\Tolk\TolkDotNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Entities\CarsonsBench.cs" />
+    <Compile Include="Entities\CarsonsGrill.cs" />
+    <Compile Include="Entities\ChipotlesCar.cs" />
+    <Compile Include="Entities\ChristinesBell.cs" />
+    <Compile Include="Entities\Corpse.cs" />
+    <Compile Include="Entities\IcecreamMachine.cs" />
+    <Compile Include="Entities\KeyHanger.cs" />
+    <Compile Include="Entities\KillersCar.cs" />
+    <Compile Include="Entities\TuttleState.cs" />
+    <Compile Include="Messaging\Commands\FollowPath.cs" />
+    <Compile Include="Messaging\Commands\Interact.cs" />
+    <Compile Include="Messaging\Commands\PickUpObject.cs" />
+    <Compile Include="Messaging\Commands\PutObject.cs" />
+    <Compile Include="Messaging\Commands\ReactToBeingPinchedInDoor.cs" />
+    <Compile Include="Messaging\Commands\ReactToCollision.cs" />
+    <Compile Include="Messaging\Commands\ReportPosition.cs" />
+    <Compile Include="Messaging\Commands\RunInventoryMenu.cs" />
+    <Compile Include="Messaging\Commands\SayLocalityDescription.cs" />
+    <Compile Include="Messaging\Commands\SayObjectDescription.cs" />
+    <Compile Include="Messaging\Commands\ResearchObject.cs" />
+    <Compile Include="Messaging\Commands\TryGoTo.cs" />
+    <Compile Include="Messaging\Commands\UseDoor.cs" />
+    <Compile Include="Messaging\Events\EmptyInventory.cs" />
+    <Compile Include="Messaging\Events\ObjectAppearedInLocality.cs" />
+    <Compile Include="Messaging\Events\ObjectDisappearedFromLocality.cs" />
+    <Compile Include="Messaging\Events\ObjectResearched.cs" />
+    <Compile Include="Messaging\Events\PickUpObjectResult.cs" />
+    <Compile Include="Messaging\Events\PinchedInDoor.cs" />
+    <Compile Include="Messaging\Commands\CreatePredefinedSave.cs" />
+    <Compile Include="Messaging\Commands\ListExits.cs" />
+    <Compile Include="Messaging\Commands\ListObjects.cs" />
+    <Compile Include="Messaging\Commands\LoadPredefinedSave.cs" />
+    <Compile Include="Messaging\Commands\MoveChipotlesCar.cs" />
+    <Compile Include="Messaging\Commands\SayCoordinates.cs" />
+    <Compile Include="Messaging\Commands\SayExits.cs" />
+    <Compile Include="Messaging\Commands\SayLocalitySize.cs" />
+    <Compile Include="Messaging\Commands\SayOrientation.cs" />
+    <Compile Include="Messaging\Commands\SayVisitedRegion.cs" />
+    <Compile Include="Messaging\Commands\StartExitNavigation.cs" />
+    <Compile Include="Messaging\Commands\StartObjectNavigation.cs" />
+    <Compile Include="Messaging\Commands\StopExitNavigation.cs" />
+    <Compile Include="Messaging\Commands\StopObjectNavigation.cs" />
+    <Compile Include="Messaging\Events\DoorManipulated.cs" />
+    <Compile Include="Messaging\Events\ExitNavigationStopped.cs" />
+    <Compile Include="Messaging\Events\ObjectNavigationStopped.cs" />
+    <Compile Include="Messaging\Events\PutObjectResult.cs" />
+    <Compile Include="Messaging\Events\SayExitsResult.cs" />
+    <Compile Include="Messaging\Events\SayObjectsResult.cs" />
+    <Compile Include="Messaging\Events\SayVisitedLocalityResult.cs" />
+    <Compile Include="Messaging\Commands\StopWalk.cs" />
+    <Compile Include="Messaging\Events\GameReloaded.cs" />
+    <Compile Include="Messaging\Events\KeyReleased.cs" />
+    <Compile Include="Messaging\Events\LocalityChanged.cs" />
+    <Compile Include="Messaging\Commands\Reveal.cs" />
+    <Compile Include="Messaging\Events\ChipotlesCarMoved.cs" />
+    <Compile Include="Messaging\Events\TuttleStateChanged.cs" />
+    <Compile Include="SerializerHelper.cs" />
+    <Compile Include="Terrain\MariottisDoor.cs" />
+    <Compile Include="Entities\PubBench.cs" />
+    <Compile Include="Entities\SweeneysBell.cs" />
+    <Compile Include="Entities\VanillaCrunchCar.cs" />
+    <Compile Include="Messaging\Commands\Destroy.cs" />
+    <Compile Include="Messaging\Commands\GotoPoint.cs" />
+    <Compile Include="Entities\PoolsideBin.cs" />
+    <Compile Include="Messaging\Commands\Hide.cs" />
+    <Compile Include="Messaging\Commands\SetPosition.cs" />
+    <Compile Include="Messaging\Commands\StartFollowing.cs" />
+    <Compile Include="Messaging\Commands\StopFollowing.cs" />
+    <Compile Include="Messaging\Commands\UnblockLocality.cs" />
+    <Compile Include="Messaging\Events\DoorHit.cs" />
+    <Compile Include="Messaging\Events\ObjectsCollided.cs" />
+    <Compile Include="Messaging\Events\CutsceneEnded.cs" />
+    <Compile Include="Messaging\Events\CutsceneBegan.cs" />
+    <Compile Include="Entities\AIComponent.cs" />
+    <Compile Include="Entities\BartenderAIComponent.cs" />
+    <Compile Include="Entities\CarsonAIComponent.cs" />
+    <Compile Include="Entities\ChipotleInputComponent.cs" />
+    <Compile Include="Entities\ChipotlePhysicsComponent.cs" />
+    <Compile Include="Entities\ChipotleSoundComponent.cs" />
+    <Compile Include="Entities\ChristineAIComponent.cs" />
+    <Compile Include="Entities\Item.cs" />
+    <Compile Include="Entities\CharacterComponent.cs" />
+    <Compile Include="Entities\Character.cs" />
+    <Compile Include="Entities\GameObject.cs" />
+    <Compile Include="Entities\InputComponent.cs" />
+    <Compile Include="Entities\MariottiAIComponent.cs" />
+    <Compile Include="Entities\SweeneyAIComponent.cs" />
+    <Compile Include="Entities\TuttleAIComponent.cs" />
+    <Compile Include="Entities\TuttlePhysicsComponent.cs" />
+    <Compile Include="Entities\TuttleSoundComponent.cs" />
+    <Compile Include="Messaging\Events\CharacterLeftLocality.cs" />
+    <Compile Include="Messaging\Events\CharacterCameToLocality.cs" />
+    <Compile Include="Messaging\Commands\SayObjects.cs" />
+    <Compile Include="Messaging\Commands\SayLocalityName.cs" />
+    <Compile Include="Messaging\Events\PositionChanged.cs" />
+    <Compile Include="Messaging\Events\TerrainCollided.cs" />
+    <Compile Include="Messaging\Commands\UseObjects.cs" />
+    <Compile Include="Messaging\Events\KeyPressed.cs" />
+    <Compile Include="Messaging\MessagingObject.cs" />
+    <Compile Include="Messaging\Commands\StartWalk.cs" />
+    <Compile Include="Messaging\Events\EntityMoved.cs" />
+    <Compile Include="Messaging\Commands\SayTerrain.cs" />
+    <Compile Include="Terrain\Angle.cs" />
+    <Compile Include="Terrain\CardinalDirection.cs" />
+    <Compile Include="Terrain\Door.cs" />
+    <Compile Include="Terrain\HallDoor.cs" />
+    <Compile Include="Terrain\MapElement.cs" />
+    <Compile Include="Terrain\ObstacleType.cs" />
+    <Compile Include="Terrain\Orientation2D.cs" />
+    <Compile Include="Terrain\Passage.cs" />
+    <Compile Include="Entities\PhysicsComponent.cs" />
+    <Compile Include="Entities\SoundComponent.cs" />
+    <Compile Include="Messaging\GameMessage.cs" />
+    <Compile Include="Terrain\Direction.cs" />
+    <Compile Include="Terrain\PassageState.cs" />
+    <Compile Include="Terrain\PathFinder.cs" />
+    <Compile Include="Terrain\PathFinder.Node.cs" />
+    <Compile Include="Terrain\Rectangle.cs" />
+    <Compile Include="Terrain\Locality.cs" />
+    <Compile Include="Terrain\SlidingDoor.cs" />
+    <Compile Include="Terrain\TerrainType.cs" />
+    <Compile Include="Terrain\Tile.cs" />
+    <Compile Include="Terrain\TileMap.cs" />
+    <Compile Include="Terrain\TurnType.cs" />
+    <Compile Include="Messaging\Commands\ChangeOrientation.cs" />
+    <Compile Include="Messaging\Events\OrientationChanged.cs" />
+    <Compile Include="Terrain\VanillaCrunchGarageDoor.cs" />
+    <Compile Include="UI\GameWindow.cs" />
+    <Compile Include="UI\InventoryMenu.cs" />
+    <Compile Include="UI\KeyEventParams.cs" />
+    <Compile Include="UI\KeyShortcut.cs" />
+    <Compile Include="UI\MainMenuWindow.cs" />
+    <Compile Include="UI\MainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\MenuWindow.cs" />
+    <Compile Include="UI\VirtualWindow.cs" />
+    <Compile Include="UI\WindowHandler.cs" />
+    <Compile Include="World.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
+    <None Include="Map.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Game\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core\Core.csproj">
+      <Project>{e4525846-a882-43d8-a581-5c39f0978855}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
