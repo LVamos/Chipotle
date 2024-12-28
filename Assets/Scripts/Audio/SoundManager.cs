@@ -177,13 +177,11 @@ namespace Assets.Scripts.Audio
 				source.volume = 0;
 				source.Play();
 				SlideVolume(source, fadingDuration, volume);
-			}
-			else
-			{
-				source.volume = volume;
-				source.Play();
+				return source;
 			}
 
+			source.volume = volume;
+			source.Play();
 			return source;
 		}
 
