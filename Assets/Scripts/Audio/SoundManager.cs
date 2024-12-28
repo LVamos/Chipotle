@@ -40,7 +40,6 @@ namespace Assets.Scripts.Audio
 			}
 		}
 
-
 		private void Update()
 		{
 			return;
@@ -77,8 +76,8 @@ namespace Assets.Scripts.Audio
 
 		public void SetRoomParameters(Locality locality)
 		{
-			_roomObject.transform.position = locality.gameObject.transform.position;
-			Vector3 size = locality.gameObject.transform.localScale;
+			_roomObject.transform.position = locality.transform.position;
+			Vector3 size = locality.transform.localScale;
 			_resonanceRoom.size = size;
 			LocalityMaterialsDefinitionModel localityMaterials = locality.Materials;
 			_resonanceRoom.leftWall = _materials[localityMaterials.LeftWall];
@@ -92,8 +91,8 @@ namespace Assets.Scripts.Audio
 				_resonanceRoom.reverbTime = .4f;
 		}
 
-		private Dictionary<Material, ResonanceAudioRoomManager.SurfaceMaterial> _materials = new Dictionary<Material, ResonanceAudioRoomManager.SurfaceMaterial>
-{
+		private Dictionary<Material, ResonanceAudioRoomManager.SurfaceMaterial> _materials = new()
+		{
 	{ Material.Transparent, ResonanceAudioRoomManager.SurfaceMaterial.Transparent },
 	{ Material.AcousticCeilingTiles, ResonanceAudioRoomManager.SurfaceMaterial.AcousticCeilingTiles },
 	{ Material.BrickBare, ResonanceAudioRoomManager.SurfaceMaterial.BrickBare },
@@ -121,7 +120,6 @@ namespace Assets.Scripts.Audio
 
 		private SoundPool _soundPool;
 
-
 		public AudioSource DisableLowPass(AudioSource source)
 		{
 			_soundPool.DisableLowPass(source);
@@ -131,7 +129,7 @@ namespace Assets.Scripts.Audio
 
 		public void SetLowPass(AudioSource source, int cutOffFrequency)
 		{
-			var lowPass = source.GetComponent<AudioLowPassFilter>()
+			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
 				?? _soundPool.EnableLowPass(source);
 
 			lowPass.cutoffFrequency = cutOffFrequency;
@@ -140,8 +138,8 @@ namespace Assets.Scripts.Audio
 
 		public AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000)
 		{
-			var source = _soundPool.GetMuffledSource();
-			var lowPass = source.gameObject.GetComponent<AudioLowPassFilter>();
+			AudioSource source = _soundPool.GetMuffledSource();
+			AudioLowPassFilter lowPass = source.gameObject.GetComponent<AudioLowPassFilter>();
 			lowPass.cutoffFrequency = cutOffFrequency;
 			source.transform.position = position;
 			source.clip = Sounds.GetClip(soundName);
@@ -157,7 +155,7 @@ namespace Assets.Scripts.Audio
 
 		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
 		{
-			var source = _soundPool.GetSource();
+			AudioSource source = _soundPool.GetSource();
 			source.gameObject.transform.position = position;
 			source.clip = Sounds.GetClip(soundName);
 			source.spatialBlend = 1; // Full surround sound
@@ -167,7 +165,7 @@ namespace Assets.Scripts.Audio
 			source.loop = loop;
 			source.dopplerLevel = 0;
 
-			var resonance = source.GetComponent<ResonanceAudioSource>();
+			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
 			resonance.bypassRoomEffects = false;
 			resonance.nearFieldEffectEnabled = true;
 			resonance.occlusionEnabled = true;
@@ -232,7 +230,6 @@ namespace Assets.Scripts.Audio
 				AudioListener.volume = targetVolume;
 			}
 		}
-
 
 		public void StopAllSounds()
 		{

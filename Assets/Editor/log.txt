@@ -1,6 +1,4 @@
-27.12.2024 21:04:32: Scéna načtena
-27.12.2024 21:04:32: Objekty smazány
-27.12.2024 21:04:32: Lokace a objekty načteny
-27.12.2024 21:04:32: Průchody načteny
-27.12.2024 21:04:41: Multiple plugins with the same name 'nvdacontrollerclient64' (found at 'Assets/nvdaControllerClient64.dll' and 'Assets/Plugins/nvdaControllerClient64.dll'). That means one or more plugins are set to be compatible with Editor. Only one plugin at the time can be used by Editor.
-27.12.2024 21:04:41: Multiple plugins with the same name 'tolk' (found at 'Assets/Plugins/Tolk.dll' and 'Assets/Tolk.dll'). That means one or more plugins are set to be compatible with Editor. Only one plugin at the time can be used by Editor.
+28.12.2024 22:07:17: Scéna načtena
+28.12.2024 22:07:17: Objekty smazány
+28.12.2024 22:07:17: Lokace a objekty načteny
+28.12.2024 22:07:17: Průchody načteny

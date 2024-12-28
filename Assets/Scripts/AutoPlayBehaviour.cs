@@ -17,14 +17,17 @@ public class AutoPlayBehaviour : MonoBehaviour
 		// camera settings
 		if (Camera.main == null)
 		{
-			GameObject newCamera = new();
-			newCamera.tag = "MainCamera";
+			GameObject newCamera = new()
+			{
+				tag = "MainCamera"
+			};
 			newCamera.AddComponent<Camera>();
 		}
 
-		AudioListener listener = null;
-		if (!Camera.main.gameObject.TryGetComponent<AudioListener>(out listener))
-			listener = Camera.main.gameObject.AddComponent<AudioListener>();
+		if (Camera.main.GetComponent<AudioListener>() == null)
+			Camera.main.gameObject.AddComponent<AudioListener>();
+		if (Camera.main.GetComponent<ResonanceAudioListener>() == null)
+			Camera.main.gameObject.AddComponent<ResonanceAudioListener>();
 
 		Camera.main.clearFlags = CameraClearFlags.Nothing;
 		Camera.main.cullingMask = 0;
@@ -69,7 +72,7 @@ public class AutoPlayBehaviour : MonoBehaviour
 		if (key == KeyCode.None)
 			return;
 
-		KeyShortcut shortcut = new KeyShortcut(shift: shift, alt: alt, control: ctrl, key: key);
+		KeyShortcut shortcut = new(shift: shift, alt: alt, control: ctrl, key: key);
 		WindowHandler.OnKeyDown(shortcut);
 	}
 
@@ -86,15 +89,15 @@ public class AutoPlayBehaviour : MonoBehaviour
 		bool ctrl = keys.Contains(KeyCode.LeftControl) || keys.Contains(KeyCode.RightControl);
 
 		KeyCode key = keys.FirstOrDefault(k =>
-			k != KeyCode.LeftShift && k != KeyCode.RightShift &&
-			k != KeyCode.LeftControl && k != KeyCode.RightControl &&
-			k != KeyCode.LeftAlt && k != KeyCode.RightAlt);
+			k is not KeyCode.LeftShift and not KeyCode.RightShift and
+			not KeyCode.LeftControl and not KeyCode.RightControl and
+			not KeyCode.LeftAlt and not KeyCode.RightAlt);
 
 		// When no keys were pressed return null.
 		if (key == KeyCode.None)
 			return;
 
-		KeyShortcut shortcut = new KeyShortcut(shift: shift, alt: alt, control: ctrl, key: key);
+		KeyShortcut shortcut = new(shift: shift, alt: alt, control: ctrl, key: key);
 		WindowHandler.OnKeyUp(shortcut);
 	}
 }
