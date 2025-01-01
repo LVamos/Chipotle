@@ -42,7 +42,7 @@ namespace Game.Terrain
 		/// <param name="message">The message to be processed</param>
 		private void OnLocalityEntered(CharacterCameToLocality message)
 		{
-			if (message.Locality == World.GetLocality("garáž v1") && message.Character == World.Player)
+			if (message.CurrentLocality == World.GetLocality("garáž v1") && message.Character == World.Player)
 				State = PassageState.Closed;
 		}
 	}

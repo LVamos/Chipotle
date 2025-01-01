@@ -128,7 +128,7 @@ namespace Game.Entities.Characters.Bartender
 		/// <param name="message">The message to be processed</param>
 		private void OnLocalityEntered(CharacterCameToLocality message)
 		{
-			if (message.Character != World.Player || message.Locality != Owner.Locality)
+			if (message.Character != World.Player || message.CurrentLocality != Owner.Locality)
 				return;
 
 			if (_velcomeChipotle)

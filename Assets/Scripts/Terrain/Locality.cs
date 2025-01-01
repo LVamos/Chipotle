@@ -28,6 +28,11 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Locality : MapElement
 	{
+		public AudioSource GetAmbientSource()
+		{
+			return _ambientSource;
+		}
+
 		private bool PlayerInSoundRadius
 			=> GetDistanceFromPlayer() <= _localitySoundRadius;
 
@@ -685,7 +690,7 @@ namespace Game.Terrain
 		/// <param name="message">The message</param>
 		private void OnCharacterCameToLocality(CharacterCameToLocality message)
 		{
-			if (message.Locality != this)
+			if (message.CurrentLocality != this)
 				return;
 
 			Register(message.Character);
@@ -694,8 +699,15 @@ namespace Game.Terrain
 
 			Sounds.SetRoomParameters(this);
 			_playerInHere = true;
+			_playersPreviousLocality = message.PreviousLocality;
 			UpdateLoop();
 		}
+
+		/// <summary>
+		/// Last previous locality visited by the player.
+		/// </summary>
+		[ProtoIgnore]
+		private Locality _playersPreviousLocality;
 
 		/// <summary>
 		/// Distributes a game message to all passages.
@@ -716,7 +728,7 @@ namespace Game.Terrain
 		/// <param name="message">The message</param>
 		private void OnCharacterLeftLocality(CharacterLeftLocality message)
 		{
-			if (message.Locality != this)
+			if (message.LeftLocality != this)
 				return;
 
 			Unregister(message.Sender as Character);
@@ -741,14 +753,23 @@ namespace Game.Terrain
 		{
 			StopInaudibleSounds();
 
-			if (string.IsNullOrWhiteSpace(AmbientSound))
+			if (string.IsNullOrEmpty(AmbientSound))
 				return;
 
 			if (_playerInHere)
-				PlayAmbientHere();
+			{
+				if (_playersPreviousLocality != null
+					&& string.Equals(_playersPreviousLocality.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase))
+					_ambientSource = _playersPreviousLocality.GetAmbientSource();
+				else
+					PlayAmbientHere();
+				_playersPreviousLocality = null;
+				return;
+			}
 
 			Locality playersLocality = World.Player.Locality;
-			if (string.Equals(playersLocality.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
+			if (playersLocality != this
+				&& string.Equals(playersLocality.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
 				return;
 
 			if (IsAccessible(playersLocality))

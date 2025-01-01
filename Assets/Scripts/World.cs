@@ -40,7 +40,6 @@ namespace Game
 	public static class World
 	{
 
-
 		/// <summary>
 		/// Indicates if the game is in progress.
 		/// </summary>
@@ -51,7 +50,10 @@ namespace Game
 		/// Check if two map elements are within a specified radius of each other.
 		/// </summary>
 		/// <returns>True if the two elements are within the specified radius of each other</returns></returns>
-		public static bool IsInRange(MapElement a, MapElement b, float radius) => GetDistance(a, b) <= radius;
+		public static bool IsInRange(MapElement a, MapElement b, float radius)
+		{
+			return GetDistance(a, b) <= radius;
+		}
 
 		/// <summary>
 		/// Determines if element 'a' is closer than element 'b'.
@@ -61,7 +63,9 @@ namespace Game
 		/// <param name="b">Second map element to compare</param>
 		/// <returns>True if element a is closer than element b</returns>
 		public static bool IsCloser(MapElement referenceElement, MapElement a, MapElement b)
-			=> GetDistance(referenceElement, a) <= GetDistance(referenceElement, b);
+		{
+			return GetDistance(referenceElement, a) <= GetDistance(referenceElement, b);
+		}
 
 		/// <summary>
 		/// Finds the closest element in a collection to a given element.
@@ -114,7 +118,7 @@ namespace Game
 		/// <returns>List of MapElements or null</returns>
 		public static CollisionsModel DetectCollisions(MapElement element, Rectangle area)
 		{
-			var obstacles = new List<object>();
+			List<object> obstacles = new();
 			List<Locality> localities = area.GetLocalities().ToList();
 
 			// Detect inaccesible terrain.
@@ -159,9 +163,7 @@ namespace Game
 		/// <returns>A string containing the requested description</returns>
 		public static string GetObjectDescription(Entity @object, int id)
 		{
-			if (_objectDescriptions.ContainsKey(@object.Type))
-				return _objectDescriptions[@object.Type][id];
-			return "popis chybí";
+			return _objectDescriptions.ContainsKey(@object.Type) ? _objectDescriptions[@object.Type][id] : "popis chybí";
 		}
 
 		/// <summary>
@@ -202,7 +204,9 @@ namespace Game
 		/// A list of points leading from start to the end or null if no possible path exists
 		/// </returns>
 		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false, int maxDistance = 300)
-			=> _pathFinder.FindPath(start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance);
+		{
+			return _pathFinder.FindPath(start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance);
+		}
 
 		/// <summary>
 		/// Searches nearest surrounding of the specified map element and selects a random walkable tile.
@@ -212,7 +216,9 @@ namespace Game
 		/// <param name="maxDistance">Specifies maximum distance fo the points in the surroundings.</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
 		public static Vector2? GetRandomWalkablePoint(MapElement element, int minDistance, int maxDistance)
-			=> GetRandomWalkablePoint(element.Area.Value, minDistance, maxDistance);
+		{
+			return GetRandomWalkablePoint(element.Area.Value, minDistance, maxDistance);
+		}
 
 		/// <summary>
 		/// Searches nearest surrounding of the specified point and selects a random walkable tile.
@@ -222,8 +228,9 @@ namespace Game
 		/// <param name="maxDistance">Specifies maximum distance fo the points in the surroundings.</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
 		public static Vector2? GetRandomWalkablePoint(Vector2 point, int minDistance, int maxDistance)
-			=> GetRandomWalkablePoint(new Rectangle(point), minDistance, maxDistance);
-
+		{
+			return GetRandomWalkablePoint(new Rectangle(point), minDistance, maxDistance);
+		}
 
 		/// <summary>
 		/// Searches nearest surrounding of plane and selects a random walkable tile.
@@ -234,7 +241,6 @@ namespace Game
 		{
 			IEnumerable<Vector2> walkables =
 				area.GetWalkableSurroundingPoints(minDistance, maxDistance);
-
 
 			if (walkables.IsNullOrEmpty())
 				return null;
@@ -254,7 +260,9 @@ namespace Game
 		/// <param name="maxDistance">Maximum distance from center</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
 		public static Vector2? GetNearestWalkableTile(MapElement element, int minDistance, int maxDistance)
-			=> GetNearestWalkableTile(element.Area.Value, minDistance, maxDistance);
+		{
+			return GetNearestWalkableTile(element.Area.Value, minDistance, maxDistance);
+		}
 
 		/// <summary>
 		/// Finds the nearest walkable tile in surroundings of this plane.
@@ -264,7 +272,9 @@ namespace Game
 		/// <param name="maxDistance">Maximum distance from center</param>
 		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
 		public static Vector2? GetNearestWalkableTile(Vector2 point, int minDistance, int maxDistance)
-			=> GetNearestWalkableTile(new Rectangle(point), minDistance, maxDistance);
+		{
+			return GetNearestWalkableTile(new Rectangle(point), minDistance, maxDistance);
+		}
 
 		/// <summary>
 		/// Finds the nearest walkable tile in surroundings of this plane.
@@ -307,7 +317,9 @@ namespace Game
 		/// Pauses an ongoing cutscene.
 		/// </summary>
 		public static void PauseCutscene()
-			=> _cutScenePlayer.Pause();
+		{
+			_cutScenePlayer.Pause();
+		}
 
 		/// <summary>
 		/// Detects acoustic obstacles between the player and the specified map element.
@@ -342,10 +354,7 @@ namespace Game
 
 				if (atPassage != null)
 				{
-					if (atPassage.State == PassageState.Closed)
-						return ObstacleType.Door;
-
-					return ObstacleType.None;
+					return atPassage.State == PassageState.Closed ? ObstacleType.Door : ObstacleType.None;
 				}
 			}
 
@@ -383,10 +392,7 @@ namespace Game
 				return ObstacleType.Wall;
 
 			// Detect objects
-			if (path.GetObjects().Any(o => !Intersects(o.Area.Value)))
-				return ObstacleType.Object;
-
-			return ObstacleType.None;
+			return path.GetObjects().Any(o => !Intersects(o.Area.Value)) ? ObstacleType.Object : ObstacleType.None;
 		}
 
 		/// <summary>
@@ -394,7 +400,9 @@ namespace Game
 		/// </summary>
 		/// <returns>Enumeration of all localities</returns>
 		public static IEnumerable<Locality> GetLocalities()
-			=> _localities.Values.AsEnumerable();
+		{
+			return _localities.Values.AsEnumerable();
+		}
 
 		/// <summary>
 		/// Enumerates all localities intersecting with the speciifed area.
@@ -571,10 +579,7 @@ namespace Game
 			Vector2 point2 = element2.Area.Value.GetClosestPoint(point1);
 
 			// Verify that elements do not intersect.
-			if (element1.Area.Value.Intersects(element2.Area.Value))
-				return 0;
-
-			return GetDistance(point1, point2);
+			return element1.Area.Value.Intersects(element2.Area.Value) ? 0 : GetDistance(point1, point2);
 		}
 
 		/// <summary>
@@ -584,8 +589,9 @@ namespace Game
 		/// <param name="b">Second point</param>
 		/// <returns>Rounded distance between two given points</returns>
 		public static float GetDistance(Vector2 a, Vector2 b)
-			=> (float)(Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y));
-
+		{
+			return (float)(Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y));
+		}
 
 		/// <summary>
 		/// Computes cartesian distance between two 3d points.
@@ -594,7 +600,9 @@ namespace Game
 		/// <param name="b">Second point</param>
 		/// <returns>Distance between two given points</returns>
 		public static float GetDistance(Vector3 a, Vector3 b)
-			=> (float)(Math.Pow(Math.Abs(a.x - b.x), 2) + Math.Pow(Math.Abs(a.y - b.y), 2) + Math.Pow(Math.Abs(a.z - b.z), 2)) * 0.5f;
+		{
+			return (float)(Math.Pow(Math.Abs(a.x - b.x), 2) + Math.Pow(Math.Abs(a.y - b.y), 2) + Math.Pow(Math.Abs(a.z - b.z), 2)) * 0.5f;
+		}
 
 		/// <summary>
 		/// Returns an entity that stands on the given position.
@@ -604,11 +612,9 @@ namespace Game
 		public static Character GetCharacter(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
-			if (locality == null)
-				return null;
-
-			return
-				(
+			return locality == null
+				? null
+				: (
 					from e in locality.Characters
 					where e.Area != null && e.Area.Value.Intersects(point)
 					select e)
@@ -621,7 +627,9 @@ namespace Game
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting entities</returns>
 		public static IEnumerable<Character> GetEntities(Rectangle area)
-			=> _characters.Values.Where(o => o.Area != null && o.Area.Value.Intersects(area));
+		{
+			return _characters.Values.Where(o => o.Area != null && o.Area.Value.Intersects(area));
+		}
 
 		/// <summary>
 		/// Returns an NPC found by its name.
@@ -630,9 +638,7 @@ namespace Game
 		/// <returns>The found NPC or null if nothing was found</returns>
 		public static Character GetCharacter(string name)
 		{
-			if (_characters != null && _characters.TryGetValue(name.ToLower(), out Character e))
-				return e;
-			return null;
+			return _characters != null && _characters.TryGetValue(name.ToLower(), out Character e) ? e : null;
 		}
 
 		/// <summary>
@@ -652,7 +658,9 @@ namespace Game
 		/// <param name="area">The point tto be checked</param>
 		/// <returns>The intersecting locality</returns>
 		public static Locality GetLocality(Rectangle area)
-			=> _localities.Values.FirstOrDefault(l => l.Area.Value.Contains(area));
+		{
+			return _localities.Values.FirstOrDefault(l => l.Area.Value.Contains(area));
+		}
 
 		/// <summary>
 		/// Returns a locality which intersects with the given point.
@@ -660,8 +668,10 @@ namespace Game
 		/// <param name="point">The point tto be checked</param>
 		/// <returns>The intersecting locality</returns>
 		public static Locality GetLocality(Vector2 point)
-			=> _localities.Values
-				.FirstOrDefault(l => l.Area.Value.Intersects(point));
+		{
+			return _localities.Values
+						.FirstOrDefault(l => l.Area.Value.Intersects(point));
+		}
 
 		/// <summary>
 		/// Enumerates all localities sorted by distance from the specified point.
@@ -684,7 +694,9 @@ namespace Game
 		/// <param name="point">The point shose surroundings is to be searched</param>
 		/// <returns>The found locality</returns>
 		public static Locality GetNearestLocality(Vector2 point)
-			=> GetNearestLocalities(point).First();
+		{
+			return GetNearestLocalities(point).First();
+		}
 
 		/// <summary>
 		/// Returns a game object closest to the specified point.
@@ -692,7 +704,9 @@ namespace Game
 		/// <param name="point">The point whose surroundings is to be searched</param>
 		/// <returns>The found game object</returns>
 		public static Entity GetNearestObject(Vector2 point)
-			=> GetNearestObjects(point).FirstOrDefault();
+		{
+			return GetNearestObjects(point).FirstOrDefault();
+		}
 
 		/// <summary>
 		/// Enumerates all game objects around a point sorted by distance.
@@ -708,7 +722,6 @@ namespace Game
 				 select o)
 				.Distinct();
 		}
-
 
 		/// <summary>
 		/// Enumerates all game objects around a point sorted by distance in the specified radius.
@@ -734,7 +747,9 @@ namespace Game
 		/// <param name="point">The point whose surrounding is to be searched</param>
 		/// <returns>The found passage</returns>
 		public static Passage GetNearestPassage(Vector2 point)
-			=> GetNearestPassages(point).FirstOrDefault();
+		{
+			return GetNearestPassages(point).FirstOrDefault();
+		}
 
 		/// <summary>
 		/// Enumerates all passages sorted by distance from the specified point.
@@ -759,8 +774,10 @@ namespace Game
 		/// <param name="maxDistance">Max allowed distance from the specified point</param>
 		/// <returns>Enumeration of all passages</returns>
 		public static IEnumerable<Passage> GetNearestPassages(Vector2 point, float maxDistance)
-			=> GetNearestPassages(point)
-				.Where(p => p.Area.Value.GetDistanceFrom(point) <= maxDistance);
+		{
+			return GetNearestPassages(point)
+						.Where(p => p.Area.Value.GetDistanceFrom(point) <= maxDistance);
+		}
 
 		/// <summary>
 		/// Enumerates nearest doors around the specified point sorted by distance.
@@ -784,7 +801,9 @@ namespace Game
 		/// <param name="name">Inner name of the required object</param>
 		/// <returns>The found game object or null if nothing was found</returns>
 		public static Item GetItem(string name)
-			=> _items.TryGetValue(name, out Item o) ? o : null;
+		{
+			return _items.TryGetValue(name, out Item o) ? o : null;
+		}
 
 		/// <summary>
 		/// Returns an NPC or game object the tile intersects.
@@ -792,13 +811,11 @@ namespace Game
 		public static Item GetItem(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
-			if (locality == null)
-				return null;
-
-			return
-				(from o in locality.Objects
-				 where o.Area != null && o.Area.Value.Intersects(point)
-				 select o)
+			return locality == null
+				? null
+				: (from o in locality.Objects
+				   where o.Area != null && o.Area.Value.Intersects(point)
+				   select o)
 				.FirstOrDefault();
 		}
 
@@ -821,7 +838,9 @@ namespace Game
 		/// <param name="type">Type of requested game objects</param>
 		/// <returns>Enumeration of game objects</returns>
 		public static IEnumerable<Item> GetItemsByType(string type)
-			=> _items.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower(CultureInfo.CurrentCulture) == type.ToLower(CultureInfo.CurrentCulture));
+		{
+			return _items.Values.Where(o => !string.IsNullOrEmpty(o.Type) && o.Type.ToLower(CultureInfo.CurrentCulture) == type.ToLower(CultureInfo.CurrentCulture));
+		}
 
 		/// <summary>
 		/// Returns a passage the tile intersects.
@@ -849,7 +868,9 @@ namespace Game
 		/// Returns all passages intersecting with the plane.
 		/// </summary>
 		public static IEnumerable<Passage> GetPassages(Rectangle area)
-			=> _passages.Values.Where(p => p.Area.Value.Intersects(area));
+		{
+			return _passages.Values.Where(p => p.Area.Value.Intersects(area));
+		}
 
 		/// <summary>
 		/// Prepares the game world.
@@ -871,7 +892,9 @@ namespace Game
 		/// <param name="point"></param>
 		/// <returns>True if there's an object or NPC on the specified position</returns>
 		public static bool IsOccupied(Vector2 point)
-			=> GetItem(point) != null || GetCharacter(point) != null;
+		{
+			return GetItem(point) != null || GetCharacter(point) != null;
+		}
 
 		/// <summary>
 		/// Checks if the tile is walkable for NPCs.
@@ -959,7 +982,9 @@ namespace Game
 		/// Loads a saved game state from default path.
 		/// </summary>
 		public static void LoadGame()
-			=> LoadGame(MainScript.SerializationPath);
+		{
+			LoadGame(MainScript.SerializationPath);
+		}
 
 		/// <summary>
 		/// Loads a saved game state from the specified binary file.
@@ -1035,7 +1060,9 @@ namespace Game
 		private static CutScenePlayer _cutScenePlayer;
 
 		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true)
-	=> prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+		{
+			return prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+		}
 
 		private static List<XElement> _localityNodes;
 
@@ -1081,7 +1108,7 @@ namespace Game
 		{
 			PassageFactory.LoadPassages();
 
-			var xPassages = root.Element("passages").Elements("passage").ToList();
+			List<XElement> xPassages = root.Element("passages").Elements("passage").ToList();
 			foreach (XElement passageNode in xPassages)
 			{
 				Name name = new(GetAttribute(passageNode, "indexedname"));
@@ -1107,19 +1134,19 @@ namespace Game
 				if (!passageObjects.TryGetValue(name.Indexed, out obj))
 					throw new InvalidOperationException("No geometry found for the passage {name.Indexed}.");
 
-				var passage = PassageFactory.CreatePassage(obj, name, area, localities, isDoor, state, dType);
+				Passage passage = PassageFactory.CreatePassage(obj, name, area, localities, isDoor, state, dType);
 				Add(passage);
 			}
 		}
 
 		private static Dictionary<string, LocalityMaterialsDefinitionModel> LoadLocalityMaterials()
 		{
-			var deserializer = new DeserializerBuilder()
+			IDeserializer deserializer = new DeserializerBuilder()
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
 			string yaml = File.ReadAllText(MainScript.MaterialsPath);
-			var materials = deserializer.Deserialize<Dictionary<string, LocalityMaterialsDefinitionModel>>(yaml);
+			Dictionary<string, LocalityMaterialsDefinitionModel> materials = deserializer.Deserialize<Dictionary<string, LocalityMaterialsDefinitionModel>>(yaml);
 			return new Dictionary<string, LocalityMaterialsDefinitionModel>(materials, StringComparer.OrdinalIgnoreCase);
 		}
 
@@ -1129,7 +1156,7 @@ namespace Game
 			Dictionary<string, LocalityMaterialsDefinitionModel> materials = LoadLocalityMaterials();
 			foreach (XElement localityNode in _localityNodes)
 			{
-				var locality = LoadLocality(localityNode, localityObjects, materials);
+				Locality locality = LoadLocality(localityNode, localityObjects, materials);
 				LoadItems(localityNode, locality.Area.Value, itemObjects);
 			}
 		}
@@ -1153,7 +1180,7 @@ namespace Game
 			if (!localitiObjects.TryGetValue(name.Indexed, out obj))
 				throw new InvalidOperationException($"No geometry found for the locality {name.Indexed}");
 
-			var locality = obj.GetComponent<Locality>();
+			Locality locality = obj.GetComponent<Locality>();
 
 			locality.Initialize(
 				name,
@@ -1173,11 +1200,11 @@ namespace Game
 
 		private static void LoadItems(XElement localityNode, Rectangle localityArea, Dictionary<string, GameObject> itemObjects)
 		{
-			var items = localityNode.Elements("object").ToList();
+			List<XElement> items = localityNode.Elements("object").ToList();
 			foreach (XElement itemNode in items)
 			{
 				Name name = new(GetAttribute(itemNode, "indexedname"), GetAttribute(itemNode, "friendlyname"));
-				var area = new Rectangle(GetAttribute(itemNode, "coordinates")).ToAbsolute(localityArea);
+				Rectangle area = new Rectangle(GetAttribute(itemNode, "coordinates")).ToAbsolute(localityArea);
 				string type = GetAttribute(itemNode, "type");
 				bool decorative = GetAttribute(itemNode, "decorative").ToBool();
 				bool pickable = GetAttribute(itemNode, "pickable").ToBool();
@@ -1262,27 +1289,35 @@ namespace Game
 		/// </summary>
 		/// <param name="l">The locality to be removed</param>
 		public static void Remove(Locality l)
-			=> _delayedActions.Enqueue(() => _localities.Remove(l.Name.Indexed));
+		{
+			_delayedActions.Enqueue(() => _localities.Remove(l.Name.Indexed));
+		}
 
 		/// <summary>
 		/// Unregisters the specified passage.
 		/// </summary>
 		/// <param name="p">The passage to be removed</param>
 		public static void Remove(Passage p)
-			=> _delayedActions.Enqueue(() => _passages.Remove(p.Name.Indexed));
+		{
+			_delayedActions.Enqueue(() => _passages.Remove(p.Name.Indexed));
+		}
 
 		/// <summary>
 		/// Unregisters the specified object.
 		/// </summary>
 		/// <param name="o">The object to be removed</param>
 		public static void Remove(Entity o)
-			=> _delayedActions.Enqueue(() => _items.Remove(o.Name.Indexed));
+		{
+			_delayedActions.Enqueue(() => _items.Remove(o.Name.Indexed));
+		}
 
 		/// <summary>
 		/// Saves the game state to the default file.
 		/// </summary>
 		public static void SaveGame()
-			=> SaveGame(MainScript.SerializationPath);
+		{
+			SaveGame(MainScript.SerializationPath);
+		}
 
 		/// <summary>
 		/// Saves sttate of the game into a specified binary file.
@@ -1343,7 +1378,6 @@ namespace Game
 			PlayCutscene(null, "cs6");
 		}
 
-
 		/// <summary>
 		/// Stops an ongoing audio cutscene.
 		/// </summary>
@@ -1363,6 +1397,7 @@ namespace Game
 		/// </summary>
 		public static void UpdateGame()
 		{
+			string[] playingLocalities = _localities.Values.Where(l => l.GetAmbientSource() != null).Select(l => l.Name.Indexed).ToArray();
 			if (!GameInProgress)
 				return;
 

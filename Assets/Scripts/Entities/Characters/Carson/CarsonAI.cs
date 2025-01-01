@@ -11,7 +11,6 @@ using System.Linq;
 
 using Message = Game.Messaging.Message;
 
-
 namespace Game.Entities.Characters.Carson
 {
 	/// <summary>
@@ -76,7 +75,7 @@ namespace Game.Entities.Characters.Carson
 		/// <param name="message">The message to be processed</param>
 		private void OnLocalityEntered(CharacterCameToLocality message)
 		{
-			if (message.Character != World.Player || message.Locality != Owner.Locality)
+			if (message.Character != World.Player || message.CurrentLocality != Owner.Locality)
 				return;
 
 			// This happens just once.
@@ -93,7 +92,7 @@ namespace Game.Entities.Characters.Carson
 		/// <param name="message">The message to be processed</param>
 		private void OnLocalityLeft(CharacterLeftLocality message)
 		{
-			if (message.Locality != Owner.Locality || message.Character != World.Player)
+			if (message.LeftLocality != Owner.Locality || message.Character != World.Player)
 				return;
 
 			bool benchUsed = World.GetItemsByType("lavice u carsona").Any(o => o.Used);

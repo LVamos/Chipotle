@@ -13,7 +13,7 @@ namespace Assets.Scripts.Audio
 		public AudioLowPassFilter EnableLowPass(AudioSource source)
 		{
 			_pool.Remove(source);
-			var lowPass = source.AddComponent<AudioLowPassFilter>();
+			AudioLowPassFilter lowPass = source.AddComponent<AudioLowPassFilter>();
 			_muffledPool.Add(source);
 			return lowPass;
 		}
@@ -21,13 +21,12 @@ namespace Assets.Scripts.Audio
 		public AudioSource DisableLowPass(AudioSource source)
 		{
 			_muffledPool.Remove(source);
-			var lowPass = GetComponent<AudioLowPassFilter>()
+			AudioLowPassFilter lowPass = GetComponent<AudioLowPassFilter>()
 				?? throw new LowPassFilterNotFoundException(source);
 			Destroy(lowPass);
 			_pool.Add(source);
 			return source;
 		}
-
 
 		public AudioSource GetMuffledSource()
 		{
@@ -37,7 +36,6 @@ namespace Assets.Scripts.Audio
 			source.gameObject.SetActive(true);
 			return source;
 		}
-
 
 		public AudioSource GetSource()
 		{
@@ -62,7 +60,7 @@ namespace Assets.Scripts.Audio
 		private void Update()
 		{
 			string[] names = _pool.Concat(_muffledPool).Where(a => a.isPlaying).Select(s => s.clip.name).ToArray();
-			var a = _pool.Concat(_muffledPool).Where(a => a.isPlaying).ToArray();
+			AudioSource[] a = _pool.Concat(_muffledPool).Where(a => a.isPlaying).ToArray();
 
 			foreach (AudioSource source in _pool.Concat(_muffledPool))
 			{
@@ -82,8 +80,6 @@ namespace Assets.Scripts.Audio
 			return source;
 		}
 
-
-
 		private AudioSource AddSource()
 		{
 			GameObject o = new("Sound");
@@ -93,6 +89,5 @@ namespace Assets.Scripts.Audio
 			_pool.Add(source);
 			return source;
 		}
-
 	}
 }

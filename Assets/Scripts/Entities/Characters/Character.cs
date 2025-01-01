@@ -33,7 +33,7 @@ namespace Game.Entities.Characters
 		protected override void DestroyObject()
 		{
 			World.Remove(this);
-			Locality.TakeMessage(new CharacterLeftLocality(this, this, Locality));
+			Locality.TakeMessage(new CharacterLeftLocality(this, this, Locality, null));
 		}
 
 		/// <summary>
@@ -45,13 +45,7 @@ namespace Game.Entities.Characters
 		/// Locality intersecting with the character.
 		/// </summary>
 		[ProtoIgnore]
-		public Locality Locality
-		{
-			get
-			{
-				return _locality == null ? null : World.GetLocality(_locality);
-			}
-		}
+		public Locality Locality => _locality == null ? null : World.GetLocality(_locality);
 
 		/// <summary>
 		/// Represents the inventory of the entity.
@@ -130,7 +124,6 @@ namespace Game.Entities.Characters
 				case PositionChanged pcd: OnPositionChanged(pcd); break;
 				default: base.HandleMessage(message); break;
 			}
-
 		}
 
 		/// <summary>
@@ -209,7 +202,9 @@ namespace Game.Entities.Characters
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnLocalityChanged(LocalityChanged message)
-			=> _locality = message.Target.Name.Indexed;
+		{
+			_locality = message.Target.Name.Indexed;
+		}
 
 		/// <summary>
 		/// Processes incoming messages.
@@ -253,10 +248,9 @@ namespace Game.Entities.Characters
 
 			IEnumerable<Locality> targetLocalities = localities.Distinct();
 
-			var moved = new CharacterMoved(this, message.SourcePosition, message.TargetPosition, message.SourceLocality, message.TargetLocality);
-			var left = new CharacterLeftLocality(this, this, message.SourceLocality);
-			var came = new CharacterCameToLocality(this, this, message.TargetLocality);
-
+			CharacterMoved moved = new(this, message.SourcePosition, message.TargetPosition, message.SourceLocality, message.TargetLocality);
+			CharacterLeftLocality left = new(this, this, message.SourceLocality, message.TargetLocality);
+			CharacterCameToLocality came = new(this, this, message.TargetLocality, message.SourceLocality);
 
 			foreach (Locality l in targetLocalities)
 			{
@@ -298,7 +292,9 @@ namespace Game.Entities.Characters
 		/// <param name="message">The message to check</param>
 		/// <returns>True if the message came from inside the NPC</returns>
 		private bool IsInternal(Message message)
-			=> message.Sender is CharacterComponent c && c.Owner == this;
+		{
+			return message.Sender is CharacterComponent c && c.Owner == this;
+		}
 
 		/// <summary>
 		/// Processes the Destroy message.

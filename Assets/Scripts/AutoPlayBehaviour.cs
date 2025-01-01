@@ -44,12 +44,6 @@ public class AutoPlayBehaviour : MonoBehaviour
 		HandleKeyDown();
 		HandleKeyUp();
 		World.UpdateGame();
-
-		// Stop the game when debugging in VS is stopped.
-#if UNITY_EDITOR
-		if (!System.Diagnostics.Debugger.IsAttached)
-			UnityEditor.EditorApplication.isPlaying = false;
-#endif
 	}
 
 	private void HandleKeyDown()

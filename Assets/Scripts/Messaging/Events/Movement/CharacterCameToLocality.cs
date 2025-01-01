@@ -16,20 +16,26 @@ namespace Game.Messaging.Events.Movement
 		public readonly Character Character;
 
 		/// <summary>
-		/// The concerning locality
+		/// The locality the character came to
 		/// </summary>
-		public readonly Locality Locality;
+		public readonly Locality CurrentLocality;
+
+		/// <summary>
+		/// The locality the character came from
+		/// </summary>
+		public readonly Locality PreviousLocality;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="entity">The NPC that entered the locality</param>
-		/// <param name="locality">The concerning locality</param>
-		public CharacterCameToLocality(object sender, Character entity, Locality locality) : base(sender)
+		/// <param name="currentLocality">The concerning locality</param>
+		public CharacterCameToLocality(object sender, Character entity, Locality currentLocality, Locality previousLocality) : base(sender)
 		{
 			Character = entity;
-			Locality = locality;
+			CurrentLocality = currentLocality;
+			PreviousLocality = previousLocality;
 		}
 	}
 }
