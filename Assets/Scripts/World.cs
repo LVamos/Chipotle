@@ -1397,7 +1397,7 @@ namespace Game
 		/// </summary>
 		public static void UpdateGame()
 		{
-			string[] playingLocalities = _localities.Values.Where(l => l.GetAmbientSource() != null).Select(l => l.Name.Indexed).ToArray();
+			//string[] playingLocalities = _localities.Values.Where(l => l.GetAmbientSource() != null).Select(l => l.Name.Indexed).ToArray();
 			if (!GameInProgress)
 				return;
 

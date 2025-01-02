@@ -1,4 +1,4 @@
-31.12.2024 12:27:20: Scéna načtena
-31.12.2024 12:27:20: Objekty smazány
-31.12.2024 12:27:20: Lokace a objekty načteny
-31.12.2024 12:27:20: Průchody načteny
+02.01.2025 15:33:52: Scéna načtena
+02.01.2025 15:33:52: Objekty smazány
+02.01.2025 15:33:52: Lokace a objekty načteny
+02.01.2025 15:33:52: Průchody načteny

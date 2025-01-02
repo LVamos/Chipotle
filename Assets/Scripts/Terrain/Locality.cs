@@ -28,6 +28,22 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Locality : MapElement
 	{
+		private void Update()
+		{
+			if (Name.Indexed != "dvorek s1")
+				return;
+
+			foreach (PassageLoopModel model in _passageLoops.Values)
+			{
+				if (model.AudioSource.spatialBlend > 0)
+					return;
+			}
+		}
+		private bool PlayerInHere()
+		{
+			return Area.Value.Intersects(World.Player.Area.Value);
+		}
+
 		public AudioSource GetAmbientSource()
 		{
 			return _ambientSource;
@@ -591,13 +607,6 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Indicates if the player is in the locality.
-		/// </summary>
-		/// <returns>True if the player is in the locality.</returns>
-		[ProtoIgnore]
-		private bool _playerInHere;
-
-		/// <summary>
 		/// Immediately removes a game object from list of present objects.
 		/// </summary>
 		/// <param name="o"></param>
@@ -680,7 +689,6 @@ namespace Game.Terrain
 		private void OnGameReloaded()
 		{
 			_passageLoops = new();
-			_playerInHere = IsItHere(World.Player);
 			UpdateLoop();
 		}
 
@@ -690,16 +698,14 @@ namespace Game.Terrain
 		/// <param name="message">The message</param>
 		private void OnCharacterCameToLocality(CharacterCameToLocality message)
 		{
-			if (message.CurrentLocality != this)
-				return;
-
 			Register(message.Character);
-			if (message.Character != World.Player)
-				return;
 
-			Sounds.SetRoomParameters(this);
-			_playerInHere = true;
-			_playersPreviousLocality = message.PreviousLocality;
+			if (this == message.CurrentLocality && message.Character == World.Player)
+			{
+				Sounds.SetRoomParameters(this);
+				_playersPreviousLocality = message.PreviousLocality;
+			}
+
 			UpdateLoop();
 		}
 
@@ -733,10 +739,6 @@ namespace Game.Terrain
 
 			Unregister(message.Sender as Character);
 
-			if (message.Character != World.Player)
-				return;
-
-			_playerInHere = false;
 			UpdateLoop();
 		}
 
@@ -752,11 +754,10 @@ namespace Game.Terrain
 		private void UpdateLoop()
 		{
 			StopInaudibleSounds();
-
 			if (string.IsNullOrEmpty(AmbientSound))
 				return;
 
-			if (_playerInHere)
+			if (PlayerInHere())
 			{
 				if (_playersPreviousLocality != null
 					&& string.Equals(_playersPreviousLocality.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase))
@@ -767,12 +768,10 @@ namespace Game.Terrain
 				return;
 			}
 
-			Locality playersLocality = World.Player.Locality;
-			if (playersLocality != this
-				&& string.Equals(playersLocality.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
+			if (string.Equals(World.Player.Locality.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
 				return;
 
-			if (IsAccessible(playersLocality))
+			if (IsAccessible(World.Player.Locality))
 				PlayAmbientAccessible();
 			else if (PlayerInSoundRadius)
 				PlayAmbientInaccessible();
@@ -812,6 +811,7 @@ namespace Game.Terrain
 			Stop(ref _ambientSource);
 			foreach (PassageLoopModel loop in _passageLoops.Values)
 				Stop(ref loop.AudioSource);
+			_passageLoops = new();
 
 			void Stop(ref AudioSource source)
 			{
@@ -877,12 +877,12 @@ namespace Game.Terrain
 				closestLoop = loops.First(loop => loop.Passage == closestPassage);
 				loops.Remove(closestLoop);
 
-				PlayPassageLoop(closestLoop, _defaultVolume, _ambientSource);
+				PlayAmbientFromPassage(closestLoop, _defaultVolume, _ambientSource);
 			}
 
 			// Start playback in The remaining exits.
 			foreach (PreparedPassageLoopModel loop in loops)
-				PlayPassageLoop(loop, _defaultVolume);
+				PlayAmbientFromPassage(loop, _defaultVolume);
 
 			_soundMode = SoundMode.InAccessibleLocality;
 		}
@@ -929,19 +929,12 @@ namespace Game.Terrain
 			SoundMode oldMode = _soundMode;
 			_soundMode = SoundMode.InLocality;
 
-			if (oldMode == SoundMode.InInaccessibleLocality)
-			{
-				_ambientSource.spatialBlend = 0;
-				return;
-			}
-
-			if (_ambientSource == null || !_ambientSource.isPlaying)
+			if ((_ambientSource == null || !_ambientSource.isPlaying) && _passageLoops.IsNullOrEmpty())
 			{
 				_ambientSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true);
 				return;
 			}
 
-			return;
 			/*
 			 * Switching from InInaccessibleLocality mode
 			 * Find a passage sound that is closest to the player, 
@@ -964,19 +957,20 @@ namespace Game.Terrain
 			return passageLoop;
 		}
 
-		private void PlayPassageLoop(PreparedPassageLoopModel loop, float volume)
+		private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume)
 		{
 			PassageLoopModel model = new()
 			{
-				AudioSource = Sounds.Play(AmbientSound, loop.Position, _defaultVolume, true, true)
+				AudioSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true)
 			};
+			model.AudioSource.transform.position = loop.Position;
 			_passageLoops[loop.Passage] = model;
 			ApplyLowPass(loop, model);
 			model.AudioSource.volume = 0;
 			Sounds.SlideVolume(model.AudioSource, .5f, _defaultVolume);
 		}
 
-		private void PlayPassageLoop(PreparedPassageLoopModel loop, float volume, AudioSource stereoAmbientSound)
+		private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume, AudioSource stereoAmbientSound)
 		{
 			stereoAmbientSound.transform.position = loop.Position;
 			PassageLoopModel model = new()

@@ -29,11 +29,11 @@ namespace Game.Messaging.Events.Movement
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		/// <param name="entity">The NPC that entered the locality</param>
+		/// <param name="character">The NPC that entered the locality</param>
 		/// <param name="currentLocality">The concerning locality</param>
-		public CharacterCameToLocality(object sender, Character entity, Locality currentLocality, Locality previousLocality) : base(sender)
+		public CharacterCameToLocality(object sender, Character character, Locality currentLocality, Locality previousLocality) : base(sender)
 		{
-			Character = entity;
+			Character = character;
 			CurrentLocality = currentLocality;
 			PreviousLocality = previousLocality;
 		}
