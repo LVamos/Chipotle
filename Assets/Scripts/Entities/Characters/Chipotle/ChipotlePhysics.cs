@@ -243,8 +243,10 @@ namespace Game.Entities.Characters.Chipotle
 		public override void Activate()
 		{
 			base.Activate();
-			_orientation = new(0, 1);
-			_orientation.Chipotle = true;
+			_orientation = new(0, 1)
+			{
+				Chipotle = true
+			};
 			OrientationChanged message = new(this, _orientation, _orientation, TurnType.None, false, true);
 			InnerMessage(message);
 			JumpTo(StartPosition.Value, true);
@@ -326,7 +328,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void ApplyItemToTarget(Item itemToUse, Entity target)
 		{
 			Vector2 manipulationPoint = FindManipulationPoint(target);
-			var message = new ObjectsUsed(Owner, manipulationPoint, itemToUse, target);
+			ObjectsUsed message = new(Owner, manipulationPoint, itemToUse, target);
 			target.TakeMessage(message);
 		}
 
@@ -361,7 +363,6 @@ namespace Game.Entities.Characters.Chipotle
 			MenuParametersDTO parameters = new(descriptions, "Okolní postavy", " ", 0, false);
 			int option = WindowHandler.Menu(parameters);
 
-
 			if (option == -1)
 				return;
 
@@ -391,7 +392,7 @@ namespace Game.Entities.Characters.Chipotle
 				descriptions.Add($"{name} {distanceDescription} {angleDescription} ");
 			}
 
-			var result = new NavigableCharactersModel(descriptions.ToArray(), characters.ToArray());
+			NavigableCharactersModel result = new(descriptions.ToArray(), characters.ToArray());
 			return result;
 		}
 
@@ -416,7 +417,7 @@ namespace Game.Entities.Characters.Chipotle
 				 select item)
 				.ToList();
 
-			var newMessage = new selectInventoryAction(Owner, items);
+			selectInventoryAction newMessage = new(Owner, items);
 			WindowHandler.ActiveWindow.TakeMessage(newMessage);
 		}
 
@@ -437,12 +438,12 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new PickUpObjectResult(this));
 			else if (items.Result == PickableItemsModel.ResultType.Unpickable)
 			{
-				var newMessage = new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.Unpickable);
+				PickUpObjectResult newMessage = new(this, null, PickUpObjectResult.ResultType.Unpickable);
 				InnerMessage(newMessage);
 			}
 			else if (items.Result == PickableItemsModel.ResultType.Unreachable)
 			{
-				var newMessage = new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.Unreachable);
+				PickUpObjectResult newMessage = new(this, null, PickUpObjectResult.ResultType.Unreachable);
 				InnerMessage(newMessage);
 			}
 
@@ -463,7 +464,8 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.Unpickable));
 			else if (_inventory.Count >= _inventoryLimit)
 				InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.FullInventory));
-			else item.TakeMessage(new PickUpObject(Owner, item));
+			else
+				item.TakeMessage(new PickUpObject(Owner, item));
 		}
 
 		/// <summary>
@@ -471,7 +473,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnCreatePredefinedSave(CreatePredefinedSave message)
-			=> World.CreatePredefinedSave();
+		{
+			World.CreatePredefinedSave();
+		}
 
 		/// <summary>
 		/// Handles the LoadPredefinedSave message.
@@ -550,7 +554,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnStopNavigation(StopNavigation message)
-			=> StopNavigation();
+		{
+			StopNavigation();
+		}
 
 		/// <summary>
 		/// Processes the ListNavigableObjects message.
@@ -681,7 +687,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message</param>
 		protected void OnSayExits(SayExits message)
-			=> SayExits();
+		{
+			SayExits();
+		}
 
 		/// <summary>
 		/// Announces the nearest exits from the locality in which the Chipotle NPC is located.
@@ -697,7 +705,8 @@ namespace Game.Entities.Characters.Chipotle
 			Passage occupiedPassage = World.GetPassage(_area.Value.Center);
 			if (occupiedPassage != null)
 				InnerMessage(new SayExitsResult(this, occupiedPassage));
-			else InnerMessage(new SayExitsResult(this, GetNavigableExits().descriptions));
+			else
+				InnerMessage(new SayExitsResult(this, GetNavigableExits().descriptions));
 		}
 
 		/// <summary>
@@ -718,15 +727,11 @@ namespace Game.Entities.Characters.Chipotle
 			// Compose output
 			if (roundedDistance == .5f)
 				return " půl metru ";
-			if (roundedDistance == 1)
-				return " metr ";
-			if (centimeters == 0 && roundedDistance >= 2 && roundedDistance <= 4)
-				return $" {meters} metry ";
-			if (roundedDistance == 1.5f)
-				return " metr a půl ";
-			if (centimeters == .5f)
-				return $" {meters} a půl metrů ";
-			return $" {meters} metrů ";
+			return roundedDistance == 1
+				? " metr "
+				: centimeters == 0 && roundedDistance >= 2 && roundedDistance <= 4
+				? $" {meters} metry "
+				: roundedDistance == 1.5f ? " metr a půl " : centimeters == .5f ? $" {meters} a půl metrů " : $" {meters} metrů ";
 		}
 
 		/// <summary>
@@ -784,7 +789,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <returns>True if Tuttle and Chipotle NPCs are in the same locality</returns>
 		private bool IsTuttleNearBy()
-			=> Owner.SameLocality(Tuttle);
+		{
+			return Owner.SameLocality(Tuttle);
+		}
 
 		/// <summary>
 		/// Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdoivá cesta w1)
@@ -814,7 +821,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// office (kancelář v1) locality.
 		/// </summary>
 		private void JumpToMariottisOffice()
-			=> JumpTo(2018, 1123, true);
+		{
+			JumpTo(2018, 1123, true);
+		}
 
 		/// <summary>
 		/// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) locality to the
@@ -831,7 +840,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// vanilla crunch company (garáž v1) locality.
 		/// </summary>
 		private void JumpToVanillaCrunchGarage()
-			=> JumpTo(2006, 1166, true);
+		{
+			JumpTo(2006, 1166, true);
+		}
 
 		/// <summary>
 		/// Stores indexes of regions visited by the NPC.
@@ -945,7 +956,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (door != null)
 			{
 				Vector2 contactPoint = door.Area.Value.GetClosestPoint(_area.Value.Center);
-				var doorHitMessage = new DoorHit(Owner, door, contactPoint);
+				DoorHit doorHitMessage = new(Owner, door, contactPoint);
 				door.TakeMessage(doorHitMessage);
 				InnerMessage(doorHitMessage);
 				return true;
@@ -965,7 +976,7 @@ namespace Game.Entities.Characters.Chipotle
 					.First();
 
 				Vector2 contactPoint = GetContactPoint(closestElement);
-				var collisionMessage = new ObjectsCollided(Owner, closestElement, contactPoint);
+				ObjectsCollided collisionMessage = new(Owner, closestElement, contactPoint);
 				closestElement.TakeMessage(collisionMessage);
 				InnerMessage(collisionMessage);
 			}
@@ -976,7 +987,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void HandleTerrainCollisions(List<object> elements)
 		{
-			var terrainPoints = elements
+			IEnumerable<Vector2> terrainPoints = elements
 				.OfType<ValueTuple<Vector2, Tile>>()
 				.Select(t => t.Item1);
 
@@ -985,7 +996,9 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		private Vector2 GetContactPoint(MapElement element)
-			=> element.Area.Value.GetClosestPoint(_area.Value.Center);
+		{
+			return element.Area.Value.GetClosestPoint(_area.Value.Center);
+		}
 
 		/// <summary>
 		/// Announces each object in specified radius.
@@ -1035,8 +1048,6 @@ namespace Game.Entities.Characters.Chipotle
 			Locality.TakeMessage(message, true);
 		}
 
-
-
 		/// <summary>
 		/// Returns information about all navigable objects from current locality in the specified radius around the NPC.
 		/// </summary>
@@ -1056,7 +1067,7 @@ namespace Game.Entities.Characters.Chipotle
 				descriptions.Add($"{name} {distanceDescription} {angleDescription}");
 			}
 
-			var result = new NavigableItemsModel(descriptions.ToArray(), items.ToArray());
+			NavigableItemsModel result = new(descriptions.ToArray(), items.ToArray());
 			return result;
 		}
 
@@ -1065,15 +1076,18 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnSayCharacters(SayCharacters message)
-			=> SayCharacters();
-
+		{
+			SayCharacters();
+		}
 
 		/// <summary>
 		/// Processes the SayNearestObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnSayObjects(SayObjects message)
-			=> SayObjects();
+		{
+			SayObjects();
+		}
 
 		/// <summary>
 		/// Announces the nearest characters around the Chipotle 
@@ -1091,7 +1105,6 @@ namespace Game.Entities.Characters.Chipotle
 			InnerMessage(new SayCharactersResult(this, characters.Descriptions));
 		}
 
-
 		/// <summary>
 		/// Announces the nearest objects around the Chipotle 
 		/// </summary>
@@ -1108,14 +1121,18 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnSayTerrain(SayTerrain message)
-			=> Tolk.Speak(World.Map[_area.Value.UpperLeftCorner].Terrain.GetDescription(), true);
+		{
+			Tolk.Speak(World.Map[_area.Value.UpperLeftCorner].Terrain.GetDescription(), true);
+		}
 
 		/// <summary>
 		/// Processes the SayVisitedLocality message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnSayVisitedLocality(SayVisitedRegion message)
-			=> InnerMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
+		{
+			InnerMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
+		}
 
 		/// <summary>
 		/// Processes the MakeStep message.
@@ -1137,7 +1154,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnStopWalk(StopWalk message)
-			=> StopWalk();
+		{
+			StopWalk();
+		}
 
 		/// <summary>
 		/// Interrupts walk of the Chipotle NPC.
@@ -1159,7 +1178,6 @@ namespace Game.Entities.Characters.Chipotle
 			_orientation.Rotate(message.Degrees);
 			InnerMessage(new OrientationChanged(this, source, _orientation, message.Direction));
 			Locality.TakeMessage(new OrientationChanged(Owner, source, _orientation, message.Direction));
-			_speed += Math.Abs(message.Degrees) * World.DeltaTime;
 		}
 
 		/// <summary>
@@ -1212,7 +1230,8 @@ namespace Game.Entities.Characters.Chipotle
 				MapElement closest = World.GetClosestElement(itemsOrCharacters.Objects, Owner);
 				if (World.IsCloser(Owner, door, closest))
 					UseElement(door);
-				else UseElement(closest);
+				else
+					UseElement(closest);
 			}
 		}
 		/// <summary>
@@ -1227,7 +1246,8 @@ namespace Game.Entities.Characters.Chipotle
 				UseElement(a);
 			else if (World.IsCloser(Owner, b, a))
 				UseElement(b);
-			else UseElement(a);
+			else
+				UseElement(a);
 		}
 
 		/// <summary>
@@ -1240,7 +1260,8 @@ namespace Game.Entities.Characters.Chipotle
 
 			if (element is Door)
 				element.TakeMessage(new UseDoor(Owner, point.Value));
-			else element.TakeMessage(new ObjectsUsed(Owner, point.Value, element as Item));
+			else
+				element.TakeMessage(new ObjectsUsed(Owner, point.Value, element as Item));
 		}
 
 		/// <summary>
@@ -1257,13 +1278,18 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Plays the game finals.
 		/// </summary>
-		private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
+		private void PlayFinalScene()
+		{
+			World.PlayCutscene(Owner, "cs35");
+		}
 
 		/// <summary>
 		/// Terminates the game and runs the main menu.
 		/// </summary>
 		private void QuitGame()
-			=> World.QuitGame();
+		{
+			World.QuitGame();
+		}
 
 		/// <summary>
 		/// He puts the NPC on its feet if it is sitting and plays the appropriate sound.
@@ -1293,7 +1319,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void WatchCar()
 		{
-			if (_carMovement == null) return;
+			if (_carMovement == null)
+				return;
 
 			// Jump to target locality
 			Vector2? target = World.GetRandomWalkablePoint(_carMovement.Target, 1, 2);
@@ -1375,7 +1402,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected override int GetSpeed()
 		{
 			float coefficient = 1;
-			if (_startWalkMessage.Direction == TurnType.SharplyLeft || _startWalkMessage.Direction == TurnType.SharplyRight)
+			if (_startWalkMessage.Direction is TurnType.SharplyLeft or TurnType.SharplyRight)
 				coefficient = _sideSpeed;
 			else if (_startWalkMessage.Direction == TurnType.Around)
 				coefficient = _backwardSpeed;
