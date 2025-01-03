@@ -233,26 +233,26 @@ namespace Game.Entities.Characters
 				RecordLocality(message.SourceLocality);
 
 			// Inform all adjecting localities
-			List<Locality> localities = new();
+			HashSet<Locality> localities = new();
 			if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
 			{
 				localities.Add(message.SourceLocality);
-				localities.AddRange(message.SourceLocality.Neighbours);
+				HashSet<Locality> temp = new(message.SourceLocality.Neighbours);
+				localities.UnionWith(temp);
 			}
 
 			if (message.TargetLocality != null)
 			{
 				localities.Add(message.TargetLocality);
-				localities.AddRange(message.TargetLocality.Neighbours);
+				HashSet<Locality> temp = new(message.TargetLocality.Neighbours);
+				localities.UnionWith(temp);
 			}
-
-			IEnumerable<Locality> targetLocalities = localities.Distinct();
 
 			CharacterMoved moved = new(this, message.SourcePosition, message.TargetPosition, message.SourceLocality, message.TargetLocality);
 			CharacterLeftLocality left = new(this, this, message.SourceLocality, message.TargetLocality);
 			CharacterCameToLocality came = new(this, this, message.TargetLocality, message.SourceLocality);
 
-			foreach (Locality l in targetLocalities)
+			foreach (Locality l in localities)
 			{
 				l.TakeMessage(moved);
 

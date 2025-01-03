@@ -258,8 +258,6 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be handled</param>
 		protected override void HandleMessage(Message message)
 		{
-			base.HandleMessage(message);
-
 			switch (message)
 			{
 				case ApplyItemToTarget m:
@@ -725,9 +723,9 @@ namespace Game.Entities.Characters.Chipotle
 			float centimeters = roundedDistance - meters;
 
 			// Compose output
-			if (roundedDistance == .5f)
-				return " půl metru ";
-			return roundedDistance == 1
+			return roundedDistance == .5f
+				? " půl metru "
+				: roundedDistance == 1
 				? " metr "
 				: centimeters == 0 && roundedDistance >= 2 && roundedDistance <= 4
 				? $" {meters} metry "

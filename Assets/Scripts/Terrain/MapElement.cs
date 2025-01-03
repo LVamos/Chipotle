@@ -30,16 +30,16 @@ namespace Game.Terrain
 	public abstract class MapElement : MessagingObject
 	{
 
-
 		[ProtoIgnore]
 		protected AudioSource _navigationAudio;
-
 
 		/// <summary>
 		/// Returns pooint that belongs to this object and is tho most close to tthe player.
 		/// </summary>
 		protected Vector2 GetClosestPointToPlayer()
-			=> _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
+		{
+			return _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
+		}
 
 		/// <summary>
 		/// Dimensions of the map element.
@@ -130,19 +130,26 @@ namespace Game.Terrain
 		/// </summary>
 		/// <returns>Public name of the element</returns>
 		public override string ToString()
-			=> Name.Friendly;
+		{
+			return Name.Friendly;
+		}
 
 		/// <summary>
 		/// Destroys the element.
 		/// </summary>
-		protected virtual void DestroyObject() => _messagingEnabled = false;
+		protected virtual void DestroyObject()
+		{
+			_messagingEnabled = false;
+		}
 
 		/// <summary>
 		/// Processes the Destroy message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnDestroyObject(DestroyObject message)
-			=> DestroyObject();
+		{
+			DestroyObject();
+		}
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -178,7 +185,7 @@ namespace Game.Terrain
 		protected virtual void ReportPosition(bool loop = false)
 		{
 			Vector2 position2d = GetClosestPointToPlayer();
-			Vector3 position3d = new Vector3(position2d.x, 2, position2d.y);
+			Vector3 position3d = new(position2d.x, 2, position2d.y);
 			_navigationAudio = Sounds.Play(_sounds["navigation"], position3d, _defaultVolume, loop);
 		}
 
@@ -196,7 +203,9 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected void OnStartNavigation(StartNavigation message)
-			=> StartNavigation();
+		{
+			StartNavigation();
+		}
 
 		protected bool ShouldNavigationContinue()
 		{
@@ -231,7 +240,9 @@ namespace Game.Terrain
 		/// </summary>
 		/// <returns>Distance in meters</returns>
 		protected float GetDistanceFromPlayer()
-			=> World.GetDistance(this, World.Player);
+		{
+			return World.GetDistance(this, World.Player);
+		}
 
 		/// <summary>
 		/// Stops the sound navigation.
@@ -268,7 +279,7 @@ namespace Game.Terrain
              * To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player. 
              */
 			Vector2 position2d = GetClosestPointToPlayer();
-			Vector3 position3d = new Vector3(position2d.x, 2, position2d.y);
+			Vector3 position3d = new(position2d.x, 2, position2d.y);
 			_navigationAudio.transform.position = position3d;
 
 			// Find opposite point
@@ -279,7 +290,7 @@ namespace Game.Terrain
 
 			// Detect potentional acoustic obstacles and set up attenuate parameters
 			ObstacleType obstacle = World.DetectAcousticObstacles(new((Vector2)opposite));
-			bool muffled = obstacle == ObstacleType.Wall || obstacle == ObstacleType.Object;
+			bool muffled = obstacle is ObstacleType.Wall or ObstacleType.Object;
 
 			if (obstacle == ObstacleType.Wall)
 			{
@@ -301,6 +312,16 @@ namespace Game.Terrain
 			_muffled = muffled;
 		}
 
+		public override bool Equals(object obj)
+		{
+			return obj is MapElement element &&
+				   base.Equals(obj) &&
+				   Name.Indexed == element.Name.Indexed;
+		}
 
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(base.GetHashCode(), Name.Indexed);
+		}
 	}
 }

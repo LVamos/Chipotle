@@ -38,7 +38,6 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected float _objectManipulationRadius = .5f;
 
-
 		/// <summary>
 		/// Represents the maximum distance in meters from which the NPC can manipulate the door.
 		/// </summary>
@@ -59,7 +58,10 @@ namespace Game.Entities.Characters.Components
 		/// Checks if there's an character standing before the character and returns it.
 		/// </summary>
 		/// <returns>The character standing before the character or null</returns>
-		protected Character CharacterBefore() => World.GetCharacter(GetNextTile(1).position);
+		protected Character CharacterBefore()
+		{
+			return World.GetCharacter(GetNextTile(1).position);
+		}
 
 		/// <summary>
 		/// Finds items and characters standing before the character.
@@ -70,10 +72,9 @@ namespace Game.Entities.Characters.Components
 		{
 			Vector2 direction = GetStepDirection();
 			CollisionsModel collisions = World.DetectCollisionsOnTrack(Owner, direction, radius);
-			if (collisions == null || collisions.Obstacles == null)
-				return null;
-
-			return collisions.Obstacles
+			return collisions == null || collisions.Obstacles == null
+				? null
+				: collisions.Obstacles
 				.OfType<Entity>()
 				.Select(o => o as Entity);
 		}
@@ -133,9 +134,7 @@ namespace Game.Entities.Characters.Components
 				.Where(o => !reachable.Contains(o))
 				.Where(o => o.Usable);
 
-			if (usableButFar.Any())
-				return new(null, UsableObjectsModel.ResultType.Far);
-			return new();
+			return usableButFar.Any() ? new(null, UsableObjectsModel.ResultType.Far) : new();
 		}
 
 		/// <summary>
@@ -156,16 +155,15 @@ namespace Game.Entities.Characters.Components
 			if (pickableItems.IsNullOrEmpty())
 			{
 				// If there are only decorative items in front of the character, we return the Unpickable result.
-				if (items.Any(i => i.Decorative))
-					return new(null, PickableItemsModel.ResultType.Unpickable);
-				return new(null, PickableItemsModel.ResultType.Unpickable);
+				return items.Any(i => i.Decorative)
+					? new(null, PickableItemsModel.ResultType.Unpickable)
+					: new(null, PickableItemsModel.ResultType.Unpickable);
 			}
 
 			// Check if there are any items that are reachable from distance of _objectManipulationRadius.
-			if (!pickableItems.Any(i => World.IsInRange(i, Owner, _objectManipulationRadius)))
-				return new(null, PickableItemsModel.ResultType.Unreachable);
-
-			return new(pickableItems, PickableItemsModel.ResultType.Success);
+			return !pickableItems.Any(i => World.IsInRange(i, Owner, _objectManipulationRadius))
+				? new(null, PickableItemsModel.ResultType.Unreachable)
+				: new(pickableItems, PickableItemsModel.ResultType.Success);
 		}
 
 		/// <summary>
@@ -187,7 +185,9 @@ namespace Game.Entities.Characters.Components
 		/// <returns>A reference to an tile that lays in the specified distance and direction</returns>
 		/// <see cref="Orientation"/>
 		protected virtual Vector2 GetNextTile()
-			=> _path.Dequeue();
+		{
+			return _path.Dequeue();
+		}
 
 		/// <summary>
 		/// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
@@ -196,7 +196,9 @@ namespace Game.Entities.Characters.Components
 		/// <returns>A reference to an tile that lays in the specified distance and direction</returns>
 		/// <see cref="Orientation"/>
 		protected (Vector2 position, Tile tile) GetNextTile(int step)
-			=> GetNextTile(Orientation, step);
+		{
+			return GetNextTile(Orientation, step);
+		}
 
 		/// <summary>
 		/// Returns a tile at the specified distance and direction.
@@ -227,7 +229,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="obstacle">Nearest point of the obstacle</param>
 		protected virtual bool DetectCollisions(Vector2 obstacle)
-			=> true;
+		{
+			return true;
+		}
 
 		/// <summary>
 		/// Performs one step in direction specified in the _startWalkMessage field.
@@ -282,24 +286,25 @@ namespace Game.Entities.Characters.Components
 			if (distance < 10)
 				return 1;
 
-			if (distance < 30)
-				return .5f;
-
-			return .2f;
+			return distance < 30 ? .5f : .2f;
 		}
 
 		/// <summary>
 		/// Computes length of the next step of the NPC.
 		/// </summary>
 		protected virtual int GetSpeed()
-			=> (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count));
+		{
+			return (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count));
+		}
 
 		/// <summary>
 		/// Returns speed of the terrain on which the NPC stands.
 		/// </summary>
 		/// <returns></returns>
 		protected int GetTerrainSpeed()
-			=> _speeds[CurrentTile.tile.Terrain];
+		{
+			return _speeds[CurrentTile.tile.Terrain];
+		}
 
 		/// <summary>
 		/// Contains walk speed settings for particullar terrain types.
@@ -334,13 +339,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Stores reference to a locality in which the NPC is currently located.
 		/// </summary>
-		public Locality Locality
-		{
-			get
-			{
-				return _area == null ? null : Owner.Locality;
-			}
-		}
+		public Locality Locality => _area == null ? null : Owner.Locality;
 
 		/// <summary>
 		/// Current orientation of the NPC
@@ -410,7 +409,9 @@ namespace Game.Entities.Characters.Components
 		/// <param name="orientation"></param>
 		/// <returns></returns>
 		protected Angle GetAngle(Vector2 point)
-			=> World.GetAngle(point, _area.Value.Center, _orientation);
+		{
+			return World.GetAngle(point, _area.Value.Center, _orientation);
+		}
 
 		/// <summary>
 		/// Immediately changes position of the NPC.
@@ -419,7 +420,9 @@ namespace Game.Entities.Characters.Components
 		/// <param name="y">Y coordinate of the target position</param>
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
 		protected void JumpTo(float x, float y, bool silently = false)
-			=> JumpTo(new Vector2(x, y), silently);
+		{
+			JumpTo(new Vector2(x, y), silently);
+		}
 
 		/// <summary>
 		/// Moves the character in the specified direction by distance defined in <see cref="_stepLength"/>.
@@ -449,7 +452,9 @@ namespace Game.Entities.Characters.Components
 		/// <param name="target">Coordinates of the target position</param>
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
 		protected virtual void JumpTo(Vector2 target, bool silently = false)
-			=> JumpTo(new Rectangle(target, Width, Height), silently);
+		{
+			JumpTo(new Rectangle(target, Width, Height), silently);
+		}
 
 		/// <summary>
 		/// Immediately changes position of the NPC.
@@ -481,7 +486,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnSetPosition(SetPosition message)
-			=> JumpTo(message.Target, message.Silently);
+		{
+			JumpTo(message.Target, message.Silently);
+		}
 
 		/// <summary>
 		/// Calculates the angle between the character and the target MapElement.
@@ -523,16 +530,13 @@ namespace Game.Entities.Characters.Components
 		/// <returns>The rounded number.</returns>
 		protected int RoundToNearest90(float n)
 		{
-			if (n >= 315 || n < 45)
+			if (n is >= 315 or < 45)
 				return 0;
 
 			if (n < 135)
 				return 90;
 
-			if (n < 225)
-				return 180;
-
-			return 270;
+			return n < 225 ? 180 : 270;
 		}
 
 		/// <summary>

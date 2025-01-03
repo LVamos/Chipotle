@@ -28,7 +28,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="message">The message to be sent</param>
 		protected void InnerMessage(Message message)
-			=> Owner.TakeMessage(message);
+		{
+			Owner.TakeMessage(message);
+		}
 
 		/// <summary>
 		/// Indexed name of the owner fo this component.
@@ -87,19 +89,22 @@ namespace Game.Entities.Characters.Components
 			}
 		}
 
-
 		/// <summary>
 		/// Processes the CutsceneBegan message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnCutsceneBegan(CutsceneBegan message)
-			=> _cutsceneInProgress = true;
+		{
+			_cutsceneInProgress = true;
+		}
 
 		/// <summary>
 		/// Processes the CutsceneEnded message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnCutsceneEnded(CutsceneEnded message)
-			=> _cutsceneInProgress = false;
+		{
+			_cutsceneInProgress = false;
+		}
 	}
 }

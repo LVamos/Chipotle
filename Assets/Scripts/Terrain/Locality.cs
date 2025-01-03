@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.Models;
 
+using DavyKager;
+
 using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
@@ -499,6 +501,8 @@ namespace Game.Terrain
 		/// <param name="message">The message to be received</param>
 		public override void TakeMessage(Message message)
 		{
+			if (Name.Indexed == "ulice s1" && message is CharacterCameToLocality m && m.Character.Name.Indexed.ToLower().Contains("chipotle"))
+				System.Diagnostics.Debugger.Break();
 			base.TakeMessage(message);
 
 			if (message is ChipotlesCarMoved)
@@ -704,9 +708,8 @@ namespace Game.Terrain
 			{
 				Sounds.SetRoomParameters(this);
 				_playersPreviousLocality = message.PreviousLocality;
+				UpdateLoop();
 			}
-
-			UpdateLoop();
 		}
 
 		/// <summary>
@@ -843,6 +846,7 @@ namespace Game.Terrain
 		/// <param name="accessible">Determines if the player is in an neighbour accessible locality.</param>
 		protected void PlayAmbientInaccessible()
 		{
+			return;
 			Vector3 position = new(_area.Value.Center.x, 2, _area.Value.Center.y);
 
 			if (_soundMode == SoundMode.InInaccessibleLocality)
@@ -928,7 +932,8 @@ namespace Game.Terrain
 		{
 			SoundMode oldMode = _soundMode;
 			_soundMode = SoundMode.InLocality;
-
+			if (Name.Indexed == "ulice s1")
+				Tolk.Speak("");
 			if ((_ambientSource == null || !_ambientSource.isPlaying) && _passageLoops.IsNullOrEmpty())
 			{
 				_ambientSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true);
@@ -952,7 +957,10 @@ namespace Game.Terrain
 		private PassageLoopModel TakeClosestPassageLoop()
 		{
 			Passage closest = World.GetClosestElement(Passages, World.Player) as Passage;
-			PassageLoopModel passageLoop = _passageLoops[closest];
+			PassageLoopModel passageLoop = null;
+			if (!_passageLoops.TryGetValue(closest, out passageLoop))
+				return null;
+
 			_passageLoops.Remove(closest);
 			return passageLoop;
 		}
