@@ -21,7 +21,7 @@ namespace Assets.Scripts.Audio
 		public AudioSource DisableLowPass(AudioSource source)
 		{
 			_muffledPool.Remove(source);
-			AudioLowPassFilter lowPass = GetComponent<AudioLowPassFilter>()
+			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
 				?? throw new LowPassFilterNotFoundException(source);
 			Destroy(lowPass);
 			_pool.Add(source);

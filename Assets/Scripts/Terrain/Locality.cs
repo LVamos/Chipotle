@@ -1,7 +1,5 @@
 ﻿using Assets.Scripts.Models;
 
-using DavyKager;
-
 using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
@@ -32,9 +30,6 @@ namespace Game.Terrain
 	{
 		private void Update()
 		{
-			if (Name.Indexed != "dvorek s1")
-				return;
-
 			foreach (PassageLoopModel model in _passageLoops.Values)
 			{
 				if (model.AudioSource.spatialBlend > 0)
@@ -43,7 +38,8 @@ namespace Game.Terrain
 		}
 		private bool PlayerInHere()
 		{
-			return Area.Value.Intersects(World.Player.Area.Value);
+			Rectangle player = World.Player.Area.Value;
+			return Area.Value.Contains(player);
 		}
 
 		public AudioSource GetAmbientSource()
@@ -127,11 +123,14 @@ namespace Game.Terrain
 				Vector2? point = passage.Area.Value.FindAlignedPoint(player)
 				?? passage.Area.Value.GetClosestPoint(player);
 				source.transform.position = point.Value.ToVector3(2);
-
-				// Update spatial blend
-				int distance = (int)GetDistanceFromPlayer();
-				source.spatialBlend = distance > 10 ? 1 : distance * .1f;
+				UpdateSpatialBlend(source);
 			}
+		}
+
+		private void UpdateSpatialBlend(AudioSource source)
+		{
+			int distance = (int)GetDistanceFromPlayer();
+			source.spatialBlend = distance > 10 ? 1 : distance * .1f;
 		}
 
 		/// <summary>
@@ -501,8 +500,6 @@ namespace Game.Terrain
 		/// <param name="message">The message to be received</param>
 		public override void TakeMessage(Message message)
 		{
-			if (Name.Indexed == "ulice s1" && message is CharacterCameToLocality m && m.Character.Name.Indexed.ToLower().Contains("chipotle"))
-				System.Diagnostics.Debugger.Break();
 			base.TakeMessage(message);
 
 			if (message is ChipotlesCarMoved)
@@ -607,7 +604,14 @@ namespace Game.Terrain
 		/// <param name="message">Source of the message</param>
 		private void OnDoorManipulated(DoorManipulated message)
 		{
-			UpdateLoop();
+			if (!_passageLoops.ContainsKey(message.Sender))
+				return;
+
+			List<PreparedPassageLoopModel> preparedLoops = PreparePassageLoops();
+			PreparedPassageLoopModel preparedLoop = preparedLoops.First(l => l.Passage == message.Sender);
+
+			PassageLoopModel loop = _passageLoops[message.Sender];
+			ApplyLowPass(preparedLoop, loop);
 		}
 
 		/// <summary>
@@ -708,8 +712,8 @@ namespace Game.Terrain
 			{
 				Sounds.SetRoomParameters(this);
 				_playersPreviousLocality = message.PreviousLocality;
-				UpdateLoop();
 			}
+			UpdateLoop();
 		}
 
 		/// <summary>
@@ -741,8 +745,6 @@ namespace Game.Terrain
 				return;
 
 			Unregister(message.Sender as Character);
-
-			UpdateLoop();
 		}
 
 		/// <summary>
@@ -770,7 +772,6 @@ namespace Game.Terrain
 				_playersPreviousLocality = null;
 				return;
 			}
-
 			if (string.Equals(World.Player.Locality.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
 				return;
 
@@ -833,6 +834,7 @@ namespace Game.Terrain
 		private Dictionary<Passage, PassageLoopModel> _passageLoops = new();
 
 		private bool _reloaded;
+		private const float _passageLoopMaxDistance = 15;
 
 		/// <summary>
 		/// The maximum distance the player is from the locality at which it makes sense to play the location audio.
@@ -846,6 +848,7 @@ namespace Game.Terrain
 		/// <param name="accessible">Determines if the player is in an neighbour accessible locality.</param>
 		protected void PlayAmbientInaccessible()
 		{
+			StopPassageLoops();
 			return;
 			Vector3 position = new(_area.Value.Center.x, 2, _area.Value.Center.y);
 
@@ -932,8 +935,6 @@ namespace Game.Terrain
 		{
 			SoundMode oldMode = _soundMode;
 			_soundMode = SoundMode.InLocality;
-			if (Name.Indexed == "ulice s1")
-				Tolk.Speak("");
 			if ((_ambientSource == null || !_ambientSource.isPlaying) && _passageLoops.IsNullOrEmpty())
 			{
 				_ambientSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true);
@@ -967,35 +968,48 @@ namespace Game.Terrain
 
 		private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume)
 		{
-			PassageLoopModel model = new()
+			PassageLoopModel newLoop = new()
 			{
 				AudioSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true)
 			};
-			model.AudioSource.transform.position = loop.Position;
-			_passageLoops[loop.Passage] = model;
-			ApplyLowPass(loop, model);
-			model.AudioSource.volume = 0;
-			Sounds.SlideVolume(model.AudioSource, .5f, _defaultVolume);
+			newLoop.AudioSource.transform.position = loop.Position;
+			newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
+
+			_passageLoops[loop.Passage] = newLoop;
+			UpdateSpatialBlend(newLoop.AudioSource);
+			ApplyLowPass(loop, newLoop);
+			newLoop.AudioSource.volume = 0;
+			Sounds.SlideVolume(newLoop.AudioSource, .5f, _defaultVolume);
 		}
 
 		private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume, AudioSource stereoAmbientSound)
 		{
 			stereoAmbientSound.transform.position = loop.Position;
-			PassageLoopModel model = new()
+			PassageLoopModel newLoop = new()
 			{
 				AudioSource = stereoAmbientSound
 			};
-			_passageLoops[loop.Passage] = model;
-			ApplyLowPass(loop, model);
+			newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
+			_passageLoops[loop.Passage] = newLoop;
+			UpdateSpatialBlend(newLoop.AudioSource);
+			ApplyLowPass(loop, newLoop);
 		}
 
-		private static void ApplyLowPass(PreparedPassageLoopModel loop, PassageLoopModel model)
+		private void ApplyLowPass(PreparedPassageLoopModel preparedLoop, PassageLoopModel loop)
 		{
-			if (loop.Passage.State is PassageState.Closed or PassageState.Locked)
+			if (preparedLoop.Passage.State is PassageState.Closed or PassageState.Locked)
 			{
-				int frequency = loop.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverDoorLowpass;
-				Sounds.SetLowPass(model.AudioSource, frequency);
-				model.Muffled = true;
+				int frequency = preparedLoop.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverDoorLowpass;
+				Sounds.SetLowPass(loop.AudioSource, frequency);
+				loop.Muffled = true;
+				return;
+			}
+
+			if (loop.Muffled)
+			{
+				Sounds.DisableLowpass(loop.AudioSource);
+				loop.AudioSource.outputAudioMixerGroup = null;
+				loop.Muffled = false;
 			}
 		}
 

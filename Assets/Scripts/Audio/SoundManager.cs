@@ -129,8 +129,9 @@ namespace Assets.Scripts.Audio
 
 		public void SetLowPass(AudioSource source, int cutOffFrequency)
 		{
-			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
-				?? _soundPool.EnableLowPass(source);
+			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
+			if (lowPass == null)
+				lowPass = _soundPool.EnableLowPass(source);
 
 			lowPass.cutoffFrequency = cutOffFrequency;
 			source.outputAudioMixerGroup = null;
