@@ -128,7 +128,6 @@ namespace Game.Terrain
 			Sounds.Play(_sounds["hit"], position, _defaultVolume);
 		}
 
-
 		/// <summary>
 		/// Closes the door if possible
 		/// </summary>
@@ -167,7 +166,8 @@ namespace Game.Terrain
 				Locality l = World.Player.Locality;
 				if (Localities.First().IsBehindDoor(l) || Localities.Last().IsBehindDoor(l)) // Can be heart from the adjecting locality
 					obstacle = ObstacleType.Wall;
-				else return; // Too far and inaudible
+				else
+					return; // Too far and inaudible
 			}
 
 			// Set attenuation parameters
@@ -175,15 +175,19 @@ namespace Game.Terrain
 
 			switch (obstacle)
 			{
-				case ObstacleType.Wall: volume = Sounds.GetOverWallVolume(_defaultVolume); break;
-				case ObstacleType.Door: volume = Sounds.GetOverDoorVolume(_defaultVolume); break;
+				case ObstacleType.Wall:
+					volume = Sounds.GetOverWallVolume(_defaultVolume);
+					break;
+				case ObstacleType.Door:
+					volume = Sounds.GetOverDoorVolume(_defaultVolume);
+					break;
 				case ObstacleType.Object:
-					volume = Sounds.OverObjectLowpass; volume = Sounds.GetOverObjectVolume(_defaultVolume); break;
+					volume = Sounds.GetOverObjectVolume(_defaultVolume); break;
 			}
 
 			// Play the sound
-			Vector3 position3d = new Vector3(point.x, 1.5f, point.y);
-			Sounds.Play(sound, point, volume);
+			Vector3 position3d = new(point.x, 1.5f, point.y);
+			Sounds.Play(sound, position3d, volume);
 		}
 
 		/// <summary>
@@ -271,7 +275,9 @@ namespace Game.Terrain
 		}
 
 		protected void Rattle(Character character, Vector2 manipulationPoint)
-							=> Play(_sounds["rattle"], character, manipulationPoint);
+		{
+			Play(_sounds["rattle"], character, manipulationPoint);
+		}
 
 		/// <summary>
 		/// Opens the door if possible.
@@ -292,6 +298,8 @@ namespace Game.Terrain
 		/// </summary>
 		/// <returns>text description of the door</returns>
 		public override string ToString()
-			=> Type == DoorType.Door ? "dveře" : "vrata";
+		{
+			return Type == DoorType.Door ? "dveře" : "vrata";
+		}
 	}
 }
