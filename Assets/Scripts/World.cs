@@ -1257,8 +1257,8 @@ namespace Game
 			TakeMessage(_cutSceneMessage);
 
 			// Stop it if cutscenes are forbidden for debugging purposes.
-			//if (!Settings.PlayCutscenes)
-			//	StopCutscene(null);
+			if (!Settings.PlayCutscenes)
+				StopCutscene(null);
 		}
 
 		/// <summary>
@@ -1369,7 +1369,7 @@ namespace Game
 			Add(CharacterFactory.CreateSweeney());
 			Add(CharacterFactory.CreateMariotti());
 
-			// start entities
+			// start characters
 			foreach (Character c in _characters.Values)
 				c.Activate();
 
