@@ -14,27 +14,91 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
+		/// <summary>
+		/// Calculates low pass filter cut off frequency.
+		/// </summary>
+		/// <param name="obstacle">Type of an obstacle blocking the sound</param>
+		/// <returns>int</returns>
+		private static int GetLowPassFrequency(ObstacleType obstacle)
+		{
+			return obstacle switch
+			{
+				ObstacleType.Wall => OverWallLowpass,
+				ObstacleType.Door => OverDoorLowpass,
+				ObstacleType.Object => OverObjectLowpass,
+				_ => 22000
+			};
+		}
+
+		/// <summary>
+		/// Calculate volume based on obstacle type.
+		/// </summary>
+		/// <param name="defaultVolume">Default volume for calculation</param>
+		/// <param name="fullVolume">Volume used when nothing blocks the sound</param>
+		/// <param name="obstacle">Type of an obstacle blocking the sound</param>
+		/// <returns>float</returns>
+		public static float GetVolumeByObstacle(ObstacleType obstacle, float defaultVolume, float fullVolume)
+		{
+			return obstacle switch
+			{
+				ObstacleType.Wall => GetOverWallVolume(defaultVolume),
+				ObstacleType.Door => GetOverDoorVolume(defaultVolume),
+				ObstacleType.Object => GetOverObjectVolume(defaultVolume),
+				_ => fullVolume
+			};
+		}
+
 		public static void SlideVolume(AudioSource sound, float duration, float targetVolume)
-			=> _soundManager.SlideVolume(sound, duration, targetVolume);
+		{
+			_soundManager.SlideVolume(sound, duration, targetVolume);
+		}
 
 		public static AudioSource DisableLowpass(AudioSource source)
-			=> _soundManager.DisableLowPass(source);
+		{
+			return _soundManager.DisableLowPass(source);
+		}
 
 		public static void SetLowPass(AudioSource source, int cutOffFrequency)
-			=> _soundManager.SetLowPass(source, cutOffFrequency);
+		{
+			_soundManager.SetLowPass(source, cutOffFrequency);
+		}
 
-		public static void SetRoomParameters(Locality locality) => _soundManager.SetRoomParameters(locality);
+		public static void SetLowPass(AudioSource source, ObstacleType obstacle)
+		{
+			_soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
+		}
+
+		public static void SetRoomParameters(Locality locality)
+		{
+			_soundManager.SetRoomParameters(locality);
+		}
+
 		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
-			=> _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration);
-		public static AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000) => _soundManager.PlayMuffled(soundName, position, volume, loop, cutOffFrequency);
+		{
+			return _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration);
+		}
+
+		public static AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000)
+		{
+			return _soundManager.PlayMuffled(soundName, position, volume, loop, cutOffFrequency);
+		}
 
 		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
-			=> _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration);
+		{
+			return _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration);
+		}
+
 		public static AudioMixerGroup MixerGroup => _soundManager.MixerGroup;
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
-		public static void AdjustMasterVolume(float duration, float targetVolume) => _soundManager.AdjustMasterVolume(duration, targetVolume);
+		public static void AdjustMasterVolume(float duration, float targetVolume)
+		{
+			_soundManager.AdjustMasterVolume(duration, targetVolume);
+		}
 
-		public static void StopAll() => _soundManager.StopAllSounds();
+		public static void StopAll()
+		{
+			_soundManager.StopAllSounds();
+		}
 
 		public static void Initialize()
 		{
@@ -48,19 +112,25 @@ namespace Game.Audio
 		/// Volume used with sound attenuation.
 		/// </summary>
 		public static float GetOverDoorVolume(float defaultVolume)
-			=> defaultVolume * .5f;
+		{
+			return defaultVolume * .5f;
+		}
 
 		/// <summary>
 		/// Volume used with sound attenuation.
 		/// </summary>
 		public static float GetOverObjectVolume(float defaultVolume)
-			=> defaultVolume * .9f;
+		{
+			return defaultVolume * .9f;
+		}
 
 		/// <summary>             /// <summary>
 		/// Volume used with sound attenuation.
 		/// </summary>
 		public static float GetOverWallVolume(float defaultVolume)
-			=> defaultVolume * .4f;
+		{
+			return defaultVolume * .4f;
+		}
 
 		public const float DefaultMasterVolume = 1;
 
@@ -73,12 +143,9 @@ namespace Game.Audio
 
 		public static AudioClip GetClip(string name, int? variant = null)
 		{
-			if (!_clips.TryGetValue(name, out ClipInfo info))
-				throw new($"Sound not found: {name}.");
-
-			if (variant != null)
-				return info[variant.Value];
-			return info.GetRandomClip();
+			return !_clips.TryGetValue(name, out ClipInfo info)
+				? throw new($"Sound not found: {name}.")
+				: variant != null ? info[variant.Value] : info.GetRandomClip();
 		}
 
 		/// <summary>
@@ -117,13 +184,15 @@ namespace Game.Audio
 			}
 		}
 
-		public static void MasterFadeOut(float duration) => AdjustMasterVolume(duration, 0);
+		public static void MasterFadeOut(float duration)
+		{
+			AdjustMasterVolume(duration, 0);
+		}
 
 		/// <summary>
 		/// All sounds used in the game
 		/// </summary>
 		private static Dictionary<string, ClipInfo> _clips = new(StringComparer.OrdinalIgnoreCase);
-
 
 	}
 }

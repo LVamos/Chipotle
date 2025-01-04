@@ -3,6 +3,7 @@
 using DavyKager;
 
 using Game.Audio;
+using Game.Entities.Characters.Components;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Events;
 using Game.Messaging.Events.Characters;
@@ -28,8 +29,13 @@ namespace Game.Entities.Characters.Chipotle
 	/// Controls the sound output of the detective Chipotle NPC
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class ChipotleSound : Components.Sound
+	public class ChipotleSound : Sound
 	{
+		private void start()
+		{
+			_announceWalls = true;
+		}
+
 		public void OnSaySize(SaySize message)
 		{
 			string text = $"{message.Area.Height} krát {message.Area.Width}";
@@ -377,7 +383,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnTerrainCollided(TerrainCollided message)
 		{
-			PlayTerrain(message.Position);
+			PlayStep(message.Position);
 		}
 
 		/// <summary>
@@ -387,10 +393,10 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnPositionChanged(PositionChanged message)
 		{
 			Vector2 center = message.TargetPosition.Center;
-			Camera.main.transform.position = new Vector3(center.x, 2, center.y);
+			Camera.main.transform.position = center.ToVector3(_footStepHeight);
 
 			if (!message.Silently)
-				PlayTerrain(message.TargetPosition.Center);
+				PlayStep(center);
 		}
 
 		/// <summary>
@@ -422,33 +428,5 @@ namespace Game.Entities.Characters.Chipotle
 		/// Stores information for dynamic listener orientation settings.
 		/// </summary>
 		private (Orientation2D current, Orientation2D final, int step, int steps) _listenerOrientation;
-		private const int _orientationSteps = 70;
-
-		/// <summary>
-		/// Plays a sound representation of a tile.
-		/// </summary>
-		/// <param name="tile">A tile to be announced</param>
-		private void PlayTerrain(Vector2 position)
-		{
-			Vector3 position3d = position.ToVector3(_footStepHeight);
-			TerrainType terrain = World.Map[position].Terrain;
-
-			if (terrain == TerrainType.Wall)
-			{
-				Sounds.Play("hitwall", position3d, _defaultVolume);
-				Tolk.Speak("zeď");
-			}
-			else
-			{
-				string sound = GetStepSoundName(terrain);
-				Sounds.Play(sound, position3d, _walkVolume);
-			}
-		}
-
-		private static string GetStepSoundName(TerrainType terrain)
-		{
-			string terrainName = Enum.GetName(terrain.GetType(), terrain);
-			return "movstep" + terrainName;
-		}
 	}
 }

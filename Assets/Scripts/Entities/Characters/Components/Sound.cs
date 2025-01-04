@@ -1,8 +1,13 @@
-﻿using Game.Entities.Characters.Chipotle;
+﻿using DavyKager;
+
+using Game.Audio;
+using Game.Entities.Characters.Chipotle;
 using Game.Entities.Characters.Tuttle;
+using Game.Terrain;
 
 using ProtoBuf;
 
+using System;
 using System.Collections;
 
 using UnityEngine;
@@ -21,7 +26,7 @@ namespace Game.Entities.Characters.Components
 		/// Default voluem of sound output.
 		/// </summary>
 		protected const float _defaultVolume = 1;
-		protected const float _footStepHeight = 1;
+		protected const float _footStepHeight = 2;
 
 		/// <summary>
 		/// Adjusts the volume of an audio source over a specified duration to a target volume.
@@ -56,6 +61,7 @@ namespace Game.Entities.Characters.Components
 		/// Volume for foot steps
 		/// </summary>
 		protected float _walkVolume = 1;
+		protected bool _announceWalls;
 
 		/// <summary>
 		/// Converts a string list to a CSV string.
@@ -77,6 +83,46 @@ namespace Game.Entities.Characters.Components
 
 			stringList[count - 2] += addAnd ? " a " : ", ";
 			return string.Join(string.Empty, stringList);
+		}
+
+		protected string GetStepSoundName(TerrainType terrain)
+		{
+			if (terrain == TerrainType.Wall)
+				return "hitwall";
+
+			string terrainName = Enum.GetName(terrain.GetType(), terrain);
+			return "movstep" + terrainName;
+		}
+
+		/// <summary>
+		/// Plays a foot step sound according to current terrain.
+		/// </summary>
+		/// <param name="position">A 2d vector</param>
+		/// <param name="obstacle">Type of an obstacle blocking the sound</param>
+		protected void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None)
+		{
+			if (obstacle == ObstacleType.Far)
+				return; // Too far and inaudible
+
+			TerrainType terrain = World.Map[position].Terrain;
+			string sound = GetStepSoundName(terrain);
+			AudioSource source = null;
+
+			// Set attenuation parameters
+			float volume = _walkVolume;
+			Vector3 position3d = position.ToVector3(_footStepHeight);
+			if (obstacle is not ObstacleType.None and not ObstacleType.IndirectPath)
+			{
+				volume = Sounds.GetVolumeByObstacle(obstacle, _walkVolume, _walkVolume * 2);
+				source = Sounds.Play(sound, position3d, volume);
+				Sounds.SetLowPass(source, obstacle);
+			}
+			else
+				source = Sounds.Play(sound, position3d, volume);
+
+			source.rolloffMode = AudioRolloffMode.Linear;
+			if (terrain == TerrainType.Wall && _announceWalls)
+				Tolk.Speak("zeď");
 		}
 	}
 }

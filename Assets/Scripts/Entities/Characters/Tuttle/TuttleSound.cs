@@ -2,11 +2,8 @@
 using Game.Entities.Characters.Components;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Events.Movement;
-using Game.Terrain;
 
 using ProtoBuf;
-
-using System;
 
 using UnityEngine;
 
@@ -127,52 +124,21 @@ namespace Game.Entities.Characters.Tuttle
 		/// <param name="message">The message to be processed</param>
 		private void OnPositionChanged(PositionChanged message)
 		{
-			Vector2 target = message.TargetPosition.Center;
-			Tile terrain = World.Map[target];
-			PlayTerrain(target, terrain, message.Silently ? ObstacleType.Far : message.Obstacle);
+			if (message.Silently)
+				return;
 
+			PlayStep(message.TargetPosition.Center, message.Obstacle);
+
+			// Slide voice of the NPC if talking
 			if (_movingSpeechAudio == null || !_movingSpeechAudio.isPlaying)
 				return;
 
 			Vector2 source = message.SourcePosition.Value.Center;
 			_voiceSlidePosition = source;
-			_voiceSlideTarget = target;
+			_voiceSlideTarget = message.TargetPosition.Center;
 			Vector3 difference = _voiceSlideTarget - _voiceSlidePosition;
 			_voiceSlideDelta = new(difference.x / _voiceSlideTicks, 0, difference.z / _voiceSlideTicks);
 			_voiceSlideTimer = 0;
-		}
-
-		/// <summary>
-		/// Plays a sound representation of a tile.
-		/// </summary>
-		/// <param name=positionof the tile to be announced"position"></param>
-		/// <param name="tile">A tile to be announced</param>
-		/// <param name="obstacle">Indicates type of an obstacle between this NPC and the player</param>
-		private void PlayTerrain(Vector2 position, Tile tile, ObstacleType obstacle)
-		{
-			if (obstacle == ObstacleType.Far)
-				return; // Too far and inaudible
-
-			// Set attenuation parameters
-			bool attenuate = obstacle is not ObstacleType.None and not ObstacleType.IndirectPath;
-			;
-			float volume = _walkVolume * 2;
-
-			switch (obstacle)
-			{
-				case ObstacleType.Wall:
-					volume = Sounds.GetOverWallVolume(_walkVolume);
-					break;
-				case ObstacleType.Door:
-					volume = Sounds.GetOverDoorVolume(_walkVolume);
-					break;
-				case ObstacleType.Object:
-					volume = Sounds.GetOverObjectVolume(_walkVolume);
-					break;
-			}
-
-			string soundName = "movstep" + Enum.GetName(tile.Terrain.GetType(), tile.Terrain);
-			Sounds.Play(soundName, position.ToVector3(_footStepHeight), volume);
 		}
 
 		/// <summary>
