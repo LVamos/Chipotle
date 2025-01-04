@@ -44,7 +44,8 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			if (m.Object == null)
 				Tolk.Speak("Před tebou nic není");
-			else Tolk.Speak(m.Object.Description);
+			else
+				Tolk.Speak(m.Object.Description);
 		}
 
 		/// <summary>
@@ -52,8 +53,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected void OnSayLocalityName(SayLocalityName message)
-			=> Tolk.Speak(Owner.Locality.Name.Friendly, true);
-
+		{
+			Tolk.Speak(Owner.Locality.Name.Friendly, true);
+		}
 
 		/// <summary>
 		/// Reverb presets for individual localities
@@ -204,7 +206,8 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			if (m.Success)
 				Tolk.Speak("Položeno");
-			else Tolk.Speak("Sem se to nevejde");
+			else
+				Tolk.Speak("Sem se to nevejde");
 		}
 
 		/// <summary>
@@ -212,7 +215,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
 		protected void OnEmptyInventory(EmptyInventory m)
-			=> Tolk.Speak("Nic u sebe nemáš");
+		{
+			Tolk.Speak("Nic u sebe nemáš");
+		}
 
 		/// <summary>
 		/// Handles the PickUpObjectResult message.
@@ -220,7 +225,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="m">The message to be processed</param>
 		protected void OnPickUpObjectResult(PickUpObjectResult m)
 		{
-			var resultMessages = new Dictionary<PickUpObjectResult.ResultType, string>
+			Dictionary<PickUpObjectResult.ResultType, string> resultMessages = new()
 			{
 				{ PickUpObjectResult.ResultType.Success, "sebráno" },
 				{ PickUpObjectResult.ResultType.FullInventory, "Víc toho nepobereš." },
@@ -256,7 +261,6 @@ namespace Game.Entities.Characters.Chipotle
 			Tolk.Speak(result, true);
 		}
 
-
 		/// <summary>
 		/// Processes the CutsceneBegan message.
 		/// </summary>
@@ -268,7 +272,9 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		private void OnSayVisitedLocality(SayVisitedLocalityResult message)
-			=> Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
+		{
+			Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
+		}
 
 		/// <summary>
 		/// Processes the SayExits message.
@@ -304,11 +310,9 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			string number;
-			if (count >= 2 && count <= 4)
-				number = "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: ";
-			else number = "Je tu " + count.ToString() + " východů: ";
-
+			string number = count is >= 2 and <= 4
+				? "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: "
+				: "Je tu " + count.ToString() + " východů: ";
 			string[] exits = message.Exits.Select(e => string.Join(" ", e)).ToArray();
 			Tolk.Speak(number + FormatStringList(exits, true) + ".", true);
 		}
@@ -328,8 +332,6 @@ namespace Game.Entities.Characters.Chipotle
 			}
 		}
 
-
-
 		/// <summary>
 		/// Handles the SayNearestObjects message.
 		/// </summary>
@@ -338,7 +340,8 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			if (message.Objects.IsNullOrEmpty())
 				Tolk.Speak("Nic tu není", true);
-			else Tolk.Speak(FormatStringList(message.Objects), true);
+			else
+				Tolk.Speak(FormatStringList(message.Objects), true);
 		}
 
 		/// <summary>
@@ -346,28 +349,36 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected void OnSayOrientation(SayOrientation message)
-			=> SayOrientation();
+		{
+			SayOrientation();
+		}
 
 		/// <summary>
 		/// Reports the current orientation of the Detective Chipotle NPC using a screen reader or
 		/// voice synthesizer..
 		/// </summary>
 		protected void SayOrientation()
-			=> Tolk.Output(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
+		{
+			Tolk.Output(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
+		}
 
 		/// <summary>
 		/// Processes the EntityHitDoor message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnEntityHitDoor(DoorHit message)
-			=> Tolk.Speak("dveře");
+		{
+			Tolk.Speak("dveře");
+		}
 
 		/// <summary>
 		/// Processes the TerrainCollided message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnTerrainCollided(TerrainCollided message)
-			=> PlayTerrain(message.Position);
+		{
+			PlayTerrain(message.Position);
+		}
 
 		/// <summary>
 		/// Processes the MovementDone message.
@@ -387,7 +398,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnObjectsCollided(ObjectsCollided message)
-			=> Tolk.Speak(message.Object.Name.Friendly);
+		{
+			Tolk.Speak(message.Object.Name.Friendly);
+		}
 
 		/// <summary>
 		/// Processes the TurnoverDone message.
@@ -417,7 +430,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="tile">A tile to be announced</param>
 		private void PlayTerrain(Vector2 position)
 		{
-			Vector3 position3d = new Vector3(position.x, 1, position.y);
+			Vector3 position3d = position.ToVector3(_footStepHeight);
 			TerrainType terrain = World.Map[position].Terrain;
 
 			if (terrain == TerrainType.Wall)

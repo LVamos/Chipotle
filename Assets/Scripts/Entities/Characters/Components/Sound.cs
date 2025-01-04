@@ -21,6 +21,7 @@ namespace Game.Entities.Characters.Components
 		/// Default voluem of sound output.
 		/// </summary>
 		protected const float _defaultVolume = 1;
+		protected const float _footStepHeight = 1;
 
 		/// <summary>
 		/// Adjusts the volume of an audio source over a specified duration to a target volume.
@@ -50,7 +51,6 @@ namespace Game.Entities.Characters.Components
 					source.Stop();
 			}
 		}
-
 
 		/// <summary>
 		/// Volume for foot steps

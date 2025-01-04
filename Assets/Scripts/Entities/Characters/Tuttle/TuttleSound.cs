@@ -117,7 +117,9 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected void OnReactToPinchingInDoor(ReactToPinchingInDoor message)
-			=> PlayMovingVoice();
+		{
+			PlayMovingVoice();
+		}
 
 		/// <summary>
 		/// Processes the message.
@@ -152,7 +154,8 @@ namespace Game.Entities.Characters.Tuttle
 				return; // Too far and inaudible
 
 			// Set attenuation parameters
-			bool attenuate = obstacle != ObstacleType.None && obstacle != ObstacleType.IndirectPath; ;
+			bool attenuate = obstacle is not ObstacleType.None and not ObstacleType.IndirectPath;
+			;
 			float volume = _walkVolume * 2;
 
 			switch (obstacle)
@@ -168,9 +171,8 @@ namespace Game.Entities.Characters.Tuttle
 					break;
 			}
 
-			// Play the sound
 			string soundName = "movstep" + Enum.GetName(tile.Terrain.GetType(), tile.Terrain);
-			Sounds.Play(soundName, position, volume);
+			Sounds.Play(soundName, position.ToVector3(_footStepHeight), volume);
 		}
 
 		/// <summary>
