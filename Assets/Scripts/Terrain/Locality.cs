@@ -708,11 +708,11 @@ namespace Game.Terrain
 		{
 			Register(message.Character);
 
-			if (this == message.CurrentLocality && message.Character == World.Player)
-			{
-				Sounds.SetRoomParameters(this);
-				_playersPreviousLocality = message.PreviousLocality;
-			}
+			if (this != message.CurrentLocality || message.Character != World.Player)
+				return;
+
+			Sounds.SetRoomParameters(this);
+			_playersPreviousLocality = message.PreviousLocality;
 			UpdateLoop();
 		}
 
