@@ -9,13 +9,13 @@ namespace Game.Messaging.Commands.Movement
 	/// Can be sent only from inside the NPC from <see cref="Entities.Characters.Components.CharacterComponent"/> class.
 	/// </remarks>
 	[Serializable]
-	public class StopFollowing : Message
+	public class StopFollowingPlayer : Message
 	{
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		public StopFollowing(object sender) : base(sender)
+		public StopFollowingPlayer(object sender) : base(sender)
 		{ }
 	}
 }

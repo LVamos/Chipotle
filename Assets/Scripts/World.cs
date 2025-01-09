@@ -39,7 +39,6 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
-
 		/// <summary>
 		/// Indicates if the game is in progress.
 		/// </summary>
@@ -203,9 +202,9 @@ namespace Game
 		/// <returns>
 		/// A list of points leading from start to the end or null if no possible path exists
 		/// </returns>
-		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false, int maxDistance = 300)
+		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false)
 		{
-			return _pathFinder.FindPath(start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance);
+			return _pathFinder.FindPath(start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal);
 		}
 
 		/// <summary>
@@ -1102,6 +1101,9 @@ namespace Game
 			LoadItemDescriptions(root);
 			LoadLocalitiesAndItems(root, localityObjects, itemObjects);
 			LoadPassages(root, passageObjects);
+
+			foreach (Locality locality in _localities.Values)
+				locality.GatherNonpassables();
 		}
 
 		private static void LoadPassages(XElement root, Dictionary<string, GameObject> passageObjects)
@@ -1363,11 +1365,11 @@ namespace Game
 				i.Activate();
 
 			Add(CharacterFactory.CreateTuttle());
-			Add(CharacterFactory.CreateCarson());
-			Add(CharacterFactory.CreateBartender());
-			Add(CharacterFactory.CreateChristine());
-			Add(CharacterFactory.CreateSweeney());
-			Add(CharacterFactory.CreateMariotti());
+			//Add(CharacterFactory.CreateCarson());
+			//Add(CharacterFactory.CreateBartender());
+			//Add(CharacterFactory.CreateChristine());
+			//Add(CharacterFactory.CreateSweeney());
+			//Add(CharacterFactory.CreateMariotti());
 
 			// start characters
 			foreach (Character c in _characters.Values)

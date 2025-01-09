@@ -129,19 +129,11 @@ namespace Game.Entities.Characters.Chipotle
 			base.Initialize();
 
 			// set initial position.
-			Width = .4f;
-			Height = .4f;
-
-			if (Settings.TestChipotleStartPosition.HasValue)
-			{
-				Vector2 position = Settings.TestChipotleStartPosition.Value;
-				StartPosition = new(
-					position,
-					new(position.x + Width, position.y - Height)
-				);
-			}
-			else
-				StartPosition = new(new(1028, 1034), new(1028.5f, 1033.5f));
+			Vector3 dimensions = new(.4f, 2, .4f);
+			gameObject.transform.localScale = dimensions;
+			Vector2 position = Settings.TestChipotleStartPosition.HasValue ? Settings.TestChipotleStartPosition.Value
+				: new(1032, 1034);
+			StartPosition = Rectangle.FromCenter(position, dimensions.z, dimensions.x);
 		}
 
 		/// <summary>
@@ -922,11 +914,10 @@ namespace Game.Entities.Characters.Chipotle
 			if (_walkTimer < _speed)
 				return;
 
-			base.MakeStep();
+			_speed = GetSpeed();
+			_walkTimer = 0;
 
-			// Move if the terrain is occupable.
 			Vector2 direction = GetStepDirection();
-
 			if (!DetectCollisions(direction))
 				Move(direction);
 			//ReportObjects();
@@ -1159,7 +1150,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Interrupts walk of the Chipotle NPC.
 		/// </summary>
-		private void StopWalk()
+		protected override void StopWalk()
 		{
 			_blockWalk = false;
 			_walking = false;
@@ -1267,7 +1258,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		protected override void PerformWalk()
 		{
-			base.PerformWalk();
+			UpdateWalkTimer();
 
 			if (_walking && _walkTimer >= _speed)
 				MakeStep();

@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.Terrain;
 
+using Game.Models;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +28,7 @@ namespace Game.Terrain
 			foreach (XElement panel in panels)
 			{
 				string coords = panel.Attribute("coordinates").Value;
-				var panelArea = new Rectangle(coords).ToAbsolute(localityArea);
+				Rectangle panelArea = new Rectangle(coords).ToAbsolute(localityArea);
 				TerrainType panelTerrain = panel.Attribute("terrain").Value.ToTerrainType();
 				bool permeable = panel.Attribute("canBeOccupied").Value.ToBool();
 				savedPanels.Add(new(panelTerrain, permeable, panelArea));
@@ -71,49 +73,17 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Puts terrain on the specified area.
-		/// </summary>
-		/// <param name="area">Coordinates of the area to be occupied</param>
-		/// <param name="terrain">Type of the terrain to be put</param>
-		/// <param name="permeable">
-		/// Specifies if the terrain should be accessible to NPCs and game objects.
-		/// </param>
-		/// <param name="locality">A locality to be registered</param>
-		public void DrawTerrain(Rectangle area, TerrainType terrain, bool permeable)
-		{
-			IEnumerable<Vector2> points = area.GetPoints();
-			foreach (Vector2 point in points)
-			{
-				Tile tile = this[point];
-
-				if (tile == null)
-					this[point] = new(terrain, permeable);
-				else tile.Register(terrain, permeable);
-			}
-		}
-
-		/// <summary>
-		/// Puts a terrain panel on the map.
-		/// </summary>
-		/// <param name="panel">A terrain panel defined in an XML node</param>
-		/// <param name="localityArea">A locality the terrain panel intersects</param>
-		public void DrawTerrain(XElement panel, Rectangle localityArea)
-		{
-			string coords = panel.Attribute("coordinates").Value;
-			Rectangle panelArea = new Rectangle(coords).ToAbsolute(localityArea);
-			TerrainType terrain = panel.Attribute("terrain").Value.ToTerrainType();
-			bool permeable = panel.Attribute("canBeOccupied").Value.ToBool();
-			DrawTerrain(panelArea, terrain, permeable);
-		}
-
-		/// <summary>
 		/// Returns an adjacent tile in the specified direction.
 		/// </summary>
 		/// <param name="position">Position of the concerning tile</param>
 		/// <param name="direction">Direction of wanted neighbour</param>
 		/// <returns>An adjacent tile and its position in a tuple</returns>
-		public (Vector2 position, Tile tile) GetNeighbour(Vector2 position, Direction direction)
-			=> GetNeighbour(position, direction.AsVector2());
+		public TileInfo GetNeighbour(Vector2 position, Direction direction)
+		{
+			Vector2 vector = direction.AsVector2();
+			Vector2 finalVector = new(vector.x * .1f, vector.y * .1f);
+			return GetNeighbour(position, finalVector);
+		}
 
 		/// <summary>
 		/// Returns adjacent tile in the specified direction.
@@ -121,24 +91,36 @@ namespace Game.Terrain
 		/// <param name="position">Position of the concerning tile</param>
 		/// <param name="direction">A directional unit vector</param>
 		/// <returns>An adjacent tile and its position in a tuple</returns>
-		public (Vector2 position, Tile tile) GetNeighbour(Vector2 position, Vector2 direction)
-			=> (position + direction, World.Map[position + direction]);
+		public TileInfo GetNeighbour(Vector2 position, Vector2 direction)
+		{
+			Vector2 finalPosition = position + direction;
+			finalPosition = RoundCoordinates(finalPosition.x, finalPosition.y);
+			Tile tile = World.Map[finalPosition];
+			return new(finalPosition, tile);
+		}
 
 		/// <summary>
 		/// Enumerates adjacent tiles in four basic directions.
 		/// </summary>
 		/// <param name="position">Position of the concerning tile</param>
 		/// <returns>The adjacent tiles in four basic directions</returns>
-		public IEnumerable<(Vector2 position, Tile tile)> GetNeighbours4(Vector2 position)
-			=> DirectionExtension.BasicDirections.Select(d => GetNeighbour(position, d))
-				.Where(t => t.tile != null);
+		public IEnumerable<TileInfo> GetNeighbours4(Vector2 position)
+		{
+			return
+				from direction in DirectionExtension.BasicDirections
+				let neighbour = GetNeighbour(position, direction)
+				where neighbour.Tile != null
+				select neighbour;
+		}
 
 		/// <summary>
 		/// Lists all adjacent tiles
 		/// </summary>
 		/// <param name="position">Position of the concerning tile</param>
-		public IEnumerable<(Vector2 position, Tile tile)> GetNeighbours8(Vector2 position)
-			=> DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(position, d)).Where(t => t.tile != null && t.position != position);
+		public IEnumerable<TileInfo> GetNeighbours8(Vector2 position)
+		{
+			return DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(position, d)).Where(t => t.Tile != null && t.Position != position);
+		}
 
 		/// <summary>
 		/// Returns a tile on the specified position.
@@ -149,9 +131,7 @@ namespace Game.Terrain
 		{
 			Tile tile = null;
 			Vector2 rounded = RoundCoordinates(point.x, point.y);
-			if (_cache.TryGetValue(rounded, out tile))
-				return tile;
-			return GetTerrain(point);
+			return _cache.TryGetValue(rounded, out tile) ? tile : GetTerrain(point);
 		}
 
 		private Tile GetTerrain(Vector2 point)
@@ -166,13 +146,13 @@ namespace Game.Terrain
 				TerrainPanel panel = panels[i];
 				if (panel.Area.Intersects(point))
 				{
-					Tile tile = new(panel.Type, panel.Permeable);
+					Tile tile = new(panel.Type, panel.Permeable, locality);
 					_cache[point] = tile;
 					return tile;
 				}
 			}
 
-			return new(locality.DefaultTerrain, true);
+			return new(locality.DefaultTerrain, true, locality);
 		}
 
 		/// <summary>
@@ -192,6 +172,8 @@ namespace Game.Terrain
 		/// <param name="y">The Y coordinate</param>
 		/// <returns>The rounded coordinates</returns>
 		private Vector2 RoundCoordinates(float x, float y)
-			=> new(x.Round(), y.Round());
+		{
+			return new(x.Round(), y.Round());
+		}
 	}
 }

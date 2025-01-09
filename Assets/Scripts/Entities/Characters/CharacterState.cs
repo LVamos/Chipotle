@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Indicates what the NPC is doing in the moment.
 	/// </summary>
-	public enum TuttleState
+	public enum CharacterState
 	{
 		/// <summary>
 		/// Does nothing and waits for an event

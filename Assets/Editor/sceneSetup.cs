@@ -16,8 +16,14 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class sceneSetup
+[InitializeOnLoad]
+public static class sceneSetup
 {
+	static sceneSetup()
+	{
+		InitializeVoiceOutput();
+	}
+
 	[MenuItem("Tools/Nastav naèítání audia na streamování")]
 	public static void SetLoadTypeToStreaming()
 	{
@@ -45,14 +51,13 @@ public class sceneSetup
 		Log("Naèítání zmìnìno na streamování");
 	}
 
-
 	[MenuItem("Tools/Zkopíruj obsah konzole %#E")]
 	private static void CopyConsoleToClipboard()
 	{
-		var assembly = Assembly.GetAssembly(typeof(EditorWindow));
-		var consoleWindowType = assembly.GetType("UnityEditor.ConsoleWindow");
-		var field = consoleWindowType.GetField("ms_ConsoleWindow", BindingFlags.Static | BindingFlags.NonPublic);
-		var consoleWindowInstance = field.GetValue(null);
+		Assembly assembly = Assembly.GetAssembly(typeof(EditorWindow));
+		Type consoleWindowType = assembly.GetType("UnityEditor.ConsoleWindow");
+		FieldInfo field = consoleWindowType.GetField("ms_ConsoleWindow", BindingFlags.Static | BindingFlags.NonPublic);
+		object consoleWindowInstance = field.GetValue(null);
 
 		if (consoleWindowInstance == null || consoleWindowType != EditorWindow.focusedWindow.GetType())
 		{
@@ -60,26 +65,26 @@ public class sceneSetup
 			return;
 		}
 
-		var listViewField = consoleWindowType.GetField("m_ListView", BindingFlags.Instance | BindingFlags.NonPublic);
-		var listView = listViewField.GetValue(consoleWindowInstance);
+		FieldInfo listViewField = consoleWindowType.GetField("m_ListView", BindingFlags.Instance | BindingFlags.NonPublic);
+		object listView = listViewField.GetValue(consoleWindowInstance);
 
-		var totalRowsField = listView.GetType().GetField("totalRows", BindingFlags.Instance | BindingFlags.Public);
+		FieldInfo totalRowsField = listView.GetType().GetField("totalRows", BindingFlags.Instance | BindingFlags.Public);
 		int totalRows = (int)totalRowsField.GetValue(listView);
 
-		var logEntriesType = assembly.GetType("UnityEditor.LogEntries");
-		var getEntryMethod = logEntriesType.GetMethod("GetEntryInternal", BindingFlags.Static | BindingFlags.Public);
-		var getCountMethod = logEntriesType.GetMethod("GetCount", BindingFlags.Static | BindingFlags.Public);
+		Type logEntriesType = assembly.GetType("UnityEditor.LogEntries");
+		MethodInfo getEntryMethod = logEntriesType.GetMethod("GetEntryInternal", BindingFlags.Static | BindingFlags.Public);
+		MethodInfo getCountMethod = logEntriesType.GetMethod("GetCount", BindingFlags.Static | BindingFlags.Public);
 
-		var entryType = assembly.GetType("UnityEditor.LogEntry");
-		var entryInstance = System.Activator.CreateInstance(entryType);
+		Type entryType = assembly.GetType("UnityEditor.LogEntry");
+		object entryInstance = System.Activator.CreateInstance(entryType);
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new();
 		int count = (int)getCountMethod.Invoke(null, null);
 
 		for (int i = 0; i < count; i++)
 		{
 			getEntryMethod.Invoke(null, new object[] { i, entryInstance });
-			var messageField = entryType.GetField("message", BindingFlags.Instance | BindingFlags.Public);
+			FieldInfo messageField = entryType.GetField("message", BindingFlags.Instance | BindingFlags.Public);
 			string message = messageField.GetValue(entryInstance) as string;
 			sb.AppendLine(message);
 		}
@@ -87,8 +92,6 @@ public class sceneSetup
 		EditorGUIUtility.systemCopyBuffer = sb.ToString();
 		Log("Text z konzole zkopírován!");
 	}
-
-
 
 	public static void LoadMap()
 	{
@@ -131,12 +134,11 @@ public class sceneSetup
 		}
 	}
 
-
 	private static void LoadPassages(XElement root)
 	{
 		PassageFactory.LoadPassages();
 		XElement passagesNode = root.Element("passages");
-		var passages = passagesNode.Elements("passage").ToList();
+		System.Collections.Generic.List<XElement> passages = passagesNode.Elements("passage").ToList();
 		foreach (XElement passage in passages)
 		{
 			string name = Attribute(passage, "indexedname");
@@ -146,10 +148,9 @@ public class sceneSetup
 		}
 	}
 
-
 	private static void LoadLocalitiesAndItems(XElement root)
 	{
-		var localities = root.Element("localities").Elements("locality").ToList();
+		System.Collections.Generic.List<XElement> localities = root.Element("localities").Elements("locality").ToList();
 		foreach (XElement localityNode in localities)
 		{
 			GameObject locality = CreateObject(Attribute(localityNode, "indexedname"), "Locality");
@@ -158,10 +159,9 @@ public class sceneSetup
 		}
 	}
 
-
 	private static void LoadItems(XElement localityNode)
 	{
-		var items = localityNode.Elements("object").ToList();
+		System.Collections.Generic.List<XElement> items = localityNode.Elements("object").ToList();
 		foreach (XElement item in items)
 		{
 			string type = Attribute(item, "type");
@@ -172,21 +172,19 @@ public class sceneSetup
 
 	private static GameObject CreateObject(string name, string tag)
 	{
-		GameObject obj = new(name);
-		obj.tag = tag;
+		GameObject obj = new(name)
+		{
+			tag = tag
+		};
 		return obj;
 	}
 
 	private static string Attribute(XElement element, string attribute, bool prepareForIndexing = true)
-	=> prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
-
-
+	{
+		return prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+	}
 
 	private static bool _eventHandlerAssigned;
-
-
-
-
 
 	private static void Log(string message)
 	{
@@ -194,11 +192,10 @@ public class sceneSetup
 		FileLogger.LogMessage(message);
 	}
 
-	static void HandleLog(string logString, string stackTrace, LogType type)
+	private static void HandleLog(string logString, string stackTrace, LogType type)
 	{
 		Log(logString);
 	}
-
 
 	/// <summary>
 	/// Static constructor that is automatically called after the editor loads.
@@ -206,7 +203,6 @@ public class sceneSetup
 	[MenuItem("Tools/Pøiprav scénu %#Q")]
 	private static void Preparescene()
 	{
-		InitializeVoiceOutput();
 		ValidateScene();
 		DeleteObjects();
 		LoadMap();
@@ -214,10 +210,11 @@ public class sceneSetup
 
 	private static void ValidateScene()
 	{
-		var scene = SceneManager.GetActiveScene();
+		Scene scene = SceneManager.GetActiveScene();
 		if (!scene.IsValid())
 			Log("Scéna nebyla naètena");
-		else Log("Scéna naètena");
+		else
+			Log("Scéna naètena");
 	}
 
 	private static void InitializeVoiceOutput()
@@ -231,7 +228,6 @@ public class sceneSetup
 		}
 	}
 
-
 	/// <summary>
 
 	[MenuItem("Tools/Najdi objekty")]
@@ -239,32 +235,6 @@ public class sceneSetup
 	{
 		GameObject[] objects = SceneManager.GetActiveScene().GetRootGameObjects();
 		Log("Hotovo");
-	}
-
-
-
-
-	private static Type FindMetaType(string typeName, bool inEditor = false)
-	{
-		string assemblyName = inEditor ? "Meta.XR.Audio.Editor" : "Meta.XR.Audio";
-		Assembly assembly = Assembly.Load(assemblyName);
-
-		if (assembly == null)
-		{
-			Log($"Assembly '{assemblyName}' nelze naèíst.");
-			return null;
-		}
-
-		// Získáme všechny typy v assembly, vèetnì neveøejných
-		Type[] types = assembly.GetTypes();
-		foreach (Type t in types)
-		{
-			if (t.Name == typeName)
-				return t;
-		}
-
-		Log($"Typ {typeName} nebyl nalezen.");
-		return null;
 	}
 
 	[MenuItem("Tools/Smaž všechny objekty")]
@@ -276,6 +246,4 @@ public class sceneSetup
 
 		Log("Objekty smazány");
 	}
-
-
 }

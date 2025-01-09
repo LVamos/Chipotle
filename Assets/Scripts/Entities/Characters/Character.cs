@@ -26,7 +26,6 @@ namespace Game.Entities.Characters
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Character : Entity
 	{
-
 		/// <summary>
 		/// Destroys the NPC.
 		/// </summary>
@@ -186,9 +185,14 @@ namespace Game.Entities.Characters
 
 			void startComponent(Type type)
 			{
-				CharacterComponent c = _components.FirstOrDefault(cm => cm.GetType().IsSubclassOf(type));
-				if (c != null)
-					c.Activate();
+				CharacterComponent c = _components.FirstOrDefault(c => IsOfTypeOrSubclass(c, type));
+				c?.Activate();
+
+				bool IsOfTypeOrSubclass(CharacterComponent component, Type type)
+				{
+					Type componentType = component.GetType();
+					return componentType.IsSubclassOf(type) || componentType == type;
+				}
 			}
 
 			startComponent(typeof(Sound));

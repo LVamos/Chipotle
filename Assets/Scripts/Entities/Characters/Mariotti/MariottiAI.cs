@@ -1,5 +1,5 @@
 ﻿using Game.Entities.Characters.Components;
-using Game.Messaging.Commands.Movement;
+
 using ProtoBuf;
 
 namespace Game.Entities.Characters.Mariotti
@@ -16,7 +16,7 @@ namespace Game.Entities.Characters.Mariotti
 		public override void Activate()
 		{
 			base.Activate();
-			InnerMessage(new SetPosition(this, new("2018, 1131"), true));
+			JumpTo(new(2015.5f, 1129.3f)); // At the reffrigerator in the office
 		}
 	}
 }

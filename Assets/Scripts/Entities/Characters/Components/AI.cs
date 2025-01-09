@@ -4,12 +4,15 @@ using Game.Entities.Characters.Christine;
 using Game.Entities.Characters.Mariotti;
 using Game.Entities.Characters.Sweeney;
 using Game.Entities.Characters.Tuttle;
+using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Movement;
-using Game.Terrain;
 
 using ProtoBuf;
 
+using UnityEngine;
+
 using Message = Game.Messaging.Message;
+using Rectangle = Game.Terrain.Rectangle;
 
 namespace Game.Entities.Characters.Components
 {
@@ -44,10 +47,24 @@ namespace Game.Entities.Characters.Components
 		}
 
 		/// <summary>
+		/// Jumps to a specific position.
+		/// </summary>
+		/// <param name="position">The position to jump to considered a center of the character.</param>
+		/// <param name="silently">Whether to jump silently or not. Default is true.</param>
+		protected void JumpTo(Vector2 position, bool silently = true)
+		{
+			Vector3 dimensions = gameObject.transform.localScale;
+			_area = Rectangle.FromCenter(position, dimensions.z, dimensions.x);
+			InnerMessage(new SetPosition(this, new(_area), silently));
+		}
+
+		/// <summary>
 		/// Processes the PositionChanged message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected void OnPositionChanged(PositionChanged message)
-			=> _area = message.TargetPosition;
+		{
+			_area = message.TargetPosition;
+		}
 	}
 }

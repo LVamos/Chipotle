@@ -1,7 +1,9 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Sound;
+
 using ProtoBuf;
+
 using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Christine
@@ -18,7 +20,7 @@ namespace Game.Entities.Characters.Christine
 		public override void Activate()
 		{
 			base.Activate();
-			InnerMessage(new SetPosition(this, new("1792, 1127"), true));
+			JumpTo(new(1774.3f, 1116.6f)); // At a table in her dining room
 		}
 
 		/// <summary>
@@ -52,6 +54,8 @@ namespace Game.Entities.Characters.Christine
 		/// Moves the NPC to the Christine's bed room (ložnice p1) locality.
 		/// </summary>
 		private void JumpToBedroom()
-			=> InnerMessage(new SetPosition(this, new("1744, 1123"), true));
+		{
+			InnerMessage(new SetPosition(this, new("1744, 1123"), true));
+		}
 	}
 }

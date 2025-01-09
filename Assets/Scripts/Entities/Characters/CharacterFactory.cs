@@ -143,7 +143,7 @@ namespace Game.Entities.Characters
 			Character tuttle = obj.AddComponent<Character>() as Character;
 
 			TuttleAI ai = obj.AddComponent<TuttleAI>();
-			TuttlePhysics physics = obj.AddComponent<TuttlePhysics>();
+			Physics physics = obj.AddComponent<Physics>();
 			TuttleSound sound = obj.AddComponent<TuttleSound>();
 			tuttle.Initialize(
 				new("Tuttle", "parťák"),
@@ -164,7 +164,7 @@ namespace Game.Entities.Characters
 		{
 			GameObject obj = new("Bartender");
 			Character bartender = obj.AddComponent<Character>() as Character;
-			BartenderAI ai = new BartenderAI();
+			BartenderAI ai = obj.AddComponent<BartenderAI>();
 			Physics physics = obj.AddComponent<Physics>();
 			Sound sound = obj.AddComponent<Sound>();
 			bartender.Initialize(
@@ -177,8 +177,5 @@ namespace Game.Entities.Characters
 				);
 			return bartender;
 		}
-
-
-
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Entities.Items;
-using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Terrain;
@@ -38,8 +37,7 @@ namespace Game.Entities.Characters.Carson
 		{
 			base.Activate();
 
-			SetPosition message = new(this, new("1230, 1017"), true); // Sitting on a bench at a table
-			InnerMessage(message);
+			JumpTo(new(1221.1f, 1019.4f)); // At a table in his garden
 		}
 
 		/// <summary>

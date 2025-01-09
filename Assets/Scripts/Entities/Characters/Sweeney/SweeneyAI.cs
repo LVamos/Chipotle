@@ -1,7 +1,9 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Sound;
+
 using ProtoBuf;
+
 using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Sweeney
@@ -18,7 +20,7 @@ namespace Game.Entities.Characters.Sweeney
 		public override void Activate()
 		{
 			base.Activate();
-			InnerMessage(new SetPosition(this, new("1402, 960"), true));
+			JumpTo(new(1402.7f, 956.4f));
 		}
 
 		/// <summary>
@@ -53,6 +55,8 @@ namespace Game.Entities.Characters.Sweeney
 		/// locality to the sweeney's hall (hala s1) locality.
 		/// </summary>
 		private void JumpToSweeneysRoom()
-			=> InnerMessage(new SetPosition(this, new("1407, 978"), true));
+		{
+			InnerMessage(new SetPosition(this, new("1407, 978"), true));
+		}
 	}
 }

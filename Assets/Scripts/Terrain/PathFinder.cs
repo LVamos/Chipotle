@@ -7,26 +7,213 @@ using UnityEngine;
 namespace Game.Terrain
 {
 	/// <summary>
-	/// Implementation of A* algorithm
+	/// Implementation of A* algorithm with PriorityQueue + Dictionary for open set,
+	/// plus a bounding box to limit the search area.
 	/// </summary>
 	[Serializable]
 	public class PathFinder
 	{
+		// Lokální proměnné, do kterých uložíme bounding box při hledání
+		private float _minX, _maxX, _minY, _maxY;
+
+		private List<Rectangle> _localities;
+
+		private HashSet<Vector2> _nonpassables;
+
 		/// <summary>
-		/// Reconstructs a path from the last pathFindingNode.
+		/// Najde cestu.
 		/// </summary>
-		/// <param name="lastPoint">The last point of the path</param>
-		/// <param name="throughStart">Specifies if the first point shoudl be included</param>
-		/// <param name="throughGoal">Specifies if the last poitn should be included.</param>
-		/// <returns></returns>
+		public Queue<Vector2> FindPath(
+			Vector2 start,
+			Vector2 goal,
+			bool throughObjects = false,
+			bool throughClosedDoors = true,
+			bool throughImpermeableTerrain = false,
+			bool sameLocality = false,
+			bool throughStart = false,
+			bool throughGoal = false
+		)
+		{
+			int counter = 0, whileCounter = 0;
+			if (sameLocality &&
+				(World.GetLocality(start) != World.GetLocality(goal)))
+				return null;
+
+			// Vypočítám bounding box
+			// Můžeš si sem dát parametr margin (rezerva), tady jen "natvrdo" 5 dlaždic
+			float margin = 2f;
+			_minX = Mathf.Min(start.x, goal.x) - margin;
+			_maxX = Mathf.Max(start.x, goal.x) + margin;
+			_minY = Mathf.Min(start.y, goal.y) - margin;
+			_maxY = Mathf.Max(start.y, goal.y) + margin;
+
+			// nonpassables
+			Locality locality = World.GetLocality(start);
+			string localityCode = locality.Name.Indexed.Substring(locality.Name.Indexed.Length - 2);
+			Locality[] localities = World.GetLocalities()
+				.Where(l => l.Name.Indexed.EndsWith(localityCode))
+				.ToArray();
+
+			_nonpassables = new();
+			foreach (Locality l in localities)
+				_nonpassables.UnionWith(l.Nonpassables);
+
+			// Start uzel
+			PathFindingNode startNode = new(start, cost: 0, parent: null);
+			startNode.ComputeDistance(goal);
+
+			// PriorityQueue pro nejlevnější uzel (Price)
+			PriorityQueue<PathFindingNode, float> openQueue = new();
+			// Dictionary na rychlé zjištění, jestli tam už node je
+			Dictionary<Vector2, PathFindingNode> openDict = new();
+			// Množina uzavřených uzlů
+			HashSet<Vector2> closed = new();
+
+			// Vložím start
+			openQueue.Enqueue(startNode, startNode.Price);
+			openDict[start] = startNode;
+
+			while (openQueue.Count > 0)
+			{
+				System.Diagnostics.Debug.WriteLine($"while {++whileCounter}");
+				PathFindingNode current = openQueue.Dequeue();
+				openDict.Remove(current.Coords);
+
+				// Jestli je current blízko cíle, vracím cestu
+				if (Math.Abs(current.Coords.x - goal.x) <= 1 &&
+					Math.Abs(current.Coords.y - goal.y) <= 1)
+				{
+					return GetPath(current, throughStart, throughGoal);
+				}
+
+				closed.Add(current.Coords);
+
+				// Sousedé
+				foreach (PathFindingNode neighbour in GetNeighbours(current,
+					start, goal,
+					throughObjects, throughClosedDoors, throughImpermeableTerrain,
+					sameLocality, throughStart, throughGoal))
+				{
+					// Není walkable nebo je už uzavřený => skip
+					if (!IsWalkable(neighbour, start, goal,
+							throughObjects, throughClosedDoors,
+							throughImpermeableTerrain, sameLocality,
+							throughStart, throughGoal)
+						|| closed.Contains(neighbour.Coords))
+						continue;
+					// Zkusím, jestli je to nový node, nebo tam už je
+					float newCost = current.Cost + 1;
+					if (!openDict.TryGetValue(neighbour.Coords, out PathFindingNode existing))
+					{
+						neighbour.Cost = newCost;
+						neighbour.Parent = current;
+						neighbour.ComputeDistance(goal);
+
+						openQueue.Enqueue(neighbour, neighbour.Price);
+						openDict[neighbour.Coords] = neighbour;
+						System.Diagnostics.Debug.WriteLine((++counter).ToString());
+
+					}
+					else
+					{
+						// Aktualizace, pokud je teď levnější cesta
+						if (newCost < existing.Cost)
+						{
+							existing.Cost = newCost;
+							existing.Parent = current;
+							existing.ComputeDistance(goal);
+
+							// Znovu vložím do PQ, abych updatoval prioritu
+							openQueue.Enqueue(existing, existing.Price);
+						}
+					}
+				}
+			}
+
+			// Nic nenalezeno
+			return null;
+		}
+
+		/// <summary>
+		/// Metoda, která vybere "lokality" do listu _localities pro IsWalkable
+		/// </summary>
+		private void FindArea(Vector2 point)
+		{
+			string localityName = World.GetLocality(point).Name.Indexed;
+			string areaCode = localityName.Substring(localityName.Length - 2);
+			_localities = World.GetLocalities(new(point))
+				.Where(l => l.Name.Indexed.Substring(l.Name.Indexed.Length - 2) == areaCode)
+				.Select(l => l.Area.Value)
+				.ToList();
+		}
+
+		/// <summary>
+		/// Metoda, která vytváří sousedy (4-směrné)
+		/// </summary>
+		private IEnumerable<PathFindingNode> GetNeighbours(
+			PathFindingNode parent,
+			Vector2 start,
+			Vector2 goal,
+			bool throughObjects,
+			bool throughClosedDoors,
+			bool throughImpermeableTerrain,
+			bool sameLocality,
+			bool throughStart,
+			bool throughGoal
+		)
+		{
+			// Vezmu sousedy 4-směrné
+			IEnumerable<Models.TileInfo> tiles = World.Map.GetNeighbours4(parent.Coords);
+
+			foreach (Models.TileInfo tileInfo in tiles)
+			{
+				// => bounding box check tady (nebo klidně v IsWalkable):
+				Vector2 pos = tileInfo.Position;
+				if (pos.x < _minX || pos.x > _maxX || pos.y < _minY || pos.y > _maxY)
+				{
+					// je to mimo bounding box => ignoruju
+					continue;
+				}
+
+				PathFindingNode n = new(pos, cost: 0, parent: null);
+				yield return n;
+			}
+		}
+
+		/// <summary>
+		/// Zkontroluje, zda je tile průchozí atd.
+		/// </summary>
+		private bool IsWalkable(
+			PathFindingNode node,
+			Vector2 start,
+			Vector2 goal,
+			bool throughObjects,
+			bool throughClosedDoors,
+			bool throughImpermeableTerrain,
+			bool sameLocality,
+			bool throughStart,
+			bool throughGoal
+		)
+		{
+			// Start/goal můžou být "průchozí", i kdyby tam byla překážka
+			if ((throughStart && node.Coords == start) ||
+				(throughGoal && node.Coords == goal))
+				return true;
+
+			Tile tile = World.Map[node.Coords];
+			return tile != null && tile.Walkable && !_nonpassables.Contains(node.Coords);
+		}
+
+		/// <summary>
+		/// Rekonstruuje cestu od nalezeného konce ke startu.
+		/// </summary>
 		private Queue<Vector2> GetPath(PathFindingNode lastPoint, bool throughStart, bool throughGoal)
 		{
-			Queue<Vector2> coords = new();
-
+			Stack<Vector2> stack = new();
 			for (PathFindingNode step = lastPoint; step != null; step = step.Parent)
-				coords.Enqueue(step.Coords);
+				stack.Push(step.Coords);
 
-			Queue<Vector2> path = new(coords.Reverse());
+			Queue<Vector2> path = new(stack);
 
 			int count = path.Count;
 			if (
@@ -40,126 +227,6 @@ namespace Game.Terrain
 				path.Dequeue();
 
 			return path;
-		}
-
-		/// <summary>
-		/// Tests if the specified pathFindingNode is walkable and in distance limit.
-		/// </summary>
-		/// <param name="pathFindingNode">The pathFindingNode to be checked</param>
-		/// <param name="start">The initial point fo path finding.</param>
-		/// <param name="goal">The goal of the path finding</param>
-		/// <param name="throughObjects">Specifies if tiles with objects should be included.</param>
-		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
-		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
-		/// <param name="sameLocality">Specifies if different localities than locality of the initial point should be included</param>
-		/// <param name="throughStart">Specifies if the start point should be considered walkable.</param>
-		/// <param name="throughGoal">Specifies if the goal should be considered walkable</param>
-		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
-		/// <returns>True if the tile is walkable</returns>
-		private bool IsWalkable(PathFindingNode pathFindingNode, Vector2 start, Vector2 goal, bool throughObjects, bool throughClosedDoors, bool throughImpermeableTerrain, bool sameLocality, bool throughStart, bool throughGoal, int maxDistance)
-		{
-			if (
-				(throughStart && pathFindingNode.Coords == start)
-				|| (throughGoal && pathFindingNode.Coords == goal)
-			)
-				return true;
-
-			return
-				World.Map[pathFindingNode.Coords] != null
-				&& (!sameLocality || (sameLocality && World.GetLocality(start) == World.GetLocality(pathFindingNode.Coords)))
-				&& pathFindingNode.Distance <= maxDistance
-				&& (throughObjects || (!throughObjects && !pathFindingNode.IsObjectOrEntity()))
-				&& (throughClosedDoors || (!throughClosedDoors && !pathFindingNode.IsClosedDoor()))
-				&& (throughImpermeableTerrain || (!throughImpermeableTerrain && !pathFindingNode.IsImpermeableTerrain()));
-		}
-
-
-		/// <summary>
-		/// Constructs the shortest possible path between two points.
-		/// </summary>
-		/// <param name="start">The initial point fo path finding.</param>
-		/// <param name="goal">The goal of the path finding</param>
-		/// <param name="throughObjects">Specifies if tiles with objects should be included.</param>
-		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
-		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
-		/// <param name="sameLocality">Specifies if different localities than locality of the initial point should be included</param>
-		/// <param name="throughStart">Specifies if the start point should be considered walkable.</param>
-		/// <param name="throughGoal">Specifies if the goal should be considered walkable</param>
-		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
-		/// <returns>
-		/// A list of points leading from start to the end or null if no possible path exists
-		/// </returns>
-		public Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false, int maxDistance = 300)
-		{
-			// Detect irrelevant requests
-			if (sameLocality &&
-				(World.GetLocality(start) != World.GetLocality(goal)))
-				return null;
-
-			// Find the path.
-			// Začni výchozím uzlem.
-			PathFindingNode first = new(start);
-			PathFindingNode last = new(goal);
-			first.ComputeDistance(last.Coords);
-
-			// Přidej výchozí uzel do seznamu otevřených uzlů.
-			List<PathFindingNode> open = new() { first };
-			List<PathFindingNode> closed = new();
-
-			// Procházej seznam otevřených uzlů, dokud se nevyprázdní.
-			while (open.Any())
-			{
-				// Z otevřených uzlů vyber ten nejlevnější.
-				PathFindingNode pathFindingNode = open.OrderByDescending(n => n.Price).Last();
-
-				// Pokud už jsme v cíli, skonči.
-				if (pathFindingNode.Coords == last.Coords)
-					return GetPath(pathFindingNode, throughStart, throughGoal);
-
-				// Jinak přesuň uzel z otevřených do uzavřených.
-				closed.Add(pathFindingNode);
-				open.Remove(pathFindingNode);
-
-				// Projdi sousedy
-				foreach (PathFindingNode neighbour in GetNeighbours(pathFindingNode, start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance))
-				{
-					// Pokud soused patří mezi uzavřené nebo je na něm nepovolená překážka, přeskoč ho.
-					if (
-						(!IsWalkable(neighbour, start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance))
-						|| closed.Any(c => c.Coords == neighbour.Coords)
-					)
-						continue;
-
-					// Jinak pokud je v otevřených uzel, který má stejné souřadnice jako soused, ale je dražší, nahraď ho sousedem. v opačném případě jen přidej souseda mezi otevřené.
-					PathFindingNode openPathFindingNode = open.FirstOrDefault(o => o.Coords == neighbour.Coords);
-					if (openPathFindingNode != null && openPathFindingNode.Price > pathFindingNode.Price)
-						open.Remove(openPathFindingNode);
-
-					open.Add(neighbour);
-				}
-			}
-
-			return null;
-		}
-
-		/// <summary>
-		/// Returns all adjacent tiles around the <paramref name="parent"/>.
-		/// </summary>
-		/// <param name="parent">The default tile</param>
-		/// <param name="goal">The target tile</param>
-		/// <returns>Enumeration of all adjacent neighbours</returns>
-		private IEnumerable<PathFindingNode> GetNeighbours(PathFindingNode parent, Vector2 start, Vector2 goal, bool throughObjects, bool throughClosedDoors, bool throughImpermeableTerrain, bool sameLocality, bool throughStart, bool throughGoal, int maxDistance)
-		{
-			IEnumerable<PathFindingNode> neighbours =
-				from neighbour in World.Map.GetNeighbours4(parent.Coords)
-				select new PathFindingNode(neighbour.position, parent.Cost + 1, parent);
-
-			foreach (PathFindingNode n in neighbours)
-			{
-				n.ComputeDistance(goal);
-				if (IsWalkable(n, start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal, maxDistance))
-					yield return n;
-			}
 		}
 	}
 }

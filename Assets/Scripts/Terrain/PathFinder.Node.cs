@@ -23,15 +23,19 @@ namespace Game.Terrain
 		/// Checks if there's an object or entity on this node.
 		/// </summary>
 		/// <returns>True if there's an object or entity on the node</returns>
-		public bool IsObjectOrEntity()
-			=> World.IsOccupied(Coords);
+		public bool IsObjectOrCharacter()
+		{
+			return World.IsOccupied(Coords);
+		}
 
 		/// <summary>
 		/// Checks if there's an impermeable terrain on this node.
 		/// </summary>
 		/// <returns>True if there's an object or entity on the node</returns>
 		public bool IsImpermeableTerrain()
-			=> !World.Map[Coords].Walkable;
+		{
+			return !World.Map[Coords].Walkable;
+		}
 
 		/// <summary>
 		/// constructor
@@ -54,7 +58,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Heuristic function determining number of steps taken from the first node to this node.
 		/// </summary>
-		public int Cost { get; private set; }
+		public float Cost { get; set; }
 
 		/// <summary>
 		/// Heuristic function expressing distance between this node and the goal node.
@@ -64,18 +68,20 @@ namespace Game.Terrain
 		/// <summary>
 		/// The parrent of this node
 		/// </summary>
-		public PathFindingNode Parent { get; private set; }
+		public PathFindingNode Parent { get; set; }
 
 		/// <summary>
 		/// A heuristic function expressing length of potential path from the start to the goal across this node.
 		/// </summary>
-		public int Price => Cost + Distance;
+		public float Price => Cost + Distance;
 
 		/// <summary>
 		/// Calculates distance between this node and the lastnode
 		/// </summary>
 		/// <param name="goal">The last point of requested path</param>
 		public void ComputeDistance(Vector2 goal)
-			=> Distance = (int)(Math.Abs(goal.x - Coords.x) + Math.Abs(goal.y - Coords.y));
+		{
+			Distance = (int)(Math.Abs(goal.x - Coords.x) + Math.Abs(goal.y - Coords.y));
+		}
 	}
 }

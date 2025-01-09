@@ -61,7 +61,10 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// React on placing on the ground.
 		/// </summary>
-		protected void Placed() => _placingAudio.Play();
+		protected void Placed()
+		{
+			_placingAudio.Play();
+		}
 
 		/// <summary>
 		/// Backing field for Localities property.
@@ -72,15 +75,8 @@ namespace Game.Entities.Items
 		/// Localities intersecting with this object.
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Locality> Localities
-		{
-			get
-			{
-				return
-					from name in _localities
-					select World.GetLocality(name);
-			}
-		}
+		public IEnumerable<Locality> Localities => from name in _localities
+												   select World.GetLocality(name);
 
 		/// <summary>
 		/// Finds all localities the object or the NPC intersects with and saves their names into _localities.
@@ -95,7 +91,6 @@ namespace Game.Entities.Items
 				 select l.Name.Indexed);
 			_localities = new HashSet<string>(query);
 		}
-
 
 		/// <summary>
 		/// Sets value of the Area property.
@@ -133,7 +128,10 @@ namespace Game.Entities.Items
 		/// Checks if the object can be picked up off the ground in the moment.
 		/// </summary>
 		/// <returns>True if the object can be picked up off the ground.</returns>
-		public virtual bool CanBePicked() => _pickable && HeldBy == null;
+		public virtual bool CanBePicked()
+		{
+			return _pickable && HeldBy == null;
+		}
 
 		/// <summary>
 		/// Indicates if the object stops playing its action sound when the player moves or turns.
@@ -239,9 +237,14 @@ namespace Game.Entities.Items
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnOrientationChanged(OrientationChanged message)
-			=> WatchPlayersMovement();
+		{
+			WatchPlayersMovement();
+		}
+
 		protected virtual void OnLocalityEntered(CharacterCameToLocality message)
-			=> UpdateLoop();
+		{
+			UpdateLoop();
+		}
 
 		/// <summary>
 		/// Checks if there's a direct path from this object to the player.
@@ -261,7 +264,9 @@ namespace Game.Entities.Items
 		/// </summary>
 		/// <param name="message">The message</param>
 		protected void OnDoorManipulated(DoorManipulated message)
-			=> UpdateLoop();
+		{
+			UpdateLoop();
+		}
 
 		/// <summary>
 		/// Stops sound loop of this object, if any.
@@ -271,7 +276,6 @@ namespace Game.Entities.Items
 			if (_loopAudio != null)
 				Sounds.SlideVolume(_loopAudio, .5f, 0);
 		}
-
 
 		/// <summary>
 		/// Determines if the object should be heart over walls and closed doors in other localities.
@@ -310,9 +314,6 @@ namespace Game.Entities.Items
 
 		[ProtoIgnore]
 		protected float _lastUse;
-
-
-
 
 		[ProtoIgnore]
 		private AudioSource _passByAudio;
@@ -384,7 +385,9 @@ namespace Game.Entities.Items
 		/// Handles the game reloaded message.
 		/// </summary>
 		private void OnGameReloaded()
-			=> UpdateLoop();
+		{
+			UpdateLoop();
+		}
 
 		/// <summary>
 		/// Plays the sound loop of this object if there's any.
@@ -398,7 +401,8 @@ namespace Game.Entities.Items
 			ObstacleType obstacle = World.DetectAcousticObstacles(_area.Value);
 			if (obstacle == ObstacleType.Far)
 				StopLoop();
-			else PlayLoop(obstacle);// != ObstacleType.Wall ? obstacle: ObstacleType.Object);
+			else
+				PlayLoop(obstacle);// != ObstacleType.Wall ? obstacle: ObstacleType.Object);
 		}
 
 		/// <summary>
@@ -416,7 +420,8 @@ namespace Game.Entities.Items
 			}
 
 			// Start the sound attenuation if needed.
-			bool attenuate = obstacle != ObstacleType.None && obstacle != ObstacleType.IndirectPath; ;
+			bool attenuate = obstacle is not ObstacleType.None and not ObstacleType.IndirectPath;
+			;
 			int cutoffFrequency = 0;
 			float volume = _defaultVolume;
 
@@ -444,13 +449,6 @@ namespace Game.Entities.Items
 
 			_muffled = attenuate;
 		}
-
-		/// <summary>
-		/// Returns distance from this object to the player.
-		/// </summary>
-		/// <returns>Distance in meters</returns>
-		protected float GetDistanceFromPlayer()
-			=> World.GetDistance(GetClosestPointToPlayer(), World.Player.Area.Value.Center);
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -501,12 +499,14 @@ namespace Game.Entities.Items
 		protected Rectangle? FindVacancy(Vector2 lowerLeftCorner)
 		{
 			// Try horizontal and vertical position.
-			List<Rectangle> positions = new();
-			positions.Add(new(
+			List<Rectangle> positions = new()
+			{
+				new(
 				new(lowerLeftCorner.x, lowerLeftCorner.y + Dimensions.height),
 				Dimensions.height,
 				Dimensions.width
-			));
+			)
+			};
 
 			if (Dimensions.height != Dimensions.width)
 			{
@@ -550,13 +550,18 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Reacts on picking off the ground.
 		/// </summary>
-		protected virtual void Picked() => _pickingAudio.Play();
+		protected virtual void Picked()
+		{
+			_pickingAudio.Play();
+		}
 
 		/// <summary>
 		/// Handles the ReportPosition message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
 		private void OnReportPosition(ReportPosition m)
-			=> ReportPosition();
+		{
+			ReportPosition();
+		}
 	}
 }

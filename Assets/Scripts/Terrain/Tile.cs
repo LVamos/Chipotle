@@ -8,6 +8,8 @@ namespace Game.Terrain
 	[Serializable]
 	public class Tile
 	{
+		public Locality Locality { get; private set; }
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -18,10 +20,11 @@ namespace Game.Terrain
 		/// Specifies if an entity or another game object can be placed on this tile
 		/// </param>
 		/// <param name="passage">A passage intersecting the tile</param>
-		public Tile(TerrainType terrain, bool permeable = true)
+		public Tile(TerrainType terrain, bool permeable, Locality locality)
 		{
 			Terrain = terrain;
 			Walkable = permeable;
+			Locality = locality;
 		}
 
 		/// <summary>

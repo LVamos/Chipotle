@@ -26,6 +26,11 @@ namespace Game.Entities.Characters.Tuttle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class TuttleAI : AI
 	{
+		public override void Initialize()
+		{
+			transform.localScale = new(.4f, 1.7f, .4f);
+		}
+
 		/// <summary>
 		/// Timer that prevents repetetive collisions. Counts milliseconds.
 		/// </summary>
@@ -58,22 +63,24 @@ namespace Game.Entities.Characters.Tuttle
 		/// Handles the TuttleStateChanged message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		private void OnTuttleStateChanged(TuttleStateChanged message)
-			=> _state = message.State;
+		private void OnTuttleStateChanged(CharacterStateChanged message)
+		{
+			_state = message.State;
+		}
 
 		/// <summary>
 		/// sets state of the NPC and announces the change to other components.
 		/// </summary>
-		private void SetState(TuttleState state)
+		private void SetState(CharacterState state)
 		{
 			_state = state;
-			InnerMessage(new TuttleStateChanged(this, state));
+			InnerMessage(new CharacterStateChanged(this, state));
 		}
 
 		/// <summary>
 		/// Indicates what the NPC is doing in the moment.
 		/// </summary>
-		private TuttleState _state = TuttleState.Waiting;
+		private CharacterState _state = CharacterState.Waiting;
 
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC
@@ -105,15 +112,15 @@ namespace Game.Entities.Characters.Tuttle
 
 			// Set position
 			if (Settings.AllowTuttlesCustomPosition && Settings.TuttleTestStart.HasValue)
-				_area = new((Vector2)Settings.TuttleTestStart);
-			else _area = new(new Vector2(1029, 1039));
-			InnerMessage(new SetPosition(this, new(_area), true));
+				JumpTo(Settings.TuttleTestStart.Value);
+			else
+				JumpTo(new(1029.8f, 1035.5f));
 
 			// scenarios for debugging purposes
 			//if (Settings.SendTuttleToPool && !Settings.PlayCutscenes)
 			//    GoToPool();
 			if (!Settings.SendTuttleToPool && Settings.LetTuttleFollowChipotle)
-				SetState(TuttleState.WatchingPlayer);
+				SetState(CharacterState.WatchingPlayer);
 		}
 
 		/// <summary>
@@ -126,7 +133,7 @@ namespace Game.Entities.Characters.Tuttle
 			{
 				case ObjectsCollided m: OnObjectsCollided(m); break;
 				case PinchedInDoor h: OnPinchedInDoor(h); break;
-				case TuttleStateChanged tsc: OnTuttleStateChanged(tsc); break;
+				case CharacterStateChanged tsc: OnTuttleStateChanged(tsc); break;
 				case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
@@ -185,21 +192,28 @@ namespace Game.Entities.Characters.Tuttle
 		}
 
 		protected void TryGoTo(Vector2[] points, bool watchPlayer = false)
-			=> InnerMessage(new TryGoTo(this, points, watchPlayer));
+		{
+			InnerMessage(new TryGoTo(this, points, watchPlayer));
+		}
+
 		/// <summary>
 		/// Sends Tuttle to the specified point.
 		/// </summary>
 		/// <param name="point">The target point</param>
 		/// <param name="watchPlayer">Specifies if Tuttle should stop following the player while leading to the target</param>
 		protected void GoToPoint(Vector2 point, bool watchPlayer = false)
-			=> InnerMessage(new GotoPoint(this, point, watchPlayer));
+		{
+			InnerMessage(new GotoPoint(this, point, watchPlayer));
+		}
 
 		/// <summary>
 		/// Sends Tuttle on the specified path.
 		/// </summary>
 		/// <param name="path">The path to be folloewd</param>
 		protected void FollowPath(Queue<Vector2> path)
-			=> InnerMessage(new FollowPath(this, path));
+		{
+			InnerMessage(new FollowPath(this, path));
+		}
 
 		/// <summary>
 		/// Processes the CutsceneBegan message.
@@ -271,6 +285,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToBelvedereStreet2()
 		{
+			JumpTo(new(1801, 1124));
 			InnerMessage(new SetPosition(this, new("1801, 1124"), true));
 			StartFollowing();
 		}
@@ -280,26 +295,34 @@ namespace Game.Entities.Characters.Tuttle
 		/// locality to the Christine's hall (hala p1) locality.
 		/// </summary>
 		private void JumpToChristinesHall()
-			=> InnerMessage(new SetPosition(this, new("1791, 1124"), true));
+		{
+			JumpTo(new(1791, 1124));
+		}
 
 		/// <summary>
 		/// Starts following the player.
 		/// </summary>
 		private void StartFollowing()
-			=> InnerMessage(new StartFollowing(this));
+		{
+			InnerMessage(new StartFollowingPlayer(this));
+		}
 
 		/// <summary>
 		/// Stops following the player.
 		/// </summary>
 		private void StopFollowing()
-			=> InnerMessage(new StopFollowing(this));
+		{
+			InnerMessage(new StopFollowingPlayer(this));
+		}
 
 		/// <summary>
 		/// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his
 		/// room (pokoj s1) locality.
 		/// </summary>
 		private void JumpToSweeneysRoom()
-			=> InnerMessage(new SetPosition(this, new("1411, 974"), true));
+		{
+			JumpTo(new(1411, 974));
+		}
 
 		/// <summary>
 		/// Processes the ChipotlesCarMoved message.
@@ -313,7 +336,7 @@ namespace Game.Entities.Characters.Tuttle
 				_carMovement = m;
 
 			_ridingTo = _carMovement.Target.GetLocalities().First();
-			InnerMessage(new StopFollowing(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new locality.
+			InnerMessage(new StopFollowingPlayer(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new locality.
 		}
 
 		/// <summary>
@@ -328,7 +351,7 @@ namespace Game.Entities.Characters.Tuttle
 				_playerWasByPool = true;
 
 				if (Settings.LetTuttleFollowChipotle)
-					InnerMessage(new StartFollowing(this));
+					InnerMessage(new StartFollowingPlayer(this));
 			}
 		}
 
@@ -388,7 +411,7 @@ namespace Game.Entities.Characters.Tuttle
 			if (_ridingTo != null && Owner.Locality == _ridingTo && World.Player.Locality == _ridingTo)
 			{
 				_ridingTo = null;
-				InnerMessage(new StartFollowing(this));
+				InnerMessage(new StartFollowingPlayer(this));
 			}
 		}
 	}

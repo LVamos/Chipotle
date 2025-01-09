@@ -1,7 +1,9 @@
 ﻿using Game.Entities.Characters.Chipotle;
-using Game.Entities.Characters.Tuttle;
 using Game.Entities.Items;
+using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
+using Game.Messaging.Commands.Physics;
+using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Models;
@@ -16,6 +18,7 @@ using System.Linq;
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
+using Random = System.Random;
 using Rectangle = Game.Terrain.Rectangle;
 
 namespace Game.Entities.Characters.Components
@@ -25,9 +28,39 @@ namespace Game.Entities.Characters.Components
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	[ProtoInclude(100, typeof(ChipotlePhysics))]
-	[ProtoInclude(101, typeof(TuttlePhysics))]
 	public class Physics : CharacterComponent
 	{
+		/// <summary>
+		/// Gets or sets the height of the character.
+		/// </summary>
+		public float Height { get; private set; }
+
+		/// <summary>
+		/// Gets or sets the width of the character.
+		/// </summary>
+		public float Width { get; private set; }
+
+		/// <summary>
+		/// Checks if the NPC is walking in the moment.
+		/// </summary>
+		protected bool _walking => _state is CharacterState.GoingToTarget or CharacterState.GoingToTargetAndWatchingPlayer or CharacterState.GoingToPlayer;
+
+		/// <summary>
+		/// Specifies the minimum allowed distance from the Detective Chipotle NPC.
+		/// </summary>
+		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
+		protected const int _minPlayerDistance = 6;
+
+		/// <summary>
+		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
+		/// </summary>
+		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
+		protected const int _maxPlayerDistance = 10;
+
+		/// <summary>
+		/// Specifies the maximum distance allowed for path finding.
+		/// </summary>
+		protected const int _maxPathFindingDistance = 60;
 		protected virtual Vector2 GetStepDirection()
 		{
 			return _orientation.UnitVector;
@@ -184,7 +217,7 @@ namespace Game.Entities.Characters.Components
 		/// <param name="step">The distance between the NPC and the required tile</param>
 		/// <returns>A reference to an tile that lays in the specified distance and direction</returns>
 		/// <see cref="Orientation"/>
-		protected virtual Vector2 GetNextTile()
+		protected virtual Vector2 GetNextPoint()
 		{
 			return _path.Dequeue();
 		}
@@ -225,33 +258,12 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 
 		/// <summary>
-		/// Solves a situation when the NPC encounters an obstacle.
-		/// </summary>
-		/// <param name="obstacle">Nearest point of the obstacle</param>
-		protected virtual bool DetectCollisions(Vector2 obstacle)
-		{
-			return true;
-		}
-
-		/// <summary>
-		/// Performs one step in direction specified in the _startWalkMessage field.
-		/// </summary>
-		protected virtual void MakeStep()
-		{
-			_speed = GetSpeed();
-			_walkTimer = 0;
-		}
-
-		/// <summary>
 		/// Specifies the length of one step in milliseconds.
 		/// </summary>
 		[ProtoIgnore]
 		protected int _walkTimer;
 
-		/// <summary>
-		/// Performs walk on a preplanned route.
-		/// </summary>
-		protected virtual void PerformWalk()
+		protected void UpdateWalkTimer()
 		{
 			if (_walkTimer < _speed)
 				_walkTimer += World.DeltaTime;
@@ -280,13 +292,7 @@ namespace Game.Entities.Characters.Components
 
 		protected float GetDistanceCoefficient(float distance)
 		{
-			if (distance < 5)
-				return 2;
-
-			if (distance < 10)
-				return 1;
-
-			return distance < 30 ? .5f : .2f;
+			return distance < 5 ? 2 : distance < 10 ? 1 : distance < 30 ? .5f : .2f;
 		}
 
 		/// <summary>
@@ -294,7 +300,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected virtual int GetSpeed()
 		{
-			return (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count));
+			return _state == CharacterState.GoingToPlayer ? (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count)) : GetTerrainSpeed();
 		}
 
 		/// <summary>
@@ -368,16 +374,6 @@ namespace Game.Entities.Characters.Components
 		public Orientation2D Orientation => new(_orientation);
 
 		/// <summary>
-		/// Gets or sets the width of the character.
-		/// </summary>
-		public float Width { get; protected set; }
-
-		/// <summary>
-		/// Gets or sets the height of the character.
-		/// </summary>
-		public float Height { get; protected set; }
-
-		/// <summary>
 		/// Handles the Reloaded message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
@@ -385,6 +381,11 @@ namespace Game.Entities.Characters.Components
 		{
 			InnerMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
 			InnerMessage(new PositionChanged(this, _area.Value, _area.Value, Locality, Locality, ObstacleType.None, true));
+			_random = new();
+
+			// Try to find a new path to the player if necessary.
+			if (_state == CharacterState.GoingToPlayer)
+				FindNewPathToPlayer();
 		}
 
 		/// <summary>
@@ -395,8 +396,41 @@ namespace Game.Entities.Characters.Components
 		{
 			switch (message)
 			{
-				case Reloaded gr: OnGameReloaded(gr); break;
-				case SetPosition sp: OnSetPosition(sp); break;
+				case Hide h:
+					OnHide(h);
+					break;
+
+				case Reveal m:
+					OnReveal(m);
+					break;
+
+				case FollowPath m: OnFollowPath(m); break;
+				case StopFollowingPlayer stf:
+					OnStopFollowingPlayer(stf);
+					break;
+
+				case TryGoTo m:
+					OnTryGoTo(m);
+					break;
+
+				case StartFollowingPlayer m:
+					OnStartFollowingPlayer(m);
+					break;
+
+				case CharacterStateChanged m:
+					OnCharacterStateChanged(m);
+					break;
+
+				case GotoPoint m:
+					OnGotoPoint(m);
+					break;
+
+				case CharacterMoved em:
+					OnCharacterMoved(em);
+					break;
+
+				case Reloaded m: OnGameReloaded(m); break;
+				case SetPosition m: OnSetPosition(m); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -447,13 +481,40 @@ namespace Game.Entities.Characters.Components
 		protected List<Vector2> _nearbyWalls;
 
 		/// <summary>
+		/// Specifies final distance from the Detective Chipotle when in process of approaching to it.
+		/// </summary>
+		protected int _targetPlayerDistance;
+
+		/// <summary>
+		/// An instance of the Random number generator
+		/// </summary>
+		[ProtoIgnore]
+		protected Random _random = new();
+
+		/// <summary>
+		/// Indicates what the NPC is doing in the moment.
+		/// </summary>
+		protected CharacterState _state = CharacterState.Waiting;
+
+		/// <summary>
+		/// Measures elapsed time from the last attempt of finding a path.
+		/// </summary>
+		protected int _finderTimer;
+
+		/// <summary>
+		/// Specifies if Tuttle should start approaching to player when a new path is found after
+		/// walk was interrupted.
+		/// </summary>
+		protected bool _restartApproaching;
+
+		/// <summary>
 		/// Immediately changes position of the NPC.
 		/// </summary>
 		/// <param name="target">Coordinates of the target position</param>
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
 		protected virtual void JumpTo(Vector2 target, bool silently = false)
 		{
-			JumpTo(new Rectangle(target, Width, Height), silently);
+			JumpTo(Rectangle.FromCenter(target, Height, Width), silently);
 		}
 
 		/// <summary>
@@ -530,13 +591,7 @@ namespace Game.Entities.Characters.Components
 		/// <returns>The rounded number.</returns>
 		protected int RoundToNearest90(float n)
 		{
-			if (n is >= 315 or < 45)
-				return 0;
-
-			if (n < 135)
-				return 90;
-
-			return n < 225 ? 180 : 270;
+			return n is >= 315 or < 45 ? 0 : n < 135 ? 90 : n < 225 ? 180 : 270;
 		}
 
 		/// <summary>
@@ -562,6 +617,383 @@ namespace Game.Entities.Characters.Components
 			if (point == null)
 				point = element.Area.Value.GetClosestPoint(_area.Value.Center);
 			return point.Value;
+		}
+
+		/// <summary>
+		/// Performs walk on a preplanned route.
+		/// </summary>
+		protected virtual void PerformWalk()
+		{
+			UpdateWalkTimer();
+
+			if (!_walking)
+				return;
+
+			if (_path.IsNullOrEmpty())
+				StopWalk();
+			else if (_walkTimer >= _speed)
+				MakeStep();
+		}
+
+		/// <summary>
+		/// Returns distance from this passage to the player.
+		/// </summary>
+		/// <returns>Distance in meters</returns>
+		protected float GetDistanceToPlayer()
+		{
+			return World.GetDistance(Owner, World.Player);
+		}
+
+		/// <summary>
+		/// Computes distance between the NPC and the current goal.
+		/// </summary>
+		/// <returns>Distance between the NPC and the current goal</returns>
+		protected float GetDistanceToGoal()
+		{
+			return World.GetDistance(_area.Value.Center, _goal);
+		}
+
+		/// <summary>
+		/// finds a walkable tile near the Detective Chipotle NPC. Prefers the locality in which the player is located.
+		/// </summary>
+		/// <returns>Coordinates of tthe target tile</returns>
+		protected Vector2? GetSpotByPlayer()
+		{
+			//todo předělat
+			return (from p in _player.Area.Value.GetWalkableSurroundingPoints(_minPlayerDistance, _minPlayerDistance)
+					let distance = World.GetDistance(_area.Value.Center, p)
+					orderby distance
+					select p)
+						.FirstOrDefault();
+		}
+
+		protected bool HasReachedPlayer()
+		{
+			if (_state != CharacterState.GoingToPlayer)
+				return false;
+
+			float distance = GetDistanceToPlayer();
+			return
+				 distance <= _targetPlayerDistance
+				&& _player.SameLocality(Owner);
+		}
+
+		protected Character _player => World.Player;
+
+		/// <summary>
+		/// starts walking the shortest path to the player.
+		/// </summary>
+		protected void GoToPlayer()
+		{
+			// This is helpful in test mode if the character is set to follow the player right from the beginning. If the player isn't initialized yet the character will keep trying to approach him.
+			if (_area == null || Owner.Locality == null || World.Player == null)
+				return;
+
+			Vector2 goal = _player.Area.Value.Center;
+			_path = FindPath(goal);
+			if (_path == null)
+				return;
+
+			_goal = goal;
+			SetState(CharacterState.GoingToPlayer);
+			_walkTimer = 0;
+			_targetPlayerDistance = _random.Next(_minPlayerDistance, _maxPlayerDistance);
+		}
+
+		/// <summary>
+		/// Repeats an attempt to find path to a goal specified in _goal field.
+		/// </summary>
+		protected void FindNewPathToPlayer()
+		{
+			if (_finderTimer < 30)
+			{
+				_finderTimer++;
+				return;
+			}
+
+			_path = FindPath(_goal);
+
+			if (_path == null)
+				return;
+
+			_restartApproaching = false;
+			_finderTimer = 0;
+			GoToPlayer();
+		}
+
+		/// <summary>
+		/// Constructs path from the NPC to the specified goal avoiding all obstacles.
+		/// </summary>
+		/// <param name="goal">The target position</param>
+		/// <returns>Queue with nodes leading to the target</returns>
+		protected Queue<Vector2> FindPath(Vector2 goal, bool throughGoal = true)
+		{
+			if (_area == null)
+				return null;
+
+			Vector2 start = _area.Value.Center;
+			bool sameLocality = World.GetLocality(_area.Value.Center) == World.GetLocality(goal); // Don't go to another localities if the goal is in the same locality.
+			bool throughDoors = !sameLocality;
+
+			return World.FindPath(
+		start: start,
+		goal: goal,
+		throughObjects: false,
+		throughClosedDoors: throughDoors,
+		throughImpermeableTerrain: false,
+		sameLocality: sameLocality,
+		throughStart: true,
+		throughGoal: throughGoal
+		);
+		}
+		/// <summary>
+		/// sets state of the NPC and announces the change to other components.
+		/// </summary>
+		protected void SetState(CharacterState state)
+		{
+			_state = state;
+			InnerMessage(new CharacterStateChanged(this, state));
+		}
+
+		/// <summary>
+		/// Processes the EntityMoved message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnCharacterMoved(CharacterMoved message)
+		{
+			// Test if the component has been initialized.
+			if (_area == null || _state != CharacterState.WatchingPlayer || message.Sender != _player)
+				return;
+
+			// Avoid too long paths.
+			if (GetDistanceToPlayer() > _maxPathFindingDistance)
+			{
+				// Simply jump nearer.
+				Vector2? nearerSpot =
+					(from p in _player.Area.Value.GetWalkableSurroundingPoints(_maxPlayerDistance, _maxPathFindingDistance)
+					 let distance = World.GetDistance(_area.Value.Center, p)
+					 orderby distance
+					 select p)
+					.FirstOrDefault();
+
+				if (nearerSpot.HasValue)
+					JumpTo(nearerSpot.Value);
+				else
+					throw new InvalidOperationException("Tuttle couldn't get tu Chipotle.");
+				return;
+			}
+
+			GoToPlayerIfTooFar();
+		}
+
+		/// <summary>
+		/// Checks if the NPC isn't too far away from the player.
+		/// </summary>
+		protected void GoToPlayerIfTooFar()
+		{
+			float distance = GetDistanceToPlayer();
+			if (
+				_state == CharacterState.WatchingPlayer && _area != null
+													 && (distance > _maxPlayerDistance || distance <= _maxPlayerDistance && !_player.SameLocality(Owner))
+			)
+				GoToPlayer();
+			else if (_state == CharacterState.GoingToPlayer && distance <= _targetPlayerDistance)
+				StopWalk();
+		}
+
+		/// <summary>
+		/// Handles the FollowPath message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnFollowPath(FollowPath message)
+		{
+			_path = message.Path;
+			_goal = _path.Last();
+			SetState(CharacterState.GoingToTarget);
+		}
+
+		/// <summary>
+		/// Initializes the component and starts its message loop.
+		/// </summary>
+		public override void Activate()
+		{
+			_orientation = new(0, 1);
+			base.Activate();
+		}
+
+		protected void UseDoor(Door door)
+		{
+			Vector2 point = FindManipulationPoint(door);
+			door.TakeMessage(new UseDoor(Owner, point));
+		}
+
+		/// <summary>
+		/// Processes the GotoPoint message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnGotoPoint(GotoPoint message)
+		{
+			_path = FindPath(message.Goal);
+
+			if (_path == null) // No path exists
+				return;
+
+			_goal = message.Goal;
+
+			CharacterState state = message.WatchPlayer ? CharacterState.GoingToTargetAndWatchingPlayer : CharacterState.GoingToTarget;
+			SetState(state);
+		}
+
+		/// <summary>
+		/// Handles the CharacterStateChanged message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		protected void OnCharacterStateChanged(CharacterStateChanged message)
+		{
+			_state = message.State;
+		}
+
+		/// <summary>
+		/// Processes the StartFollowing message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnStartFollowingPlayer(StartFollowingPlayer message)
+		{
+			StartFollowingPlayer();
+		}
+
+		/// <summary>
+		/// starts walking after the Detective Chipotle NPC.
+		/// </summary>
+		protected void StartFollowingPlayer()
+		{
+			StopWalk();
+			SetState(CharacterState.WatchingPlayer);
+		}
+
+		/// <summary>
+		/// Stops following the Detective Chipotle NPC.
+		/// </summary>
+		protected void StopFollowingPlayer()
+		{
+			StopWalk();
+			SetState(CharacterState.Waiting);
+		}
+
+		/// <summary>
+		/// Processes the StopFollowing message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnStopFollowingPlayer(StopFollowingPlayer message)
+		{
+			StopFollowingPlayer();
+		}
+
+		/// <summary>
+		/// Handles the TryGoTo message.
+		/// </summary>
+		/// <param name="message"><The message to be processed/param>
+		protected void OnTryGoTo(TryGoTo message)
+		{
+			if (message.Sender is not CharacterComponent)
+				throw new InvalidOperationException("Message of type TryGoTo was sent to inappropriate object.");
+
+			foreach (Vector2 point in message.Points)
+			{
+				Queue<Vector2> path = FindPath(point);
+				if (path != null)
+				{
+					_path = path;
+					_goal = point;
+					SetState(message.WatchPlayer ? CharacterState.GoingToTargetAndWatchingPlayer : CharacterState.GoingToTarget);
+					return;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Stops ongoing walk and deletes current preplanned route.
+		/// </summary>
+		protected virtual void StopWalk()
+		{
+			_path = null;
+			_walkTimer = 0;
+
+			if (_state is CharacterState.GoingToPlayer or CharacterState.GoingToTargetAndWatchingPlayer)
+				SetState(CharacterState.WatchingPlayer);
+			else
+				SetState(CharacterState.Waiting);
+		}
+
+		/// <summary>
+		/// Performs one step in the direction given by the current orientation of the entity.
+		/// </summary>
+		protected virtual void MakeStep()
+		{
+			_speed = GetSpeed();
+			_walkTimer = 0;
+
+			int stepSegments = (int)(_stepLength / .1f);
+			for (int i = 0; i < stepSegments; i++)
+			{
+				Rectangle area = Rectangle.FromCenter(GetNextPoint(), Height, Width);
+				if (!DetectCollisions(area))
+					JumpTo(area);
+
+				if (HasReachedPlayer())
+					StopWalk();
+			}
+		}
+
+		/// <summary>
+		/// Processes the Reveal message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnReveal(Reveal message)
+		{
+			_area = message.Location;
+			StartFollowingPlayer();
+		}
+
+		/// <summary>
+		/// Processes the Hide message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnHide(Hide message)
+		{
+			StopFollowingPlayer();
+		}
+		/// <summary>
+		/// Avoids an obstacle or walks through a door if any.
+		/// </summary>
+		/// <param name="area">The target coordinates</param>
+		protected virtual bool DetectCollisions(Rectangle area)
+		{
+			List<object> obstacles = World.DetectCollisions(Owner, area)?.Obstacles;
+			if (obstacles == null)
+				return false;
+
+			bool blocked = false;
+			Character character = obstacles.OfType<Character>().FirstOrDefault();
+			if (character != null)
+				blocked = true;
+
+			Door door = obstacles.OfType<Door>().FirstOrDefault();
+			if (door is { State: PassageState.Locked })
+				blocked = true;
+
+			HandleCollisions(door, character);
+			return blocked;
+
+			return door.State == PassageState.Locked;
+		}
+		protected virtual void HandleCollisions(Door door, Character character)
+		{
+			if (character != null && _state == CharacterState.GoingToPlayer)
+				_restartApproaching = true;
+
+			if (door is { State: PassageState.Closed })
+				UseDoor(door); // Open the door and keep walking.
 		}
 	}
 }

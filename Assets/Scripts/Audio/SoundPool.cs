@@ -49,6 +49,7 @@ namespace Assets.Scripts.Audio
 		private List<AudioSource> _pool = new();
 		private List<AudioSource> _muffledPool = new();
 		private const int _poolSize = 20;
+
 		private void Start()
 		{
 			for (int i = 0; i < _poolSize; i++)

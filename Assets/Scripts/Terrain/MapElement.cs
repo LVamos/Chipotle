@@ -209,7 +209,7 @@ namespace Game.Terrain
 
 		protected bool ShouldNavigationContinue()
 		{
-			float distance = GetDistanceFromPlayer();
+			float distance = GetDistanceToPlayer();
 			bool playerInHere = SameLocality(World.Player);
 			return distance > 1 && distance <= 50 && playerInHere;
 		}
@@ -239,7 +239,7 @@ namespace Game.Terrain
 		/// Returns distance from this passage to the player.
 		/// </summary>
 		/// <returns>Distance in meters</returns>
-		protected float GetDistanceFromPlayer()
+		protected float GetDistanceToPlayer()
 		{
 			return World.GetDistance(this, World.Player);
 		}

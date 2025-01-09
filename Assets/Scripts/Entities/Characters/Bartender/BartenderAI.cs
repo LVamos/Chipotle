@@ -1,6 +1,5 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Entities.Items;
-using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Movement;
 using Game.Terrain;
 
@@ -51,7 +50,7 @@ namespace Game.Entities.Characters.Bartender
 		public override void Activate()
 		{
 			base.Activate();
-			InnerMessage(new SetPosition(this, new("1577, 1037")));
+			JumpTo(new(1555.9f, 1076.3f)); // At the bar in the pub
 		}
 
 		/// <summary>
@@ -95,7 +94,9 @@ namespace Game.Entities.Characters.Bartender
 		/// </summary>
 		/// <returns>True if the Detective's car object is in Bonita street (ulice h1) locality</returns>
 		private bool IsChipotlesCarNearBy()
-			=> BonitaStreet.IsItHere(ChipotlesCar);
+		{
+			return BonitaStreet.IsItHere(ChipotlesCar);
+		}
 
 		/// <summary>
 		/// Processes the EntityMoved message.

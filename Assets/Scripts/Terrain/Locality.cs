@@ -28,14 +28,23 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Locality : MapElement
 	{
-		private void Update()
+		public bool IsPassable(Vector2 point)
 		{
-			foreach (PassageLoopModel model in _passageLoops.Values)
+			return !Nonpassables.Contains(point);
+		}
+
+		public HashSet<Vector2> Nonpassables = new();
+		public void GatherNonpassables()
+		{
+			foreach (Item item in Objects)
 			{
-				if (model.AudioSource.spatialBlend > 0)
-					return;
+				Vector2[] points = item.Area.Value.GetPoints()
+					.ToArray();
+				foreach (Vector2 point in points)
+					Nonpassables.Add(point);
 			}
 		}
+
 		private bool PlayerInHere()
 		{
 			Rectangle player = World.Player.Area.Value;
@@ -48,7 +57,7 @@ namespace Game.Terrain
 		}
 
 		private bool PlayerInSoundRadius
-			=> GetDistanceFromPlayer() <= _localitySoundRadius;
+			=> GetDistanceToPlayer() <= _localitySoundRadius;
 
 		/// <summary>
 		/// Surfacematerials for walls, floor and ceiling
@@ -129,7 +138,7 @@ namespace Game.Terrain
 
 		private void UpdateSpatialBlend(AudioSource source)
 		{
-			int distance = (int)GetDistanceFromPlayer();
+			int distance = (int)GetDistanceToPlayer();
 			source.spatialBlend = distance > 10 ? 1 : distance * .1f;
 		}
 
