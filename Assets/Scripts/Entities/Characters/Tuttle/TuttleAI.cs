@@ -180,7 +180,7 @@ namespace Game.Entities.Characters.Tuttle
 			Vector2[] walkables =
 				(from p in _player.Area.Value.GetWalkableSurroundingPoints(minDistance, maxDistance)
 				 let distance = area.GetDistanceFrom(p)
-				 where _player.Locality.Area.Value.Intersects(p) && distance >= minDistance && distance <= maxDistance
+				 where _player.Locality.Area.Value.Contains(p) && distance >= minDistance && distance <= maxDistance
 				 orderby _player.Area.Value.GetDistanceFrom(p)
 				 select p)
 				.Take(20)

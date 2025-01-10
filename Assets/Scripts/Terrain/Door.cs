@@ -233,7 +233,7 @@ namespace Game.Terrain
 			}
 
 			// The door is open. Prevent closing it if player is standing in it.
-			if (_area.Value.Intersects(World.Player.Area.Value.Center))
+			if (_area.Value.Contains(World.Player.Area.Value.Center))
 			{
 				if (_manipulationTimer >= _manipulationTimeLimit)
 				{

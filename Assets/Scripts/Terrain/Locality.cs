@@ -126,7 +126,7 @@ namespace Game.Terrain
 				AudioSource source = _passageLoops[passage].AudioSource;
 
 				// If the player is standing right in the passage locate the sound right on his position.
-				if (passage.Area.Value.Intersects(player))
+				if (passage.Area.Value.Contains(player))
 				{
 					source.transform.position = player.ToVector3(2);
 					continue;
@@ -280,7 +280,7 @@ namespace Game.Terrain
 		{
 			return
 				from e in Passages
-				where !e.Area.Value.Intersects(point) && World.GetDistance(e.Area.Value.GetClosestPoint(point), point) <= radius
+				where !e.Area.Value.Contains(point) && World.GetDistance(e.Area.Value.GetClosestPoint(point), point) <= radius
 				orderby e.Area.Value.GetDistanceFrom(point)
 				select e;
 		}
@@ -918,7 +918,7 @@ namespace Game.Terrain
 				Vector2 player = World.Player.Area.Value.Center;
 
 				// Player stands in the passage
-				if (passage.Area.Value.Intersects(player))
+				if (passage.Area.Value.Contains(player))
 				{
 					Locality other = passage.AnotherLocality(playersLocality);
 					position = other.Area.Value.GetClosestPoint(player);

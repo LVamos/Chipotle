@@ -454,7 +454,7 @@ namespace Game.Terrain
 		/// <returns>True if the given plane fully intersects this plane</returns>
 		public bool Contains(Rectangle area)
 		{
-			return Intersects(area.UpperLeftCorner) && Intersects(area.LowerRightCorner);
+			return Contains(area.UpperLeftCorner) && Contains(area.LowerRightCorner);
 		}
 
 		/// <summary>
@@ -525,7 +525,7 @@ namespace Game.Terrain
 		/// <returns>Enumeration of intersecting entities</returns>
 		public IEnumerable<Character> GetEntities()
 		{
-			return World.GetEntities(this);
+			return World.GetCharacters(this);
 		}
 
 		/// <summary>
@@ -779,7 +779,7 @@ namespace Game.Terrain
 				(from p in points
 				 let closestPoint = copy.GetClosestPoint(p)
 				 let distance = World.GetDistance(closestPoint, p)
-				 where !copy.Intersects(p) && distance >= minDistance && distance <= maxDistance
+				 where !copy.Contains(p) && distance >= minDistance && distance <= maxDistance
 				 select p);
 		}
 
@@ -925,7 +925,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point to be checked</param>
 		/// <returns>True if the point lays on the plane</returns>
-		public bool Intersects(Vector2 point)
+		public bool Contains(Vector2 point)
 		{
 			return point.x >= UpperLeftCorner.x && point.x <= LowerRightCorner.x && point.y >= LowerRightCorner.y && point.y <= UpperLeftCorner.y;
 		}

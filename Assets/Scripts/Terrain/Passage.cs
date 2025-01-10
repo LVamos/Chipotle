@@ -52,7 +52,7 @@ namespace Game.Terrain
 		/// <param name="point">The point to be checked</param>
 		/// <returns>True if the specified point lays in one of the localities connected by the passage</returns>
 		public bool IsInRelatedLocality(Vector2 point)
-			=> Localities.Any(l => l.Area.Value.Intersects(point));
+			=> Localities.Any(l => l.Area.Value.Contains(point));
 
 		/// <summary>
 		/// Checks if the passage is horizontal.
@@ -62,8 +62,8 @@ namespace Game.Terrain
 		{
 			// Tests if both upper left corner and lower left corner lay in different localities (faster than World.GetLocality)
 			return
-				Localities.First().Area.Value.Intersects(_area.Value.UpperLeftCorner)
-				^ Localities.First().Area.Value.Intersects(_area.Value.LowerLeftCorner);
+				Localities.First().Area.Value.Contains(_area.Value.UpperLeftCorner)
+				^ Localities.First().Area.Value.Contains(_area.Value.LowerLeftCorner);
 		}
 
 		/// <summary>

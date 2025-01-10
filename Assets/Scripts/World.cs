@@ -370,7 +370,7 @@ namespace Game
 		public static ObstacleType DetectObstacles(Rectangle path)
 		{
 			bool Intersects(Rectangle area)
-				=> area.Intersects(path.UpperLeftCorner) || area.Intersects(path.LowerRightCorner);
+				=> area.Contains(path.UpperLeftCorner) || area.Contains(path.LowerRightCorner);
 
 			// Is it a line?
 			if (!path.IsLine)
@@ -617,7 +617,7 @@ namespace Game
 				? null
 				: (
 					from e in locality.Characters
-					where e.Area != null && e.Area.Value.Intersects(point)
+					where e.Area != null && e.Area.Value.Contains(point)
 					select e)
 				.FirstOrDefault();
 		}
@@ -627,7 +627,7 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting entities</returns>
-		public static IEnumerable<Character> GetEntities(Rectangle area)
+		public static IEnumerable<Character> GetCharacters(Rectangle area)
 		{
 			return _characters.Values.Where(o => o.Area != null && o.Area.Value.Intersects(area));
 		}
@@ -670,8 +670,7 @@ namespace Game
 		/// <returns>The intersecting locality</returns>
 		public static Locality GetLocality(Vector2 point)
 		{
-			return _localities.Values
-						.FirstOrDefault(l => l.Area.Value.Intersects(point));
+			return Map[point]?.Locality;
 		}
 
 		/// <summary>
@@ -718,7 +717,7 @@ namespace Game
 		{
 			return
 				(from o in _items.Values
-				 where o.Area != null && !o.Area.Value.Intersects(point)
+				 where o.Area != null && !o.Area.Value.Contains(point)
 				 orderby o.Area.Value.GetDistanceFrom(point)
 				 select o)
 				.Distinct();
@@ -737,7 +736,7 @@ namespace Game
 				(from o in _items.Values
 				 let distance = o.Area.Value.GetDistanceFrom(point)
 				 orderby distance
-				 where o.Area != null && o.Decorative == includeDecoaration && !o.Area.Value.Intersects(point) && distance <= radius
+				 where o.Area != null && o.Decorative == includeDecoaration && !o.Area.Value.Contains(point) && distance <= radius
 				 select o)
 				.Distinct();
 		}
@@ -763,7 +762,7 @@ namespace Game
 			return
 				(from p in _passages.Values
 				 let distance = p.Area.Value.GetDistanceFrom(point)
-				 where !p.Area.Value.Intersects(point)
+				 where !p.Area.Value.Contains(point)
 				 orderby distance
 				 select p);
 		}
@@ -812,11 +811,17 @@ namespace Game
 		public static Item GetItem(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
-			return locality == null
-				? null
-				: (from o in locality.Objects
-				   where o.Area != null && o.Area.Value.Intersects(point)
-				   select o)
+
+			if (locality == null
+				|| locality.IsPassable(point))
+				return null;
+
+			return
+				 (from o in locality.Objects
+				  let notHidden = o.Area != null
+				  let contains = o.Area.Value.Contains(point)
+				  where notHidden && contains
+				  select o)
 				.FirstOrDefault();
 		}
 
@@ -851,7 +856,7 @@ namespace Game
 		public static Passage GetPassage(Vector2 point)
 		{
 			Locality locality = GetLocality(point);
-			return locality?.Passages.FirstOrDefault(p => p.Area.Value.Intersects(point));
+			return locality?.Passages.FirstOrDefault(p => p.Area.Value.Contains(point));
 		}
 
 		/// <summary>
