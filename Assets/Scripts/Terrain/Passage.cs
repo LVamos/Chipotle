@@ -158,7 +158,7 @@ namespace Game.Terrain
 			{
 				Locality locality = World.GetLocality(info.Position);
 				if (locality != null)
-					info.Tile.Register(locality.DefaultTerrain);
+					info.Tile.Edit(locality.DefaultTerrain);
 			}
 			foreach (Locality locality in Localities)
 				locality.Register(this);

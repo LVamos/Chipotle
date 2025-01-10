@@ -337,8 +337,7 @@ namespace Game.Terrain
 		/// Height of the plane.
 		/// </summary>
 		[ProtoIgnore]
-		public float Height
-			=> (UpperLeftCorner.y - LowerRightCorner.y).Round();
+		public float Height => (UpperLeftCorner.y - LowerRightCorner.y).Round();
 
 		/// <summary>
 		/// Returns coordinates of the lower left corner of the plane.
@@ -370,8 +369,7 @@ namespace Game.Terrain
 		/// Returns size of the plane.
 		/// </summary>
 		[ProtoIgnore]
-		public float Size
-			=> Height * Width;
+		public float Size => Height * Width;
 
 		private Vector2 Round(Vector2 coordinates)
 		{
@@ -685,24 +683,38 @@ namespace Game.Terrain
 		/// Enumerates all points of the plane.
 		/// </summary>
 		/// <returns>all points of the plane</returns>
-		public IEnumerable<Vector2> GetPoints(float resolution = .1f)
+		public IEnumerable<Vector2> GetPoints(float resolution = 0.1f)
 		{
-			float x = UpperLeftCorner.x;
+			Vector2 upperLeft = World.Map.SnapToGrid(UpperLeftCorner);
+			Vector2 upperRight = World.Map.SnapToGrid(UpperRightCorner);
+			Vector2 lowerRight = World.Map.SnapToGrid(LowerRightCorner);
 
-			do
+			float startX = upperLeft.x;
+			float endX = lowerRight.x;
+			float startY = lowerRight.y;
+			float endY = upperRight.y;
+
+			int stepsX = (int)Math.Floor((endX - startX) / resolution) + 1;
+			int stepsY = (int)Math.Floor((endY - startY) / resolution) + 1;
+
+			for (int i = 0; i < stepsX; i++)
 			{
-				float y = LowerRightCorner.y;
+				float x = startX + i * resolution;
+				if (x > endX)
+					x = endX;
 
-				do
+				for (int j = 0; j < stepsY; j++)
 				{
-					yield return new(x, y);
-					y = (y + resolution).Round();
-				}
-				while (y <= UpperRightCorner.y);
+					float y = startY + j * resolution;
+					if (y > endY)
+						y = endY;
 
-				x = (x + resolution).Round();
+					float roundedX = (float)Math.Round(x, 1, MidpointRounding.AwayFromZero);
+					float roundedY = (float)Math.Round(y, 1, MidpointRounding.AwayFromZero);
+
+					yield return new Vector2(roundedX, roundedY);
+				}
 			}
-			while (x <= LowerRightCorner.x);
 		}
 
 		/// <summary>

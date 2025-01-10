@@ -42,10 +42,15 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="terrain">Type of the terrain</param>
 		/// <param name="permeable">Specifies if the tile is accessible for NPCs</param>
-		public void Register(TerrainType terrain, bool permeable = true)
+		public void Edit(TerrainType terrain, bool permeable = true)
 		{
 			Terrain = terrain;
 			Walkable = permeable;
+		}
+
+		public void AddLocality(Locality locality)
+		{
+			Locality = locality;
 		}
 	}
 }

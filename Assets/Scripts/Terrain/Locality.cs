@@ -36,12 +36,15 @@ namespace Game.Terrain
 		public HashSet<Vector2> Nonpassables = new();
 		public void GatherNonpassables()
 		{
+			float tileSize = World.Map.TileSize;
+
 			foreach (Item item in Objects)
 			{
-				Vector2[] points = item.Area.Value.GetPoints()
-					.ToArray();
+				Vector2[] points = item.Area.Value.GetPoints().ToArray();
+
+				// I "snap" each point to the nearest half and put it in the list of non-passable points
 				foreach (Vector2 point in points)
-					Nonpassables.Add(point);
+					Nonpassables.Add(World.Map.SnapToGrid(point));
 			}
 		}
 

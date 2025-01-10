@@ -726,25 +726,16 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="goal">The target position</param>
 		/// <returns>Queue with nodes leading to the target</returns>
-		protected Queue<Vector2> FindPath(Vector2 goal, bool throughGoal = true)
+		protected Queue<Vector2> FindPath(Vector2 goal, bool withGoal = true)
 		{
 			if (_area == null)
 				return null;
 
 			Vector2 start = _area.Value.Center;
-			bool sameLocality = World.GetLocality(_area.Value.Center) == World.GetLocality(goal); // Don't go to another localities if the goal is in the same locality.
-			bool throughDoors = !sameLocality;
 
-			return World.FindPath(
-		start: start,
-		goal: goal,
-		throughObjects: false,
-		throughClosedDoors: throughDoors,
-		throughImpermeableTerrain: false,
-		sameLocality: sameLocality,
-		throughStart: true,
-		throughGoal: throughGoal
-		);
+			bool sameLocality = World.Map[start].Locality == World.Map[goal].Locality; // Don't go to another localities if the goal is in the same locality.
+
+			return World.FindPath(start, goal, sameLocality, true, withGoal);
 		}
 		/// <summary>
 		/// sets state of the NPC and announces the change to other components.
@@ -933,16 +924,12 @@ namespace Game.Entities.Characters.Components
 			_speed = GetSpeed();
 			_walkTimer = 0;
 
-			int stepSegments = (int)(_stepLength / .1f);
-			for (int i = 0; i < stepSegments; i++)
-			{
-				Rectangle area = Rectangle.FromCenter(GetNextPoint(), Height, Width);
-				if (!DetectCollisions(area))
-					JumpTo(area);
+			Rectangle area = Rectangle.FromCenter(GetNextPoint(), Height, Width);
+			if (!DetectCollisions(area))
+				JumpTo(area);
 
-				if (HasReachedPlayer())
-					StopWalk();
-			}
+			if (HasReachedPlayer())
+				StopWalk();
 		}
 
 		/// <summary>

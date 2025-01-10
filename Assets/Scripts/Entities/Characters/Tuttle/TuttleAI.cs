@@ -114,7 +114,7 @@ namespace Game.Entities.Characters.Tuttle
 			if (Settings.AllowTuttlesCustomPosition && Settings.TuttleTestStart.HasValue)
 				JumpTo(Settings.TuttleTestStart.Value);
 			else
-				JumpTo(new(1029.8f, 1035.5f));
+				JumpTo(new(1031.8f, 1035.5f));
 
 			// scenarios for debugging purposes
 			//if (Settings.SendTuttleToPool && !Settings.PlayCutscenes)

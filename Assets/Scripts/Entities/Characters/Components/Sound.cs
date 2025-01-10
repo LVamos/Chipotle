@@ -120,7 +120,8 @@ namespace Game.Entities.Characters.Components
 			else
 				source = Sounds.Play(sound, position3d, volume);
 
-			source.rolloffMode = AudioRolloffMode.Linear;
+			source.minDistance = 5;
+			//source.rolloffMode = AudioRolloffMode.Linear;
 			if (terrain == TerrainType.Wall && _announceWalls)
 				Tolk.Speak("zeď");
 		}

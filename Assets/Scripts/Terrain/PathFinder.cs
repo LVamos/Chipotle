@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using UnityEngine;
 
@@ -26,9 +25,6 @@ namespace Game.Terrain
 		public Queue<Vector2> FindPath(
 			Vector2 start,
 			Vector2 goal,
-			bool throughObjects = false,
-			bool throughClosedDoors = true,
-			bool throughImpermeableTerrain = false,
 			bool sameLocality = false,
 			bool throughStart = false,
 			bool throughGoal = false
@@ -36,7 +32,7 @@ namespace Game.Terrain
 		{
 			int counter = 0, whileCounter = 0;
 			if (sameLocality &&
-				(World.GetLocality(start) != World.GetLocality(goal)))
+				(World.Map[start].Locality != World.Map[goal].Locality))
 				return null;
 
 			// Vypočítám bounding box
@@ -46,17 +42,6 @@ namespace Game.Terrain
 			_maxX = Mathf.Max(start.x, goal.x) + margin;
 			_minY = Mathf.Min(start.y, goal.y) - margin;
 			_maxY = Mathf.Max(start.y, goal.y) + margin;
-
-			// nonpassables
-			Locality locality = World.GetLocality(start);
-			string localityCode = locality.Name.Indexed.Substring(locality.Name.Indexed.Length - 2);
-			Locality[] localities = World.GetLocalities()
-				.Where(l => l.Name.Indexed.EndsWith(localityCode))
-				.ToArray();
-
-			_nonpassables = new();
-			foreach (Locality l in localities)
-				_nonpassables.UnionWith(l.Nonpassables);
 
 			// Start uzel
 			PathFindingNode startNode = new(start, cost: 0, parent: null);
@@ -89,16 +74,11 @@ namespace Game.Terrain
 				closed.Add(current.Coords);
 
 				// Sousedé
-				foreach (PathFindingNode neighbour in GetNeighbours(current,
-					start, goal,
-					throughObjects, throughClosedDoors, throughImpermeableTerrain,
-					sameLocality, throughStart, throughGoal))
+				IEnumerable<PathFindingNode> neighbours = GetNeighbours(current, start, goal, sameLocality, throughStart, throughGoal);
+				foreach (PathFindingNode neighbour in neighbours)
 				{
 					// Není walkable nebo je už uzavřený => skip
-					if (!IsWalkable(neighbour, start, goal,
-							throughObjects, throughClosedDoors,
-							throughImpermeableTerrain, sameLocality,
-							throughStart, throughGoal)
+					if (!IsWalkable(neighbour, start, goal, sameLocality, throughStart, throughGoal)
 						|| closed.Contains(neighbour.Coords))
 						continue;
 					// Zkusím, jestli je to nový node, nebo tam už je
@@ -135,28 +115,12 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Metoda, která vybere "lokality" do listu _localities pro IsWalkable
-		/// </summary>
-		private void FindArea(Vector2 point)
-		{
-			string localityName = World.GetLocality(point).Name.Indexed;
-			string areaCode = localityName.Substring(localityName.Length - 2);
-			_localities = World.GetLocalities(new(point))
-				.Where(l => l.Name.Indexed.Substring(l.Name.Indexed.Length - 2) == areaCode)
-				.Select(l => l.Area.Value)
-				.ToList();
-		}
-
-		/// <summary>
 		/// Metoda, která vytváří sousedy (4-směrné)
 		/// </summary>
 		private IEnumerable<PathFindingNode> GetNeighbours(
 			PathFindingNode parent,
 			Vector2 start,
 			Vector2 goal,
-			bool throughObjects,
-			bool throughClosedDoors,
-			bool throughImpermeableTerrain,
 			bool sameLocality,
 			bool throughStart,
 			bool throughGoal
@@ -187,9 +151,6 @@ namespace Game.Terrain
 			PathFindingNode node,
 			Vector2 start,
 			Vector2 goal,
-			bool throughObjects,
-			bool throughClosedDoors,
-			bool throughImpermeableTerrain,
 			bool sameLocality,
 			bool throughStart,
 			bool throughGoal
@@ -201,7 +162,7 @@ namespace Game.Terrain
 				return true;
 
 			Tile tile = World.Map[node.Coords];
-			return tile != null && tile.Walkable && !_nonpassables.Contains(node.Coords);
+			return tile is { Walkable: true } && tile.Locality.IsPassable(node.Coords);
 		}
 
 		/// <summary>

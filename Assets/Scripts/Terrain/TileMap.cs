@@ -1,6 +1,4 @@
-﻿using Assets.Scripts.Terrain;
-
-using Game.Models;
+﻿using Game.Models;
 
 using System;
 using System.Collections.Generic;
@@ -17,25 +15,16 @@ namespace Game.Terrain
 	[Serializable]
 	public class TileMap
 	{
-		public void SaveTerrain(XElement locality)
+		public Vector2 SnapToGrid(Vector2 point)
 		{
-			Rectangle localityArea = new(locality.Attribute("coordinates").Value);
-			string localityName = locality.Attribute("indexedname").Value;
-			TerrainType defaultTerrain = locality.Attribute("defaultTerrain").Value.ToTerrainType();
-			List<XElement> panels = locality.Elements("panel").ToList();
-
-			List<TerrainPanel> savedPanels = new();
-			foreach (XElement panel in panels)
-			{
-				string coords = panel.Attribute("coordinates").Value;
-				Rectangle panelArea = new Rectangle(coords).ToAbsolute(localityArea);
-				TerrainType panelTerrain = panel.Attribute("terrain").Value.ToTerrainType();
-				bool permeable = panel.Attribute("canBeOccupied").Value.ToBool();
-				savedPanels.Add(new(panelTerrain, permeable, panelArea));
-			}
-
-			_terrain[localityName] = savedPanels;
+			return new
+				(
+				TileSize * Mathf.Round(point.x / TileSize),
+				TileSize * Mathf.Round(point.y / TileSize)
+				);
 		}
+
+		public readonly float TileSize = .5f;
 
 		/// <summary>
 		/// Name of an opened map file
@@ -43,22 +32,16 @@ namespace Game.Terrain
 		public readonly string FileName;
 
 		/// <summary>
-		/// Maps tiles to coordinates.
-		/// </summary>
-		private Dictionary<Vector2, Tile> _cache = new();
-
-		private Dictionary<string, List<TerrainPanel>> _terrain = new(StringComparer.InvariantCultureIgnoreCase);
-
-		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="fileName">Name of the map file to be loaded</param>
-		public TileMap(string fileName)
+		public TileMap(string fileName, int tileCount)
 		{
 			if (string.IsNullOrEmpty(fileName))
 				throw new ArgumentNullException("missing file name");
 
 			FileName = fileName;
+			_terrain = new Dictionary<Vector2, Tile>(tileCount);
 		}
 
 		/// <summary>
@@ -69,7 +52,7 @@ namespace Game.Terrain
 		public Tile this[Vector2 point]
 		{
 			get => GetTile(point); //_tiles[(int)position.X - LeftBorder, (int)position.Y - BottomBorder];
-			set => PutTile(point, value); // _tiles[(int)position.X - LeftBorder, (int)position.Y - BottomBorder]=value;
+			set => PutTile(point, value);
 		}
 
 		/// <summary>
@@ -81,7 +64,7 @@ namespace Game.Terrain
 		public TileInfo GetNeighbour(Vector2 position, Direction direction)
 		{
 			Vector2 vector = direction.AsVector2();
-			Vector2 finalVector = new(vector.x * .1f, vector.y * .1f);
+			Vector2 finalVector = new(vector.x * .5f, vector.y * .5f);
 			return GetNeighbour(position, finalVector);
 		}
 
@@ -129,31 +112,44 @@ namespace Game.Terrain
 		/// <returns>a tile on the specified position</returns>
 		public Tile GetTile(Vector2 point)
 		{
-			Tile tile = null;
-			Vector2 rounded = RoundCoordinates(point.x, point.y);
-			return _cache.TryGetValue(rounded, out tile) ? tile : GetTerrain(point);
+			Vector2 rounded = SnapToGrid(point);
+			_terrain.TryGetValue(rounded, out Tile tile);
+			return tile;
 		}
 
-		private Tile GetTerrain(Vector2 point)
+		public void DrawLocality(XElement localityNode)
 		{
-			Locality locality = World.GetLocality(point);
-			if (locality == null)
-				return null;
+			Rectangle localityArea = new(localityNode.Attribute("coordinates").Value);
+			TerrainType defaultTerrain = localityNode.Attribute("defaultTerrain").Value.ToTerrainType();
 
-			List<TerrainPanel> panels = _terrain[locality.Name.Indexed];
-			for (int i = panels.Count - 1; i >= 0; i--)
-			{
-				TerrainPanel panel = panels[i];
-				if (panel.Area.Intersects(point))
-				{
-					Tile tile = new(panel.Type, panel.Permeable, locality);
-					_cache[point] = tile;
-					return tile;
-				}
-			}
-
-			return new(locality.DefaultTerrain, true, locality);
+			DrawTerrain(localityArea, defaultTerrain);
+			foreach (XElement panel in localityNode.Elements("panel"))
+				DrawPanel(panel, localityArea);
 		}
+
+		private void DrawTerrain(Rectangle area, TerrainType terrain, bool permeable = true)
+		{
+			Vector2[] points = area.GetPoints(TileSize).ToArray();
+			bool contained = points.Contains(new Vector2(1030, 1035.5f));
+			foreach (Vector2 point in points)
+			{
+				_terrain[point] = new(terrain, permeable, null);
+			}
+		}
+
+		private void DrawPanel(XElement panel, Rectangle localityArea)
+		{
+			string coords = panel.Attribute("coordinates").Value;
+			Rectangle panelArea = new Rectangle(coords).ToAbsolute(localityArea);
+			TerrainType panelTerrain = panel.Attribute("terrain").Value.ToTerrainType();
+			bool permeable = panel.Attribute("canBeOccupied").Value.ToBool();
+
+			foreach (Vector2 point in panelArea.GetPoints(TileSize))
+				_terrain[point] = new(panelTerrain, permeable, null);
+
+		}
+
+		private Dictionary<Vector2, Tile> _terrain;
 
 		/// <summary>
 		/// Puts the specified tile on the map on the specified coordinates.
@@ -162,7 +158,12 @@ namespace Game.Terrain
 		/// <param name="tile">The tile to be put</param>
 		public void PutTile(Vector2 point, Tile tile)
 		{
-			_cache[RoundCoordinates(point.x, point.y)] = tile;
+			if (point.x == 1029.8f && point.y == 1035.5f)
+				System.Diagnostics.Debugger.Break();
+
+			if (SnapToGrid(point) == new Vector2(1030, 1035.5f))
+				System.Diagnostics.Debugger.Break();
+			_terrain[SnapToGrid(point)] = tile;
 		}
 
 		/// <summary>
@@ -174,6 +175,12 @@ namespace Game.Terrain
 		private Vector2 RoundCoordinates(float x, float y)
 		{
 			return new(x.Round(), y.Round());
+		}
+
+		public void RegisterLocality(Locality locality)
+		{
+			foreach (Vector2 point in locality.Area.Value.GetPoints(TileSize))
+				_terrain[point].AddLocality(locality);
 		}
 	}
 }

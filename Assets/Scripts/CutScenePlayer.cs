@@ -1,4 +1,5 @@
-﻿using Game.Audio;
+﻿using Game;
+using Game.Audio;
 
 using System.Collections;
 
@@ -23,15 +24,7 @@ namespace Assets.Scripts
 					_audio.time -= seconds;
 		}
 
-		public bool Finished
-		{
-			get
-			{
-				if (_audio == null || _audio.clip == null)
-					return false;
-				return !Paused && Mathf.Approximately(_audio.time, _audio.clip.length);
-			}
-		}
+		public bool Finished => _audio != null && _audio.clip != null && !Paused && Mathf.Approximately(_audio.time, _audio.clip.length);
 
 		public bool Paused { get; set; }
 		protected void AdjustVolume(float duration, float targetVolume)
@@ -61,6 +54,9 @@ namespace Assets.Scripts
 
 		public void Stop()
 		{
+			if (!Settings.PlayCutscenes)
+				return;
+
 			if (Paused)
 				_audio.Stop();
 			AdjustVolume(.5f, 0);
@@ -84,8 +80,12 @@ namespace Assets.Scripts
 
 		public void Play(string cutSceneName)
 		{
+			if (!Settings.PlayCutscenes)
+				return;
+
 			_audio = Sounds.Play2d(cutSceneName);
 			Paused = false;
+
 		}
 
 		private AudioSource _audio;

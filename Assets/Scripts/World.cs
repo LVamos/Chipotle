@@ -196,15 +196,16 @@ namespace Game
 		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
 		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
 		/// <param name="sameLocality">Specifies if different localities than locality of the initial point should be included</param>
-		/// <param name="throughStart">Specifies if the start point should be considered walkable.</param>
-		/// <param name="throughGoal">Specifies if the goal should be considered walkable</param>
+		/// <param name="withStart">Specifies if the start point should be considered walkable.</param>
+		/// <param name="withGoal">Specifies if the goal should be considered walkable</param>
 		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
 		/// <returns>
 		/// A list of points leading from start to the end or null if no possible path exists
 		/// </returns>
-		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool throughObjects = false, bool throughClosedDoors = true, bool throughImpermeableTerrain = false, bool sameLocality = false, bool throughStart = false, bool throughGoal = false)
+		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool sameLocality = false, bool withStart = false, bool withGoal = false)
 		{
-			return _pathFinder.FindPath(start, goal, throughObjects, throughClosedDoors, throughImpermeableTerrain, sameLocality, throughStart, throughGoal);
+			Queue<Vector2> path = _pathFinder.FindPath(start, goal, sameLocality, withStart, withGoal);
+			return path;
 		}
 
 		/// <summary>
@@ -521,18 +522,19 @@ namespace Game
 		/// <summary>
 		/// Registers a locality.
 		/// </summary>
-		/// <param name="l">The locality to be registered</param>
-		public static void Add(Locality l)
+		/// <param name="locality">The locality to be registered</param>
+		public static void Add(Locality locality)
 		{
 			// null check
-			if (l == null)
-				throw new ArgumentNullException(nameof(l));
+			if (locality == null)
+				throw new ArgumentNullException(nameof(locality));
 
 			// Isn't the locality already registered?
-			if (_localities.ContainsKey(l.Name.Indexed))
+			if (_localities.ContainsKey(locality.Name.Indexed))
 				throw new ArgumentException("Locality already registered");
 
-			_localities.Add(l.Name.Indexed, l);
+			_localities.Add(locality.Name.Indexed, locality);
+			Map.RegisterLocality(locality);
 		}
 
 		/// <summary>
@@ -1238,10 +1240,19 @@ namespace Game
 
 		public static void LoadTerrain(XElement root)
 		{
-			Map = new(MainScript.MapPath);
+			// count tiles
+			int tileCount = 0;
+			foreach (XElement locality in _localityNodes)
+			{
+				Rectangle area = new(locality.Attribute("coordinates").Value);
+				int size = (int)(area.Height * 10 * area.Width * 10);
+				tileCount += size;
+			}
+
+			Map = new(MainScript.MapPath, tileCount);
 
 			foreach (XElement locality in _localityNodes)
-				Map.SaveTerrain(locality);
+				Map.DrawLocality(locality);
 		}
 
 		/// <summary>
