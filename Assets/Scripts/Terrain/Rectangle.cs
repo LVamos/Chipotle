@@ -22,6 +22,27 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Rectangle
 	{
+		public float GetDistanceFrom(Rectangle other)
+		{
+			if (Intersects(other))
+				return 0;
+
+			float horizontalGap = 0f;
+			if (this.LowerRightCorner.x < other.UpperLeftCorner.x)
+				horizontalGap = other.UpperLeftCorner.x - this.LowerRightCorner.x;
+			else if (other.LowerRightCorner.x < this.UpperLeftCorner.x)
+				horizontalGap = this.UpperLeftCorner.x - other.LowerRightCorner.x;
+
+			float verticalGap = 0f;
+			if (this.UpperLeftCorner.y < other.LowerRightCorner.y)
+				verticalGap = other.LowerRightCorner.y - this.UpperLeftCorner.y;
+			else if (other.UpperLeftCorner.y < this.LowerRightCorner.y)
+				verticalGap = this.LowerRightCorner.y - other.UpperLeftCorner.y;
+
+			float distance = Mathf.Sqrt(horizontalGap * horizontalGap + verticalGap * verticalGap);
+			return distance.Round();
+		}
+
 		/// <summary>
 		/// Gets the distance from the center to a corner.
 		/// </summary>
@@ -182,18 +203,6 @@ namespace Game.Terrain
 		public bool IsOutOfMap()
 		{
 			return Corners.Any(p => World.GetLocality(p) == null);
-		}
-
-		/// <summary>
-		/// Enumerates all walkable points in a distance range around this plane.
-		/// </summary>
-		/// <param name="minDistance"Minimum distance of the surrounding pint from the plane></param>
-		/// <param name="maxDistance">Maximum distance of the surroudning points from the plane</param>
-		/// <returns>Enumeration of points</returns>
-		public IEnumerable<Vector2> GetWalkableSurroundingPoints(int minDistance, int maxDistance)
-		{
-			return GetSurroundingPoints(minDistance, maxDistance)
-						.Where(World.IsWalkable);
 		}
 
 		/// <summary>
@@ -471,13 +480,17 @@ namespace Game.Terrain
 		/// Extends the plane to all directions by the specified amount of units in all directions.
 		/// </summary>
 		/// <param name="units">Amount of the units by which the rectangle is extended</param>
-		public void Extend(int units = 1)
+		public void Extend(float distance = 1)
 		{
-			for (int i = 1; i <= units; i++)
-			{
-				UpperLeftCorner += Direction.UpLeft.AsVector2();
-				LowerRightCorner += Direction.DownRight.AsVector2();
-			}
+			UpperLeftCorner = new Vector2(
+				UpperLeftCorner.x - distance,
+				UpperLeftCorner.y + distance
+			);
+
+			LowerRightCorner = new Vector2(
+				LowerRightCorner.x + distance,
+				LowerRightCorner.y - distance
+			);
 		}
 
 		/// <summary>
@@ -500,14 +513,8 @@ namespace Game.Terrain
 		/// <returns>The distance between the default point and the plane</returns>
 		public float GetDistanceFrom(Vector2 point)
 		{
-			// Calculation of "clamped" x and y values
-			float clampedX = Math.Max(UpperLeftCorner.x, Math.Min(point.x, LowerRightCorner.x));
-			float clampedY = Math.Max(LowerRightCorner.y, Math.Min(point.y, UpperLeftCorner.y));
-
-			// Create a new point on the edge of the rectangle, closest to the specified point
-			Vector2 closestPoint = new(clampedX, clampedY);
-
-			return (GetClosestPoint(point) - point).magnitude;
+			Vector2 closestPoint = GetClosestPoint(point);
+			return World.GetDistance(closestPoint, point);
 		}
 
 		/// <summary>
@@ -767,20 +774,16 @@ namespace Game.Terrain
 		/// <param name="minDistance">Specifies minimum distance of the surrounding points from edges of the specified plane.</param>
 		/// <param name="maxDistance">Specifies maximum distance of the surrounding points from edges of the specified plane.</param>
 		/// <returns>all closest points from surroundings of this plane</returns>
-		public IEnumerable<Vector2> GetSurroundingPoints(int minDistance, int maxDistance, float resolution = .1f)
+		public IEnumerable<Vector2> GetSurroundingPoints(int minDistance, int maxDistance, float tileSize = .1f)
 		{
-			Rectangle surroundings = new(this);
-			surroundings.Extend(maxDistance);
+			Rectangle maxRectangle = this;
+			maxRectangle.Extend(maxDistance);
+			Rectangle minRectangle = this;
+			minRectangle.Extend(minDistance);
+			IEnumerable<Vector2> points = maxRectangle.GetPoints(tileSize);
 
-			IEnumerable<Vector2> points = surroundings.GetPoints(resolution);
-
-			Rectangle copy = this;
-			return
-				(from p in points
-				 let closestPoint = copy.GetClosestPoint(p)
-				 let distance = World.GetDistance(closestPoint, p)
-				 where !copy.Contains(p) && distance >= minDistance && distance <= maxDistance
-				 select p);
+			return points
+.Where(point => !minRectangle.Contains(point));
 		}
 
 		/// <summary>

@@ -653,20 +653,6 @@ namespace Game.Entities.Characters.Components
 			return World.GetDistance(_area.Value.Center, _goal);
 		}
 
-		/// <summary>
-		/// finds a walkable tile near the Detective Chipotle NPC. Prefers the locality in which the player is located.
-		/// </summary>
-		/// <returns>Coordinates of tthe target tile</returns>
-		protected Vector2? GetSpotByPlayer()
-		{
-			//todo předělat
-			return (from p in _player.Area.Value.GetWalkableSurroundingPoints(_minPlayerDistance, _minPlayerDistance)
-					let distance = World.GetDistance(_area.Value.Center, p)
-					orderby distance
-					select p)
-						.FirstOrDefault();
-		}
-
 		protected bool HasReachedPlayer()
 		{
 			if (_state != CharacterState.GoingToPlayer)
@@ -760,21 +746,23 @@ namespace Game.Entities.Characters.Components
 			if (GetDistanceToPlayer() > _maxPathFindingDistance)
 			{
 				// Simply jump nearer.
-				Vector2? nearerSpot =
-					(from p in _player.Area.Value.GetWalkableSurroundingPoints(_maxPlayerDistance, _maxPathFindingDistance)
-					 let distance = World.GetDistance(_area.Value.Center, p)
-					 orderby distance
-					 select p)
-					.FirstOrDefault();
-
-				if (nearerSpot.HasValue)
-					JumpTo(nearerSpot.Value);
-				else
-					throw new InvalidOperationException("Tuttle couldn't get tu Chipotle.");
-				return;
+				Vector2? target = FindSpotByPlayer()
+					?? throw new InvalidOperationException("Tuttle couldn't get to Chipotle.");
+				JumpTo(target.Value);
 			}
 
 			GoToPlayerIfTooFar();
+		}
+
+		private Vector2? FindSpotByPlayer()
+		{
+			Rectangle playerArea = _player.Area.Value;
+			playerArea.Extend(_maxPlayerDistance);
+			IEnumerable<Vector2> points = World.FindValidPlacements(Owner, playerArea, transform.localScale.z, transform.localScale.x);
+			Vector2? target =
+				points.OrderBy(p => World.GetDistance(p, playerArea.Center))
+				.FirstOrDefault();
+			return target;
 		}
 
 		/// <summary>

@@ -1026,6 +1026,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// Lists near objects that have been already announced.
 		/// </summary>
 		protected HashSet<string> _nearObjects = new();
+		private const float _maxDistanceToCar = 2;
+		private const float _minDistanceToCar = 1;
 
 		/// <summary>
 		/// Processes the ChipotlesCarMoved message.
@@ -1312,12 +1314,15 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 
 			// Jump to target locality
-			Vector2? target = World.GetRandomWalkablePoint(_carMovement.Target, 1, 2);
-
+			float height = transform.localScale.y;
+			float width = transform.localScale.x;
+			Vector2? target = World.FindFreePlacementsAroundArea(null, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
+				.FirstOrDefault();
 			if (target == null)
 				throw new InvalidOperationException("No walkable tile found.");
 
-			World.GetLocality((Vector2)target).TakeMessage(_carMovement);
+			Locality carLocality = World.GetLocality((Vector2)target);
+			carLocality.TakeMessage(_carMovement);
 			InnerMessage(new LeftBycar(this));
 			JumpTo((Vector2)target, true);//todo předělat na Rectangle
 			_carMovement = null;

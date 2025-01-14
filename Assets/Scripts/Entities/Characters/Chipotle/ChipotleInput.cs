@@ -280,7 +280,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 
 			Character tuttle = World.GetCharacter("tuttle");
-			string distance = World.GetDistance(tuttle.Area.Value.Center, Owner.Area.Value.Center).ToString();
+			string distance = World.GetDistance(tuttle, Owner).ToString();
 			string position = tuttle.Area.Value.Center.ToString();
 			string locality = tuttle.Locality.Name.Indexed;
 			Tolk.Speak(distance + Environment.NewLine + locality + " " + position, true);

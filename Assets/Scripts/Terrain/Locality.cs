@@ -28,23 +28,29 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Locality : MapElement
 	{
-		public bool IsPassable(Vector2 point)
+		public bool IsWalkable(Rectangle area)
 		{
-			return !Nonpassables.Contains(point);
+			IEnumerable<Vector2> points = area.GetPoints(World.Map.TileSize);
+			return points.All(p => IsWalkable(p));
 		}
 
-		public HashSet<Vector2> Nonpassables = new();
-		public void GatherNonpassables()
+		public bool IsWalkable(Vector2 point)
+		{
+			return !_nonpassables.Contains(point);
+		}
+
+		private HashSet<Vector2> _nonpassables = new();
+		public void GatherNonwalkables()
 		{
 			float tileSize = World.Map.TileSize;
 
-			foreach (Item item in Objects)
+			foreach (Item item in Items.Where(i => !i.CanBePicked()))
 			{
 				Vector2[] points = item.Area.Value.GetPoints().ToArray();
 
 				// I "snap" each point to the nearest half and put it in the list of non-passable points
 				foreach (Vector2 point in points)
-					Nonpassables.Add(World.Map.SnapToGrid(point));
+					_nonpassables.Add(World.Map.SnapToGrid(point));
 			}
 		}
 
@@ -314,7 +320,7 @@ namespace Game.Terrain
 		/// <returns>Enumeration of items</returns>
 		public IEnumerable<Item> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
 		{
-			IEnumerable<Item> items = Objects.Where(o => o.Area != null);
+			IEnumerable<Item> items = Items.Where(o => o.Area != null);
 
 			return
 				from o in items
@@ -437,11 +443,14 @@ namespace Game.Terrain
 		[ProtoIgnore]
 		public IEnumerable<Character> Characters => _characters.Select(World.GetCharacter);
 
+		[ProtoIgnore]
+		public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
+
 		/// <summary>
 		/// List of objects present in this locality.
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Item> Objects
+		public IEnumerable<Item> Items
 		{
 			get
 			{
@@ -662,7 +671,7 @@ namespace Game.Terrain
 		protected void Disappear()
 		{
 			// Delete objects.
-			foreach (Item o in Objects)
+			foreach (Item o in Items)
 				World.Remove(o);
 
 			// Delete passages.
@@ -687,7 +696,7 @@ namespace Game.Terrain
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 
-			foreach (Item o in Objects)
+			foreach (Item o in Items)
 			{
 				if (o != message.Sender)
 					o.TakeMessage(message);

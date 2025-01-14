@@ -162,7 +162,7 @@ namespace Game.Terrain
 				return true;
 
 			Tile tile = World.Map[node.Coords];
-			return tile is { Walkable: true } && tile.Locality.IsPassable(node.Coords);
+			return tile is { Walkable: true } && tile.Locality.IsWalkable(node.Coords);
 		}
 
 		/// <summary>

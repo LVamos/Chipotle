@@ -10,7 +10,7 @@ namespace Game.Messaging.Commands.Characters
 		/// <summary>
 		/// The entity that bumped to this entity.
 		/// </summary>
-		public readonly Character entity;
+		public readonly Character Character;
 
 		/// <summary>
 		/// Constructor

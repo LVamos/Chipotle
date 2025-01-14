@@ -45,13 +45,15 @@ namespace Game.Entities.Characters.Tuttle
 		/// Specifies the minimum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		private const int _minDistanceFromPlayer = 6;
+		private const float _minDistanceToPlayer = 2.5f;
 
 		/// <summary>
 		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		private const int _maxDistanceFromPlayer = 10;
+		private const int _maxDistanceToPlayer = 7;
+		private const int _minDistanceToCar = 1;
+		private const int _maxDistanceToCar = 2;
 
 		/// <summary>
 		/// Specifies if the NPC is just moving to another locality with the Chipotle's car.
@@ -145,14 +147,14 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Handles the Objectscolided message.
 		/// </summary>
-		/// <param name="m">The message to be handled</param>
-		protected void OnObjectsCollided(ObjectsCollided m)
+		/// <param name="message">The message to be handled</param>
+		protected void OnObjectsCollided(ObjectsCollided message)
 		{
-			if (m.Sender != _player || m.Sender == _player && _collisionTimer < _collisionInterval)
+			if (message.Sender != _player || message.Sender == _player && _collisionTimer < _collisionInterval)
 				return;
 
 			// Walk to the side a bit.
-			GoAwayFrom(_area, 2, _maxDistanceFromPlayer);
+			GoTopLayer(_minDistanceToPlayer, _maxDistanceToPlayer);
 			InnerMessage(new ReactToCollision(this, _player));
 			_collisionTimer = 0;
 		}
@@ -164,31 +166,33 @@ namespace Game.Entities.Characters.Tuttle
 		private void OnPinchedInDoor(PinchedInDoor message)
 		{
 			InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
-			GoAwayFrom(message.Sender.Area.Value);
+			GoTopLayer(_minDistanceToPlayer, _maxDistanceToPlayer);
 		}
 
 		/// <summary>
 		/// Tuttle makes few random steps in the current locality.
 		/// </summary>
-		protected void GoAwayFrom(Rectangle area, int minDistance = 4, int maxDistance = 10)
+		protected void GoTopLayer(float minDistance = _minDistanceToPlayer, float maxDistance = _maxDistanceToPlayer)
 		{
-			// Go away from the door. Find a random walkable tile near the player in the same locality where he's standing.
-			Rectangle aroundPlayer = new(_player.Area.Value);
-			aroundPlayer.Extend(4);
+			Vector2[] placements = FindFreePlacementsByPlayer(minDistance, maxDistance);
 
-			// Find walkable tiles around the player.
-			Vector2[] walkables =
-				(from p in _player.Area.Value.GetWalkableSurroundingPoints(minDistance, maxDistance)
-				 let distance = area.GetDistanceFrom(p)
-				 where _player.Locality.Area.Value.Contains(p) && distance >= minDistance && distance <= maxDistance
-				 orderby _player.Area.Value.GetDistanceFrom(p)
-				 select p)
+			// Tuttle tries each point from the array.
+			if (placements.Length > 0)
+				TryGoTo(placements);
+		}
+
+		private Vector2[] FindFreePlacementsByPlayer(float minDistance = _minDistanceToPlayer, float maxDistance = _maxDistanceToPlayer)
+		{
+			Rectangle playerArea = World.Player.Area.Value;
+			float height = transform.localScale.z;
+			float width = transform.localScale.x;
+
+			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, playerArea, height, width, minDistance, maxDistance, true)
 				.Take(20)
 				.ToArray();
 
-			// Tuttle tries each point from the array.
-			if (walkables != null)
-				TryGoTo(walkables);
+			float[] a = points.Select(p => playerArea.GetDistanceFrom(p)).ToArray();
+			return points;
 		}
 
 		protected void TryGoTo(Vector2[] points, bool watchPlayer = false)
@@ -360,7 +364,9 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void Reveal()
 		{
-			Vector2? target = World.GetRandomWalkablePoint(_player, _minDistanceFromPlayer, _maxDistanceFromPlayer);
+			Vector2? target = FindFreePlacementsByPlayer(_minDistanceToPlayer, _maxDistanceToPlayer)
+				.FirstOrDefault();
+
 			if (target == null)
 				throw new ArgumentNullException("No walkable tile near player");
 
@@ -376,7 +382,10 @@ namespace Game.Entities.Characters.Tuttle
 			if (_hidden || _carMovement == null)
 				return;
 
-			Vector2? target = World.GetRandomWalkablePoint(_carMovement.Target, 1, 2);
+			float height = transform.localScale.y;
+			float width = transform.localScale.x;
+			Vector2? target = World.FindFreePlacementsAroundArea(null, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
+				.FirstOrDefault();
 			if (target == null)
 				throw new ArgumentNullException("No walkable tile found.");
 

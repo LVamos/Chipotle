@@ -100,6 +100,10 @@ namespace Game.Entities.Items
 		{
 			base.SetArea(value);
 
+			// Don't search for localities till the item is not activated.
+			if (!_messagingEnabled)
+				return;
+
 			// Find out which localities the object now intersects, then sends the appropriate messages to the concerning localities.
 			Locality[] backup = Localities.ToArray();
 			FindLocalities();

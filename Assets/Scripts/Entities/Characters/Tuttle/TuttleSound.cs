@@ -17,7 +17,6 @@ namespace Game.Entities.Characters.Tuttle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class TuttleSound : Sound
 	{
-		private GameObject _movingSpeechObject;
 
 		/// <summary>
 		/// A sound played when Tuttle gets pinched in a door by another NPC.
@@ -96,17 +95,19 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Handles the ReactToCollision message.
 		/// </summary>
-		/// <param name="m">The message to be handled.</param>
-		private void OnReactToCollision(ReactToCollision m)
+		/// <param name="message">The message to be handled.</param>
+		private void OnReactToCollision(ReactToCollision message)
 		{
-			Sounds.Play("movcrashdefault", Owner.Area.Value.Center, _defaultVolume);
+			Sounds.Play("movcrashdefault", transform.position, _defaultVolume);
 			PlayMovingVoice();
 		}
 
+		private const string _movingSound = "TuttleHitByDoor";
+
 		private void PlayMovingVoice()
 		{
-			_movingSpeechObject.transform.position = Owner.Area.Value.Center;
-			_movingSpeechAudio.Play();
+			_voiceSlidePosition = transform.position;
+			_movingSpeechAudio = Sounds.Play(_movingSound, _voiceSlidePosition);
 		}
 
 		/// <summary>
@@ -133,9 +134,10 @@ namespace Game.Entities.Characters.Tuttle
 			if (_movingSpeechAudio == null || !_movingSpeechAudio.isPlaying)
 				return;
 
-			Vector2 source = message.SourcePosition.Value.Center;
+			float height = transform.localScale.y;
+			Vector3 source = message.SourcePosition.Value.Center.ToVector3(height);
 			_voiceSlidePosition = source;
-			_voiceSlideTarget = message.TargetPosition.Center;
+			_voiceSlideTarget = message.TargetPosition.Center.ToVector3(height);
 			Vector3 difference = _voiceSlideTarget - _voiceSlidePosition;
 			_voiceSlideDelta = new(difference.x / _voiceSlideTicks, 0, difference.z / _voiceSlideTicks);
 			_voiceSlideTimer = 0;
@@ -155,11 +157,11 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void DoVoiceSliding()
 		{
-			if (_voiceSlideTimer == -1 || !_movingSpeechAudio.isPlaying)
+			if (_voiceSlideTimer == -1 || _movingSpeechAudio is { isPlaying: false })
 				return;
 
 			_voiceSlidePosition += _voiceSlideDelta;
-			_movingSpeechObject.transform.position = _voiceSlideDelta;
+			_movingSpeechAudio.transform.position = _voiceSlidePosition;
 
 			if (++_voiceSlideTimer >= _voiceSlideTicks)
 			{

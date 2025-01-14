@@ -29,7 +29,6 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 using Message = Game.Messaging.Message;
-using Random = System.Random;
 using Rectangle = Game.Terrain.Rectangle;
 
 namespace Game
@@ -39,6 +38,41 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
+		public static IEnumerable<Vector2> FindFreePlacementsAroundArea(MapElement ignoredElement, Rectangle areaToAvoid, float height, float width, float minDistance, float maxDistance, bool sameLocality = true)
+		{
+			Rectangle maxArea = areaToAvoid;
+			maxArea.Extend(maxDistance);
+
+			IEnumerable<Vector2> candidatePoints = FindValidPlacements(ignoredElement, maxArea, height, width);
+
+			Locality locality = GetLocality(areaToAvoid.Center);
+			IEnumerable<Vector2> filteredPoints =
+				from point in candidatePoints
+				let inSameLocality = GetLocality(point) == locality
+				let tempArea = Rectangle.FromCenter(point, height, width)
+				let distance = areaToAvoid.GetDistanceFrom(tempArea)
+				let allowedDistance = distance >= minDistance && distance <= maxDistance
+				where inSameLocality && allowedDistance
+				orderby distance
+				select point
+				;
+			return filteredPoints;
+		}
+
+		public static IEnumerable<Vector2> FindValidPlacements(MapElement ignoredElement, Rectangle areaToAvoid, float height, float width)
+		{
+			List<Vector2> placements = new();
+
+			foreach (Vector2 point in areaToAvoid.GetPoints(Map.TileSize))
+			{
+				Rectangle rectangle = Rectangle.FromCenter(point, height, width);
+				CollisionsModel collisions = DetectCollisions(ignoredElement, rectangle);
+				if (collisions is { Obstacles: null, OutOfMap: false })
+					placements.Add(point);
+			}
+			return placements;
+		}
+
 		/// <summary>
 		/// Indicates if the game is in progress.
 		/// </summary>
@@ -112,12 +146,24 @@ namespace Game
 		/// <summary>
 		/// Detects collisions between the specified map element and other map elements.
 		/// </summary>
-		/// <param name="element">The element to be moved.</param>
+		/// <param name="ignoredElement">The element to be moved.</param>
 		/// <param name="area">The map element to detect collisions for.</param>
 		/// <returns>List of MapElements or null</returns>
-		public static CollisionsModel DetectCollisions(MapElement element, Rectangle area)
+		public static CollisionsModel DetectCollisions(MapElement ignoredElement, Rectangle area)
 		{
 			List<object> obstacles = new();
+
+			// Check precomputed nonwalkable tiles first.
+			Tile tile = World.Map[area.Center];
+			Locality locality = tile?.Locality;
+			if (locality != null && locality.IsWalkable(area))
+			{
+				DetectCollision(locality.Characters);
+				DetectCollision(locality.MovableItems);
+				if (obstacles.Any())
+					return new(obstacles, false);
+			}
+
 			List<Locality> localities = area.GetLocalities().ToList();
 
 			// Detect inaccesible terrain.
@@ -130,21 +176,11 @@ namespace Game
 				obstacles.AddRange(inaccessibleTiles.Cast<object>());
 
 			// Check all objects, passages and characters in localities the given element intersects. Skip the given element.
-			foreach (Locality locality in localities)
+			foreach (Locality l in localities)
 			{
-				void DetectCollision(IEnumerable<MapElement> elements)
-				{
-					IEnumerable<MapElement> newObstacles = elements
-						.Where(e => e != element && e.Area != null)
-						.Where(e => e.Area.Value.Intersects(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value));
-
-					if (newObstacles.Any())
-						obstacles.AddRange(newObstacles);
-				}
-
-				DetectCollision(locality.Objects);
-				DetectCollision(locality.Characters);
-				DetectCollision(locality.Passages.Where(p => p is Door d && (d.State == PassageState.Closed || d.State == PassageState.Locked)));
+				DetectCollision(l.Items);
+				DetectCollision(l.Characters);
+				DetectCollision(l.Passages.Where(p => p is Door d && (d.State == PassageState.Closed || d.State == PassageState.Locked)));
 			}
 
 			bool outOfMap = area.IsOutOfMap();
@@ -152,6 +188,16 @@ namespace Game
 			if (!obstacles.Any())
 				obstacles = null;
 			return new(obstacles, outOfMap);
+
+			void DetectCollision(IEnumerable<MapElement> elements)
+			{
+				IEnumerable<MapElement> newObstacles = elements
+					.Where(element => element.Area != null && element != ignoredElement)
+					.Where(e => e.Area.Value.Intersects(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value));
+
+				if (newObstacles.Any())
+					obstacles.AddRange(newObstacles);
+			}
 		}
 
 		/// <summary>
@@ -206,91 +252,6 @@ namespace Game
 		{
 			Queue<Vector2> path = _pathFinder.FindPath(start, goal, sameLocality, withStart, withGoal);
 			return path;
-		}
-
-		/// <summary>
-		/// Searches nearest surrounding of the specified map element and selects a random walkable tile.
-		/// </summary>
-		/// <param name="element">Specifies the map element around which to search</param>
-		/// <param name="minDistance">Specifies minimum distance oif the points from the surroundings.</param>
-		/// <param name="maxDistance">Specifies maximum distance fo the points in the surroundings.</param>
-		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetRandomWalkablePoint(MapElement element, int minDistance, int maxDistance)
-		{
-			return GetRandomWalkablePoint(element.Area.Value, minDistance, maxDistance);
-		}
-
-		/// <summary>
-		/// Searches nearest surrounding of the specified point and selects a random walkable tile.
-		/// </summary>
-		/// <param name="point">Specifies the point around which to search</param>
-		/// <param name="minDistance">Specifies minimum distance oif the points from the surroundings.</param>
-		/// <param name="maxDistance">Specifies maximum distance fo the points in the surroundings.</param>
-		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetRandomWalkablePoint(Vector2 point, int minDistance, int maxDistance)
-		{
-			return GetRandomWalkablePoint(new Rectangle(point), minDistance, maxDistance);
-		}
-
-		/// <summary>
-		/// Searches nearest surrounding of plane and selects a random walkable tile.
-		/// </summary>
-		/// <param name="maxDistance">Specifies width of the searched perimeter around the plane</param>
-		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetRandomWalkablePoint(Rectangle area, int minDistance, int maxDistance)
-		{
-			IEnumerable<Vector2> walkables =
-				area.GetWalkableSurroundingPoints(minDistance, maxDistance);
-
-			if (walkables.IsNullOrEmpty())
-				return null;
-
-			// Select a random point.
-			int index = (new Random())
-				.Next(walkables.Count());
-
-			return (Vector2?)walkables.ElementAt(index);
-		}
-
-		/// <summary>
-		/// Finds the nearest walkable tile in surroundings of this plane.
-		/// </summary>
-		/// <param name="element">The map element around which to search.</param>
-		/// <param name="minDistance">Minimum distance from center</param>
-		/// <param name="maxDistance">Maximum distance from center</param>
-		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetNearestWalkableTile(MapElement element, int minDistance, int maxDistance)
-		{
-			return GetNearestWalkableTile(element.Area.Value, minDistance, maxDistance);
-		}
-
-		/// <summary>
-		/// Finds the nearest walkable tile in surroundings of this plane.
-		/// </summary>
-		/// <param name="point">The point around which to search.</param>
-		/// <param name="minDistance">Minimum distance from center</param>
-		/// <param name="maxDistance">Maximum distance from center</param>
-		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetNearestWalkableTile(Vector2 point, int minDistance, int maxDistance)
-		{
-			return GetNearestWalkableTile(new Rectangle(point), minDistance, maxDistance);
-		}
-
-		/// <summary>
-		/// Finds the nearest walkable tile in surroundings of this plane.
-		/// </summary>
-		/// <param name="area">The plane around which to search.</param>
-		/// <param name="minDistance">Minimum distance from center</param>
-		/// <param name="maxDistance">Maximum distance from center</param>
-		/// <returns>Coordinates of the found walkable tile or null if nothing was found</returns>
-		public static Vector2? GetNearestWalkableTile(Rectangle area, int minDistance, int maxDistance)
-		{
-			return
-				(from p in area.GetWalkableSurroundingPoints(minDistance, maxDistance)
-				 let distance = GetDistance(area.GetClosestPoint(p), p)
-				 orderby distance
-				 select p)
-				.FirstOrDefault();
 		}
 
 		private static readonly float _cutsceneVolume = 1;
@@ -411,10 +372,12 @@ namespace Game
 		/// <returns>enumeration of localities</returns>
 		public static IEnumerable<Locality> GetLocalities(Game.Terrain.Rectangle area)
 		{
+			IEnumerable<Vector2> points = area.GetPoints(Map.TileSize);
 			return
-				from l in GetLocalities()
-				where l.Area.Value.Intersects(area)
-				select l;
+				points
+				.Select(p => World.Map[p])
+				.Where(t => t != null)
+				.Select(t => t.Locality);
 		}
 
 		/// <summary>
@@ -471,6 +434,7 @@ namespace Game
 		/// List of all simple game objects
 		/// </summary>
 		private static Dictionary<string, Item> _items;
+		private static Dictionary<string, Item> _movableItems;
 
 		/// <summary>
 		/// List of all passages
@@ -576,11 +540,7 @@ namespace Game
 		/// <returns>Distance between two map elements in meters</returns>
 		public static float GetDistance(MapElement element1, MapElement element2)
 		{
-			Vector2 point1 = element1.Area.Value.GetClosestPoint(element2.Area.Value.Center);
-			Vector2 point2 = element2.Area.Value.GetClosestPoint(point1);
-
-			// Verify that elements do not intersect.
-			return element1.Area.Value.Intersects(element2.Area.Value) ? 0 : GetDistance(point1, point2);
+			return element1.Area.Value.GetDistanceFrom(element2.Area.Value);
 		}
 
 		/// <summary>
@@ -591,7 +551,7 @@ namespace Game
 		/// <returns>Rounded distance between two given points</returns>
 		public static float GetDistance(Vector2 a, Vector2 b)
 		{
-			return (float)(Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y));
+			return Vector2.Distance(a, b);
 		}
 
 		/// <summary>
@@ -813,11 +773,11 @@ namespace Game
 			Locality locality = GetLocality(point);
 
 			if (locality == null
-				|| locality.IsPassable(point))
+				|| locality.IsWalkable(point))
 				return null;
 
 			return
-				 (from o in locality.Objects
+				 (from o in locality.Items
 				  let notHidden = o.Area != null
 				  let contains = o.Area.Value.Contains(point)
 				  where notHidden && contains
@@ -883,10 +843,11 @@ namespace Game
 		/// </summary>
 		public static void Initialize()
 		{
-			_items = new();
-			_localities = new();
-			_characters = new();
-			_passages = new();
+			_items = new(StringComparer.OrdinalIgnoreCase);
+			_movableItems = new(StringComparer.OrdinalIgnoreCase);
+			_localities = new(StringComparer.OrdinalIgnoreCase);
+			_characters = new(StringComparer.OrdinalIgnoreCase);
+			_passages = new(StringComparer.OrdinalIgnoreCase);
 			Sounds.Initialize();
 			GameObject obj = new();
 			_cutScenePlayer = obj.AddComponent<CutScenePlayer>();
@@ -1110,7 +1071,7 @@ namespace Game
 			LoadPassages(root, passageObjects);
 
 			foreach (Locality locality in _localities.Values)
-				locality.GatherNonpassables();
+				locality.GatherNonwalkables();
 		}
 
 		private static void LoadPassages(XElement root, Dictionary<string, GameObject> passageObjects)
