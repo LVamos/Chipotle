@@ -1,5 +1,4 @@
 ﻿using Game.Entities.Characters.Components;
-using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Sound;
 
 using ProtoBuf;
@@ -55,7 +54,7 @@ namespace Game.Entities.Characters.Christine
 		/// </summary>
 		private void JumpToBedroom()
 		{
-			InnerMessage(new SetPosition(this, new("1744, 1123"), true));
+			JumpTo(World.GetItem("zrcadlo p1").Area.Value);
 		}
 	}
 }

@@ -30,6 +30,29 @@ namespace Game.Entities.Characters.Components
 	[ProtoInclude(100, typeof(ChipotlePhysics))]
 	public class Physics : CharacterComponent
 	{
+		protected float _minObjectDistance = 2;
+		protected float _maxObjectDistance = 4;
+
+		protected void JumpTo(Rectangle area)
+		{
+			Vector2? target = FindFreePlacementsAroundArea(area, _minObjectDistance, _maxObjectDistance)
+				.FirstOrDefault();
+			if (target == null)
+				throw new InvalidOperationException("No free placement found.");
+			JumpTo(target.Value);
+		}
+
+		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance, bool sameLocality = true)
+		{
+			float height = transform.localScale.z;
+			float width = transform.localScale.x;
+
+			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, sameLocality)
+				.ToArray();
+
+			return points;
+		}
+
 		/// <summary>
 		/// Gets or sets the height of the character.
 		/// </summary>

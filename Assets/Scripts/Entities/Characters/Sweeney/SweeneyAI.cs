@@ -1,5 +1,4 @@
 ﻿using Game.Entities.Characters.Components;
-using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Sound;
 
 using ProtoBuf;
@@ -56,7 +55,7 @@ namespace Game.Entities.Characters.Sweeney
 		/// </summary>
 		private void JumpToSweeneysRoom()
 		{
-			InnerMessage(new SetPosition(this, new("1407, 978"), true));
+			JumpTo(World.GetItem("postel s1").Area.Value);
 		}
 	}
 }

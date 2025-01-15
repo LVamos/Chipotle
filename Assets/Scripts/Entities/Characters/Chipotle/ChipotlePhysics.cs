@@ -661,7 +661,7 @@ namespace Game.Entities.Characters.Chipotle
 				case "cs7": case "cs10": PlayFinalScene(); break;
 				case "cs11": WatchIcecreamMachine(); JumpToMariottisOffice(); break;
 				case "cs12": JumpToVanillaCrunchGarage(); break;
-				case "cs14": JumpToBelvedereStreet2(); break;
+				case "cs14": JumpToBelvedereStreet(); break;
 				case "cs15":
 				case "cs16":
 				case "cs17":
@@ -787,13 +787,13 @@ namespace Game.Entities.Characters.Chipotle
 		/// Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdoivá cesta w1)
 		/// locality right outside the Christine's door.Christine's front door.
 		/// </summary>
-		private void JumpToBelvedereStreet2()
+		private void JumpToBelvedereStreet()
 		{
 			_phoneCountdown = true;
 			Random r = new();
 			_phoneInterval = r.Next(30000, 120000);
 			_phoneDeltaTime = 0;
-			JumpTo(1813, 1126, true);
+			JumpTo(World.GetItem("zvonek p1").Area.Value);
 		}
 
 		/// <summary>
@@ -802,7 +802,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToChristinesHall()
 		{
-			JumpTo(1797, 1125, true);
+			JumpTo(World.GetItem("zeď p700").Area.Value);
 			World.PlayCutscene(Owner, "cs38");
 		}
 
@@ -812,7 +812,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToMariottisOffice()
 		{
-			JumpTo(2018, 1123, true);
+			JumpTo(World.GetItem("křeslo v6").Area.Value);
 		}
 
 		/// <summary>
@@ -821,7 +821,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToSweeneysHall()
 		{
-			JumpTo(1405, 965, true);
+			JumpTo(World.GetItem("skříň s1").Area.Value);
 			World.PlayCutscene(Owner, "cs41");
 		}
 
@@ -831,7 +831,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToVanillaCrunchGarage()
 		{
-			JumpTo(2006, 1166, true);
+			JumpTo(World.GetItem("zeď v6").Area.Value);
 		}
 
 		/// <summary>
