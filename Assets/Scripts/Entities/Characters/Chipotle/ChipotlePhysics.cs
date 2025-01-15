@@ -130,7 +130,7 @@ namespace Game.Entities.Characters.Chipotle
 
 			// set initial position.
 			Vector3 dimensions = new(.4f, 2, .4f);
-			gameObject.transform.localScale = dimensions;
+			transform.localScale = dimensions;
 			Vector2 position = Settings.TestChipotleStartPosition.HasValue ? Settings.TestChipotleStartPosition.Value
 				: new(1032, 1034);
 			StartPosition = Rectangle.FromCenter(position, dimensions.z, dimensions.x);
@@ -976,9 +976,10 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void HandleTerrainCollisions(List<object> elements)
 		{
-			IEnumerable<Vector2> terrainPoints = elements
+			Vector2[] terrainPoints = elements
 				.OfType<ValueTuple<Vector2, Tile>>()
-				.Select(t => t.Item1);
+				.Select(t => t.Item1)
+				.ToArray();
 
 			foreach (Vector2 point in terrainPoints)
 				InnerMessage(new TerrainCollided(this, point));

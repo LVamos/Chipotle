@@ -383,7 +383,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnTerrainCollided(TerrainCollided message)
 		{
-			PlayStep(message.Position);
+			float height = transform.localScale.y;
+			Vector3 finalPosition = message.Position.ToVector3(height);
+			PlayStep(finalPosition);
 		}
 
 		/// <summary>
