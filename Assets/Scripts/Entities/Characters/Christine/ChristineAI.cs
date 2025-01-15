@@ -20,7 +20,7 @@ namespace Game.Entities.Characters.Christine
 		public override void Activate()
 		{
 			base.Activate();
-			JumpTo(new(1774.3f, 1116.6f)); // At a table in her dining room
+			JumpTo(World.GetItem("stůl p1").Area.Value); // At a table in her dining room
 		}
 
 		/// <summary>

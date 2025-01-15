@@ -37,7 +37,7 @@ namespace Game.Entities.Characters.Carson
 		{
 			base.Activate();
 
-			JumpTo(new(1221.1f, 1019.4f)); // At a table in his garden
+			JumpTo(World.GetItem("stůl c1").Area.Value); // At a table in his garden
 		}
 
 		/// <summary>

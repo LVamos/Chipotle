@@ -11,6 +11,7 @@ using Game.Messaging.Events.Movement;
 
 using ProtoBuf;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,6 +53,8 @@ namespace Game.Entities.Characters.Components
 		/// Indicates what the NPC is doing in the moment.
 		/// </summary>
 		protected CharacterState _state = CharacterState.Waiting;
+		protected float _minObjectDistance = 2;
+		protected float _maxObjectDistance = 4;
 
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC
@@ -59,12 +62,12 @@ namespace Game.Entities.Characters.Components
 		[ProtoIgnore]
 		protected Character _player => World.Player;
 
-		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance)
+		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance, bool sameLocality = true)
 		{
 			float height = transform.localScale.z;
 			float width = transform.localScale.x;
 
-			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, true)
+			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, sameLocality)
 				.ToArray();
 
 			return points;
@@ -173,6 +176,15 @@ namespace Game.Entities.Characters.Components
 		protected void GoToPoint(Vector2 point, bool watchPlayer = false)
 		{
 			InnerMessage(new GotoPoint(this, point, watchPlayer));
+		}
+
+		protected void JumpTo(Rectangle area)
+		{
+			Vector2? target = FindFreePlacementsAroundArea(area, _minObjectDistance, _maxObjectDistance)
+				.FirstOrDefault();
+			if (target == null)
+				throw new InvalidOperationException("No free placement found.");
+			JumpTo(target.Value);
 		}
 	}
 }

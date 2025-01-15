@@ -16,7 +16,7 @@ namespace Game.Entities.Characters.Mariotti
 		public override void Activate()
 		{
 			base.Activate();
-			JumpTo(new(2015.5f, 1129.3f)); // At the reffrigerator in the office
+			JumpTo(World.GetItem("mrazák v1").Area.Value); // At the reffrigerator in the office
 		}
 	}
 }

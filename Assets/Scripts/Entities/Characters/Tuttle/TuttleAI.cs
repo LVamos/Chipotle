@@ -80,7 +80,7 @@ namespace Game.Entities.Characters.Tuttle
 			if (Settings.AllowTuttlesCustomPosition && Settings.TuttleTestStart.HasValue)
 				JumpTo(Settings.TuttleTestStart.Value);
 			else
-				JumpTo(new(1031.8f, 1035.5f));
+				JumpTo(new Vector2(1031.8f, 1035.5f));
 
 			// scenarios for debugging purposes
 			//if (Settings.SendTuttleToPool && !Settings.PlayCutscenes)
@@ -162,7 +162,7 @@ namespace Game.Entities.Characters.Tuttle
 			switch (message.CutsceneName)
 			{
 				case "cs6": GoToPool(); break;
-				case "cs14": JumpToBelvedereStreet2(); break;
+				case "cs14": JumpToBelvedereStreet(); break;
 				case "cs21": JumpToChristinesHall(); break;
 				case "cs23": JumpToSweeneysRoom(); break;
 				case "cs38": StartFollowingPlayer(); break;
@@ -192,10 +192,9 @@ namespace Game.Entities.Characters.Tuttle
 		/// cesta w1) locality to the Belvedere street (ulice p1) locality right outside the
 		/// Christine's door.
 		/// </summary>
-		private void JumpToBelvedereStreet2()
+		private void JumpToBelvedereStreet()
 		{
-			JumpTo(new(1801, 1124));
-			InnerMessage(new SetPosition(this, new("1801, 1124"), true));
+			JumpTo(World.GetItem("zvonek p1").Area.Value);
 			StartFollowingPlayer();
 		}
 
@@ -205,7 +204,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToChristinesHall()
 		{
-			JumpTo(new(1791, 1124));
+			JumpTo(World.GetItem("botník p1").Area.Value);
 		}
 
 		/// <summary>
@@ -222,7 +221,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToSweeneysRoom()
 		{
-			JumpTo(new(1411, 974));
+			JumpTo(World.GetItem("skříň s2").Area.Value);
 		}
 
 		/// <summary>

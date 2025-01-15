@@ -20,7 +20,7 @@ namespace Game.Entities.Characters.Sweeney
 		public override void Activate()
 		{
 			base.Activate();
-			JumpTo(new(1402.7f, 956.4f));
+			JumpTo(World.GetItem("stůl s1").Area.Value);
 		}
 
 		/// <summary>
