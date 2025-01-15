@@ -33,7 +33,7 @@ namespace Game.Entities.Characters.Components
 		protected float _minObjectDistance = 2;
 		protected float _maxObjectDistance = 4;
 
-		protected void JumpTo(Rectangle area)
+		protected void JumpNear(Rectangle area)
 		{
 			Vector2? target = FindFreePlacementsAroundArea(area, _minObjectDistance, _maxObjectDistance)
 				.FirstOrDefault();
@@ -937,7 +937,7 @@ namespace Game.Entities.Characters.Components
 
 			Rectangle area = Rectangle.FromCenter(GetNextPoint(), Height, Width);
 			if (!DetectCollisions(area))
-				JumpTo(area);
+				JumpNear(area);
 
 			if (HasReachedPlayer())
 				StopWalk();

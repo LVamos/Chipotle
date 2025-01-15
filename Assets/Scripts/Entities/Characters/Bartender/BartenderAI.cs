@@ -50,7 +50,7 @@ namespace Game.Entities.Characters.Bartender
 		public override void Activate()
 		{
 			base.Activate();
-			JumpTo(World.GetItem("pult h2").Area.Value); // At the bar in the pub
+			JumpNear(World.GetItem("pult h2").Area.Value); // At the bar in the pub
 		}
 
 		/// <summary>

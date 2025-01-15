@@ -194,7 +194,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToBelvedereStreet()
 		{
-			JumpTo(World.GetItem("zvonek p1").Area.Value);
+			JumpNear(World.GetItem("zvonek p1").Area.Value);
 			StartFollowingPlayer();
 		}
 
@@ -204,7 +204,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToChristinesHall()
 		{
-			JumpTo(World.GetItem("botník p1").Area.Value);
+			JumpNear(World.GetItem("botník p1").Area.Value);
 		}
 
 		/// <summary>
@@ -221,7 +221,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToSweeneysRoom()
 		{
-			JumpTo(World.GetItem("skříň s2").Area.Value);
+			JumpNear(World.GetItem("skříň s2").Area.Value);
 		}
 
 		/// <summary>

@@ -26,7 +26,6 @@ namespace Game.Entities.Characters.Components
 		/// Default voluem of sound output.
 		/// </summary>
 		protected const float _defaultVolume = 1;
-		protected const float _footStepHeight = 2;
 
 		/// <summary>
 		/// Adjusts the volume of an audio source over a specified duration to a target volume.
@@ -110,7 +109,8 @@ namespace Game.Entities.Characters.Components
 
 			// Set attenuation parameters
 			float volume = _walkVolume;
-			Vector3 position3d = position.ToVector3(_footStepHeight);
+			float height = transform.localScale.y;
+			Vector3 position3d = position.ToVector3(height);
 			if (obstacle is not ObstacleType.None and not ObstacleType.IndirectPath)
 			{
 				volume = Sounds.GetVolumeByObstacle(obstacle, _walkVolume, _walkVolume * 2);

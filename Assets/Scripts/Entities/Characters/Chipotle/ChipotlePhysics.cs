@@ -793,7 +793,7 @@ namespace Game.Entities.Characters.Chipotle
 			Random r = new();
 			_phoneInterval = r.Next(30000, 120000);
 			_phoneDeltaTime = 0;
-			JumpTo(World.GetItem("zvonek p1").Area.Value);
+			JumpNear(World.GetItem("zvonek p1").Area.Value);
 		}
 
 		/// <summary>
@@ -802,7 +802,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToChristinesHall()
 		{
-			JumpTo(World.GetItem("zeď p700").Area.Value);
+			JumpNear(World.GetItem("zeď p700").Area.Value);
 			World.PlayCutscene(Owner, "cs38");
 		}
 
@@ -812,7 +812,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToMariottisOffice()
 		{
-			JumpTo(World.GetItem("křeslo v6").Area.Value);
+			JumpNear(World.GetItem("křeslo v6").Area.Value);
 		}
 
 		/// <summary>
@@ -821,7 +821,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToSweeneysHall()
 		{
-			JumpTo(World.GetItem("skříň s1").Area.Value);
+			JumpNear(World.GetItem("skříň s1").Area.Value);
 			World.PlayCutscene(Owner, "cs41");
 		}
 
@@ -831,7 +831,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToVanillaCrunchGarage()
 		{
-			JumpTo(World.GetItem("zeď v6").Area.Value);
+			JumpNear(World.GetItem("zeď v6").Area.Value);
 		}
 
 		/// <summary>
@@ -976,13 +976,12 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void HandleTerrainCollisions(List<object> elements)
 		{
-			Vector2[] terrainPoints = elements
-				.OfType<ValueTuple<Vector2, Tile>>()
-				.Select(t => t.Item1)
+			TileInfo[] terrainPoints = elements
+				.OfType<TileInfo>()
 				.ToArray();
 
-			foreach (Vector2 point in terrainPoints)
-				InnerMessage(new TerrainCollided(this, point));
+			foreach (TileInfo tile in terrainPoints)
+				InnerMessage(new TerrainCollided(this, tile.Position));
 		}
 
 		private Vector2 GetContactPoint(MapElement element)

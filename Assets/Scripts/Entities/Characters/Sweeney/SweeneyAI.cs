@@ -19,7 +19,7 @@ namespace Game.Entities.Characters.Sweeney
 		public override void Activate()
 		{
 			base.Activate();
-			JumpTo(World.GetItem("stůl s1").Area.Value);
+			JumpNear(World.GetItem("stůl s1").Area.Value);
 		}
 
 		/// <summary>
@@ -55,7 +55,7 @@ namespace Game.Entities.Characters.Sweeney
 		/// </summary>
 		private void JumpToSweeneysRoom()
 		{
-			JumpTo(World.GetItem("postel s1").Area.Value);
+			JumpNear(World.GetItem("postel s1").Area.Value);
 		}
 	}
 }

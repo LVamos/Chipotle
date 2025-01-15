@@ -383,9 +383,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnTerrainCollided(TerrainCollided message)
 		{
-			float height = transform.localScale.y;
-			Vector3 finalPosition = message.Position.ToVector3(height);
-			PlayStep(finalPosition);
+			PlayStep(message.Position);
 		}
 
 		/// <summary>
@@ -395,7 +393,8 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnPositionChanged(PositionChanged message)
 		{
 			Vector2 center = message.TargetPosition.Center;
-			Camera.main.transform.position = center.ToVector3(_footStepHeight);
+			float height = transform.localScale.y;
+			Camera.main.transform.position = center.ToVector3(height);
 
 			if (!message.Silently)
 				PlayStep(center);

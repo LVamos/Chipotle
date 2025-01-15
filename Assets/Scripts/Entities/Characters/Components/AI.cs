@@ -178,7 +178,7 @@ namespace Game.Entities.Characters.Components
 			InnerMessage(new GotoPoint(this, point, watchPlayer));
 		}
 
-		protected void JumpTo(Rectangle area)
+		protected void JumpNear(Rectangle area)
 		{
 			Vector2? target = FindFreePlacementsAroundArea(area, _minObjectDistance, _maxObjectDistance)
 				.FirstOrDefault();

@@ -19,7 +19,7 @@ namespace Game.Entities.Characters.Christine
 		public override void Activate()
 		{
 			base.Activate();
-			JumpTo(World.GetItem("stůl p1").Area.Value); // At a table in her dining room
+			JumpNear(World.GetItem("stůl p1").Area.Value); // At a table in her dining room
 		}
 
 		/// <summary>
@@ -54,7 +54,7 @@ namespace Game.Entities.Characters.Christine
 		/// </summary>
 		private void JumpToBedroom()
 		{
-			JumpTo(World.GetItem("zrcadlo p1").Area.Value);
+			JumpNear(World.GetItem("zrcadlo p1").Area.Value);
 		}
 	}
 }
