@@ -10,13 +10,11 @@ using Game.Terrain;
 using ProtoBuf;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
-using Rectangle = Game.Terrain.Rectangle;
 
 namespace Game.Entities.Characters.Tuttle
 {
@@ -62,43 +60,9 @@ namespace Game.Entities.Characters.Tuttle
 		protected Locality _ridingTo;
 
 		/// <summary>
-		/// Handles the TuttleStateChanged message.
-		/// </summary>
-		/// <param name="message">The message</param>
-		private void OnTuttleStateChanged(CharacterStateChanged message)
-		{
-			_state = message.State;
-		}
-
-		/// <summary>
-		/// sets state of the NPC and announces the change to other components.
-		/// </summary>
-		private void SetState(CharacterState state)
-		{
-			_state = state;
-			InnerMessage(new CharacterStateChanged(this, state));
-		}
-
-		/// <summary>
-		/// Indicates what the NPC is doing in the moment.
-		/// </summary>
-		private CharacterState _state = CharacterState.Waiting;
-
-		/// <summary>
-		/// Reference to the Detective Chipotle NPC
-		/// </summary>
-		[ProtoIgnore]
-		private Character _player => World.Player;
-
-		/// <summary>
 		/// A delayed message of ChipotlesCarMoved type
 		/// </summary>
 		private ChipotlesCarMoved _carMovement;
-
-		/// <summary>
-		/// Indicates if the NPC is invisible for other NPCs and objects.
-		/// </summary>
-		private bool _hidden;
 
 		/// <summary>
 		/// Indicates if the Detective Chipotle NPC visited the Walsch's pool (bazén w1) locality.
@@ -135,7 +99,7 @@ namespace Game.Entities.Characters.Tuttle
 			{
 				case ObjectsCollided m: OnObjectsCollided(m); break;
 				case PinchedInDoor h: OnPinchedInDoor(h); break;
-				case CharacterStateChanged tsc: OnTuttleStateChanged(tsc); break;
+				case CharacterStateChanged tsc: OnCharacterStateChanged(tsc); break;
 				case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
@@ -154,7 +118,7 @@ namespace Game.Entities.Characters.Tuttle
 				return;
 
 			// Walk to the side a bit.
-			GoTopLayer(_minDistanceToPlayer, _maxDistanceToPlayer);
+			GoTo(_player.Area.Value, _minDistanceToPlayer, _maxDistanceToPlayer);
 			InnerMessage(new ReactToCollision(this, _player));
 			_collisionTimer = 0;
 		}
@@ -166,57 +130,7 @@ namespace Game.Entities.Characters.Tuttle
 		private void OnPinchedInDoor(PinchedInDoor message)
 		{
 			InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
-			GoTopLayer(_minDistanceToPlayer, _maxDistanceToPlayer);
-		}
-
-		/// <summary>
-		/// Tuttle makes few random steps in the current locality.
-		/// </summary>
-		protected void GoTopLayer(float minDistance = _minDistanceToPlayer, float maxDistance = _maxDistanceToPlayer)
-		{
-			Vector2[] placements = FindFreePlacementsByPlayer(minDistance, maxDistance);
-
-			// Tuttle tries each point from the array.
-			if (placements.Length > 0)
-				TryGoTo(placements);
-		}
-
-		private Vector2[] FindFreePlacementsByPlayer(float minDistance = _minDistanceToPlayer, float maxDistance = _maxDistanceToPlayer)
-		{
-			Rectangle playerArea = World.Player.Area.Value;
-			float height = transform.localScale.z;
-			float width = transform.localScale.x;
-
-			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, playerArea, height, width, minDistance, maxDistance, true)
-				.Take(20)
-				.ToArray();
-
-			float[] a = points.Select(p => playerArea.GetDistanceFrom(p)).ToArray();
-			return points;
-		}
-
-		protected void TryGoTo(Vector2[] points, bool watchPlayer = false)
-		{
-			InnerMessage(new TryGoTo(this, points, watchPlayer));
-		}
-
-		/// <summary>
-		/// Sends Tuttle to the specified point.
-		/// </summary>
-		/// <param name="point">The target point</param>
-		/// <param name="watchPlayer">Specifies if Tuttle should stop following the player while leading to the target</param>
-		protected void GoToPoint(Vector2 point, bool watchPlayer = false)
-		{
-			InnerMessage(new GotoPoint(this, point, watchPlayer));
-		}
-
-		/// <summary>
-		/// Sends Tuttle on the specified path.
-		/// </summary>
-		/// <param name="path">The path to be folloewd</param>
-		protected void FollowPath(Queue<Vector2> path)
-		{
-			InnerMessage(new FollowPath(this, path));
+			GoTo(_player.Area.Value, _minDistanceToPlayer, _maxDistanceToPlayer);
 		}
 
 		/// <summary>
@@ -251,7 +165,7 @@ namespace Game.Entities.Characters.Tuttle
 				case "cs14": JumpToBelvedereStreet2(); break;
 				case "cs21": JumpToChristinesHall(); break;
 				case "cs23": JumpToSweeneysRoom(); break;
-				case "cs38": StartFollowing(); break;
+				case "cs38": StartFollowingPlayer(); break;
 			}
 		}
 
@@ -274,15 +188,6 @@ namespace Game.Entities.Characters.Tuttle
 		private bool _playerWasByThePool;
 
 		/// <summary>
-		/// Makes the NPC invisible for the other NPCs and objects.
-		/// </summary>
-		private void Hide()
-		{
-			_hidden = true;
-			InnerMessage(new Hide(this));
-		}
-
-		/// <summary>
 		/// The Detective Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdová
 		/// cesta w1) locality to the Belvedere street (ulice p1) locality right outside the
 		/// Christine's door.
@@ -291,7 +196,7 @@ namespace Game.Entities.Characters.Tuttle
 		{
 			JumpTo(new(1801, 1124));
 			InnerMessage(new SetPosition(this, new("1801, 1124"), true));
-			StartFollowing();
+			StartFollowingPlayer();
 		}
 
 		/// <summary>
@@ -301,14 +206,6 @@ namespace Game.Entities.Characters.Tuttle
 		private void JumpToChristinesHall()
 		{
 			JumpTo(new(1791, 1124));
-		}
-
-		/// <summary>
-		/// Starts following the player.
-		/// </summary>
-		private void StartFollowing()
-		{
-			InnerMessage(new StartFollowingPlayer(this));
 		}
 
 		/// <summary>
@@ -349,7 +246,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// <param name="message">The message to be processed</param>
 		private void OnLocalityEntered(CharacterCameToLocality message)
 		{
-			// When the player first time enters the loclaity start following him.
+			// When the player first time enters the locality start following him.
 			if (message.Character == _player && Owner.Locality.Name.Indexed == "bazén w1" && !_playerWasByPool)
 			{
 				_playerWasByPool = true;
@@ -362,16 +259,14 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Makes the NPC visible to the other NPCs and objects.
 		/// </summary>
-		private void Reveal()
+		protected void Reveal()
 		{
-			Vector2? target = FindFreePlacementsByPlayer(_minDistanceToPlayer, _maxDistanceToPlayer)
+			Vector2? target = FindFreePlacementsAroundArea(_player.Area.Value, _minDistanceToPlayer, _maxDistanceToPlayer)
 				.FirstOrDefault();
 
 			if (target == null)
 				throw new ArgumentNullException("No walkable tile near player");
-
-			_hidden = false;
-			InnerMessage(new Reveal(this, new((Vector2)target)));
+			base.Reveal(target.Value);
 		}
 
 		/// <summary>
@@ -399,7 +294,7 @@ namespace Game.Entities.Characters.Tuttle
 		public override void GameUpdate()
 		{
 			base.GameUpdate();
-			WaitForChipotle();
+			WaitForPlayer();
 			WatchTimers();
 		}
 
@@ -415,7 +310,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Restarts following the Chipotle NPC if they both arrived to a new locality by car.
 		/// </summary>
-		private void WaitForChipotle()
+		private void WaitForPlayer()
 		{
 			if (_ridingTo != null && Owner.Locality == _ridingTo && World.Player.Locality == _ridingTo)
 			{

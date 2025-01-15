@@ -4,10 +4,15 @@ using Game.Entities.Characters.Christine;
 using Game.Entities.Characters.Mariotti;
 using Game.Entities.Characters.Sweeney;
 using Game.Entities.Characters.Tuttle;
+using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
+using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.Movement;
 
 using ProtoBuf;
+
+using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -28,10 +33,63 @@ namespace Game.Entities.Characters.Components
 	[ProtoInclude(105, typeof(TuttleAI))]
 	public class AI : CharacterComponent
 	{
+		protected virtual void Reveal(Vector2 target)
+		{
+			_hidden = false;
+			InnerMessage(new Reveal(this, new(target)));
+		}
 		/// <summary>
 		/// Area occupied by the NPC
 		/// </summary>
 		protected Rectangle _area;
+
+		/// <summary>
+		/// Indicates if the NPC is invisible for other NPCs and objects.
+		/// </summary>
+		protected bool _hidden;
+
+		/// <summary>
+		/// Indicates what the NPC is doing in the moment.
+		/// </summary>
+		protected CharacterState _state = CharacterState.Waiting;
+
+		/// <summary>
+		/// Reference to the Detective Chipotle NPC
+		/// </summary>
+		[ProtoIgnore]
+		protected Character _player => World.Player;
+
+		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance)
+		{
+			float height = transform.localScale.z;
+			float width = transform.localScale.x;
+
+			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, true)
+				.ToArray();
+
+			return points;
+		}
+
+		/// <summary>
+		/// Sends Tuttle on the specified path.
+		/// </summary>
+		/// <param name="path">The path to be folloewd</param>
+		protected void FollowPath(Queue<Vector2> path)
+		{
+			InnerMessage(new FollowPath(this, path));
+		}
+
+		/// <summary>
+		/// Tuttle makes few random steps in the current locality.
+		/// </summary>
+		protected void GoTo(Rectangle area, float minDistance, float maxDistance)
+		{
+			Vector2[] placements = FindFreePlacementsAroundArea(area, minDistance, maxDistance);
+
+			// Tuttle tries each point from the array.
+			if (placements.Length > 0)
+				TryGoTo(placements);
+		}
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -59,12 +117,62 @@ namespace Game.Entities.Characters.Components
 		}
 
 		/// <summary>
+		/// Handles the TuttleStateChanged message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		protected void OnCharacterStateChanged(CharacterStateChanged message)
+		{
+			_state = message.State;
+		}
+
+		/// <summary>
 		/// Processes the PositionChanged message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected void OnPositionChanged(PositionChanged message)
 		{
 			_area = message.TargetPosition;
+		}
+
+		/// <summary>
+		/// sets state of the NPC and announces the change to other components.
+		/// </summary>
+		protected void SetState(CharacterState state)
+		{
+			_state = state;
+			InnerMessage(new CharacterStateChanged(this, state));
+		}
+
+		/// <summary>
+		/// Starts following the player.
+		/// </summary>
+		protected void StartFollowingPlayer()
+		{
+			InnerMessage(new StartFollowingPlayer(this));
+		}
+
+		protected void TryGoTo(Vector2[] points, bool watchPlayer = false)
+		{
+			InnerMessage(new TryGoTo(this, points, watchPlayer));
+		}
+
+		/// <summary>
+		/// Makes the NPC invisible for the other NPCs and objects.
+		/// </summary>
+		protected void Hide()
+		{
+			_hidden = true;
+			InnerMessage(new Hide(this));
+		}
+
+		/// <summary>
+		/// Sends Tuttle to the specified point.
+		/// </summary>
+		/// <param name="point">The target point</param>
+		/// <param name="watchPlayer">Specifies if Tuttle should stop following the player while leading to the target</param>
+		protected void GoToPoint(Vector2 point, bool watchPlayer = false)
+		{
+			InnerMessage(new GotoPoint(this, point, watchPlayer));
 		}
 	}
 }
