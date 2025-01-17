@@ -14,6 +14,9 @@ public class AutoPlayBehaviour : MonoBehaviour
 {
 	public void Start()
 	{
+		Logger.Initialize("log.html");
+		Logger.LogInfo("Hra spuštěna");
+
 		// camera settings
 		if (Camera.main == null)
 		{
@@ -22,12 +25,19 @@ public class AutoPlayBehaviour : MonoBehaviour
 				tag = "MainCamera"
 			};
 			newCamera.AddComponent<Camera>();
+			Logger.LogInfo("Kamera vytvořena");
 		}
 
 		if (Camera.main.GetComponent<AudioListener>() == null)
+		{
 			Camera.main.gameObject.AddComponent<AudioListener>();
+			Logger.LogInfo("Listener vytvořen");
+		}
 		if (Camera.main.GetComponent<ResonanceAudioListener>() == null)
+		{
 			Camera.main.gameObject.AddComponent<ResonanceAudioListener>();
+			Logger.LogInfo("ResonanceAudioListener vytvořen");
+		}
 
 		Camera.main.clearFlags = CameraClearFlags.Nothing;
 		Camera.main.cullingMask = 0;
