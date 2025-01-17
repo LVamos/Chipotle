@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 
 /// <summary>
 /// Provides static methods for logging HTML-formatted messages to a file.
@@ -28,9 +30,10 @@ public static class Logger
 	/// </summary>
 	private static void InitializeLogFile()
 	{
-		// If the file does not exist, create it with initial HTML structure.
-		if (!File.Exists(_filePath))
+		// If the file exists, delete it to start fresh with initial HTML structure.
+		if (File.Exists(_filePath))
 		{
+			File.Delete(_filePath);
 			string header = "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Log</title></head><body>\n";
 			File.WriteAllText(_filePath, header);
 		}
@@ -47,44 +50,63 @@ public static class Logger
 	}
 
 	/// <summary>
-	/// Writes a log entry to the file with a message and marks it as error if specified.
+	/// Writes a log entry to the file with a title and multiple messages, marking it as error if specified.
+	/// Each newline in messages is replaced with an HTML line break.
+	/// After logging all messages, the current timestamp with milliseconds is appended as the last list item.
+	/// The entry starts with a level 2 heading for the message type and a level 1 heading for the title.
 	/// </summary>
-	/// <param name="message">The message to log.</param>
 	/// <param name="isError">Whether the log entry represents an error.</param>
-	private static void Log(string message, bool isError)
+	/// <param name="title">The title of the log entry.</param>
+	/// <param name="messages">An array of messages to log.</param>
+	private static void Log(bool isError, string title, params string[] messages)
 	{
+		// Filter out the empty messages
+		messages = messages.Where(m => !string.IsNullOrEmpty(m)).ToArray();
+
 		// Choose heading based on message type
 		string heading = isError ? "<h2 style='color:red;'>Error</h2>" : "<h2>Info</h2>";
 
 		// Format time with milliseconds
 		string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
 
-		// Create HTML fragment
+		// Build HTML list items for each message, replacing newlines with <br>
+		StringBuilder listItems = new();
+		foreach (string message in messages)
+		{
+			string processed = WebUtility.HtmlEncode(message.Replace(Environment.NewLine, "<br>"));
+			listItems.AppendLine($"<li>{processed}</li>");
+		}
+		// Append timestamp as the last list item
+		listItems.AppendLine($"<li><em>{timestamp}</em></li>");
+
+		// Create HTML fragment with level 2 heading for type and level 1 heading for title
 		string htmlEntry = $@"
 {heading}
+<h1>{WebUtility.HtmlEncode(title)}</h1>
 <ul>
-    <li>{WebUtility.HtmlEncode(message)}</li>
-    <li><em>{timestamp}</em></li>
+{listItems}
 </ul>
 ";
 		File.AppendAllText(_filePath, htmlEntry);
 	}
 
 	/// <summary>
-	/// Logs an error message.
+	/// Logs an error message or multiple error messages with a title.
 	/// </summary>
-	/// <param name="message">The error message to log.</param>
-	public static void LogError(string message)
+	/// <param name="title">The title of the error message.</param>
+	/// <param name="messages">The error messages to log.</param>
+	public static void LogError(string title, params string[] messages)
 	{
-		Log(message, isError: true);
+		Log(isError: true, title, messages);
 	}
 
 	/// <summary>
-	/// Logs an informational message.
+	/// Logs an informational message or multiple informational messages with a title.
 	/// </summary>
-	/// <param name="message">The informational message to log.</param>
-	public static void LogInfo(string message)
+	/// <param name="title">The title of the informational message.</param>
+	/// <param name="messages">The informational messages to log.</param>
+	public static void LogInfo(string title, params string[] messages)
 	{
-		Log(message, isError: false);
+		Log(isError: false, title, messages);
 	}
 }

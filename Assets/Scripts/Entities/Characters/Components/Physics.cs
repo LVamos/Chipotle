@@ -563,6 +563,45 @@ namespace Game.Entities.Characters.Components
 
 			if (targetLocality != sourceLocality)
 				InnerMessage(new LocalityChanged(this, sourceLocality, targetLocality));
+			LogPosition();
+		}
+
+		protected void LogPosition()
+		{
+			string title = "Krok";
+			string name = Owner.Name.Indexed;
+
+			string position = string.Empty;
+			if (Owner.Area == null)
+				position += ": pozice: nenastavena";
+			else
+				position += $"Pozice: {Owner.Area.Value.Center.GetString()}";
+
+			string locality = string.Empty;
+			if (Owner.Locality == null)
+				locality = "Lokace: neznámá";
+			else
+				locality = $"Lokace: {Owner.Locality.Name.Indexed}";
+
+			string relativePosition = string.Empty;
+			if (Owner.Locality != null)
+				relativePosition = $"Relativní pozice: {Rectangle.GetRelativeCoordinates(Owner.Area.Value.Center)}";
+
+			string objectsBefore = null;
+			if (Owner.Area != null)
+			{
+				IEnumerable<Entity> query = GetItemsAndCharactersBefore(_objectManipulationRadius);
+				if (!query.IsNullOrEmpty())
+				{
+					string[] objects = query
+						.Select(e => e.Name.Indexed)?
+						.ToArray();
+					objectsBefore = string.Join(',', objects);
+					objectsBefore = $"Objekty před: {objects}";
+				}
+			}
+
+			Logger.LogInfo(title, name, position, relativePosition, locality, objectsBefore);
 		}
 
 		/// <summary>
