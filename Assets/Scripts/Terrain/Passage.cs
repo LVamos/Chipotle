@@ -26,14 +26,18 @@ namespace Game.Terrain
 		/// </summary>
 		/// <returns>text description of the passage</returns>
 		public override string ToString()
-			=> "průchod";
+		{
+			return "průchod";
+		}
 
 		/// <summary>
 		/// Checks if the specified point lays in front or behind the passage.
 		/// </summary>
 		/// <returns>True if the specified point lays in front or behind the passage</returns>
 		public bool IsInFrontOrBehind(Vector2 point)
-			=> IsInRelatedLocality(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
+		{
+			return IsInRelatedLocality(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
+		}
 
 		private bool IsInHorizontalRange(Vector2 point)
 		{
@@ -52,7 +56,9 @@ namespace Game.Terrain
 		/// <param name="point">The point to be checked</param>
 		/// <returns>True if the specified point lays in one of the localities connected by the passage</returns>
 		public bool IsInRelatedLocality(Vector2 point)
-			=> Localities.Any(l => l.Area.Value.Contains(point));
+		{
+			return Localities.Any(l => l.Area.Value.Contains(point));
+		}
 
 		/// <summary>
 		/// Checks if the passage is horizontal.
@@ -71,7 +77,9 @@ namespace Game.Terrain
 		/// </summary>
 		/// <returns>True if the passage is vertical</returns>
 		public bool IsVertical()
-			=> !IsHorizontal();
+		{
+			return !IsHorizontal();
+		}
 
 		/// <summary>
 		/// Indicates if the door is open or closed.
@@ -84,7 +92,9 @@ namespace Game.Terrain
 		/// <param name="l">The locality to be checked</param>
 		/// <returns>True if the passage leads to the specified locality</returns>
 		public bool LeadsTo(Locality l)
-			=> Localities.Contains(l);
+		{
+			return Localities.Contains(l);
+		}
 
 		/// <summary>
 		/// Localities connected by the passage
@@ -104,7 +114,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Localities connected by the passage
 		/// </summary>
-		private string[] _localities = new string[2];
+		protected string[] _localities = new string[2];
 
 		/// <summary>
 		/// Constructor
@@ -145,7 +155,9 @@ namespace Game.Terrain
 		/// <param name="comparedLocality">The locality to be compared</param>
 		/// <returns>The other side of the passage than the specified one</returns>
 		public Locality AnotherLocality(Locality comparedLocality)
-			=> Localities.First(l => l.Name.Indexed != comparedLocality.Name.Indexed);
+		{
+			return Localities.First(l => l.Name.Indexed != comparedLocality.Name.Indexed);
+		}
 
 		/// <summary>
 		/// Displays the passage in the game world.
@@ -176,12 +188,13 @@ namespace Game.Terrain
 				l.Unregister(this);
 		}
 
-
 		/// <summary>
 		/// Returns pooint that belongs to this object and is the most close to the player.
 		/// </summary>
 		protected Vector2 GetClosestPointToPlayer()
-			=> _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
+		{
+			return _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
+		}
 
 		/// <summary>
 		/// stores a locality in which the player is located after navigation start.

@@ -882,6 +882,17 @@ namespace Game.Entities.Characters.Components
 		{
 			Vector2 point = FindManipulationPoint(door);
 			door.TakeMessage(new UseDoor(Owner, point));
+			LogDoorUsage(door);
+		}
+
+		protected void LogDoorUsage(Door door)
+		{
+			string title = "Postava použila dveře";
+			string name = Owner.Name.Indexed;
+			string doorDestination = door.AnotherLocality(Locality).To;
+			string doorName = $"Název dveří: {door.Name.Indexed}";
+
+			Logger.LogInfo(title, name, doorDestination, doorName);
 		}
 
 		/// <summary>
@@ -1069,6 +1080,16 @@ namespace Game.Entities.Characters.Components
 			string objectsBefore = GetObjectsBeforeForLog();
 
 			Logger.LogInfo(title, name, initialMessage, targetMessage, deltaMessage, objectsBefore);
+		}
+
+		protected void LogDoorCollision(Door door)
+		{
+			string title = "Postava narazila do dveří";
+			string name = $"Postava: {Owner.Name.Indexed}";
+			string doorDestination = door.AnotherLocality(Locality).To;
+			string doorName = $"Název dveří: {door.Name.Indexed}";
+
+			Logger.LogInfo(title, name, doorDestination, doorName);
 		}
 	}
 }

@@ -123,9 +123,27 @@ namespace Game.Terrain
 		/// <param name="message">The message to be handled</param>
 		protected virtual void OnDoorHit(DoorHit message)
 		{
-			float cameraHeight = Camera.main.transform.localScale.y;
-			Vector3 position = new(message.Point.x, cameraHeight, message.Point.y);
-			Sounds.Play(_sounds["hit"], position, _defaultVolume);
+			Character character = message.Sender as Character;
+			float characterHeight = character.transform.localScale.y;
+			Vector3 slamPoint = message.Point.ToVector3(characterHeight);
+			PlayDoorHit(message.Point);
+			LogDoorHit(message.Sender as Character, message.Point);
+		}
+
+		private void LogDoorHit(Character character, Vector2 point)
+		{
+			string title = "Náraz do dveří";
+			string name = $"Název: {Name.Indexed}";
+			string characterMessage = $"Postava {character.Name.Indexed} v lokaci {character.Locality.Name.Indexed}";
+			string type = $"typ dveří: {ToString()}";
+			string localities = $"Lokace: {_localities[0]}, {_localities[1]}";
+
+			Logger.LogInfo(title, name, localities, type, characterMessage);
+		}
+
+		private void PlayDoorHit(Vector3 point)
+		{
+			Sounds.Play(_sounds["hit"], point, _defaultVolume);
 		}
 
 		/// <summary>
@@ -133,13 +151,23 @@ namespace Game.Terrain
 		/// </summary>
 		protected void Close(object sender, Vector2 point)
 		{
-			if (Area.Value.Walkable())
-			{
-				State = PassageState.Closed;
+			if (!Area.Value.Walkable())
+				return;
 
-				AnnounceManipulation();
-				Play(_closingSound, sender as Character, point);
-			}
+			State = PassageState.Closed;
+
+			AnnounceManipulation();
+			Play(_closingSound, sender as Character, point);
+			LogClosing();
+		}
+
+		private void LogClosing()
+		{
+			string title = "Dveře zavřeny";
+			string name = $"Název: {Name.Indexed}";
+			string type = $"typ dveří: {ToString()}";
+
+			Logger.LogInfo(title, name, type);
 		}
 
 		private void AnnounceManipulation()
@@ -219,6 +247,7 @@ namespace Game.Terrain
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnUseDoor(UseDoor message)
 		{
+			LogUsage(message.Sender, message.ManipulationPoint);
 			if (State == PassageState.Locked)
 			{
 				Rattle(message.Sender as Character, message.ManipulationPoint);
@@ -244,7 +273,9 @@ namespace Game.Terrain
 			}
 
 			// The door is open. If there are some objects or entities blocking the door then inform them that they were slammed by the door and let the door open.
-			IEnumerable<Entity> obstacles = GetObstacles().Where(o => o != World.Player);
+			Entity[] obstacles = GetObstacles()
+				.Where(o => o != World.Player)
+				.ToArray();
 			if (obstacles.IsNullOrEmpty()) // No obstacles, close the door.
 			{
 				if (_manipulationTimer >= _manipulationTimeLimit)
@@ -259,24 +290,61 @@ namespace Game.Terrain
 			if (_pinchTimer < _pinchTimeLimit)
 				return;
 
-			// Play a slamming sound at the nearest entity or object
+			PinchEntities(message.Sender as Character, obstacles);
+		}
+
+		private void PinchEntities(Character character, Entity[] entities)
+		{
 			_pinchTimer = 0;
+			float characterHeight = character.transform.localScale.y;
 
-			Vector3 slamPoint = obstacles.OrderBy(o => o.Area.Value.GetDistanceFrom(_area.Value.Center)).First().Area.Value.Center;
-			Play(_sounds["hit"], message.Sender as Character, slamPoint);
-
-			// Inform the obstacles without closing the door.
-
-			foreach (Entity o in obstacles)
+			foreach (Entity entity in entities)
 			{
-				PinchedInDoor pMessage = new(this, (Character)message.Sender);
-				o.TakeMessage(pMessage);
+				Vector2 center = entity.Area.Value.Center;
+				Vector3 slamPoint = center.ToVector3(characterHeight);
+				Play(_sounds["hit"], character, slamPoint);
+
+				PinchedInDoor pMessage = new(this, character);
+				entity.TakeMessage(pMessage);
 			}
+		}
+
+		protected string GetStateDescription()
+		{
+			return State switch
+			{
+				PassageState.Closed => "zavřené",
+				PassageState.Open => "otevřené",
+				PassageState.Locked => "zamčené",
+				_ => "neznámý stav"
+			};
+		}
+
+		private void LogUsage(Character sender, Vector2 manipulationPoint)
+		{
+			string title = "Dveře reagují na použití";
+			string doorName = $"Název: {Name.Indexed}";
+			string characterName = $"Postava: {sender.Name.Indexed}";
+			string doorType = $"typ dveří: {ToString()}";
+			string doorState = $"Stav dveří: {GetStateDescription()}";
+			string point = $"Bod: {manipulationPoint.GetString()}";
+
+			Logger.LogInfo(title, doorName, characterName, doorType, doorState, point);
 		}
 
 		protected void Rattle(Character character, Vector2 manipulationPoint)
 		{
 			Play(_sounds["rattle"], character, manipulationPoint);
+			LogRattling();
+		}
+
+		private void LogRattling()
+		{
+			string title = "Lomcování dveřmi";
+			string name = $"Název: {Name.Indexed}";
+			string type = $"typ dveří: {ToString()}";
+
+			Logger.LogInfo(title, name, type);
 		}
 
 		/// <summary>
@@ -291,6 +359,16 @@ namespace Game.Terrain
 
 			AnnounceManipulation();
 			Play(_openingSound, sender as Character, point);
+			LogOpening();
+		}
+
+		private void LogOpening()
+		{
+			string title = "Dveře otevřeny";
+			string name = $"Název: {Name.Indexed}";
+			string type = $"typ dveří: {ToString()}";
+
+			Logger.LogInfo(title, name, type);
 		}
 
 		/// <summary>

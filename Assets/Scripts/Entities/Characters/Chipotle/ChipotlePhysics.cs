@@ -948,6 +948,7 @@ namespace Game.Entities.Characters.Chipotle
 				DoorHit doorHitMessage = new(Owner, door, contactPoint);
 				door.TakeMessage(doorHitMessage);
 				InnerMessage(doorHitMessage);
+				LogDoorCollision(door);
 				return true;
 			}
 			return false;
@@ -1249,8 +1250,11 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			Vector2? point = FindManipulationPoint(element);
 
-			if (element is Door)
-				element.TakeMessage(new UseDoor(Owner, point.Value));
+			if (element is Door door)
+			{
+				door.TakeMessage(new UseDoor(Owner, point.Value));
+				LogDoorUsage(door);
+			}
 			else
 				element.TakeMessage(new ObjectsUsed(Owner, point.Value, element as Item));
 		}
