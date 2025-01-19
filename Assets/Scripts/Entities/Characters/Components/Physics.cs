@@ -587,6 +587,13 @@ namespace Game.Entities.Characters.Components
 			if (Owner.Locality != null)
 				relativePosition = $"Relativní pozice: {Rectangle.GetRelativeCoordinates(Owner.Area.Value.Center)}";
 
+			string objectsBefore = GetObjectsBeforeForLog();
+
+			Logger.LogInfo(title, name, position, relativePosition, locality, objectsBefore);
+		}
+
+		protected string GetObjectsBeforeForLog()
+		{
 			string objectsBefore = null;
 			if (Owner.Area != null)
 			{
@@ -601,7 +608,7 @@ namespace Game.Entities.Characters.Components
 				}
 			}
 
-			Logger.LogInfo(title, name, position, relativePosition, locality, objectsBefore);
+			return objectsBefore;
 		}
 
 		/// <summary>
@@ -1031,6 +1038,28 @@ namespace Game.Entities.Characters.Components
 
 			if (door is { State: PassageState.Closed })
 				UseDoor(door); // Open the door and keep walking.
+		}
+
+		/// <summary>
+		/// Logs the change in orientation.
+		/// </summary>
+		/// <param name="initial">The initial orientation</param>
+		/// <param name="target">The target orientation</param>
+		/// <param name="delta">The change in orientation</param>
+		protected void LogOrientationChange(Orientation2D initial, Orientation2D target, int delta)
+		{
+			string title = "Orientace změněna";
+			string name = Owner.Name.Indexed;
+			string initialCardinalDirection = initial.Angle.GetCardinalDirection().GetDescription();
+			string targetCardinalDirection = target.Angle.GetCardinalDirection().GetDescription();
+			float initialCompassDegrees = ((float)initial.Angle.CompassDegrees).Round();
+			float targetCompassDegrees = ((float)target.Angle.CompassDegrees).Round();
+			string initialMessage = $"Původní orientace: {initialCardinalDirection} ({initialCompassDegrees})";
+			string targetMessage = $"Nová orientace: {targetCardinalDirection} ({targetCompassDegrees})";
+			string deltaMessage = $"Změna: {delta}°";
+			string objectsBefore = GetObjectsBeforeForLog();
+
+			Logger.LogInfo(title, name, initialMessage, targetMessage, deltaMessage, objectsBefore);
 		}
 	}
 }
