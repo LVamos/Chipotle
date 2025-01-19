@@ -30,6 +30,15 @@ namespace Game.Entities.Characters.Components
 	[ProtoInclude(100, typeof(ChipotlePhysics))]
 	public class Physics : CharacterComponent
 	{
+		protected void LogOutOfMapAttempt(Vector2 position)
+		{
+			string title = "Mimo mapu";
+			string name = Owner.Name.Indexed;
+			string positionMessage = $"Poslední vadlidní pozice: {position.GetString()}";
+
+			Logger.LogError(title, name, positionMessage);
+		}
+
 		protected float _minObjectDistance = 2;
 		protected float _maxObjectDistance = 4;
 

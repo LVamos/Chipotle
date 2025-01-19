@@ -1419,7 +1419,8 @@ namespace Game.Entities.Characters.Chipotle
 			_walking = false;
 			_startWalkMessage = null;
 
-			// If the track doesn't lead off the map, announce collisions.
+			if (collisions.OutOfMap)
+				LogOutOfMapAttempt(_area.Value.Center);
 			if (collisions.Obstacles != null)
 				HandleCollisions(collisions.Obstacles);
 			return true;
