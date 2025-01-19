@@ -181,6 +181,9 @@ namespace Game
 		/// <param name="ex">The exception</param>
 		public static void OnError(Exception ex, string message = null)
 		{
+			if (Settings.ThrowExceptions)
+				throw ex;
+			LogException(ex);
 			throw new NotImplementedException();
 			EnableJAWSKeyHook(); // Restore JAWS key hook
 
@@ -222,6 +225,11 @@ namespace Game
 
 			Environment.Exit(0);
 
+		}
+
+		private static void LogException(Exception ex)
+		{
+			Logger.LogError("Výjimka", ex.ToString());
 		}
 
 		/// <summary>
