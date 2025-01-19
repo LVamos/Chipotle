@@ -1168,7 +1168,6 @@ namespace Game.Entities.Characters.Chipotle
 			Orientation2D source = _orientation;
 			_orientation.Rotate(message.Degrees);
 			InnerMessage(new OrientationChanged(this, source, _orientation, message.Direction));
-			Locality.TakeMessage(new OrientationChanged(Owner, source, _orientation, message.Direction));
 		}
 
 		/// <summary>
