@@ -3,6 +3,7 @@ using Game.UI;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using UnityEngine;
@@ -14,7 +15,8 @@ public class AutoPlayBehaviour : MonoBehaviour
 {
 	public void Start()
 	{
-		Logger.Initialize("log.html");
+		string FilePath = Path.Combine(MainScript.LogPath, "log.html");
+		Logger.Initialize(FilePath);
 		Logger.LogInfo("Hra spuštěna");
 
 		// camera settings

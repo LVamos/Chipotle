@@ -36,7 +36,6 @@ namespace Game
 
 		public static string MaterialsPath => Path.Combine(DataPath, @"Materials\materials.yaml");
 
-
 		/// <summary>
 		/// Path to a map file
 		/// </summary>
@@ -90,7 +89,8 @@ namespace Game
 
 			if (!SendMeMail(subject, body))
 				Tolk.Speak("Zprávu se nepodařilo odeslat.");
-			else Tolk.Speak("Odesláno");
+			else
+				Tolk.Speak("Odesláno");
 		}
 
 		/// <summary>
@@ -106,11 +106,11 @@ namespace Game
 		/// <returns>True if the message is sent properly</returns>
 		private static bool SendMeMail(string subject, string body, Attachment attachment = null)
 		{
-			var fromAddress = new MailAddress("lukas.vamos@gmail.com", Environment.UserName);
-			var toAddress = new MailAddress("lukas.vamos@gmail.com", "Lukáš Vámoš");
+			MailAddress fromAddress = new("lukas.vamos@gmail.com", Environment.UserName);
+			MailAddress toAddress = new("lukas.vamos@gmail.com", "Lukáš Vámoš");
 			const string fromPassword = "zphoeiuuqlbvemgy";
 
-			var smtp = new SmtpClient
+			SmtpClient smtp = new()
 			{
 				Host = "smtp.gmail.com",
 				Port = 587,
@@ -124,7 +124,7 @@ namespace Game
 
 			try
 			{
-				using var message = new MailMessage(fromAddress, toAddress)
+				using MailMessage message = new(fromAddress, toAddress)
 				{
 					Subject = subject,
 					Body = body
@@ -163,8 +163,7 @@ namespace Game
 		/// Path to data folder
 		/// </summary>
 		public static readonly string DataPath = @"Assets\Resources\Data\";
-
-
+		public static readonly string LogPath = @"Assets\Resources\Data\Logs";
 
 		/// <summary>
 		/// Path to file used for serialization.
@@ -174,10 +173,7 @@ namespace Game
 		/// <summary>
 		/// Path to the folder with predefined saves.
 		/// </summary>
-		public static string PredefinedSavesPath
-		{
-			get => Path.Combine(DataPath, "Saves");
-		}
+		public static string PredefinedSavesPath => Path.Combine(DataPath, "Saves");
 
 		/// <summary>
 		/// An error handler
@@ -187,7 +183,6 @@ namespace Game
 		{
 			throw new NotImplementedException();
 			EnableJAWSKeyHook(); // Restore JAWS key hook
-
 
 			Action action = () =>
 			{
@@ -235,7 +230,9 @@ namespace Game
 		/// <param name="sender">Source of the exception</param>
 		/// <param name="e">The exception</param>
 		private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
-			=> OnError(e.Exception);
+		{
+			OnError(e.Exception);
+		}
 
 		/// <summary>
 		/// An error handler
@@ -243,10 +240,9 @@ namespace Game
 		/// <param name="sender">Source of the exception</param>
 		/// <param name="e">The exception</param>
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-			=>
-				OnError((Exception)e.ExceptionObject, sender?.ToString());
-
-
+		{
+			OnError((Exception)e.ExceptionObject, sender?.ToString());
+		}
 
 		/// <summary>
 		/// Path to a file containing a delayed error report.
