@@ -4,7 +4,7 @@ using System;
 
 namespace Game.Messaging.Events.Physics
 {
-	public class PlaceObjectResult : Message
+	public class PlaceItemResult : Message
 	{
 		/// <summary>
 		/// Result of placing an object to the ground
@@ -22,7 +22,7 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="sender">Source of the message</param>
 		/// <param name="result">Result of the operation</param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public PlaceObjectResult(Item sender, bool success = false) : base(sender)
+		public PlaceItemResult(Item sender, bool success = false) : base(sender)
 		{
 			Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 			Success = success;

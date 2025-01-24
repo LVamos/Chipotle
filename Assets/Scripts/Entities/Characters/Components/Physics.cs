@@ -1,11 +1,11 @@
 ﻿using Game.Entities.Characters.Chipotle;
-using Game.Entities.Items;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
+using Game.Messaging.Events.Physics;
 using Game.Models;
 using Game.Terrain;
 
@@ -17,6 +17,7 @@ using System.Linq;
 
 using UnityEngine;
 
+using Item = Game.Entities.Items.Item;
 using Message = Game.Messaging.Message;
 using Random = System.Random;
 using Rectangle = Game.Terrain.Rectangle;
@@ -209,12 +210,12 @@ namespace Game.Entities.Characters.Components
 		/// <returns>Enumeration of items standing before the character.</returns>
 		protected virtual PickableItemsModel GetPickableItemsBefore(float radius)
 		{
-			List<Item> items = GetItemsBefore(_objectManipulationHelpRadius).ToList();
+			List<Items.Item> items = GetItemsBefore(_objectManipulationHelpRadius).ToList();
 			if (items.IsNullOrEmpty())
 				return new();
 
 			// Some items are before the NPC but they can't be picked.
-			List<Item> pickableItems = items
+			List<Items.Item> pickableItems = items
 				.Where(i => i.CanBePicked())
 				.ToList();
 			if (pickableItems.IsNullOrEmpty())
@@ -236,7 +237,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items standing before the character.</returns>
-		protected virtual IEnumerable<Item> GetItemsBefore(float radius)
+		protected virtual IEnumerable<Items.Item> GetItemsBefore(float radius)
 		{
 			return
 				GetItemsAndCharactersBefore(radius)
@@ -1090,6 +1091,45 @@ namespace Game.Entities.Characters.Components
 			string doorName = $"Název dveří: {door.Name.Indexed}";
 
 			Logger.LogInfo(title, name, doorDestination, doorName);
+		}
+
+		protected void LogEntityCollision(Entity entity, Vector2 contactPoint)
+		{
+			string title = "Postava narazila do entity";
+			string character = $"Postava: {Owner.Name.Indexed}";
+			string collidedEntity = $"Kolidovaná entita: {entity.Name.Indexed}";
+			string pointOfCollision = $"Bod srážky: {contactPoint.GetString()}";
+			Logger.LogInfo(title, character, collidedEntity, pointOfCollision);
+		}
+
+		protected void LogItemUsage(Items.Item item, Vector2 point)
+		{
+			string title = "Postava použila objekt";
+			string character = Owner.Name.Indexed;
+			string itemName = $"Objekt: {item.Name.Indexed}";
+			string pointMessage = $"Bod: {point.GetString()}";
+
+			Logger.LogInfo(title, character, itemName, pointMessage);
+		}
+
+		protected void LogItemUsedToTarget(Items.Item itemToUse, Entity target, Vector2 point)
+		{
+			string title = "Postava použila objekt na objekt";
+			string character = Owner.Name.Indexed;
+			string item1 = $"Objekt: {itemToUse.Name.Indexed}";
+			string item2 = $"Druhý objekt: {target.Name.Indexed}";
+			string pointMessage = $"Bod: {point.GetString()}";
+
+			Logger.LogInfo(title, character, item1, item2, pointMessage);
+		}
+
+		protected void LogItemPickup(Item item, PickUpObjectResult.ResultType result)
+		{
+			string title = "Postava se pokusila sebrat předmět";
+			string itemName = $"Objekt: {item.Name.Indexed}";
+			string resultDescription = $"Výsledek: {result}";
+
+			Logger.LogInfo(title, itemName, resultDescription);
 		}
 	}
 }

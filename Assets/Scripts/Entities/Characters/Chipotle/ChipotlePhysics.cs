@@ -320,6 +320,7 @@ namespace Game.Entities.Characters.Chipotle
 			Vector2 manipulationPoint = FindManipulationPoint(target);
 			ObjectsUsed message = new(Owner, manipulationPoint, itemToUse, target);
 			target.TakeMessage(message);
+			LogItemUsedToTarget(itemToUse, target, manipulationPoint);
 		}
 
 		/// <summary>
@@ -425,16 +426,23 @@ namespace Game.Entities.Characters.Chipotle
 
 			PickableItemsModel items = GetPickableItemsBefore(_objectManipulationRadius);
 			if (items.Result == PickableItemsModel.ResultType.NothingFound)
-				InnerMessage(new PickUpObjectResult(this));
+			{
+				PickUpObjectResult.ResultType result = PickUpObjectResult.ResultType.NothingFound;
+				InnerMessage(new PickUpObjectResult(this, null, result));
+				LogItemPickup(null, result);
+			}
 			else if (items.Result == PickableItemsModel.ResultType.Unpickable)
 			{
-				PickUpObjectResult newMessage = new(this, null, PickUpObjectResult.ResultType.Unpickable);
-				InnerMessage(newMessage);
+				PickUpObjectResult.ResultType result = PickUpObjectResult.ResultType.Unpickable;
+				InnerMessage(new PickUpObjectResult(this, null, result));
+				LogItemPickup(null, result);
 			}
 			else if (items.Result == PickableItemsModel.ResultType.Unreachable)
 			{
-				PickUpObjectResult newMessage = new(this, null, PickUpObjectResult.ResultType.Unreachable);
+				PickUpObjectResult.ResultType result = PickUpObjectResult.ResultType.Unreachable;
+				PickUpObjectResult newMessage = new(this, null, result);
 				InnerMessage(newMessage);
+				LogItemPickup(null, result);
 			}
 
 			else if (items.Items.Count() == 1)
@@ -450,12 +458,24 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void TryPickItem(Item item)
 		{
+			PickUpObjectResult.ResultType result;
 			if (!item.CanBePicked())
-				InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.Unpickable));
+			{
+				result = PickUpObjectResult.ResultType.Unpickable;
+				InnerMessage(new PickUpObjectResult(this, null, result));
+			}
 			else if (_inventory.Count >= _inventoryLimit)
-				InnerMessage(new PickUpObjectResult(this, null, PickUpObjectResult.ResultType.FullInventory));
+			{
+				result = PickUpObjectResult.ResultType.FullInventory;
+				InnerMessage(new PickUpObjectResult(this, null, result));
+			}
 			else
+			{
+				result = PickUpObjectResult.ResultType.Success;
 				item.TakeMessage(new PickUpObject(Owner, item));
+			}
+
+			LogItemPickup(item, result);
 		}
 
 		/// <summary>
@@ -956,7 +976,11 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void HandleItemsAndCharactersCollisions(List<object> elements)
 		{
-			IEnumerable<IGrouping<string, Entity>> groupedElements = elements
+			IEnumerable<Entity> entities = elements.OfType<Entity>();
+			if (entities.IsNullOrEmpty())
+				return;
+
+			IEnumerable<IGrouping<string, Entity>> groupedElements = entities
 				.OfType<Entity>()
 				.GroupBy(o => o.Name.Friendly);
 
@@ -971,6 +995,12 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(collisionMessage);
 			}
 
+			foreach (MapElement element in elements)
+			{
+				Vector2 contactPoint = GetContactPoint(element);
+				LogEntityCollision(element as Entity, contactPoint);
+			}
+
 			float GetDistance(MapElement element)
 				=> World.GetDistance(GetContactPoint(element), _area.Value.Center);
 		}
@@ -979,10 +1009,26 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			TileInfo[] terrainPoints = elements
 				.OfType<TileInfo>()
+					.GroupBy(tile => tile.Tile.Terrain)
+	.Select(group => group.First())
 				.ToArray();
 
 			foreach (TileInfo tile in terrainPoints)
 				InnerMessage(new TerrainCollided(this, tile.Position));
+			LogTerrainCollision(terrainPoints);
+		}
+
+		protected void LogTerrainCollision(TileInfo[] terrainPoints)
+		{
+			string title = "Kolize s terénem";
+			string name = $"Postava: {Owner.Name.Indexed}";
+
+			string[] terrainDescriptions = terrainPoints.Select(p => $"Bod: {p.Position.GetString()}; terén: {p.Tile.Terrain.GetDescription()}")
+				.ToArray();
+
+			List<string> parameters = new() { name };
+			parameters.AddRange(terrainDescriptions);
+			Logger.LogInfo(title, parameters.ToArray());
 		}
 
 		private Vector2 GetContactPoint(MapElement element)
@@ -1256,7 +1302,11 @@ namespace Game.Entities.Characters.Chipotle
 				LogDoorUsage(door);
 			}
 			else
-				element.TakeMessage(new ObjectsUsed(Owner, point.Value, element as Item));
+			{
+				Item item = element as Item;
+				element.TakeMessage(new ObjectsUsed(Owner, point.Value, item));
+				LogItemUsage(item, point.Value);
+			}
 		}
 
 		/// <summary>

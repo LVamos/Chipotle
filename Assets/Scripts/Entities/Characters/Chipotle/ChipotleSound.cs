@@ -140,7 +140,7 @@ namespace Game.Entities.Characters.Chipotle
 				case SayObjectDescription m: OnSayObjectDescription(m); break;
 				case SayLocalityDescription m: OnSayLocalityDescription(m); break;
 				case SayLocalityName m: OnSayLocalityName(m); break;
-				case PlaceObjectResult m: OnPutObjectResult(m); break;
+				case PlaceItemResult m: OnPutObjectResult(m); break;
 				case EmptyInventory m: OnEmptyInventory(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case SayCoordinates sc: OnSayCoordinates(sc); break;
@@ -208,7 +208,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">Source of the message</param>
-		private void OnPutObjectResult(PlaceObjectResult m)
+		private void OnPutObjectResult(PlaceItemResult m)
 		{
 			if (m.Success)
 				Tolk.Speak("Položeno");

@@ -42,6 +42,27 @@ namespace Game.Entities.Items
 	[ProtoInclude(111, typeof(VanillaCrunchCar))]
 	public class Item : Entity
 	{
+		protected void LogCollision(Character character, Vector2 point)
+		{
+			string title = "Objekt zaznamenal náraz postavy";
+			string characterName = $"Postava: {character.Name.Indexed}";
+			string pointOfCollision = $"Bod srážky: {point.GetString()}";
+
+			Logger.LogInfo(title, characterName, pointOfCollision);
+		}
+
+		protected void LogUssage(Character character, Item usedItem, Entity target, Vector2 point)
+		{
+			string title = "Objekt zaznamenal použití";
+			string characterName = character.Name.Indexed;
+			string itemName = $"Objekt: {usedItem.Name.Indexed}";
+			string targetName = string.Empty;
+			if (target != null)
+				targetName = $"Cíl: {target.Name.Indexed}";
+			string pointMessage = $"Bod: {point.GetString()}";
+
+			Logger.LogInfo(title, characterName, itemName, targetName, pointMessage);
+		}
 
 		[ProtoIgnore]
 		protected AudioSource _loopAudio;
@@ -350,6 +371,7 @@ namespace Game.Entities.Items
 			float height = objectHeight < cameraHeight ? objectHeight : cameraHeight;
 			Vector3 position = new(message.Position.x, height, message.Position.y);
 			Sounds.Play(_sounds["collision"], position);
+			LogCollision(message.Sender as Character, message.Position);
 		}
 
 		/// <summary>
@@ -383,6 +405,7 @@ namespace Game.Entities.Items
 
 			UsedOnce = !Used;
 			Used = true;
+			LogUssage(message.Sender, message.UsedObject, message.Target, message.ManipulationPoint);
 		}
 
 		/// <summary>
@@ -462,7 +485,7 @@ namespace Game.Entities.Items
 		{
 			switch (message)
 			{
-				case PlaceItem m: OnPlaceObject(m); break;
+				case PlaceItem m: OnPlaceItem(m); break;
 				case PickUpObject m: OnPickUpObject(m); break;
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
@@ -480,7 +503,7 @@ namespace Game.Entities.Items
 		/// Handles a message.
 		/// </summary>
 		/// <param name="message">Source of the message</param>
-		private void OnPlaceObject(PlaceItem message)
+		private void OnPlaceItem(PlaceItem message)
 		{
 			Rectangle? vacancy = FindVacancy(message.Position.Value);
 			bool success = vacancy != null;
@@ -492,7 +515,21 @@ namespace Game.Entities.Items
 				Placed();
 			}
 
-			(message.Sender as MessagingObject).TakeMessage(new PlaceObjectResult(this, success));
+			MessagingObject sender = (message.Sender as MessagingObject);
+			sender.TakeMessage(new PlaceItemResult(this, success));
+			LogPlacement(message.Sender as Character, message.Position, success);
+		}
+
+		protected void LogPlacement(Character character, Vector2? position, bool success)
+		{
+			string title = "Objekt zaznamenal pokus o položení";
+			string itemName = $"Objekt: {Name.Indexed}";
+			string resultDescription = $"Výsledek: {(success ? "úspěch" : "neúspěch")}";
+			string pointOfPlacement = string.Empty;
+			if (position != null)
+				pointOfPlacement = $"Bod umístění: {position.Value.GetString()}";
+
+			Logger.LogInfo(title, itemName, resultDescription);
 		}
 
 		/// <summary>
@@ -535,20 +572,31 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Handles the PickUpObject message.
 		/// </summary>
-		/// <param name="m">The message to be handled</param>
-		protected void OnPickUpObject(PickUpObject m)
+		/// <param name="message">The message to be handled</param>
+		protected void OnPickUpObject(PickUpObject message)
 		{
 			PickUpObjectResult.ResultType result = CanBePicked() ? PickUpObjectResult.ResultType.Success : PickUpObjectResult.ResultType.Unpickable;
 
 			if (result == PickUpObjectResult.ResultType.Success)
 			{
 				Picked();
-				HeldBy = (Character)m.Sender;
+				HeldBy = (Character)message.Sender;
 				Area = null;
 			}
 
 			// Report the result.
-			m.Sender.TakeMessage(new PickUpObjectResult(this, this, result));
+			message.Sender.TakeMessage(new PickUpObjectResult(this, this, result));
+			LogPickup(message.Sender as Character, result);
+		}
+
+		protected void LogPickup(Character character, PickUpObjectResult.ResultType result)
+		{
+			string title = "Objekt zaznamenal pokus o sebrání";
+			string itemName = $"Objekt: {Name.Indexed}";
+			string characterName = $"Postava: {character.Name.Indexed}";
+			string resultDescription = $"Výsledek: {result}";
+
+			Logger.LogInfo(title, itemName, characterName, resultDescription);
 		}
 
 		/// <summary>
