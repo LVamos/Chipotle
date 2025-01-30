@@ -389,7 +389,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// List of objects present in this locality.
 		/// </summary>
-		private HashSet<string> _objects = new();
+		private HashSet<string> _items = new();
 
 		/// <summary>
 		/// List of exits from this locality
@@ -454,9 +454,10 @@ namespace Game.Terrain
 		{
 			get
 			{
-				_objects ??= new();
+				_items ??= new();
 
-				return _objects.Select(World.GetItem).Where(o => o != null);
+				return _items.Select(World.GetItem)
+					.Where(o => o != null);
 			}
 		}
 
@@ -476,7 +477,7 @@ namespace Game.Terrain
 		/// <returns>True if the object is present in the locality</returns>
 		public bool IsItHere(Item o)
 		{
-			return _objects.Contains(o.Name.Indexed);
+			return _items.Contains(o.Name.Indexed);
 		}
 
 		/// <summary>
@@ -550,7 +551,7 @@ namespace Game.Terrain
 		/// <param name="o">The object ot be added</param>
 		private void Register(Item o)
 		{
-			_objects.Add(o.Name.Indexed);
+			_items.Add(o.Name.Indexed);
 		}
 
 		/// <summary>
@@ -641,7 +642,7 @@ namespace Game.Terrain
 		/// <param name="o"></param>
 		private void Unregister(Entity o)
 		{
-			_objects.Remove(o.Name.Indexed);
+			_items.Remove(o.Name.Indexed);
 		}
 
 		/// <summary>

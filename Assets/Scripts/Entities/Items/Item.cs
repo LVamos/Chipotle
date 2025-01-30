@@ -15,8 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Unity.VisualScripting;
-
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
@@ -71,9 +69,6 @@ namespace Game.Entities.Items
 		protected AudioSource _actionAudio;
 
 		[ProtoIgnore]
-		protected AudioSource _pickingAudio;
-
-		[ProtoIgnore]
 		protected AudioSource _placingAudio;
 
 		[ProtoIgnore]
@@ -124,24 +119,6 @@ namespace Game.Entities.Items
 			// Don't search for localities till the item is not activated.
 			if (!_messagingEnabled)
 				return;
-
-			// Find out which localities the object now intersects, then sends the appropriate messages to the concerning localities.
-			Locality[] backup = Localities.ToArray();
-			FindLocalities();
-
-			// Inform concerning localities that the object disappeared.
-			foreach (Locality l in backup)
-			{
-				if (!Localities.Contains(l))
-					l.TakeMessage(new ObjectDisappearedFromLocality(this, this, l));
-			}
-
-			// Inform concerning localities that the object appeared.
-			foreach (Locality l in Localities)
-			{
-				if (!backup.Contains(l))
-					l.TakeMessage(new ObjectAppearedInLocality(this, this, l));
-			}
 		}
 
 		/// <summary>
@@ -250,6 +227,7 @@ namespace Game.Entities.Items
 			base.Activate();
 
 			// Add the object to intersecting localities
+			FindLocalities();
 			foreach (Locality l in Localities)
 				l.TakeMessage(new ObjectAppearedInLocality(this, this, l));
 
@@ -604,7 +582,9 @@ namespace Game.Entities.Items
 		/// </summary>
 		protected virtual void Picked()
 		{
-			_pickingAudio.Play();
+			string soundName = _sounds["picking"];
+			if (!string.IsNullOrEmpty(soundName))
+				Sounds.Play(soundName, transform.position, _defaultVolume);
 		}
 
 		/// <summary>
