@@ -441,7 +441,20 @@ namespace Game.Terrain
 		/// List of NPCs present in this locality.
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Character> Characters => _characters.Select(World.GetCharacter);
+		public List<Character> Characters
+		{
+			get
+			{
+				List<Character> result = new();
+				foreach (string name in _characters)
+				{
+					Character character = World.GetCharacter(name)
+						?? throw new ArgumentNullException($"Character {name} not found");
+					result.Add(character);
+				}
+				return result;
+			}
+		}
 
 		[ProtoIgnore]
 		public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
@@ -557,10 +570,10 @@ namespace Game.Terrain
 		/// <summary>
 		/// Adds an entity to locality.
 		/// </summary>
-		/// <param name="c">The entity to be added</param>
-		public void Register(Character c)
+		/// <param name="character">The entity to be added</param>
+		public void Register(Character character)
 		{
-			_characters.Add(c.Name.Indexed);
+			_characters.Add(character.Name.Indexed);
 		}
 
 		/// <summary>

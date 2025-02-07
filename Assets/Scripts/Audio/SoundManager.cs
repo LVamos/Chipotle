@@ -157,7 +157,7 @@ namespace Assets.Scripts.Audio
 		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
 		{
 			AudioSource source = _soundPool.GetSource();
-			source.gameObject.transform.position = position;
+			source.transform.position = position;
 			source.clip = Sounds.GetClip(soundName);
 			source.spatialBlend = 1; // Full surround sound
 			source.spatialize = true;

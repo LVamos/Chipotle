@@ -1,8 +1,11 @@
-﻿using DavyKager;
+﻿using Assets.Scripts.Models;
+
+using DavyKager;
 
 using Game.Entities.Items;
 using Game.Models;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,11 +15,18 @@ namespace Game.UI
 {
 	public class InventoryMenu : MenuWindow
 	{
-		public static InventoryMenu CreateInstance(List<Item> inventory)
+		protected override void FinalizeMenu()
+		{
+			_menuClosed?.Invoke(Index, Action);
+		}
+
+		private Action<int, ActionType> _menuClosed;
+
+		public static InventoryMenu CreateInstance(InventoryMenuParametersDTO parameters)
 		{
 			GameObject obj = new();
 			InventoryMenu menu = obj.AddComponent<InventoryMenu>();
-			menu.Initialize(inventory);
+			menu.Initialize(parameters);
 			return menu;
 		}
 
@@ -35,9 +45,9 @@ namespace Game.UI
 		/// </summary>
 		/// <param name="inventory">The list of items in the inventory.</param>
 		/// <returns>InventoryMenuResultModel</returns>
-		public static InventoryMenuResultModel Run(List<Item> inventory)
+		public static InventoryMenuResultModel Run(InventoryMenuParametersDTO parameters)
 		{
-			InventoryMenu menu = CreateInstance(inventory);
+			InventoryMenu menu = CreateInstance(parameters);
 			WindowHandler.OpenModalWindow(menu);
 
 			if (menu.SelectedItem == null)
@@ -79,12 +89,13 @@ namespace Game.UI
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public void Initialize(List<Item> inventory)
+		public void Initialize(InventoryMenuParametersDTO parameters)
 		{
 			base.Initialize(new(null, "inventář", " ", 0, false));
+			_menuClosed = parameters.MenuClosed;
 
 			// Prepare the menu items and sort them by picking time.
-			_inventory = inventory;
+			_inventory = parameters.Inventory;
 			_items =
 				_inventory.Select(o => new List<string> { o.Name.Indexed })
 					.Reverse()
@@ -169,7 +180,10 @@ namespace Game.UI
 		/// <summary>
 		/// Identifies the currently selected object and assigns it to the SelectedObject property.
 		/// </summary>
-		protected void AssignSelectedObject() => SelectedItem = _inventory.First(o => o.Name.Indexed == _items[_index][0]);
+		protected void AssignSelectedObject()
+		{
+			SelectedItem = _inventory.First(o => o.Name.Indexed == _items[_index][0]);
+		}
 
 		/// <summary>
 		/// Announces selected item using a screen reader or voice synthesizer

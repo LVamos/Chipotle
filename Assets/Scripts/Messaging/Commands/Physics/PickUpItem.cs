@@ -5,7 +5,7 @@ namespace Game.Messaging.Commands.Physics
 	/// <summary>
 	/// Tells an entity to pick up an object off the ground.
 	/// </summary>
-	public class PickUpObject : Message
+	public class PickUpItem : Message
 	{
 		/// <summary>
 		/// Source of the message (Entity or EntityComponent).
@@ -15,17 +15,17 @@ namespace Game.Messaging.Commands.Physics
 		/// <summary>
 		/// The object that should be picked.
 		/// </summary>
-		public readonly Item Object;
+		public readonly Item Item;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message (Entity or EntityComponent)</param>
-		/// <param name="object">The object that should be picked</param>
-		public PickUpObject(MessagingObject sender, Item @object = null) : base(sender)
+		/// <param name="item">The object that should be picked</param>
+		public PickUpItem(MessagingObject sender, Item item = null) : base(sender)
 		{
 			Sender = sender;
-			Object = @object;
+			Item = item;
 		}
 	}
 }

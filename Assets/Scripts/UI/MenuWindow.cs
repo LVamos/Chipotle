@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-
 namespace Game.UI
 {
 	/// <summary>
@@ -15,19 +14,22 @@ namespace Game.UI
 	{
 		public override void Close()
 		{
-			if (_menuClosed != null)
-				_menuClosed(Index);
+			FinalizeMenu();
 			base.Close();
+		}
+
+		protected virtual void FinalizeMenu()
+		{
+			_menuClosed?.Invoke(Index);
 		}
 
 		public static MenuWindow CreateInstance(MenuParametersDTO parameters)
 		{
 			GameObject obj = new();
-			var instance = obj.AddComponent<MenuWindow>();
+			MenuWindow instance = obj.AddComponent<MenuWindow>();
 			instance.Initialize(parameters);
 			return instance;
 		}
-
 
 		/// <summary>
 		/// Index of the first item of the menu
@@ -169,7 +171,10 @@ namespace Game.UI
 		/// A setter for the Index property.
 		/// </summary>
 		/// <param name="value"></param>
-		protected virtual void SetIndex(int value) => _index = value;
+		protected virtual void SetIndex(int value)
+		{
+			_index = value;
+		}
 
 		/// <summary>
 		/// Index of last item
@@ -220,7 +225,9 @@ namespace Game.UI
 		/// Checks if cursor got out of range
 		/// </summary>
 		protected bool IndexOffEdge()
-			=> (Index < 0 || Index > _lastItem);
+		{
+			return (Index < 0 || Index > _lastItem);
+		}
 
 		/// <summary>
 		/// Jumps to last item.
@@ -251,7 +258,8 @@ namespace Game.UI
 			{
 				if (_wrappingAllowed)
 					_wrapUp();
-				else JumpToLowerEdge();
+				else
+					JumpToLowerEdge();
 			}
 			SayItem();
 		}
@@ -264,13 +272,15 @@ namespace Game.UI
 			// If user haven't selected anything yet then just announce first item.
 			if (IndexOffEdge())
 				Index = 0;
-			else Index--;
+			else
+				Index--;
 
 			if (IndexOffEdge())
 			{
 				if (_wrappingAllowed)
 					WrapDown();
-				else JumpToUpperEdge();
+				else
+					JumpToUpperEdge();
 			}
 			SayItem(); // Ohlaš aktuální položku
 		}

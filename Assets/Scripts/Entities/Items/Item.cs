@@ -79,7 +79,9 @@ namespace Game.Entities.Items
 		/// </summary>
 		protected void Placed()
 		{
-			_placingAudio.Play();
+			string soundName = _sounds["placing"];
+			if (!string.IsNullOrEmpty(soundName))
+				Sounds.Play(soundName, transform.position, _defaultVolume);
 		}
 
 		/// <summary>
@@ -115,10 +117,8 @@ namespace Game.Entities.Items
 		protected override void SetArea(Rectangle? value)
 		{
 			base.SetArea(value);
-
-			// Don't search for localities till the item is not activated.
-			if (!_messagingEnabled)
-				return;
+			if (value != null)
+				transform.position = value.Value.Center.ToVector3(2);
 		}
 
 		/// <summary>
@@ -344,12 +344,18 @@ namespace Game.Entities.Items
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnObjectsCollided(ObjectsCollided message)
 		{
-			float objectHeight = message.Object.gameObject.transform.localScale.y;
-			float cameraHeight = Camera.main.transform.position.y;
-			float height = objectHeight < cameraHeight ? objectHeight : cameraHeight;
-			Vector3 position = new(message.Position.x, height, message.Position.y);
-			Sounds.Play(_sounds["collision"], position);
+			Vector3 position = message.Position.ToVector3(GetSoundHeight());
+			string soundName = _sounds["collision"];
+			Sounds.Play(soundName, position, _defaultVolume);
 			LogCollision(message.Sender as Character, message.Position);
+		}
+
+		private float GetSoundHeight()
+		{
+			float itemHeight = transform.localScale.y;
+			float cameraHeight = Camera.main.transform.position.y;
+			float height = itemHeight < cameraHeight ? itemHeight : cameraHeight;
+			return height;
 		}
 
 		/// <summary>
@@ -371,9 +377,13 @@ namespace Game.Entities.Items
 				World.PlayCutscene(this, _cutscene);
 			else if (!_quickActionsAllowed)
 			{
-				if (!_actionAudio.isPlaying)
-					_actionAudio.Play();
+				if (_actionAudio == null || !_actionAudio.isPlaying)
+				{
+					Vector3 position = message.ManipulationPoint.ToVector3(GetSoundHeight());
+					_actionAudio = Sounds.Play(_sounds["action"], position, _defaultVolume);
+				}
 			}
+
 			// Play the sound if predefined amount of time has passed since the last use.
 			else if (_quickActionsAllowed && Time.time - _lastUse > _intervalBetweenActions)
 			{
@@ -464,7 +474,7 @@ namespace Game.Entities.Items
 			switch (message)
 			{
 				case PlaceItem m: OnPlaceItem(m); break;
-				case PickUpObject m: OnPickUpObject(m); break;
+				case PickUpItem m: OnPickUpObject(m); break;
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
 				case CharacterCameToLocality le: OnLocalityEntered(le); break;
@@ -483,7 +493,11 @@ namespace Game.Entities.Items
 		/// <param name="message">Source of the message</param>
 		private void OnPlaceItem(PlaceItem message)
 		{
-			Rectangle? vacancy = FindVacancy(message.Position.Value);
+			Rectangle? vacancy = FindVacancy(
+				message.Character.Area.Value,
+message.DirectionFromCharacter.Value,
+message.MaxDistanceFromCharacter
+);
 			bool success = vacancy != null;
 
 			if (success)
@@ -495,7 +509,7 @@ namespace Game.Entities.Items
 
 			MessagingObject sender = (message.Sender as MessagingObject);
 			sender.TakeMessage(new PlaceItemResult(this, success));
-			LogPlacement(message.Sender as Character, message.Position, success);
+			LogPlacement(message.Sender as Character, message.DirectionFromCharacter, success);
 		}
 
 		protected void LogPlacement(Character character, Vector2? position, bool success)
@@ -515,43 +529,39 @@ namespace Game.Entities.Items
 		/// </summary>
 		/// <param name="lowerLeftCorner">A point that should intersect with the placed object</param>
 		/// <returns>An area the object could be placed on</returns>
-		protected Rectangle? FindVacancy(Vector2 lowerLeftCorner)
+		protected Rectangle? FindVacancy(Rectangle characterArea, Vector2 directionFromCharacter, float maxDistanceFromCharacter)
 		{
-			// Try horizontal and vertical position.
+			float offset = characterArea.Height / 2;
 			List<Rectangle> positions = new()
 			{
-				new(
-				new(lowerLeftCorner.x, lowerLeftCorner.y + Dimensions.height),
-				Dimensions.height,
-				Dimensions.width
-			)
+Rectangle.FromCenter(characterArea.Center, Dimensions.height, Dimensions.width),
+Rectangle.FromCenter(characterArea.Center, Dimensions.width, Dimensions.height)
 			};
 
-			if (Dimensions.height != Dimensions.width)
-			{
-				positions.Add(new(
-					new(lowerLeftCorner.x, lowerLeftCorner.y + Dimensions.width),
-					Dimensions.height,
-					Dimensions.width
-				));
-			}
+			return TryFindPosition(positions[0]) ?? TryFindPosition(positions[1]);
 
-			// Detect collisions
-			foreach (Rectangle position in positions)
+			Rectangle? TryFindPosition(Rectangle rectangle)
 			{
-				CollisionsModel result = World.DetectCollisions(World.Player, position);
-				if (result.OutOfMap || result.Obstacles != null)
-					return position;
-			}
+				rectangle.Move(directionFromCharacter, offset); // Move the rectangle to the edge of the character
+				float step = 0.1f;
+				do
+				{
+					CollisionsModel result = World.DetectCollisions(null, rectangle);
+					if ((!result.OutOfMap && result.Obstacles == null))
+						return rectangle;
+					rectangle.Move(directionFromCharacter, step);
+				}
+				while (rectangle.GetDistanceFrom(characterArea) <= maxDistanceFromCharacter);
 
-			return null;
+				return null;
+			}
 		}
 
 		/// <summary>
 		/// Handles the PickUpObject message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		protected void OnPickUpObject(PickUpObject message)
+		protected void OnPickUpObject(PickUpItem message)
 		{
 			PickUpObjectResult.ResultType result = CanBePicked() ? PickUpObjectResult.ResultType.Success : PickUpObjectResult.ResultType.Unpickable;
 

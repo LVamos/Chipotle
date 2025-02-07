@@ -1126,7 +1126,7 @@ namespace Game.Entities.Characters.Components
 		protected void LogItemPickup(Item item, PickUpObjectResult.ResultType result)
 		{
 			string title = "Postava se pokusila sebrat předmět";
-			string itemName = $"Objekt: {item.Name.Indexed}";
+			string itemName = item == null ? string.Empty : $"Objekt: {item.Name.Indexed}";
 			string resultDescription = $"Výsledek: {result}";
 
 			Logger.LogInfo(title, itemName, resultDescription);

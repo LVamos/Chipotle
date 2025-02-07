@@ -80,12 +80,11 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
-		/// <param name="m">Source of the message</param>
-		protected void OnPickUpObjectResult(PickUpObjectResult m)
+		/// <param name="message">Source of the message</param>
+		protected void OnPickUpObjectResult(PickUpObjectResult message)
 		{
-			if (m.Result == PickUpObjectResult.ResultType.Success)
-				_inventory.Add(m.Object.Name.Indexed);
-
+			if (message.Result == PickUpObjectResult.ResultType.Success)
+				_inventory.Add(message.Object.Name.Indexed);
 		}
 
 		/// <summary>
@@ -252,6 +251,9 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
+				case PlaceItemResult m:
+					OnPlaceItemResult(m); break;
+				case PlaceItem m: OnPlaceItem(m); break;
 				case ApplyItemToTarget m:
 					OnApplyItemToTarget(m); break;
 				case SayCharacters m: OnSayCharacters(m); break;
@@ -260,7 +262,7 @@ namespace Game.Entities.Characters.Chipotle
 				case ExploreObject m: OnExploreObject(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case RunInventoryMenu m: OnRunInventoryMenu(m); break;
-				case PickUpObject m: OnPickUpObject(m); break;
+				case PickUpItem m: OnPickUpObject(m); break;
 				case CreatePredefinedSave c: OnCreatePredefinedSave(c); break;
 				case LoadPredefinedSave l: OnLoadPredefinedSave(l); break;
 				case ListExits lex: OnListExits(lex); break;
@@ -280,6 +282,24 @@ namespace Game.Entities.Characters.Chipotle
 				case Interact m: OnInteract(m); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		private void OnPlaceItemResult(PlaceItemResult message)
+		{
+			if (message.Success)
+				_inventory.Remove(message.Sender.Name.Indexed);
+		}
+
+		private void OnPlaceItem(PlaceItem message)
+		{
+			PlaceItem newMessage = new(
+				Owner,
+				message.Item,
+				Owner,
+				Owner.Orientation.UnitVector,
+				_stepLength
+				);
+			message.Item.TakeMessage(newMessage);
 		}
 
 		/// <summary>
@@ -416,11 +436,11 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles the PickUpObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed.
-		protected void OnPickUpObject(PickUpObject message)
+		protected void OnPickUpObject(PickUpItem message)
 		{
-			if (message.Object != null)
+			if (message.Item != null)
 			{
-				TryPickItem(message.Object);
+				TryPickItem(message.Item);
 				return;
 			}
 
@@ -472,7 +492,7 @@ namespace Game.Entities.Characters.Chipotle
 			else
 			{
 				result = PickUpObjectResult.ResultType.Success;
-				item.TakeMessage(new PickUpObject(Owner, item));
+				item.TakeMessage(new PickUpItem(Owner, item));
 			}
 
 			LogItemPickup(item, result);

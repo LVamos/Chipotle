@@ -143,7 +143,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void PickUpObject()
 		{
-			InnerMessage(new PickUpObject(this));
+			InnerMessage(new PickUpItem(this));
 		}
 
 		/// <summary>

@@ -10,7 +10,7 @@
 		public string Cutscene { get; set; }
 		public bool UsableOnce { get; set; }
 		public bool AudibleOverWalls { get; set; }
-		public float Volume { get; set; }
+		public float Volume { get; set; } = 1;
 		public bool StopWhenPlayerMoves { get; set; }
 		public bool QuickActionsAllowed { get; set; }
 		public string PickingSound { get; set; }

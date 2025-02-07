@@ -22,6 +22,46 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Rectangle
 	{
+
+		private float Left => UpperLeftCorner.x;
+		private float Right => LowerRightCorner.x;
+		private float Top => UpperLeftCorner.y;
+		private float bottom => LowerRightCorner.y;
+
+		/// <summary>
+		/// Computes a point at the rectangle.
+		/// </summary>
+		/// <param name="direction">The direction vector of the wanted point (must be normalized).</param>
+		/// <param name="distance">The distance to extend beyond the rectangle's front edge.</param>
+		/// <returns>A point at the rectangle, at the specified distance from its front edge.</returns>
+		public Vector2 GetPointInFront(Vector2 direction, float distance)
+		{
+			// Compute t for vertical boundaries:
+			float tVertical = float.PositiveInfinity;
+			if (direction.x > 0)
+				tVertical = (Right - Center.x) / direction.x;
+			else if (direction.x < 0)
+				tVertical = (Left - Center.x) / direction.x;
+
+			// Compute t for horizontal boundaries:
+			float tHorizontal = float.PositiveInfinity;
+			if (direction.y > 0)
+				tHorizontal = (Top - Center.y) / direction.y;
+			else if (direction.y < 0)
+				tHorizontal = (bottom - Center.y) / direction.y;
+
+			// Choose the smallest positive t (the intersection with the rectangle boundary)
+			float t = Mathf.Min(tVertical, tHorizontal);
+
+			// Calculate the boundary point in the given direction
+			Vector2 boundaryPoint = Center + direction * t;
+
+			// Extend from the boundary point by the given distance along the same direction
+			Vector2 result = boundaryPoint + direction * distance;
+
+			return result;
+		}
+
 		public float GetDistanceFrom(Rectangle other)
 		{
 			if (Intersects(other))
@@ -314,6 +354,11 @@ namespace Game.Terrain
 			_lowerRightCorner = plane.LowerRightCorner;
 			MinimumHeight = plane.MinimumHeight;
 			MinimumWidth = plane.MinimumWidth;
+		}
+
+		public Rectangle Rotate90()
+		{
+			return FromCenter(Center, Width, Height);
 		}
 
 		public static Rectangle FromCenter(Vector2 center, float height, float width)

@@ -1,10 +1,11 @@
-﻿using Game.Entities;
+﻿using Assets.Scripts.Models;
+
+using Game.Entities;
 using Game.Entities.Items;
 using Game.Messaging;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
 using Game.Messaging.Events.Input;
-using Game.Models;
 using Game.Terrain;
 
 using System;
@@ -63,7 +64,7 @@ namespace Game.UI
 				return;
 
 			// Send message to the characterr.
-			var newMessage = new ApplyItemToTarget(this, message.ItemToApply, selectedObject);
+			ApplyItemToTarget newMessage = new(this, message.ItemToApply, selectedObject);
 			(message.Sender as MessagingObject).TakeMessage(newMessage);
 		}
 
@@ -73,22 +74,31 @@ namespace Game.UI
 		/// <param name="message">The message to be handled</param>
 		private void OnselectInventoryAction(selectInventoryAction message)
 		{
-			// Run the menu
-			InventoryMenuResultModel result = InventoryMenu.Run(message.Items);
-			if (result == null)
+			InventoryMenuParametersDTO parameters = new(
+				message.Items,
+				(option, action) => HandleInventoryAction(message.Sender as MessagingObject, message.Items, option, action)
+			);
+
+			InventoryMenu.Run(parameters);
+		}
+
+		private void HandleInventoryAction(MessagingObject sender, List<Item> items, int option, InventoryMenu.ActionType action)
+		{
+			if (option == -1 || sender == null)
 				return;
 
-			MessagingObject sender = message.Sender as MessagingObject;
-			switch (result.Action)
+			Item selectedItem = items[option];
+
+			switch (action)
 			{
 				case InventoryMenu.ActionType.Use:
-					sender.TakeMessage(new Interact(this, result.Item));
+					sender.TakeMessage(new Interact(this, selectedItem));
 					break;
 				case InventoryMenu.ActionType.ApplyToTarget:
-					sender.TakeMessage(new ApplyItemToTarget(this, result.Item));
+					sender.TakeMessage(new ApplyItemToTarget(this, selectedItem));
 					break;
 				case InventoryMenu.ActionType.Place:
-					sender.TakeMessage(new PlaceItem(this, result.Item));
+					sender.TakeMessage(new PlaceItem(this, selectedItem));
 					break;
 			}
 		}
@@ -103,8 +113,8 @@ namespace Game.UI
 				return;
 
 			// Send message to the characterr.
-			var newMessage = new PickUpObject(this, selectedItem);
-			var sender = message.Sender as MessagingObject;
+			PickUpItem newMessage = new(this, selectedItem);
+			MessagingObject sender = message.Sender as MessagingObject;
 			sender.TakeMessage(newMessage);
 
 		}
@@ -140,10 +150,9 @@ namespace Game.UI
 				return;
 
 			// Send message to the characterr.
-			var newMessage = new Interact(this, selectedObject);
+			Interact newMessage = new(this, selectedObject);
 			(message.Sender as MessagingObject).TakeMessage(newMessage);
 		}
-
 
 		/// <summary>
 		/// Handles a message.
@@ -159,7 +168,7 @@ namespace Game.UI
 				return;
 
 			// Send message to the characterr.
-			var newMessage = new ExploreObject(this, selectedObject);
+			ExploreObject newMessage = new(this, selectedObject);
 			(message.Sender as MessagingObject).TakeMessage(newMessage);
 		}
 
@@ -201,6 +210,8 @@ namespace Game.UI
 		/// Quits the game.
 		/// </summary>
 		private void QuitGame()
-			=> World.QuitGame();
+		{
+			World.QuitGame();
+		}
 	}
 }
