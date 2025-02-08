@@ -1,6 +1,7 @@
-﻿using System;
-using Game.Entities.Items;
+﻿using Game.Entities.Items;
 using Game.UI;
+
+using System;
 
 namespace Game.Models
 {
@@ -9,7 +10,7 @@ namespace Game.Models
 		/// <summary>
 		/// Selected action
 		/// </summary>
-		public readonly InventoryMenu.ActionType Action;
+		public readonly InventoryAction Action;
 
 		/// <summary>
 		/// Selected item
@@ -21,7 +22,7 @@ namespace Game.Models
 		/// </summary>
 		/// <param name="action">Selected action</param>
 		/// <param name="item">selected item</param>
-		public InventoryMenuResultModel(InventoryMenu.ActionType action, Item item)
+		public InventoryMenuResultModel(InventoryAction action, Item item)
 		{
 			Action = action;
 			Item = item ?? throw new ArgumentNullException(nameof(item));

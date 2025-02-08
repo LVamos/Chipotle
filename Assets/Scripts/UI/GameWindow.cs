@@ -82,7 +82,7 @@ namespace Game.UI
 			InventoryMenu.Run(parameters);
 		}
 
-		private void HandleInventoryAction(MessagingObject sender, List<Item> items, int option, InventoryMenu.ActionType action)
+		private void HandleInventoryAction(MessagingObject sender, List<Item> items, int option, InventoryAction action)
 		{
 			if (option == -1 || sender == null)
 				return;
@@ -91,13 +91,13 @@ namespace Game.UI
 
 			switch (action)
 			{
-				case InventoryMenu.ActionType.Use:
+				case InventoryAction.Use:
 					sender.TakeMessage(new Interact(this, selectedItem));
 					break;
-				case InventoryMenu.ActionType.ApplyToTarget:
+				case InventoryAction.ApplyToTarget:
 					sender.TakeMessage(new ApplyItemToTarget(this, selectedItem));
 					break;
-				case InventoryMenu.ActionType.Place:
+				case InventoryAction.Place:
 					sender.TakeMessage(new PlaceItem(this, selectedItem));
 					break;
 			}

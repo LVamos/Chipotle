@@ -20,7 +20,7 @@ namespace Game.UI
 			_menuClosed?.Invoke(Index, Action);
 		}
 
-		private Action<int, ActionType> _menuClosed;
+		private Action<int, InventoryAction> _menuClosed;
 
 		public static InventoryMenu CreateInstance(InventoryMenuParametersDTO parameters)
 		{
@@ -56,35 +56,9 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// Defines possible actions
-		/// </summary>
-		public enum ActionType
-		{
-			/// <summary>
-			/// No action selected
-			/// </summary>
-			None = 0,
-
-			/// <summary>
-			/// Puts an object on the ground.
-			/// </summary>
-			Place,
-
-			/// <summary>
-			/// Uses the selected item.
-			/// </summary>
-			Use,
-
-			/// <summary>
-			/// Applies the selected item to another item.
-			/// </summary>
-			ApplyToTarget
-		}
-
-		/// <summary>
 		/// The action selected by the player
 		/// </summary>
-		public ActionType Action { get; protected set; }
+		public InventoryAction Action { get; protected set; }
 
 		/// <summary>
 		/// Constructor
@@ -117,7 +91,7 @@ namespace Game.UI
 				return;
 			}
 
-			Action = ActionType.ApplyToTarget;
+			Action = InventoryAction.ApplyToTarget;
 			ActivateItem();
 		}
 
@@ -126,7 +100,7 @@ namespace Game.UI
 		/// </summary>
 		private void PlaceItem()
 		{
-			Action = ActionType.Place;
+			Action = InventoryAction.Place;
 			ActivateItem();
 		}
 
@@ -141,7 +115,7 @@ namespace Game.UI
 				return;
 			}
 
-			Action = ActionType.Use;
+			Action = InventoryAction.Use;
 			ActivateItem();
 		}
 
@@ -151,7 +125,7 @@ namespace Game.UI
 		protected override void Quit()
 		{
 			base.Quit();
-			Action = ActionType.None;
+			Action = InventoryAction.None;
 		}
 
 		/// <summary>
