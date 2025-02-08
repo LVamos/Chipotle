@@ -26,6 +26,12 @@ namespace Game.Entities.Characters
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Character : Entity
 	{
+		private void OnPlaceItemResult(PlaceItemResult message)
+		{
+			if (message.Success)
+				_inventory.Remove(message.Sender.Name.Indexed);
+		}
+
 		/// <summary>
 		/// Destroys the NPC.
 		/// </summary>
@@ -117,6 +123,7 @@ namespace Game.Entities.Characters
 		{
 			switch (message)
 			{
+				case PlaceItemResult m: OnPlaceItemResult(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case OrientationChanged och: OnOrientationChanged(och); break;
 				case LocalityChanged lcd: OnLocalityChanged(lcd); break;
