@@ -1,4 +1,5 @@
 using Game;
+using Game.Audio;
 using Game.UI;
 
 using System;
@@ -13,6 +14,47 @@ using UnityEngine;
 /// </summary>
 public class AutoPlayBehaviour : MonoBehaviour
 {
+	private void OnActivated()
+	{
+		MainScript.DisableJAWSKeyHook();
+
+		if (Sounds.Muted)
+		{
+			World.ResumeCutscene();
+			Sounds.Unmute();
+		}
+	}
+
+	private void OnDeactivated()
+	{
+		MainScript.EnableJAWSKeyHook();
+		World.PauseCutscene();
+		Sounds.Mute();
+	}
+
+	private void OnApplicationFocus(bool focus)
+	{
+		_hasFocus = focus;
+		CheckApplicationState();
+	}
+
+	private void OnApplicationPause(bool pause)
+	{
+		_isPaused = pause;
+		CheckApplicationState();
+	}
+
+	private void CheckApplicationState()
+	{
+		if (!_hasFocus || _isPaused)
+			OnDeactivated();
+		else
+			OnActivated();
+	}
+
+	private bool _isPaused;
+	private bool _hasFocus;
+
 	public void Start()
 	{
 		string FilePath = Path.Combine(MainScript.LogPath, "log.html");

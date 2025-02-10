@@ -12,6 +12,9 @@ namespace Assets.Scripts
 		public float Volume => _audio.volume;
 		public void FadeIn(float duration, float volume)
 		{
+			if (_audio == null)
+				return;
+
 			_audio.volume = 0;
 			AdjustVolume(duration, volume);
 		}
@@ -19,6 +22,9 @@ namespace Assets.Scripts
 
 		public void Revind(int seconds)
 		{
+			if (_audio == null)
+				return;
+
 			if (Paused || _audio.isPlaying)
 				if (_audio.time > seconds)
 					_audio.time -= seconds;
@@ -65,13 +71,16 @@ namespace Assets.Scripts
 
 		public void Resume()
 		{
+			if (_audio == null)
+				return;
+
 			_audio.UnPause();
 			Paused = false;
 		}
 
 		public void Pause()
 		{
-			if (Paused)
+			if (_audio == null || Paused)
 				return;
 
 			_audio.Pause();

@@ -14,6 +14,8 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
+		public static bool Muted { get; private set; }
+
 		/// <summary>
 		/// Calculates low pass filter cut off frequency.
 		/// </summary>
@@ -184,9 +186,19 @@ namespace Game.Audio
 			}
 		}
 
-		public static void MasterFadeOut(float duration)
+		private static float? _volumeBackup;
+		public static void Mute(float duration = .5f)
 		{
+			Muted = true;
+			_volumeBackup = MasterVolume;
 			AdjustMasterVolume(duration, 0);
+		}
+
+		public static void Unmute(float duration = .5f)
+		{
+			Muted = false;
+			AdjustMasterVolume(duration, _volumeBackup.Value);
+			_volumeBackup = null;
 		}
 
 		/// <summary>

@@ -1247,7 +1247,7 @@ namespace Game
 		{
 			GameInProgress = false;
 			_cutSceneMessage = null;
-			Sounds.MasterFadeOut(.5f);
+			Sounds.Mute(.5f);
 			SaveGame();
 			System.Threading.Thread.Sleep(1000);
 			WindowHandler.MainMenu();
