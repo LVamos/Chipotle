@@ -30,7 +30,6 @@ namespace Game.Terrain
 			bool throughGoal = false
 		)
 		{
-			int counter = 0, whileCounter = 0;
 			if (sameLocality &&
 				(World.Map[start].Locality != World.Map[goal].Locality))
 				return null;
@@ -60,7 +59,6 @@ namespace Game.Terrain
 
 			while (openQueue.Count > 0)
 			{
-				System.Diagnostics.Debug.WriteLine($"while {++whileCounter}");
 				PathFindingNode current = openQueue.Dequeue();
 				openDict.Remove(current.Coords);
 
@@ -91,8 +89,6 @@ namespace Game.Terrain
 
 						openQueue.Enqueue(neighbour, neighbour.Price);
 						openDict[neighbour.Coords] = neighbour;
-						System.Diagnostics.Debug.WriteLine((++counter).ToString());
-
 					}
 					else
 					{
