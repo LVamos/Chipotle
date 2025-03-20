@@ -263,15 +263,15 @@ namespace Game.Entities.Characters
 			CharacterLeftLocality left = new(this, this, message.SourceLocality, message.TargetLocality);
 			CharacterCameToLocality came = new(this, this, message.TargetLocality, message.SourceLocality);
 
-			foreach (Locality l in localities)
+			foreach (Locality locality in localities)
 			{
-				l.TakeMessage(moved);
+				locality.TakeMessage(moved);
 
 				if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
-					l.TakeMessage(left);
+					locality.TakeMessage(left);
 
 				if (message.SourceLocality != message.TargetLocality)
-					l.TakeMessage(came);
+					locality.TakeMessage(came);
 			}
 		}
 

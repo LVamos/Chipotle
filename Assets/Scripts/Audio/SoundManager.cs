@@ -17,6 +17,27 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundManager : MonoBehaviour
 	{
+		public AudioSource ConvertTo3d(AudioSource source, Vector3 position, int? lowPassFrequency = null)
+		{
+			source.spatialize = true;
+			source.outputAudioMixerGroup = MixerGroup;
+			source.spatialBlend = 1;
+			source.transform.position = position;
+			if (lowPassFrequency != null)
+				SetLowPass(source, lowPassFrequency.Value);
+			return source;
+		}
+
+		public AudioSource ConvertTo2d(AudioSource source, bool disableLowPass = false)
+		{
+			if (disableLowPass)
+				_soundPool.DisableLowPass(source);
+			source.spatialize = false;
+			source.outputAudioMixerGroup = null;
+			source.spatialBlend = 0;
+			return source;
+		}
+
 		public void SlideVolume(AudioSource sound, float duration, float targetVolume)
 		{
 			if (targetVolume == sound.volume)
@@ -51,13 +72,8 @@ namespace Assets.Scripts.Audio
 			source.clip = Sounds.GetClip(soundName);
 			source.spatialize = false;
 			source.spatialBlend = 0;
-			source.spatializePostEffects = false;
 			source.loop = loop;
-			source.bypassListenerEffects = true;
-			source.bypassReverbZones = true;
 			source.outputAudioMixerGroup = null;
-			ResonanceAudioSource resonance = source.gameObject.GetComponent<ResonanceAudioSource>();
-			resonance.bypassRoomEffects = true;
 
 			if (fadeIn)
 			{

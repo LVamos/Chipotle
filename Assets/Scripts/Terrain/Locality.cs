@@ -741,14 +741,19 @@ namespace Game.Terrain
 		/// <param name="message">The message</param>
 		private void OnCharacterCameToLocality(CharacterCameToLocality message)
 		{
-			Register(message.Character);
+			if (message.CurrentLocality == this)
+			{
+				Register(message.Character);
 
-			if (this != message.CurrentLocality || message.Character != World.Player)
-				return;
+				if (message.Character == World.Player)
+				{
+					Sounds.SetRoomParameters(this);
+					_playersPreviousLocality = message.PreviousLocality;
+				}
+			}
 
-			Sounds.SetRoomParameters(this);
-			_playersPreviousLocality = message.PreviousLocality;
-			UpdateLoop();
+			if (message.Character == World.Player)
+				UpdateLoop();
 		}
 
 		/// <summary>
@@ -982,12 +987,10 @@ namespace Game.Terrain
 			 * change it to full stereo, disable Low pass and stop the rest of the passage loops.
 			 */
 			PassageLoopModel loop = TakeClosestPassageLoop();
-			loop.AudioSource.spatialBlend = 0;
-			if (loop.Muffled)
-				Sounds.DisableLowpass(loop.AudioSource);
+			Sounds.ConvertTo2d(loop.AudioSource, loop.Muffled);
+			_ambientSource = loop.AudioSource;
 
 			StopPassageLoops();
-			_ambientSource = loop.AudioSource;
 		}
 
 		private PassageLoopModel TakeClosestPassageLoop()
@@ -1009,7 +1012,7 @@ namespace Game.Terrain
 			};
 			newLoop.AudioSource.transform.position = loop.Position;
 			newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
-
+			newLoop.AudioSource.rolloffMode = AudioRolloffMode.Linear;
 			_passageLoops[loop.Passage] = newLoop;
 			UpdateSpatialBlend(newLoop.AudioSource);
 			ApplyLowPass(loop, newLoop);

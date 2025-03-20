@@ -201,6 +201,11 @@ namespace Game.Audio
 			_volumeBackup = null;
 		}
 
+		public static void ConvertTo2d(AudioSource audioSource, bool muffled)
+		{
+			_soundManager.ConvertTo2d(audioSource, muffled);
+		}
+
 		/// <summary>
 		/// All sounds used in the game
 		/// </summary>
