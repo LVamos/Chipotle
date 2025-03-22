@@ -17,6 +17,26 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundManager : MonoBehaviour
 	{
+		public void Mute(float duration = .5f)
+		{
+			if (_muted)
+				return;
+
+			_muted = true;
+			AdjustMasterVolume(duration, 0);
+		}
+
+		private const float _fullMasterVolume = 1;
+		private bool _muted;
+		public void Unmute(float duration = .5f)
+		{
+			if (!_muted)
+				return;
+
+			_muted = false;
+			AdjustMasterVolume(duration, _fullMasterVolume);
+		}
+
 		public AudioSource ConvertTo3d(AudioSource source, Vector3 position, int? lowPassFrequency = null)
 		{
 			source.spatialize = true;
@@ -238,12 +258,15 @@ namespace Assets.Scripts.Audio
 			IEnumerator Adjust()
 			{
 				float startVolume = AudioListener.volume;
+				float elapsedTime = 0f;
 
-				for (float t = 0; t < duration; t += Time.deltaTime)
+				while (elapsedTime < duration)
 				{
-					AudioListener.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
+					elapsedTime += Time.deltaTime;
+					AudioListener.volume = Mathf.Lerp(startVolume, targetVolume, elapsedTime / duration);
 					yield return null;
 				}
+
 				AudioListener.volume = targetVolume;
 			}
 		}

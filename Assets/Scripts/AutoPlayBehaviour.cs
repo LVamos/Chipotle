@@ -18,11 +18,8 @@ public class AutoPlayBehaviour : MonoBehaviour
 	{
 		MainScript.DisableJAWSKeyHook();
 
-		if (Sounds.Muted)
-		{
-			World.ResumeCutscene();
-			Sounds.Unmute();
-		}
+		World.ResumeCutscene();
+		Sounds.Unmute();
 	}
 
 	private void OnDeactivated()
