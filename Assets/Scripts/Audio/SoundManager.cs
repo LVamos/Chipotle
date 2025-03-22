@@ -7,7 +7,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.Audio;
@@ -18,18 +17,19 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundManager : MonoBehaviour
 	{
-		public void Mute(float duration = .5f)
+		public void Mute(float duration = _fadingDuration)
 		{
 			if (_muted)
 				return;
 
 			_muted = true;
-			AdjustMasterVolume(duration, 0);
+			AdjustMasterVolume(duration, 0.2f);
 		}
 
 		private const float _fullMasterVolume = 1;
+		private const int _fadingDuration = 2;
 		private bool _muted;
-		public void Unmute(float duration = .5f)
+		public void Unmute(float duration = _fadingDuration)
 		{
 			if (!_muted)
 				return;
@@ -243,38 +243,41 @@ namespace Assets.Scripts.Audio
 			set => AudioListener.volume = value;
 		}
 
+		private float stepSize;
+		private float targetVolume;
+
 		/// <summary>
 		/// Adjusts the volume of an audio source over a specified duration to a target volume.
 		/// </summary>
 		/// <param name="source">An audio source to be adjusted</param>
 		/// <param name="duration">Duration of the adjustment</param>
 		/// <param name="targetVolume">Target volume</param>
-		public async void AdjustMasterVolume(float duration, float targetVolume)
+		public void AdjustMasterVolume(float duration, float newTargetVolume)
 		{
-			if (targetVolume == AudioListener.volume)
+			if (newTargetVolume == AudioListener.volume)
 				return;
 
+			targetVolume = newTargetVolume;
 			float startVolume = AudioListener.volume;
-			float volumeDifference = Mathf.Abs(targetVolume - startVolume);
-			int totalSteps = Mathf.Max(1, Mathf.RoundToInt(duration * 50));
-			float stepSize = volumeDifference / totalSteps;
-			float stepInterval = duration / totalSteps;
+			int steps = Mathf.RoundToInt(duration * 100); // 100 kroků za sekundu
+			stepSize = (targetVolume - startVolume) / steps;
+			float stepInterval = duration / steps;
 
-			float currentVolume = startVolume;
-			bool isIncreasing = targetVolume > currentVolume;
+			CancelInvoke(nameof(AdjustStep));
+			InvokeRepeating(nameof(AdjustStep), 0, stepInterval);
 
-			for (int i = 0; i < totalSteps; i++)
+		}
+
+		private void AdjustStep()
+		{
+			if (Mathf.Abs(AudioListener.volume - targetVolume) < Mathf.Abs(stepSize))
 			{
-				if (isIncreasing)
-					currentVolume = Mathf.Min(targetVolume, currentVolume + stepSize);
-				else
-					currentVolume = Mathf.Max(targetVolume, currentVolume - stepSize);
-
-				AudioListener.volume = currentVolume;
-				await Task.Delay((int)(stepInterval * 1000));
+				AudioListener.volume = targetVolume;
+				CancelInvoke(nameof(AdjustStep));
+				return;
 			}
 
-			AudioListener.volume = targetVolume;
+			AudioListener.volume += stepSize;
 		}
 
 		public void StopAllSounds()
