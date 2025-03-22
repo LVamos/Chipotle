@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.Audio;
@@ -248,27 +249,32 @@ namespace Assets.Scripts.Audio
 		/// <param name="source">An audio source to be adjusted</param>
 		/// <param name="duration">Duration of the adjustment</param>
 		/// <param name="targetVolume">Target volume</param>
-		public void AdjustMasterVolume(float duration, float targetVolume)
+		public async void AdjustMasterVolume(float duration, float targetVolume)
 		{
 			if (targetVolume == AudioListener.volume)
 				return;
 
-			StartCoroutine(Adjust());
+			float startVolume = AudioListener.volume;
+			float volumeDifference = Mathf.Abs(targetVolume - startVolume);
+			int totalSteps = Mathf.Max(1, Mathf.RoundToInt(duration * 50));
+			float stepSize = volumeDifference / totalSteps;
+			float stepInterval = duration / totalSteps;
 
-			IEnumerator Adjust()
+			float currentVolume = startVolume;
+			bool isIncreasing = targetVolume > currentVolume;
+
+			for (int i = 0; i < totalSteps; i++)
 			{
-				float startVolume = AudioListener.volume;
-				float elapsedTime = 0f;
+				if (isIncreasing)
+					currentVolume = Mathf.Min(targetVolume, currentVolume + stepSize);
+				else
+					currentVolume = Mathf.Max(targetVolume, currentVolume - stepSize);
 
-				while (elapsedTime < duration)
-				{
-					elapsedTime += Time.deltaTime;
-					AudioListener.volume = Mathf.Lerp(startVolume, targetVolume, elapsedTime / duration);
-					yield return null;
-				}
-
-				AudioListener.volume = targetVolume;
+				AudioListener.volume = currentVolume;
+				await Task.Delay((int)(stepInterval * 1000));
 			}
+
+			AudioListener.volume = targetVolume;
 		}
 
 		public void StopAllSounds()
