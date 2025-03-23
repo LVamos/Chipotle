@@ -29,18 +29,6 @@ public class AutoPlayBehaviour : MonoBehaviour
 		Sounds.Mute();
 	}
 
-	private void OnApplicationFocus(bool focus)
-	{
-		_hasFocus = focus;
-		CheckApplicationState();
-	}
-
-	private void OnApplicationPause(bool pause)
-	{
-		_isPaused = pause;
-		CheckApplicationState();
-	}
-
 	private void CheckApplicationState()
 	{
 		if (!_hasFocus || _isPaused)
@@ -83,6 +71,7 @@ public class AutoPlayBehaviour : MonoBehaviour
 		Camera.main.clearFlags = CameraClearFlags.Nothing;
 		Camera.main.cullingMask = 0;
 		Application.targetFrameRate = 30;
+		Application.runInBackground = true;
 
 		if (!Settings.MainMenuAtStartup)
 			WindowHandler.StartGame();
@@ -95,6 +84,28 @@ public class AutoPlayBehaviour : MonoBehaviour
 		HandleKeyDown();
 		HandleKeyUp();
 		World.UpdateGame();
+
+		if (!Application.isPlaying)
+		{
+			return;
+		}
+
+		if (Application.isFocused)
+		{
+			if (!_hasFocus)
+			{
+				_hasFocus = true;
+				CheckApplicationState();
+			}
+		}
+		else
+		{
+			if (_hasFocus)
+			{
+				_hasFocus = false;
+				CheckApplicationState();
+			}
+		}
 	}
 
 	private void HandleKeyDown()

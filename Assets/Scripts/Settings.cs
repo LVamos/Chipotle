@@ -18,11 +18,11 @@ namespace Game
 		/// </summary>
 		public static void SaveSettings()
 		{
-			var serializer = new SerializerBuilder()
+			ISerializer serializer = new SerializerBuilder()
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
-			var settings = new Dictionary<string, object>();
+			Dictionary<string, object> settings = new();
 
 			// Using reflection to get static properties
 			FieldInfo[] fields = typeof(Settings).GetFields();
@@ -42,7 +42,7 @@ namespace Game
 		/// <param name="configurationName">Name of a YAML file without extension</param>
 		public static void LoadSettings()
 		{
-			var deserializer = new DeserializerBuilder()
+			IDeserializer deserializer = new DeserializerBuilder()
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
@@ -50,7 +50,7 @@ namespace Game
 			string configName = File.ReadAllText(path);
 			path = Path.Combine(MainScript.ConfigPath, configName) + ".yaml";
 			string yamlContent = File.ReadAllText(path);
-			var settingsDictionary = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
+			Dictionary<string, object> settingsDictionary = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
 
 			// Using reflection to set static properties
 			FieldInfo[] fields = typeof(Settings).GetFields();
@@ -68,8 +68,7 @@ namespace Game
 					continue;
 				}
 
-				Dictionary<object, object> vectorDict = value as Dictionary<object, object>;
-				if (vectorDict == null)
+				if (value is not Dictionary<object, object> vectorDict)
 					field.SetValue(null, null);
 				else
 				{
@@ -87,6 +86,11 @@ namespace Game
 		/// Name of currently loaded configuration file.
 		/// </summary>
 		public static string Configuration { get; private set; }
+
+		/// <summary>
+		/// Enables or disables logging of currently played sounds into console.
+		/// </summary>
+		public static bool LogPlayingSounds { get; set; }
 
 		/// <summary>
 		/// Gets or sets the name of the configuration file.

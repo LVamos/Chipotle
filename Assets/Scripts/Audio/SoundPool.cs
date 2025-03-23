@@ -1,4 +1,7 @@
 ﻿
+using Game;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +13,24 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundPool : MonoBehaviour
 	{
+		private void LogPlayingSounds()
+		{
+			string[] soundNames = GetPlayingSounds().names;
+			string output = "Playing sounds: " + string.Join(',', soundNames);
+			System.Diagnostics.Debug.WriteLine(output);
+		}
+
+		/// <summary>
+		/// Returns currently playing sounds.
+		/// </summary>
+		/// <returns>(AudioSource[] sounds, string[] names)</returns>
+		private (AudioSource[] sounds, string[] names) GetPlayingSounds()
+		{
+			AudioSource[] playingSounds = _pool.Concat(_muffledPool).Where(a => a.isPlaying).ToArray();
+			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
+			return (playingSounds, playingSoundNames);
+		}
+
 		public AudioLowPassFilter EnableLowPass(AudioSource source)
 		{
 			_pool.Remove(source);
@@ -60,10 +81,12 @@ namespace Assets.Scripts.Audio
 
 		private void Update()
 		{
-			string[] names = _pool.Concat(_muffledPool).Where(a => a.isPlaying).Select(s => s.clip.name).ToArray();
-			AudioSource[] a = _pool.Concat(_muffledPool).Where(a => a.isPlaying).ToArray();
+			if (string.Equals(Settings.Configuration, "debug", StringComparison.OrdinalIgnoreCase)
+				&& Settings.LogPlayingSounds)
+				LogPlayingSounds();
 
-			foreach (AudioSource source in _pool.Concat(_muffledPool))
+			IEnumerable<AudioSource> allSources = _pool.Concat(_muffledPool);
+			foreach (AudioSource source in allSources)
 			{
 				if (!source.isPlaying)
 					source.gameObject.SetActive(false);
