@@ -31,13 +31,12 @@ public class AutoPlayBehaviour : MonoBehaviour
 
 	private void CheckApplicationState()
 	{
-		if (!_hasFocus || _isPaused)
+		if (!_hasFocus)
 			OnDeactivated();
 		else
 			OnActivated();
 	}
 
-	private bool _isPaused;
 	private bool _hasFocus;
 
 	public void Start()
