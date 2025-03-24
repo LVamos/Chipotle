@@ -19,10 +19,7 @@ using UnityEngine.SceneManagement;
 [InitializeOnLoad]
 public static class sceneSetup
 {
-	static sceneSetup()
-	{
-		InitializeVoiceOutput();
-	}
+	static sceneSetup() => InitializeVoiceOutput();
 
 	[MenuItem("Tools/Nastav naèítání audia na streamování")]
 	public static void SetLoadTypeToStreaming()
@@ -115,7 +112,6 @@ public static class sceneSetup
 		try
 		{
 			LoadLocalitiesAndItems(document.Root);
-			Log("Lokace a objekty naèteny");
 		}
 		catch (Exception)
 		{
@@ -126,12 +122,12 @@ public static class sceneSetup
 		try
 		{
 			LoadPassages(document.Root);
-			Log("Prùchody naèteny");
 		}
 		catch (Exception)
 		{
 			Log("Chyba pøi naèítání prùchodù");
 		}
+		Log("Objekty vytvoøeny");
 	}
 
 	private static void LoadPassages(XElement root)
@@ -179,10 +175,7 @@ public static class sceneSetup
 		return obj;
 	}
 
-	private static string Attribute(XElement element, string attribute, bool prepareForIndexing = true)
-	{
-		return prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
-	}
+	private static string Attribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
 	private static bool _eventHandlerAssigned;
 
