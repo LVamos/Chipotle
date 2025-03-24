@@ -127,7 +127,7 @@ public static class sceneSetup
 		{
 			Log("Chyba pøi naèítání prùchodù");
 		}
-		Log("Objekty vytvoøeny");
+		Log("Scena pøipravena");
 	}
 
 	private static void LoadPassages(XElement root)
@@ -209,8 +209,6 @@ public static class sceneSetup
 		Scene scene = SceneManager.GetActiveScene();
 		if (!scene.IsValid())
 			Log("Scéna nebyla naètena");
-		else
-			Log("Scéna naètena");
 	}
 
 	private static void InitializeVoiceOutput()
@@ -239,7 +237,5 @@ public static class sceneSetup
 		GameObject[] objects = SceneManager.GetActiveScene().GetRootGameObjects();
 		foreach (GameObject obj in objects)
 			UnityEngine.Object.DestroyImmediate(obj);  // Use DestroyImmediate because we are in the editor
-
-		Log("Objekty smazány");
 	}
 }
