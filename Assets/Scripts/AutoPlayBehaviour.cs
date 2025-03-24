@@ -85,9 +85,7 @@ public class AutoPlayBehaviour : MonoBehaviour
 		World.UpdateGame();
 
 		if (!Application.isPlaying)
-		{
 			return;
-		}
 
 		if (Application.isFocused)
 		{

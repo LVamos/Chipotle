@@ -57,9 +57,7 @@ public class PriorityQueue<TElement, TPriority>
 
 		// Srovnat haldu dolů
 		if (_heap.Count > 0)
-		{
 			BubbleDown(0);
-		}
 
 		return rootElement;
 	}
@@ -67,10 +65,7 @@ public class PriorityQueue<TElement, TPriority>
 	/// <summary>
 	/// Podívá se na nejmenší prvek (vrchol haldy), ale nevyndá ho.
 	/// </summary>
-	public TElement Peek()
-	{
-		return _heap.Count == 0 ? throw new InvalidOperationException("PriorityQueue is empty.") : _heap[0].Element;
-	}
+	public TElement Peek() => _heap.Count == 0 ? throw new InvalidOperationException("PriorityQueue is empty.") : _heap[0].Element;
 
 	/// <summary>
 	/// Pomůže srovnat nově přidaný prvek nahoru v haldě.

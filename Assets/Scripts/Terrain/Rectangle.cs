@@ -105,14 +105,10 @@ namespace Game.Terrain
 			float clampedY = Clamp(point.y, UpperLeftCorner.y, LowerRightCorner.y);
 
 			if (point.x >= LowerLeftCorner.x && point.x <= LowerRightCorner.x)
-			{
 				return point.y <= LowerRightCorner.y ? Round(new(point.x, LowerRightCorner.y)) : Round(new(point.x, UpperRightCorner.y));
-			}
 
 			if (point.y >= LowerLeftCorner.y && point.y <= UpperLeftCorner.y)
-			{
 				return point.x <= LowerLeftCorner.x ? new(LowerLeftCorner.x, point.y) : new(LowerRightCorner.x, point.y);
-			}
 
 			// Vypočítání vzdáleností od každé hrany
 			float distanceToLeft = point.x - UpperLeftCorner.x;
@@ -124,24 +120,16 @@ namespace Game.Terrain
 			float minDistance = Math.Min(Math.Min(distanceToLeft, distanceToRight), Math.Min(distanceToTop, distanceToBottom));
 
 			if (minDistance == distanceToLeft)
-			{
 				return new(UpperLeftCorner.x, clampedY);
-			}
 
 			if (minDistance == distanceToRight)
-			{
 				return new(LowerRightCorner.x, clampedY);
-			}
 
 			if (minDistance == distanceToTop)
-			{
 				return new(clampedX, UpperLeftCorner.y);
-			}
 
 			if (minDistance == distanceToBottom)
-			{
 				return new(clampedX, LowerRightCorner.y);
-			}
 
 			// Pokud bod leží přesně v rohu, vrátíme upnutý bod
 			return new(clampedX, clampedY);
@@ -154,10 +142,7 @@ namespace Game.Terrain
 		/// <param name="min">The minimum value to clamp to.</param>
 		/// <param name="max">The maximum value to clamp to.</param>
 		/// <returns>The clamped value.</returns>
-		private float Clamp(float value, float min, float max)
-		{
-			return Math.Max(min, Math.Min(max, value));
-		}
+		private float Clamp(float value, float min, float max) => Math.Max(min, Math.Min(max, value));
 
 		/// <summary>
 		/// Calculating a point on the perimeter of the rectangle in the given direction
@@ -240,10 +225,7 @@ namespace Game.Terrain
 		/// Checks if any points are outside of the map.
 		/// </summary>
 		/// <returns>True if any points are outside of the map, otherwise false.</returns>
-		public bool IsOutOfMap()
-		{
-			return Corners.Any(p => World.GetLocality(p) == null);
-		}
+		public bool IsOutOfMap() => Corners.Any(p => World.GetLocality(p) == null);
 
 		/// <summary>
 		/// Checks if all the plane is walkable.
@@ -356,10 +338,7 @@ namespace Game.Terrain
 			MinimumWidth = plane.MinimumWidth;
 		}
 
-		public Rectangle Rotate90()
-		{
-			return FromCenter(Center, Width, Height);
-		}
+		public Rectangle Rotate90() => FromCenter(Center, Width, Height);
 
 		public static Rectangle FromCenter(Vector2 center, float height, float width)
 		{
@@ -461,10 +440,7 @@ namespace Game.Terrain
 		/// The locality according to which <paramref name="relative"/> was calculated
 		/// </param>
 		/// <returns>New isntance of <see cref="Rectangle"/> defined by the absolute coordinates</returns>
-		public static Vector2 GetAbsoluteCoordinates(Vector2 relative, Rectangle area)
-		{
-			return new(area.UpperLeftCorner.x + relative.x, area.UpperLeftCorner.y - relative.y);
-		}
+		public static Vector2 GetAbsoluteCoordinates(Vector2 relative, Rectangle area) => new(area.UpperLeftCorner.x + relative.x, area.UpperLeftCorner.y - relative.y);
 
 		/// <summary>
 		/// Converts absolute coordinates to relative coordinates.
@@ -506,20 +482,14 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="area">The plane to be checked</param>
 		/// <returns>True if the given plane fully intersects this plane</returns>
-		public bool Contains(Rectangle area)
-		{
-			return Contains(area.UpperLeftCorner) && Contains(area.LowerRightCorner);
-		}
+		public bool Contains(Rectangle area) => Contains(area.UpperLeftCorner) && Contains(area.LowerRightCorner);
 
 		/// <summary>
 		/// Checks if both instances are equal.
 		/// </summary>
 		/// <param name="p">The other plane to compare</param>
 		/// <returns>True if both instances are equal</returns>
-		public bool Equals(Rectangle p)
-		{
-			return UpperLeftCorner == p.UpperLeftCorner && LowerRightCorner == p.LowerRightCorner;
-		}
+		public bool Equals(Rectangle p) => UpperLeftCorner == p.UpperLeftCorner && LowerRightCorner == p.LowerRightCorner;
 
 		/// <summary>
 		/// Extends the plane to all directions by the specified amount of units in all directions.
@@ -566,37 +536,25 @@ namespace Game.Terrain
 		/// Returns hash code of this instance.
 		/// </summary>
 		/// <returns>The hash code</returns>
-		public override int GetHashCode()
-		{
-			return unchecked(4112 * (8121 + UpperLeftCorner.GetHashCode()) * (6988 + LowerRightCorner.GetHashCode()));
-		}
+		public override int GetHashCode() => unchecked(4112 * (8121 + UpperLeftCorner.GetHashCode()) * (6988 + LowerRightCorner.GetHashCode()));
 
 		/// <summary>
 		/// Enumerates entities intersecting with the plane.
 		/// </summary>
 		/// <returns>Enumeration of intersecting entities</returns>
-		public IEnumerable<Character> GetEntities()
-		{
-			return World.GetCharacters(this);
-		}
+		public IEnumerable<Character> GetEntities() => World.GetCharacters(this);
 
 		/// <summary>
 		/// Returns all game objects intersecting with the plane.
 		/// </summary>
 		/// <returns>List of intersecting objects</returns>
-		public IEnumerable<Entity> GetObjects()
-		{
-			return World.GetItems(this);
-		}
+		public IEnumerable<Entity> GetObjects() => World.GetItems(this);
 
 		/// <summary>
 		/// Returns all passages intersecting with the plane.
 		/// </summary>
 		/// <returns>List of intersecting passages</returns>
-		public IEnumerable<Passage> GetPassages()
-		{
-			return World.GetPassages(this);
-		}
+		public IEnumerable<Passage> GetPassages() => World.GetPassages(this);
 
 		/// <summary>
 		/// Identifies a perimeter side of the plane on which the specified point lays.
@@ -618,10 +576,7 @@ namespace Game.Terrain
 		/// Enumerates all localities this plane intersects with.
 		/// </summary>
 		/// <returns>enumeration of the intersecting localities</returns>
-		public IEnumerable<Locality> GetLocalities()
-		{
-			return World.GetLocalities(this);
-		}
+		public IEnumerable<Locality> GetLocalities() => World.GetLocalities(this);
 
 		/// <summary>
 		/// Enumerates all tiles laying on the perimeter of this plane.
@@ -774,10 +729,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">Coordinates of the default point whose surroundings should be explored.</param>
 		/// <returns>Coordinates</returns>
-		public IEnumerable<Vector2> GetPointsByDistance(Vector2 point)
-		{
-			return GetPoints().OrderBy(p => World.GetDistance(p, point));
-		}
+		public IEnumerable<Vector2> GetPointsByDistance(Vector2 point) => GetPoints().OrderBy(p => World.GetDistance(p, point));
 
 		/// <summary>
 		/// Returns a new plane corresponding to coordinates of the specified perimeter side of this plane.
@@ -973,19 +925,13 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point to be checked</param>
 		/// <returns>True if the point lays on the plane</returns>
-		public bool Contains(Vector2 point)
-		{
-			return point.x >= UpperLeftCorner.x && point.x <= LowerRightCorner.x && point.y >= LowerRightCorner.y && point.y <= UpperLeftCorner.y;
-		}
+		public bool Contains(Vector2 point) => point.x >= UpperLeftCorner.x && point.x <= LowerRightCorner.x && point.y >= LowerRightCorner.y && point.y <= UpperLeftCorner.y;
 
 		/// <summary>
 		/// Transforms plane coordinates by one unit to the specified direction.
 		/// </summary>
 		/// <param name="direction">The direction where the plane is to be moved</param>
-		public Rectangle Move(Direction direction)
-		{
-			return Move(direction.AsVector2());
-		}
+		public Rectangle Move(Direction direction) => Move(direction.AsVector2());
 
 		/// <summary>
 		/// Transforms plane coordinates to the specified direction.
@@ -1008,10 +954,7 @@ namespace Game.Terrain
 		/// <param name="direction">
 		/// The direction defined by an unitvector where the plane is to be moved
 		/// </param>
-		public Rectangle Move(Vector2 direction)
-		{
-			return Move(direction, 1f);
-		}
+		public Rectangle Move(Vector2 direction) => Move(direction, 1f);
 
 		/// <summary>
 		/// Transforms plane coordinates to the specified direction.
@@ -1020,10 +963,7 @@ namespace Game.Terrain
 		/// The direction defined by an <see cref="Orientation2D"/> struct where the plane is to be moved
 		/// </param>
 		/// <param name="step">Specifies length of the transformation</param>
-		public void Move(Orientation2D direction, float step)
-		{
-			Move(direction.UnitVector, step);
-		}
+		public void Move(Orientation2D direction, float step) => Move(direction.UnitVector, step);
 
 		/// <summary>
 		/// Transforms plane coordinates one unit to the specified direction.
@@ -1031,10 +971,7 @@ namespace Game.Terrain
 		/// <param name="direction">
 		/// The direction defined by an <see cref="Orientation2D"/> struct where the plane is to be moved
 		/// </param>
-		public void Move(Orientation2D direction)
-		{
-			Move(direction, 1f);
-		}
+		public void Move(Orientation2D direction) => Move(direction, 1f);
 
 		/// <summary>
 		/// Reduces the plane in given direction. Moves one side.
@@ -1061,28 +998,19 @@ namespace Game.Terrain
 		/// <param name="area">The plane according to which coordinates of this plane were calculated</param>
 		/// <returns>A new plane with absolute coordinates</returns>
 		/// <remarks>Considers this plane to be relative</remarks>
-		public Rectangle ToAbsolute(Rectangle area)
-		{
-			return new(GetAbsoluteCoordinates(UpperLeftCorner, area), GetAbsoluteCoordinates(LowerRightCorner, area));
-		}
+		public Rectangle ToAbsolute(Rectangle area) => new(GetAbsoluteCoordinates(UpperLeftCorner, area), GetAbsoluteCoordinates(LowerRightCorner, area));
 
 		/// <summary>
 		/// converts this plane to a plane with relative coordinates.
 		/// </summary>
 		/// <returns>A new plane with relative coordinates</returns>
 		/// <remarks>Considers this plane to be absolute</remarks>
-		public Rectangle ToRelative()
-		{
-			return new(GetRelativeCoordinates(UpperLeftCorner), GetRelativeCoordinates(LowerRightCorner));
-		}
+		public Rectangle ToRelative() => new(GetRelativeCoordinates(UpperLeftCorner), GetRelativeCoordinates(LowerRightCorner));
 
 		/// <summary>
 		/// Returns coordinates of the plane as a string.
 		/// </summary>
 		/// <returns>coordinates of the plane as a comma separated string</returns>
-		public override string ToString()
-		{
-			return $"{UpperLeftCorner}, {LowerRightCorner}";
-		}
+		public override string ToString() => $"{UpperLeftCorner}, {LowerRightCorner}";
 	}
 }

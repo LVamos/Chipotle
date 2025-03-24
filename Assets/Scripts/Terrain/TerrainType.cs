@@ -150,14 +150,10 @@ namespace Game.Terrain
 			int index2 = Array.IndexOf(_descriptions4Case, terrainDescription);
 
 			if (index != -1)
-			{
 				return (TerrainType)index;
-			}
 
 			if (index2 != -1)
-			{
 				return (TerrainType)index2;
-			}
 
 			return (TerrainType)Enum.Parse(typeof(TerrainType), s);
 		}

@@ -32,9 +32,7 @@ namespace Game.Entities.Items
 			base.OnObjectsUsed(message);
 
 			if (UsedOnce)
-			{
 				Move(new(new Vector2(911, 1042)));
-			}
 		}
 	}
 }

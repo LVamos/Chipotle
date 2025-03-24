@@ -100,10 +100,7 @@ namespace Game.Terrain
 		/// Lists all adjacent tiles
 		/// </summary>
 		/// <param name="position">Position of the concerning tile</param>
-		public IEnumerable<TileInfo> GetNeighbours8(Vector2 position)
-		{
-			return DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(position, d)).Where(t => t.Tile != null && t.Position != position);
-		}
+		public IEnumerable<TileInfo> GetNeighbours8(Vector2 position) => DirectionExtension.DirectionDeltas.Select(d => GetNeighbour(position, d)).Where(t => t.Tile != null && t.Position != position);
 
 		/// <summary>
 		/// Returns a tile on the specified position.
@@ -132,9 +129,7 @@ namespace Game.Terrain
 			Vector2[] points = area.GetPoints(TileSize).ToArray();
 			bool contained = points.Contains(new Vector2(1030, 1035.5f));
 			foreach (Vector2 point in points)
-			{
 				_terrain[point] = new(terrain, permeable, null);
-			}
 		}
 
 		private void DrawPanel(XElement panel, Rectangle localityArea)
@@ -172,10 +167,7 @@ namespace Game.Terrain
 		/// <param name="x">The X coordinate</param>
 		/// <param name="y">The Y coordinate</param>
 		/// <returns>The rounded coordinates</returns>
-		private Vector2 RoundCoordinates(float x, float y)
-		{
-			return new(x.Round(), y.Round());
-		}
+		private Vector2 RoundCoordinates(float x, float y) => new(x.Round(), y.Round());
 
 		public void RegisterLocality(Locality locality)
 		{

@@ -320,9 +320,7 @@ namespace Game
 					return ObstacleType.Wall;
 
 				if (atPassage != null)
-				{
 					return atPassage.State == PassageState.Closed ? ObstacleType.Door : ObstacleType.None;
-				}
 			}
 
 			return obstacle != ObstacleType.Wall ? obstacle : ObstacleType.Object;

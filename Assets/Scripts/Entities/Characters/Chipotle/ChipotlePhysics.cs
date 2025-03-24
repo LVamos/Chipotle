@@ -466,9 +466,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			else if (items.Items.Count() == 1)
-			{
 				TryPickItem(items.Items[0]);
-			}
 			else // More items awailable.
 				WindowHandler.ActiveWindow.TakeMessage(new SelectItemToPick(Owner, items.Items));
 		}
