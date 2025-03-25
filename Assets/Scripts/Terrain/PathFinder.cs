@@ -63,8 +63,8 @@ namespace Game.Terrain
 				openDict.Remove(current.Coords);
 
 				// Jestli je current blízko cíle, vracím cestu
-				if (Math.Abs(current.Coords.x - goal.x) <= 1 &&
-					Math.Abs(current.Coords.y - goal.y) <= 1)
+				if (Math.Abs(current.Coords.x - goal.x) <= .2f &&
+					Math.Abs(current.Coords.y - goal.y) <= .2f)
 				{
 					return GetPath(current, throughStart, throughGoal);
 				}
