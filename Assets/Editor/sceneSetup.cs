@@ -127,7 +127,7 @@ public static class sceneSetup
 		{
 			Log("Chyba pøi naèítání prùchodù");
 		}
-		Log("Scena pøipravena");
+		Log("Scéna pøipravena");
 	}
 
 	private static void LoadPassages(XElement root)
