@@ -28,16 +28,21 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Locality : MapElement
 	{
+		public IEnumerable<Door> GetClosedDoors()
+		{
+			return
+				Passages
+				.OfType<Door>()
+				.Where(d => d.State is PassageState.Closed or PassageState.Locked);
+		}
+
 		public bool IsWalkable(Rectangle area)
 		{
 			IEnumerable<Vector2> points = area.GetPoints(World.Map.TileSize);
 			return points.All(p => IsWalkable(p));
 		}
 
-		public bool IsWalkable(Vector2 point)
-		{
-			return !_nonpassables.Contains(point);
-		}
+		public bool IsWalkable(Vector2 point) => !_nonpassables.Contains(point);
 
 		private HashSet<Vector2> _nonpassables = new();
 		public void GatherNonwalkables()
@@ -60,10 +65,7 @@ namespace Game.Terrain
 			return Area.Value.Contains(player);
 		}
 
-		public AudioSource GetAmbientSource()
-		{
-			return _ambientSource;
-		}
+		public AudioSource GetAmbientSource() => _ambientSource;
 
 		private bool PlayerInSoundRadius
 			=> GetDistanceToPlayer() <= _localitySoundRadius;
@@ -81,10 +83,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="l">The target locality</param>
 		/// <returns>enumaretion of passages</returns>
-		public IEnumerable<Passage> GetExitsTo(Locality l)
-		{
-			return Passages.Where(p => p.LeadsTo(l));
-		}
+		public IEnumerable<Passage> GetExitsTo(Locality l) => Passages.Where(p => p.LeadsTo(l));
 
 		/// <summary>
 		/// Indicates if a locality is inside a building or outside.
@@ -106,10 +105,7 @@ namespace Game.Terrain
 		/// Enumerates all accessible localities.
 		/// </summary>
 		/// <returns>All accessible localities</returns>
-		public IEnumerable<Locality> GetAccessibleLocalities()
-		{
-			return Passages.Select(p => p.AnotherLocality(this)).Distinct();
-		}
+		public IEnumerable<Locality> GetAccessibleLocalities() => Passages.Select(p => p.AnotherLocality(this)).Distinct();
 
 		/// <summary>
 		/// Handles the EntityMoved message.
@@ -156,89 +152,62 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point to be checked</param>
 		/// <returns>The passage by in front or behind which the specified point lays or null if nothing found</returns>
-		public Passage IsAtPassage(Vector2 point)
-		{
-			return Passages.FirstOrDefault(p => p.IsInFrontOrBehind(point));
-		}
+		public Passage IsAtPassage(Vector2 point) => Passages.FirstOrDefault(p => p.IsInFrontOrBehind(point));
 
 		/// <summary>
 		/// Checks if the specified entity is in any neighbour locality.
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInNeighbourLocality(Character e)
-		{
-			return Neighbours.FirstOrDefault(l => l.IsItHere(e));
-		}
+		public Locality IsInNeighbourLocality(Character e) => Neighbours.FirstOrDefault(l => l.IsItHere(e));
 
 		/// <summary>
 		/// Checks if the specified object is in any neighbour locality.
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInNeighbourLocality(Item o)
-		{
-			return Neighbours.FirstOrDefault(l => l.IsItHere(o));
-		}
+		public Locality IsInNeighbourLocality(Item o) => Neighbours.FirstOrDefault(l => l.IsItHere(o));
 
 		/// <summary>
 		/// Checks if the specified entity is in any accessible neighbour locality.
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInAccessibleLocality(Character e)
-		{
-			return GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
-		}
+		public Locality IsInAccessibleLocality(Character e) => GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
 
 		/// <summary>
 		/// Checks if the specified object is in any accessible neighbour locality.
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
 		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInAccessibleLocality(Item o)
-		{
-			return GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
-		}
+		public Locality IsInAccessibleLocality(Item o) => GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
 
 		/// <summary>
 		/// Returns all open passages.
 		/// </summary>
 		/// <returns>Enumeration of all open passages</returns>
-		public IEnumerable<Passage> GetApertures()
-		{
-			return Passages.Where(p => p.State == PassageState.Open);
-		}
+		public IEnumerable<Passage> GetApertures() => Passages.Where(p => p.State == PassageState.Open);
 
 		/// <summary>
 		/// Chekcs if the specified locality is accessible from this locality.
 		/// </summary>
 		/// <param name="l">The locality to be checked</param>
 		/// <returns>True if the specified locality is accessible form this locality</returns>
-		public bool IsBehindDoor(Locality l)
-		{
-			return GetLocalitiesBehindDoor().Any(locality => locality.Name.Indexed == l.Name.Indexed);
-		}
+		public bool IsBehindDoor(Locality l) => GetLocalitiesBehindDoor().Any(locality => locality.Name.Indexed == l.Name.Indexed);
 
 		/// <summary>
 		/// Checks if it's possible to get to the specified locality from this locality over doors or open passages.
 		/// </summary>
 		/// <param name="locality">The target locality</param>
 		/// <returns>True if there's a way between this loclaity and the specified locality</returns>
-		public bool IsAccessible(Locality locality)
-		{
-			return GetAccessibleLocalities().Any(l => l.Name.Indexed == locality.Name.Indexed);
-		}
+		public bool IsAccessible(Locality locality) => GetAccessibleLocalities().Any(l => l.Name.Indexed == locality.Name.Indexed);
 
 		/// <summary>
 		/// Checks if the specified locality is next to this locality.
 		/// </summary>
 		/// <param name="l">The locality to be checked</param>
 		/// <returns>True if the speicifed locality is adjecting to this locality</returns>
-		public bool IsNeighbour(Locality l)
-		{
-			return Neighbours.Contains(l);
-		}
+		public bool IsNeighbour(Locality l) => Neighbours.Contains(l);
 
 		/// <summary>
 		/// Maps all adejcting localities.
@@ -271,10 +240,7 @@ namespace Game.Terrain
 		/// Returns all open passages between this locality and the specified one..
 		/// </summary>
 		/// <returns>Enumeration of all open passages between this locality and the specified one</returns>
-		public IEnumerable<Passage> GetApertures(Locality l)
-		{
-			return GetApertures().Where(p => p.LeadsTo(l));
-		}
+		public IEnumerable<Passage> GetApertures(Locality l) => GetApertures().Where(p => p.LeadsTo(l));
 
 		/// <summary>
 		/// Enumerates passages ordered by distance from the specified point.
@@ -478,40 +444,28 @@ namespace Game.Terrain
 		/// Returns all adjecting localities to which it's possible to get from this locality.
 		/// </summary>
 		/// <returns>An enumeration of all adjecting accessible localities</returns>
-		public IEnumerable<Locality> GetLocalitiesBehindDoor()
-		{
-			return Passages.Select(p => p.AnotherLocality(this));
-		}
+		public IEnumerable<Locality> GetLocalitiesBehindDoor() => Passages.Select(p => p.AnotherLocality(this));
 
 		/// <summary>
 		/// Checks if the specified game object is present in this locality in the moment.
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
 		/// <returns>True if the object is present in the locality</returns>
-		public bool IsItHere(Item o)
-		{
-			return _items.Contains(o.Name.Indexed);
-		}
+		public bool IsItHere(Item o) => _items.Contains(o.Name.Indexed);
 
 		/// <summary>
 		/// Checks if an entity is present in this locality in the moment.
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
 		/// <returns>True if the entity is here</returns>
-		public bool IsItHere(Character e)
-		{
-			return Characters.Contains(e);
-		}
+		public bool IsItHere(Character e) => Characters.Contains(e);
 
 		/// <summary>
 		/// Checks if a passage lays in the locality.
 		/// </summary>
 		/// <param name="p">The passage to be checked</param>
 		/// <returns>True if the passage lays in this locality</returns>
-		public bool IsItHere(Passage p)
-		{
-			return Passages.Contains(p);
-		}
+		public bool IsItHere(Passage p) => Passages.Contains(p);
 
 		/// <summary>
 		/// Gets a message from another messaging object and stores it for processing.
@@ -562,19 +516,13 @@ namespace Game.Terrain
 		/// Adds a game object to list of present objects.
 		/// </summary>
 		/// <param name="o">The object ot be added</param>
-		private void Register(Item o)
-		{
-			_items.Add(o.Name.Indexed);
-		}
+		private void Register(Item o) => _items.Add(o.Name.Indexed);
 
 		/// <summary>
 		/// Adds an entity to locality.
 		/// </summary>
 		/// <param name="character">The entity to be added</param>
-		public void Register(Character character)
-		{
-			_characters.Add(character.Name.Indexed);
-		}
+		public void Register(Character character) => _characters.Add(character.Name.Indexed);
 
 		/// <summary>
 		/// Initializes the locality and starts its message loop.
@@ -609,19 +557,13 @@ namespace Game.Terrain
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnObjectDisappearedFromLocality(ObjectDisappearedFromLocality m)
-		{
-			Unregister(m.Object);
-		}
+		private void OnObjectDisappearedFromLocality(ObjectDisappearedFromLocality m) => Unregister(m.Object);
 
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnObjectAppearedInLocality(ObjectAppearedInLocality m)
-		{
-			Register(m.Object);
-		}
+		private void OnObjectAppearedInLocality(ObjectAppearedInLocality m) => Register(m.Object);
 
 		/// <summary>
 		/// Handles the ChipotlesCarMoved message.
@@ -653,19 +595,13 @@ namespace Game.Terrain
 		/// Immediately removes a game object from list of present objects.
 		/// </summary>
 		/// <param name="o"></param>
-		private void Unregister(Entity o)
-		{
-			_items.Remove(o.Name.Indexed);
-		}
+		private void Unregister(Entity o) => _items.Remove(o.Name.Indexed);
 
 		/// <summary>
 		/// Immediately removes an entity from list of present entities.
 		/// </summary>
 		/// <param name="e">The entity to be removed</param>
-		public void Unregister(Character e)
-		{
-			_characters.Remove(e.Name.Indexed);
-		}
+		public void Unregister(Character e) => _characters.Remove(e.Name.Indexed);
 
 		/// <summary>
 		/// Removes a passage from the locality.
@@ -1056,10 +992,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="locality">The locality to which the passages should lead</param>
 		/// <returns> all passages leading to the specified locality</returns>
-		private IEnumerable<Passage> GetPassagesTo(Locality locality)
-		{
-			return Passages.Where(p => p.Localities.Contains(locality));
-		}
+		private IEnumerable<Passage> GetPassagesTo(Locality locality) => Passages.Where(p => p.Localities.Contains(locality));
 
 		//protected new float OverDoorVolume => .05f * _defaultVolume;
 

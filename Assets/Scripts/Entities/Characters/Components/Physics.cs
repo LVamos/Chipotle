@@ -66,12 +66,12 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Gets or sets the height of the character.
 		/// </summary>
-		public float Height { get; private set; }
+		public float Height { get; private set; } = .4f;
 
 		/// <summary>
 		/// Gets or sets the width of the character.
 		/// </summary>
-		public float Width { get; private set; }
+		public float Width { get; private set; } = .4f; //todo předělat
 
 		/// <summary>
 		/// Checks if the NPC is walking in the moment.
@@ -94,10 +94,7 @@ namespace Game.Entities.Characters.Components
 		/// Specifies the maximum distance allowed for path finding.
 		/// </summary>
 		protected const int _maxPathFindingDistance = 60;
-		protected virtual Vector2 GetStepDirection()
-		{
-			return _orientation.UnitVector;
-		}
+		protected virtual Vector2 GetStepDirection() => _orientation.UnitVector;
 
 		/// <summary>
 		/// Represents the maximum distance in meters from which the NPC can manipulate items or characters.
@@ -124,10 +121,7 @@ namespace Game.Entities.Characters.Components
 		/// Checks if there's an character standing before the character and returns it.
 		/// </summary>
 		/// <returns>The character standing before the character or null</returns>
-		protected Character CharacterBefore()
-		{
-			return World.GetCharacter(GetNextTile(1).position);
-		}
+		protected Character CharacterBefore() => World.GetCharacter(GetNextTile(1).position);
 
 		/// <summary>
 		/// Finds items and characters standing before the character.
@@ -250,10 +244,7 @@ namespace Game.Entities.Characters.Components
 		/// <param name="step">The distance between the NPC and the required tile</param>
 		/// <returns>A reference to an tile that lays in the specified distance and direction</returns>
 		/// <see cref="Orientation"/>
-		protected virtual Vector2 GetNextPoint()
-		{
-			return _path.Dequeue();
-		}
+		protected virtual Vector2 GetNextPoint() => _path.Dequeue();
 
 		/// <summary>
 		/// Returns a tile at a given distance from the NPC in the direction of the NPC's current orientation.
@@ -261,10 +252,7 @@ namespace Game.Entities.Characters.Components
 		/// <param name="step">The distance between the NPC and the required tile</param>
 		/// <returns>A reference to an tile that lays in the specified distance and direction</returns>
 		/// <see cref="Orientation"/>
-		protected (Vector2 position, Tile tile) GetNextTile(int step)
-		{
-			return GetNextTile(Orientation, step);
-		}
+		protected (Vector2 position, Tile tile) GetNextTile(int step) => GetNextTile(Orientation, step);
 
 		/// <summary>
 		/// Returns a tile at the specified distance and direction.
@@ -323,27 +311,18 @@ namespace Game.Entities.Characters.Components
 		protected (Vector2 position, Tile tile) CurrentTile
 			=> (_area.Value.Center, World.Map[_area.Value.Center]);
 
-		protected float GetDistanceCoefficient(float distance)
-		{
-			return distance < 5 ? 2 : distance < 10 ? 1 : distance < 30 ? .5f : .2f;
-		}
+		protected float GetDistanceCoefficient(float distance) => distance < 5 ? 2 : distance < 10 ? 1 : distance < 30 ? .5f : .2f;
 
 		/// <summary>
 		/// Computes length of the next step of the NPC.
 		/// </summary>
-		protected virtual int GetSpeed()
-		{
-			return _state == CharacterState.GoingToPlayer ? (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count)) : GetTerrainSpeed();
-		}
+		protected virtual int GetSpeed() => _state == CharacterState.GoingToPlayer ? (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count)) : GetTerrainSpeed();
 
 		/// <summary>
 		/// Returns speed of the terrain on which the NPC stands.
 		/// </summary>
 		/// <returns></returns>
-		protected int GetTerrainSpeed()
-		{
-			return _speeds[CurrentTile.tile.Terrain];
-		}
+		protected int GetTerrainSpeed() => _speeds[CurrentTile.tile.Terrain];
 
 		/// <summary>
 		/// Contains walk speed settings for particullar terrain types.
@@ -475,10 +454,7 @@ namespace Game.Entities.Characters.Components
 		/// <param name="b"></param>
 		/// <param name="orientation"></param>
 		/// <returns></returns>
-		protected Angle GetAngle(Vector2 point)
-		{
-			return World.GetAngle(point, _area.Value.Center, _orientation);
-		}
+		protected Angle GetAngle(Vector2 point) => World.GetAngle(point, _area.Value.Center, _orientation);
 
 		/// <summary>
 		/// Immediately changes position of the NPC.
@@ -486,10 +462,7 @@ namespace Game.Entities.Characters.Components
 		/// <param name="x">X coordinate of the target position</param>
 		/// <param name="y">Y coordinate of the target position</param>
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-		protected void JumpTo(float x, float y, bool silently = false)
-		{
-			JumpTo(new Vector2(x, y), silently);
-		}
+		protected void JumpTo(float x, float y, bool silently = false) => JumpTo(new Vector2(x, y), silently);
 
 		/// <summary>
 		/// Moves the character in the specified direction by distance defined in <see cref="_stepLength"/>.
@@ -545,10 +518,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="target">Coordinates of the target position</param>
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-		protected virtual void JumpTo(Vector2 target, bool silently = false)
-		{
-			JumpTo(Rectangle.FromCenter(target, Height, Width), silently);
-		}
+		protected virtual void JumpTo(Vector2 target, bool silently = false) => JumpTo(Rectangle.FromCenter(target, Height, Width), silently);
 
 		/// <summary>
 		/// Immediately changes position of the NPC.
@@ -625,10 +595,7 @@ namespace Game.Entities.Characters.Components
 		/// Processes the SetPosition message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnSetPosition(SetPosition message)
-		{
-			JumpTo(message.Target, message.Silently);
-		}
+		protected virtual void OnSetPosition(SetPosition message) => JumpTo(message.Target, message.Silently);
 
 		/// <summary>
 		/// Calculates the angle between the character and the target MapElement.
@@ -668,10 +635,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="n">The number to round.</param>
 		/// <returns>The rounded number.</returns>
-		protected int RoundToNearest90(float n)
-		{
-			return n is >= 315 or < 45 ? 0 : n < 135 ? 90 : n < 225 ? 180 : 270;
-		}
+		protected int RoundToNearest90(float n) => n is >= 315 or < 45 ? 0 : n < 135 ? 90 : n < 225 ? 180 : 270;
 
 		/// <summary>
 		/// Returns the nearest door in front of the NPC.
@@ -718,19 +682,13 @@ namespace Game.Entities.Characters.Components
 		/// Returns distance from this passage to the player.
 		/// </summary>
 		/// <returns>Distance in meters</returns>
-		protected float GetDistanceToPlayer()
-		{
-			return World.GetDistance(Owner, World.Player);
-		}
+		protected float GetDistanceToPlayer() => World.GetDistance(Owner, World.Player);
 
 		/// <summary>
 		/// Computes distance between the NPC and the current goal.
 		/// </summary>
 		/// <returns>Distance between the NPC and the current goal</returns>
-		protected float GetDistanceToGoal()
-		{
-			return World.GetDistance(_area.Value.Center, _goal);
-		}
+		protected float GetDistanceToGoal() => World.GetDistance(_area.Value.Center, _goal);
 
 		protected bool HasReachedPlayer()
 		{
@@ -917,19 +875,13 @@ namespace Game.Entities.Characters.Components
 		/// Handles the CharacterStateChanged message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnCharacterStateChanged(CharacterStateChanged message)
-		{
-			_state = message.State;
-		}
+		protected void OnCharacterStateChanged(CharacterStateChanged message) => _state = message.State;
 
 		/// <summary>
 		/// Processes the StartFollowing message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnStartFollowingPlayer(StartFollowingPlayer message)
-		{
-			StartFollowingPlayer();
-		}
+		protected void OnStartFollowingPlayer(StartFollowingPlayer message) => StartFollowingPlayer();
 
 		/// <summary>
 		/// starts walking after the Detective Chipotle NPC.
@@ -953,10 +905,7 @@ namespace Game.Entities.Characters.Components
 		/// Processes the StopFollowing message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnStopFollowingPlayer(StopFollowingPlayer message)
-		{
-			StopFollowingPlayer();
-		}
+		protected void OnStopFollowingPlayer(StopFollowingPlayer message) => StopFollowingPlayer();
 
 		/// <summary>
 		/// Handles the TryGoTo message.
@@ -999,13 +948,18 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected virtual void MakeStep()
 		{
+			//test
+			//Rectangle area1 = new(new Vector2(1039.8f, 1036.9f), new Vector2(1040.1f, 1036.6f));
+			//DetectCollisions(area1);
+
 			_speed = GetSpeed();
 			_walkTimer = 0;
 
 			Rectangle area = Rectangle.FromCenter(GetNextPoint(), Height, Width);
 			if (!DetectCollisions(area))
 				JumpNear(area);
-
+			else
+				_path = FindPath(_goal);
 			if (HasReachedPlayer())
 				StopWalk();
 		}
@@ -1024,10 +978,7 @@ namespace Game.Entities.Characters.Components
 		/// Processes the Hide message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnHide(Hide message)
-		{
-			StopFollowingPlayer();
-		}
+		protected void OnHide(Hide message) => StopFollowingPlayer();
 		/// <summary>
 		/// Avoids an obstacle or walks through a door if any.
 		/// </summary>
@@ -1035,30 +986,21 @@ namespace Game.Entities.Characters.Components
 		protected virtual bool DetectCollisions(Rectangle area)
 		{
 			List<object> obstacles = World.DetectCollisions(Owner, area)?.Obstacles;
-			if (obstacles == null)
+			if (obstacles.IsNullOrEmpty())
 				return false;
 
-			bool blocked = false;
-			Character character = obstacles.OfType<Character>().FirstOrDefault();
-			if (character != null)
-				blocked = true;
-
-			Door door = obstacles.OfType<Door>().FirstOrDefault();
-			if (door is { State: PassageState.Locked })
-				blocked = true;
-
-			HandleCollisions(door, character);
-			return blocked;
-
-			return door.State == PassageState.Locked;
+			return !HandleCollisions(obstacles.First());
 		}
-		protected virtual void HandleCollisions(Door door, Character character)
-		{
-			if (character != null && _state == CharacterState.GoingToPlayer)
-				_restartApproaching = true;
 
-			if (door is { State: PassageState.Closed })
-				UseDoor(door); // Open the door and keep walking.
+		protected virtual bool HandleCollisions(object obstacle)
+		{
+			if (obstacle is Door door && door.State == PassageState.Closed)
+			{
+				UseDoor(door); // Open it and keep walking.
+				return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>

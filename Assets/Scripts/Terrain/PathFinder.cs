@@ -65,9 +65,7 @@ namespace Game.Terrain
 				// Jestli je current blízko cíle, vracím cestu
 				if (Math.Abs(current.Coords.x - goal.x) <= .2f &&
 					Math.Abs(current.Coords.y - goal.y) <= .2f)
-				{
 					return GetPath(current, throughStart, throughGoal);
-				}
 
 				closed.Add(current.Coords);
 
@@ -79,6 +77,7 @@ namespace Game.Terrain
 					if (!IsWalkable(neighbour, start, goal, sameLocality, throughStart, throughGoal)
 						|| closed.Contains(neighbour.Coords))
 						continue;
+
 					// Zkusím, jestli je to nový node, nebo tam už je
 					float newCost = current.Cost + 1;
 					if (!openDict.TryGetValue(neighbour.Coords, out PathFindingNode existing))
@@ -152,13 +151,17 @@ namespace Game.Terrain
 			bool throughGoal
 		)
 		{
-			// Start/goal můžou být "průchozí", i kdyby tam byla překážka
-			if ((throughStart && node.Coords == start) ||
-				(throughGoal && node.Coords == goal))
-				return true;
-
 			Tile tile = World.Map[node.Coords];
-			return tile is { Walkable: true } && tile.Locality.IsWalkable(node.Coords);
+			bool walkable = tile is { Walkable: true } && tile.Locality.IsWalkable(node.Coords);
+			if (!walkable)
+				return false;
+
+			// If the node lays on start or goal, exclude it if not allowed.
+			if ((!throughStart && node.Coords == start) ||
+				(!throughGoal && node.Coords == goal))
+				return false;
+
+			return true;
 		}
 
 		/// <summary>
