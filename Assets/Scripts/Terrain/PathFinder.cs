@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -12,6 +13,9 @@ namespace Game.Terrain
 	[Serializable]
 	public class PathFinder
 	{
+		private const float _distanceToleration = .5f;
+		private const float _boundingBoxMargin = 10f;
+
 		// Lokální proměnné, do kterých uložíme bounding box při hledání
 		private float _minX, _maxX, _minY, _maxY;
 
@@ -25,87 +29,88 @@ namespace Game.Terrain
 		public Queue<Vector2> FindPath(
 			Vector2 start,
 			Vector2 goal,
-			bool sameLocality = false,
-			bool throughStart = false,
-			bool throughGoal = false
+			bool sameLocality,
+			bool throughStart,
+			bool throughGoal,
+			float characterHeight,
+			float characterWidth
 		)
 		{
-			if (sameLocality &&
-				(World.Map[start].Locality != World.Map[goal].Locality))
+			// validate the smaeLocality parameter.
+			Locality startLocality = World.Map[start].Locality;
+			Locality targetLocality = World.Map[goal].Locality;
+			if (sameLocality && startLocality != targetLocality)
 				return null;
 
-			// Vypočítám bounding box
-			// Můžeš si sem dát parametr margin (rezerva), tady jen "natvrdo" 5 dlaždic
-			float margin = 2f;
+			// Calculate bounding box to prevent the algorithm from searching the whole map.
+			float margin = _boundingBoxMargin;
 			_minX = Mathf.Min(start.x, goal.x) - margin;
 			_maxX = Mathf.Max(start.x, goal.x) + margin;
 			_minY = Mathf.Min(start.y, goal.y) - margin;
 			_maxY = Mathf.Max(start.y, goal.y) + margin;
 
-			// Start uzel
 			PathFindingNode startNode = new(start, cost: 0, parent: null);
 			startNode.ComputeDistance(goal);
 
-			// PriorityQueue pro nejlevnější uzel (Price)
-			PriorityQueue<PathFindingNode, float> openQueue = new();
-			// Dictionary na rychlé zjištění, jestli tam už node je
-			Dictionary<Vector2, PathFindingNode> openDict = new();
-			// Množina uzavřených uzlů
-			HashSet<Vector2> closed = new();
+			PriorityQueue<PathFindingNode, float> openQueue = new(); // For the cheapest node (Price)
 
-			// Vložím start
+			Dictionary<Vector2, PathFindingNode> open = new(); // Dictionary to a quick finding, if the node is already there
+			HashSet<Vector2> closed = new(); // set of closed nodes
+
+			// I put the start
 			openQueue.Enqueue(startNode, startNode.Price);
-			openDict[start] = startNode;
+			open[start] = startNode;
 
 			while (openQueue.Count > 0)
 			{
 				PathFindingNode current = openQueue.Dequeue();
-				openDict.Remove(current.Coords);
+				open.Remove(current.Coords);
 
-				// Jestli je current blízko cíle, vracím cestu
-				if (Math.Abs(current.Coords.x - goal.x) <= .2f &&
-					Math.Abs(current.Coords.y - goal.y) <= .2f)
+				// If Current is close to the target, I am returning the path
+				if (Vector2.Distance(current.Coords, goal) <= _distanceToleration)
 					return GetPath(current, throughStart, throughGoal);
 
 				closed.Add(current.Coords);
 
-				// Sousedé
 				IEnumerable<PathFindingNode> neighbours = GetNeighbours(current, start, goal, sameLocality, throughStart, throughGoal);
 				foreach (PathFindingNode neighbour in neighbours)
 				{
-					// Není walkable nebo je už uzavřený => skip
-					if (!IsWalkable(neighbour, start, goal, sameLocality, throughStart, throughGoal)
-						|| closed.Contains(neighbour.Coords))
+					// Is not walkable or is already closed => skip
+					if (closed.Contains(neighbour.Coords)
+						|| !IsWalkable(neighbour, start, goal, sameLocality, throughStart, throughGoal, characterHeight, characterWidth)
+						)
+					{
+						closed.Add(neighbour.Coords);
 						continue;
+					}
 
-					// Zkusím, jestli je to nový node, nebo tam už je
+					// I'll try if it's a new node or there is already there
 					float newCost = current.Cost + 1;
-					if (!openDict.TryGetValue(neighbour.Coords, out PathFindingNode existing))
+					if (!open.TryGetValue(neighbour.Coords, out PathFindingNode existing))
 					{
 						neighbour.Cost = newCost;
 						neighbour.Parent = current;
 						neighbour.ComputeDistance(goal);
 
 						openQueue.Enqueue(neighbour, neighbour.Price);
-						openDict[neighbour.Coords] = neighbour;
+						open[neighbour.Coords] = neighbour;
 					}
 					else
 					{
-						// Aktualizace, pokud je teď levnější cesta
+						// update if there is now a cheaper way
 						if (newCost < existing.Cost)
 						{
 							existing.Cost = newCost;
 							existing.Parent = current;
 							existing.ComputeDistance(goal);
 
-							// Znovu vložím do PQ, abych updatoval prioritu
+							// re -put in PQ to update the priority
 							openQueue.Enqueue(existing, existing.Price);
 						}
 					}
 				}
 			}
 
-			// Nic nenalezeno
 			return null;
 		}
 
@@ -148,11 +153,17 @@ namespace Game.Terrain
 			Vector2 goal,
 			bool sameLocality,
 			bool throughStart,
-			bool throughGoal
+			bool throughGoal,
+			float characterHeight,
+			float characterWidth
 		)
 		{
+			Rectangle area = Rectangle.FromCenter(node.Coords, characterHeight, characterWidth);
+			bool noStaticObjects = World.Map[area.Center].Locality.IsWalkable(area);
+			bool walkableTerrain = area.GetTiles(World.Map.TileSize)
+				.All(t => t != null && t.Tile.Walkable);
 			Tile tile = World.Map[node.Coords];
-			bool walkable = tile is { Walkable: true } && tile.Locality.IsWalkable(node.Coords);
+			bool walkable = walkableTerrain && noStaticObjects;
 			if (!walkable)
 				return false;
 

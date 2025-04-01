@@ -45,18 +45,18 @@ namespace Game.Terrain
 		public bool IsWalkable(Vector2 point) => !_nonpassables.Contains(point);
 
 		private HashSet<Vector2> _nonpassables = new();
-		public void GatherNonwalkables()
+		public void GatherNonwalkables(Item item)
 		{
+			if (item.CanBePicked())
+				return;
+
 			float tileSize = World.Map.TileSize;
 
-			foreach (Item item in Items.Where(i => !i.CanBePicked()))
-			{
-				Vector2[] points = item.Area.Value.GetPoints().ToArray();
+			Vector2[] points = item.Area.Value.GetPoints(tileSize).ToArray();
 
-				// I "snap" each point to the nearest half and put it in the list of non-passable points
-				foreach (Vector2 point in points)
-					_nonpassables.Add(World.Map.SnapToGrid(point));
-			}
+			// I "snap" each point to the nearest half and put it in the list of non-passable points
+			foreach (Vector2 point in points)
+				_nonpassables.Add(World.Map.SnapToGrid(point));
 		}
 
 		private bool PlayerInHere()
@@ -81,9 +81,9 @@ namespace Game.Terrain
 		/// <summary>
 		/// Enumerates all passages leading to the specified locality.
 		/// </summary>
-		/// <param name="l">The target locality</param>
-		/// <returns>enumaretion of passages</returns>
-		public IEnumerable<Passage> GetExitsTo(Locality l) => Passages.Where(p => p.LeadsTo(l));
+		/// <param name="target">The target locality</param>
+		/// <returns>enumeration of passages</returns>
+		public IEnumerable<Passage> GetExitsTo(Locality target) => Passages.Where(p => p.LeadsTo(target));
 
 		/// <summary>
 		/// Indicates if a locality is inside a building or outside.
@@ -134,7 +134,7 @@ namespace Game.Terrain
 					continue;
 				}
 
-				Vector2? point = passage.Area.Value.FindAlignedPoint(player)
+				Vector2? point = passage.Area.Value.GetAlignedPoint(player)
 				?? passage.Area.Value.GetClosestPoint(player);
 				source.transform.position = point.Value.ToVector3(2);
 				UpdateSpatialBlend(source);
@@ -562,8 +562,12 @@ namespace Game.Terrain
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
-		/// <param name="m">The message to be handled</param>
-		private void OnObjectAppearedInLocality(ObjectAppearedInLocality m) => Register(m.Object);
+		/// <param name="message">The message to be handled</param>
+		private void OnObjectAppearedInLocality(ObjectAppearedInLocality message)
+		{
+			Register(message.Object);
+			GatherNonwalkables(message.Object);
+		}
 
 		/// <summary>
 		/// Handles the ChipotlesCarMoved message.
@@ -890,7 +894,7 @@ namespace Game.Terrain
 				else
 				{
 					// Is the player standing in opposit to the passage?
-					Vector2? tmp = passage.Area.Value.FindAlignedPoint(player);
+					Vector2? tmp = passage.Area.Value.GetAlignedPoint(player);
 					position = tmp != null ? tmp.Value : passage.Area.Value.GetClosestPoint(player);
 				}
 				Vector3 position3d = new(position.x, 2, position.y);

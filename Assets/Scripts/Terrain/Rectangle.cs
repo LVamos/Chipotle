@@ -22,14 +22,13 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Rectangle
 	{
-
 		private float Left => UpperLeftCorner.x;
 		private float Right => LowerRightCorner.x;
 		private float Top => UpperLeftCorner.y;
 		private float bottom => LowerRightCorner.y;
 
 		/// <summary>
-		/// Computes a point at the rectangle.
+		/// Computes a point at the rectangle opposite to the given direction at the given distance.
 		/// </summary>
 		/// <param name="direction">The direction vector of the wanted point (must be normalized).</param>
 		/// <param name="distance">The distance to extend beyond the rectangle's front edge.</param>
@@ -787,29 +786,34 @@ namespace Game.Terrain
 		/// Finds a point on the rectangle that is alligned to the specified point.
 		/// </summary>
 		/// <param name="point">The point to be aligned</param></param>
-		public Vector2? FindAlignedPoint(Vector2 point)
+		public Vector2? GetAlignedPoint(Vector2 point, float distanceFromEdge = 0)
 		{
 			// Check if the point is aligned vertically
-			if (point.x >= this.UpperLeftCorner.x && point.x <= this.LowerRightCorner.x)
+			if (point.x >= MinX && point.x <= MaxX)
 			{
-				if (point.y > this.UpperLeftCorner.y)
-					return new Vector2(point.x, this.UpperLeftCorner.y); // Above the rectangle
-				else if (point.y < this.LowerRightCorner.y)
-					return new Vector2(point.x, this.LowerRightCorner.y); // Below the rectangle
+				if (point.y > MaxY)
+					return new(point.x, MaxY - distanceFromEdge); // Above the rectangle
+				if (point.y < MinY)
+					return new(point.x, MinY + distanceFromEdge); // Below the rectangle
 			}
 
 			// Check if the point is aligned horizontally
-			if (point.y >= this.LowerRightCorner.y && point.y <= this.UpperLeftCorner.y)
+			if (point.y >= MinY && point.y <= MaxY)
 			{
-				if (point.x < this.UpperLeftCorner.x)
-					return new Vector2(this.UpperLeftCorner.x, point.y); // Left of the rectangle
-				else if (point.x > this.LowerRightCorner.x)
-					return new Vector2(this.LowerRightCorner.x, point.y); // Right of the rectangle
+				if (point.x < MinX)
+					return new(MinX + distanceFromEdge, point.y); // Left of the rectangle
+				if (point.x > MaxX)
+					return new(MaxX - distanceFromEdge, point.y); // Right of the rectangle
 			}
 
 			// the point is not aligned
 			return null;
 		}
+
+		public float MinX => UpperLeftCorner.x;
+		public float MaxX => UpperRightCorner.x;
+		public float MinY => LowerRightCorner.y;
+		public float MaxY => UpperLeftCorner.y;
 
 		/// <summary>
 		/// Enumerates all closest tiles from surroundings of this plane.

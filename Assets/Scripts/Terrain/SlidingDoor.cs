@@ -32,7 +32,7 @@ namespace Game.Terrain
 
 			// Find point from which the door sound should be heart.
 			Vector2 center = entity.Area.Value.Center;
-			Vector2? tmp = _area.Value.FindAlignedPoint(center);
+			Vector2? tmp = _area.Value.GetAlignedPoint(center);
 			Vector2 point = tmp.HasValue ? (Vector2)tmp : _area.Value.GetClosestPoint(entity.Area.Value.Center);
 
 			if (opposite && near && (State == PassageState.Closed || State == PassageState.Locked))

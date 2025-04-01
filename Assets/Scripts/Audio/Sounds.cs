@@ -48,57 +48,27 @@ namespace Game.Audio
 			};
 		}
 
-		public static void SlideVolume(AudioSource sound, float duration, float targetVolume)
-		{
-			_soundManager.SlideVolume(sound, duration, targetVolume);
-		}
+		public static void SlideVolume(AudioSource sound, float duration, float targetVolume) => _soundManager.SlideVolume(sound, duration, targetVolume);
 
-		public static AudioSource DisableLowpass(AudioSource source)
-		{
-			return _soundManager.DisableLowPass(source);
-		}
+		public static AudioSource DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 
-		public static void SetLowPass(AudioSource source, int cutOffFrequency)
-		{
-			_soundManager.SetLowPass(source, cutOffFrequency);
-		}
+		public static void SetLowPass(AudioSource source, int cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
 
-		public static void SetLowPass(AudioSource source, ObstacleType obstacle)
-		{
-			_soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
-		}
+		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
 
-		public static void SetRoomParameters(Locality locality)
-		{
-			_soundManager.SetRoomParameters(locality);
-		}
+		public static void SetRoomParameters(Locality locality) => _soundManager.SetRoomParameters(locality);
 
-		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
-		{
-			return _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration);
-		}
+		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f) => _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration);
 
-		public static AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000)
-		{
-			return _soundManager.PlayMuffled(soundName, position, volume, loop, cutOffFrequency);
-		}
+		public static AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000) => _soundManager.PlayMuffled(soundName, position, volume, loop, cutOffFrequency);
 
-		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
-		{
-			return _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration);
-		}
+		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration);
 
 		public static AudioMixerGroup MixerGroup => _soundManager.MixerGroup;
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
-		public static void AdjustMasterVolume(float duration, float targetVolume)
-		{
-			_soundManager.AdjustMasterVolume(duration, targetVolume);
-		}
+		public static void AdjustMasterVolume(float duration, float targetVolume) => _soundManager.AdjustMasterVolume(duration, targetVolume);
 
-		public static void StopAll()
-		{
-			_soundManager.StopAllSounds();
-		}
+		public static void StopAll() => _soundManager.StopAllSounds();
 
 		public static void Initialize()
 		{
@@ -111,26 +81,17 @@ namespace Game.Audio
 		/// <summary>
 		/// Volume used with sound attenuation.
 		/// </summary>
-		public static float GetOverDoorVolume(float defaultVolume)
-		{
-			return defaultVolume * .5f;
-		}
+		public static float GetOverDoorVolume(float defaultVolume) => defaultVolume * .5f;
 
 		/// <summary>
 		/// Volume used with sound attenuation.
 		/// </summary>
-		public static float GetOverObjectVolume(float defaultVolume)
-		{
-			return defaultVolume * .9f;
-		}
+		public static float GetOverObjectVolume(float defaultVolume) => defaultVolume * .9f;
 
 		/// <summary>             /// <summary>
 		/// Volume used with sound attenuation.
 		/// </summary>
-		public static float GetOverWallVolume(float defaultVolume)
-		{
-			return defaultVolume * .4f;
-		}
+		public static float GetOverWallVolume(float defaultVolume) => defaultVolume * .4f;
 
 		public const float DefaultMasterVolume = 1;
 
@@ -185,20 +146,11 @@ namespace Game.Audio
 		}
 
 		private static float? _volumeBackup;
-		public static void Mute(float duration = .5f)
-		{
-			_soundManager.Mute();
-		}
+		public static void Mute(float duration = .5f) => _soundManager.Mute();
 
-		public static void Unmute(float duration = .5f)
-		{
-			_soundManager.Unmute();
-		}
+		public static void Unmute(float duration = .5f) => _soundManager.Unmute();
 
-		public static void ConvertTo2d(AudioSource audioSource, bool muffled)
-		{
-			_soundManager.ConvertTo2d(audioSource, muffled);
-		}
+		public static void ConvertTo2d(AudioSource audioSource, bool muffled) => _soundManager.ConvertTo2d(audioSource, muffled);
 
 		/// <summary>
 		/// All sounds used in the game

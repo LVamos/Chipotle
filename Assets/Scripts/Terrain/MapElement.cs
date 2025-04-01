@@ -284,7 +284,7 @@ namespace Game.Terrain
 
 			// Find opposite point
 			Vector2 player = World.Player.Area.Value.Center;
-			Vector2? opposite = _area.Value.FindAlignedPoint(player);
+			Vector2? opposite = _area.Value.GetAlignedPoint(player);
 			if (opposite == null)
 				return; // Sound blocked, play it normally.
 

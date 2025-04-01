@@ -1,6 +1,4 @@
-﻿using System;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Game.Terrain
 {
@@ -23,19 +21,13 @@ namespace Game.Terrain
 		/// Checks if there's an object or entity on this node.
 		/// </summary>
 		/// <returns>True if there's an object or entity on the node</returns>
-		public bool IsObjectOrCharacter()
-		{
-			return World.IsOccupied(Coords);
-		}
+		public bool IsObjectOrCharacter() => World.IsOccupied(Coords);
 
 		/// <summary>
 		/// Checks if there's an impermeable terrain on this node.
 		/// </summary>
 		/// <returns>True if there's an object or entity on the node</returns>
-		public bool IsImpermeableTerrain()
-		{
-			return !World.Map[Coords].Walkable;
-		}
+		public bool IsImpermeableTerrain() => !World.Map[Coords].Walkable;
 
 		/// <summary>
 		/// constructor
@@ -63,7 +55,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Heuristic function expressing distance between this node and the goal node.
 		/// </summary>
-		public int Distance { get; private set; }
+		public float Distance { get; private set; }
 
 		/// <summary>
 		/// The parrent of this node
@@ -79,9 +71,6 @@ namespace Game.Terrain
 		/// Calculates distance between this node and the lastnode
 		/// </summary>
 		/// <param name="goal">The last point of requested path</param>
-		public void ComputeDistance(Vector2 goal)
-		{
-			Distance = (int)(Math.Abs(goal.x - Coords.x) + Math.Abs(goal.y - Coords.y));
-		}
+		public void ComputeDistance(Vector2 goal) => Distance = Vector2.Distance(Coords, goal);
 	}
 }

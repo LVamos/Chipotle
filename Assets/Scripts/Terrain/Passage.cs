@@ -21,28 +21,29 @@ namespace Game.Terrain
 	[ProtoInclude(100, typeof(Door))]
 	public class Passage : MapElement
 	{
+		public List<Vector2> GetPointsOfLocality(Locality locality)
+		{
+			List<Vector2> points = _area.Value.GetPoints(World.Map.TileSize).ToList();
+
+			return
+				points
+				.Where(p => locality.Area.Value.Contains(p))
+				.ToList();
+		}
+
 		/// <summary>
 		/// Returns text description of the passage.
 		/// </summary>
 		/// <returns>text description of the passage</returns>
-		public override string ToString()
-		{
-			return "průchod";
-		}
+		public override string ToString() => "průchod";
 
 		/// <summary>
 		/// Checks if the specified point lays in front or behind the passage.
 		/// </summary>
 		/// <returns>True if the specified point lays in front or behind the passage</returns>
-		public bool IsInFrontOrBehind(Vector2 point)
-		{
-			return IsInRelatedLocality(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
-		}
+		public bool IsInFrontOrBehind(Vector2 point) => IsInRelatedLocality(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
 
-		private bool IsInHorizontalRange(Vector2 point)
-		{
-			return IsHorizontal() && point.x >= _area.Value.UpperLeftCorner.x && point.x <= _area.Value.UpperRightCorner.x;
-		}
+		private bool IsInHorizontalRange(Vector2 point) => IsHorizontal() && point.x >= _area.Value.UpperLeftCorner.x && point.x <= _area.Value.UpperRightCorner.x;
 
 		private bool IsInVerticalRange(Vector2 point)
 		{
@@ -55,10 +56,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point to be checked</param>
 		/// <returns>True if the specified point lays in one of the localities connected by the passage</returns>
-		public bool IsInRelatedLocality(Vector2 point)
-		{
-			return Localities.Any(l => l.Area.Value.Contains(point));
-		}
+		public bool IsInRelatedLocality(Vector2 point) => Localities.Any(l => l.Area.Value.Contains(point));
 
 		/// <summary>
 		/// Checks if the passage is horizontal.
@@ -76,10 +74,7 @@ namespace Game.Terrain
 		/// Checks if the passage is vertical.
 		/// </summary>
 		/// <returns>True if the passage is vertical</returns>
-		public bool IsVertical()
-		{
-			return !IsHorizontal();
-		}
+		public bool IsVertical() => !IsHorizontal();
 
 		/// <summary>
 		/// Indicates if the door is open or closed.
@@ -91,10 +86,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="l">The locality to be checked</param>
 		/// <returns>True if the passage leads to the specified locality</returns>
-		public bool LeadsTo(Locality l)
-		{
-			return Localities.Contains(l);
-		}
+		public bool LeadsTo(Locality l) => Localities.Contains(l);
 
 		/// <summary>
 		/// Localities connected by the passage
@@ -154,10 +146,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="comparedLocality">The locality to be compared</param>
 		/// <returns>The other side of the passage than the specified one</returns>
-		public Locality AnotherLocality(Locality comparedLocality)
-		{
-			return Localities.First(l => l.Name.Indexed != comparedLocality.Name.Indexed);
-		}
+		public Locality AnotherLocality(Locality comparedLocality) => Localities.First(l => l.Name.Indexed != comparedLocality.Name.Indexed);
 
 		/// <summary>
 		/// Displays the passage in the game world.
@@ -189,12 +178,9 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Returns pooint that belongs to this object and is the most close to the player.
+		/// Returns the point closest to the player.
 		/// </summary>
-		protected Vector2 GetClosestPointToPlayer()
-		{
-			return _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
-		}
+		protected Vector2 GetClosestPointToPlayer() => _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
 
 		/// <summary>
 		/// stores a locality in which the player is located after navigation start.

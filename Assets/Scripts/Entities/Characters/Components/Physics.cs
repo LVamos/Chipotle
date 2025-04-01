@@ -656,7 +656,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected Vector2 FindManipulationPoint(MapElement element)
 		{
-			Vector2? point = element.Area.Value.FindAlignedPoint(_area.Value.Center);
+			Vector2? point = element.Area.Value.GetAlignedPoint(_area.Value.Center);
 			if (point == null)
 				point = element.Area.Value.GetClosestPoint(_area.Value.Center);
 			return point.Value;
@@ -749,17 +749,60 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="goal">The target position</param>
 		/// <returns>Queue with nodes leading to the target</returns>
-		protected Queue<Vector2> FindPath(Vector2 goal, bool withGoal = true)
+		protected Queue<Vector2> FindPath(Vector2 goal, bool withStart = true, bool withGoal = true)
 		{
 			if (_area == null)
 				return null;
 
 			Vector2 start = _area.Value.Center;
+			Vector2? goal1 = goal, goal2 = goal;
+			Locality startLocality = Locality;
+			Locality targetLocality = World.Map[goal].Locality;
+			bool sameLocality = startLocality == targetLocality; // Don't go to another localities if the goal is in the same locality.
 
-			bool sameLocality = World.Map[start].Locality == World.Map[goal].Locality; // Don't go to another localities if the goal is in the same locality.
+			// Give it up if the goal is in another locality and the NPC can't go there.
+			if (!sameLocality)
+			{
+				if (!startLocality.IsAccessible(targetLocality))
+					return null;
 
-			return World.FindPath(start, goal, sameLocality, true, withGoal);
+				goal1 = FindPointBehindPassage(targetLocality);
+				if (goal1 == null)
+					return null;
+			}
+
+			Queue<Vector2> path1 = World.FindPath(start, goal1.Value, sameLocality, withStart, withGoal, Height, Width);
+
+			if (!sameLocality)
+			{
+				// Construct the rest of the path from the entrance to the goal.
+				Queue<Vector2> path2 = World.FindPath(goal1.Value, goal2.Value, true, false, withGoal, Height, Width);
+				if (path2 != null)
+					return new(path1.Concat(path2));
+			}
+
+			return path1;
 		}
+
+		private Vector2? FindPointBehindPassage(Locality targetLocality)
+		{
+			Passage closestExit =
+				targetLocality.GetExitsTo(targetLocality)
+				.OrderBy(p => p.Area.Value.GetDistanceFrom(_area.Value))
+				.FirstOrDefault();
+			if (closestExit == null)
+				return null;
+
+			Rectangle targetArea = targetLocality.Area.Value;
+			List<Vector2> exitPoints = closestExit.GetPointsOfLocality(closestExit.AnotherLocality(targetLocality));
+			if (exitPoints.IsNullOrEmpty())
+				return null;
+
+			Vector2 exitPoint = exitPoints.FirstOrDefault();
+			Vector2? target = targetArea.GetAlignedPoint(exitPoint, 2 * _area.Value.Size);
+			return target;
+		}
+
 		/// <summary>
 		/// sets state of the NPC and announces the change to other components.
 		/// </summary>
@@ -948,18 +991,15 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected virtual void MakeStep()
 		{
-			//test
-			//Rectangle area1 = new(new Vector2(1039.8f, 1036.9f), new Vector2(1040.1f, 1036.6f));
-			//DetectCollisions(area1);
-
 			_speed = GetSpeed();
 			_walkTimer = 0;
 
-			Rectangle area = Rectangle.FromCenter(GetNextPoint(), Height, Width);
+			Vector2 nextPoint = GetNextPoint();
+			Rectangle area = Rectangle.FromCenter(nextPoint, Height, Width);
 			if (!DetectCollisions(area))
 				JumpNear(area);
 			else
-				_path = FindPath(_goal);
+				_path = FindPath(_goal, false);
 			if (HasReachedPlayer())
 				StopWalk();
 		}

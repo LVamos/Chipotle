@@ -104,10 +104,10 @@ namespace Game.Entities.Items
 			if (_area == null)
 				return;
 
-			IEnumerable<string> query =
+			_localities =
 				(from l in World.GetLocalities(_area.Value)
-				 select l.Name.Indexed);
-			_localities = new HashSet<string>(query);
+				 select l.Name.Indexed)
+				 .ToHashSet();
 		}
 
 		/// <summary>
@@ -130,10 +130,7 @@ namespace Game.Entities.Items
 		/// Checks if the object can be picked up off the ground in the moment.
 		/// </summary>
 		/// <returns>True if the object can be picked up off the ground.</returns>
-		public virtual bool CanBePicked()
-		{
-			return _pickable && HeldBy == null;
-		}
+		public virtual bool CanBePicked() => _pickable && HeldBy == null;
 
 		/// <summary>
 		/// Indicates if the object stops playing its action sound when the player moves or turns.
@@ -239,15 +236,9 @@ namespace Game.Entities.Items
 		/// Processes the Collision message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnOrientationChanged(OrientationChanged message)
-		{
-			WatchPlayersMovement();
-		}
+		private void OnOrientationChanged(OrientationChanged message) => WatchPlayersMovement();
 
-		protected virtual void OnLocalityEntered(CharacterCameToLocality message)
-		{
-			UpdateLoop();
-		}
+		protected virtual void OnLocalityEntered(CharacterCameToLocality message) => UpdateLoop();
 
 		/// <summary>
 		/// Checks if there's a direct path from this object to the player.
@@ -266,10 +257,7 @@ namespace Game.Entities.Items
 		/// Handles the DoorManipulated message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnDoorManipulated(DoorManipulated message)
-		{
-			UpdateLoop();
-		}
+		protected void OnDoorManipulated(DoorManipulated message) => UpdateLoop();
 
 		/// <summary>
 		/// Stops sound loop of this object, if any.
@@ -399,10 +387,7 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Handles the game reloaded message.
 		/// </summary>
-		private void OnGameReloaded()
-		{
-			UpdateLoop();
-		}
+		private void OnGameReloaded() => UpdateLoop();
 
 		/// <summary>
 		/// Plays the sound loop of this object if there's any.
@@ -601,9 +586,6 @@ Rectangle.FromCenter(characterArea.Center, Dimensions.width, Dimensions.height)
 		/// Handles the ReportPosition message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnReportPosition(ReportPosition m)
-		{
-			ReportPosition();
-		}
+		private void OnReportPosition(ReportPosition m) => ReportPosition();
 	}
 }
