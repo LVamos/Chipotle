@@ -146,7 +146,7 @@ namespace Game.Audio
 		}
 
 		private static float? _volumeBackup;
-		public static void Mute(float duration = .5f) => _soundManager.Mute();
+		public static void Mute(float duration = .5f) => _soundManager?.Mute();
 
 		public static void Unmute(float duration = .5f) => _soundManager.Unmute();
 
