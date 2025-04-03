@@ -24,10 +24,7 @@ namespace Game.Entities.Characters.Tuttle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class TuttleAI : AI
 	{
-		public override void Initialize()
-		{
-			transform.localScale = new(.4f, 1.7f, .4f);
-		}
+		public override void Initialize() => transform.localScale = new(.4f, 1.7f, .4f);
 
 		/// <summary>
 		/// Timer that prevents repetetive collisions. Counts milliseconds.
@@ -83,8 +80,6 @@ namespace Game.Entities.Characters.Tuttle
 				JumpTo(new Vector2(1031.8f, 1035.5f));
 
 			// scenarios for debugging purposes
-			//if (Settings.SendTuttleToPool && !Settings.PlayCutscenes)
-			//    GoToPool();
 			if (!Settings.SendTuttleToPool && Settings.LetTuttleFollowChipotle)
 				SetState(CharacterState.WatchingPlayer);
 		}
@@ -202,27 +197,18 @@ namespace Game.Entities.Characters.Tuttle
 		/// The detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)
 		/// locality to the Christine's hall (hala p1) locality.
 		/// </summary>
-		private void JumpToChristinesHall()
-		{
-			JumpNear(World.GetItem("botník p1").Area.Value);
-		}
+		private void JumpToChristinesHall() => JumpNear(World.GetItem("botník p1").Area.Value);
 
 		/// <summary>
 		/// Stops following the player.
 		/// </summary>
-		private void StopFollowing()
-		{
-			InnerMessage(new StopFollowingPlayer(this));
-		}
+		private void StopFollowing() => InnerMessage(new StopFollowingPlayer(this));
 
 		/// <summary>
 		/// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his
 		/// room (pokoj s1) locality.
 		/// </summary>
-		private void JumpToSweeneysRoom()
-		{
-			JumpNear(World.GetItem("skříň s2").Area.Value);
-		}
+		private void JumpToSweeneysRoom() => JumpNear(World.GetItem("skříň s2").Area.Value);
 
 		/// <summary>
 		/// Processes the ChipotlesCarMoved message.

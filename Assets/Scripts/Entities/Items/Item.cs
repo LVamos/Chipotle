@@ -11,7 +11,6 @@ using Game.Terrain;
 
 using ProtoBuf;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -195,15 +194,12 @@ namespace Game.Entities.Items
 			_quickActionsAllowed = quickActionsAllowed;
 
 			// Set up sound names
-			_sounds = new(StringComparer.OrdinalIgnoreCase)
-			{
-				{"collision", collisionSound ?? "MovCrashDefault" },
-				{"action",actionSound },
-				{"picking", pickingSound },
-				{"placing", placingSound },
-				{"loop", loopSound },
-				{"passBy", "ObjectPassBy" }
-			};
+			_sounds["collision"] = collisionSound ?? "MovCrashDefault";
+			_sounds["action"] = actionSound;
+			_sounds["picking"] = pickingSound;
+			_sounds["placing"] = placingSound;
+			_sounds["loop"] = loopSound;
+			_sounds["passBy"] = "ObjectPassBy";
 		}
 
 		/// <summary>

@@ -82,13 +82,13 @@ namespace Game.Entities.Characters.Components
 		/// Specifies the minimum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		protected const int _minPlayerDistance = 6;
+		protected const int _minPlayerDistance = 4;
 
 		/// <summary>
 		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		protected const int _maxPlayerDistance = 10;
+		protected const int _maxPlayerDistance = 7;
 
 		/// <summary>
 		/// Specifies the maximum distance allowed for path finding.
@@ -311,12 +311,27 @@ namespace Game.Entities.Characters.Components
 		protected (Vector2 position, Tile tile) CurrentTile
 			=> (_area.Value.Center, World.Map[_area.Value.Center]);
 
-		protected float GetDistanceCoefficient(float distance) => distance < 5 ? 2 : distance < 10 ? 1 : distance < 30 ? .5f : .2f;
+		protected float GetDistanceCoefficient(float distance)
+		{
+			if (distance < 5)
+				return 3;
+			if (distance < 10)
+				return 2;
+			if (distance < 30)
+				return 1;
+
+			return .6f;
+		}
 
 		/// <summary>
 		/// Computes length of the next step of the NPC.
 		/// </summary>
-		protected virtual int GetSpeed() => _state == CharacterState.GoingToPlayer ? (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count)) : GetTerrainSpeed();
+		protected virtual int GetSpeed()
+		{
+			if (_state == CharacterState.GoingToPlayer)
+				return (int)(GetTerrainSpeed() * GetDistanceCoefficient(_path.Count));
+			return GetTerrainSpeed();
+		}
 
 		/// <summary>
 		/// Returns speed of the terrain on which the NPC stands.
@@ -357,7 +372,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Stores reference to a locality in which the NPC is currently located.
 		/// </summary>
-		public Locality Locality => _area == null ? null : Owner.Locality;
+		public Locality Locality => _area == null ? null : World.GetLocality(_area.Value.Center);
 
 		/// <summary>
 		/// Current orientation of the NPC
@@ -766,19 +781,29 @@ namespace Game.Entities.Characters.Components
 				if (!startLocality.IsAccessible(targetLocality))
 					return null;
 
-				goal1 = FindPointBehindPassage(targetLocality);
+				Passage closestExit =
+				targetLocality.GetExitsTo(targetLocality)
+				.OrderBy(p => p.Area.Value.GetDistanceFrom(_area.Value))
+				.FirstOrDefault();
+
+				goal1 = closestExit.Area.Value.Center;
 				if (goal1 == null)
 					return null;
 			}
 
 			Queue<Vector2> path1 = World.FindPath(start, goal1.Value, sameLocality, withStart, withGoal, Height, Width);
+			if (path1 == null)
+				return null;
 
 			if (!sameLocality)
 			{
 				// Construct the rest of the path from the entrance to the goal.
 				Queue<Vector2> path2 = World.FindPath(goal1.Value, goal2.Value, true, false, withGoal, Height, Width);
 				if (path2 != null)
-					return new(path1.Concat(path2));
+				{
+					Queue<Vector2> finalPath = new(path1.Concat(path2));
+					return finalPath;
+				}
 			}
 
 			return path1;
@@ -794,7 +819,7 @@ namespace Game.Entities.Characters.Components
 				return null;
 
 			Rectangle targetArea = targetLocality.Area.Value;
-			List<Vector2> exitPoints = closestExit.GetPointsOfLocality(closestExit.AnotherLocality(targetLocality));
+			List<Vector2> exitPoints = closestExit.GetPointsOfLocality(Locality);
 			if (exitPoints.IsNullOrEmpty())
 				return null;
 
@@ -808,6 +833,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected void SetState(CharacterState state)
 		{
+			//test
+			if (Owner.Name.Indexed == "tuttle")
+				System.Diagnostics.Debug.WriteLine(state);
 			_state = state;
 			InnerMessage(new CharacterStateChanged(this, state));
 		}
@@ -1025,11 +1053,12 @@ namespace Game.Entities.Characters.Components
 		/// <param name="area">The target coordinates</param>
 		protected virtual bool DetectCollisions(Rectangle area)
 		{
-			List<object> obstacles = World.DetectCollisions(Owner, area)?.Obstacles;
-			if (obstacles.IsNullOrEmpty())
+			CollisionsModel collisions = World.DetectCollisions(Owner, area, true);
+			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
-			return !HandleCollisions(obstacles.First());
+			object obstacle = collisions.Obstacles?.First();
+			return !HandleCollisions(obstacle);
 		}
 
 		protected virtual bool HandleCollisions(object obstacle)

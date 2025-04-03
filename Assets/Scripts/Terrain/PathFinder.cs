@@ -36,7 +36,7 @@ namespace Game.Terrain
 			float characterWidth
 		)
 		{
-			// validate the smaeLocality parameter.
+			// validate the sameLocality parameter.
 			Locality startLocality = World.Map[start].Locality;
 			Locality targetLocality = World.Map[goal].Locality;
 			if (sameLocality && startLocality != targetLocality)

@@ -23,12 +23,13 @@ namespace Game.Terrain
 	{
 		public List<Vector2> GetPointsOfLocality(Locality locality)
 		{
-			List<Vector2> points = _area.Value.GetPoints(World.Map.TileSize).ToList();
+			List<Vector2> points = _area.Value.GetPoints().ToList();
 
-			return
-				points
+			List<Vector2> pointsOfLocality = points
 				.Where(p => locality.Area.Value.Contains(p))
 				.ToList();
+			List<Locality> test = points.Select(p => World.Map[p]?.Locality).Distinct().ToList();
+			return pointsOfLocality;
 		}
 
 		/// <summary>

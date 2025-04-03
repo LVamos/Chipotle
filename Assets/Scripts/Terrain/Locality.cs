@@ -39,7 +39,7 @@ namespace Game.Terrain
 		public bool IsWalkable(Rectangle area)
 		{
 			IEnumerable<Vector2> points = area.GetPoints(World.Map.TileSize);
-			return points.All(p => IsWalkable(p));
+			return points.All(IsWalkable);
 		}
 
 		public bool IsWalkable(Vector2 point) => !_nonpassables.Contains(point);
@@ -924,7 +924,7 @@ namespace Game.Terrain
 			/*
 			 * Switching from InInaccessibleLocality mode
 			 * Find a passage sound that is closest to the player, 
-			 * change it to full stereo, disable Low pass and stop the rest of the passage loops.
+			] * change it to full stereo, disable Low pass and stop the rest of the passage loops.
 			 */
 			PassageLoopModel loop = TakeClosestPassageLoop();
 			Sounds.ConvertTo2d(loop.AudioSource, loop.Muffled);

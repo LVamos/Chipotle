@@ -143,38 +143,47 @@ namespace Game
 		/// <param name="ignoredElement">The element to be moved.</param>
 		/// <param name="area">The map element to detect collisions for.</param>
 		/// <returns>List of MapElements or null</returns>
-		public static CollisionsModel DetectCollisions(MapElement ignoredElement, Rectangle area)
+		public static CollisionsModel DetectCollisions(MapElement ignoredElement, Rectangle area, bool justFirstObstacle = false)
 		{
 			List<object> obstacles = new();
-
-			// Check precomputed nonwalkable tiles first.
-			Tile tile = World.Map[area.Center];
-			Locality locality = tile?.Locality;
-			if (locality != null && locality.IsWalkable(area))
-			{
-				DetectCollision(locality.Characters);
-				DetectCollision(locality.MovableItems);
-				if (obstacles.Any())
-					return new(obstacles, false);
-			}
-
 			List<Locality> localities = area.GetLocalities().ToList();
 
 			// Detect inaccesible terrain.
-			List<TileInfo> enumerable = area.GetTiles();
-			List<TileInfo> inaccessibleTiles = enumerable
+			List<TileInfo> allTiles = area.GetTiles(Map.TileSize);
+			List<TileInfo> inaccessibleTiles = allTiles
 				.Where(t => !t.Tile.Walkable)
 				.Distinct().ToList();
 
 			if (inaccessibleTiles.Any())
+			{
 				obstacles.AddRange(inaccessibleTiles.Cast<object>());
+				if (justFirstObstacle)
+					return new(obstacles, false);
+			}
 
 			// Check all objects, passages and characters in localities the given element intersects. Skip the given element.
 			foreach (Locality l in localities)
 			{
-				DetectCollision(l.Items);
-				DetectCollision(l.Characters);
-				DetectCollision(l.Passages.Where(p => p is Door d && (d.State == PassageState.Closed || d.State == PassageState.Locked)));
+				if (l.IsWalkable(area))
+				{
+					Detect(l.Characters);
+					if (Enough())
+						return new(obstacles, false);
+
+					Detect(l.MovableItems);
+					if (Enough())
+						return new(obstacles, false);
+
+					Detect(l.GetClosedDoors());
+					if (Enough())
+						return new(obstacles, false);
+				}
+				else
+				{
+					Detect(l.Items);
+					if (Enough())
+						return new(obstacles, false);
+				}
 			}
 
 			bool outOfMap = area.IsOutOfMap();
@@ -183,7 +192,7 @@ namespace Game
 				obstacles = null;
 			return new(obstacles, outOfMap);
 
-			void DetectCollision(IEnumerable<MapElement> elements)
+			void Detect(IEnumerable<MapElement> elements)
 			{
 				IEnumerable<MapElement> newObstacles = elements
 					.Where(element => element.Area != null && element != ignoredElement)
@@ -192,6 +201,8 @@ namespace Game
 				if (newObstacles.Any())
 					obstacles.AddRange(newObstacles);
 			}
+
+			bool Enough() => justFirstObstacle && obstacles.Count > 0;
 		}
 
 		/// <summary>
@@ -362,7 +373,7 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The area the localities should intersect with</param>
 		/// <returns>enumeration of localities</returns>
-		public static IEnumerable<Locality> GetLocalities(Game.Terrain.Rectangle area)
+		public static IEnumerable<Locality> GetLocalities(Rectangle area)
 		{
 			IEnumerable<Vector2> points = area.GetPoints(Map.TileSize);
 			return
