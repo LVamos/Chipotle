@@ -500,10 +500,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles the CreatePredefinedSave message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnCreatePredefinedSave(CreatePredefinedSave message)
-		{
-			World.CreatePredefinedSave();
-		}
+		private void OnCreatePredefinedSave(CreatePredefinedSave message) => World.CreatePredefinedSave();
 
 		/// <summary>
 		/// Handles the LoadPredefinedSave message.
@@ -581,10 +578,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the StopObjectNavigation message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnStopNavigation(StopNavigation message)
-		{
-			StopNavigation();
-		}
+		private void OnStopNavigation(StopNavigation message) => StopNavigation();
 
 		/// <summary>
 		/// Processes the ListNavigableObjects message.
@@ -714,10 +708,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayExits message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnSayExits(SayExits message)
-		{
-			SayExits();
-		}
+		protected void OnSayExits(SayExits message) => SayExits();
 
 		/// <summary>
 		/// Announces the nearest exits from the locality in which the Chipotle NPC is located.
@@ -816,10 +807,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Checks if Tuttle and Chipotle NPCs are in the same locality.
 		/// </summary>
 		/// <returns>True if Tuttle and Chipotle NPCs are in the same locality</returns>
-		private bool IsTuttleNearBy()
-		{
-			return Owner.SameLocality(Tuttle);
-		}
+		private bool IsTuttleNearBy() => Owner.SameLocality(Tuttle);
 
 		/// <summary>
 		/// Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdoivá cesta w1)
@@ -848,10 +836,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Relocates the NPC from the hall in Vanilla crunch company (hala v1) into the Mariotti's
 		/// office (kancelář v1) locality.
 		/// </summary>
-		private void JumpToMariottisOffice()
-		{
-			JumpNear(World.GetItem("křeslo v6").Area.Value);
-		}
+		private void JumpToMariottisOffice() => JumpNear(World.GetItem("křeslo v6").Area.Value);
 
 		/// <summary>
 		/// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) locality to the
@@ -867,10 +852,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Relocates the NPC from the Mariotti's office (kancelář v1) into the garage of the
 		/// vanilla crunch company (garáž v1) locality.
 		/// </summary>
-		private void JumpToVanillaCrunchGarage()
-		{
-			JumpNear(World.GetItem("zeď v6").Area.Value);
-		}
+		private void JumpToVanillaCrunchGarage() => JumpNear(World.GetItem("zeď v6").Area.Value);
 
 		/// <summary>
 		/// Stores indexes of regions visited by the NPC.
@@ -956,6 +938,7 @@ namespace Game.Entities.Characters.Chipotle
 			_walkTimer = 0;
 
 			Vector2 direction = GetStepDirection();
+
 			if (!DetectCollisions(direction))
 				Move(direction);
 			//ReportObjects();
@@ -1049,10 +1032,7 @@ namespace Game.Entities.Characters.Chipotle
 			Logger.LogInfo(title, parameters.ToArray());
 		}
 
-		private Vector2 GetContactPoint(MapElement element)
-		{
-			return element.Area.Value.GetClosestPoint(_area.Value.Center);
-		}
+		private Vector2 GetContactPoint(MapElement element) => element.Area.Value.GetClosestPoint(_area.Value.Center);
 
 		/// <summary>
 		/// Announces each object in specified radius.
@@ -1131,19 +1111,13 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayCharacters message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayCharacters(SayCharacters message)
-		{
-			SayCharacters();
-		}
+		private void OnSayCharacters(SayCharacters message) => SayCharacters();
 
 		/// <summary>
 		/// Processes the SayNearestObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayObjects(SayObjects message)
-		{
-			SayObjects();
-		}
+		private void OnSayObjects(SayObjects message) => SayObjects();
 
 		/// <summary>
 		/// Announces the nearest characters around the Chipotle 
@@ -1176,19 +1150,13 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayTerrain message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayTerrain(SayTerrain message)
-		{
-			Tolk.Speak(World.Map[_area.Value.UpperLeftCorner].Terrain.GetDescription(), true);
-		}
+		private void OnSayTerrain(SayTerrain message) => Tolk.Speak(World.Map[_area.Value.UpperLeftCorner].Terrain.GetDescription(), true);
 
 		/// <summary>
 		/// Processes the SayVisitedLocality message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayVisitedLocality(SayVisitedRegion message)
-		{
-			InnerMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
-		}
+		private void OnSayVisitedLocality(SayVisitedRegion message) => InnerMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
 
 		/// <summary>
 		/// Processes the MakeStep message.
@@ -1209,10 +1177,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the StopWalk message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnStopWalk(StopWalk message)
-		{
-			StopWalk();
-		}
+		private void OnStopWalk(StopWalk message) => StopWalk();
 
 		/// <summary>
 		/// Interrupts walk of the Chipotle NPC.
@@ -1341,18 +1306,12 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Plays the game finals.
 		/// </summary>
-		private void PlayFinalScene()
-		{
-			World.PlayCutscene(Owner, "cs35");
-		}
+		private void PlayFinalScene() => World.PlayCutscene(Owner, "cs35");
 
 		/// <summary>
 		/// Terminates the game and runs the main menu.
 		/// </summary>
-		private void QuitGame()
-		{
-			World.QuitGame();
-		}
+		private void QuitGame() => World.QuitGame();
 
 		/// <summary>
 		/// He puts the NPC on its feet if it is sitting and plays the appropriate sound.

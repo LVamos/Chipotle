@@ -31,6 +31,13 @@ namespace Game.Entities.Characters.Components
 	[ProtoInclude(100, typeof(ChipotlePhysics))]
 	public class Physics : CharacterComponent
 	{
+		private void FixedUpdate()
+		{
+			System.Diagnostics.Debug.WriteLine("FixedUpdate: " + Time.time);
+			if (World.GameInProgress)
+				PerformWalk();
+		}
+
 		protected void LogOutOfMapAttempt(Vector2 position)
 		{
 			string title = "Mimo mapu";
@@ -287,17 +294,13 @@ namespace Game.Entities.Characters.Components
 		protected void UpdateWalkTimer()
 		{
 			if (_walkTimer < _speed)
-				_walkTimer += World.DeltaTime;
+				_walkTimer += (int)(1000 * Time.fixedDeltaTime);
 		}
 
 		/// <summary>
 		/// Processes incoming messages.
 		/// </summary>
-		public override void GameUpdate()
-		{
-			base.GameUpdate();
-			PerformWalk();
-		}
+		public override void GameUpdate() => base.GameUpdate();
 
 		/// <summary>
 		/// The goal that Tuttle is just going to.
@@ -833,9 +836,6 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected void SetState(CharacterState state)
 		{
-			//test
-			if (Owner.Name.Indexed == "tuttle")
-				System.Diagnostics.Debug.WriteLine(state);
 			_state = state;
 			InnerMessage(new CharacterStateChanged(this, state));
 		}

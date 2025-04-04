@@ -69,8 +69,8 @@ public class AutoPlayBehaviour : MonoBehaviour
 
 		Camera.main.clearFlags = CameraClearFlags.Nothing;
 		Camera.main.cullingMask = 0;
-		Application.targetFrameRate = 30;
 		Application.runInBackground = true;
+		Time.fixedDeltaTime = 1f / 30f;
 
 		if (!Settings.MainMenuAtStartup)
 			WindowHandler.StartGame();

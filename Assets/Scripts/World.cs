@@ -588,7 +588,12 @@ namespace Game
 		/// </summary>
 		/// <param name="name">Inner name of the required NPC</param>
 		/// <returns>The found NPC or null if nothing was found</returns>
-		public static Character GetCharacter(string name) => _characters != null && _characters.TryGetValue(name.ToLower(), out Character e) ? e : null;
+		public static Character GetCharacter(string name)
+		{
+			if (_characters.TryGetValue(name, out Character c))
+				return c;
+			return null;
+		}
 
 		/// <summary>
 		/// Returns a locality found by its name.
