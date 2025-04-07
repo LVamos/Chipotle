@@ -1,4 +1,6 @@
-﻿using Game.Audio;
+﻿using DavyKager;
+
+using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
@@ -100,7 +102,7 @@ namespace Game.Terrain
 			Type = type;
 			_sounds["hit"] = "KitchenDoorCrash";
 			_sounds["rattle"] = "DoorKnobRattle";
-			_defaultVolume = .5f;
+			_defaultVolume = 1;
 		}
 
 		/// <summary>
@@ -141,10 +143,7 @@ namespace Game.Terrain
 			Logger.LogInfo(title, name, localities, type, characterMessage);
 		}
 
-		private void PlayDoorHit(Vector3 point)
-		{
-			Sounds.Play(_sounds["hit"], point, _defaultVolume);
-		}
+		private void PlayDoorHit(Vector3 point) => Sounds.Play(_sounds["hit"], point, _defaultVolume);
 
 		/// <summary>
 		/// Closes the door if possible
@@ -214,8 +213,10 @@ namespace Game.Terrain
 			}
 
 			// Play the sound
-			Vector3 position3d = new(point.x, 1.5f, point.y);
-			Sounds.Play(sound, position3d, volume);
+			Vector3 position = new(point.x, 1.5f, point.y);
+			Sounds.Play(sound, position, volume);
+			//test
+			Tolk.Speak($"dveře {volume}");
 		}
 
 		/// <summary>
@@ -375,9 +376,6 @@ namespace Game.Terrain
 		/// Returns text description of the door.
 		/// </summary>
 		/// <returns>text description of the door</returns>
-		public override string ToString()
-		{
-			return Type == DoorType.Door ? "dveře" : "vrata";
-		}
+		public override string ToString() => Type == DoorType.Door ? "dveře" : "vrata";
 	}
 }

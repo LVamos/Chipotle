@@ -40,13 +40,13 @@ namespace Game.Entities.Characters.Tuttle
 		/// Specifies the minimum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		private const float _minDistanceToPlayer = 2.5f;
+		private const float _minPlayerDistance = 4;
 
 		/// <summary>
 		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		private const int _maxDistanceToPlayer = 7;
+		private const int _maxPlayerDistance = 5;
 		private const int _minDistanceToCar = 1;
 		private const int _maxDistanceToCar = 2;
 
@@ -113,7 +113,7 @@ namespace Game.Entities.Characters.Tuttle
 				return;
 
 			// Walk to the side a bit.
-			GoTo(_player.Area.Value, _minDistanceToPlayer, _maxDistanceToPlayer);
+			GoTo(_player.Area.Value, _minPlayerDistance, _maxPlayerDistance, true);
 			InnerMessage(new ReactToCollision(this, _player));
 			_collisionTimer = 0;
 		}
@@ -125,7 +125,7 @@ namespace Game.Entities.Characters.Tuttle
 		private void OnPinchedInDoor(PinchedInDoor message)
 		{
 			InnerMessage(new ReactToPinchingInDoor(this, message.Entity));
-			GoTo(_player.Area.Value, _minDistanceToPlayer, _maxDistanceToPlayer);
+			GoTo(_player.Area.Value, _minPlayerDistance, _maxPlayerDistance, true);
 		}
 
 		/// <summary>
@@ -246,7 +246,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		protected void Reveal()
 		{
-			Vector2? target = FindFreePlacementsAroundArea(_player.Area.Value, _minDistanceToPlayer, _maxDistanceToPlayer)
+			Vector2? target = FindFreePlacementsAroundArea(_player.Area.Value, _minPlayerDistance, _maxPlayerDistance)
 				.FirstOrDefault();
 
 			if (target == null)

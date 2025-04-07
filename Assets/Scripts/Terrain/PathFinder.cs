@@ -64,6 +64,7 @@ namespace Game.Terrain
 			while (openQueue.Count > 0)
 			{
 				PathFindingNode current = openQueue.Dequeue();
+
 				open.Remove(current.Coords);
 
 				// If Current is close to the target, I am returning the path
@@ -75,6 +76,7 @@ namespace Game.Terrain
 				IEnumerable<PathFindingNode> neighbours = GetNeighbours(current, start, goal, sameLocality, throughStart, throughGoal);
 				foreach (PathFindingNode neighbour in neighbours)
 				{
+
 					// Is not walkable or is already closed => skip
 					if (closed.Contains(neighbour.Coords)
 						|| !IsWalkable(neighbour, start, goal, sameLocality, throughStart, throughGoal, characterHeight, characterWidth)
@@ -158,12 +160,17 @@ namespace Game.Terrain
 			float characterWidth
 		)
 		{
+			//test
+			if (node.Coords == start)
+				System.Diagnostics.Debugger.Break();
+
 			Rectangle area = Rectangle.FromCenter(node.Coords, characterHeight, characterWidth);
-			bool noStaticObjects = World.Map[area.Center].Locality.IsWalkable(area);
+			Locality locality = World.Map[area.Center].Locality;
+			bool noStaticObjects = locality.IsWalkable(area);
 			bool walkableTerrain = area.GetTiles(World.Map.TileSize)
 				.All(t => t != null && t.Tile.Walkable);
 			Tile tile = World.Map[node.Coords];
-			bool walkable = walkableTerrain && noStaticObjects;
+			bool walkable = walkableTerrain && noStaticObjects && !locality.Characters.Any(c => c.Area.Value.Contains(node.Coords));
 			if (!walkable)
 				return false;
 
@@ -194,7 +201,7 @@ namespace Game.Terrain
 			)
 				return null;
 
-			if (throughStart)
+			if (!throughStart)
 				path.Dequeue();
 
 			return path;

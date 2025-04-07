@@ -77,21 +77,18 @@ namespace Game.Entities.Characters.Components
 		/// Sends Tuttle on the specified path.
 		/// </summary>
 		/// <param name="path">The path to be folloewd</param>
-		protected void FollowPath(Queue<Vector2> path)
-		{
-			InnerMessage(new FollowPath(this, path));
-		}
+		protected void FollowPath(Queue<Vector2> path) => InnerMessage(new FollowPath(this, path));
 
 		/// <summary>
 		/// Tuttle makes few random steps in the current locality.
 		/// </summary>
-		protected void GoTo(Rectangle area, float minDistance, float maxDistance)
+		protected void GoTo(Rectangle area, float minDistance, float maxDistance, bool watchPlayer = false)
 		{
 			Vector2[] placements = FindFreePlacementsAroundArea(area, minDistance, maxDistance);
 
 			// Tuttle tries each point from the array.
 			if (placements.Length > 0)
-				TryGoTo(placements);
+				TryGoTo(placements, watchPlayer);
 		}
 
 		/// <summary>
@@ -123,19 +120,13 @@ namespace Game.Entities.Characters.Components
 		/// Handles the TuttleStateChanged message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnCharacterStateChanged(CharacterStateChanged message)
-		{
-			_state = message.State;
-		}
+		protected void OnCharacterStateChanged(CharacterStateChanged message) => _state = message.State;
 
 		/// <summary>
 		/// Processes the PositionChanged message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnPositionChanged(PositionChanged message)
-		{
-			_area = message.TargetPosition;
-		}
+		protected void OnPositionChanged(PositionChanged message) => _area = message.TargetPosition;
 
 		/// <summary>
 		/// sets state of the NPC and announces the change to other components.
@@ -149,14 +140,12 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Starts following the player.
 		/// </summary>
-		protected void StartFollowingPlayer()
-		{
-			InnerMessage(new StartFollowingPlayer(this));
-		}
+		protected void StartFollowingPlayer() => InnerMessage(new StartFollowingPlayer(this));
 
 		protected void TryGoTo(Vector2[] points, bool watchPlayer = false)
 		{
-			InnerMessage(new TryGoTo(this, points, watchPlayer));
+			TryGoTo message = new(this, points, watchPlayer);
+			InnerMessage(message);
 		}
 
 		/// <summary>
@@ -173,10 +162,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="point">The target point</param>
 		/// <param name="watchPlayer">Specifies if Tuttle should stop following the player while leading to the target</param>
-		protected void GoToPoint(Vector2 point, bool watchPlayer = false)
-		{
-			InnerMessage(new GotoPoint(this, point, watchPlayer));
-		}
+		protected void GoToPoint(Vector2 point, bool watchPlayer = false) => InnerMessage(new GotoPoint(this, point, watchPlayer));
 
 		protected void JumpNear(Rectangle area)
 		{

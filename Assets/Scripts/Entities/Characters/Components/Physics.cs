@@ -33,7 +33,6 @@ namespace Game.Entities.Characters.Components
 	{
 		private void FixedUpdate()
 		{
-			System.Diagnostics.Debug.WriteLine("FixedUpdate: " + Time.time);
 			if (World.GameInProgress)
 				PerformWalk();
 		}
@@ -95,7 +94,7 @@ namespace Game.Entities.Characters.Components
 		/// Specifies the maximum allowed distance from the Detective Chipotle NPC.
 		/// </summary>
 		/// <remarks>Used when following the Detective Chipotle NPC</remarks>
-		protected const int _maxPlayerDistance = 7;
+		protected const int _maxPlayerDistance = 5;
 
 		/// <summary>
 		/// Specifies the maximum distance allowed for path finding.
@@ -547,8 +546,7 @@ namespace Game.Entities.Characters.Components
 		{
 			Locality sourceLocality = Locality;
 			Locality targetLocality = target.GetLocalities().First();
-			Rectangle? sourcePosition = _area == null ? null : new Rectangle(_area.Value);
-
+			Rectangle? sourcePosition = _area == null ? null : _area.Value;
 			_area = new(target);
 
 			// If it isn't the player detect obstacles between him and this NPC.
@@ -708,6 +706,8 @@ namespace Game.Entities.Characters.Components
 		/// <returns>Distance between the NPC and the current goal</returns>
 		protected float GetDistanceToGoal() => World.GetDistance(_area.Value.Center, _goal);
 
+		protected bool HasReachedTarget() => (_state != CharacterState.GoingToPlayer && _path.IsNullOrEmpty()) || HasReachedPlayer();
+
 		protected bool HasReachedPlayer()
 		{
 			if (_state != CharacterState.GoingToPlayer)
@@ -767,7 +767,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="goal">The target position</param>
 		/// <returns>Queue with nodes leading to the target</returns>
-		protected Queue<Vector2> FindPath(Vector2 goal, bool withStart = true, bool withGoal = true)
+		protected Queue<Vector2> FindPath(Vector2 goal, bool withStart = false, bool withGoal = true)
 		{
 			if (_area == null)
 				return null;
@@ -994,7 +994,9 @@ namespace Game.Entities.Characters.Components
 				{
 					_path = path;
 					_goal = point;
-					SetState(message.WatchPlayer ? CharacterState.GoingToTargetAndWatchingPlayer : CharacterState.GoingToTarget);
+
+					CharacterState state = message.WatchPlayer ? CharacterState.GoingToTargetAndWatchingPlayer : CharacterState.GoingToTarget;
+					SetState(state);
 					return;
 				}
 			}
@@ -1025,10 +1027,11 @@ namespace Game.Entities.Characters.Components
 			Vector2 nextPoint = GetNextPoint();
 			Rectangle area = Rectangle.FromCenter(nextPoint, Height, Width);
 			if (!DetectCollisions(area))
-				JumpNear(area);
+				JumpTo(area);
 			else
 				_path = FindPath(_goal, false);
-			if (HasReachedPlayer())
+
+			if (HasReachedTarget())
 				StopWalk();
 		}
 
