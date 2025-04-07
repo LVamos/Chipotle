@@ -144,17 +144,17 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Time interval for backward walk
 		/// </summary>
-		private const float _backwardSpeed = 1.3f;
+		private const float _backwardSpeed = 1.2f;
 
 		/// <summary>
 		/// Time interval for forward walk
 		/// </summary>
-		private const int _forwardWalkSpeed = 15;
+		private const float _forwardWalkSpeed = .8f;
 
 		/// <summary>
 		/// Time interval for walk to the side
 		/// </summary>
-		private const float _sideSpeed = 1.2f;
+		private const float _sideSpeed = 1.1f;
 
 		/// <summary>
 		/// Stores references to all the localities the NPC has visited.
@@ -1426,12 +1426,13 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="goal">Coordinates of the goal of an ongoing movement of the NPC</param>
 		protected override int GetSpeed()
 		{
-			float coefficient = 1;
+			float coefficient;
 			if (_startWalkMessage.Direction is TurnType.SharplyLeft or TurnType.SharplyRight)
 				coefficient = _sideSpeed;
 			else if (_startWalkMessage.Direction == TurnType.Around)
 				coefficient = _backwardSpeed;
-
+			else
+				coefficient = _forwardWalkSpeed;
 			return (int)(GetTerrainSpeed() * coefficient);
 		}
 
