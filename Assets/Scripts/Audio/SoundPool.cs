@@ -85,11 +85,14 @@ namespace Assets.Scripts.Audio
 				&& Settings.LogPlayingSounds)
 				LogPlayingSounds();
 
-			IEnumerable<AudioSource> allSources = _pool.Concat(_muffledPool);
+			List<AudioSource> allSources = _pool.Concat(_muffledPool).ToList();
 			foreach (AudioSource source in allSources)
 			{
 				if (!source.isPlaying)
+				{
+					source.gameObject.transform.SetParent(null);
 					source.gameObject.SetActive(false);
+				}
 			}
 		}
 

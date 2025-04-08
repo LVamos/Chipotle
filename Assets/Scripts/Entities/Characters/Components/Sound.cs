@@ -121,6 +121,8 @@ namespace Game.Entities.Characters.Components
 				source = Sounds.Play(sound, position3d, volume);
 			source.minDistance = 5;
 
+			// A measure to ensure that the sound is moving with the character.
+			source.gameObject.transform.SetParent(Owner.gameObject.transform);
 			if (terrain == TerrainType.Wall && _announceWalls)
 				Tolk.Speak("zeď");
 		}
