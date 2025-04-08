@@ -90,7 +90,6 @@ namespace Assets.Scripts.Audio
 			{
 				if (!source.isPlaying)
 				{
-					source.gameObject.transform.SetParent(null);
 					source.gameObject.SetActive(false);
 				}
 			}

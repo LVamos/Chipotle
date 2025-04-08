@@ -98,10 +98,10 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="position">A 2d vector</param>
 		/// <param name="obstacle">Type of an obstacle blocking the sound</param>
-		protected void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None)
+		protected virtual AudioSource PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None)
 		{
 			if (obstacle == ObstacleType.Far)
-				return; // Too far and inaudible
+				return null; // Too far and inaudible
 
 			TerrainType terrain = World.Map[position].Terrain;
 			string sound = GetStepSoundName(terrain);
@@ -122,9 +122,11 @@ namespace Game.Entities.Characters.Components
 			source.minDistance = 5;
 
 			// A measure to ensure that the sound is moving with the character.
-			source.gameObject.transform.SetParent(Owner.gameObject.transform);
+			//source.gameObject.transform.SetParent(Owner.gameObject.transform);
 			if (terrain == TerrainType.Wall && _announceWalls)
 				Tolk.Speak("zeď");
+
+			return source;
 		}
 	}
 }

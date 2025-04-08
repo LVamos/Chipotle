@@ -31,10 +31,23 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleSound : Sound
 	{
-		private void start()
+		protected override AudioSource PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None)
 		{
-			_announceWalls = true;
+			AudioSource source = base.PlayStep(position, obstacle);
+
+			Transform cam = Camera.main.transform;
+
+			// Vektor dopředu od kamery
+			Vector3 forward = cam.forward;
+
+			// Výsledná pozice: 0.5 metru před kamerou a 0.2 metru níž
+			Vector3 soundPosition = cam.position + forward * 0.5f - Vector3.up * 0.2f;
+
+			source.transform.position = soundPosition;
+			return source;
 		}
+
+		private void start() => _announceWalls = true;
 
 		public void OnSaySize(SaySize message)
 		{
@@ -58,10 +71,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayLocality message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnSayLocalityName(SayLocalityName message)
-		{
-			Tolk.Speak(Owner.Locality.Name.Friendly, true);
-		}
+		protected void OnSayLocalityName(SayLocalityName message) => Tolk.Speak(Owner.Locality.Name.Friendly, true);
 
 		/// <summary>
 		/// Reverb presets for individual localities
@@ -169,10 +179,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		private void OnNearbywallsDetected(NearbywallsDetected message)
-		{
-			throw new NotImplementedException();
-		}
+		private void OnNearbywallsDetected(NearbywallsDetected message) => throw new NotImplementedException();
 
 		private void OnNoWallsNearby(NoWallsNearby message)
 		{
@@ -199,10 +206,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnSayLocalityDescription(SayLocalityDescription m)
-		{
-			Tolk.Speak(Owner.Locality.Description);
-		}
+		private void OnSayLocalityDescription(SayLocalityDescription m) => Tolk.Speak(Owner.Locality.Description);
 
 		/// <summary>
 		/// Handles a message.
@@ -220,10 +224,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		protected void OnEmptyInventory(EmptyInventory m)
-		{
-			Tolk.Speak("Nic u sebe nemáš");
-		}
+		protected void OnEmptyInventory(EmptyInventory m) => Tolk.Speak("Nic u sebe nemáš");
 
 		/// <summary>
 		/// Handles the PickUpObjectResult message.
@@ -277,10 +278,7 @@ namespace Game.Entities.Characters.Chipotle
 			Tolk.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
 		}
 
-		private void OnSayVisitedLocality(SayVisitedLocalityResult message)
-		{
-			Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
-		}
+		private void OnSayVisitedLocality(SayVisitedLocalityResult message) => Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
 
 		/// <summary>
 		/// Processes the SayExits message.
@@ -354,37 +352,25 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the CutsceneBegan message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnSayOrientation(SayOrientation message)
-		{
-			SayOrientation();
-		}
+		protected void OnSayOrientation(SayOrientation message) => SayOrientation();
 
 		/// <summary>
 		/// Reports the current orientation of the Detective Chipotle NPC using a screen reader or
 		/// voice synthesizer..
 		/// </summary>
-		protected void SayOrientation()
-		{
-			Tolk.Output(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
-		}
+		protected void SayOrientation() => Tolk.Output(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
 
 		/// <summary>
 		/// Processes the EntityHitDoor message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnEntityHitDoor(DoorHit message)
-		{
-			Tolk.Speak("dveře");
-		}
+		private void OnEntityHitDoor(DoorHit message) => Tolk.Speak("dveře");
 
 		/// <summary>
 		/// Processes the TerrainCollided message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnTerrainCollided(TerrainCollided message)
-		{
-			PlayStep(message.Position);
-		}
+		private void OnTerrainCollided(TerrainCollided message) => PlayStep(message.Position);
 
 		/// <summary>
 		/// Processes the MovementDone message.
@@ -404,10 +390,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the ObjectsCollided message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnObjectsCollided(ObjectsCollided message)
-		{
-			Tolk.Speak(message.Object.Name.Friendly);
-		}
+		private void OnObjectsCollided(ObjectsCollided message) => Tolk.Speak(message.Object.Name.Friendly);
 
 		/// <summary>
 		/// Processes the TurnoverDone message.
