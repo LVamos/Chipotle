@@ -163,6 +163,7 @@ public static class sceneSetup
 			string type = Attribute(item, "type");
 			GameObject obj = CreateObject(Attribute(item, "indexedname"), "Item");
 			ItemFactory.AddComponent(obj, type);
+			UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 		}
 	}
 
@@ -191,6 +192,12 @@ public static class sceneSetup
 		const string resonanceWarning = "Make sure AudioSource is routed to a mixer that ResonanceAudioRenderer is attached to.";
 		if (!string.Equals(resonanceWarning, logString, StringComparison.OrdinalIgnoreCase))
 			Log(logString);
+
+		if (Application.isPlaying && type == LogType.Exception)
+		{
+			Exception ex = new(logString + Environment.NewLine + stackTrace);
+			MainScript.OnError(ex);
+		}
 	}
 
 	/// <summary>

@@ -180,7 +180,7 @@ namespace Game.UI
 			_messagingEnabled = true;
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),
-				(new(KeyShortcut.Modifiers.Control, KeyCode.Z), MainScript.SendFeedback)
+				(new(KeyShortcut.Modifiers.Control, KeyCode.Y), MainScript.SendFeedback)
 			);
 		}
 
@@ -209,9 +209,6 @@ namespace Game.UI
 		/// <summary>
 		/// Quits the game.
 		/// </summary>
-		private void QuitGame()
-		{
-			World.QuitGame();
-		}
+		private void QuitGame() => World.QuitGame();
 	}
 }

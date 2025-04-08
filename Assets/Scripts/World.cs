@@ -1269,11 +1269,11 @@ namespace Game
 			{
 				LoadMap();
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
-				MainScript.OnError(e);
+				throw;
 			}
-
+			MainScript.GameLoaded = true;
 			Player = CharacterFactory.CreateChipotle();
 			Add(Player);
 

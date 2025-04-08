@@ -2,6 +2,8 @@ using DavyKager;
 
 using Game.Audio;
 
+using Microsoft.VisualBasic;
+
 using System;
 using System.IO;
 using System.Linq;
@@ -22,6 +24,7 @@ namespace Game
 	/// </summary>
 	public static class MainScript
 	{
+		public static bool GameLoaded;
 		public static string SoundPath => Path.Combine(DataPath, "Sounds");
 
 		/// <summary>
@@ -71,10 +74,8 @@ namespace Game
 
 		public static void SendFeedback()
 		{
-			throw new NotImplementedException();
 			World.GameInProgress = false;
-			string message = null;
-			//string message = Microsoft.VisualBasic.Interaction.InputBox("", "Zadej zprávu pro autora", "");
+			string message = Interaction.InputBox("", "Zadej zprávu pro autora", "");
 			World.GameInProgress = true;
 
 			if (string.IsNullOrEmpty(message))
@@ -86,11 +87,27 @@ namespace Game
 			string subject = null;
 			//string subject = "Chipotle: " + WindowsIdentity.GetCurrent().Name + " posílá připomínku";
 			string body = "Zpráva: " + message + Environment.NewLine + GetUserInfo();
+			Attachment attachment = GetAttachment();
 
-			if (!SendMeMail(subject, body))
+			if (!SendMeMail(subject, body, attachment))
 				Tolk.Speak("Zprávu se nepodařilo odeslat.");
 			else
 				Tolk.Speak("Odesláno");
+		}
+
+		private static Attachment GetAttachment()
+		{
+			try
+			{
+				byte[] logBytes = File.ReadAllBytes(LogPath);
+				MemoryStream stream = new(logBytes);
+				Attachment attachment = new(stream, "log.html", "text/html");
+				return attachment;
+			}
+			catch (Exception)
+			{
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -108,7 +125,7 @@ namespace Game
 		{
 			MailAddress fromAddress = new("lukas.vamos@gmail.com", Environment.UserName);
 			MailAddress toAddress = new("lukas.vamos@gmail.com", "Lukáš Vámoš");
-			const string fromPassword = "zphoeiuuqlbvemgy";
+			const string fromPassword = "yhfk gdui kund nfjm";
 
 			SmtpClient smtp = new()
 			{
@@ -148,11 +165,9 @@ namespace Game
 		/// </summary>
 		/// <param name="message">A description of the problem from an user</param>
 		/// <returns>True if it¨s successful</returns>
-		private static bool ReportError(string message, bool addUserInfo = true)
+		public static bool ReportError(string message, bool addUserInfo = true)
 		{
-			throw new NotImplementedException();
-			string path = @"data\game.sav";
-			Attachment attachment = File.Exists(path) ? new Attachment(path) : null;
+			Attachment attachment = GetAttachment();
 			string subject = null;
 			//string subject=  "Chipotle: " + WindowsIdentity.GetCurrent().Name + " hlásí kritickou chybu";
 			string body = message + Environment.NewLine + GetUserInfo();
@@ -163,7 +178,7 @@ namespace Game
 		/// Path to data folder
 		/// </summary>
 		public static readonly string DataPath = @"Assets\Resources\Data\";
-		public static readonly string LogPath = @"Assets\Resources\Data\Logs";
+		public static readonly string LogPath = @"Assets\Resources\Data\Logs\log.html";
 
 		/// <summary>
 		/// Path to file used for serialization.
@@ -181,17 +196,25 @@ namespace Game
 		/// <param name="ex">The exception</param>
 		public static void OnError(Exception ex, string message = null)
 		{
-			if (Settings.ThrowExceptions)
-				throw ex;
+			GUIUtility.systemCopyBuffer = ex.ToString();
+			//if (Settings.ThrowExceptions)
+			throw ex;
 			LogException(ex);
-			throw new NotImplementedException();
 			EnableJAWSKeyHook(); // Restore JAWS key hook
+
+			if (!Settings.ReportErrors || !GameLoaded)
+			{
+#if UNITY_EDITOR
+				UnityEditor.EditorApplication.isPlaying = false;
+#else
+Application.Quit();
+#endif
+			}
 
 			Action action = () =>
 			{
 				// Ask for problem description
-				string description = null;
-				//string description = Microsoft.VisualBasic.Interaction.InputBox("", "          Ta zkurvená hra spadla! Napiš Lukimu, co se stalo, než mu definitivně jebne.", "");
+				string description = Microsoft.VisualBasic.Interaction.InputBox("", "          Ta zkurvená hra spadla! Napiš Lukimu, co se stalo, než mu definitivně jebne.", "");
 
 				// Prepare an error message
 				StringBuilder text = new(GetUserInfo());
@@ -214,7 +237,7 @@ namespace Game
 				report = ok
 					? "Už to má na mailu. Ten bude mít radost."
 					: "Nepovedlo se to. Hlášení se odešle při příštím spuštění.";
-				//MessageBox.Show(report, "", MessageBoxButtons.OK);
+				Interaction.MsgBox(report, MsgBoxStyle.OkOnly, "");
 			};
 
 			if (Settings.ReportErrors)
@@ -223,34 +246,28 @@ namespace Game
 			if (Settings.ThrowExceptions)
 				throw ex;
 
-			Environment.Exit(0);
-
+#if UNITY_EDITOR
+			UnityEditor.EditorApplication.isPlaying = false;
+#else
+Application.Quit();
+#endif
 		}
 
-		private static void LogException(Exception ex)
-		{
-			Logger.LogError("Výjimka", ex.ToString());
-		}
-
-		/// <summary>
-		/// An error handler
-		/// </summary>
-		/// <param name="sender">Source of the exception</param>
-		/// <param name="e">The exception</param>
-		private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
-		{
-			OnError(e.Exception);
-		}
+		private static void LogException(Exception ex) => Logger.LogError("Výjimka", ex.ToString());
 
 		/// <summary>
 		/// An error handler
 		/// </summary>
 		/// <param name="sender">Source of the exception</param>
 		/// <param name="e">The exception</param>
-		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-		{
-			OnError((Exception)e.ExceptionObject, sender?.ToString());
-		}
+		private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e) => OnError(e.Exception);
+
+		/// <summary>
+		/// An error handler
+		/// </summary>
+		/// <param name="sender">Source of the exception</param>
+		/// <param name="e">The exception</param>
+		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e) => OnError((Exception)e.ExceptionObject, sender?.ToString());
 
 		/// <summary>
 		/// Path to a file containing a delayed error report.
@@ -275,7 +292,6 @@ namespace Game
 				return;
 			}
 
-			throw new NotImplementedException();
 			string subject = null;
 			//string subject = "Chipotle: " + WindowsIdentity.GetCurrent().Name + " hlásí kritickou chybu";
 			if (SendMeMail(subject, body))
@@ -350,7 +366,7 @@ namespace Game
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		public static void AfterSceneLoad()
 		{
-			AppDomain.CurrentDomain.UnhandledException += new(CurrentDomain_UnhandledException);
+			AppDomain.CurrentDomain.UnhandledException += (sender, e) => OnError((Exception)e.ExceptionObject);
 
 			try
 			{
