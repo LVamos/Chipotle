@@ -375,12 +375,10 @@ namespace Game
 		/// <returns>enumeration of localities</returns>
 		public static IEnumerable<Locality> GetLocalities(Rectangle area)
 		{
-			IEnumerable<Vector2> points = area.GetPoints(Map.TileSize);
-			return
-				points
-				.Select(p => World.Map[p])
-				.Where(t => t != null)
-				.Select(t => t.Locality);
+			IEnumerable<Locality> localities = _localities.Values
+				.Where(l => l.Area.Value.Intersects(area))
+				.Distinct();
+			return localities;
 		}
 
 		/// <summary>

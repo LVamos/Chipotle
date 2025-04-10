@@ -161,9 +161,6 @@ namespace Game.Terrain
 		)
 		{
 			//test
-			if (node.Coords == start)
-				System.Diagnostics.Debugger.Break();
-
 			Rectangle area = Rectangle.FromCenter(node.Coords, characterHeight, characterWidth);
 			Locality locality = World.Map[area.Center].Locality;
 			bool noStaticObjects = locality.IsWalkable(area);

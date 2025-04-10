@@ -12,8 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Unity.VisualScripting;
-
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
@@ -36,10 +34,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Returns pooint that belongs to this object and is tho most close to tthe player.
 		/// </summary>
-		protected Vector2 GetClosestPointToPlayer()
-		{
-			return _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
-		}
+		protected Vector2 GetClosestPointToPlayer() => _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
 
 		/// <summary>
 		/// Dimensions of the map element.
@@ -129,27 +124,18 @@ namespace Game.Terrain
 		/// Returns the public name of the element.
 		/// </summary>
 		/// <returns>Public name of the element</returns>
-		public override string ToString()
-		{
-			return Name.Friendly;
-		}
+		public override string ToString() => Name.Friendly;
 
 		/// <summary>
 		/// Destroys the element.
 		/// </summary>
-		protected virtual void DestroyObject()
-		{
-			_messagingEnabled = false;
-		}
+		protected virtual void DestroyObject() => _messagingEnabled = false;
 
 		/// <summary>
 		/// Processes the Destroy message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnDestroyObject(DestroyObject message)
-		{
-			DestroyObject();
-		}
+		protected virtual void OnDestroyObject(DestroyObject message) => DestroyObject();
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -193,19 +179,13 @@ namespace Game.Terrain
 		/// Processes the StopExitNavigation message.
 		/// </summary>
 		/// <param name="message">Source of the message</param>
-		protected void OnStopNavigation(StopNavigation message)
-		{
-			StopNavigation();
-		}
+		protected void OnStopNavigation(StopNavigation message) => StopNavigation();
 
 		/// <summary>
 		/// Processes the StartNavigation message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnStartNavigation(StartNavigation message)
-		{
-			StartNavigation();
-		}
+		protected void OnStartNavigation(StartNavigation message) => StartNavigation();
 
 		protected bool ShouldNavigationContinue()
 		{
@@ -239,10 +219,7 @@ namespace Game.Terrain
 		/// Returns distance from this passage to the player.
 		/// </summary>
 		/// <returns>Distance in meters</returns>
-		protected float GetDistanceToPlayer()
-		{
-			return World.GetDistance(this, World.Player);
-		}
+		protected float GetDistanceToPlayer() => World.GetDistance(this, World.Player);
 
 		/// <summary>
 		/// Stops the sound navigation.
@@ -260,12 +237,13 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="element">The element to be checked</param>
 		/// <returns>True if the specified element and this element are at least partially in the same locality.</returns>
-		public bool SameLocality(Entity element)
+		public virtual bool SameLocality(Entity element)
 		{
-			IEnumerable<Locality> mine = _area.Value.GetLocalities();
-			IEnumerable<Locality> its = element.Area.Value.GetLocalities();
+			List<Locality> mine = _area.Value.GetLocalities().ToList();
+			List<Locality> its = element.Area.Value.GetLocalities().ToList();
 
-			return mine.Any(l => its.Contains(l));
+			bool result = mine.Any(l => its.Contains(l));
+			return result;
 		}
 		/// <summary>
 		/// Updates position and attenuation of navigating sound if the navigation is in progress.
@@ -319,9 +297,6 @@ namespace Game.Terrain
 				   Name.Indexed == element.Name.Indexed;
 		}
 
-		public override int GetHashCode()
-		{
-			return HashCode.Combine(base.GetHashCode(), Name.Indexed);
-		}
+		public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Name.Indexed);
 	}
 }

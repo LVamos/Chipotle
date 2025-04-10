@@ -151,15 +151,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">Target posiiton of the tile</param>
 		/// <param name="tile">The tile to be put</param>
-		public void PutTile(Vector2 point, Tile tile)
-		{
-			if (point.x == 1029.8f && point.y == 1035.5f)
-				System.Diagnostics.Debugger.Break();
-
-			if (SnapToGrid(point) == new Vector2(1030, 1035.5f))
-				System.Diagnostics.Debugger.Break();
-			_terrain[SnapToGrid(point)] = tile;
-		}
+		public void PutTile(Vector2 point, Tile tile) => _terrain[SnapToGrid(point)] = tile;
 
 		/// <summary>
 		/// Rounds the coordinates.
