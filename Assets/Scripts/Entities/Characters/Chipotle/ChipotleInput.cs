@@ -34,6 +34,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void WatchClipboard()
 		{
+			return;
 			// Jump to coords in clipboard whenever the clipboard content changes.
 			if (!Settings.TestCommandsEnabled)
 				return;

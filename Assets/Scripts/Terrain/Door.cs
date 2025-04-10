@@ -100,7 +100,7 @@ namespace Game.Terrain
 			Type = type;
 			_sounds["hit"] = "KitchenDoorCrash";
 			_sounds["rattle"] = "DoorKnobRattle";
-			_defaultVolume = 1;
+			_defaultVolume = .4f;
 		}
 
 		/// <summary>
@@ -126,7 +126,7 @@ namespace Game.Terrain
 			Character character = message.Sender as Character;
 			float characterHeight = character.transform.localScale.y;
 			Vector3 slamPoint = message.Point.ToVector3(characterHeight);
-			PlayDoorHit(message.Point);
+			PlayDoorHit(slamPoint);
 			LogDoorHit(message.Sender as Character, message.Point);
 		}
 

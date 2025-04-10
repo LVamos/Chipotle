@@ -1200,6 +1200,9 @@ namespace Game
 		/// </summary>
 		public static void QuitGame()
 		{
+			//test hlavní menu zatím zakázat
+			return;
+
 			GameInProgress = false;
 			_cutSceneMessage = null;
 			Sounds.Mute(.5f);
