@@ -611,7 +611,11 @@ namespace Game.Entities.Characters.Components
 		/// Processes the SetPosition message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnSetPosition(SetPosition message) => JumpTo(message.Target, message.Silently);
+		protected virtual void OnSetPosition(SetPosition message)
+		{
+			Rectangle area = Rectangle.FromCenter(message.Target, Height, Width);
+			JumpTo(area, message.Silently);
+		}
 
 		/// <summary>
 		/// Calculates the angle between the character and the target MapElement.

@@ -30,6 +30,27 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleInput : Input
 	{
+		private void Update() => WatchClipboard();
+
+		private void WatchClipboard()
+		{
+			// Jump to coords in clipboard whenever the clipboard content changes.
+			if (!Settings.TestCommandsEnabled)
+				return;
+
+			string clipboard = GUIUtility.systemCopyBuffer;
+			if (clipboard != _lastClipboardText)
+			{
+				if (GoToClipboardCoords())
+				{
+					_lastClipboardText = clipboard;
+					WindowHandler.FocusGameWindow();
+				}
+			}
+		}
+
+		private string _lastClipboardText;
+
 		/// <summary>
 		/// Runs a message handler for the specified message.
 		/// </summary>
@@ -47,18 +68,12 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Reports current position of the player in relative coordinates.
 		/// </summary>
-		private void SayRelativeCoordinates()
-		{
-			InnerMessage(new SayCoordinates(this));
-		}
+		private void SayRelativeCoordinates() => InnerMessage(new SayCoordinates(this));
 
 		/// <summary>
 		/// Sends the ListCharacter message.
 		/// </summary>
-		private void ListCharacters()
-		{
-			InnerMessage(new ListCharacters(this));
-		}
+		private void ListCharacters() => InnerMessage(new ListCharacters(this));
 
 		/// <summary>
 		/// Determines how quickly the game reacts to movement commands. The speed is in milliseconds.
@@ -84,7 +99,7 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyCode.F10)] = JumpToLocality,
 					[new(KeyCode.F11)] = SaveStartPosition,
 					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
-					[new(KeyCode.F12)] = GoToClipboardCoords,
+					[new(KeyCode.F12)] = () => GoToClipboardCoords(),
 
 					// Other commands
 					[new(KeyCode.Q)] = SayCharacters,
@@ -128,23 +143,14 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Instruucts the sound component to read description of the current locality.
 		/// </summary>
-		private void ResearchObject()
-		{
-			InnerMessage(new ExploreObject(this));
-		}
+		private void ResearchObject() => InnerMessage(new ExploreObject(this));
 
-		private void SayLocalityDescription()
-		{
-			InnerMessage(new SayLocalityDescription(this));
-		}
+		private void SayLocalityDescription() => InnerMessage(new SayLocalityDescription(this));
 
 		/// <summary>
 		/// Performs the command to pick up an object off the ground.
 		/// </summary>
-		private void PickUpObject()
-		{
-			InnerMessage(new PickUpItem(this));
-		}
+		private void PickUpObject() => InnerMessage(new PickUpItem(this));
 
 		/// <summary>
 		/// Creates a predefined save.
@@ -167,10 +173,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Lists navigable objects.
 		/// </summary>
-		protected void ListObjects()
-		{
-			InnerMessage(new ListObjects(this));
-		}
+		protected void ListObjects() => InnerMessage(new ListObjects(this));
 
 		/// <summary>
 		/// Runs the game menu
@@ -222,10 +225,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Runs the inventory menu.
 		/// </summary>
-		protected void RunInventoryMenu()
-		{
-			InnerMessage(new RunInventoryMenu(this));
-		}
+		protected void RunInventoryMenu() => InnerMessage(new RunInventoryMenu(this));
 
 		/// <summary>
 		/// Moves the NPC one step to the right.
@@ -266,10 +266,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Reports size of the locality in which the Chipotle NPC is currently located.
 		/// </summary>
-		private void SayLocalitySize()
-		{
-			InnerMessage(new SayLocalitySize(this));
-		}
+		private void SayLocalitySize() => InnerMessage(new SayLocalitySize(this));
 
 		/// <summary>
 		/// Test function to announce Tuttle's position
@@ -308,12 +305,11 @@ namespace Game.Entities.Characters.Chipotle
 
 			Locality locality = World.GetLocality(items[item][0]);
 			Vector2 point = locality.Area.Value.GetWalkableTiles().First().Position;
-			Rectangle area = new(point, new Vector2(point.x + .4f, point.y - .4f));
-			InnerMessage(new SetPosition(this, area));
+			InnerMessage(new SetPosition(this, point));
 
 			// Move Tuttle
 			point = locality.Area.Value.GetWalkableTiles().First(t => t.Position != point).Position;
-			World.GetCharacter("tuttle").TakeMessage(new SetPosition(null, new(point)));
+			World.GetCharacter("tuttle").TakeMessage(new SetPosition(null, point));
 		}
 
 		/// <summary>
@@ -343,31 +339,28 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Test method that moves Chipotle to coords taken from clipboard
 		/// </summary>
-		private void GoToClipboardCoords()
+		private bool GoToClipboardCoords()
 		{
 			if (!Settings.TestCommandsEnabled)
-				return;
+				return false;
 
 			try
 			{
 				string coords = GUIUtility.systemCopyBuffer;
-				Rectangle target = new(coords);
-				target.LowerRightCorner = new(target.UpperLeftCorner.x + 0.5f, target.UpperLeftCorner.y - .5f);
+				Vector2 target = coords.ToVector2();
 				InnerMessage(new SetPosition(this, target));
+				return true;
 			}
 			catch (Exception)
 			{
-				Tolk.Speak("Nesprávný formát");
+				return false;
 			}
 		}
 
 		/// <summary>
 		/// Lists exits from current locality.
 		/// </summary>
-		protected void ListExits()
-		{
-			InnerMessage(new ListExits(this));
-		}
+		protected void ListExits() => InnerMessage(new ListExits(this));
 
 		/// <summary>
 		/// Processes the CutsceneBegan message.
@@ -409,83 +402,53 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Reports list of all exits from current locality.
 		/// </summary>
-		protected void SayExits()
-		{
-			InnerMessage(new SayExits(this));
-		}
+		protected void SayExits() => InnerMessage(new SayExits(this));
 
 		/// <summary>
 		/// Reports current orientation setting of the Chipotle NPC.
 		/// </summary>
-		protected void SayOrientation()
-		{
-			InnerMessage(new SayOrientation(this));
-		}
+		protected void SayOrientation() => InnerMessage(new SayOrientation(this));
 
 		/// <summary>
 		/// Allows the player to use a nearby object or door.
 		/// </summary>
-		private void Interact()
-		{
-			InnerMessage(new Interact(this));
-		}
+		private void Interact() => InnerMessage(new Interact(this));
 
 		/// <summary>
 		/// Moves the NPC one step back.
 		/// </summary>
-		private void GoBack()
-		{
-			InnerMessage(new StartWalk(this, TurnType.Around));
-		}
+		private void GoBack() => InnerMessage(new StartWalk(this, TurnType.Around));
 
 		/// <summary>
 		/// Starts Moving the NPC forth.
 		/// </summary>
-		private void GoForward()
-		{
-			InnerMessage(new StartWalk(this, TurnType.None));
-		}
+		private void GoForward() => InnerMessage(new StartWalk(this, TurnType.None));
 
 		/// <summary>
 		/// Starts moving the NPC to the left.
 		/// </summary>
-		private void GoLeft()
-		{
-			InnerMessage(new StartWalk(this, TurnType.SharplyLeft));
-		}
+		private void GoLeft() => InnerMessage(new StartWalk(this, TurnType.SharplyLeft));
 
 		/// <summary>
 		/// Moves the NPC one step to the right perpendicullar to current orientation.
 		/// </summary>
-		private void GoRight()
-		{
-			InnerMessage(new StartWalk(this, TurnType.SharplyRight));
-		}
+		private void GoRight() => InnerMessage(new StartWalk(this, TurnType.SharplyRight));
 
 		/// <summary>
 		/// Announces the public name of the locality where the NPC is currently located using a
 		/// screen reader or a voice synthesizer.
 		/// </summary>
-		private void SayLocalityName()
-		{
-			InnerMessage(new SayLocalityName(this));
-		}
+		private void SayLocalityName() => InnerMessage(new SayLocalityName(this));
 
 		/// <summary>
 		/// Reports the nearest characters around this character using a screen reader or voice synthesizer.
 		/// </summary>
-		private void SayCharacters()
-		{
-			InnerMessage(new SayCharacters(this));
-		}
+		private void SayCharacters() => InnerMessage(new SayCharacters(this));
 
 		/// <summary>
 		/// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
 		/// </summary>
-		private void SayObjects()
-		{
-			InnerMessage(new SayObjects(this));
-		}
+		private void SayObjects() => InnerMessage(new SayObjects(this));
 
 		/// <summary>
 		/// Stops the currently playing cutscene.
@@ -502,66 +465,42 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Tells the physics to stop the Chipotle NPC.
 		/// </summary>
-		private void StopWalk()
-		{
-			InnerMessage(new StopWalk(this));
-		}
+		private void StopWalk() => InnerMessage(new StopWalk(this));
 
 		/// <summary>
 		/// Reports the terrain on which the NPC is standing.
 		/// </summary>
-		private void TerrainInfo()
-		{
-			InnerMessage(new SayTerrain(this));
-		}
+		private void TerrainInfo() => InnerMessage(new SayTerrain(this));
 
 		/// <summary>
 		/// Rotates the NPC around Z axis.
 		/// </summary>
-		private void TurnAround()
-		{
-			InnerMessage(new ChangeOrientation(this, TurnType.Around));
-		}
+		private void TurnAround() => InnerMessage(new ChangeOrientation(this, TurnType.Around));
 
 		/// <summary>
 		/// Rotates the NPC around Z axis 45 degrees to the left.
 		/// </summary>
-		private void TurnLeft()
-		{
-			InnerMessage(new ChangeOrientation(this, TurnType.SlightlyLeft));
-		}
+		private void TurnLeft() => InnerMessage(new ChangeOrientation(this, TurnType.SlightlyLeft));
 
 		/// <summary>
 		/// Rotates the NPC around Z axis 45 degrees to the right.
 		/// </summary>
-		private void TurnRight()
-		{
-			InnerMessage(new ChangeOrientation(this, TurnType.SlightlyRight));
-		}
+		private void TurnRight() => InnerMessage(new ChangeOrientation(this, TurnType.SlightlyRight));
 
 		/// <summary>
 		/// Rotates the NPC around Z axis 90 degrees to the left.
 		/// </summary>
-		private void TurnSharplyLeft()
-		{
-			InnerMessage(new ChangeOrientation(this, TurnType.SharplyLeft));
-		}
+		private void TurnSharplyLeft() => InnerMessage(new ChangeOrientation(this, TurnType.SharplyLeft));
 
 		/// <summary>
 		/// Rotates the NPC around Z axis 90 degrees to the right.
 		/// </summary>
-		private void TurnSharplyRight()
-		{
-			InnerMessage(new ChangeOrientation(this, TurnType.SharplyRight));
-		}
+		private void TurnSharplyRight() => InnerMessage(new ChangeOrientation(this, TurnType.SharplyRight));
 
 		/// <summary>
 		/// Reports if the player have already visited the current locality.
 		/// </summary>
-		private void SayVisitedRegion()
-		{
-			InnerMessage(new SayVisitedRegion(this));
-		}
+		private void SayVisitedRegion() => InnerMessage(new SayVisitedRegion(this));
 
 		/// <summary>
 		/// Processes the KeyDown message.

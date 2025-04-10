@@ -269,7 +269,7 @@ namespace Game.Entities.Characters.Tuttle
 			if (target == null)
 				throw new ArgumentNullException("No walkable tile found.");
 
-			InnerMessage(new SetPosition(this, new((Vector2)target), true));
+			InnerMessage(new SetPosition(this, target.Value, true));
 			_carMovement = null;
 		}
 

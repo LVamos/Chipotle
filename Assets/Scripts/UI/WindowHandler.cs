@@ -1,10 +1,33 @@
-﻿namespace Game.UI
+﻿using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+namespace Game.UI
 {
 	/// <summary>
 	/// Manages user interface, redistributes keyboard input to virtual windows
 	/// </summary>
 	public static class WindowHandler
 	{
+		[DllImport("user32.dll")]
+		private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+		private const int SW_RESTORE = 9;
+
+		public static void FocusGameWindow()
+		{
+			IntPtr hwnd = Process.GetCurrentProcess().MainWindowHandle;
+
+			if (hwnd != IntPtr.Zero)
+			{
+				ShowWindow(hwnd, SW_RESTORE);
+				SetForegroundWindow(hwnd);
+			}
+		}
+
 		/// <summary>
 		/// Handles the KeyPress message.
 		/// </summary>
@@ -13,14 +36,9 @@
 			=> ActiveWindow.OnKeyPress(letter);
 
 		/// <summary>
-		/// Internal reference to currently active window
-		/// </summary>
-		private static VirtualWindow _activeWindow;
-
-		/// <summary>
 		/// Currently focused window
 		/// </summary>
-		public static VirtualWindow ActiveWindow { get => _activeWindow; private set => _activeWindow = value; }
+		public static VirtualWindow ActiveWindow { get; private set; }
 
 		/// <summary>
 		/// Reference to previously active window
@@ -48,7 +66,7 @@
 		/// <returns>Tuple with index of selected item and value of selected item</returns>
 		public static int Menu(MenuParametersDTO parameters)
 		{
-			var menu = MenuWindow.CreateInstance(parameters);
+			MenuWindow menu = MenuWindow.CreateInstance(parameters);
 
 			OpenModalWindow(menu);
 			return 0;
@@ -75,9 +93,9 @@
 		public static void OpenModalWindow(VirtualWindow modalWindow)
 		{
 			PreviousWindow = ActiveWindow;
-			_activeWindow = modalWindow;
-			_activeWindow.ParentWindow = PreviousWindow;
-			_activeWindow.OnActivate();
+			ActiveWindow = modalWindow;
+			ActiveWindow.ParentWindow = PreviousWindow;
+			ActiveWindow.OnActivate();
 		}
 
 		/// <summary>
@@ -95,9 +113,9 @@
 		/// <param name="window">New window</param>
 		public static void Switch(VirtualWindow window)
 		{
-			_activeWindow?.OnDeactivate(); // Let active window react on deactivating
+			ActiveWindow?.OnDeactivate(); // Let active window react on deactivating
 			PreviousWindow = ActiveWindow; // Backing up for future use
-			_activeWindow = window;
+			ActiveWindow = window;
 			ActiveWindow.OnActivate(); // Let new window react on activation
 		}
 	}

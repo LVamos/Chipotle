@@ -1,5 +1,7 @@
 ﻿using System;
 
+using UnityEngine;
+
 namespace Game.Messaging.Commands.Movement
 {
 	/// <summary>
@@ -20,7 +22,7 @@ namespace Game.Messaging.Commands.Movement
 		/// <summary>
 		/// The location to which the NPC moves
 		/// </summary>
-		public readonly Terrain.Rectangle Target;
+		public readonly Vector2 Target;
 
 		/// <summary>
 		/// Constructor
@@ -28,7 +30,7 @@ namespace Game.Messaging.Commands.Movement
 		/// <param name="sender">source of the message</param>
 		/// <param name="target">The location to which the NPC moves</param>
 		/// <param name="silently">Specifies if some walk sounds should be played.</param>
-		public SetPosition(object sender, Terrain.Rectangle target, bool silently = false) : base(sender)
+		public SetPosition(object sender, Vector2 target, bool silently = false) : base(sender)
 		{
 			Target = target;
 			Silently = silently;

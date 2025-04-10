@@ -1,6 +1,4 @@
-﻿using DavyKager;
-
-using Game.Audio;
+﻿using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
@@ -215,8 +213,6 @@ namespace Game.Terrain
 			// Play the sound
 			Vector3 position = new(point.x, 1.5f, point.y);
 			Sounds.Play(sound, position, volume);
-			//test
-			Tolk.Speak($"dveře {volume}");
 		}
 
 		/// <summary>

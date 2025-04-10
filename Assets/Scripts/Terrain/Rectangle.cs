@@ -22,6 +22,16 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Rectangle
 	{
+		public static Rectangle FromCenter(string value, float height, float width)
+		{
+			if (string.IsNullOrEmpty(value))
+				throw new ArgumentNullException($"{nameof(value)} cann't be null.");
+
+			List<float> coords = ParseCoords(value);
+			Vector2 center = new(coords[0].Round(), coords[1].Round());
+			return FromCenter(center, height, width);
+		}
+
 		private float Left => UpperLeftCorner.x;
 		private float Right => LowerRightCorner.x;
 		private float Top => UpperLeftCorner.y;
@@ -306,12 +316,12 @@ namespace Game.Terrain
 
 			MinimumHeight = MinimumWidth = 0;
 
-			List<float> coords = Parse(value);
+			List<float> coords = ParseCoords(value);
 			_upperLeftCorner = new Vector2(coords[0].Round(), coords[1].Round());
 			_lowerRightCorner = coords.Count == 2 ? _upperLeftCorner : new(coords[2].Round(), coords[3].Round());
 		}
 
-		private static List<float> Parse(string value)
+		private static List<float> ParseCoords(string value)
 		{
 			// Parse the values
 			List<float> coords = new();
