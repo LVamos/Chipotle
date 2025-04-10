@@ -44,6 +44,7 @@ namespace Game.Entities.Characters.Chipotle
 			Vector3 soundPosition = cam.position + forward * 0.5f - Vector3.up * 0.2f;
 
 			source.transform.position = soundPosition;
+			source.transform.SetParent(Owner.transform, true);
 			return source;
 		}
 
