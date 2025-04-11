@@ -913,7 +913,6 @@ namespace Game.Terrain
 
 		private void PlayAmbientHere()
 		{
-			SoundMode oldMode = _soundMode;
 			_soundMode = SoundMode.InLocality;
 			if ((_ambientSource == null || !_ambientSource.isPlaying) && _passageLoops.IsNullOrEmpty())
 			{
@@ -935,13 +934,15 @@ namespace Game.Terrain
 
 		private PassageLoopModel TakeClosestPassageLoop()
 		{
-			Passage closest = World.GetClosestElement(Passages, World.Player) as Passage;
-			PassageLoopModel passageLoop = null;
-			if (!_passageLoops.TryGetValue(closest, out passageLoop))
+			Passage closest = _passageLoops.Keys
+				.OrderBy(p => p.Area.Value.GetDistanceFrom(World.Player.Area.Value))
+				.FirstOrDefault();
+			if (closest == null)
 				return null;
 
+			PassageLoopModel loop = _passageLoops[closest];
 			_passageLoops.Remove(closest);
-			return passageLoop;
+			return loop;
 		}
 
 		private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume)
