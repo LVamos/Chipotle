@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands.Physics;
+﻿using Assets.Scripts.Entities.Items;
+// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
+using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
@@ -13,7 +15,7 @@ namespace Game.Entities.Items
 	/// Represents a bench object in the zahrada c1 locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class CarsonsBench : Item
+	public class CarsonsBench : InteractiveItem
 	{
 		/// <summary>
 		/// Constructor

@@ -1,4 +1,7 @@
-﻿using Game.Models;
+﻿using Game;
+// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
+using Game.Entities.Items;
+using Game.Models;
 
 using System;
 using System.Collections.Generic;
@@ -11,20 +14,24 @@ using YamlDotNet.Serialization.NamingConventions;
 
 using Rectangle = Game.Terrain.Rectangle;
 
-namespace Game.Entities.Items
+namespace Assets.Scripts.Entities.Items
 {
-	public static class ItemFactory
+	public class ItemFactory : InteractiveItem
 	{
 		public static Item AddComponent(GameObject obj, string type)
 		{
 			Item item = null;
 
 			if (_types.TryGetValue(type, out Type itemType))
-				item = obj.AddComponent(itemType) as Item;
+			{
+				item = obj.AddComponent(itemType) as InteractiveItem;
+				return item;
+			}
 
 			if (_itemParameters.ContainsKey(type))
 				item = obj.AddComponent<Item>() as Item;
-			else item = obj.AddComponent<Item>();
+			else
+				item = obj.AddComponent<Item>();
 
 			return item;
 		}
@@ -37,11 +44,11 @@ namespace Game.Entities.Items
 		/// </summary>
 		public static void LoadItems()
 		{
-			var deserializer = new DeserializerBuilder()
+			IDeserializer deserializer = new DeserializerBuilder()
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
-			var yamlText = File.ReadAllText(MainScript.ItemsPath);
+			string yamlText = File.ReadAllText(MainScript.ItemsPath);
 			YamlItemsModel items = deserializer.Deserialize<YamlItemsModel>(yamlText);
 
 			foreach (YamlItemModel item in items.Items)
@@ -52,7 +59,7 @@ namespace Game.Entities.Items
 				if (!string.IsNullOrWhiteSpace(item.ClassName))
 				{
 					string className = $"Game.Entities.Items.{item.ClassName}";
-					_types[item.Type] = Type.GetType(className);
+					_types[item.Type] = System.Type.GetType(className);
 					continue;
 				}
 
@@ -92,9 +99,9 @@ namespace Game.Entities.Items
 
 			if (_types.TryGetValue(type, out Type itemType))
 			{
-				item = obj.GetComponent(itemType) as Item;
-				item.Initialize(name, area, type, decorative, pickable, usable);
-				return item;
+				InteractiveItem interactiveItem = obj.GetComponent(itemType) as InteractiveItem;
+				interactiveItem.Initialize(name, area, type, decorative, pickable, usable);
+				return interactiveItem;
 			}
 
 			ItemCreationParametersModel parameters;
@@ -123,7 +130,7 @@ namespace Game.Entities.Items
 				return item;
 			}
 
-			item = obj.GetComponent<Item>();
+			item = obj.GetComponent<Item>() as Item;
 			item.Initialize(name, area, type, decorative, pickable, usable);
 			return item;
 		}

@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Events.Movement;
+﻿using Assets.Scripts.Entities.Items;
+// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
+using Game.Messaging.Events.Movement;
 
 using ProtoBuf;
 
@@ -11,7 +13,7 @@ namespace Game.Entities.Items
 	/// Represents the grill object in the zahrada c1 locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class CarsonsGrill : Item
+	public class CarsonsGrill : InteractiveItem
 	{
 		/// <summary>
 		/// Constructor

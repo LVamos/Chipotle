@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Events.Physics;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
@@ -10,7 +12,7 @@ namespace Game.Entities.Items
 	/// Represents the key hanger object in the garage in Vanilla crunch company (garáž v1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class KeyHanger : Item
+	public class KeyHanger : InteractiveItem
 	{
 		/// <summary>
 		/// constructor

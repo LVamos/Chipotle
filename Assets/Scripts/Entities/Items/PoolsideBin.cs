@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Events.Physics;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
@@ -12,7 +14,7 @@ namespace Game.Entities.Items
 	/// Represents the bin object in the Walsch's pool (bazén w1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class PoolsideBin : Item
+	public class PoolsideBin : InteractiveItem
 	{
 		/// <summary>
 		/// constructor

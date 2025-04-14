@@ -1,4 +1,6 @@
-﻿using Game.Entities.Characters;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Entities.Characters;
 using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
@@ -11,7 +13,7 @@ namespace Game.Entities.Items
 	/// Represents a table in the pub (výčep h1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class PubBench : Item
+	public class PubBench : InteractiveItem
 	{
 		/// <summary>
 		/// constructor

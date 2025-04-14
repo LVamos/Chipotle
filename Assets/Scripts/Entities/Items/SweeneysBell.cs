@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Events.Physics;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
@@ -10,7 +12,7 @@ namespace Game.Entities.Items
 	/// Represents the Sweeney's bell (zvonek p1) in the Easterby street (ulice p1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class SweeneysBell : Item
+	public class SweeneysBell : InteractiveItem
 	{
 		/// <summary>
 		/// constructor
@@ -29,7 +31,8 @@ namespace Game.Entities.Items
 		{
 			if (!Used)
 				_cutscene = "cs23";
-			else _sounds["action"] = "snd25";
+			else
+				_sounds["action"] = "snd25";
 
 			base.OnObjectsUsed(message);
 		}

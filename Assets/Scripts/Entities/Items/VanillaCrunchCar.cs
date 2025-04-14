@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Events.Physics;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
@@ -11,7 +13,7 @@ namespace Game.Entities.Items
 	/// the company (garáž v1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class VanillaCrunchCar : Item
+	public class VanillaCrunchCar : InteractiveItem
 	{
 		/// <summary>
 		/// constructor

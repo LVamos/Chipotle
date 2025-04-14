@@ -1,4 +1,6 @@
-﻿using Game.Audio;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Audio;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
@@ -21,7 +23,7 @@ namespace Game.Entities.Items
 	/// Represents the car of the Detective Chipotle NPC.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class ChipotlesCar : Item
+	public class ChipotlesCar : InteractiveItem
 	{
 		/// <summary>
 		/// Indicates if the object has moved at least once.
@@ -149,7 +151,8 @@ namespace Game.Entities.Items
 				DestinationMenu("cs20");
 				AllowDestination(World.GetLocality("příjezdová cesta w1"));
 			}
-			else DestinationMenu(); // Let player seldct destination.
+			else
+				DestinationMenu(); // Let player seldct destination.
 		}
 
 		/// <summary>
@@ -186,7 +189,8 @@ namespace Game.Entities.Items
 			string cutscene;
 			if (string.IsNullOrEmpty(preferredCutscene))
 				cutscene = IsChipotleAlone() ? "cs37" : "cs36";
-			else cutscene = preferredCutscene;
+			else
+				cutscene = preferredCutscene;
 
 			Dictionary<string, Locality> destinations = new();
 			foreach (string indexedName in _allowedDestinations.Where(d => !_localities.Contains(d)))

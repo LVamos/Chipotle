@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Events.Physics;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
@@ -10,7 +12,7 @@ namespace Game.Entities.Items
 	/// Represents the Christine's bell (zvonek p1) in the Belvedere street (ulice p1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class ChristinesBell : Item
+	public class ChristinesBell : InteractiveItem
 	{
 		/// <summary>
 		/// constructor
@@ -28,7 +30,8 @@ namespace Game.Entities.Items
 		{
 			if (!Used)
 				_cutscene = "cs21";
-			else _sounds["action"] = "snd25";
+			else
+				_sounds["action"] = "snd25";
 
 			base.OnObjectsUsed(message);
 		}

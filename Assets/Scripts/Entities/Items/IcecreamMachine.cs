@@ -1,4 +1,6 @@
-﻿using Game.Entities.Characters;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Entities.Characters;
 using Game.Messaging.Events.Physics;
 using Game.Terrain;
 
@@ -15,7 +17,7 @@ namespace Game.Entities.Items
 	/// company (hala v1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class IcecreamMachine : Item
+	public class IcecreamMachine : InteractiveItem
 	{
 		/// <summary>
 		/// constructor

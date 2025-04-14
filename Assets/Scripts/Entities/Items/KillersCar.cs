@@ -1,4 +1,6 @@
-﻿using Game.Messaging.Commands.Physics;
+﻿using Assets.Scripts.Entities.Items;
+
+using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
@@ -11,7 +13,7 @@ namespace Game.Entities.Items
 	/// Represents the killer's car object in the garage of Vanilla crunch (garáž v1) locality.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class KillersCar : Item
+	public class KillersCar : InteractiveItem
 	{
 		/// <summary>
 		/// constructor

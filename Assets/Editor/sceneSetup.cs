@@ -1,7 +1,7 @@
 using Assets.Scripts;
+using Assets.Scripts.Entities.Items;
 
 using Game;
-using Game.Entities.Items;
 using Game.Terrain;
 
 using System;
@@ -157,6 +157,8 @@ public static class sceneSetup
 
 	private static void LoadItems(XElement localityNode)
 	{
+		ItemFactory.LoadItems();
+
 		System.Collections.Generic.List<XElement> items = localityNode.Elements("object").ToList();
 		foreach (XElement item in items)
 		{
