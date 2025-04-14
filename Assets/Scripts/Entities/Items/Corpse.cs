@@ -14,7 +14,7 @@ namespace Game.Entities.Items
 	public class Corpse : Item
 	{
 		/// <summary>
-		/// Constructor
+		/// Initializes the item
 		/// </summary>
 		/// <param name="name">Inner and public name for the object</param>
 		/// <param name="area">The coordinates of the area that the object occupies</param>
