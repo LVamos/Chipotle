@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Entities.Items;
-// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
+﻿// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
 using ProtoBuf;
 
 using Rectangle = Game.Terrain.Rectangle;
@@ -13,7 +12,7 @@ namespace Game.Entities.Items
 	/// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 locality.
 	/// </remarks>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class Corpse : InteractiveItem
+	public class Corpse : Item
 	{
 		/// <summary>
 		/// Initializes the item

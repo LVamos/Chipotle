@@ -94,7 +94,6 @@ namespace Assets.Scripts
 
 			_audio = Sounds.Play2d(cutSceneName);
 			Paused = false;
-
 		}
 
 		private AudioSource _audio;

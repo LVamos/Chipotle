@@ -1,6 +1,4 @@
-﻿using Assets.Scripts.Entities.Items;
-
-using Game.Audio;
+﻿using Game.Audio;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
@@ -23,7 +21,7 @@ namespace Game.Entities.Items
 	/// Represents the car of the Detective Chipotle NPC.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class ChipotlesCar : InteractiveItem
+	public class ChipotlesCar : Item
 	{
 		/// <summary>
 		/// Indicates if the object has moved at least once.
@@ -71,8 +69,9 @@ namespace Game.Entities.Items
 		/// </summary>
 		/// <param name="name">Inner and public name of the object</param>
 		/// <param name="area">Coordinates of the area that the object occupies</param>
-		public void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable)
-			=> base.Initialize(name: name, area: area, type: type, decorative: decorative, pickable: pickable,
+
+		public override void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
+					=> base.Initialize(name: name, area: area, type: type, decorative: decorative, pickable: pickable,
 				usable: usable, stopWhenPlayerMoves: true);
 
 		/// <summary>

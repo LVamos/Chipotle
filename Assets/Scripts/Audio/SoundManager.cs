@@ -107,7 +107,6 @@ namespace Assets.Scripts.Audio
 				source.volume = volume;
 				source.Play();
 			}
-
 			return source;
 		}
 

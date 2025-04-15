@@ -170,7 +170,7 @@ namespace Game.Entities.Characters.Components
 		protected virtual UsableObjectsModel GetUsableItemsAndCharactersBefore(float radius)
 		{
 			List<Entity> objectsBefore = GetItemsAndCharactersBefore(_objectManipulationHelpRadius)
-				.ToList();
+				?.ToList();
 
 			// No objects in range
 			if (objectsBefore.IsNullOrEmpty())

@@ -16,7 +16,7 @@ using Rectangle = Game.Terrain.Rectangle;
 
 namespace Assets.Scripts.Entities.Items
 {
-	public class ItemFactory : InteractiveItem
+	public class ItemFactory
 	{
 		public static Item AddComponent(GameObject obj, string type)
 		{
@@ -24,7 +24,7 @@ namespace Assets.Scripts.Entities.Items
 
 			if (_types.TryGetValue(type, out Type itemType))
 			{
-				item = obj.AddComponent(itemType) as InteractiveItem;
+				item = obj.AddComponent(itemType) as Item;
 				return item;
 			}
 
@@ -99,9 +99,9 @@ namespace Assets.Scripts.Entities.Items
 
 			if (_types.TryGetValue(type, out Type itemType))
 			{
-				InteractiveItem interactiveItem = obj.GetComponent(itemType) as InteractiveItem;
-				interactiveItem.Initialize(name, area, type, decorative, pickable, usable);
-				return interactiveItem;
+				item = obj.GetComponent(itemType) as Item;
+				item.Initialize(name, area, type, decorative, pickable, usable);
+				return item;
 			}
 
 			ItemCreationParametersModel parameters;
