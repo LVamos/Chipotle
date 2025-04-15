@@ -486,11 +486,12 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="direction">The direction in which to move the object.</param>
 		/// <param name="silently">Optional. Determines whether to move silently or not. Defaults to false.</param>
-		public void Move(Vector2 direction, bool silently = false)
+		public virtual Vector2 Move(Vector2 direction, bool silently = false)
 		{
 			Rectangle target = new(_area.Value);
 			target.Move(direction * _stepLength);
 			JumpTo(target);
+			return target.Center;
 		}
 
 		/// <summary>
@@ -542,7 +543,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="target">coordinates of the target position</param>
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-		protected void JumpTo(Rectangle target, bool silently = false)
+		protected virtual void JumpTo(Rectangle target, bool silently = false)
 		{
 			Locality sourceLocality = Locality;
 			Locality targetLocality = target.GetLocalities().First();

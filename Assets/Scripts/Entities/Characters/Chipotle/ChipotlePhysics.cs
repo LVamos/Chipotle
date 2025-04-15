@@ -38,6 +38,18 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotlePhysics : Physics
 	{
+		public override Vector2 Move(Vector2 direction, bool silently = false)
+		{
+			Vector2 target = base.Move(direction, silently);
+
+			RecordRegion(target); // Record visited region
+
+			// Watch important events
+			WatchPuddle(target); // Check if player walked in a puddle
+			WatchPhone();
+			return target;
+		}
+
 		public void OnSayItemSize(SayItemSize message)
 		{
 			Item item = World.GetNearestObjects(_area.Value.Center).FirstOrDefault();
@@ -103,21 +115,6 @@ namespace Game.Entities.Characters.Chipotle
 			if (_startWalkMessage != null && _startWalkMessage.Direction != TurnType.None)
 				finalOrientation.Rotate(_startWalkMessage.Direction);
 			return finalOrientation.UnitVector;
-		}
-
-		/// <summary>
-		/// Immediately changes position of the NPC.
-		/// </summary>
-		/// <param name="target">Coordinates of the target position</param>
-		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
-		protected override void JumpTo(Vector2 target, bool silently = false)
-		{
-			base.JumpTo(target, silently);
-			RecordRegion(target); // Record visited region
-
-			// Watch important events
-			WatchPuddle(target); // Check if player walked in a puddle
-			WatchPhone();
 		}
 
 		/// <summary>
