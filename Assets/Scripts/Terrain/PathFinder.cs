@@ -160,7 +160,6 @@ namespace Game.Terrain
 			float characterWidth
 		)
 		{
-			//test
 			Rectangle area = Rectangle.FromCenter(node.Coords, characterHeight, characterWidth);
 			Zone zone = World.Map[area.Center].Zone;
 			bool noStaticObjects = zone.IsWalkable(area);

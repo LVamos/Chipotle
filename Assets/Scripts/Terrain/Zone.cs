@@ -61,7 +61,7 @@ namespace Game.Terrain
 
 		private bool PlayerInHere()
 		{
-			Rectangle player = World.Player.Area.Value;
+			Vector2 player = World.Player.Area.Value.Center;
 			return Area.Value.Contains(player);
 		}
 
@@ -137,12 +137,17 @@ namespace Game.Terrain
 				Vector2? point = passage.Area.Value.GetAlignedPoint(player)
 				?? passage.Area.Value.GetClosestPoint(player);
 				source.transform.position = point.Value.ToVector3(2);
-				UpdateSpatialBlend(source);
+				UpdateSpatialBlend(passage, source);
 			}
 		}
 
-		private void UpdateSpatialBlend(AudioSource source)
+		private void UpdateSpatialBlend(Passage passage, AudioSource source)
 		{
+			if (passage is Door)
+			{
+				source.spatialBlend = 1;
+				return;
+			}
 			int distance = (int)GetDistanceToPlayer();
 			source.spatialBlend = distance > 10 ? 1 : distance * .1f;
 		}
@@ -548,7 +553,7 @@ namespace Game.Terrain
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;
 				case CharacterLeftZone ll: OnCharacterLeftZone(ll); break;
-				case CharacterCameToZone le: OnCharacterCameToZone(le); break;
+				case CharacterCameToZone m: OnCharacterCameToZone(m); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -752,7 +757,7 @@ namespace Game.Terrain
 				_playersPreviousZone = null;
 				return;
 			}
-			if (string.Equals(World.Player.Zone.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
+			if (_playersPreviousZone != null && string.Equals(_playersPreviousZone.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
 				return;
 
 			if (IsAccessible(World.Player.Zone))
@@ -820,6 +825,8 @@ namespace Game.Terrain
 		/// The maximum distance the player is from the zone at which it makes sense to play the location audio.
 		/// </summary>
 		private const float _zoneSoundRadius = 100;
+		private const int _passageLoopOpenDoorMaxDistance = 3;
+		private const int _passageLoopClosedDoorMaxDistance = 2;
 
 		/// <summary>
 		/// Plays soudn loop of the zone.
@@ -952,10 +959,24 @@ namespace Game.Terrain
 				AudioSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true)
 			};
 			newLoop.AudioSource.transform.position = loop.Position;
-			newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
-			newLoop.AudioSource.rolloffMode = AudioRolloffMode.Linear;
+
+			if (loop.Passage is Door door)
+			{
+				newLoop.AudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+				if (door.State == PassageState.Open)
+					newLoop.AudioSource.maxDistance = _passageLoopOpenDoorMaxDistance;
+				else
+					newLoop.AudioSource.maxDistance = _passageLoopClosedDoorMaxDistance;
+			}
+			else
+			{
+				newLoop.AudioSource.rolloffMode = AudioRolloffMode.Linear;
+				newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
+			}
+
+			newLoop.AudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
 			_passageLoops[loop.Passage] = newLoop;
-			UpdateSpatialBlend(newLoop.AudioSource);
+			UpdateSpatialBlend(loop.Passage, newLoop.AudioSource);
 			ApplyLowPass(loop, newLoop);
 			newLoop.AudioSource.volume = 0;
 			Sounds.SlideVolume(newLoop.AudioSource, .5f, _defaultVolume);
@@ -970,7 +991,7 @@ namespace Game.Terrain
 			};
 			newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
 			_passageLoops[loop.Passage] = newLoop;
-			UpdateSpatialBlend(newLoop.AudioSource);
+			UpdateSpatialBlend(loop.Passage, newLoop.AudioSource);
 			ApplyLowPass(loop, newLoop);
 		}
 

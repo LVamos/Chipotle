@@ -212,10 +212,7 @@ namespace Game.Entities.Characters
 		/// Processes the ZoneChanged message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnZoneChanged(ZoneChanged message)
-		{
-			_zone = message.Target.Name.Indexed;
-		}
+		private void OnZoneChanged(ZoneChanged message) => _zone = message.Target.Name.Indexed;
 
 		/// <summary>
 		/// Processes incoming messages.
@@ -302,10 +299,7 @@ namespace Game.Entities.Characters
 		/// </summary>
 		/// <param name="message">The message to check</param>
 		/// <returns>True if the message came from inside the NPC</returns>
-		private bool IsInternal(Message message)
-		{
-			return message.Sender is CharacterComponent c && c.Owner == this;
-		}
+		private bool IsInternal(Message message) => message.Sender is CharacterComponent c && c.Owner == this;
 
 		/// <summary>
 		/// Processes the Destroy message.

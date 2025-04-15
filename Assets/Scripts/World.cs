@@ -617,7 +617,13 @@ namespace Game
 		/// </summary>
 		/// <param name="point">The point tto be checked</param>
 		/// <returns>The intersecting zone</returns>
-		public static Zone GetZone(Vector2 point) => Map[point]?.Zone;
+		public static Zone GetZone(Vector2 point)
+		{
+			Zone zone = _zones.Values.FirstOrDefault(z => matches(point, z));
+			return zone;
+
+			bool matches(Vector2 point, Zone zone) => zone.Area.Value.Contains(point);
+		}
 
 		/// <summary>
 		/// Enumerates all zones sorted by distance from the specified point.

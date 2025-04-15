@@ -546,9 +546,9 @@ namespace Game.Entities.Characters.Components
 		protected virtual void JumpTo(Rectangle target, bool silently = false)
 		{
 			Zone sourceZone = Zone;
-			Zone targetZone = target.GetZones().First();
-			Rectangle? sourcePosition = _area == null ? null : _area.Value;
-			_area = new(target);
+			Zone targetZone = World.GetZone(target.Center);
+			Rectangle? sourcePosition = _area;
+			_area = target;
 
 			// If it isn't the player detect obstacles between him and this NPC.
 			Character player = World.Player;
