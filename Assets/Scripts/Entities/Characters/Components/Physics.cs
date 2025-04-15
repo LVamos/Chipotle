@@ -58,12 +58,12 @@ namespace Game.Entities.Characters.Components
 			JumpTo(target.Value);
 		}
 
-		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance, bool sameLocality = true)
+		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance, bool sameZone = true)
 		{
 			float height = transform.localScale.z;
 			float width = transform.localScale.x;
 
-			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, sameLocality)
+			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, sameZone)
 				.ToArray();
 
 			return points;
@@ -372,9 +372,9 @@ namespace Game.Entities.Characters.Components
 		protected Rectangle? _area;
 
 		/// <summary>
-		/// Stores reference to a locality in which the NPC is currently located.
+		/// Stores reference to a zone in which the NPC is currently located.
 		/// </summary>
-		public Locality Locality => _area == null ? null : World.GetLocality(_area.Value.Center);
+		public Zone Zone => _area == null ? null : World.GetZone(_area.Value.Center);
 
 		/// <summary>
 		/// Current orientation of the NPC
@@ -409,7 +409,7 @@ namespace Game.Entities.Characters.Components
 		protected virtual void OnGameReloaded(Reloaded message)
 		{
 			InnerMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
-			InnerMessage(new PositionChanged(this, _area.Value, _area.Value, Locality, Locality, ObstacleType.None, true));
+			InnerMessage(new PositionChanged(this, _area.Value, _area.Value, Zone, Zone, ObstacleType.None, true));
 			_random = new();
 
 			// Try to find a new path to the player if necessary.
@@ -545,8 +545,8 @@ namespace Game.Entities.Characters.Components
 		/// <param name="silently">Specifies if the NPC plays sounds of walk.</param>
 		protected virtual void JumpTo(Rectangle target, bool silently = false)
 		{
-			Locality sourceLocality = Locality;
-			Locality targetLocality = target.GetLocalities().First();
+			Zone sourceZone = Zone;
+			Zone targetZone = target.GetZones().First();
 			Rectangle? sourcePosition = _area == null ? null : _area.Value;
 			_area = new(target);
 
@@ -555,11 +555,11 @@ namespace Game.Entities.Characters.Components
 			ObstacleType obstacle = Owner != player ? World.DetectAcousticObstacles(_area.Value) : ObstacleType.None;
 
 			// Announce changes
-			PositionChanged changed = new(this, sourcePosition, target, sourceLocality, targetLocality, obstacle, silently);
+			PositionChanged changed = new(this, sourcePosition, target, sourceZone, targetZone, obstacle, silently);
 			InnerMessage(changed);
 
-			if (targetLocality != sourceLocality)
-				InnerMessage(new LocalityChanged(this, sourceLocality, targetLocality));
+			if (targetZone != sourceZone)
+				InnerMessage(new ZoneChanged(this, sourceZone, targetZone));
 			LogPosition();
 		}
 
@@ -574,19 +574,19 @@ namespace Game.Entities.Characters.Components
 			else
 				position += $"Pozice: {Owner.Area.Value.Center.GetString()}";
 
-			string locality = string.Empty;
-			if (Owner.Locality == null)
-				locality = "Lokace: neznámá";
+			string zone = string.Empty;
+			if (Owner.Zone == null)
+				zone = "Lokace: neznámá";
 			else
-				locality = $"Lokace: {Owner.Locality.Name.Indexed}";
+				zone = $"Lokace: {Owner.Zone.Name.Indexed}";
 
 			string relativePosition = string.Empty;
-			if (Owner.Locality != null)
+			if (Owner.Zone != null)
 				relativePosition = $"Relativní pozice: {Rectangle.GetRelativeCoordinates(Owner.Area.Value.Center)}";
 
 			string objectsBefore = GetObjectsBeforeForLog();
 
-			Logger.LogInfo(title, name, position, relativePosition, locality, objectsBefore);
+			Logger.LogInfo(title, name, position, relativePosition, zone, objectsBefore);
 		}
 
 		protected string GetObjectsBeforeForLog()
@@ -721,7 +721,7 @@ namespace Game.Entities.Characters.Components
 			float distance = GetDistanceToPlayer();
 			return
 				 distance <= _targetPlayerDistance
-				&& _player.SameLocality(Owner);
+				&& _player.SameZone(Owner);
 		}
 
 		protected Character _player => World.Player;
@@ -732,7 +732,7 @@ namespace Game.Entities.Characters.Components
 		protected void GoToPlayer()
 		{
 			// This is helpful in test mode if the character is set to follow the player right from the beginning. If the player isn't initialized yet the character will keep trying to approach him.
-			if (_area == null || Owner.Locality == null || World.Player == null)
+			if (_area == null || Owner.Zone == null || World.Player == null)
 				return;
 
 			Vector2 goal = _player.Area.Value.Center;
@@ -779,18 +779,18 @@ namespace Game.Entities.Characters.Components
 
 			Vector2 start = _area.Value.Center;
 			Vector2? goal1 = goal, goal2 = goal;
-			Locality startLocality = Locality;
-			Locality targetLocality = World.Map[goal].Locality;
-			bool sameLocality = startLocality == targetLocality; // Don't go to another localities if the goal is in the same locality.
+			Zone startZone = Zone;
+			Zone targetZone = World.Map[goal].Zone;
+			bool sameZone = startZone == targetZone; // Don't go to another zones if the goal is in the same zone.
 
-			// Give it up if the goal is in another locality and the NPC can't go there.
-			if (!sameLocality)
+			// Give it up if the goal is in another zone and the NPC can't go there.
+			if (!sameZone)
 			{
-				if (!startLocality.IsAccessible(targetLocality))
+				if (!startZone.IsAccessible(targetZone))
 					return null;
 
 				Passage closestExit =
-				targetLocality.GetExitsTo(targetLocality)
+				targetZone.GetExitsTo(targetZone)
 				.OrderBy(p => p.Area.Value.GetDistanceFrom(_area.Value))
 				.FirstOrDefault();
 
@@ -799,11 +799,11 @@ namespace Game.Entities.Characters.Components
 					return null;
 			}
 
-			Queue<Vector2> path1 = World.FindPath(start, goal1.Value, sameLocality, withStart, withGoal, Height, Width);
+			Queue<Vector2> path1 = World.FindPath(start, goal1.Value, sameZone, withStart, withGoal, Height, Width);
 			if (path1 == null)
 				return null;
 
-			if (!sameLocality)
+			if (!sameZone)
 			{
 				// Construct the rest of the path from the entrance to the goal.
 				Queue<Vector2> path2 = World.FindPath(goal1.Value, goal2.Value, true, false, withGoal, Height, Width);
@@ -817,17 +817,17 @@ namespace Game.Entities.Characters.Components
 			return path1;
 		}
 
-		private Vector2? FindPointBehindPassage(Locality targetLocality)
+		private Vector2? FindPointBehindPassage(Zone targetZone)
 		{
 			Passage closestExit =
-				targetLocality.GetExitsTo(targetLocality)
+				targetZone.GetExitsTo(targetZone)
 				.OrderBy(p => p.Area.Value.GetDistanceFrom(_area.Value))
 				.FirstOrDefault();
 			if (closestExit == null)
 				return null;
 
-			Rectangle targetArea = targetLocality.Area.Value;
-			List<Vector2> exitPoints = closestExit.GetPointsOfLocality(Locality);
+			Rectangle targetArea = targetZone.Area.Value;
+			List<Vector2> exitPoints = closestExit.GetPointsOfZone(Zone);
 			if (exitPoints.IsNullOrEmpty())
 				return null;
 
@@ -886,7 +886,7 @@ namespace Game.Entities.Characters.Components
 			float distance = GetDistanceToPlayer();
 			if (
 				_state == CharacterState.WatchingPlayer && _area != null
-													 && (distance > _maxPlayerDistance || distance <= _maxPlayerDistance && !_player.SameLocality(Owner))
+													 && (distance > _maxPlayerDistance || distance <= _maxPlayerDistance && !_player.SameZone(Owner))
 			)
 				GoToPlayer();
 			else if (_state == CharacterState.GoingToPlayer && distance <= _targetPlayerDistance)
@@ -924,7 +924,7 @@ namespace Game.Entities.Characters.Components
 		{
 			string title = "Postava použila dveře";
 			string name = Owner.Name.Indexed;
-			string doorDestination = door.AnotherLocality(Locality).To;
+			string doorDestination = door.AnotherZone(Zone).To;
 			string doorName = $"Název dveří: {door.Name.Indexed}";
 
 			Logger.LogInfo(title, name, doorDestination, doorName);
@@ -1106,7 +1106,7 @@ namespace Game.Entities.Characters.Components
 		{
 			string title = "Postava narazila do dveří";
 			string name = $"Postava: {Owner.Name.Indexed}";
-			string doorDestination = door.AnotherLocality(Locality).To;
+			string doorDestination = door.AnotherZone(Zone).To;
 			string doorName = $"Název dveří: {door.Name.Indexed}";
 
 			Logger.LogInfo(title, name, doorDestination, doorName);

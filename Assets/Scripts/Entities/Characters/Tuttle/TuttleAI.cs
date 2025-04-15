@@ -51,10 +51,10 @@ namespace Game.Entities.Characters.Tuttle
 		private const int _maxDistanceToCar = 2;
 
 		/// <summary>
-		/// Specifies if the NPC is just moving to another locality with the Chipotle's car.
+		/// Specifies if the NPC is just moving to another zone with the Chipotle's car.
 		/// </summary>
 		[ProtoIgnore]
-		protected Locality _ridingTo;
+		protected Zone _ridingTo;
 
 		/// <summary>
 		/// A delayed message of ChipotlesCarMoved type
@@ -62,7 +62,7 @@ namespace Game.Entities.Characters.Tuttle
 		private ChipotlesCarMoved _carMovement;
 
 		/// <summary>
-		/// Indicates if the Detective Chipotle NPC visited the Walsch's pool (bazén w1) locality.
+		/// Indicates if the Detective Chipotle NPC visited the Walsch's pool (bazén w1) zone.
 		/// </summary>
 		private bool _playerWasByPool;
 
@@ -98,7 +98,7 @@ namespace Game.Entities.Characters.Tuttle
 				case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
-				case CharacterCameToLocality le: OnLocalityEntered(le); break;
+				case CharacterCameToZone le: OnZoneEntered(le); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -178,13 +178,13 @@ namespace Game.Entities.Characters.Tuttle
 		}
 
 		/// <summary>
-		/// Indicates that the player moved from his original location to the bazén w1 locality. It also means that he walked past the Tuttle NPC because 
+		/// Indicates that the player moved from his original location to the bazén w1 zone. It also means that he walked past the Tuttle NPC because 
 		/// </summary>
 		private bool _playerWasByThePool;
 
 		/// <summary>
 		/// The Detective Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdová
-		/// cesta w1) locality to the Belvedere street (ulice p1) locality right outside the
+		/// cesta w1) zone to the Belvedere street (ulice p1) zone right outside the
 		/// Christine's door.
 		/// </summary>
 		private void JumpToBelvedereStreet()
@@ -195,7 +195,7 @@ namespace Game.Entities.Characters.Tuttle
 
 		/// <summary>
 		/// The detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)
-		/// locality to the Christine's hall (hala p1) locality.
+		/// zone to the Christine's hall (hala p1) zone.
 		/// </summary>
 		private void JumpToChristinesHall() => JumpNear(World.GetItem("botník p1").Area.Value);
 
@@ -205,8 +205,8 @@ namespace Game.Entities.Characters.Tuttle
 		private void StopFollowing() => InnerMessage(new StopFollowingPlayer(this));
 
 		/// <summary>
-		/// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) locality to his
-		/// room (pokoj s1) locality.
+		/// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) zone to his
+		/// room (pokoj s1) zone.
 		/// </summary>
 		private void JumpToSweeneysRoom() => JumpNear(World.GetItem("skříň s2").Area.Value);
 
@@ -216,23 +216,23 @@ namespace Game.Entities.Characters.Tuttle
 		/// <param name="m">The message to be processed</param>
 		private void OnChipotlesCarMoved(ChipotlesCarMoved m)
 		{
-			Locality locality = m.Target.GetLocalities().First();
+			Zone zone = m.Target.GetZones().First();
 
-			if (locality.Name.Indexed != "asfaltka c1")
+			if (zone.Name.Indexed != "asfaltka c1")
 				_carMovement = m;
 
-			_ridingTo = _carMovement.Target.GetLocalities().First();
-			InnerMessage(new StopFollowingPlayer(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new locality.
+			_ridingTo = _carMovement.Target.GetZones().First();
+			InnerMessage(new StopFollowingPlayer(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new zone.
 		}
 
 		/// <summary>
-		/// Processes the LocalityEntered message.
+		/// Processes the ZoneEntered message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnLocalityEntered(CharacterCameToLocality message)
+		private void OnZoneEntered(CharacterCameToZone message)
 		{
-			// When the player first time enters the locality start following him.
-			if (message.Character == _player && Owner.Locality.Name.Indexed == "bazén w1" && !_playerWasByPool)
+			// When the player first time enters the zone start following him.
+			if (message.Character == _player && Owner.Zone.Name.Indexed == "bazén w1" && !_playerWasByPool)
 			{
 				_playerWasByPool = true;
 
@@ -293,11 +293,11 @@ namespace Game.Entities.Characters.Tuttle
 		}
 
 		/// <summary>
-		/// Restarts following the Chipotle NPC if they both arrived to a new locality by car.
+		/// Restarts following the Chipotle NPC if they both arrived to a new zone by car.
 		/// </summary>
 		private void WaitForPlayer()
 		{
-			if (_ridingTo != null && Owner.Locality == _ridingTo && World.Player.Locality == _ridingTo)
+			if (_ridingTo != null && Owner.Zone == _ridingTo && World.Player.Zone == _ridingTo)
 			{
 				_ridingTo = null;
 				InnerMessage(new StartFollowingPlayer(this));

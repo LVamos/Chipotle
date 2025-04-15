@@ -23,7 +23,7 @@ namespace Game.Terrain
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	[ProtoInclude(100, typeof(Entity))]
-	[ProtoInclude(101, typeof(Locality))]
+	[ProtoInclude(101, typeof(Zone))]
 	[ProtoInclude(102, typeof(Passage))]
 	public abstract class MapElement : MessagingObject
 	{
@@ -190,7 +190,7 @@ namespace Game.Terrain
 		protected bool ShouldNavigationContinue()
 		{
 			float distance = GetDistanceToPlayer();
-			bool playerInHere = SameLocality(World.Player);
+			bool playerInHere = SameZone(World.Player);
 			return distance > 1 && distance <= 50 && playerInHere;
 		}
 
@@ -233,14 +233,14 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Checks if the specified element and this element are at least partially in the same locality.
+		/// Checks if the specified element and this element are at least partially in the same zone.
 		/// </summary>
 		/// <param name="element">The element to be checked</param>
-		/// <returns>True if the specified element and this element are at least partially in the same locality.</returns>
-		public virtual bool SameLocality(Entity element)
+		/// <returns>True if the specified element and this element are at least partially in the same zone.</returns>
+		public virtual bool SameZone(Entity element)
 		{
-			List<Locality> mine = _area.Value.GetLocalities().ToList();
-			List<Locality> its = element.Area.Value.GetLocalities().ToList();
+			List<Zone> mine = _area.Value.GetZones().ToList();
+			List<Zone> its = element.Area.Value.GetZones().ToList();
 
 			bool result = mine.Any(l => its.Contains(l));
 			return result;

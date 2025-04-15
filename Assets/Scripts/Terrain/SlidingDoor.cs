@@ -46,10 +46,10 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="name">Inner name of the door</param>
 		/// <param name="area">Coordinates of the area the door occupies</param>
-		/// <param name="localities">The localities connected by the door</param>
-		public override void Initialize(Name name, Rectangle area, IEnumerable<string> localities)
+		/// <param name="zones">The zones connected by the door</param>
+		public override void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
 		{
-			base.Initialize(name, PassageState.Closed, area, localities);
+			base.Initialize(name, PassageState.Closed, area, zones);
 			State = PassageState.Locked;
 			_openingSound = _closingSound = "SlidingDoor";
 		}

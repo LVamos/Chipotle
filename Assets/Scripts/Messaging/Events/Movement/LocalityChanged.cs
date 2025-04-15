@@ -4,29 +4,29 @@ using Game.Terrain;
 namespace Game.Messaging.Events.Movement
 {
 	/// <summary>
-	/// Indicates that an NPC moved from one locality to another one.
+	/// Indicates that an NPC moved from one zone to another one.
 	/// </summary>
 	/// <remarks>Sent from a descendant of the <see cref="Entities.Characters.Components.CharacterComponent"/> class.</remarks>
 	[Serializable]
-	public class LocalityChanged : Message
+	public class ZoneChanged : Message
 	{
 		/// <summary>
-		/// The locality the NPC left
+		/// The zone the NPC left
 		/// </summary>
-		public readonly Locality Source;
+		public readonly Zone Source;
 
 		/// <summary>
-		/// The locality the NPC entered
+		/// The zone the NPC entered
 		/// </summary>
-		public readonly Locality Target;
+		public readonly Zone Target;
 
 		/// <summary>
 		/// constructor
 		/// </summary>
 		/// <param name="sender">Object that sends the message</param>
-		/// <param name="source">The locality the NPC left</param>
-		/// <param name="target">The locality the NPC entered</param>
-		public LocalityChanged(object sender, Locality source, Locality target) : base(sender)
+		/// <param name="source">The zone the NPC left</param>
+		/// <param name="target">The zone the NPC entered</param>
+		public ZoneChanged(object sender, Zone source, Zone target) : base(sender)
 		{
 			Source = source;
 			Target = target;

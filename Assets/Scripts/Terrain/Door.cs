@@ -17,7 +17,7 @@ using Message = Game.Messaging.Message;
 namespace Game.Terrain
 {
 	/// <summary>
-	/// Represents a door between two localities.
+	/// Represents a door between two zones.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	[ProtoInclude(100, typeof(HallDoor))]
@@ -91,10 +91,10 @@ namespace Game.Terrain
 		/// <param name="name">Inner name for the door</param>
 		/// <param name="closed">Specifies whether the door should be implicitly closed or open</param>
 		/// <param name="area">Location of the door</param>
-		/// <param name="localities">Two localities connected by the door</param>
-		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> localities, DoorType type = DoorType.Door)
+		/// <param name="zones">Two zones connected by the door</param>
+		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door)
 		{
-			base.Initialize(name, area, localities);
+			base.Initialize(name, area, zones);
 
 			State = state;
 			Type = type;
@@ -134,11 +134,11 @@ namespace Game.Terrain
 		{
 			string title = "Náraz do dveří";
 			string name = $"Název: {Name.Indexed}";
-			string characterMessage = $"Postava {character.Name.Indexed} v lokaci {character.Locality.Name.Indexed}";
+			string characterMessage = $"Postava {character.Name.Indexed} v lokaci {character.Zone.Name.Indexed}";
 			string type = $"typ dveří: {ToString()}";
-			string localities = $"Lokace: {_localities[0]}, {_localities[1]}";
+			string zones = $"Lokace: {_zones[0]}, {_zones[1]}";
 
-			Logger.LogInfo(title, name, localities, type, characterMessage);
+			Logger.LogInfo(title, name, zones, type, characterMessage);
 		}
 
 		private void PlayDoorHit(Vector3 point) => Sounds.Play(_sounds["hit"], point, _defaultVolume);
@@ -170,8 +170,8 @@ namespace Game.Terrain
 		private void AnnounceManipulation()
 		{
 			DoorManipulated message = new(this);
-			IEnumerable<Locality> accessibles = Localities.First().GetAccessibleLocalities().Concat(Localities.Last().GetAccessibleLocalities()).Distinct();
-			foreach (Locality l in accessibles)
+			IEnumerable<Zone> accessibles = Zones.First().GetAccessibleZones().Concat(Zones.Last().GetAccessibleZones()).Distinct();
+			foreach (Zone l in accessibles)
 				l.TakeMessage(message);
 		}
 
@@ -188,8 +188,8 @@ namespace Game.Terrain
 
 			if (obstacle == ObstacleType.Far)
 			{
-				Locality l = World.Player.Locality;
-				if (Localities.First().IsBehindDoor(l) || Localities.Last().IsBehindDoor(l)) // Can be heart from the adjecting locality
+				Zone l = World.Player.Zone;
+				if (Zones.First().IsBehindDoor(l) || Zones.Last().IsBehindDoor(l)) // Can be heart from the adjecting zone
 					obstacle = ObstacleType.Wall;
 				else
 					return; // Too far and inaudible

@@ -4,38 +4,38 @@ using Game.Terrain;
 namespace Game.Messaging.Events.Movement
 {
 	/// <summary>
-	/// Tells a <see cref="Terrain.Locality">object that an <see
+	/// Tells a <see cref="Terrain.Zone">object that an <see
 	/// cref="Entities.Characters.Character">has entered.</see>/&gt;</see>/&gt;that an NPC
 	/// </summary>
 	/// <remarks>Sent from a descendant of the <see cref="Entities.Characters.Components.CharacterComponent"/> class.</remarks>
-	public class CharacterCameToLocality : Message
+	public class CharacterCameToZone : Message
 	{
 		/// <summary>
-		/// The NPC that entered the locality
+		/// The NPC that entered the zone
 		/// </summary>
 		public readonly Character Character;
 
 		/// <summary>
-		/// The locality the character came to
+		/// The zone the character came to
 		/// </summary>
-		public readonly Locality CurrentLocality;
+		public readonly Zone CurrentZone;
 
 		/// <summary>
-		/// The locality the character came from
+		/// The zone the character came from
 		/// </summary>
-		public readonly Locality PreviousLocality;
+		public readonly Zone PreviousZone;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		/// <param name="character">The NPC that entered the locality</param>
-		/// <param name="currentLocality">The concerning locality</param>
-		public CharacterCameToLocality(object sender, Character character, Locality currentLocality, Locality previousLocality) : base(sender)
+		/// <param name="character">The NPC that entered the zone</param>
+		/// <param name="currentZone">The concerning zone</param>
+		public CharacterCameToZone(object sender, Character character, Zone currentZone, Zone previousZone) : base(sender)
 		{
 			Character = character;
-			CurrentLocality = currentLocality;
-			PreviousLocality = previousLocality;
+			CurrentZone = currentZone;
+			PreviousZone = previousZone;
 		}
 	}
 }

@@ -58,7 +58,7 @@ namespace Game
 				Vector2 position = World.Player.Area.Value.Center;
 				text.AppendLine("Verze: " + Version);
 				text.AppendLine("Pozice: " + position.ToString());
-				text.AppendLine("Lokace: " + World.Player.Locality.Name.Indexed);
+				text.AppendLine("Lokace: " + World.Player.Zone.Name.Indexed);
 
 				// Get nearest objects
 				string[] objectList = World.GetNearestObjects(position)

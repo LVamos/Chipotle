@@ -9,7 +9,7 @@ namespace Game.Messaging.Commands.GameInfo
 	public class SayCoordinates : Message
 	{
 		/// <summary>
-		/// Specifies if the game should report relative or absolute coordinates. Relative coordinates are computed as an offset from upper left corner of the current locality.
+		/// Specifies if the game should report relative or absolute coordinates. Relative coordinates are computed as an offset from upper left corner of the current zone.
 		/// </summary>
 		public readonly bool Relative;
 

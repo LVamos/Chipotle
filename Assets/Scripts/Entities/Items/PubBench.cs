@@ -8,7 +8,7 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents a table in the pub (výčep h1) locality.
+	/// Represents a table in the pub (výčep h1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class PubBench : Item
@@ -31,8 +31,8 @@ namespace Game.Entities.Items
 			Character tuttle = World.GetCharacter("tuttle");
 
 			if (
-				!World.GetLocality("ulice h1").IsItHere(tuttle)
-				&& !SameLocality(tuttle)
+				!World.GetZone("ulice h1").IsItHere(tuttle)
+				&& !SameZone(tuttle)
 			)
 				_cutscene = "cs24";
 			else

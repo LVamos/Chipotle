@@ -69,13 +69,13 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Processes the SayLocality message.
+		/// Processes the SayZone message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnSayLocalityName(SayLocalityName message) => Tolk.Speak(Owner.Locality.Name.Friendly, true);
+		protected void OnSayZoneName(SayZoneName message) => Tolk.Speak(Owner.Zone.Name.Friendly, true);
 
 		/// <summary>
-		/// Reverb presets for individual localities
+		/// Reverb presets for individual zones
 		/// </summary>
 		private Dictionary<string, (string name, float gain)> _reverbPresets = new()
 		{
@@ -149,14 +149,14 @@ namespace Game.Entities.Characters.Chipotle
 				case SayCharactersResult m: OnSayCharactersResult(m); break;
 				case SaySize m: OnSaySize(m); break;
 				case SayObjectDescription m: OnSayObjectDescription(m); break;
-				case SayLocalityDescription m: OnSayLocalityDescription(m); break;
-				case SayLocalityName m: OnSayLocalityName(m); break;
+				case SayZoneDescription m: OnSayZoneDescription(m); break;
+				case SayZoneName m: OnSayZoneName(m); break;
 				case PlaceItemResult m: OnPlaceItemResult(m); break;
 				case EmptyInventory m: OnEmptyInventory(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case SayCoordinates sc: OnSayCoordinates(sc); break;
-				case SayLocalitySize sl: OnSayLocalitySize(sl); break;
-				case SayVisitedLocalityResult svl: OnSayVisitedLocality(svl); break;
+				case SayZoneSize sl: OnSayZoneSize(sl); break;
+				case SayVisitedZoneResult svl: OnSayVisitedZone(svl); break;
 				case SayOrientation m: OnSayOrientation(m); break;
 				case SayExitsResult ser: OnSayExitsResult(ser); break;
 				case SayObjectsResult sor: OnSayObjectsResult(sor); break;
@@ -207,7 +207,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnSayLocalityDescription(SayLocalityDescription m) => Tolk.Speak(Owner.Locality.Description);
+		private void OnSayZoneDescription(SayZoneDescription m) => Tolk.Speak(Owner.Zone.Description);
 
 		/// <summary>
 		/// Handles a message.
@@ -273,13 +273,13 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the CutsceneBegan message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayLocalitySize(SayLocalitySize message)
+		private void OnSayZoneSize(SayZoneSize message)
 		{
-			Terrain.Rectangle a = Owner.Locality.Area.Value;
+			Terrain.Rectangle a = Owner.Zone.Area.Value;
 			Tolk.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
 		}
 
-		private void OnSayVisitedLocality(SayVisitedLocalityResult message) => Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
+		private void OnSayVisitedZone(SayVisitedZoneResult message) => Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
 
 		/// <summary>
 		/// Processes the SayExits message.
@@ -297,7 +297,7 @@ namespace Game.Entities.Characters.Chipotle
 					_ => null
 				};
 
-				string to = message.OccupiedPassage.AnotherLocality(Owner.Locality).To;
+				string to = message.OccupiedPassage.AnotherZone(Owner.Zone).To;
 				Tolk.Speak($"Stojíš {type}{to}", true);
 				return;
 			}

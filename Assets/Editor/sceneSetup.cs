@@ -111,7 +111,7 @@ public static class sceneSetup
 
 		try
 		{
-			LoadLocalitiesAndItems(document.Root);
+			LoadZonesAndItems(document.Root);
 		}
 		catch (Exception)
 		{
@@ -144,22 +144,22 @@ public static class sceneSetup
 		}
 	}
 
-	private static void LoadLocalitiesAndItems(XElement root)
+	private static void LoadZonesAndItems(XElement root)
 	{
-		System.Collections.Generic.List<XElement> localities = root.Element("localities").Elements("locality").ToList();
-		foreach (XElement localityNode in localities)
+		System.Collections.Generic.List<XElement> zones = root.Element("zones").Elements("zone").ToList();
+		foreach (XElement zoneNode in zones)
 		{
-			GameObject locality = CreateObject(Attribute(localityNode, "indexedname"), "Locality");
-			locality.AddComponent<Locality>();
-			LoadItems(localityNode);
+			GameObject zone = CreateObject(Attribute(zoneNode, "indexedname"), "Zone");
+			zone.AddComponent<Zone>();
+			LoadItems(zoneNode);
 		}
 	}
 
-	private static void LoadItems(XElement localityNode)
+	private static void LoadItems(XElement zoneNode)
 	{
 		ItemFactory.LoadItems();
 
-		System.Collections.Generic.List<XElement> items = localityNode.Elements("object").ToList();
+		System.Collections.Generic.List<XElement> items = zoneNode.Elements("object").ToList();
 		foreach (XElement item in items)
 		{
 			string type = Attribute(item, "type");

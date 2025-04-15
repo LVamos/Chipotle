@@ -8,7 +8,7 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents the killer's car object in the garage of Vanilla crunch (garáž v1) locality.
+	/// Represents the killer's car object in the garage of Vanilla crunch (garáž v1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class KillersCar : Item
@@ -54,7 +54,7 @@ namespace Game.Entities.Items
 			else
 			{
 				_cutscene = "cs8";
-				ChipotlesCar.TakeMessage(new MoveChipotlesCar(this, World.GetLocality("ullice h1")));
+				ChipotlesCar.TakeMessage(new MoveChipotlesCar(this, World.GetZone("ullice h1")));
 			}
 
 			base.OnObjectsUsed(message);

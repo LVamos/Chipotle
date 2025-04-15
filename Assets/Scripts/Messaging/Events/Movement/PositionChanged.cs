@@ -29,12 +29,12 @@ namespace Game.Messaging.Events.Movement
 		/// <param name="sender">Source of the message</param>
 		/// <param name="sourcePosition">Source position of the NPC</param>
 		/// <param name="targetPosition">Target position of the NPC</param>
-		/// <param name="sourceLocality"Source locality of the NPC></param>
-		/// <param name="targetLocality">Target locality of the NPC</param>
+		/// <param name="sourceZone"Source zone of the NPC></param>
+		/// <param name="targetZone">Target zone of the NPC</param>
 		/// <param name="obstacle">Describes type of obstacle between the entity and the player if any</param>
 		/// <param name="silently">Determines if the fott steps of the NPC should be audible</param>
-		public PositionChanged(object sender, Rectangle? sourcePosition, Rectangle targetPosition, Locality sourceLocality, Locality targetLocality, ObstacleType obstacle = ObstacleType.None, bool silently = false)
-			: base(sender, sourcePosition, targetPosition, sourceLocality, targetLocality)
+		public PositionChanged(object sender, Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone, ObstacleType obstacle = ObstacleType.None, bool silently = false)
+			: base(sender, sourcePosition, targetPosition, sourceZone, targetZone)
 		{
 			Obstacle = obstacle;
 			Silently = silently;

@@ -39,21 +39,21 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
-		public static IEnumerable<Vector2> FindFreePlacementsAroundArea(MapElement ignoredElement, Rectangle areaToAvoid, float height, float width, float minDistance, float maxDistance, bool sameLocality = true)
+		public static IEnumerable<Vector2> FindFreePlacementsAroundArea(MapElement ignoredElement, Rectangle areaToAvoid, float height, float width, float minDistance, float maxDistance, bool sameZone = true)
 		{
 			Rectangle maxArea = areaToAvoid;
 			maxArea.Extend(maxDistance);
 
 			IEnumerable<Vector2> candidatePoints = FindValidPlacements(ignoredElement, maxArea, height, width);
 
-			Locality locality = GetLocality(areaToAvoid.Center);
+			Zone zone = GetZone(areaToAvoid.Center);
 			IEnumerable<Vector2> filteredPoints =
 				from point in candidatePoints
-				let inSameLocality = GetLocality(point) == locality
+				let inSameZone = GetZone(point) == zone
 				let tempArea = Rectangle.FromCenter(point, height, width)
 				let distance = areaToAvoid.GetDistanceFrom(tempArea)
 				let allowedDistance = distance >= minDistance && distance <= maxDistance
-				where inSameLocality && allowedDistance
+				where inSameZone && allowedDistance
 				orderby distance
 				select point
 				;
@@ -120,7 +120,7 @@ namespace Game
 		/// <param name="direction">The direction in which to detect collisions.</param>
 		/// <param name="length">The length for which to detect collisions in meters</param>
 		/// <returns>A list of MapElements representing the obstacles detected on the track or null</returns>
-		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting localities for collision. The search ends at the position where collisions were detected.</remarks>
+		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting zones for collision. The search ends at the position where collisions were detected.</remarks>
 		public static CollisionsModel DetectCollisionsOnTrack(MapElement ignoredElement, Vector2 direction, float length)
 		{
 			int steps = (int)Math.Ceiling(length / CollisionDetectionResolution);
@@ -147,7 +147,7 @@ namespace Game
 		public static CollisionsModel DetectCollisions(MapElement ignoredElement, Rectangle area, bool justFirstObstacle = false)
 		{
 			List<object> obstacles = new();
-			List<Locality> localities = area.GetLocalities().ToList();
+			List<Zone> zones = area.GetZones().ToList();
 
 			// Detect inaccesible terrain.
 			List<TileInfo> allTiles = area.GetTiles(Map.TileSize);
@@ -162,8 +162,8 @@ namespace Game
 					return new(obstacles, false);
 			}
 
-			// Check all objects, passages and characters in localities the given element intersects. Skip the given element.
-			foreach (Locality l in localities)
+			// Check all objects, passages and characters in zones the given element intersects. Skip the given element.
+			foreach (Zone l in zones)
 			{
 				if (l.IsWalkable(area))
 				{
@@ -220,14 +220,14 @@ namespace Game
 		private static Dictionary<string, string[]> _objectDescriptions = new();
 
 		/// <summary>
-		/// Enumerates all localities in an area specified by the area code.
+		/// Enumerates all zones in an area specified by the area code.
 		/// </summary>
-		/// <param name="areaCode">Part of locality indexed name that specifies the containing area</param>
-		/// <returns>enumeration of localities</returns>
-		public static IEnumerable<Locality> GetLocalitiesInArea(string areaCode)
+		/// <param name="areaCode">Part of zone indexed name that specifies the containing area</param>
+		/// <returns>enumeration of zones</returns>
+		public static IEnumerable<Zone> GetZonesInArea(string areaCode)
 		{
 			return
-				from l in GetLocalities()
+				from l in GetZones()
 				let name = l.Name.Indexed
 				let position = name.Length - 2
 				where name.Substring(position, 1).ToLower() == "h"
@@ -244,16 +244,16 @@ namespace Game
 		/// <param name="throughObjects">Specifies if tiles with objects should be included.</param>
 		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
 		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
-		/// <param name="sameLocality">Specifies if different localities than locality of the initial point should be included</param>
+		/// <param name="sameZone">Specifies if different zones than zone of the initial point should be included</param>
 		/// <param name="withStart">Specifies if the start point should be considered walkable.</param>
 		/// <param name="withGoal">Specifies if the goal should be considered walkable</param>
 		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
 		/// <returns>
 		/// A list of points leading from start to the end or null if no possible path exists
 		/// </returns>
-		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool sameLocality, bool withStart, bool withGoal, float characterHeight, float characterWidth)
+		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool sameZone, bool withStart, bool withGoal, float characterHeight, float characterWidth)
 		{
-			Queue<Vector2> path = _pathFinder.FindPath(start, goal, sameLocality, withStart, withGoal, characterHeight, characterWidth);
+			Queue<Vector2> path = _pathFinder.FindPath(start, goal, sameZone, withStart, withGoal, characterHeight, characterWidth);
 			return path;
 		}
 
@@ -300,24 +300,24 @@ namespace Game
 		{
 			// If it's an object that is held by an 
 
-			Locality playersLocality = Player.Locality;
+			Zone playersZone = Player.Zone;
 			Vector2 closest = area.GetClosestPoint(World.Player.Area.Value.Center);
-			Locality otherLocality = World.GetLocality(closest);
-			bool neighbour = playersLocality.IsNeighbour(otherLocality);
-			bool accessible = otherLocality.IsAccessible(playersLocality);
+			Zone otherZone = World.GetZone(closest);
+			bool neighbour = playersZone.IsNeighbour(otherZone);
+			bool accessible = otherZone.IsAccessible(playersZone);
 
-			// Are the regions in inadjecting localities?
+			// Are the regions in inadjecting zones?
 			if (GetDistance(area.Center, Player.Area.Value.Center) > 100
-				|| (playersLocality != otherLocality && (!neighbour || (neighbour && !accessible))))
+				|| (playersZone != otherZone && (!neighbour || (neighbour && !accessible))))
 				return ObstacleType.Far;  // Inaudible
 
-			// Adjecting localities
+			// Adjecting zones
 			Rectangle path = new(area.GetClosestPoint(Player.Area.Value.Center), Player.Area.Value.Center);
 			ObstacleType obstacle = DetectObstacles(path);
 
 			if (neighbour && accessible)
 			{
-				Passage atPassage = Player.Locality.IsAtPassage(area.Center);
+				Passage atPassage = Player.Zone.IsAtPassage(area.Center);
 
 				if (obstacle == ObstacleType.IndirectPath && atPassage == null)
 					return ObstacleType.Wall;
@@ -364,22 +364,22 @@ namespace Game
 		}
 
 		/// <summary>
-		/// Enumerates all localities.
+		/// Enumerates all zones.
 		/// </summary>
-		/// <returns>Enumeration of all localities</returns>
-		public static IEnumerable<Locality> GetLocalities() => _localities.Values.AsEnumerable();
+		/// <returns>Enumeration of all zones</returns>
+		public static IEnumerable<Zone> GetZones() => _zones.Values.AsEnumerable();
 
 		/// <summary>
-		/// Enumerates all localities intersecting with the speciifed area.
+		/// Enumerates all zones intersecting with the speciifed area.
 		/// </summary>
-		/// <param name="area">The area the localities should intersect with</param>
-		/// <returns>enumeration of localities</returns>
-		public static IEnumerable<Locality> GetLocalities(Rectangle area)
+		/// <param name="area">The area the zones should intersect with</param>
+		/// <returns>enumeration of zones</returns>
+		public static IEnumerable<Zone> GetZones(Rectangle area)
 		{
-			IEnumerable<Locality> localities = _localities.Values
+			IEnumerable<Zone> zones = _zones.Values
 				.Where(l => l.Area.Value.Intersects(area))
 				.Distinct();
-			return localities;
+			return zones;
 		}
 
 		/// <summary>
@@ -398,9 +398,9 @@ namespace Game
 		private static readonly Queue<Action> _delayedActions = new();
 
 		/// <summary>
-		/// Map of localities and corresponding background sounds
+		/// Map of zones and corresponding background sounds
 		/// </summary>
-		private static readonly Dictionary<string, (string sound, float volume)> _localityLoops = new()
+		private static readonly Dictionary<string, (string sound, float volume)> _zoneLoops = new()
 		{
 			["chodba h1"] = ("ElectricalBoxLoop", 1),
 			["balkon p1"] = ("BelvedereStreetLoop", 1),
@@ -428,9 +428,9 @@ namespace Game
 		private static Dictionary<string, Character> _characters;
 
 		/// <summary>
-		/// List of all localities
+		/// List of all zones
 		/// </summary>
-		private static Dictionary<string, Locality> _localities;
+		private static Dictionary<string, Zone> _zones;
 
 		/// <summary>
 		/// List of all simple game objects
@@ -486,21 +486,21 @@ namespace Game
 		}
 
 		/// <summary>
-		/// Registers a locality.
+		/// Registers a zone.
 		/// </summary>
-		/// <param name="locality">The locality to be registered</param>
-		public static void Add(Locality locality)
+		/// <param name="zone">The zone to be registered</param>
+		public static void Add(Zone zone)
 		{
 			// null check
-			if (locality == null)
-				throw new ArgumentNullException(nameof(locality));
+			if (zone == null)
+				throw new ArgumentNullException(nameof(zone));
 
-			// Isn't the locality already registered?
-			if (_localities.ContainsKey(locality.Name.Indexed))
-				throw new ArgumentException("Locality already registered");
+			// Isn't the zone already registered?
+			if (_zones.ContainsKey(zone.Name.Indexed))
+				throw new ArgumentException("Zone already registered");
 
-			_localities.Add(locality.Name.Indexed, locality);
-			Map.RegisterLocality(locality);
+			_zones.Add(zone.Name.Indexed, zone);
+			Map.RegisterZone(zone);
 		}
 
 		/// <summary>
@@ -565,11 +565,11 @@ namespace Game
 		/// <returns>Reference to the entity if there's any</returns>
 		public static Character GetCharacter(Vector2 point)
 		{
-			Locality locality = GetLocality(point);
-			return locality == null
+			Zone zone = GetZone(point);
+			return zone == null
 				? null
 				: (
-					from e in locality.Characters
+					from e in zone.Characters
 					where e.Area != null && e.Area.Value.Contains(point)
 					select e)
 				.FirstOrDefault();
@@ -595,51 +595,51 @@ namespace Game
 		}
 
 		/// <summary>
-		/// Returns a locality found by its name.
+		/// Returns a zone found by its name.
 		/// </summary>
-		/// <param name="name">Inner name of the required locality</param>
-		/// <returns>The found locality or null if nothing was found</returns>
-		public static Locality GetLocality(string name)
+		/// <param name="name">Inner name of the required zone</param>
+		/// <returns>The found zone or null if nothing was found</returns>
+		public static Zone GetZone(string name)
 		{
-			_localities.TryGetValue(name.PrepareForIndexing(), out Locality locality);
-			return locality;
+			_zones.TryGetValue(name.PrepareForIndexing(), out Zone zone);
+			return zone;
 		}
 
 		/// <summary>
-		/// Returns a locality that fully intersects with the given plane.
+		/// Returns a zone that fully intersects with the given plane.
 		/// </summary>
 		/// <param name="area">The point tto be checked</param>
-		/// <returns>The intersecting locality</returns>
-		public static Locality GetLocality(Rectangle area) => _localities.Values.FirstOrDefault(l => l.Area.Value.Contains(area));
+		/// <returns>The intersecting zone</returns>
+		public static Zone GetZone(Rectangle area) => _zones.Values.FirstOrDefault(l => l.Area.Value.Contains(area));
 
 		/// <summary>
-		/// Returns a locality which intersects with the given point.
+		/// Returns a zone which intersects with the given point.
 		/// </summary>
 		/// <param name="point">The point tto be checked</param>
-		/// <returns>The intersecting locality</returns>
-		public static Locality GetLocality(Vector2 point) => Map[point]?.Locality;
+		/// <returns>The intersecting zone</returns>
+		public static Zone GetZone(Vector2 point) => Map[point]?.Zone;
 
 		/// <summary>
-		/// Enumerates all localities sorted by distance from the specified point.
+		/// Enumerates all zones sorted by distance from the specified point.
 		/// </summary>
 		/// <param name="point">The point whose surroundings should be explored</param>
-		/// <returns>Enumeration of the found localities</returns>
-		public static IEnumerable<Locality> GetNearestLocalities(Vector2 point)
+		/// <returns>Enumeration of the found zones</returns>
+		public static IEnumerable<Zone> GetNearestZones(Vector2 point)
 		{
 			return
-				(from l in _localities.Values
-				 where l != GetLocality(point)
+				(from l in _zones.Values
+				 where l != GetZone(point)
 				 orderby l.Area.Value.GetDistanceFrom(point)
 				 select l)
 				.Distinct();
 		}
 
 		/// <summary>
-		/// Returns the locality nearest from the specified point.
+		/// Returns the zone nearest from the specified point.
 		/// </summary>
 		/// <param name="point">The point shose surroundings is to be searched</param>
-		/// <returns>The found locality</returns>
-		public static Locality GetNearestLocality(Vector2 point) => GetNearestLocalities(point).First();
+		/// <returns>The found zone</returns>
+		public static Zone GetNearestZone(Vector2 point) => GetNearestZones(point).First();
 
 		/// <summary>
 		/// Returns a game object closest to the specified point.
@@ -744,14 +744,14 @@ namespace Game
 		/// </summary>
 		public static Item GetItem(Vector2 point)
 		{
-			Locality locality = GetLocality(point);
+			Zone zone = GetZone(point);
 
-			if (locality == null
-				|| locality.IsWalkable(point))
+			if (zone == null
+				|| zone.IsWalkable(point))
 				return null;
 
 			return
-				 (from o in locality.Items
+				 (from o in zone.Items
 				  let notHidden = o.Area != null
 				  let contains = o.Area.Value.Contains(point)
 				  where notHidden && contains
@@ -786,8 +786,8 @@ namespace Game
 		/// <returns>The passage if there's any</returns>
 		public static Passage GetPassage(Vector2 point)
 		{
-			Locality locality = GetLocality(point);
-			return locality?.Passages.FirstOrDefault(p => p.Area.Value.Contains(point));
+			Zone zone = GetZone(point);
+			return zone?.Passages.FirstOrDefault(p => p.Area.Value.Contains(point));
 		}
 
 		/// <summary>
@@ -813,7 +813,7 @@ namespace Game
 		{
 			_items = new(StringComparer.OrdinalIgnoreCase);
 			_movableItems = new(StringComparer.OrdinalIgnoreCase);
-			_localities = new(StringComparer.OrdinalIgnoreCase);
+			_zones = new(StringComparer.OrdinalIgnoreCase);
 			_characters = new(StringComparer.OrdinalIgnoreCase);
 			_passages = new(StringComparer.OrdinalIgnoreCase);
 			Sounds.Initialize();
@@ -934,7 +934,7 @@ namespace Game
 				if (!File.Exists(path))
 					MainScript.Terminate($"Nevidím soubor {MainScript.SerializationPath}. Že ty ses v tom hrabal?");
 
-				// Load terrain, objects, NPCs, localities and passages.
+				// Load terrain, objects, NPCs, zones and passages.
 				LoadTerrain(OpenMap().Root);
 				FileStream stream = null;
 
@@ -956,14 +956,14 @@ namespace Game
 			_characters = helper.Entities;
 			_items = helper.Objects;
 			_passages = helper.Passages;
-			_localities = helper.Localities;
+			_zones = helper.Zones;
 			WindowHandler.Switch(GameWindow.CreateInstance());
 			Reloaded message = new();
 
 			foreach (Character c in _characters.Values)
 				c.TakeMessage(message);
 
-			foreach (Locality l in _localities.Values)
+			foreach (Zone l in _zones.Values)
 				l.TakeMessage(message);
 
 			foreach (Item i in _items.Values)
@@ -990,7 +990,7 @@ namespace Game
 
 		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
 
-		private static List<XElement> _localityNodes;
+		private static List<XElement> _zoneNodes;
 
 		/// <summary>
 		/// Loads the map from file.
@@ -998,7 +998,7 @@ namespace Game
 		public static void LoadMap()
 		{
 			// gather precreated game objects.
-			Dictionary<string, GameObject> localityObjects = new();
+			Dictionary<string, GameObject> zoneObjects = new();
 			Dictionary<string, GameObject> itemObjects = new();
 			Dictionary<string, GameObject> passageObjects = new();
 			Scene scene = SceneManager.GetActiveScene();
@@ -1007,26 +1007,26 @@ namespace Game
 			{
 				switch (obj.tag)
 				{
-					case "Locality": localityObjects[obj.name] = obj; break;
+					case "Zone": zoneObjects[obj.name] = obj; break;
 					case "Item": itemObjects[obj.name] = obj; break;
 					case "Passage": passageObjects[obj.name] = obj; break;
 				}
 			}
 
-			if (localityObjects.Count == 0)
-				throw new InvalidOperationException("No geometry for localities found in the scene.");
+			if (zoneObjects.Count == 0)
+				throw new InvalidOperationException("No geometry for zones found in the scene.");
 			if (itemObjects.Count == 0)
 				throw new InvalidOperationException("No geometry for items found in the scene.");
 			if (passageObjects.Count == 0)
-				throw new InvalidOperationException("No geometry for localities found in the scene.");
+				throw new InvalidOperationException("No geometry for zones found in the scene.");
 
 			XElement root = OpenMap().Root;
 			Initialize();
-			_localityNodes = root.Element("localities").Elements("locality").ToList();
+			_zoneNodes = root.Element("zones").Elements("zone").ToList();
 
 			LoadTerrain(root);
 			LoadItemDescriptions(root);
-			LoadLocalitiesAndItems(root, localityObjects, itemObjects);
+			LoadZonesAndItems(root, zoneObjects, itemObjects);
 			LoadPassages(root, passageObjects);
 		}
 
@@ -1050,7 +1050,7 @@ namespace Game
 					state = PassageState.Closed;
 
 				Rectangle area = new(GetAttribute(passageNode, "coordinates"));
-				string[] localities = new string[]
+				string[] zones = new string[]
 				{ GetAttribute(passageNode, "from"),
 					GetAttribute(passageNode, "to")
 				};
@@ -1060,55 +1060,55 @@ namespace Game
 				if (!passageObjects.TryGetValue(name.Indexed, out obj))
 					throw new InvalidOperationException("No geometry found for the passage {name.Indexed}.");
 
-				Passage passage = PassageFactory.CreatePassage(obj, name, area, localities, isDoor, state, dType);
+				Passage passage = PassageFactory.CreatePassage(obj, name, area, zones, isDoor, state, dType);
 				Add(passage);
 			}
 		}
 
-		private static Dictionary<string, LocalityMaterialsDefinitionModel> LoadLocalityMaterials()
+		private static Dictionary<string, ZoneMaterialsDefinitionModel> LoadZoneMaterials()
 		{
 			IDeserializer deserializer = new DeserializerBuilder()
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
 			string yaml = File.ReadAllText(MainScript.MaterialsPath);
-			Dictionary<string, LocalityMaterialsDefinitionModel> materials = deserializer.Deserialize<Dictionary<string, LocalityMaterialsDefinitionModel>>(yaml);
-			return new Dictionary<string, LocalityMaterialsDefinitionModel>(materials, StringComparer.OrdinalIgnoreCase);
+			Dictionary<string, ZoneMaterialsDefinitionModel> materials = deserializer.Deserialize<Dictionary<string, ZoneMaterialsDefinitionModel>>(yaml);
+			return new Dictionary<string, ZoneMaterialsDefinitionModel>(materials, StringComparer.OrdinalIgnoreCase);
 		}
 
-		private static void LoadLocalitiesAndItems(XElement root, Dictionary<string, GameObject> localityObjects, Dictionary<string, GameObject> itemObjects)
+		private static void LoadZonesAndItems(XElement root, Dictionary<string, GameObject> zoneObjects, Dictionary<string, GameObject> itemObjects)
 		{
 			ItemFactory.LoadItems();
-			Dictionary<string, LocalityMaterialsDefinitionModel> materials = LoadLocalityMaterials();
-			foreach (XElement localityNode in _localityNodes)
+			Dictionary<string, ZoneMaterialsDefinitionModel> materials = LoadZoneMaterials();
+			foreach (XElement zoneNode in _zoneNodes)
 			{
-				Locality locality = LoadLocality(localityNode, localityObjects, materials);
-				LoadItems(localityNode, locality.Area.Value, itemObjects);
+				Zone zone = LoadZone(zoneNode, zoneObjects, materials);
+				LoadItems(zoneNode, zone.Area.Value, itemObjects);
 			}
 		}
 
-		private static Locality LoadLocality(XElement localityNode, Dictionary<string, GameObject> localitiObjects, Dictionary<string, LocalityMaterialsDefinitionModel> materials)
+		private static Zone LoadZone(XElement zoneNode, Dictionary<string, GameObject> localitiObjects, Dictionary<string, ZoneMaterialsDefinitionModel> materials)
 		{
 			(string sound, float volume) lBackgroundInfo;
-			_localityLoops.TryGetValue(GetAttribute(localityNode, "indexedname"), out lBackgroundInfo);
-			Name name = new(GetAttribute(localityNode, "indexedname"), GetAttribute(localityNode, "friendlyname"));
-			string description = GetAttribute(localityNode, "description");
-			string to = GetAttribute(localityNode, "to");
-			Locality.LocalityType type = GetAttribute(localityNode, "type").ToLocalityType();
-			float height = int.Parse(GetAttribute(localityNode, "height"));
-			Rectangle area = new(GetAttribute(localityNode, "coordinates"));
-			TerrainType defaultTerrain = GetAttribute(localityNode, "defaultTerrain", false).ToTerrainType();
+			_zoneLoops.TryGetValue(GetAttribute(zoneNode, "indexedname"), out lBackgroundInfo);
+			Name name = new(GetAttribute(zoneNode, "indexedname"), GetAttribute(zoneNode, "friendlyname"));
+			string description = GetAttribute(zoneNode, "description");
+			string to = GetAttribute(zoneNode, "to");
+			Zone.ZoneType type = GetAttribute(zoneNode, "type").ToZoneType();
+			float height = int.Parse(GetAttribute(zoneNode, "height"));
+			Rectangle area = new(GetAttribute(zoneNode, "coordinates"));
+			TerrainType defaultTerrain = GetAttribute(zoneNode, "defaultTerrain", false).ToTerrainType();
 
-			if (type == Locality.LocalityType.Outdoor)
+			if (type == Zone.ZoneType.Outdoor)
 				height = 6;
 
 			GameObject obj = null;
 			if (!localitiObjects.TryGetValue(name.Indexed, out obj))
-				throw new InvalidOperationException($"No geometry found for the locality {name.Indexed}");
+				throw new InvalidOperationException($"No geometry found for the zone {name.Indexed}");
 
-			Locality locality = obj.GetComponent<Locality>();
+			Zone zone = obj.GetComponent<Zone>();
 
-			locality.Initialize(
+			zone.Initialize(
 				name,
 				description,
 				to,
@@ -1120,17 +1120,17 @@ namespace Game
 				lBackgroundInfo.volume,
 				materials[name.Indexed]
 			);
-			Add(locality);
-			return locality;
+			Add(zone);
+			return zone;
 		}
 
-		private static void LoadItems(XElement localityNode, Rectangle localityArea, Dictionary<string, GameObject> itemObjects)
+		private static void LoadItems(XElement zoneNode, Rectangle zoneArea, Dictionary<string, GameObject> itemObjects)
 		{
-			List<XElement> items = localityNode.Elements("object").ToList();
+			List<XElement> items = zoneNode.Elements("object").ToList();
 			foreach (XElement itemNode in items)
 			{
 				Name name = new(GetAttribute(itemNode, "indexedname"), GetAttribute(itemNode, "friendlyname"));
-				Rectangle area = new Rectangle(GetAttribute(itemNode, "coordinates")).ToAbsolute(localityArea);
+				Rectangle area = new Rectangle(GetAttribute(itemNode, "coordinates")).ToAbsolute(zoneArea);
 				string type = GetAttribute(itemNode, "type");
 				bool decorative = GetAttribute(itemNode, "decorative").ToBool();
 				bool pickable = GetAttribute(itemNode, "pickable").ToBool();
@@ -1164,17 +1164,17 @@ namespace Game
 		{
 			// count tiles
 			int tileCount = 0;
-			foreach (XElement locality in _localityNodes)
+			foreach (XElement zone in _zoneNodes)
 			{
-				Rectangle area = new(locality.Attribute("coordinates").Value);
+				Rectangle area = new(zone.Attribute("coordinates").Value);
 				int size = (int)(area.Height * 10 * area.Width * 10);
 				tileCount += size;
 			}
 
 			Map = new(MainScript.MapPath, tileCount);
 
-			foreach (XElement locality in _localityNodes)
-				Map.DrawLocality(locality);
+			foreach (XElement zone in _zoneNodes)
+				Map.DrawZone(zone);
 		}
 
 		/// <summary>
@@ -1223,10 +1223,10 @@ namespace Game
 		}
 
 		/// <summary>
-		/// Unregisters the specified locality.
+		/// Unregisters the specified zone.
 		/// </summary>
-		/// <param name="l">The locality to be removed</param>
-		public static void Remove(Locality l) => _delayedActions.Enqueue(() => _localities.Remove(l.Name.Indexed));
+		/// <param name="l">The zone to be removed</param>
+		public static void Remove(Zone l) => _delayedActions.Enqueue(() => _zones.Remove(l.Name.Indexed));
 
 		/// <summary>
 		/// Unregisters the specified passage.
@@ -1253,7 +1253,7 @@ namespace Game
 		public static void SaveGame(string path)
 		{
 			return; // todo nefunguje
-			SerializerHelper helper = new(_characters, _items, _passages, _localities);
+			SerializerHelper helper = new(_characters, _items, _passages, _zones);
 			FileStream stream = null;
 			using (stream = File.Create(path))
 			{
@@ -1279,7 +1279,7 @@ namespace Game
 			Player = CharacterFactory.CreateChipotle();
 			Add(Player);
 
-			foreach (Locality l in _localities.Values)
+			foreach (Zone l in _zones.Values)
 				l.Activate();
 
 			foreach (Passage p in _passages.Values)
@@ -1326,8 +1326,8 @@ namespace Game
 				return;
 
 			PerformDelayedActions();
-			foreach (Locality locality in _localities.Values)
-				locality.GameUpdate();
+			foreach (Zone zone in _zones.Values)
+				zone.GameUpdate();
 
 			foreach (Passage passage in _passages.Values)
 				passage.GameUpdate();

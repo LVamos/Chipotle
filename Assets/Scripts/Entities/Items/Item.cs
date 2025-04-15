@@ -84,27 +84,27 @@ namespace Game.Entities.Items
 		}
 
 		/// <summary>
-		/// Backing field for Localities property.
+		/// Backing field for Zones property.
 		/// </summary>
-		protected HashSet<string> _localities = new();
+		protected HashSet<string> _zones = new();
 
 		/// <summary>
-		/// Localities intersecting with this object.
+		/// Zones intersecting with this object.
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Locality> Localities => from name in _localities
-												   select World.GetLocality(name);
+		public IEnumerable<Zone> Zones => from name in _zones
+											   select World.GetZone(name);
 
 		/// <summary>
-		/// Finds all localities the object or the NPC intersects with and saves their names into _localities.
+		/// Finds all zones the object or the NPC intersects with and saves their names into _zones.
 		/// </summary>
-		protected void FindLocalities()
+		protected void FindZones()
 		{
 			if (_area == null)
 				return;
 
-			_localities =
-				(from l in World.GetLocalities(_area.Value)
+			_zones =
+				(from l in World.GetZones(_area.Value)
 				 select l.Name.Indexed)
 				 .ToHashSet();
 		}
@@ -219,10 +219,10 @@ namespace Game.Entities.Items
 		{
 			base.Activate();
 
-			// Add the object to intersecting localities
-			FindLocalities();
-			foreach (Locality l in Localities)
-				l.TakeMessage(new ObjectAppearedInLocality(this, this, l));
+			// Add the object to intersecting zones
+			FindZones();
+			foreach (Zone l in Zones)
+				l.TakeMessage(new ObjectAppearedInZone(this, this, l));
 
 			// Play loop sound if any and if the player can hear it.
 			UpdateLoop();
@@ -234,7 +234,7 @@ namespace Game.Entities.Items
 		/// <param name="message">The message to be processed</param>
 		private void OnOrientationChanged(OrientationChanged message) => WatchPlayersMovement();
 
-		protected virtual void OnLocalityEntered(CharacterCameToLocality message) => UpdateLoop();
+		protected virtual void OnZoneEntered(CharacterCameToZone message) => UpdateLoop();
 
 		/// <summary>
 		/// Checks if there's a direct path from this object to the player.
@@ -265,7 +265,7 @@ namespace Game.Entities.Items
 		}
 
 		/// <summary>
-		/// Determines if the object should be heart over walls and closed doors in other localities.
+		/// Determines if the object should be heart over walls and closed doors in other zones.
 		/// </summary>
 		protected bool _audibleOverWalls;
 
@@ -317,9 +317,9 @@ namespace Game.Entities.Items
 			if (_loopAudio.isPlaying)
 				_loopAudio.Stop();
 
-			// Inform localities that the object disappeared.
-			foreach (Locality l in Localities)
-				l.TakeMessage(new ObjectDisappearedFromLocality(this, this, l));
+			// Inform zones that the object disappeared.
+			foreach (Zone l in Zones)
+				l.TakeMessage(new ObjectDisappearedFromZone(this, this, l));
 		}
 
 		/// <summary>
@@ -458,7 +458,7 @@ namespace Game.Entities.Items
 				case PickUpItem m: OnPickUpObject(m); break;
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
-				case CharacterCameToLocality le: OnLocalityEntered(le); break;
+				case CharacterCameToZone le: OnZoneEntered(le); break;
 				case CharacterMoved em: OnEntityMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;

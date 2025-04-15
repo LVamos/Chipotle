@@ -9,7 +9,7 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents the bin object in the Walsch's pool (bazén w1) locality.
+	/// Represents the bin object in the Walsch's pool (bazén w1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class PoolsideBin : Item

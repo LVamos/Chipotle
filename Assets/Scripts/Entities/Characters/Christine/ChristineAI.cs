@@ -50,7 +50,7 @@ namespace Game.Entities.Characters.Christine
 		}
 
 		/// <summary>
-		/// Moves the NPC to the Christine's bed room (ložnice p1) locality.
+		/// Moves the NPC to the Christine's bed room (ložnice p1) zone.
 		/// </summary>
 		private void JumpToBedroom()
 		{

@@ -51,7 +51,7 @@ namespace Game.Entities.Characters.Sweeney
 
 		/// <summary>
 		/// Relocates the Detective Chipotle and Tuttle NPCs from Easterby street (ulice s1)
-		/// locality to the sweeney's hall (hala s1) locality.
+		/// zone to the sweeney's hall (hala s1) zone.
 		/// </summary>
 		private void JumpToSweeneysRoom()
 		{

@@ -9,7 +9,7 @@ using Message = Game.Messaging.Message;
 namespace Game.Terrain
 {
 	/// <summary>
-	/// Represents the garage door in the garage of the Vanilla crunch company (garáž v1) locality.
+	/// Represents the garage door in the garage of the Vanilla crunch company (garáž v1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class VanillaCrunchGarageDoor : Door
@@ -19,9 +19,9 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="name">Inner name of the door</param>
 		/// <param name="area">Coordinates of the area occupied by the door</param>
-		/// <param name="localities">Localities connected by the door</param>
-		public override void Initialize(Name name, Rectangle area, IEnumerable<string> localities)
-			=> base.Initialize(name, PassageState.Closed, area, localities);
+		/// <param name="zones">Zones connected by the door</param>
+		public override void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
+			=> base.Initialize(name, PassageState.Closed, area, zones);
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -31,18 +31,18 @@ namespace Game.Terrain
 		{
 			switch (message)
 			{
-				case CharacterCameToLocality le: OnLocalityEntered(le); break;
+				case CharacterCameToZone le: OnZoneEntered(le); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
 
 		/// <summary>
-		/// Processes the LocalityEntered message.
+		/// Processes the ZoneEntered message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnLocalityEntered(CharacterCameToLocality message)
+		private void OnZoneEntered(CharacterCameToZone message)
 		{
-			if (message.CurrentLocality == World.GetLocality("garáž v1") && message.Character == World.Player)
+			if (message.CurrentZone == World.GetZone("garáž v1") && message.Character == World.Player)
 				State = PassageState.Closed;
 		}
 	}

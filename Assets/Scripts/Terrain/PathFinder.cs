@@ -19,7 +19,7 @@ namespace Game.Terrain
 		// Lokální proměnné, do kterých uložíme bounding box při hledání
 		private float _minX, _maxX, _minY, _maxY;
 
-		private List<Rectangle> _localities;
+		private List<Rectangle> _zones;
 
 		private HashSet<Vector2> _nonpassables;
 
@@ -29,17 +29,17 @@ namespace Game.Terrain
 		public Queue<Vector2> FindPath(
 			Vector2 start,
 			Vector2 goal,
-			bool sameLocality,
+			bool sameZone,
 			bool throughStart,
 			bool throughGoal,
 			float characterHeight,
 			float characterWidth
 		)
 		{
-			// validate the sameLocality parameter.
-			Locality startLocality = World.Map[start].Locality;
-			Locality targetLocality = World.Map[goal].Locality;
-			if (sameLocality && startLocality != targetLocality)
+			// validate the sameZone parameter.
+			Zone startZone = World.Map[start].Zone;
+			Zone targetZone = World.Map[goal].Zone;
+			if (sameZone && startZone != targetZone)
 				return null;
 
 			// Calculate bounding box to prevent the algorithm from searching the whole map.
@@ -73,13 +73,13 @@ namespace Game.Terrain
 
 				closed.Add(current.Coords);
 
-				IEnumerable<PathFindingNode> neighbours = GetNeighbours(current, start, goal, sameLocality, throughStart, throughGoal);
+				IEnumerable<PathFindingNode> neighbours = GetNeighbours(current, start, goal, sameZone, throughStart, throughGoal);
 				foreach (PathFindingNode neighbour in neighbours)
 				{
 
 					// Is not walkable or is already closed => skip
 					if (closed.Contains(neighbour.Coords)
-						|| !IsWalkable(neighbour, start, goal, sameLocality, throughStart, throughGoal, characterHeight, characterWidth)
+						|| !IsWalkable(neighbour, start, goal, sameZone, throughStart, throughGoal, characterHeight, characterWidth)
 						)
 					{
 						closed.Add(neighbour.Coords);
@@ -123,7 +123,7 @@ namespace Game.Terrain
 			PathFindingNode parent,
 			Vector2 start,
 			Vector2 goal,
-			bool sameLocality,
+			bool sameZone,
 			bool throughStart,
 			bool throughGoal
 		)
@@ -153,7 +153,7 @@ namespace Game.Terrain
 			PathFindingNode node,
 			Vector2 start,
 			Vector2 goal,
-			bool sameLocality,
+			bool sameZone,
 			bool throughStart,
 			bool throughGoal,
 			float characterHeight,
@@ -162,12 +162,12 @@ namespace Game.Terrain
 		{
 			//test
 			Rectangle area = Rectangle.FromCenter(node.Coords, characterHeight, characterWidth);
-			Locality locality = World.Map[area.Center].Locality;
-			bool noStaticObjects = locality.IsWalkable(area);
+			Zone zone = World.Map[area.Center].Zone;
+			bool noStaticObjects = zone.IsWalkable(area);
 			bool walkableTerrain = area.GetTiles(World.Map.TileSize)
 				.All(t => t != null && t.Tile.Walkable);
 			Tile tile = World.Map[node.Coords];
-			bool walkable = walkableTerrain && noStaticObjects && !locality.Characters.Any(c => c.Area.Value.Contains(node.Coords));
+			bool walkable = walkableTerrain && noStaticObjects && !zone.Characters.Any(c => c.Area.Value.Contains(node.Coords));
 			if (!walkable)
 				return false;
 

@@ -18,7 +18,7 @@ namespace Game.Entities.Characters.Bartender
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class BartenderAI : AI
 	{
-		private readonly Locality BonitaStreet = World.GetLocality("ulice h1");
+		private readonly Zone BonitaStreet = World.GetZone("ulice h1");
 
 		/// <summary>
 		/// Determines whether the bartender NPC should say goodbye to the detective Chipotle NPC
@@ -61,7 +61,7 @@ namespace Game.Entities.Characters.Bartender
 		{
 			switch (message)
 			{
-				case CharacterCameToLocality le: OnLocalityEntered(le); break;
+				case CharacterCameToZone le: OnZoneEntered(le); break;
 				case CharacterMoved em: OnEntityMoved(em); break;
 				default: base.HandleMessage(message); break;
 			}
@@ -78,25 +78,22 @@ namespace Game.Entities.Characters.Bartender
 		}
 
 		/// <summary>
-		/// Checks if Tuttle NPC is in the same locality as Detective Chipotle NPC.
+		/// Checks if Tuttle NPC is in the same zone as Detective Chipotle NPC.
 		/// </summary>
-		/// <returns>True if Tuttle NPC is in the same locality as Detective Chipotle NPC</returns>
+		/// <returns>True if Tuttle NPC is in the same zone as Detective Chipotle NPC</returns>
 		private bool IsChipotleAlone()
 		{
 			Character tuttle = World.GetCharacter("tuttle");
-			IEnumerable<Locality> nearPub = World.GetLocalitiesInArea("h");
+			IEnumerable<Zone> nearPub = World.GetZonesInArea("h");
 
 			return !nearPub.Any(l => l.IsItHere(tuttle));
 		}
 
 		/// <summary>
-		/// Checks if the Detective's car object is in Bonita street (ulice h1) locality.
+		/// Checks if the Detective's car object is in Bonita street (ulice h1) zone.
 		/// </summary>
-		/// <returns>True if the Detective's car object is in Bonita street (ulice h1) locality</returns>
-		private bool IsChipotlesCarNearBy()
-		{
-			return BonitaStreet.IsItHere(ChipotlesCar);
-		}
+		/// <returns>True if the Detective's car object is in Bonita street (ulice h1) zone</returns>
+		private bool IsChipotlesCarNearBy() => BonitaStreet.IsItHere(ChipotlesCar);
 
 		/// <summary>
 		/// Processes the EntityMoved message.
@@ -114,7 +111,7 @@ namespace Game.Entities.Characters.Bartender
 			if (
 				_sayGoodbyeToChipotle
 				&& tableUsed
-				&& player.SameLocality(Owner)
+				&& player.SameZone(Owner)
 				&& door.Area.Value.GetDistanceFrom(player.Area.Value.Center) == 1
 			)
 			{
@@ -124,12 +121,12 @@ namespace Game.Entities.Characters.Bartender
 		}
 
 		/// <summary>
-		/// Processes the LocalityEntered message.
+		/// Processes the ZoneEntered message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnLocalityEntered(CharacterCameToLocality message)
+		private void OnZoneEntered(CharacterCameToZone message)
 		{
-			if (message.Character != World.Player || message.CurrentLocality != Owner.Locality)
+			if (message.Character != World.Player || message.CurrentZone != Owner.Zone)
 				return;
 
 			if (_velcomeChipotle)
@@ -141,7 +138,7 @@ namespace Game.Entities.Characters.Bartender
 		}
 
 		/// <summary>
-		/// checks if the Detective's car object is in Bonita street (ulice h1) locality.
+		/// checks if the Detective's car object is in Bonita street (ulice h1) zone.
 		/// </summary>
 		/// <remarks>The method is called from the GameUpdate method.</remarks>
 		private void WatchChipotlesCar()

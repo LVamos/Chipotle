@@ -26,7 +26,7 @@ namespace Game.Terrain
 	/// Represents one region on the game map (e.g. a room).
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class Locality : MapElement
+	public class Zone : MapElement
 	{
 		public IEnumerable<Door> GetClosedDoors()
 		{
@@ -68,27 +68,27 @@ namespace Game.Terrain
 		public AudioSource GetAmbientSource() => _ambientSource;
 
 		private bool PlayerInSoundRadius
-			=> GetDistanceToPlayer() <= _localitySoundRadius;
+			=> GetDistanceToPlayer() <= _zoneSoundRadius;
 
 		/// <summary>
 		/// Surfacematerials for walls, floor and ceiling
 		/// </summary>
-		public LocalityMaterialsDefinitionModel Materials { get; private set; }
+		public ZoneMaterialsDefinitionModel Materials { get; private set; }
 
 		[ProtoIgnore]
 		private AudioSource _ambientSource;
 
 		/// <summary>
-		/// Enumerates all passages leading to the specified locality.
+		/// Enumerates all passages leading to the specified zone.
 		/// </summary>
-		/// <param name="target">The target locality</param>
+		/// <param name="target">The target zone</param>
 		/// <returns>enumeration of passages</returns>
-		public IEnumerable<Passage> GetExitsTo(Locality target) => Passages.Where(p => p.LeadsTo(target));
+		public IEnumerable<Passage> GetExitsTo(Zone target) => Passages.Where(p => p.LeadsTo(target));
 
 		/// <summary>
-		/// Indicates if a locality is inside a building or outside.
+		/// Indicates if a zone is inside a building or outside.
 		/// </summary>
-		public enum LocalityType
+		public enum ZoneType
 		{
 			/// <summary>
 			/// A room or corridor in a building
@@ -102,10 +102,10 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Enumerates all accessible localities.
+		/// Enumerates all accessible zones.
 		/// </summary>
-		/// <returns>All accessible localities</returns>
-		public IEnumerable<Locality> GetAccessibleLocalities() => Passages.Select(p => p.AnotherLocality(this)).Distinct();
+		/// <returns>All accessible zones</returns>
+		public IEnumerable<Zone> GetAccessibleZones() => Passages.Select(p => p.AnotherZone(this)).Distinct();
 
 		/// <summary>
 		/// Handles the EntityMoved message.
@@ -155,32 +155,32 @@ namespace Game.Terrain
 		public Passage IsAtPassage(Vector2 point) => Passages.FirstOrDefault(p => p.IsInFrontOrBehind(point));
 
 		/// <summary>
-		/// Checks if the specified entity is in any neighbour locality.
+		/// Checks if the specified entity is in any neighbour zone.
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
-		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInNeighbourLocality(Character e) => Neighbours.FirstOrDefault(l => l.IsItHere(e));
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInNeighbourZone(Character e) => Neighbours.FirstOrDefault(l => l.IsItHere(e));
 
 		/// <summary>
-		/// Checks if the specified object is in any neighbour locality.
+		/// Checks if the specified object is in any neighbour zone.
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
-		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInNeighbourLocality(Item o) => Neighbours.FirstOrDefault(l => l.IsItHere(o));
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInNeighbourZone(Item o) => Neighbours.FirstOrDefault(l => l.IsItHere(o));
 
 		/// <summary>
-		/// Checks if the specified entity is in any accessible neighbour locality.
+		/// Checks if the specified entity is in any accessible neighbour zone.
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
-		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInAccessibleLocality(Character e) => GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInAccessibleZone(Character e) => GetZonesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
 
 		/// <summary>
-		/// Checks if the specified object is in any accessible neighbour locality.
+		/// Checks if the specified object is in any accessible neighbour zone.
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
-		/// <returns>An instance of the locality in which the specified entity is located or null if it wasn't found</returns>
-		public Locality IsInAccessibleLocality(Item o) => GetLocalitiesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInAccessibleZone(Item o) => GetZonesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
 
 		/// <summary>
 		/// Returns all open passages.
@@ -189,28 +189,28 @@ namespace Game.Terrain
 		public IEnumerable<Passage> GetApertures() => Passages.Where(p => p.State == PassageState.Open);
 
 		/// <summary>
-		/// Chekcs if the specified locality is accessible from this locality.
+		/// Chekcs if the specified zone is accessible from this zone.
 		/// </summary>
-		/// <param name="l">The locality to be checked</param>
-		/// <returns>True if the specified locality is accessible form this locality</returns>
-		public bool IsBehindDoor(Locality l) => GetLocalitiesBehindDoor().Any(locality => locality.Name.Indexed == l.Name.Indexed);
+		/// <param name="l">The zone to be checked</param>
+		/// <returns>True if the specified zone is accessible form this zone</returns>
+		public bool IsBehindDoor(Zone l) => GetZonesBehindDoor().Any(zone => zone.Name.Indexed == l.Name.Indexed);
 
 		/// <summary>
-		/// Checks if it's possible to get to the specified locality from this locality over doors or open passages.
+		/// Checks if it's possible to get to the specified zone from this zone over doors or open passages.
 		/// </summary>
-		/// <param name="locality">The target locality</param>
-		/// <returns>True if there's a way between this loclaity and the specified locality</returns>
-		public bool IsAccessible(Locality locality) => GetAccessibleLocalities().Any(l => l.Name.Indexed == locality.Name.Indexed);
+		/// <param name="zone">The target zone</param>
+		/// <returns>True if there's a way between this loclaity and the specified zone</returns>
+		public bool IsAccessible(Zone zone) => GetAccessibleZones().Any(l => l.Name.Indexed == zone.Name.Indexed);
 
 		/// <summary>
-		/// Checks if the specified locality is next to this locality.
+		/// Checks if the specified zone is next to this zone.
 		/// </summary>
-		/// <param name="l">The locality to be checked</param>
-		/// <returns>True if the speicifed locality is adjecting to this locality</returns>
-		public bool IsNeighbour(Locality l) => Neighbours.Contains(l);
+		/// <param name="l">The zone to be checked</param>
+		/// <returns>True if the speicifed zone is adjecting to this zone</returns>
+		public bool IsNeighbour(Zone l) => Neighbours.Contains(l);
 
 		/// <summary>
-		/// Maps all adejcting localities.
+		/// Maps all adejcting zones.
 		/// </summary>
 		private void FindNeighbours()
 		{
@@ -219,34 +219,34 @@ namespace Game.Terrain
 			_neighbours =
 			(
 				from p in a.GetPerimeterPoints()
-				let l = World.GetLocality(p)
+				let l = World.GetZone(p)
 				where l != null
 				select l.Name.Indexed
 			).Distinct().ToList();
 		}
 
 		/// <summary>
-		/// List of adjecting localities
+		/// List of adjecting zones
 		/// </summary>
 		private List<string> _neighbours;
 
 		/// <summary>
-		/// List of adjecting localities
+		/// List of adjecting zones
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Locality> Neighbours => _neighbours.Select(World.GetLocality);
+		public IEnumerable<Zone> Neighbours => _neighbours.Select(World.GetZone);
 
 		/// <summary>
-		/// Returns all open passages between this locality and the specified one..
+		/// Returns all open passages between this zone and the specified one..
 		/// </summary>
-		/// <returns>Enumeration of all open passages between this locality and the specified one</returns>
-		public IEnumerable<Passage> GetApertures(Locality l) => GetApertures().Where(p => p.LeadsTo(l));
+		/// <returns>Enumeration of all open passages between this zone and the specified one</returns>
+		public IEnumerable<Passage> GetApertures(Zone l) => GetApertures().Where(p => p.LeadsTo(l));
 
 		/// <summary>
 		/// Enumerates passages ordered by distance from the specified point.
 		/// </summary>
 		/// <param name="point">The default point</param>
-		/// <param name="radius">distance in which exits from current locality are searched</param>
+		/// <param name="radius">distance in which exits from current zone are searched</param>
 		/// <returns>Enumeration of passages</returns>
 		public IEnumerable<Passage> GetNearestExits(Vector2 point, int radius)
 		{
@@ -299,12 +299,12 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Height of ceiling of the locality (0 in case of outdoor localities)
+		/// Height of ceiling of the zone (0 in case of outdoor zones)
 		/// </summary>
 		public readonly float Ceiling;
 
 		/// <summary>
-		/// All exits from the locality
+		/// All exits from the zone
 		/// </summary>
 		[ProtoIgnore]
 		public IEnumerable<Passage> Passages
@@ -318,71 +318,71 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Text description of the locality
+		/// Text description of the zone
 		/// </summary>
 		public string Description { get; private set; }
 
 		/// <summary>
-		/// Name of the locality in a shape that expresses a direction to the locality.
+		/// Name of the zone in a shape that expresses a direction to the zone.
 		/// </summary>
 		public string To { get; private set; }
 
 		/// <summary>
-		/// Specifies if the locality is outside or inside a building.
+		/// Specifies if the zone is outside or inside a building.
 		/// </summary>
-		public LocalityType Type { get; private set; }
+		public ZoneType Type { get; private set; }
 
 		/// <summary>
-		/// The minimum permitted Y dimension of the floor in this locality
+		/// The minimum permitted Y dimension of the floor in this zone
 		/// </summary>
 		private const int MinimumHeight = 3;
 
 		/// <summary>
-		/// The minimum permitted X dimension of the floor in this locality
+		/// The minimum permitted X dimension of the floor in this zone
 		/// </summary>
 		private const int MinimumWidth = 3;
 
 		/// <summary>
-		/// Height of ceiling of the locality (0 in case of outdoor localities)
+		/// Height of ceiling of the zone (0 in case of outdoor zones)
 		/// </summary>
 		private float _ceiling;
 
 		/// <summary>
-		/// List of NPCs present in this locality.
+		/// List of NPCs present in this zone.
 		/// </summary>
 		private HashSet<string> _characters = new();
 
 		/// <summary>
-		/// List of objects present in this locality.
+		/// List of objects present in this zone.
 		/// </summary>
 		private HashSet<string> _items = new();
 
 		/// <summary>
-		/// List of exits from this locality
+		/// List of exits from this zone
 		/// </summary>
 		private HashSet<string> _passages = new();
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="name">Inner and public name of the locality</param>
+		/// <param name="name">Inner and public name of the zone</param>
 		/// <param name="to">
-		/// Name of the locality in a shape that expresses a direction to the locality
+		/// Name of the zone in a shape that expresses a direction to the zone
 		/// </param>
-		/// <param name="type">Specifies if the locality is outside or inside a building.</param>
-		/// <param name="ceiling">Ceiling height of the locality (should be 0 for outdoor localities)</param>
-		/// <param name="area">Coordinates of the area occupied by the locality</param>
-		/// <param name="defaultTerrain">Lowest layer of the terrain in the locality</param>
+		/// <param name="type">Specifies if the zone is outside or inside a building.</param>
+		/// <param name="ceiling">Ceiling height of the zone (should be 0 for outdoor zones)</param>
+		/// <param name="area">Coordinates of the area occupied by the zone</param>
+		/// <param name="defaultTerrain">Lowest layer of the terrain in the zone</param>
 		/// <param name="backgroundInfo">A background sound played in loop</param>
-		public void Initialize(Name name, string description, string to, LocalityType type, float ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume, LocalityMaterialsDefinitionModel materials = null)
+		public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume, ZoneMaterialsDefinitionModel materials = null)
 		{
 			base.Initialize(name, area);
 
 			Description = description;
 			To = to;
 			Type = type;
-			_ceiling = Type == LocalityType.Outdoor && ceiling <= 2 ? 0 : ceiling;
-			_ceiling = type == LocalityType.Outdoor ? 0 : ceiling;
+			_ceiling = Type == ZoneType.Outdoor && ceiling <= 2 ? 0 : ceiling;
+			_ceiling = type == ZoneType.Outdoor ? 0 : ceiling;
 			DefaultTerrain = defaultTerrain;
 			Rectangle temp = Area.Value;
 			temp.MinimumHeight = MinimumHeight;
@@ -398,13 +398,13 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Defines the lowest layer of terrain in the locality.
+		/// Defines the lowest layer of terrain in the zone.
 		/// </summary>
 		[ProtoIgnore]
 		public TerrainType DefaultTerrain { get; private set; }
 
 		/// <summary>
-		/// List of NPCs present in this locality.
+		/// List of NPCs present in this zone.
 		/// </summary>
 		[ProtoIgnore]
 		public List<Character> Characters
@@ -426,7 +426,7 @@ namespace Game.Terrain
 		public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
 
 		/// <summary>
-		/// List of objects present in this locality.
+		/// List of objects present in this zone.
 		/// </summary>
 		[ProtoIgnore]
 		public IEnumerable<Item> Items
@@ -441,44 +441,44 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Returns all adjecting localities to which it's possible to get from this locality.
+		/// Returns all adjecting zones to which it's possible to get from this zone.
 		/// </summary>
-		/// <returns>An enumeration of all adjecting accessible localities</returns>
-		public IEnumerable<Locality> GetLocalitiesBehindDoor() => Passages.Select(p => p.AnotherLocality(this));
+		/// <returns>An enumeration of all adjecting accessible zones</returns>
+		public IEnumerable<Zone> GetZonesBehindDoor() => Passages.Select(p => p.AnotherZone(this));
 
 		/// <summary>
-		/// Checks if the specified game object is present in this locality in the moment.
+		/// Checks if the specified game object is present in this zone in the moment.
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
-		/// <returns>True if the object is present in the locality</returns>
+		/// <returns>True if the object is present in the zone</returns>
 		public bool IsItHere(Item o) => _items.Contains(o.Name.Indexed);
 
 		/// <summary>
-		/// Checks if an entity is present in this locality in the moment.
+		/// Checks if an entity is present in this zone in the moment.
 		/// </summary>
 		/// <param name="e">The entity to be checked</param>
 		/// <returns>True if the entity is here</returns>
 		public bool IsItHere(Character e) => Characters.Contains(e);
 
 		/// <summary>
-		/// Checks if a passage lays in the locality.
+		/// Checks if a passage lays in the zone.
 		/// </summary>
 		/// <param name="p">The passage to be checked</param>
-		/// <returns>True if the passage lays in this locality</returns>
+		/// <returns>True if the passage lays in this zone</returns>
 		public bool IsItHere(Passage p) => Passages.Contains(p);
 
 		/// <summary>
 		/// Gets a message from another messaging object and stores it for processing.
 		/// </summary>
 		/// <param name="message">The message to be received</param>
-		/// <param name="routeToNeighbours">Specifies if the message should be distributed to the neighbours of this locality</param>
+		/// <param name="routeToNeighbours">Specifies if the message should be distributed to the neighbours of this zone</param>
 		public void TakeMessage(Message message, bool routeToNeighbours)
 		{
 			TakeMessage(message);
 
 			if (routeToNeighbours)
 			{
-				foreach (Locality neighbour in Neighbours)
+				foreach (Zone neighbour in Neighbours)
 					neighbour.TakeMessage(message);
 			}
 		}
@@ -500,7 +500,7 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Adds an passage to the locality.
+		/// Adds an passage to the zone.
 		/// </summary>
 		/// <param name="p">The passage to be added</param>
 		public void Register(Passage p)
@@ -519,13 +519,13 @@ namespace Game.Terrain
 		private void Register(Item o) => _items.Add(o.Name.Indexed);
 
 		/// <summary>
-		/// Adds an entity to locality.
+		/// Adds an entity to zone.
 		/// </summary>
 		/// <param name="character">The entity to be added</param>
 		public void Register(Character character) => _characters.Add(character.Name.Indexed);
 
 		/// <summary>
-		/// Initializes the locality and starts its message loop.
+		/// Initializes the zone and starts its message loop.
 		/// </summary>
 		public override void Activate()
 		{
@@ -541,14 +541,14 @@ namespace Game.Terrain
 		{
 			switch (message)
 			{
-				case ObjectDisappearedFromLocality m: OnObjectDisappearedFromLocality(m); break;
-				case ObjectAppearedInLocality m: OnObjectAppearedInLocality(m); break;
+				case ObjectDisappearedFromZone m: OnObjectDisappearedFromZone(m); break;
+				case ObjectAppearedInZone m: OnObjectAppearedInZone(m); break;
 				case ChipotlesCarMoved ccmv: OnChipotlesCarMoved(ccmv); break;
 				case CharacterMoved em: OnCharacterMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;
-				case CharacterLeftLocality ll: OnCharacterLeftLocality(ll); break;
-				case CharacterCameToLocality le: OnCharacterCameToLocality(le); break;
+				case CharacterLeftZone ll: OnCharacterLeftZone(ll); break;
+				case CharacterCameToZone le: OnCharacterCameToZone(le); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -557,13 +557,13 @@ namespace Game.Terrain
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnObjectDisappearedFromLocality(ObjectDisappearedFromLocality m) => Unregister(m.Object);
+		private void OnObjectDisappearedFromZone(ObjectDisappearedFromZone m) => Unregister(m.Object);
 
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		private void OnObjectAppearedInLocality(ObjectAppearedInLocality message)
+		private void OnObjectAppearedInZone(ObjectAppearedInZone message)
 		{
 			Register(message.Object);
 			GatherNonwalkables(message.Object);
@@ -575,7 +575,7 @@ namespace Game.Terrain
 		/// <param name="message"The message to be handled></param>
 		private void OnChipotlesCarMoved(ChipotlesCarMoved message)
 		{
-			if (message.Target.GetLocalities() != this)
+			if (message.Target.GetZones() != this)
 				StopAmbientSounds(true);
 		}
 
@@ -608,7 +608,7 @@ namespace Game.Terrain
 		public void Unregister(Character e) => _characters.Remove(e.Name.Indexed);
 
 		/// <summary>
-		/// Removes a passage from the locality.
+		/// Removes a passage from the zone.
 		/// </summary>
 		/// <param name="p">The passage to be removed</param>
 		public void Unregister(Passage p)
@@ -620,7 +620,7 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Erases the locality from game world.
+		/// Erases the zone from game world.
 		/// </summary>
 		protected void Disappear()
 		{
@@ -636,13 +636,13 @@ namespace Game.Terrain
 			foreach (Character e in Characters)
 				World.Remove(e);
 
-			// Delete locality from the map.
+			// Delete zone from the map.
 			foreach (Vector2 p in _area.Value.GetPoints())
 				World.Map[p] = null;
 		}
 
 		/// <summary>
-		/// Sends a message to all game objects in the locality.
+		/// Sends a message to all game objects in the zone.
 		/// </summary>
 		/// <param name="message">The message to be sent</param>
 		protected void MessageObjects(Message message)
@@ -676,19 +676,19 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Handles the LocalityEntered message.
+		/// Handles the ZoneEntered message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		private void OnCharacterCameToLocality(CharacterCameToLocality message)
+		private void OnCharacterCameToZone(CharacterCameToZone message)
 		{
-			if (message.CurrentLocality == this)
+			if (message.CurrentZone == this)
 			{
 				Register(message.Character);
 
 				if (message.Character == World.Player)
 				{
 					Sounds.SetRoomParameters(this);
-					_playersPreviousLocality = message.PreviousLocality;
+					_playersPreviousZone = message.PreviousZone;
 				}
 			}
 
@@ -697,10 +697,10 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Last previous locality visited by the player.
+		/// Last previous zone visited by the player.
 		/// </summary>
 		[ProtoIgnore]
-		private Locality _playersPreviousLocality;
+		private Zone _playersPreviousZone;
 
 		/// <summary>
 		/// Distributes a game message to all passages.
@@ -716,12 +716,12 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Handles the LocalityLeft message.
+		/// Handles the ZoneLeft message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		private void OnCharacterLeftLocality(CharacterLeftLocality message)
+		private void OnCharacterLeftZone(CharacterLeftZone message)
 		{
-			if (message.LeftLocality != this)
+			if (message.LeftZone != this)
 				return;
 
 			Unregister(message.Sender as Character);
@@ -733,9 +733,9 @@ namespace Game.Terrain
 		public string AmbientSound;
 
 		/// <summary>
-		/// Plays the background sound of this locality in a loop.
+		/// Plays the background sound of this zone in a loop.
 		/// </summary>
-		/// <param name="playerMoved">Specifies if the player just moved from one locality to another one.</param>
+		/// <param name="playerMoved">Specifies if the player just moved from one zone to another one.</param>
 		private void UpdateLoop()
 		{
 			StopInaudibleSounds();
@@ -744,18 +744,18 @@ namespace Game.Terrain
 
 			if (PlayerInHere())
 			{
-				if (_playersPreviousLocality != null
-					&& string.Equals(_playersPreviousLocality.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase))
-					_ambientSource = _playersPreviousLocality.GetAmbientSource();
+				if (_playersPreviousZone != null
+					&& string.Equals(_playersPreviousZone.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase))
+					_ambientSource = _playersPreviousZone.GetAmbientSource();
 				else
 					PlayAmbientHere();
-				_playersPreviousLocality = null;
+				_playersPreviousZone = null;
 				return;
 			}
-			if (string.Equals(World.Player.Locality.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
+			if (string.Equals(World.Player.Zone.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
 				return;
 
-			if (IsAccessible(World.Player.Locality))
+			if (IsAccessible(World.Player.Zone))
 				PlayAmbientAccessible();
 			else if (PlayerInSoundRadius)
 				PlayAmbientInaccessible();
@@ -767,24 +767,24 @@ namespace Game.Terrain
 		private SoundMode _soundMode;
 
 		/// <summary>
-		/// Defines playback modes for locality background sound based on player's proximity.
+		/// Defines playback modes for zone background sound based on player's proximity.
 		/// </summary>
 		public enum SoundMode
 		{
 			/// <summary>
-			/// If the player is in the locality, the sound plays in full stereo.
+			/// If the player is in the zone, the sound plays in full stereo.
 			/// </summary>
-			InLocality,
+			InZone,
 
 			/// <summary>
-			/// If the player is in an accessible locality, the sound plays softly from every passage leading to the player's current locality.
+			/// If the player is in an accessible zone, the sound plays softly from every passage leading to the player's current zone.
 			/// </summary>
-			InAccessibleLocality,
+			InAccessibleZone,
 
 			/// <summary>
-			/// If the player is far, the sound plays softly from the center of the locality, provided the player is within the sound's radius defined by _soundRadius.
+			/// If the player is far, the sound plays softly from the center of the zone, provided the player is within the sound's radius defined by _soundRadius.
 			/// </summary>
-			InInaccessibleLocality
+			InInaccessibleZone
 		}
 
 		private void StopInaudibleSounds()
@@ -817,22 +817,22 @@ namespace Game.Terrain
 		private const float _passageLoopMaxDistance = 15;
 
 		/// <summary>
-		/// The maximum distance the player is from the locality at which it makes sense to play the location audio.
+		/// The maximum distance the player is from the zone at which it makes sense to play the location audio.
 		/// </summary>
-		private const float _localitySoundRadius = 100;
+		private const float _zoneSoundRadius = 100;
 
 		/// <summary>
-		/// Plays soudn loop of the locality.
+		/// Plays soudn loop of the zone.
 		/// </summary>
-		/// <param name="playerInHere">Determines if the player is in this locality.</param>
-		/// <param name="accessible">Determines if the player is in an neighbour accessible locality.</param>
+		/// <param name="playerInHere">Determines if the player is in this zone.</param>
+		/// <param name="accessible">Determines if the player is in an neighbour accessible zone.</param>
 		protected void PlayAmbientInaccessible()
 		{
 			StopPassageLoops();
 			return;
 			Vector3 position = new(_area.Value.Center.x, 2, _area.Value.Center.y);
 
-			if (_soundMode == SoundMode.InInaccessibleLocality)
+			if (_soundMode == SoundMode.InInaccessibleZone)
 				_ambientSource = TakeClosestPassageLoop()?.AudioSource;
 
 			if (_ambientSource != null)
@@ -844,16 +844,16 @@ namespace Game.Terrain
 				_ambientSource = Sounds.Play(AmbientSound, position, _defaultVolume, true);
 
 			Sounds.SetLowPass(_ambientSource, Sounds.OverWallLowpass);
-			_soundMode = SoundMode.InInaccessibleLocality;
+			_soundMode = SoundMode.InInaccessibleZone;
 		}
 
 		private void PlayAmbientAccessible()
 		{
-			Locality playersLocality = World.Player.Locality;
+			Zone playersZone = World.Player.Zone;
 			List<PreparedPassageLoopModel> loops = PreparePassageLoops();
 
 			/* 
-			 * If the ambient sounds are already playing in the player's locality, 
+			 * If the ambient sounds are already playing in the player's zone, 
 			 * use a sound source from a passage closest to the player.
 			 */
 			if (_ambientSource != null && _ambientSource.isPlaying)
@@ -871,13 +871,13 @@ namespace Game.Terrain
 			foreach (PreparedPassageLoopModel loop in loops)
 				PlayAmbientFromPassage(loop, _defaultVolume);
 
-			_soundMode = SoundMode.InAccessibleLocality;
+			_soundMode = SoundMode.InAccessibleZone;
 		}
 
 		private List<PreparedPassageLoopModel> PreparePassageLoops()
 		{
-			Locality playersLocality = World.Player.Locality;
-			List<Passage> exits = GetExitsTo(playersLocality).ToList();
+			Zone playersZone = World.Player.Zone;
+			List<Passage> exits = GetExitsTo(playersZone).ToList();
 			List<PreparedPassageLoopModel> result = new();
 
 			foreach (Passage passage in exits)
@@ -888,7 +888,7 @@ namespace Game.Terrain
 				// Player stands in the passage
 				if (passage.Area.Value.Contains(player))
 				{
-					Locality other = passage.AnotherLocality(playersLocality);
+					Zone other = passage.AnotherZone(playersZone);
 					position = other.Area.Value.GetClosestPoint(player);
 				}
 				else
@@ -899,9 +899,9 @@ namespace Game.Terrain
 				}
 				Vector3 position3d = new(position.x, 2, position.y);
 
-				// Make it quieter if the player is in a inadjecting locality behind a closed door.
-				Locality between = playersLocality.GetLocalitiesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
-				bool doubleAttenuation = between != null && playersLocality.GetApertures(between).IsNullOrEmpty();
+				// Make it quieter if the player is in a inadjecting zone behind a closed door.
+				Zone between = playersZone.GetZonesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
+				bool doubleAttenuation = between != null && playersZone.GetApertures(between).IsNullOrEmpty();
 				float volume = passage.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
 				if (doubleAttenuation)
 					volume *= .01f;
@@ -913,7 +913,7 @@ namespace Game.Terrain
 
 		private void PlayAmbientHere()
 		{
-			_soundMode = SoundMode.InLocality;
+			_soundMode = SoundMode.InZone;
 			if ((_ambientSource == null || !_ambientSource.isPlaying) && _passageLoops.IsNullOrEmpty())
 			{
 				_ambientSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true);
@@ -921,7 +921,7 @@ namespace Game.Terrain
 			}
 
 			/*
-			 * Switching from InInaccessibleLocality mode
+			 * Switching from InInaccessibleZone mode
 			 * Find a passage sound that is closest to the player, 
 			] * change it to full stereo, disable Low pass and stop the rest of the passage loops.
 			 */
@@ -993,11 +993,11 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Returns all passages leading to the specified locality.
+		/// Returns all passages leading to the specified zone.
 		/// </summary>
-		/// <param name="locality">The locality to which the passages should lead</param>
-		/// <returns> all passages leading to the specified locality</returns>
-		private IEnumerable<Passage> GetPassagesTo(Locality locality) => Passages.Where(p => p.Localities.Contains(locality));
+		/// <param name="zone">The zone to which the passages should lead</param>
+		/// <returns> all passages leading to the specified zone</returns>
+		private IEnumerable<Passage> GetPassagesTo(Zone zone) => Passages.Where(p => p.Zones.Contains(zone));
 
 		//protected new float OverDoorVolume => .05f * _defaultVolume;
 

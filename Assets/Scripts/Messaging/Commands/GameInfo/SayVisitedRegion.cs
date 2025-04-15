@@ -3,7 +3,7 @@
 namespace Game.Messaging.Commands.GameInfo
 {
 	/// <summary>
-	/// Makes the Chipotle NPC announce if it have already visited the locality it's currently
+	/// Makes the Chipotle NPC announce if it have already visited the zone it's currently
 	/// located in.
 	/// </summary>
 	[Serializable]

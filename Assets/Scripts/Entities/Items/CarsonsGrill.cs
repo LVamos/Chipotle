@@ -9,7 +9,7 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents the grill object in the zahrada c1 locality.
+	/// Represents the grill object in the zahrada c1 zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class CarsonsGrill : Item
@@ -30,16 +30,16 @@ namespace Game.Entities.Items
 		{
 			switch (message)
 			{
-				case CharacterLeftLocality ll: OnLocalityLeft(ll); break;
+				case CharacterLeftZone ll: OnZoneLeft(ll); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
 
 		/// <summary>
-		/// Handles the LocalityLeft message.
+		/// Handles the ZoneLeft message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		private void OnLocalityLeft(CharacterLeftLocality message)
+		private void OnZoneLeft(CharacterLeftZone message)
 		{
 			if (message.Sender == World.GetCharacter("carson"))
 				StopLoop();

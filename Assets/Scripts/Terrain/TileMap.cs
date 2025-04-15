@@ -114,14 +114,14 @@ namespace Game.Terrain
 			return tile;
 		}
 
-		public void DrawLocality(XElement localityNode)
+		public void DrawZone(XElement zoneNode)
 		{
-			Rectangle localityArea = new(localityNode.Attribute("coordinates").Value);
-			TerrainType defaultTerrain = localityNode.Attribute("defaultTerrain").Value.ToTerrainType();
+			Rectangle zoneArea = new(zoneNode.Attribute("coordinates").Value);
+			TerrainType defaultTerrain = zoneNode.Attribute("defaultTerrain").Value.ToTerrainType();
 
-			DrawTerrain(localityArea, defaultTerrain);
-			foreach (XElement panel in localityNode.Elements("panel"))
-				DrawPanel(panel, localityArea);
+			DrawTerrain(zoneArea, defaultTerrain);
+			foreach (XElement panel in zoneNode.Elements("panel"))
+				DrawPanel(panel, zoneArea);
 		}
 
 		private void DrawTerrain(Rectangle area, TerrainType terrain, bool permeable = true)
@@ -132,10 +132,10 @@ namespace Game.Terrain
 				_terrain[point] = new(terrain, permeable, null);
 		}
 
-		private void DrawPanel(XElement panel, Rectangle localityArea)
+		private void DrawPanel(XElement panel, Rectangle zoneArea)
 		{
 			string coords = panel.Attribute("coordinates").Value;
-			Rectangle panelArea = new Rectangle(coords).ToAbsolute(localityArea);
+			Rectangle panelArea = new Rectangle(coords).ToAbsolute(zoneArea);
 			TerrainType panelTerrain = panel.Attribute("terrain").Value.ToTerrainType();
 			bool permeable = panel.Attribute("canBeOccupied").Value.ToBool();
 
@@ -161,10 +161,10 @@ namespace Game.Terrain
 		/// <returns>The rounded coordinates</returns>
 		private Vector2 RoundCoordinates(float x, float y) => new(x.Round(), y.Round());
 
-		public void RegisterLocality(Locality locality)
+		public void RegisterZone(Zone zone)
 		{
-			foreach (Vector2 point in locality.Area.Value.GetPoints(TileSize))
-				_terrain[point].AddLocality(locality);
+			foreach (Vector2 point in zone.Area.Value.GetPoints(TileSize))
+				_terrain[point].AddZone(zone);
 		}
 	}
 }

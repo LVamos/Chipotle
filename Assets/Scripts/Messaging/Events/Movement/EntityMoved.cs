@@ -14,14 +14,14 @@ namespace Game.Messaging.Events.Movement
 	public class CharacterMoved : Message
 	{
 		/// <summary>
-		/// The locality in which the NPC was originally located.
+		/// The zone in which the NPC was originally located.
 		/// </summary>
-		public readonly Locality SourceLocality;
+		public readonly Zone SourceZone;
 
 		/// <summary>
-		/// The locality in which the NPC is currently located.
+		/// The zone in which the NPC is currently located.
 		/// </summary>
-		public readonly Locality TargetLocality;
+		public readonly Zone TargetZone;
 
 		/// <summary>
 		/// Original position of the NPC
@@ -39,14 +39,14 @@ namespace Game.Messaging.Events.Movement
 		/// <param name="sender">Source of the message</param>
 		/// <param name="sourcePosition">Source position fo the NPC</param>
 		/// <param name="targetPosition">Target position of the NPC</param>
-		/// <param name="sourceLocality">Source locality of the NPC</param>
-		/// <param name="targetLocality">Target locality of the NPC</param>
-		public CharacterMoved(object sender, Rectangle? sourcePosition, Rectangle targetPosition, Locality sourceLocality, Locality targetLocality) : base(sender)
+		/// <param name="sourceZone">Source zone of the NPC</param>
+		/// <param name="targetZone">Target zone of the NPC</param>
+		public CharacterMoved(object sender, Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone) : base(sender)
 		{
 			SourcePosition = sourcePosition;
 			TargetPosition = targetPosition;
-			SourceLocality = sourceLocality;
-			TargetLocality = targetLocality;
+			SourceZone = sourceZone;
+			TargetZone = targetZone;
 		}
 	}
 }

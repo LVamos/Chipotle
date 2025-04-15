@@ -38,19 +38,19 @@ namespace Game.Entities.Characters
 		protected override void DestroyObject()
 		{
 			World.Remove(this);
-			Locality.TakeMessage(new CharacterLeftLocality(this, this, Locality, null));
+			Zone.TakeMessage(new CharacterLeftZone(this, this, Zone, null));
 		}
 
 		/// <summary>
-		/// A backing field for Locality property.
+		/// A backing field for Zone property.
 		/// </summary>
-		protected string _locality;
+		protected string _zone;
 
 		/// <summary>
-		/// Locality intersecting with the character.
+		/// Zone intersecting with the character.
 		/// </summary>
 		[ProtoIgnore]
-		public Locality Locality => _locality == null ? null : World.GetLocality(_locality);
+		public Zone Zone => _zone == null ? null : World.GetZone(_zone);
 
 		/// <summary>
 		/// Represents the inventory of the entity.
@@ -60,7 +60,7 @@ namespace Game.Entities.Characters
 			get
 			{
 				if (_inventory == null)
-					_visitedLocalities = new();
+					_visitedZones = new();
 
 				return _inventory.Select(World.GetItem);
 			}
@@ -77,9 +77,9 @@ namespace Game.Entities.Characters
 		protected CharacterComponent[] _components;
 
 		/// <summary>
-		/// List of all localities visited by the NPC
+		/// List of all zones visited by the NPC
 		/// </summary>
-		protected HashSet<string> _visitedLocalities;
+		protected HashSet<string> _visitedZones;
 
 		/// <summary>
 		/// constructor
@@ -110,9 +110,9 @@ namespace Game.Entities.Characters
 			if (physics.StartPosition != null)
 				Area = new(physics.StartPosition.Value);
 
-			// Find intersecting locality
+			// Find intersecting zone
 			if (_area != null)
-				_locality = World.GetLocality(_area.Value.Center).Name.Indexed;
+				_zone = World.GetZone(_area.Value.Center).Name.Indexed;
 		}
 
 		/// <summary>
@@ -126,7 +126,7 @@ namespace Game.Entities.Characters
 				case PlaceItemResult m: OnPlaceItemResult(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case OrientationChanged och: OnOrientationChanged(och); break;
-				case LocalityChanged lcd: OnLocalityChanged(lcd); break;
+				case ZoneChanged lcd: OnZoneChanged(lcd); break;
 				case PositionChanged pcd: OnPositionChanged(pcd); break;
 				default: base.HandleMessage(message); break;
 			}
@@ -159,15 +159,15 @@ namespace Game.Entities.Characters
 		public Orientation2D Orientation { get; private set; }
 
 		/// <summary>
-		/// List of all localities visited by the NPC
+		/// List of all zones visited by the NPC
 		/// </summary>
-		public IEnumerable<Locality> VisitedLocalities
+		public IEnumerable<Zone> VisitedZones
 		{
 			get
 			{
-				_visitedLocalities ??= new();
+				_visitedZones ??= new();
 
-				return _visitedLocalities.Select(World.GetLocality);
+				return _visitedZones.Select(World.GetZone);
 			}
 		}
 
@@ -209,12 +209,12 @@ namespace Game.Entities.Characters
 		}
 
 		/// <summary>
-		/// Processes the LocalityChanged message.
+		/// Processes the ZoneChanged message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnLocalityChanged(LocalityChanged message)
+		private void OnZoneChanged(ZoneChanged message)
 		{
-			_locality = message.Target.Name.Indexed;
+			_zone = message.Target.Name.Indexed;
 		}
 
 		/// <summary>
@@ -237,51 +237,51 @@ namespace Game.Entities.Characters
 			Area = message.TargetPosition; // Set new position.
 			transform.position = new Vector3(Area.Value.Center.x, 2, Area.Value.Center.y);
 
-			_locality = message.TargetLocality.Name.Indexed;
+			_zone = message.TargetZone.Name.Indexed;
 
-			// Record visited locality.
-			if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
-				RecordLocality(message.SourceLocality);
+			// Record visited zone.
+			if (message.SourceZone != null && message.SourceZone != message.TargetZone)
+				RecordZone(message.SourceZone);
 
-			// Inform all adjecting localities
-			HashSet<Locality> localities = new();
-			if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
+			// Inform all adjecting zones
+			HashSet<Zone> zones = new();
+			if (message.SourceZone != null && message.SourceZone != message.TargetZone)
 			{
-				localities.Add(message.SourceLocality);
-				HashSet<Locality> temp = new(message.SourceLocality.Neighbours);
-				localities.UnionWith(temp);
+				zones.Add(message.SourceZone);
+				HashSet<Zone> temp = new(message.SourceZone.Neighbours);
+				zones.UnionWith(temp);
 			}
 
-			if (message.TargetLocality != null)
+			if (message.TargetZone != null)
 			{
-				localities.Add(message.TargetLocality);
-				HashSet<Locality> temp = new(message.TargetLocality.Neighbours);
-				localities.UnionWith(temp);
+				zones.Add(message.TargetZone);
+				HashSet<Zone> temp = new(message.TargetZone.Neighbours);
+				zones.UnionWith(temp);
 			}
 
-			CharacterMoved moved = new(this, message.SourcePosition, message.TargetPosition, message.SourceLocality, message.TargetLocality);
-			CharacterLeftLocality left = new(this, this, message.SourceLocality, message.TargetLocality);
-			CharacterCameToLocality came = new(this, this, message.TargetLocality, message.SourceLocality);
+			CharacterMoved moved = new(this, message.SourcePosition, message.TargetPosition, message.SourceZone, message.TargetZone);
+			CharacterLeftZone left = new(this, this, message.SourceZone, message.TargetZone);
+			CharacterCameToZone came = new(this, this, message.TargetZone, message.SourceZone);
 
-			foreach (Locality locality in localities)
+			foreach (Zone zone in zones)
 			{
-				locality.TakeMessage(moved);
+				zone.TakeMessage(moved);
 
-				if (message.SourceLocality != null && message.SourceLocality != message.TargetLocality)
-					locality.TakeMessage(left);
+				if (message.SourceZone != null && message.SourceZone != message.TargetZone)
+					zone.TakeMessage(left);
 
-				if (message.SourceLocality != message.TargetLocality)
-					locality.TakeMessage(came);
+				if (message.SourceZone != message.TargetZone)
+					zone.TakeMessage(came);
 			}
 		}
 
 		/// <summary>
-		/// Records the current locality as visited.
+		/// Records the current zone as visited.
 		/// </summary>
-		protected void RecordLocality(Locality locality)
+		protected void RecordZone(Zone zone)
 		{
-			if (!VisitedLocalities.Contains(locality))
-				_visitedLocalities.Add(locality.Name.Indexed);
+			if (!VisitedZones.Contains(zone))
+				_visitedZones.Add(zone.Name.Indexed);
 		}
 
 		/// <summary>

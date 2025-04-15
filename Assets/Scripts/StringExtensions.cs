@@ -6,12 +6,12 @@ namespace Game
 {
 	public static class StringExtensions
 	{
-		public static Locality.LocalityType ToLocalityType(this string value)
+		public static Zone.ZoneType ToZoneType(this string value)
 		{
 			if (string.Equals(value, "outdoor", StringComparison.OrdinalIgnoreCase))
-				return Locality.LocalityType.Outdoor;
+				return Zone.ZoneType.Outdoor;
 			else if (string.Equals(value, "indoor", StringComparison.OrdinalIgnoreCase))
-				return Locality.LocalityType.Indoor;
+				return Zone.ZoneType.Indoor;
 			throw new ArgumentException(nameof(value));
 		}
 		/// <summary>

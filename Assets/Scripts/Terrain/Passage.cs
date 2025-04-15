@@ -15,21 +15,21 @@ using Message = Game.Messaging.Message;
 namespace Game.Terrain
 {
 	/// <summary>
-	/// Represents a passage between two localities.
+	/// Represents a passage between two zones.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	[ProtoInclude(100, typeof(Door))]
 	public class Passage : MapElement
 	{
-		public List<Vector2> GetPointsOfLocality(Locality locality)
+		public List<Vector2> GetPointsOfZone(Zone zone)
 		{
 			List<Vector2> points = _area.Value.GetPoints().ToList();
 
-			List<Vector2> pointsOfLocality = points
-				.Where(p => locality.Area.Value.Contains(p))
+			List<Vector2> pointsOfZone = points
+				.Where(p => zone.Area.Value.Contains(p))
 				.ToList();
-			List<Locality> test = points.Select(p => World.Map[p]?.Locality).Distinct().ToList();
-			return pointsOfLocality;
+			List<Zone> test = points.Select(p => World.Map[p]?.Zone).Distinct().ToList();
+			return pointsOfZone;
 		}
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace Game.Terrain
 		/// Checks if the specified point lays in front or behind the passage.
 		/// </summary>
 		/// <returns>True if the specified point lays in front or behind the passage</returns>
-		public bool IsInFrontOrBehind(Vector2 point) => IsInRelatedLocality(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
+		public bool IsInFrontOrBehind(Vector2 point) => IsInRelatedZone(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
 
 		private bool IsInHorizontalRange(Vector2 point) => IsHorizontal() && point.x >= _area.Value.UpperLeftCorner.x && point.x <= _area.Value.UpperRightCorner.x;
 
@@ -53,11 +53,11 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Chekcs if the specified point lays in one of the localities connected by the passage.
+		/// Chekcs if the specified point lays in one of the zones connected by the passage.
 		/// </summary>
 		/// <param name="point">The point to be checked</param>
-		/// <returns>True if the specified point lays in one of the localities connected by the passage</returns>
-		public bool IsInRelatedLocality(Vector2 point) => Localities.Any(l => l.Area.Value.Contains(point));
+		/// <returns>True if the specified point lays in one of the zones connected by the passage</returns>
+		public bool IsInRelatedZone(Vector2 point) => Zones.Any(l => l.Area.Value.Contains(point));
 
 		/// <summary>
 		/// Checks if the passage is horizontal.
@@ -65,10 +65,10 @@ namespace Game.Terrain
 		/// <returns>True if the passage is horizontal</returns>
 		public bool IsHorizontal()
 		{
-			// Tests if both upper left corner and lower left corner lay in different localities (faster than World.GetLocality)
+			// Tests if both upper left corner and lower left corner lay in different zones (faster than World.GetZone)
 			return
-				Localities.First().Area.Value.Contains(_area.Value.UpperLeftCorner)
-				^ Localities.First().Area.Value.Contains(_area.Value.LowerLeftCorner);
+				Zones.First().Area.Value.Contains(_area.Value.UpperLeftCorner)
+				^ Zones.First().Area.Value.Contains(_area.Value.LowerLeftCorner);
 		}
 
 		/// <summary>
@@ -83,53 +83,53 @@ namespace Game.Terrain
 		public PassageState State { get; protected set; } = PassageState.Open;
 
 		/// <summary>
-		/// Checks if the passage leads to the specified locality.
+		/// Checks if the passage leads to the specified zone.
 		/// </summary>
-		/// <param name="l">The locality to be checked</param>
-		/// <returns>True if the passage leads to the specified locality</returns>
-		public bool LeadsTo(Locality l) => Localities.Contains(l);
+		/// <param name="l">The zone to be checked</param>
+		/// <returns>True if the passage leads to the specified zone</returns>
+		public bool LeadsTo(Zone l) => Zones.Contains(l);
 
 		/// <summary>
-		/// Localities connected by the passage
+		/// Zones connected by the passage
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Locality> Localities
+		public IEnumerable<Zone> Zones
 		{
 			get
 			{
-				_localities ??= new string[2];
+				_zones ??= new string[2];
 
-				return _localities.Select(World.GetLocality)
+				return _zones.Select(World.GetZone)
 					.Where(l => l != null);
 			}
 		}
 
 		/// <summary>
-		/// Localities connected by the passage
+		/// Zones connected by the passage
 		/// </summary>
-		protected string[] _localities = new string[2];
+		protected string[] _zones = new string[2];
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="name">Inner name of the passage</param>
 		/// <param name="area">Coordinates of the are occupied by the passage</param>
-		/// <param name="localities">Localities connected by the passage</param>
-		public virtual void Initialize(Name name, Rectangle area, IEnumerable<string> localities)
+		/// <param name="zones">Zones connected by the passage</param>
+		public virtual void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
 		{
 			base.Initialize(name, area);
 
 			// Validate parameters
 			if (
-				localities == null
-				|| localities.Count() != 2
-				|| localities.First() == null
-				|| localities.Last() == null
-				|| localities.First() == localities.Last())
-				throw new ArgumentException("Two different localities required");
+				zones == null
+				|| zones.Count() != 2
+				|| zones.First() == null
+				|| zones.Last() == null
+				|| zones.First() == zones.Last())
+				throw new ArgumentException("Two different zones required");
 
 			_sounds["navigation"] = "ExitLoop";
-			_localities = localities.ToArray<string>();
+			_zones = zones.ToArray<string>();
 			Rectangle testArea = new("1054, 1029, 1055, 1028.4");
 			IEnumerable<Entity> testItems = testArea.GetObjects();
 
@@ -145,9 +145,9 @@ namespace Game.Terrain
 		/// <summary>
 		/// Returns another side of this passage.
 		/// </summary>
-		/// <param name="comparedLocality">The locality to be compared</param>
+		/// <param name="comparedZone">The zone to be compared</param>
 		/// <returns>The other side of the passage than the specified one</returns>
-		public Locality AnotherLocality(Locality comparedLocality) => Localities.First(l => l.Name.Indexed != comparedLocality.Name.Indexed);
+		public Zone AnotherZone(Zone comparedZone) => Zones.First(l => l.Name.Indexed != comparedZone.Name.Indexed);
 
 		/// <summary>
 		/// Displays the passage in the game world.
@@ -158,14 +158,14 @@ namespace Game.Terrain
 
 			foreach (TileInfo info in tiles)
 			{
-				Locality locality = World.GetLocality(info.Position);
-				if (locality != null)
-					info.Tile.Edit(locality.DefaultTerrain);
+				Zone zone = World.GetZone(info.Position);
+				if (zone != null)
+					info.Tile.Edit(zone.DefaultTerrain);
 			}
-			foreach (Locality locality in Localities)
-				locality.Register(this);
+			foreach (Zone zone in Zones)
+				zone.Register(this);
 
-			foreach (Locality l in Localities)
+			foreach (Zone l in Zones)
 				l.Register(this);
 		}
 
@@ -174,7 +174,7 @@ namespace Game.Terrain
 		/// </summary>
 		protected void Disappear()
 		{
-			foreach (Locality l in Localities)
+			foreach (Zone l in Zones)
 				l.Unregister(this);
 		}
 
@@ -184,10 +184,10 @@ namespace Game.Terrain
 		protected Vector2 GetClosestPointToPlayer() => _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
 
 		/// <summary>
-		/// stores a locality in which the player is located after navigation start.
+		/// stores a zone in which the player is located after navigation start.
 		/// </summary>
 		[ProtoIgnore]
-		protected Locality _playersLocality;
+		protected Zone _playersZone;
 
 		/// <summary>
 		/// Runs a message handler for the specified message.

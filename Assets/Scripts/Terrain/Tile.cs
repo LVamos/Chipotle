@@ -8,23 +8,23 @@ namespace Game.Terrain
 	[Serializable]
 	public class Tile
 	{
-		public Locality Locality { get; private set; }
+		public Zone Zone { get; private set; }
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="terrain">Terrain type on this tile</param>
 		/// <param name="position">Position of the tile on the tile map</param>
-		/// <param name="locality">A locality intersecting the tile</param>
+		/// <param name="zone">A zone intersecting the tile</param>
 		/// <param name="permeable">
 		/// Specifies if an entity or another game object can be placed on this tile
 		/// </param>
 		/// <param name="passage">A passage intersecting the tile</param>
-		public Tile(TerrainType terrain, bool permeable, Locality locality)
+		public Tile(TerrainType terrain, bool permeable, Zone zone)
 		{
 			Terrain = terrain;
 			Walkable = permeable;
-			Locality = locality;
+			Zone = zone;
 		}
 
 		/// <summary>
@@ -48,9 +48,9 @@ namespace Game.Terrain
 			Walkable = permeable;
 		}
 
-		public void AddLocality(Locality locality)
+		public void AddZone(Zone zone)
 		{
-			Locality = locality;
+			Zone = zone;
 		}
 	}
 }

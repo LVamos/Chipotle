@@ -4,30 +4,30 @@ using Game.Terrain;
 namespace Game.Messaging.Events.Physics
 {
 	/// <summary>
-	/// Informs that a game object appeared in a locality.
+	/// Informs that a game object appeared in a zone.
 	/// </summary>
-	public class ObjectAppearedInLocality : Message
+	public class ObjectAppearedInZone : Message
 	{
 		/// <summary>
-		/// The object that appeared in the locality.
+		/// The object that appeared in the zone.
 		/// </summary>
 		public readonly Item Object;
 
 		/// <summary>
-		/// The locality the object apeared in
+		/// The zone the object apeared in
 		/// </summary>
-		public readonly Locality Locality;
+		public readonly Zone Zone;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		/// <param name="object">The object that appeared in the locality</param>
-		/// <param name="locality">The concerning locality</param>
-		public ObjectAppearedInLocality(object sender, Item @object, Locality locality) : base(sender)
+		/// <param name="object">The object that appeared in the zone</param>
+		/// <param name="zone">The concerning zone</param>
+		public ObjectAppearedInZone(object sender, Item @object, Zone zone) : base(sender)
 		{
 			Object = @object;
-			Locality = locality;
+			Zone = zone;
 		}
 	}
 }

@@ -158,7 +158,7 @@ namespace Game
 		public static bool MainMenuAtStartup;
 
 		/// <summary>
-		/// Enables or disables sending Tuttle to the pool locality at startup.
+		/// Enables or disables sending Tuttle to the pool zone at startup.
 		/// </summary>
 		public static bool SendTuttleToPool;
 

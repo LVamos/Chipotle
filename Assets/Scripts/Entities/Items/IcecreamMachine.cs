@@ -12,7 +12,7 @@ namespace Game.Entities.Items
 {
 	/// <summary>
 	/// Represents the icecream machine object (automat v1) )in the hall of the Vanilla crunch
-	/// company (hala v1) locality.
+	/// company (hala v1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class IcecreamMachine : Item
@@ -33,11 +33,11 @@ namespace Game.Entities.Items
 		protected override void OnObjectsUsed(ObjectsUsed message)
 		{
 			Character tuttle = World.GetCharacter("tuttle");
-			Locality garage = World.GetLocality("garáž v1");
+			Zone garage = World.GetZone("garáž v1");
 			if (
-				SameLocality(tuttle)
-				&& tuttle.VisitedLocalities.Contains(garage)
-				&& World.Player.VisitedLocalities.Contains(garage)
+				SameZone(tuttle)
+				&& tuttle.VisitedZones.Contains(garage)
+				&& World.Player.VisitedZones.Contains(garage)
 			)
 				_cutscene = "cs10";
 			else

@@ -11,7 +11,7 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents a bench object in the zahrada c1 locality.
+	/// Represents a bench object in the zahrada c1 zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class CarsonsBench : Item
@@ -42,7 +42,7 @@ namespace Game.Entities.Items
 			)
 			{
 				base.OnObjectsUsed(message);
-				Car.TakeMessage(new UnblockLocality(this, World.GetLocality("ulice v1")));
+				Car.TakeMessage(new UnblockZone(this, World.GetZone("ulice v1")));
 			}
 		}
 	}

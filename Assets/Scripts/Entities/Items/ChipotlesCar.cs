@@ -29,15 +29,15 @@ namespace Game.Entities.Items
 		public bool Moved;
 
 		/// <summary>
-		/// Returns enumeration of localities where the car can ride.
+		/// Returns enumeration of zones where the car can ride.
 		/// </summary>
-		public IEnumerable<Locality> AllowedDestinations
+		public IEnumerable<Zone> AllowedDestinations
 		{
 			get
 			{
 				_allowedDestinations ??= new();
 
-				return _allowedDestinations.Select(World.GetLocality);
+				return _allowedDestinations.Select(World.GetZone);
 			}
 		}
 
@@ -47,14 +47,14 @@ namespace Game.Entities.Items
 		protected HashSet<string> _allowedDestinations;
 
 		/// <summary>
-		/// List of all localities visited by the object.
+		/// List of all zones visited by the object.
 		/// </summary>
-		protected HashSet<Locality> _visitedLocalities = new();
+		protected HashSet<Zone> _visitedZones = new();
 
 		/// <summary>
-		/// Maps all possible movements among localities.
+		/// Maps all possible movements among zones.
 		/// </summary>
-		private readonly Dictionary<string, string> _destinations = new() // locality inner name/rectangle coordinates
+		private readonly Dictionary<string, string> _destinations = new() // zone inner name/rectangle coordinates
 		{
 			["ulice p1"] = "1810, 1123, 1812, 1119", // at Christine's
 			["ulice h1"] = "1539, 1000, 1543, 998", // At the pub
@@ -81,9 +81,9 @@ namespace Game.Entities.Items
 		private Character Player => World.Player;
 
 		/// <summary>
-		/// List of all localities visited by the object
+		/// List of all zones visited by the object
 		/// </summary>
-		public IReadOnlyCollection<Locality> VisitedLocalities => _visitedLocalities;
+		public IReadOnlyCollection<Zone> VisitedZones => _visitedZones;
 
 		/// <summary>
 		/// Reference to the Tuttle NPC
@@ -109,7 +109,7 @@ namespace Game.Entities.Items
 			switch (message)
 			{
 				case MoveChipotlesCar mc: OnMoveChipotlesCar(mc); break;
-				case UnblockLocality ul: OnUnblockLocality(ul); break;
+				case UnblockZone ul: OnUnblockZone(ul); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -136,8 +136,8 @@ namespace Game.Entities.Items
 
 			// When it's not allowed to use the car, play a knocking souund.
 			if (
-				_localities.Contains("příjezdová cesta w1") && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored())
-				|| Localities.Any(l => l.Name.Indexed == "asfaltka c1") && !CarsonsBenchesUsed())
+				_zones.Contains("příjezdová cesta w1") && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored())
+				|| Zones.Any(l => l.Name.Indexed == "asfaltka c1") && !CarsonsBenchesUsed())
 			{
 				_actionAudio.clip = Sounds.GetClip("snd14");
 				_actionAudio.Play();
@@ -146,19 +146,19 @@ namespace Game.Entities.Items
 			// If player didn't leave Walsh area but used required objects and went through all area
 			else if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
 			{
-				AllowDestination(World.GetLocality("ulice p1"));
+				AllowDestination(World.GetZone("ulice p1"));
 				DestinationMenu("cs20");
-				AllowDestination(World.GetLocality("příjezdová cesta w1"));
+				AllowDestination(World.GetZone("příjezdová cesta w1"));
 			}
 			else
 				DestinationMenu(); // Let player seldct destination.
 		}
 
 		/// <summary>
-		/// Makes the specified locality accessible.
+		/// Makes the specified zone accessible.
 		/// </summary>
-		/// <param name="destination">The locality to be allowed</param>
-		private void AllowDestination(Locality destination)
+		/// <param name="destination">The zone to be allowed</param>
+		private void AllowDestination(Zone destination)
 		{
 			if (!AllowedDestinations.Any(d => d == destination))
 				_allowedDestinations.Add(destination.Name.Indexed);
@@ -191,10 +191,10 @@ namespace Game.Entities.Items
 			else
 				cutscene = preferredCutscene;
 
-			Dictionary<string, Locality> destinations = new();
-			foreach (string indexedName in _allowedDestinations.Where(d => !_localities.Contains(d)))
+			Dictionary<string, Zone> destinations = new();
+			foreach (string indexedName in _allowedDestinations.Where(d => !_zones.Contains(d)))
 			{
-				Locality l = World.GetLocality(indexedName);
+				Zone l = World.GetZone(indexedName);
 				destinations[l.Name.Friendly] = l;
 			}
 
@@ -216,11 +216,11 @@ namespace Game.Entities.Items
 		}
 
 		/// <summary>
-		/// Checks if the Detective Chipotle and Tuttle NPC are in the same locality.
+		/// Checks if the Detective Chipotle and Tuttle NPC are in the same zone.
 		/// </summary>
-		/// <returns>True if the Detective Chipotle and Tuttle NPC are in the same locality</returns>
+		/// <returns>True if the Detective Chipotle and Tuttle NPC are in the same zone</returns>
 		private bool IsChipotleAlone()
-			=> !SameLocality(_tuttle);
+			=> !SameZone(_tuttle);
 
 		/// <summary>
 		/// Moves the object to the specified position and plays a cutscene.
@@ -235,29 +235,29 @@ namespace Game.Entities.Items
 		}
 
 		/// <summary>
-		/// Moves the object to the specified locality.
+		/// Moves the object to the specified zone.
 		/// </summary>
-		/// <param name="locality">Inner name of the target locality</param>
+		/// <param name="zone">Inner name of the target zone</param>
 		/// <remarks>
 		/// The exact target location is taken from the _destinations dictionary. The movement is
-		/// allowed only if the specified locality is in the _allowedDestinations hash set.
+		/// allowed only if the specified zone is in the _allowedDestinations hash set.
 		/// </remarks>
 		/// <completionlist cref="_destinations"/>
-		private void Move(Locality locality)
-			=> Move(new Rectangle(_destinations[locality.Name.Indexed]));
+		private void Move(Zone zone)
+			=> Move(new Rectangle(_destinations[zone.Name.Indexed]));
 
 		/// <summary>
-		/// Moves the object to the specified locality.
+		/// Moves the object to the specified zone.
 		/// </summary>
-		/// <param name="locality">Inner name of the target locality</param>
+		/// <param name="zone">Inner name of the target zone</param>
 		/// <param name="cutscene">Name of a cutscene to be played</param>
 		/// <remarks>
 		/// The exact target location is taken from the _destinations dictionary. The movement is
-		/// allowed only if the specified locality is in the _allowedDestinations hash set. If no
+		/// allowed only if the specified zone is in the _allowedDestinations hash set. If no
 		/// cutscene is defined then a predefined alternative is played.
 		/// </remarks>
-		private void Move(Locality locality, string cutscene)
-			=> Move(new Rectangle(_destinations[locality.Name.Indexed]), cutscene);
+		private void Move(Zone zone, string cutscene)
+			=> Move(new Rectangle(_destinations[zone.Name.Indexed]), cutscene);
 
 		/// <summary>
 		/// Processes the MoveChipotlesCar message.
@@ -267,13 +267,13 @@ namespace Game.Entities.Items
 			=> Move(message.Destination);
 
 		/// <summary>
-		/// Processes the UnblockLocality message.
+		/// Processes the UnblockZone message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnUnblockLocality(UnblockLocality message)
+		private void OnUnblockZone(UnblockZone message)
 		{
-			if (!_allowedDestinations.Contains(message.Locality.Name.Indexed))
-				_allowedDestinations.Add(message.Locality.Name.Indexed);
+			if (!_allowedDestinations.Contains(message.Zone.Name.Indexed))
+				_allowedDestinations.Add(message.Zone.Name.Indexed);
 		}
 
 		/// <summary>
@@ -281,8 +281,8 @@ namespace Game.Entities.Items
 		/// </summary>
 		/// <returns>True if all the Walsch's area was explored</returns>
 		private bool WalshAreaExplored()
-			=> Player.VisitedLocalities.Count() == 14
-			   && Player.VisitedLocalities.All(l => l.Name.Indexed.ToLower().Contains("w1"));
+			=> Player.VisitedZones.Count() == 14
+			   && Player.VisitedZones.All(l => l.Name.Indexed.ToLower().Contains("w1"));
 
 		/// <summary>
 		/// Checks if all crutial objects in Walsch's area were used.

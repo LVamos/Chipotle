@@ -7,7 +7,7 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents the Christine's bell (zvonek p1) in the Belvedere street (ulice p1) locality.
+	/// Represents the Christine's bell (zvonek p1) in the Belvedere street (ulice p1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChristinesBell : Item

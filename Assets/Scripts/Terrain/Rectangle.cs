@@ -234,7 +234,7 @@ namespace Game.Terrain
 		/// Checks if any points are outside of the map.
 		/// </summary>
 		/// <returns>True if any points are outside of the map, otherwise false.</returns>
-		public bool IsOutOfMap() => Corners.Any(p => World.GetLocality(p) == null);
+		public bool IsOutOfMap() => Corners.Any(p => World.GetZone(p) == null);
 
 		/// <summary>
 		/// Checks if all the plane is walkable.
@@ -446,7 +446,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="relative">The coordinates related to upper left corner of <paramref name="area"/></param>
 		/// <param name="area">
-		/// The locality according to which <paramref name="relative"/> was calculated
+		/// The zone according to which <paramref name="relative"/> was calculated
 		/// </param>
 		/// <returns>New isntance of <see cref="Rectangle"/> defined by the absolute coordinates</returns>
 		public static Vector2 GetAbsoluteCoordinates(Vector2 relative, Rectangle area) => new(area.UpperLeftCorner.x + relative.x, area.UpperLeftCorner.y - relative.y);
@@ -458,9 +458,9 @@ namespace Game.Terrain
 		/// <returns></returns>
 		public static Vector2 GetRelativeCoordinates(Vector2 absolute)
 		{
-			Rectangle locality = World.GetLocality(absolute).Area.Value;
-			locality.ArrangeCorners();
-			Vector2 corner = locality.UpperLeftCorner;
+			Rectangle zone = World.GetZone(absolute).Area.Value;
+			zone.ArrangeCorners();
+			Vector2 corner = zone.UpperLeftCorner;
 			return new(absolute.x - corner.x, corner.y - absolute.y);
 		}
 
@@ -582,10 +582,10 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
-		/// Enumerates all localities this plane intersects with.
+		/// Enumerates all zones this plane intersects with.
 		/// </summary>
-		/// <returns>enumeration of the intersecting localities</returns>
-		public IEnumerable<Locality> GetLocalities() => World.GetLocalities(this);
+		/// <returns>enumeration of the intersecting zones</returns>
+		public IEnumerable<Zone> GetZones() => World.GetZones(this);
 
 		/// <summary>
 		/// Enumerates all tiles laying on the perimeter of this plane.

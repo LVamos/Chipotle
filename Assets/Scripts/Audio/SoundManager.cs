@@ -110,20 +110,20 @@ namespace Assets.Scripts.Audio
 			return source;
 		}
 
-		public void SetRoomParameters(Locality locality)
+		public void SetRoomParameters(Zone zone)
 		{
-			_roomObject.transform.position = locality.transform.position;
-			Vector3 size = locality.transform.localScale;
+			_roomObject.transform.position = zone.transform.position;
+			Vector3 size = zone.transform.localScale;
 			_resonanceRoom.size = size;
-			LocalityMaterialsDefinitionModel localityMaterials = locality.Materials;
-			_resonanceRoom.leftWall = _materials[localityMaterials.LeftWall];
-			_resonanceRoom.frontWall = _materials[localityMaterials.FrontWall];
-			_resonanceRoom.rightWall = _materials[localityMaterials.RightWall];
-			_resonanceRoom.backWall = _materials[localityMaterials.BackWall];
-			_resonanceRoom.floor = _materials[localityMaterials.Floor];
-			_resonanceRoom.ceiling = _materials[localityMaterials.Ceiling];
+			ZoneMaterialsDefinitionModel zoneMaterials = zone.Materials;
+			_resonanceRoom.leftWall = _materials[zoneMaterials.LeftWall];
+			_resonanceRoom.frontWall = _materials[zoneMaterials.FrontWall];
+			_resonanceRoom.rightWall = _materials[zoneMaterials.RightWall];
+			_resonanceRoom.backWall = _materials[zoneMaterials.BackWall];
+			_resonanceRoom.floor = _materials[zoneMaterials.Floor];
+			_resonanceRoom.ceiling = _materials[zoneMaterials.Ceiling];
 
-			if (locality.Type == Locality.LocalityType.Outdoor)
+			if (zone.Type == Zone.ZoneType.Outdoor)
 				_resonanceRoom.reverbTime = .4f;
 		}
 

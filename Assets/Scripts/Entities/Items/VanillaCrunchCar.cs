@@ -8,7 +8,7 @@ namespace Game.Entities.Items
 {
 	/// <summary>
 	/// Represents the car of the Vanilla crunch company (auto v1) object standing in the garage of
-	/// the company (garáž v1) locality.
+	/// the company (garáž v1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class VanillaCrunchCar : Item
@@ -24,7 +24,7 @@ namespace Game.Entities.Items
 
 		/// <summary>
 		/// A reference to the key hanger (věšák v1) object in the garage of the Vanilla crunch
-		/// company (garáž v1) locality.
+		/// company (garáž v1) zone.
 		/// </summary>
 		private KeyHanger KeyHanger
 			=> World.GetItem("věšák v1") as KeyHanger;

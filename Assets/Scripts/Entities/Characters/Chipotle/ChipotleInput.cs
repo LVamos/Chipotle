@@ -97,7 +97,7 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyCode.F5)] = CreatePredefinedSave,
 					[new(KeyCode.C)] = SayRelativeCoordinates,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.T)] = SayTuttlesPosition,
-					[new(KeyCode.F10)] = JumpToLocality,
+					[new(KeyCode.F10)] = JumpToZone,
 					[new(KeyCode.F11)] = SaveStartPosition,
 					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
 					[new(KeyCode.F12)] = () => GoToClipboardCoords(),
@@ -106,11 +106,11 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyCode.Q)] = SayCharacters,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.Q)] = ListCharacters,
 					[new(KeyCode.P)] = ResearchObject,
-					[new(KeyCode.R)] = SayLocalityDescription,
+					[new(KeyCode.R)] = SayZoneDescription,
 					[new(KeyCode.I)] = RunInventoryMenu,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.Return)] = PickUpObject,
 					[new(KeyCode.Tab)] = GameMenu,
-					[new(KeyCode.L)] = SayLocalitySize,
+					[new(KeyCode.L)] = SayZoneSize,
 					[new(false, true, false, KeyCode.V)] = ListExits,
 					[new(false, true, false, KeyCode.O)] = ListObjects,
 					[new(KeyCode.S)] = SayOrientation,
@@ -121,7 +121,7 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.LeftArrow)] = GoLeft,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.RightArrow)] = GoRight,
 					[new(KeyCode.O)] = SayObjects,
-					[new(KeyCode.K)] = SayLocalityName,
+					[new(KeyCode.K)] = SayZoneName,
 					[new(KeyCode.UpArrow)] = GoForward,
 					[new(KeyCode.DownArrow)] = GoBack,
 					[new(KeyCode.LeftArrow)] = TurnLeft,
@@ -142,11 +142,11 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Instruucts the sound component to read description of the current locality.
+		/// Instruucts the sound component to read description of the current zone.
 		/// </summary>
 		private void ResearchObject() => InnerMessage(new ExploreObject(this));
 
-		private void SayLocalityDescription() => InnerMessage(new SayLocalityDescription(this));
+		private void SayZoneDescription() => InnerMessage(new SayZoneDescription(this));
 
 		/// <summary>
 		/// Performs the command to pick up an object off the ground.
@@ -187,7 +187,7 @@ namespace Game.Entities.Characters.Chipotle
 			(string name, Action command)[] commands =
 			{
 				("Prozkoumej objekt: pé", ResearchObject),
-				("Rozhlédni se: r", SayLocalityDescription),
+				("Rozhlédni se: r", SayZoneDescription),
 				("inventář: I", RunInventoryMenu),
 				("použij objekt nebo dveře: entr", Interact),
 				("Vezmi objekt: šift entr", PickUpObject),
@@ -204,9 +204,9 @@ namespace Game.Entities.Characters.Chipotle
 				("Naveď mě k objektu: šift O", ListObjects),
 				("východy z lokace: Vé", SayExits),
 				("Naveď mě k východu: šift vé", ListExits),
-				("kde jsem: ká", SayLocalityName),
+				("kde jsem: ká", SayZoneName),
 				("Byl jsem tu: bé", SayVisitedRegion),
-				("Rozměry lokace: el", SayLocalitySize),
+				("Rozměry lokace: el", SayZoneSize),
 				("kompas: Es", SayOrientation),
 				("souřadnice: Cé", SayAbsoluteCoordinates),
 				("Poslat zprávu autorovi: Kontrol zet", MainScript.SendFeedback),
@@ -265,9 +265,9 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Reports size of the locality in which the Chipotle NPC is currently located.
+		/// Reports size of the zone in which the Chipotle NPC is currently located.
 		/// </summary>
-		private void SayLocalitySize() => InnerMessage(new SayLocalitySize(this));
+		private void SayZoneSize() => InnerMessage(new SayZoneSize(this));
 
 		/// <summary>
 		/// Test function to announce Tuttle's position
@@ -280,14 +280,14 @@ namespace Game.Entities.Characters.Chipotle
 			Character tuttle = World.GetCharacter("tuttle");
 			string distance = World.GetDistance(tuttle, Owner).ToString();
 			string position = tuttle.Area.Value.Center.ToString();
-			string locality = tuttle.Locality.Name.Indexed;
-			Tolk.Speak(distance + Environment.NewLine + locality + " " + position, true);
+			string zone = tuttle.Zone.Name.Indexed;
+			Tolk.Speak(distance + Environment.NewLine + zone + " " + position, true);
 		}
 
 		/// <summary>
-		/// Opens a menu with all localities and jumps to the nearest walkable position in the selected locality.
+		/// Opens a menu with all zones and jumps to the nearest walkable position in the selected zone.
 		/// </summary>
-		private void JumpToLocality()
+		private void JumpToZone()
 		{
 			if (!Settings.TestCommandsEnabled)
 				return;
@@ -295,7 +295,7 @@ namespace Game.Entities.Characters.Chipotle
 			Vector2 me = Owner.Area.Value.Center;
 			List<List<string>> items =
 			(
-				from l in World.GetLocalities()
+				from l in World.GetZones()
 				orderby l.Name.Indexed
 				select (new List<string> { l.Name.Indexed })
 			).ToList();
@@ -304,12 +304,12 @@ namespace Game.Entities.Characters.Chipotle
 			if (item == -1)
 				return;
 
-			Locality locality = World.GetLocality(items[item][0]);
-			Vector2 point = locality.Area.Value.GetWalkableTiles().First().Position;
+			Zone zone = World.GetZone(items[item][0]);
+			Vector2 point = zone.Area.Value.GetWalkableTiles().First().Position;
 			InnerMessage(new SetPosition(this, point));
 
 			// Move Tuttle
-			point = locality.Area.Value.GetWalkableTiles().First(t => t.Position != point).Position;
+			point = zone.Area.Value.GetWalkableTiles().First(t => t.Position != point).Position;
 			World.GetCharacter("tuttle").TakeMessage(new SetPosition(null, point));
 		}
 
@@ -359,7 +359,7 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Lists exits from current locality.
+		/// Lists exits from current zone.
 		/// </summary>
 		protected void ListExits() => InnerMessage(new ListExits(this));
 
@@ -401,7 +401,7 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Reports list of all exits from current locality.
+		/// Reports list of all exits from current zone.
 		/// </summary>
 		protected void SayExits() => InnerMessage(new SayExits(this));
 
@@ -436,10 +436,10 @@ namespace Game.Entities.Characters.Chipotle
 		private void GoRight() => InnerMessage(new StartWalk(this, TurnType.SharplyRight));
 
 		/// <summary>
-		/// Announces the public name of the locality where the NPC is currently located using a
+		/// Announces the public name of the zone where the NPC is currently located using a
 		/// screen reader or a voice synthesizer.
 		/// </summary>
-		private void SayLocalityName() => InnerMessage(new SayLocalityName(this));
+		private void SayZoneName() => InnerMessage(new SayZoneName(this));
 
 		/// <summary>
 		/// Reports the nearest characters around this character using a screen reader or voice synthesizer.
@@ -499,7 +499,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void TurnSharplyRight() => InnerMessage(new ChangeOrientation(this, TurnType.SharplyRight));
 
 		/// <summary>
-		/// Reports if the player have already visited the current locality.
+		/// Reports if the player have already visited the current zone.
 		/// </summary>
 		private void SayVisitedRegion() => InnerMessage(new SayVisitedRegion(this));
 

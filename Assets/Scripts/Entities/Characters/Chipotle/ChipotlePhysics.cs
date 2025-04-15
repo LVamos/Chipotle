@@ -154,9 +154,9 @@ namespace Game.Entities.Characters.Chipotle
 		private const float _sideSpeed = 1.1f;
 
 		/// <summary>
-		/// Stores references to all the localities the NPC has visited.
+		/// Stores references to all the zones the NPC has visited.
 		/// </summary>
-		private readonly HashSet<Locality> _visitedLocalities = new();
+		private readonly HashSet<Zone> _visitedZones = new();
 
 		/// <summary>
 		/// A delayed message of ChipotlesCarMoved type
@@ -165,7 +165,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		/// <summary>
 		/// Indicates the ongoing countdown of the phone call cutscene that should be played after
-		/// the Detective Chipotle and Tuttle NPCs leave the Christine's bed room (ložnice p1) locality.
+		/// the Detective Chipotle and Tuttle NPCs leave the Christine's bed room (ložnice p1) zone.
 		/// </summary>
 		private bool _phoneCountdown;
 
@@ -180,7 +180,7 @@ namespace Game.Entities.Characters.Chipotle
 		private int _phoneInterval;
 
 		/// <summary>
-		/// Indicates if the NPC is sitting at a table in the pub (výčep h1) locality.
+		/// Indicates if the NPC is sitting at a table in the pub (výčep h1) zone.
 		/// </summary>
 		private bool _sittingAtPubTable;
 
@@ -196,7 +196,7 @@ namespace Game.Entities.Characters.Chipotle
 		private StartWalk _startWalkMessage;
 
 		/// <summary>
-		/// Indicates if the NPC stepped into the puddle in the pool (bazén w1) locality.
+		/// Indicates if the NPC stepped into the puddle in the pool (bazén w1) zone.
 		/// </summary>
 		private bool _steppedIntoPuddle;
 
@@ -207,10 +207,10 @@ namespace Game.Entities.Characters.Chipotle
 		private bool _walking;
 
 		/// <summary>
-		/// Returns reference to the asphalt road (asfaltka c1) locality.
+		/// Returns reference to the asphalt road (asfaltka c1) zone.
 		/// </summary>
-		private Locality AsphaltRoad
-			=> World.GetLocality("asfaltka c1");
+		private Zone AsphaltRoad
+			=> World.GetZone("asfaltka c1");
 
 		/// <summary>
 		/// Returns a reference to the Chipotle's car object.
@@ -269,7 +269,7 @@ namespace Game.Entities.Characters.Chipotle
 				case SayExits sex: OnSayExits(sex); break;
 				case StopWalk sw: OnStopWalk(sw); break;
 				case SayTerrain ste: OnSayTerrain(ste); break;
-				case SayVisitedRegion sv: OnSayVisitedLocality(sv); break;
+				case SayVisitedRegion sv: OnSayVisitedZone(sv); break;
 				case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
@@ -382,7 +382,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		private NavigableCharactersModel GetNavigableCharacters()
 		{
-			IEnumerable<Character> characters = Locality.GetNearByCharacters(
+			IEnumerable<Character> characters = Zone.GetNearByCharacters(
 				_area.Value.Center,
 				_navigableObjectsRadius,
 				Owner
@@ -708,7 +708,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected void OnSayExits(SayExits message) => SayExits();
 
 		/// <summary>
-		/// Announces the nearest exits from the locality in which the Chipotle NPC is located.
+		/// Announces the nearest exits from the zone in which the Chipotle NPC is located.
 		/// </summary>
 		private void SayExits()
 		{
@@ -757,7 +757,7 @@ namespace Game.Entities.Characters.Chipotle
 		private (List<List<string>> descriptions, Passage[] exits) GetNavigableExits()
 		{
 			IEnumerable<Passage> exits =
-				Locality.GetNearestExits(
+				Zone.GetNearestExits(
 					_area.Value.Center,
 					_exitRadius);
 			List<List<string>> descriptions =
@@ -766,7 +766,7 @@ namespace Game.Entities.Characters.Chipotle
 				let distance = World.GetDistance(Owner, e)
 				let distanceDescription = GetDistanceDescription(distance)
 				let type = e.ToString()
-				let to = e.AnotherLocality(Locality).To + " "
+				let to = e.AnotherZone(Zone).To + " "
 				let index = to.IndexOf(' ')
 				let to1 = to.Substring(0, index)
 				let to2 = to.Substring(index + 1)
@@ -801,14 +801,14 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Checks if Tuttle and Chipotle NPCs are in the same locality.
+		/// Checks if Tuttle and Chipotle NPCs are in the same zone.
 		/// </summary>
-		/// <returns>True if Tuttle and Chipotle NPCs are in the same locality</returns>
-		private bool IsTuttleNearBy() => Owner.SameLocality(Tuttle);
+		/// <returns>True if Tuttle and Chipotle NPCs are in the same zone</returns>
+		private bool IsTuttleNearBy() => Owner.SameZone(Tuttle);
 
 		/// <summary>
 		/// Chipotle and Tuttle NPCs relocate from the Walsch's drive way (příjezdoivá cesta w1)
-		/// locality right outside the Christine's door.Christine's front door.
+		/// zone right outside the Christine's door.Christine's front door.
 		/// </summary>
 		private void JumpToBelvedereStreet()
 		{
@@ -821,7 +821,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		/// <summary>
 		/// The Detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)
-		/// locality to the Christine's hall (hala p1) locality.
+		/// zone to the Christine's hall (hala p1) zone.
 		/// </summary>
 		private void JumpToChristinesHall()
 		{
@@ -831,13 +831,13 @@ namespace Game.Entities.Characters.Chipotle
 
 		/// <summary>
 		/// Relocates the NPC from the hall in Vanilla crunch company (hala v1) into the Mariotti's
-		/// office (kancelář v1) locality.
+		/// office (kancelář v1) zone.
 		/// </summary>
 		private void JumpToMariottisOffice() => JumpNear(World.GetItem("křeslo v6").Area.Value);
 
 		/// <summary>
-		/// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) locality to the
-		/// Sweeney's hall (hala s1) locality.
+		/// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) zone to the
+		/// Sweeney's hall (hala s1) zone.
 		/// </summary>
 		private void JumpToSweeneysHall()
 		{
@@ -847,15 +847,15 @@ namespace Game.Entities.Characters.Chipotle
 
 		/// <summary>
 		/// Relocates the NPC from the Mariotti's office (kancelář v1) into the garage of the
-		/// vanilla crunch company (garáž v1) locality.
+		/// vanilla crunch company (garáž v1) zone.
 		/// </summary>
 		private void JumpToVanillaCrunchGarage() => JumpNear(World.GetItem("zeď v6").Area.Value);
 
 		/// <summary>
 		/// Stores indexes of regions visited by the NPC.
 		/// </summary>
-		/// <remarks>Each locality is divided into regions of same size specified by the _motionTrackRadius field. Index of a region define distance from the top left region of the current locality (MotionTrackWidth *row +column). Last row and last column can be smaller.</remarks>
-		protected readonly Dictionary<Locality, HashSet<int>> _motionTrack = new();
+		/// <remarks>Each zone is divided into regions of same size specified by the _motionTrackRadius field. Index of a region define distance from the top left region of the current zone (MotionTrackWidth *row +column). Last row and last column can be smaller.</remarks>
+		protected readonly Dictionary<Zone, HashSet<int>> _motionTrack = new();
 
 		/// <summary>
 		/// Determines the maximum distance from the pool at which stepping into a puddle will trigger a cutscene.
@@ -863,14 +863,14 @@ namespace Game.Entities.Characters.Chipotle
 		protected const float _puddleRadius = 10;
 
 		/// <summary>
-		/// Computes amount of horizontal motion track regions for the current locality.
+		/// Computes amount of horizontal motion track regions for the current zone.
 		/// </summary>
-		protected int MotionTrackWidth => (int)(Locality.Area.Value.Width / _motionTrackRadius + (Locality.Area.Value.Width % _motionTrackRadius > 0 ? 1 : 0));
+		protected int MotionTrackWidth => (int)(Zone.Area.Value.Width / _motionTrackRadius + (Zone.Area.Value.Width % _motionTrackRadius > 0 ? 1 : 0));
 
 		/// <summary>
-		/// Computes amount of vertical motion track regions for the current locality.
+		/// Computes amount of vertical motion track regions for the current zone.
 		/// </summary>
-		protected int MotionTrackHeight => (int)(Locality.Area.Value.Height / _motionTrackRadius + (Locality.Area.Value.Height % _motionTrackRadius > 0 ? 1 : 0));
+		protected int MotionTrackHeight => (int)(Zone.Area.Value.Height / _motionTrackRadius + (Zone.Area.Value.Height % _motionTrackRadius > 0 ? 1 : 0));
 
 		protected int GetRegionIndex(Vector2 point)
 		{
@@ -897,7 +897,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected int _currentRegion;
 
 		/// <summary>
-		/// Specifies distance in which exits from current locality are searched.
+		/// Specifies distance in which exits from current zone are searched.
 		/// </summary>
 		protected const int _exitRadius = 50;
 
@@ -907,18 +907,18 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="point">Current position of the NPC</param>
 		protected void RecordRegion(Vector2 point)
 		{
-			if (!_motionTrack.ContainsKey(Locality))
-				_motionTrack[Locality] = new();
+			if (!_motionTrack.ContainsKey(Zone))
+				_motionTrack[Zone] = new();
 
 			int regionIndex = GetRegionIndex(point);
 
 			if (_currentRegion != regionIndex)
 			{
 				_currentRegion = regionIndex;
-				_inVisitedRegion = _motionTrack[Locality].Contains(regionIndex);
+				_inVisitedRegion = _motionTrack[Zone].Contains(regionIndex);
 
 				if (!_inVisitedRegion)
-					_motionTrack[Locality].Add(regionIndex);
+					_motionTrack[Zone].Add(regionIndex);
 			}
 		}
 
@@ -1037,7 +1037,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected void ReportObjects()
 		{
 			HashSet<string> nearObjects =
-				(from o in Locality.GetNearByObjects(_area.Value.Center, _nearObjectRadius, false)
+				(from o in Zone.GetNearByObjects(_area.Value.Center, _nearObjectRadius, false)
 				 select o.Name.Indexed)
 				.ToHashSet();
 
@@ -1078,17 +1078,17 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnChipotlesCarMoved(ChipotlesCarMoved message)
 		{
 			_carMovement = message;
-			Locality.TakeMessage(message, true);
+			Zone.TakeMessage(message, true);
 		}
 
 		/// <summary>
-		/// Returns information about all navigable objects from current locality in the specified radius around the NPC.
+		/// Returns information about all navigable objects from current zone in the specified radius around the NPC.
 		/// </summary>
 		/// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
 		protected NavigableItemsModel GetNavigableItems()
 		{
 			List<string> descriptions = new();
-			IEnumerable<Item> items = Locality.GetNearByObjects(_area.Value.Center, _navigableObjectsRadius);
+			IEnumerable<Item> items = Zone.GetNearByObjects(_area.Value.Center, _navigableObjectsRadius);
 
 			foreach (Item item in items)
 			{
@@ -1150,10 +1150,10 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnSayTerrain(SayTerrain message) => Tolk.Speak(World.Map[_area.Value.UpperLeftCorner].Terrain.GetDescription(), true);
 
 		/// <summary>
-		/// Processes the SayVisitedLocality message.
+		/// Processes the SayVisitedZone message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayVisitedLocality(SayVisitedRegion message) => InnerMessage(new SayVisitedLocalityResult(this, _inVisitedRegion));
+		private void OnSayVisitedZone(SayVisitedRegion message) => InnerMessage(new SayVisitedZoneResult(this, _inVisitedRegion));
 
 		/// <summary>
 		/// Processes the MakeStep message.
@@ -1341,7 +1341,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (_carMovement == null)
 				return;
 
-			// Jump to target locality
+			// Jump to target zone
 			float height = transform.localScale.y;
 			float width = transform.localScale.x;
 			Vector2? target = World.FindFreePlacementsAroundArea(null, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
@@ -1349,8 +1349,8 @@ namespace Game.Entities.Characters.Chipotle
 			if (target == null)
 				throw new InvalidOperationException("No walkable tile found.");
 
-			Locality carLocality = World.GetLocality((Vector2)target);
-			carLocality.TakeMessage(_carMovement);
+			Zone carZone = World.GetZone((Vector2)target);
+			carZone.TakeMessage(_carMovement);
 			InnerMessage(new LeftBycar(this));
 			JumpTo((Vector2)target, true);//todo předělat na Rectangle
 			_carMovement = null;
@@ -1374,7 +1374,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (_phoneCountdown && _phoneDeltaTime >= _phoneInterval)
 			{
 				_phoneCountdown = false;
-				World.GetItem("detektivovo auto").TakeMessage(new UnblockLocality(Owner, World.GetLocality("ulice s1")));
+				World.GetItem("detektivovo auto").TakeMessage(new UnblockZone(Owner, World.GetZone("ulice s1")));
 				World.PlayCutscene(Owner, "cs22");
 			}
 		}
@@ -1399,7 +1399,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		/// <summary>
 		/// Relocates the Chipotle's car (detektivovo auto) object to the afphalt road (asfaltka c1)
-		/// locality and plays an appropriate cutscene if crutial objects in the sweeney's room
+		/// zone and plays an appropriate cutscene if crutial objects in the sweeney's room
 		/// (pokoj s1) has been used.
 		/// </summary>
 		/// <remarks>The Detective Chiptole and Tuttle NPCs should move with the car afterwards.</remarks>

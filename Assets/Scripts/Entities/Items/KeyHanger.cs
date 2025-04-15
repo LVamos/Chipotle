@@ -7,7 +7,7 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents the key hanger object in the garage in Vanilla crunch company (garáž v1) locality.
+	/// Represents the key hanger object in the garage in Vanilla crunch company (garáž v1) zone.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class KeyHanger : Item

@@ -62,12 +62,12 @@ namespace Game.Entities.Characters.Components
 		[ProtoIgnore]
 		protected Character _player => World.Player;
 
-		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance, bool sameLocality = true)
+		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance, bool sameZone = true)
 		{
 			float height = transform.localScale.z;
 			float width = transform.localScale.x;
 
-			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, sameLocality)
+			Vector2[] points = World.FindFreePlacementsAroundArea(Owner, area, height, width, minDistance, maxDistance, sameZone)
 				.ToArray();
 
 			return points;
@@ -80,7 +80,7 @@ namespace Game.Entities.Characters.Components
 		protected void FollowPath(Queue<Vector2> path) => InnerMessage(new FollowPath(this, path));
 
 		/// <summary>
-		/// Tuttle makes few random steps in the current locality.
+		/// Tuttle makes few random steps in the current zone.
 		/// </summary>
 		protected void GoTo(Rectangle area, float minDistance, float maxDistance, bool watchPlayer = false)
 		{

@@ -47,25 +47,25 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="name">Inner name of the passage</param>
 		/// <param name="area">Coordinates of the are occupied by the passage</param>
-		/// <param name="localities">Localities connectedd by the passage</param>
+		/// <param name="zones">Zones connectedd by the passage</param>
 		/// <param name="isDoor">Specifies if the passage is a door.</param>
 		/// <param name="state">State of a door</param>
 		/// <param name="doorType">Type of a door</param>
 		/// <returns>A new instance of the passage</returns>
-		public static Passage CreatePassage(GameObject obj, Name name, Rectangle area, IEnumerable<string> localities, bool isDoor, PassageState state, Door.DoorType doorType)
+		public static Passage CreatePassage(GameObject obj, Name name, Rectangle area, IEnumerable<string> zones, bool isDoor, PassageState state, Door.DoorType doorType)
 		{
 			if (name == null || string.IsNullOrWhiteSpace(name.Indexed))
 				throw new ArgumentNullException(nameof(name));
-			if (localities.IsNullOrEmpty() || localities.Count() != 2)
-				throw new ArgumentException("Invalid localities.");
+			if (zones.IsNullOrEmpty() || zones.Count() != 2)
+				throw new ArgumentException("Invalid zones.");
 
 			Passage passage = obj.GetComponent<Passage>();
 
 			if (passage is not Passage && passage is not Door)
-				passage.Initialize(name, area, localities);
+				passage.Initialize(name, area, zones);
 			else if (passage is Door)
-				(passage as Door).Initialize(name, state, area, localities, doorType);
-			else passage.Initialize(name, area, localities);
+				(passage as Door).Initialize(name, state, area, zones, doorType);
+			else passage.Initialize(name, area, zones);
 
 			return passage;
 		}

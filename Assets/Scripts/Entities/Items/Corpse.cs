@@ -6,10 +6,10 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Items
 {
 	/// <summary>
-	/// Represents the tělo w1 object in the bazén w1 locality.
+	/// Represents the tělo w1 object in the bazén w1 zone.
 	/// </summary>
 	/// <remarks>
-	/// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 locality.
+	/// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 zone.
 	/// </remarks>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Corpse : Item

@@ -1,7 +1,7 @@
 ﻿namespace Game.Messaging.Commands.GameInfo
 {
-	public class SayLocalitySize : Message
+	public class SayZoneSize : Message
 	{
-		public SayLocalitySize(object sender) : base(sender) { }
+		public SayZoneSize(object sender) : base(sender) { }
 	}
 }
