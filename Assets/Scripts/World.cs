@@ -1007,7 +1007,7 @@ namespace Game
 			{
 				switch (obj.tag)
 				{
-					case "Zone": zoneObjects[obj.name] = obj; break;
+					case "Locality": zoneObjects[obj.name] = obj; break;
 					case "Item": itemObjects[obj.name] = obj; break;
 					case "Passage": passageObjects[obj.name] = obj; break;
 				}
@@ -1022,7 +1022,7 @@ namespace Game
 
 			XElement root = OpenMap().Root;
 			Initialize();
-			_zoneNodes = root.Element("zones").Elements("zone").ToList();
+			_zoneNodes = root.Element("localities").Elements("locality").ToList();
 
 			LoadTerrain(root);
 			LoadItemDescriptions(root);

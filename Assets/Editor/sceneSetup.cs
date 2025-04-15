@@ -5,6 +5,7 @@ using Game;
 using Game.Terrain;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -146,10 +147,10 @@ public static class sceneSetup
 
 	private static void LoadZonesAndItems(XElement root)
 	{
-		System.Collections.Generic.List<XElement> zones = root.Element("zones").Elements("zone").ToList();
+		List<XElement> zones = root.Element("localities").Elements("locality").ToList();
 		foreach (XElement zoneNode in zones)
 		{
-			GameObject zone = CreateObject(Attribute(zoneNode, "indexedname"), "Zone");
+			GameObject zone = CreateObject(Attribute(zoneNode, "indexedname"), "Locality");
 			zone.AddComponent<Zone>();
 			LoadItems(zoneNode);
 		}
