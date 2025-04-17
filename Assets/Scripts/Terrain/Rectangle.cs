@@ -710,8 +710,8 @@ namespace Game.Terrain
 			float startY = lowerRight.y;
 			float endY = upperRight.y;
 
-			int stepsX = (int)Math.Floor((endX - startX) / resolution) + 1;
-			int stepsY = (int)Math.Floor((endY - startY) / resolution) + 1;
+			int stepsX = (int)Math.Round((endX - startX) / resolution) + 1;
+			int stepsY = (int)Math.Round((endY - startY) / resolution) + 1;
 
 			for (int i = 0; i < stepsX; i++)
 			{
