@@ -123,8 +123,8 @@ namespace Game
 		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting zones for collision. The search ends at the position where collisions were detected.</remarks>
 		public static CollisionsModel DetectCollisionsOnTrack(MapElement ignoredElement, Vector2 direction, float length)
 		{
-			int steps = (int)Math.Ceiling(length / CollisionDetectionResolution);
-			Rectangle area = new(ignoredElement.Area.Value);
+			int steps = (int)Math.Round(length / CollisionDetectionResolution);
+			Rectangle area = ignoredElement.Area.Value;
 
 			for (int i = 0; i < steps; i++)
 			{

@@ -24,7 +24,7 @@ namespace Game.Terrain
 				);
 		}
 
-		public readonly float TileSize = .5f;
+		public readonly float TileSize = .1f;
 
 		/// <summary>
 		/// Name of an opened map file
@@ -64,7 +64,7 @@ namespace Game.Terrain
 		public TileInfo GetNeighbour(Vector2 position, Direction direction)
 		{
 			Vector2 vector = direction.AsVector2();
-			Vector2 finalVector = new(vector.x * .5f, vector.y * .5f);
+			Vector2 finalVector = new(vector.x * TileSize, vector.y * TileSize);
 			return GetNeighbour(position, finalVector);
 		}
 
@@ -127,7 +127,6 @@ namespace Game.Terrain
 		private void DrawTerrain(Rectangle area, TerrainType terrain, bool permeable = true)
 		{
 			Vector2[] points = area.GetPoints(TileSize).ToArray();
-			bool contained = points.Contains(new Vector2(1030, 1035.5f));
 			foreach (Vector2 point in points)
 				_terrain[point] = new(terrain, permeable, null);
 		}

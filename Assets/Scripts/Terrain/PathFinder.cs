@@ -13,7 +13,7 @@ namespace Game.Terrain
 	[Serializable]
 	public class PathFinder
 	{
-		private const float _distanceToleration = .5f;
+		private const float _distanceToleration = .1f;
 		private const float _boundingBoxMargin = 10f;
 
 		// Lokální proměnné, do kterých uložíme bounding box při hledání

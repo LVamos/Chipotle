@@ -1147,7 +1147,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayTerrain message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayTerrain(SayTerrain message) => Tolk.Speak(World.Map[_area.Value.UpperLeftCorner].Terrain.GetDescription(), true);
+		private void OnSayTerrain(SayTerrain message) => Tolk.Speak(World.Map[_area.Value.Center].Terrain.GetDescription(), true);
 
 		/// <summary>
 		/// Processes the SayVisitedZone message.
