@@ -14,7 +14,7 @@ namespace Game.Terrain
 	public class PathFinder
 	{
 		private const float _distanceToleration = .1f;
-		private const float _boundingBoxMargin = 10f;
+		private const float _boundingBoxMargin = 10;
 
 		// Lokální proměnné, do kterých uložíme bounding box při hledání
 		private float _minX, _maxX, _minY, _maxY;
@@ -129,7 +129,7 @@ namespace Game.Terrain
 		)
 		{
 			// Vezmu sousedy 4-směrné
-			IEnumerable<Models.TileInfo> tiles = World.Map.GetNeighbours4(parent.Coords);
+			List<Models.TileInfo> tiles = World.Map.GetNeighbours4(parent.Coords).ToList();
 
 			foreach (Models.TileInfo tileInfo in tiles)
 			{

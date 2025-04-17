@@ -1180,7 +1180,13 @@ namespace Game
 			Map = new(MainScript.MapPath, tileCount);
 
 			foreach (XElement zone in _zoneNodes)
+			{
+				//test
+				if (zone.Attribute("indexedname").Value.ToLower() == "příjezdová cesta w1")
+					System.Diagnostics.Debugger.Break();
+
 				Map.DrawZone(zone);
+			}
 		}
 
 		/// <summary>

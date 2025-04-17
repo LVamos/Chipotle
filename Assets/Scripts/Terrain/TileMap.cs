@@ -17,11 +17,13 @@ namespace Game.Terrain
 	{
 		public Vector2 SnapToGrid(Vector2 point)
 		{
-			return new
-				(
-				TileSize * Mathf.Round(point.x / TileSize),
-				TileSize * Mathf.Round(point.y / TileSize)
-				);
+			float x = TileSize * Mathf.Round(point.x / TileSize);
+			float y = TileSize * Mathf.Round(point.y / TileSize);
+
+			x = Mathf.Round(x * 10f) / 10f;
+			y = Mathf.Round(y * 10f) / 10f;
+
+			return new Vector2(x, y);
 		}
 
 		public readonly float TileSize = .1f;
@@ -128,7 +130,9 @@ namespace Game.Terrain
 		{
 			Vector2[] points = area.GetPoints(TileSize).ToArray();
 			foreach (Vector2 point in points)
+			{
 				_terrain[point] = new(terrain, permeable, null);
+			}
 		}
 
 		private void DrawPanel(XElement panel, Rectangle zoneArea)
@@ -150,7 +154,14 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">Target posiiton of the tile</param>
 		/// <param name="tile">The tile to be put</param>
-		public void PutTile(Vector2 point, Tile tile) => _terrain[SnapToGrid(point)] = tile;
+		public void PutTile(Vector2 point, Tile tile)
+		{
+			//test
+			if (point == new Vector2(1031.7f, 1035.5f))
+				System.Diagnostics.Debugger.Break();
+
+			_terrain[SnapToGrid(point)] = tile;
+		}
 
 		/// <summary>
 		/// Rounds the coordinates.
