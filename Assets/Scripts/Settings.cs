@@ -90,7 +90,7 @@ namespace Game
 		/// <summary>
 		/// Enables or disables logging of currently played sounds into console.
 		/// </summary>
-		public static bool LogPlayingSounds { get; set; }
+		public static bool LogPlayingSounds { get; set; } = true;
 
 		/// <summary>
 		/// Gets or sets the name of the configuration file.

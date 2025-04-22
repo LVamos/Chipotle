@@ -22,1027 +22,1030 @@ using Message = Game.Messaging.Message;
 
 namespace Game.Terrain
 {
-    /// <summary>
-    /// Represents one region on the game map (e.g. a room).
-    /// </summary>
-    [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-    public class Zone : MapElement
-    {
-        public IEnumerable<Door> GetClosedDoors()
-        {
-            return
-                Passages
-                .OfType<Door>()
-                .Where(d => d.State is PassageState.Closed or PassageState.Locked);
-        }
-
-        public bool IsWalkable(Rectangle area)
-        {
-            HashSet<Vector2> points = area.GetPoints(TileMap.TileSize);
-            return points.All(IsWalkable);
-        }
-
-        public bool IsWalkable(Vector2 point) => !_nonpassables.Contains(point);
-
-        private HashSet<Vector2> _nonpassables = new();
-        public void GatherNonwalkables(Item item)
-        {
-            if (item.CanBePicked())
-                return;
-
-            float tileSize = TileMap.TileSize;
-
-            HashSet<Vector2> points = item.Area.Value.GetPoints(tileSize);
-
-            // I "snap" each point to the nearest half and put it in the list of non-passable points
-            foreach (Vector2 point in points)
-                _nonpassables.Add(World.Map.SnapToGrid(point));
-        }
-
-        private bool PlayerInHere()
-        {
-            Vector2 player = World.Player.Area.Value.Center;
-            return Area.Value.Contains(player);
-        }
-
-        public AudioSource GetAmbientSource() => _ambientSource;
-
-        private bool PlayerInSoundRadius
-            => GetDistanceToPlayer() <= _zoneSoundRadius;
-
-        /// <summary>
-        /// Surfacematerials for walls, floor and ceiling
-        /// </summary>
-        public ZoneMaterialsDefinitionModel Materials { get; private set; }
-
-        [ProtoIgnore]
-        private AudioSource _ambientSource;
-
-        /// <summary>
-        /// Enumerates all passages leading to the specified zone.
-        /// </summary>
-        /// <param name="target">The target zone</param>
-        /// <returns>enumeration of passages</returns>
-        public IEnumerable<Passage> GetExitsTo(Zone target) => Passages.Where(p => p.LeadsTo(target));
-
-        /// <summary>
-        /// Indicates if a zone is inside a building or outside.
-        /// </summary>
-        public enum ZoneType
-        {
-            /// <summary>
-            /// A room or corridor in a building
-            /// </summary>
-            Indoor,
-
-            /// <summary>
-            /// An openair place like yard or meadow
-            /// </summary>
-            Outdoor
-        }
-
-        /// <summary>
-        /// Enumerates all accessible zones.
-        /// </summary>
-        /// <returns>All accessible zones</returns>
-        public IEnumerable<Zone> GetAccessibleZones() => Passages.Select(p => p.AnotherZone(this)).Distinct();
-
-        /// <summary>
-        /// Handles the EntityMoved message.
-        /// </summary>
-        /// <param name="message">The mesage to be handled</param>
-        private void OnCharacterMoved(CharacterMoved message)
-        {
-            if (message.Sender == World.Player)
-                UpdatePassageLoops();
-        }
-
-        /// <summary>
-        /// Updates position of passage sound loops.
-        /// </summary>
-        private void UpdatePassageLoops()
-        {
-            foreach (Passage passage in _passageLoops.Keys)
-            {
-                Vector2 player = World.Player.Area.Value.Center;
-                AudioSource source = _passageLoops[passage].AudioSource;
-
-                // If the player is standing right in the passage locate the sound right on his position.
-                if (passage.Area.Value.Contains(player))
-                {
-                    source.transform.position = player.ToVector3(2);
-                    continue;
-                }
-
-                Vector2? point = passage.Area.Value.GetAlignedPoint(player)
-                ?? passage.Area.Value.GetClosestPoint(player);
-                source.transform.position = point.Value.ToVector3(2);
-                UpdateSpatialBlend(passage, source);
-            }
-        }
-
-        private void UpdateSpatialBlend(Passage passage, AudioSource source)
-        {
-            if (passage is Door)
-            {
-                source.spatialBlend = 1;
-                return;
-            }
-            int distance = (int)GetDistanceToPlayer();
-            source.spatialBlend = distance > 10 ? 1 : distance * .1f;
-        }
-
-        /// <summary>
-        /// Checks if the specified point lays in front or behind a passage.
-        /// </summary>
-        /// <param name="point">The point to be checked</param>
-        /// <returns>The passage by in front or behind which the specified point lays or null if nothing found</returns>
-        public Passage IsAtPassage(Vector2 point) => Passages.FirstOrDefault(p => p.IsInFrontOrBehind(point));
-
-        /// <summary>
-        /// Checks if the specified entity is in any neighbour zone.
-        /// </summary>
-        /// <param name="e">The entity to be checked</param>
-        /// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
-        public Zone IsInNeighbourZone(Character e) => Neighbours.FirstOrDefault(l => l.IsItHere(e));
-
-        /// <summary>
-        /// Checks if the specified object is in any neighbour zone.
-        /// </summary>
-        /// <param name="o">The object to be checked</param>
-        /// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
-        public Zone IsInNeighbourZone(Item o) => Neighbours.FirstOrDefault(l => l.IsItHere(o));
-
-        /// <summary>
-        /// Checks if the specified entity is in any accessible neighbour zone.
-        /// </summary>
-        /// <param name="e">The entity to be checked</param>
-        /// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
-        public Zone IsInAccessibleZone(Character e) => GetZonesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
-
-        /// <summary>
-        /// Checks if the specified object is in any accessible neighbour zone.
-        /// </summary>
-        /// <param name="o">The object to be checked</param>
-        /// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
-        public Zone IsInAccessibleZone(Item o) => GetZonesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
-
-        /// <summary>
-        /// Returns all open passages.
-        /// </summary>
-        /// <returns>Enumeration of all open passages</returns>
-        public IEnumerable<Passage> GetApertures() => Passages.Where(p => p.State == PassageState.Open);
-
-        /// <summary>
-        /// Chekcs if the specified zone is accessible from this zone.
-        /// </summary>
-        /// <param name="l">The zone to be checked</param>
-        /// <returns>True if the specified zone is accessible form this zone</returns>
-        public bool IsBehindDoor(Zone l) => GetZonesBehindDoor().Any(zone => zone.Name.Indexed == l.Name.Indexed);
-
-        /// <summary>
-        /// Checks if it's possible to get to the specified zone from this zone over doors or open passages.
-        /// </summary>
-        /// <param name="zone">The target zone</param>
-        /// <returns>True if there's a way between this loclaity and the specified zone</returns>
-        public bool IsAccessible(Zone zone) => GetAccessibleZones().Any(l => l.Name.Indexed == zone.Name.Indexed);
-
-        /// <summary>
-        /// Checks if the specified zone is next to this zone.
-        /// </summary>
-        /// <param name="l">The zone to be checked</param>
-        /// <returns>True if the speicifed zone is adjecting to this zone</returns>
-        public bool IsNeighbour(Zone l) => Neighbours.Contains(l);
-
-        /// <summary>
-        /// Maps all adejcting zones.
-        /// </summary>
-        private void FindNeighbours()
-        {
-            Rectangle a = Area.Value;
-            a.Extend();
-            _neighbours =
-            (
-                from p in a.GetPerimeterPoints()
-                let l = World.GetZone(p)
-                where l != null
-                select l.Name.Indexed
-            ).Distinct().ToList();
-        }
-
-        /// <summary>
-        /// List of adjecting zones
-        /// </summary>
-        private List<string> _neighbours;
-
-        /// <summary>
-        /// List of adjecting zones
-        /// </summary>
-        [ProtoIgnore]
-        public IEnumerable<Zone> Neighbours => _neighbours.Select(World.GetZone);
-
-        /// <summary>
-        /// Returns all open passages between this zone and the specified one..
-        /// </summary>
-        /// <returns>Enumeration of all open passages between this zone and the specified one</returns>
-        public IEnumerable<Passage> GetApertures(Zone l) => GetApertures().Where(p => p.LeadsTo(l));
-
-        /// <summary>
-        /// Enumerates passages ordered by distance from the specified point.
-        /// </summary>
-        /// <param name="point">The default point</param>
-        /// <param name="radius">distance in which exits from current zone are searched</param>
-        /// <returns>Enumeration of passages</returns>
-        public IEnumerable<Passage> GetNearestExits(Vector2 point, int radius)
-        {
-            return
-                from e in Passages
-                where !e.Area.Value.Contains(point) && World.GetDistance(e.Area.Value.GetClosestPoint(point), point) <= radius
-                orderby e.Area.Value.GetDistanceFrom(point)
-                select e;
-        }
-
-        /// <summary>
-        /// Enumerates all characters around the specified <paramref name="point"/>.
-        /// </summary>
-        /// <param name="point">The point in whose surroundings the characters should be listed.</param>
-        /// <param name="radius">Max distance from the specified <paramref name="point"/></param>
-        /// <param name="ignoredCharacter">A character that shouldn't be included in the results</param>
-        /// <returns>Enumeration of characters</returns>
-        public IEnumerable<Character> GetNearByCharacters(Vector2 point, int radius, Character ignoredCharacter = null)
-        {
-            return
-                from c in Characters
-                let notTheIgnoredOne = c != ignoredCharacter
-                let visible = c.Area != null
-                let distance = c.Area.Value.GetDistanceFrom(point)
-                let inRange = distance <= radius
-                where notTheIgnoredOne && visible && inRange
-                orderby distance
-                select c;
-        }
-
-        /// <summary>
-        /// Enumerates all items around the specified <paramref name="point"/>.
-        /// </summary>
-        /// <param name="point">The point in whose surroundings the items should be listed.</param>
-        /// <param name="radius">Max distance from the specified <paramref name="point"/></param>
-        /// <param name="includeDecoration">Specifies if the method lists decorative objects such as fences or rails.</param>
-        /// <returns>Enumeration of items</returns>
-        public IEnumerable<Item> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
-        {
-            IEnumerable<Item> items = Items.Where(o => o.Area != null);
-
-            return
-                from o in items
-                let distance = o.Area.Value.GetDistanceFrom(point)
-                let inRange = distance <= radius
-                let decorationMatches = o.Decorative == includeDecoration
-                where decorationMatches && inRange
-                orderby distance
-                select o;
-        }
-
-        /// <summary>
-        /// Height of ceiling of the zone (0 in case of outdoor zones)
-        /// </summary>
-        public readonly float Ceiling;
-
-        /// <summary>
-        /// All exits from the zone
-        /// </summary>
-        [ProtoIgnore]
-        public IEnumerable<Passage> Passages
-        {
-            get
-            {
-                _passages ??= new();
-
-                return _passages.Select(World.GetPassage).Where(p => p != null);
-            }
-        }
-
-        /// <summary>
-        /// Text description of the zone
-        /// </summary>
-        public string Description { get; private set; }
-
-        /// <summary>
-        /// Name of the zone in a shape that expresses a direction to the zone.
-        /// </summary>
-        public string To { get; private set; }
-
-        /// <summary>
-        /// Specifies if the zone is outside or inside a building.
-        /// </summary>
-        public ZoneType Type { get; private set; }
-
-        /// <summary>
-        /// The minimum permitted Y dimension of the floor in this zone
-        /// </summary>
-        private const int MinimumHeight = 3;
-
-        /// <summary>
-        /// The minimum permitted X dimension of the floor in this zone
-        /// </summary>
-        private const int MinimumWidth = 3;
-
-        /// <summary>
-        /// Height of ceiling of the zone (0 in case of outdoor zones)
-        /// </summary>
-        private float _ceiling;
-
-        /// <summary>
-        /// List of NPCs present in this zone.
-        /// </summary>
-        private HashSet<string> _characters = new();
-
-        /// <summary>
-        /// List of objects present in this zone.
-        /// </summary>
-        private HashSet<string> _items = new();
-
-        /// <summary>
-        /// List of exits from this zone
-        /// </summary>
-        private HashSet<string> _passages = new();
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Inner and public name of the zone</param>
-        /// <param name="to">
-        /// Name of the zone in a shape that expresses a direction to the zone
-        /// </param>
-        /// <param name="type">Specifies if the zone is outside or inside a building.</param>
-        /// <param name="ceiling">Ceiling height of the zone (should be 0 for outdoor zones)</param>
-        /// <param name="area">Coordinates of the area occupied by the zone</param>
-        /// <param name="defaultTerrain">Lowest layer of the terrain in the zone</param>
-        /// <param name="backgroundInfo">A background sound played in loop</param>
-        public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume, ZoneMaterialsDefinitionModel materials = null)
-        {
-            base.Initialize(name, area);
-
-            Description = description;
-            To = to;
-            Type = type;
-            _ceiling = Type == ZoneType.Outdoor && ceiling <= 2 ? 0 : ceiling;
-            _ceiling = type == ZoneType.Outdoor ? 0 : ceiling;
-            DefaultTerrain = defaultTerrain;
-            Rectangle temp = Area.Value;
-            temp.MinimumHeight = MinimumHeight;
-            temp.MinimumWidth = MinimumWidth;
-            Area = temp;
-
-            AmbientSound = loop;
-            _defaultVolume = volume;
-
-            gameObject.transform.position = new Vector3(area.Center.x, ceiling / 2, area.Center.y);
-            gameObject.transform.localScale = new Vector3(area.Width, ceiling, area.Height);
-            Materials = materials;
-        }
-
-        /// <summary>
-        /// Defines the lowest layer of terrain in the zone.
-        /// </summary>
-        [ProtoIgnore]
-        public TerrainType DefaultTerrain { get; private set; }
-
-        /// <summary>
-        /// List of NPCs present in this zone.
-        /// </summary>
-        [ProtoIgnore]
-        public List<Character> Characters
-        {
-            get
-            {
-                List<Character> result = new();
-                foreach (string name in _characters)
-                {
-                    Character character = World.GetCharacter(name)
-                        ?? throw new ArgumentNullException($"Character {name} not found");
-                    result.Add(character);
-                }
-                return result;
-            }
-        }
-
-        [ProtoIgnore]
-        public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
-
-        /// <summary>
-        /// List of objects present in this zone.
-        /// </summary>
-        [ProtoIgnore]
-        public IEnumerable<Item> Items
-        {
-            get
-            {
-                _items ??= new();
-
-                return _items.Select(World.GetItem)
-                    .Where(o => o != null);
-            }
-        }
-
-        /// <summary>
-        /// Returns all adjecting zones to which it's possible to get from this zone.
-        /// </summary>
-        /// <returns>An enumeration of all adjecting accessible zones</returns>
-        public IEnumerable<Zone> GetZonesBehindDoor() => Passages.Select(p => p.AnotherZone(this));
-
-        /// <summary>
-        /// Checks if the specified game object is present in this zone in the moment.
-        /// </summary>
-        /// <param name="o">The object to be checked</param>
-        /// <returns>True if the object is present in the zone</returns>
-        public bool IsItHere(Item o) => _items.Contains(o.Name.Indexed);
-
-        /// <summary>
-        /// Checks if an entity is present in this zone in the moment.
-        /// </summary>
-        /// <param name="e">The entity to be checked</param>
-        /// <returns>True if the entity is here</returns>
-        public bool IsItHere(Character e) => Characters.Contains(e);
-
-        /// <summary>
-        /// Checks if a passage lays in the zone.
-        /// </summary>
-        /// <param name="p">The passage to be checked</param>
-        /// <returns>True if the passage lays in this zone</returns>
-        public bool IsItHere(Passage p) => Passages.Contains(p);
-
-        /// <summary>
-        /// Gets a message from another messaging object and stores it for processing.
-        /// </summary>
-        /// <param name="message">The message to be received</param>
-        /// <param name="routeToNeighbours">Specifies if the message should be distributed to the neighbours of this zone</param>
-        public void TakeMessage(Message message, bool routeToNeighbours)
-        {
-            TakeMessage(message);
-
-            if (routeToNeighbours)
-            {
-                foreach (Zone neighbour in Neighbours)
-                    neighbour.TakeMessage(message);
-            }
-        }
-
-        /// <summary>
-        /// Gets a message from another messaging object and stores it for processing.
-        /// </summary>
-        /// <param name="message">The message to be received</param>
-        public override void TakeMessage(Message message)
-        {
-            base.TakeMessage(message);
-
-            if (message is ChipotlesCarMoved)
-                return; // Don't send this to other objects and entities.
-
-            MessageObjects(message);
-            MessageEntities(message);
-            MessagePassages(message);
-        }
-
-        /// <summary>
-        /// Adds an passage to the zone.
-        /// </summary>
-        /// <param name="p">The passage to be added</param>
-        public void Register(Passage p)
-        {
-            // Check if exit isn't already in list
-            if (IsItHere(p))
-                throw new InvalidOperationException("exit already registered");
-
-            _passages.Add(p.Name.Indexed);
-        }
-
-        /// <summary>
-        /// Adds a game object to list of present objects.
-        /// </summary>
-        /// <param name="o">The object ot be added</param>
-        private void Register(Item o) => _items.Add(o.Name.Indexed);
-
-        /// <summary>
-        /// Adds an entity to zone.
-        /// </summary>
-        /// <param name="character">The entity to be added</param>
-        public void Register(Character character) => _characters.Add(character.Name.Indexed);
-
-        /// <summary>
-        /// Initializes the zone and starts its message loop.
-        /// </summary>
-        public override void Activate()
-        {
-            base.Activate();
-            FindNeighbours();
-        }
-
-        /// <summary>
-        /// Runs a message handler for the specified message.
-        /// </summary>
-        /// <param name="message">The message to be handled</param>
-        protected override void HandleMessage(Message message)
-        {
-            switch (message)
-            {
-                case ObjectDisappearedFromZone m: OnObjectDisappearedFromZone(m); break;
-                case ObjectAppearedInZone m: OnObjectAppearedInZone(m); break;
-                case ChipotlesCarMoved ccmv: OnChipotlesCarMoved(ccmv); break;
-                case CharacterMoved em: OnCharacterMoved(em); break;
-                case DoorManipulated dm: OnDoorManipulated(dm); break;
-                case Reloaded gr: OnGameReloaded(); break;
-                case CharacterLeftZone ll: OnCharacterLeftZone(ll); break;
-                case CharacterCameToZone m: OnCharacterCameToZone(m); break;
-                default: base.HandleMessage(message); break;
-            }
-        }
-
-        /// <summary>
-        /// Handles a message.
-        /// </summary>
-        /// <param name="m">The message to be handled</param>
-        private void OnObjectDisappearedFromZone(ObjectDisappearedFromZone m) => Unregister(m.Object);
-
-        /// <summary>
-        /// Handles a message.
-        /// </summary>
-        /// <param name="message">The message to be handled</param>
-        private void OnObjectAppearedInZone(ObjectAppearedInZone message)
-        {
-            Register(message.Object);
-            GatherNonwalkables(message.Object);
-        }
-
-        /// <summary>
-        /// Handles the ChipotlesCarMoved message.
-        /// </summary>
-        /// <param name="message"The message to be handled></param>
-        private void OnChipotlesCarMoved(ChipotlesCarMoved message)
-        {
-            if (message.Target.GetZones() != this)
-                StopAmbientSounds(true);
-        }
-
-        /// <summary>
-        /// Handles the DoorManipulated message.
-        /// </summary>
-        /// <param name="message">Source of the message</param>
-        private void OnDoorManipulated(DoorManipulated message)
-        {
-            if (!_passageLoops.ContainsKey(message.Sender))
-                return;
-
-            List<PreparedPassageLoopModel> preparedLoops = PreparePassageLoops();
-            PreparedPassageLoopModel preparedLoop = preparedLoops.First(l => l.Passage == message.Sender);
-
-            PassageLoopModel loop = _passageLoops[message.Sender];
-            ApplyLowPass(preparedLoop, loop);
-        }
-
-        /// <summary>
-        /// Immediately removes a game object from list of present objects.
-        /// </summary>
-        /// <param name="o"></param>
-        private void Unregister(Entity o) => _items.Remove(o.Name.Indexed);
-
-        /// <summary>
-        /// Immediately removes an entity from list of present entities.
-        /// </summary>
-        /// <param name="e">The entity to be removed</param>
-        public void Unregister(Character e) => _characters.Remove(e.Name.Indexed);
-
-        /// <summary>
-        /// Removes a passage from the zone.
-        /// </summary>
-        /// <param name="p">The passage to be removed</param>
-        public void Unregister(Passage p)
-        {
-            if (!Passages.Contains(p))
-                throw new InvalidOperationException("Unregistered passage");
-
-            _passages.Remove(p.Name.Indexed);
-        }
-
-        /// <summary>
-        /// Erases the zone from game world.
-        /// </summary>
-        protected void Disappear()
-        {
-            // Delete objects.
-            foreach (Item o in Items)
-                World.Remove(o);
-
-            // Delete passages.
-            foreach (Passage p in Passages)
-                World.Remove(p);
-
-            // Delete character.
-            foreach (Character e in Characters)
-                World.Remove(e);
-
-            // Delete zone from the map.
-            foreach (Vector2 p in _area.Value.GetPoints())
-                World.Map[p] = null;
-        }
-
-        /// <summary>
-        /// Sends a message to all game objects in the zone.
-        /// </summary>
-        /// <param name="message">The message to be sent</param>
-        protected void MessageObjects(Message message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            foreach (Item o in Items)
-            {
-                if (o != message.Sender)
-                    o.TakeMessage(message);
-            }
-        }
-
-        private void MessageEntities(Message message)
-        {
-            foreach (Character e in Characters)
-            {
-                if (e != message.Sender)
-                    e.TakeMessage(message);
-            }
-        }
-
-        /// <summary>
-        /// Handles the Reloaded message.
-        /// </summary>
-        private void OnGameReloaded()
-        {
-            _passageLoops = new();
-            UpdateLoop();
-        }
-
-        /// <summary>
-        /// Handles the ZoneEntered message.
-        /// </summary>
-        /// <param name="message">The message</param>
-        private void OnCharacterCameToZone(CharacterCameToZone message)
-        {
-            if (message.CurrentZone == this)
-            {
-                Register(message.Character);
-
-                if (message.Character == World.Player)
-                {
-                    Sounds.SetRoomParameters(this);
-                    _playersPreviousZone = message.PreviousZone;
-                }
-            }
-
-            if (message.Character == World.Player)
-                UpdateLoop();
-        }
-
-        /// <summary>
-        /// Last previous zone visited by the player.
-        /// </summary>
-        [ProtoIgnore]
-        private Zone _playersPreviousZone;
-
-        /// <summary>
-        /// Distributes a game message to all passages.
-        /// </summary>
-        /// <param name="message">The message to be sent</param>
-        private void MessagePassages(Message message)
-        {
-            foreach (Passage p in Passages)
-            {
-                if (p != message.Sender)
-                    p.TakeMessage(message);
-            }
-        }
-
-        /// <summary>
-        /// Handles the ZoneLeft message.
-        /// </summary>
-        /// <param name="message">The message</param>
-        private void OnCharacterLeftZone(CharacterLeftZone message)
-        {
-            if (message.LeftZone != this)
-                return;
-
-            Unregister(message.Sender as Character);
-        }
-
-        /// <summary>
-        /// Name of background sound played in loop.
-        /// </summary>
-        public string AmbientSound;
-
-        /// <summary>
-        /// Plays the background sound of this zone in a loop.
-        /// </summary>
-        /// <param name="playerMoved">Specifies if the player just moved from one zone to another one.</param>
-        private void UpdateLoop()
-        {
-            StopInaudibleSounds();
-            if (string.IsNullOrEmpty(AmbientSound))
-                return;
-
-            if (PlayerInHere())
-            {
-                if (_playersPreviousZone != null
-                    && string.Equals(_playersPreviousZone.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase))
-                    _ambientSource = _playersPreviousZone.GetAmbientSource();
-                else
-                    PlayAmbientHere();
-                _playersPreviousZone = null;
-                return;
-            }
-            if (_playersPreviousZone != null && string.Equals(_playersPreviousZone.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
-                return;
-
-            if (IsAccessible(World.Player.Zone))
-                PlayAmbientAccessible();
-            else if (PlayerInSoundRadius)
-                PlayAmbientInaccessible();
-        }
-
-        /// <summary>
-        /// Playback mode for background sounds
-        /// </summary>
-        private SoundMode _soundMode;
-
-        /// <summary>
-        /// Defines playback modes for zone background sound based on player's proximity.
-        /// </summary>
-        public enum SoundMode
-        {
-            /// <summary>
-            /// If the player is in the zone, the sound plays in full stereo.
-            /// </summary>
-            InZone,
-
-            /// <summary>
-            /// If the player is in an accessible zone, the sound plays softly from every passage leading to the player's current zone.
-            /// </summary>
-            InAccessibleZone,
-
-            /// <summary>
-            /// If the player is far, the sound plays softly from the center of the zone, provided the player is within the sound's radius defined by _soundRadius.
-            /// </summary>
-            InInaccessibleZone
-        }
-
-        private void StopInaudibleSounds()
-        {
-            if (PlayerInSoundRadius)
-                return;
-
-            Stop(ref _ambientSource);
-            foreach (PassageLoopModel loop in _passageLoops.Values)
-                Stop(ref loop.AudioSource);
-            _passageLoops = new();
-
-            void Stop(ref AudioSource source)
-            {
-                if (source != null && source.isPlaying)
-                {
-                    source.Stop();
-                    source = null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Stores the identifiers of location audio loops played in passages.
-        /// </summary>
-        [ProtoIgnore]
-        private Dictionary<Passage, PassageLoopModel> _passageLoops = new();
-
-        private bool _reloaded;
-        private const float _passageLoopMaxDistance = 15;
-
-        /// <summary>
-        /// The maximum distance the player is from the zone at which it makes sense to play the location audio.
-        /// </summary>
-        private const float _zoneSoundRadius = 100;
-        private const int _passageLoopOpenDoorMaxDistance = 3;
-        private const int _passageLoopClosedDoorMaxDistance = 2;
-
-        /// <summary>
-        /// Plays soudn loop of the zone.
-        /// </summary>
-        /// <param name="playerInHere">Determines if the player is in this zone.</param>
-        /// <param name="accessible">Determines if the player is in an neighbour accessible zone.</param>
-        protected void PlayAmbientInaccessible()
-        {
-            StopPassageLoops();
-            return;
-            Vector3 position = new(_area.Value.Center.x, 2, _area.Value.Center.y);
-
-            if (_soundMode == SoundMode.InInaccessibleZone)
-                _ambientSource = TakeClosestPassageLoop()?.AudioSource;
-
-            if (_ambientSource != null)
-            {
-                _ambientSource.spatialBlend = 1;
-                _ambientSource.transform.position = position;
-            }
-            else
-                _ambientSource = Sounds.Play(AmbientSound, position, _defaultVolume, true);
-
-            Sounds.SetLowPass(_ambientSource, Sounds.OverWallLowpass);
-            _soundMode = SoundMode.InInaccessibleZone;
-        }
-
-        private void PlayAmbientAccessible()
-        {
-            Zone playersZone = World.Player.Zone;
-            List<PreparedPassageLoopModel> loops = PreparePassageLoops();
-
-            /* 
-			 * If the ambient sounds are already playing in the player's zone, 
-			 * use a sound source from a passage closest to the player.
+	/// <summary>
+	/// Represents one region on the game map (e.g. a room).
+	/// </summary>
+	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	public class Zone : MapElement
+	{
+		public IEnumerable<Door> GetClosedDoors()
+		{
+			return
+				Passages
+				.OfType<Door>()
+				.Where(d => d.State is PassageState.Closed or PassageState.Locked);
+		}
+
+		public bool IsWalkable(Rectangle area)
+		{
+			HashSet<Vector2> points = area.GetPoints(TileMap.TileSize);
+			return points.All(IsWalkable);
+		}
+
+		public bool IsWalkable(Vector2 point) => !_nonpassables.Contains(point);
+
+		private HashSet<Vector2> _nonpassables = new();
+		public void GatherNonwalkables(Item item)
+		{
+			if (item.CanBePicked())
+				return;
+
+			float tileSize = TileMap.TileSize;
+
+			HashSet<Vector2> points = item.Area.Value.GetPoints(tileSize);
+
+			// I "snap" each point to the nearest half and put it in the list of non-passable points
+			foreach (Vector2 point in points)
+				_nonpassables.Add(World.Map.SnapToGrid(point));
+		}
+
+		private bool PlayerInHere()
+		{
+			Vector2 player = World.Player.Area.Value.Center;
+			return Area.Value.Contains(player);
+		}
+
+		public AudioSource GetAmbientSource() => _ambientSource;
+
+		private bool PlayerInSoundRadius
+		{ get => GetDistanceToPlayer() <= _zoneSoundRadius; }
+
+		/// <summary>
+		/// Surfacematerials for walls, floor and ceiling
+		/// </summary>
+		public ZoneMaterialsDefinitionModel Materials { get; private set; }
+
+		[ProtoIgnore]
+		private AudioSource _ambientSource;
+
+		/// <summary>
+		/// Enumerates all passages leading to the specified zone.
+		/// </summary>
+		/// <param name="target">The target zone</param>
+		/// <returns>enumeration of passages</returns>
+		public IEnumerable<Passage> GetExitsTo(Zone target) => Passages.Where(p => p.LeadsTo(target));
+
+		/// <summary>
+		/// Indicates if a zone is inside a building or outside.
+		/// </summary>
+		public enum ZoneType
+		{
+			/// <summary>
+			/// A room or corridor in a building
+			/// </summary>
+			Indoor,
+
+			/// <summary>
+			/// An openair place like yard or meadow
+			/// </summary>
+			Outdoor
+		}
+
+		/// <summary>
+		/// Enumerates all accessible zones.
+		/// </summary>
+		/// <returns>All accessible zones</returns>
+		public IEnumerable<Zone> GetAccessibleZones() => Passages.Select(p => p.AnotherZone(this)).Distinct();
+
+		/// <summary>
+		/// Handles the EntityMoved message.
+		/// </summary>
+		/// <param name="message">The mesage to be handled</param>
+		private void OnCharacterMoved(CharacterMoved message)
+		{
+			if (message.Sender == World.Player)
+				UpdatePassageLoops();
+		}
+
+		/// <summary>
+		/// Updates position of passage sound loops.
+		/// </summary>
+		private void UpdatePassageLoops()
+		{
+			foreach (Passage passage in _passageLoops.Keys)
+			{
+				Vector2 player = World.Player.Area.Value.Center;
+				AudioSource source = _passageLoops[passage].AudioSource;
+
+				// If the player is standing right in the passage locate the sound right on his position.
+				if (passage.Area.Value.Contains(player))
+				{
+					source.transform.position = player.ToVector3(2);
+					continue;
+				}
+
+				Vector2? point = passage.Area.Value.GetAlignedPoint(player)
+				?? passage.Area.Value.GetClosestPoint(player);
+				source.transform.position = point.Value.ToVector3(2);
+				UpdateSpatialBlend(passage, source);
+			}
+		}
+
+		private void UpdateSpatialBlend(Passage passage, AudioSource source)
+		{
+			if (passage is Door)
+			{
+				source.spatialBlend = 1;
+				return;
+			}
+			int distance = (int)GetDistanceToPlayer();
+			source.spatialBlend = distance > 10 ? 1 : distance * .1f;
+		}
+
+		/// <summary>
+		/// Checks if the specified point lays in front or behind a passage.
+		/// </summary>
+		/// <param name="point">The point to be checked</param>
+		/// <returns>The passage by in front or behind which the specified point lays or null if nothing found</returns>
+		public Passage IsAtPassage(Vector2 point) => Passages.FirstOrDefault(p => p.IsInFrontOrBehind(point));
+
+		/// <summary>
+		/// Checks if the specified entity is in any neighbour zone.
+		/// </summary>
+		/// <param name="e">The entity to be checked</param>
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInNeighbourZone(Character e) => Neighbours.FirstOrDefault(l => l.IsItHere(e));
+
+		/// <summary>
+		/// Checks if the specified object is in any neighbour zone.
+		/// </summary>
+		/// <param name="o">The object to be checked</param>
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInNeighbourZone(Item o) => Neighbours.FirstOrDefault(l => l.IsItHere(o));
+
+		/// <summary>
+		/// Checks if the specified entity is in any accessible neighbour zone.
+		/// </summary>
+		/// <param name="e">The entity to be checked</param>
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInAccessibleZone(Character e) => GetZonesBehindDoor().FirstOrDefault(l => l.IsItHere(e));
+
+		/// <summary>
+		/// Checks if the specified object is in any accessible neighbour zone.
+		/// </summary>
+		/// <param name="o">The object to be checked</param>
+		/// <returns>An instance of the zone in which the specified entity is located or null if it wasn't found</returns>
+		public Zone IsInAccessibleZone(Item o) => GetZonesBehindDoor().FirstOrDefault(l => l.IsItHere(o));
+
+		/// <summary>
+		/// Returns all open passages.
+		/// </summary>
+		/// <returns>Enumeration of all open passages</returns>
+		public IEnumerable<Passage> GetApertures() => Passages.Where(p => p.State == PassageState.Open);
+
+		/// <summary>
+		/// Chekcs if the specified zone is accessible from this zone.
+		/// </summary>
+		/// <param name="l">The zone to be checked</param>
+		/// <returns>True if the specified zone is accessible form this zone</returns>
+		public bool IsBehindDoor(Zone l) => GetZonesBehindDoor().Any(zone => zone.Name.Indexed == l.Name.Indexed);
+
+		/// <summary>
+		/// Checks if it's possible to get to the specified zone from this zone over doors or open passages.
+		/// </summary>
+		/// <param name="zone">The target zone</param>
+		/// <returns>True if there's a way between this loclaity and the specified zone</returns>
+		public bool IsAccessible(Zone zone) => GetAccessibleZones().Any(l => l == zone);
+
+		/// <summary>
+		/// Checks if the specified zone is next to this zone.
+		/// </summary>
+		/// <param name="l">The zone to be checked</param>
+		/// <returns>True if the speicifed zone is adjecting to this zone</returns>
+		public bool IsNeighbour(Zone l) => Neighbours.Contains(l);
+
+		/// <summary>
+		/// Maps all adejcting zones.
+		/// </summary>
+		private void FindNeighbours()
+		{
+			Rectangle a = Area.Value;
+			a.Extend();
+			_neighbours =
+			(
+				from p in a.GetPerimeterPoints()
+				let l = World.GetZone(p)
+				where l != null
+				select l.Name.Indexed
+			).Distinct().ToList();
+		}
+
+		/// <summary>
+		/// List of adjecting zones
+		/// </summary>
+		private List<string> _neighbours;
+
+		/// <summary>
+		/// List of adjecting zones
+		/// </summary>
+		[ProtoIgnore]
+		public IEnumerable<Zone> Neighbours => _neighbours.Select(World.GetZone);
+
+		/// <summary>
+		/// Returns all open passages between this zone and the specified one..
+		/// </summary>
+		/// <returns>Enumeration of all open passages between this zone and the specified one</returns>
+		public IEnumerable<Passage> GetApertures(Zone l) => GetApertures().Where(p => p.LeadsTo(l));
+
+		/// <summary>
+		/// Enumerates passages ordered by distance from the specified point.
+		/// </summary>
+		/// <param name="point">The default point</param>
+		/// <param name="radius">distance in which exits from current zone are searched</param>
+		/// <returns>Enumeration of passages</returns>
+		public IEnumerable<Passage> GetNearestExits(Vector2 point, int radius)
+		{
+			return
+				from e in Passages
+				where !e.Area.Value.Contains(point) && World.GetDistance(e.Area.Value.GetClosestPoint(point), point) <= radius
+				orderby e.Area.Value.GetDistanceFrom(point)
+				select e;
+		}
+
+		/// <summary>
+		/// Enumerates all characters around the specified <paramref name="point"/>.
+		/// </summary>
+		/// <param name="point">The point in whose surroundings the characters should be listed.</param>
+		/// <param name="radius">Max distance from the specified <paramref name="point"/></param>
+		/// <param name="ignoredCharacter">A character that shouldn't be included in the results</param>
+		/// <returns>Enumeration of characters</returns>
+		public IEnumerable<Character> GetNearByCharacters(Vector2 point, int radius, Character ignoredCharacter = null)
+		{
+			return
+				from c in Characters
+				let notTheIgnoredOne = c != ignoredCharacter
+				let visible = c.Area != null
+				let distance = c.Area.Value.GetDistanceFrom(point)
+				let inRange = distance <= radius
+				where notTheIgnoredOne && visible && inRange
+				orderby distance
+				select c;
+		}
+
+		/// <summary>
+		/// Enumerates all items around the specified <paramref name="point"/>.
+		/// </summary>
+		/// <param name="point">The point in whose surroundings the items should be listed.</param>
+		/// <param name="radius">Max distance from the specified <paramref name="point"/></param>
+		/// <param name="includeDecoration">Specifies if the method lists decorative objects such as fences or rails.</param>
+		/// <returns>Enumeration of items</returns>
+		public IEnumerable<Item> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
+		{
+			IEnumerable<Item> items = Items.Where(o => o.Area != null);
+
+			return
+				from o in items
+				let distance = o.Area.Value.GetDistanceFrom(point)
+				let inRange = distance <= radius
+				let decorationMatches = o.Decorative == includeDecoration
+				where decorationMatches && inRange
+				orderby distance
+				select o;
+		}
+
+		/// <summary>
+		/// Height of ceiling of the zone (0 in case of outdoor zones)
+		/// </summary>
+		public readonly float Ceiling;
+
+		/// <summary>
+		/// All exits from the zone
+		/// </summary>
+		[ProtoIgnore]
+		public IEnumerable<Passage> Passages
+		{
+			get
+			{
+				_passages ??= new();
+
+				return _passages.Select(World.GetPassage).Where(p => p != null);
+			}
+		}
+
+		/// <summary>
+		/// Text description of the zone
+		/// </summary>
+		public string Description { get; private set; }
+
+		/// <summary>
+		/// Name of the zone in a shape that expresses a direction to the zone.
+		/// </summary>
+		public string To { get; private set; }
+
+		/// <summary>
+		/// Specifies if the zone is outside or inside a building.
+		/// </summary>
+		public ZoneType Type { get; private set; }
+
+		/// <summary>
+		/// The minimum permitted Y dimension of the floor in this zone
+		/// </summary>
+		private const int MinimumHeight = 3;
+
+		/// <summary>
+		/// The minimum permitted X dimension of the floor in this zone
+		/// </summary>
+		private const int MinimumWidth = 3;
+
+		/// <summary>
+		/// Height of ceiling of the zone (0 in case of outdoor zones)
+		/// </summary>
+		private float _ceiling;
+
+		/// <summary>
+		/// List of NPCs present in this zone.
+		/// </summary>
+		private HashSet<string> _characters = new();
+
+		/// <summary>
+		/// List of objects present in this zone.
+		/// </summary>
+		private HashSet<string> _items = new();
+
+		/// <summary>
+		/// List of exits from this zone
+		/// </summary>
+		private HashSet<string> _passages = new();
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="name">Inner and public name of the zone</param>
+		/// <param name="to">
+		/// Name of the zone in a shape that expresses a direction to the zone
+		/// </param>
+		/// <param name="type">Specifies if the zone is outside or inside a building.</param>
+		/// <param name="ceiling">Ceiling height of the zone (should be 0 for outdoor zones)</param>
+		/// <param name="area">Coordinates of the area occupied by the zone</param>
+		/// <param name="defaultTerrain">Lowest layer of the terrain in the zone</param>
+		/// <param name="backgroundInfo">A background sound played in loop</param>
+		public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume, ZoneMaterialsDefinitionModel materials = null)
+		{
+			base.Initialize(name, area);
+
+			Description = description;
+			To = to;
+			Type = type;
+			_ceiling = Type == ZoneType.Outdoor && ceiling <= 2 ? 0 : ceiling;
+			_ceiling = type == ZoneType.Outdoor ? 0 : ceiling;
+			DefaultTerrain = defaultTerrain;
+			Rectangle temp = Area.Value;
+			temp.MinimumHeight = MinimumHeight;
+			temp.MinimumWidth = MinimumWidth;
+			Area = temp;
+
+			AmbientSound = loop;
+			_defaultVolume = volume;
+
+			gameObject.transform.position = new Vector3(area.Center.x, ceiling / 2, area.Center.y);
+			gameObject.transform.localScale = new Vector3(area.Width, ceiling, area.Height);
+			Materials = materials;
+		}
+
+		/// <summary>
+		/// Defines the lowest layer of terrain in the zone.
+		/// </summary>
+		[ProtoIgnore]
+		public TerrainType DefaultTerrain { get; private set; }
+
+		/// <summary>
+		/// List of NPCs present in this zone.
+		/// </summary>
+		[ProtoIgnore]
+		public List<Character> Characters
+		{
+			get
+			{
+				List<Character> result = new();
+				foreach (string name in _characters)
+				{
+					Character character = World.GetCharacter(name)
+						?? throw new ArgumentNullException($"Character {name} not found");
+					result.Add(character);
+				}
+				return result;
+			}
+		}
+
+		[ProtoIgnore]
+		public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
+
+		/// <summary>
+		/// List of objects present in this zone.
+		/// </summary>
+		[ProtoIgnore]
+		public IEnumerable<Item> Items
+		{
+			get
+			{
+				_items ??= new();
+
+				return _items.Select(World.GetItem)
+					.Where(o => o != null);
+			}
+		}
+
+		/// <summary>
+		/// Returns all adjecting zones to which it's possible to get from this zone.
+		/// </summary>
+		/// <returns>An enumeration of all adjecting accessible zones</returns>
+		public IEnumerable<Zone> GetZonesBehindDoor() => Passages.Select(p => p.AnotherZone(this));
+
+		/// <summary>
+		/// Checks if the specified game object is present in this zone in the moment.
+		/// </summary>
+		/// <param name="o">The object to be checked</param>
+		/// <returns>True if the object is present in the zone</returns>
+		public bool IsItHere(Item o) => _items.Contains(o.Name.Indexed);
+
+		/// <summary>
+		/// Checks if an entity is present in this zone in the moment.
+		/// </summary>
+		/// <param name="e">The entity to be checked</param>
+		/// <returns>True if the entity is here</returns>
+		public bool IsItHere(Character e) => Characters.Contains(e);
+
+		/// <summary>
+		/// Checks if a passage lays in the zone.
+		/// </summary>
+		/// <param name="p">The passage to be checked</param>
+		/// <returns>True if the passage lays in this zone</returns>
+		public bool IsItHere(Passage p) => Passages.Contains(p);
+
+		/// <summary>
+		/// Gets a message from another messaging object and stores it for processing.
+		/// </summary>
+		/// <param name="message">The message to be received</param>
+		/// <param name="routeToNeighbours">Specifies if the message should be distributed to the neighbours of this zone</param>
+		public void TakeMessage(Message message, bool routeToNeighbours)
+		{
+			TakeMessage(message);
+
+			if (routeToNeighbours)
+			{
+				foreach (Zone neighbour in Neighbours)
+					neighbour.TakeMessage(message);
+			}
+		}
+
+		/// <summary>
+		/// Gets a message from another messaging object and stores it for processing.
+		/// </summary>
+		/// <param name="message">The message to be received</param>
+		public override void TakeMessage(Message message)
+		{
+			base.TakeMessage(message);
+
+			if (message is ChipotlesCarMoved)
+				return; // Don't send this to other objects and entities.
+
+			MessageObjects(message);
+			MessageEntities(message);
+			MessagePassages(message);
+		}
+
+		/// <summary>
+		/// Adds an passage to the zone.
+		/// </summary>
+		/// <param name="p">The passage to be added</param>
+		public void Register(Passage p)
+		{
+			// Check if exit isn't already in list
+			if (IsItHere(p))
+				throw new InvalidOperationException("exit already registered");
+
+			_passages.Add(p.Name.Indexed);
+		}
+
+		/// <summary>
+		/// Adds a game object to list of present objects.
+		/// </summary>
+		/// <param name="o">The object ot be added</param>
+		private void Register(Item o) => _items.Add(o.Name.Indexed);
+
+		/// <summary>
+		/// Adds an entity to zone.
+		/// </summary>
+		/// <param name="character">The entity to be added</param>
+		public void Register(Character character) => _characters.Add(character.Name.Indexed);
+
+		/// <summary>
+		/// Initializes the zone and starts its message loop.
+		/// </summary>
+		public override void Activate()
+		{
+			base.Activate();
+			FindNeighbours();
+		}
+
+		/// <summary>
+		/// Runs a message handler for the specified message.
+		/// </summary>
+		/// <param name="message">The message to be handled</param>
+		protected override void HandleMessage(Message message)
+		{
+			switch (message)
+			{
+				case ObjectDisappearedFromZone m: OnObjectDisappearedFromZone(m); break;
+				case ObjectAppearedInZone m: OnObjectAppearedInZone(m); break;
+				case ChipotlesCarMoved ccmv: OnChipotlesCarMoved(ccmv); break;
+				case CharacterMoved em: OnCharacterMoved(em); break;
+				case DoorManipulated dm: OnDoorManipulated(dm); break;
+				case Reloaded gr: OnGameReloaded(); break;
+				case CharacterLeftZone ll: OnCharacterLeftZone(ll); break;
+				case CharacterCameToZone m: OnCharacterCameToZone(m); break;
+				default: base.HandleMessage(message); break;
+			}
+		}
+
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		private void OnObjectDisappearedFromZone(ObjectDisappearedFromZone m) => Unregister(m.Object);
+
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="message">The message to be handled</param>
+		private void OnObjectAppearedInZone(ObjectAppearedInZone message)
+		{
+			Register(message.Object);
+			GatherNonwalkables(message.Object);
+		}
+
+		/// <summary>
+		/// Handles the ChipotlesCarMoved message.
+		/// </summary>
+		/// <param name="message"The message to be handled></param>
+		private void OnChipotlesCarMoved(ChipotlesCarMoved message)
+		{
+			if (message.Target.GetZones() != this)
+				StopAmbientSounds(true);
+		}
+
+		/// <summary>
+		/// Handles the DoorManipulated message.
+		/// </summary>
+		/// <param name="message">Source of the message</param>
+		private void OnDoorManipulated(DoorManipulated message)
+		{
+			if (!_passageLoops.ContainsKey(message.Sender))
+				return;
+
+			List<PreparedPassageLoopModel> preparedLoops = PreparePassageLoops();
+			PreparedPassageLoopModel preparedLoop = preparedLoops.First(l => l.Passage == message.Sender);
+
+			PassageLoopModel loop = _passageLoops[message.Sender];
+			ApplyLowPass(preparedLoop, loop);
+		}
+
+		/// <summary>
+		/// Immediately removes a game object from list of present objects.
+		/// </summary>
+		/// <param name="o"></param>
+		private void Unregister(Entity o) => _items.Remove(o.Name.Indexed);
+
+		/// <summary>
+		/// Immediately removes an entity from list of present entities.
+		/// </summary>
+		/// <param name="e">The entity to be removed</param>
+		public void Unregister(Character e) => _characters.Remove(e.Name.Indexed);
+
+		/// <summary>
+		/// Removes a passage from the zone.
+		/// </summary>
+		/// <param name="p">The passage to be removed</param>
+		public void Unregister(Passage p)
+		{
+			if (!Passages.Contains(p))
+				throw new InvalidOperationException("Unregistered passage");
+
+			_passages.Remove(p.Name.Indexed);
+		}
+
+		/// <summary>
+		/// Erases the zone from game world.
+		/// </summary>
+		protected void Disappear()
+		{
+			// Delete objects.
+			foreach (Item o in Items)
+				World.Remove(o);
+
+			// Delete passages.
+			foreach (Passage p in Passages)
+				World.Remove(p);
+
+			// Delete character.
+			foreach (Character e in Characters)
+				World.Remove(e);
+
+			// Delete zone from the map.
+			foreach (Vector2 p in _area.Value.GetPoints())
+				World.Map[p] = null;
+		}
+
+		/// <summary>
+		/// Sends a message to all game objects in the zone.
+		/// </summary>
+		/// <param name="message">The message to be sent</param>
+		protected void MessageObjects(Message message)
+		{
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
+
+			foreach (Item o in Items)
+			{
+				if (o != message.Sender)
+					o.TakeMessage(message);
+			}
+		}
+
+		private void MessageEntities(Message message)
+		{
+			foreach (Character e in Characters)
+			{
+				if (e != message.Sender)
+					e.TakeMessage(message);
+			}
+		}
+
+		/// <summary>
+		/// Handles the Reloaded message.
+		/// </summary>
+		private void OnGameReloaded()
+		{
+			_passageLoops = new();
+			UpdateLoop();
+		}
+
+		/// <summary>
+		/// Handles the ZoneEntered message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		private void OnCharacterCameToZone(CharacterCameToZone message)
+		{
+			if (message.CurrentZone == this)
+			{
+				Register(message.Character);
+
+				if (message.Character == World.Player)
+				{
+					Sounds.SetRoomParameters(this);
+					_playersPreviousZone = message.PreviousZone;
+				}
+			}
+
+			if (message.Character == World.Player)
+				UpdateLoop();
+		}
+
+		/// <summary>
+		/// Last previous zone visited by the player.
+		/// </summary>
+		[ProtoIgnore]
+		private Zone _playersPreviousZone;
+
+		/// <summary>
+		/// Distributes a game message to all passages.
+		/// </summary>
+		/// <param name="message">The message to be sent</param>
+		private void MessagePassages(Message message)
+		{
+			foreach (Passage p in Passages)
+			{
+				if (p != message.Sender)
+					p.TakeMessage(message);
+			}
+		}
+
+		/// <summary>
+		/// Handles the ZoneLeft message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		private void OnCharacterLeftZone(CharacterLeftZone message)
+		{
+			if (message.LeftZone != this)
+				return;
+
+			Unregister(message.Sender as Character);
+		}
+
+		/// <summary>
+		/// Name of background sound played in loop.
+		/// </summary>
+		public string AmbientSound;
+
+		/// <summary>
+		/// Plays the background sound of this zone in a loop.
+		/// </summary>
+		/// <param name="playerMoved">Specifies if the player just moved from one zone to another one.</param>
+		private void UpdateLoop()
+		{
+			if (string.IsNullOrEmpty(AmbientSound))
+				return;
+
+			if (PlayerInHere())
+			{
+				if (_playersPreviousZone != null
+					&& string.Equals(_playersPreviousZone.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase))
+					_ambientSource = _playersPreviousZone.GetAmbientSource();
+				else
+					PlayAmbientHere();
+				_playersPreviousZone = null;
+				return;
+			}
+			if (_playersPreviousZone != null && string.Equals(_playersPreviousZone.AmbientSound, AmbientSound, StringComparison.InvariantCultureIgnoreCase))
+				return;
+
+			if (IsAccessible(World.Player.Zone))
+			{
+				PlayAmbientAccessible();
+				return;
+			}
+
+			if (Name.Indexed == "výčep h1" && PlayerInSoundRadius) //todo přenést do konfiguračních souborů
+			{
+				PlayAmbientInaccessible();
+				return;
+			}
+
+			StopLoops();
+		}
+
+		/// <summary>
+		/// Playback mode for background sounds
+		/// </summary>
+		private SoundMode _soundMode;
+
+		/// <summary>
+		/// Defines playback modes for zone background sound based on player's proximity.
+		/// </summary>
+		public enum SoundMode
+		{
+			/// <summary>
+			/// If the player is in the zone, the sound plays in full stereo.
+			/// </summary>
+			InZone,
+
+			/// <summary>
+			/// If the player is in an accessible zone, the sound plays softly from every passage leading to the player's current zone.
+			/// </summary>
+			InAccessibleZone,
+
+			/// <summary>
+			/// If the player is far, the sound plays softly from the center of the zone, provided the player is within the sound's radius defined by _soundRadius.
+			/// </summary>
+			InInaccessibleZone
+		}
+
+		private void StopLoops()
+		{
+			Stop(ref _ambientSource);
+			foreach (PassageLoopModel loop in _passageLoops.Values)
+				Stop(ref loop.AudioSource);
+			_passageLoops = new();
+
+			void Stop(ref AudioSource source)
+			{
+				if (source != null && source.isPlaying)
+				{
+					source.Stop();
+					source = null;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Stores the identifiers of location audio loops played in passages.
+		/// </summary>
+		[ProtoIgnore]
+		private Dictionary<Passage, PassageLoopModel> _passageLoops = new();
+
+		private bool _reloaded;
+		private const float _passageLoopMaxDistance = 15;
+
+		/// <summary>
+		/// The maximum distance the player is from the zone at which it makes sense to play the location audio.
+		/// </summary>
+		private const float _zoneSoundRadius = 100;
+		private const int _passageLoopOpenDoorMaxDistance = 3;
+		private const int _passageLoopClosedDoorMaxDistance = 2;
+
+		/// <summary>
+		/// Plays soudn loop of the zone.
+		/// </summary>
+		/// <param name="playerInHere">Determines if the player is in this zone.</param>
+		/// <param name="accessible">Determines if the player is in an neighbour accessible zone.</param>
+		protected void PlayAmbientInaccessible()
+		{
+			Vector3 position = new(_area.Value.Center.x, 2, _area.Value.Center.y);
+
+			if (_soundMode == SoundMode.InInaccessibleZone)
+				_ambientSource = TakeClosestPassageLoop()?.AudioSource;
+
+			if (_ambientSource != null)
+			{
+				_ambientSource.spatialBlend = 1;
+				_ambientSource.transform.position = position;
+			}
+			else
+				_ambientSource = Sounds.Play(AmbientSound, position, _defaultVolume, true);
+
+			Sounds.SetLowPass(_ambientSource, Sounds.OverWallLowpass);
+			_soundMode = SoundMode.InInaccessibleZone;
+		}
+
+		private void PlayAmbientAccessible()
+		{
+			Zone playersZone = World.Player.Zone;
+			List<PreparedPassageLoopModel> loops = PreparePassageLoops();
+
+			/* 
+			 * Player leaved this zone.
 			 */
-            if (_ambientSource != null && _ambientSource.isPlaying)
-            {
-                IEnumerable<Passage> passages = loops.Select(loop => loop.Passage);
-                Passage closestPassage = World.GetClosestElement(passages, World.Player) as Passage;
-                PreparedPassageLoopModel closestLoop;
-                closestLoop = loops.First(loop => loop.Passage == closestPassage);
-                loops.Remove(closestLoop);
+			if (_playersPreviousZone == this)
+			{
+				// Change 2D ambient sound to 3D and place it in the nearest passage between this and new zone. Start playing 3D ambient sounds from other passages between this and the new zone.
+				List<Passage> passages = loops.Select(loop => loop.Passage).ToList();
+				Passage closestPassage = World.GetClosestElement(passages, World.Player) as Passage;
+				PreparedPassageLoopModel closestLoop;
+				closestLoop = loops.First(loop => loop.Passage == closestPassage);
+				loops.Remove(closestLoop);
 
-                PlayAmbientFromPassage(closestLoop, _defaultVolume, _ambientSource);
-            }
+				MoveAmbientToPassage(closestLoop, _defaultVolume, _ambientSource);
+			}
+			else StopAmbientSounds();
 
-            // Start playback in The remaining exits.
-            foreach (PreparedPassageLoopModel loop in loops)
-                PlayAmbientFromPassage(loop, _defaultVolume);
+			// Start playback in The remaining exits.
+			foreach (PreparedPassageLoopModel loop in loops)
+				PlayAmbientFromPassage(loop, _defaultVolume);
 
-            _soundMode = SoundMode.InAccessibleZone;
-        }
+			_soundMode = SoundMode.InAccessibleZone;
+		}
 
-        private List<PreparedPassageLoopModel> PreparePassageLoops()
-        {
-            Zone playersZone = World.Player.Zone;
-            List<Passage> exits = GetExitsTo(playersZone).ToList();
-            List<PreparedPassageLoopModel> result = new();
+		private List<PreparedPassageLoopModel> PreparePassageLoops()
+		{
+			Zone playersZone = World.Player.Zone;
+			List<Passage> exits = GetExitsTo(playersZone).ToList();
+			List<PreparedPassageLoopModel> result = new();
 
-            foreach (Passage passage in exits)
-            {
-                Vector2 position = default;
-                Vector2 player = World.Player.Area.Value.Center;
+			foreach (Passage passage in exits)
+			{
+				Vector2 position = default;
+				Vector2 player = World.Player.Area.Value.Center;
 
-                // Player stands in the passage
-                if (passage.Area.Value.Contains(player))
-                {
-                    Zone other = passage.AnotherZone(playersZone);
-                    position = other.Area.Value.GetClosestPoint(player);
-                }
-                else
-                {
-                    // Is the player standing in opposit to the passage?
-                    Vector2? tmp = passage.Area.Value.GetAlignedPoint(player);
-                    position = tmp != null ? tmp.Value : passage.Area.Value.GetClosestPoint(player);
-                }
-                Vector3 position3d = new(position.x, 2, position.y);
+				// Player stands in the passage
+				if (passage.Area.Value.Contains(player))
+				{
+					Zone other = passage.AnotherZone(playersZone);
+					position = other.Area.Value.GetClosestPoint(player);
+				}
+				else
+				{
+					// Is the player standing in opposit to the passage?
+					Vector2? tmp = passage.Area.Value.GetAlignedPoint(player);
+					position = tmp != null ? tmp.Value : passage.Area.Value.GetClosestPoint(player);
+				}
+				Vector3 position3d = new(position.x, 2, position.y);
 
-                // Make it quieter if the player is in a inadjecting zone behind a closed door.
-                Zone between = playersZone.GetZonesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
-                bool doubleAttenuation = between != null && playersZone.GetApertures(between).IsNullOrEmpty();
-                float volume = passage.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
-                if (doubleAttenuation)
-                    volume *= .01f;
+				// Make it quieter if the player is in a inadjecting zone behind a closed door.
+				Zone between = playersZone.GetZonesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
+				bool doubleAttenuation = between != null && playersZone.GetApertures(between).IsNullOrEmpty();
+				float volume = passage.State == PassageState.Closed ? _defaultVolume : OverDoorVolume;
+				if (doubleAttenuation)
+					volume *= .01f;
 
-                result.Add(new(passage, position3d, doubleAttenuation));
-            }
-            return result;
-        }
+				result.Add(new(passage, position3d, doubleAttenuation));
+			}
+			return result;
+		}
 
-        private void PlayAmbientHere()
-        {
-            _soundMode = SoundMode.InZone;
-            if ((_ambientSource == null || !_ambientSource.isPlaying) && _passageLoops.IsNullOrEmpty())
-            {
-                _ambientSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true);
-                return;
-            }
+		private void PlayAmbientHere()
+		{
+			_soundMode = SoundMode.InZone;
+			if ((_ambientSource == null || !_ambientSource.isPlaying) && _passageLoops.IsNullOrEmpty())
+			{
+				_ambientSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true);
+				return;
+			}
 
-            /*
+			/*
 			 * Switching from InInaccessibleZone mode
 			 * Find a passage sound that is closest to the player, 
 			] * change it to full stereo, disable Low pass and stop the rest of the passage loops.
 			 */
-            PassageLoopModel loop = TakeClosestPassageLoop();
-            Sounds.ConvertTo2d(loop.AudioSource, loop.Muffled);
-            _ambientSource = loop.AudioSource;
+			PassageLoopModel loop = TakeClosestPassageLoop();
+			Sounds.ConvertTo2d(loop.AudioSource, loop.Muffled);
+			_ambientSource = loop.AudioSource;
 
-            StopPassageLoops();
-        }
+			StopPassageLoops();
+		}
 
-        private PassageLoopModel TakeClosestPassageLoop()
-        {
-            Passage closest = _passageLoops.Keys
-                .OrderBy(p => p.Area.Value.GetDistanceFrom(World.Player.Area.Value))
-                .FirstOrDefault();
-            if (closest == null)
-                return null;
+		private PassageLoopModel TakeClosestPassageLoop()
+		{
+			Passage closest = _passageLoops.Keys
+				.OrderBy(p => p.Area.Value.GetDistanceFrom(World.Player.Area.Value))
+				.FirstOrDefault();
+			if (closest == null)
+				return null;
 
-            PassageLoopModel loop = _passageLoops[closest];
-            _passageLoops.Remove(closest);
-            return loop;
-        }
+			PassageLoopModel loop = _passageLoops[closest];
+			_passageLoops.Remove(closest);
+			return loop;
+		}
 
-        private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume)
-        {
-            PassageLoopModel newLoop = new()
-            {
-                AudioSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true)
-            };
-            newLoop.AudioSource.transform.position = loop.Position;
+		private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume)
+		{
+			PassageLoopModel newLoop = new()
+			{
+				AudioSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true)
+			};
+			newLoop.AudioSource.transform.position = loop.Position;
 
-            if (loop.Passage is Door door)
-            {
-                newLoop.AudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-                if (door.State == PassageState.Open)
-                    newLoop.AudioSource.maxDistance = _passageLoopOpenDoorMaxDistance;
-                else
-                    newLoop.AudioSource.maxDistance = _passageLoopClosedDoorMaxDistance;
-            }
-            else
-            {
-                newLoop.AudioSource.rolloffMode = AudioRolloffMode.Linear;
-                newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
-            }
+			if (loop.Passage is Door door)
+			{
+				newLoop.AudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+				if (door.State == PassageState.Open)
+					newLoop.AudioSource.maxDistance = _passageLoopOpenDoorMaxDistance;
+				else
+					newLoop.AudioSource.maxDistance = _passageLoopClosedDoorMaxDistance;
+			}
+			else
+			{
+				newLoop.AudioSource.rolloffMode = AudioRolloffMode.Linear;
+				newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
+			}
 
-            newLoop.AudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-            _passageLoops[loop.Passage] = newLoop;
-            UpdateSpatialBlend(loop.Passage, newLoop.AudioSource);
-            ApplyLowPass(loop, newLoop);
-            newLoop.AudioSource.volume = 0;
-            Sounds.SlideVolume(newLoop.AudioSource, .5f, _defaultVolume);
-        }
+			_passageLoops[loop.Passage] = newLoop;
+			UpdateSpatialBlend(loop.Passage, newLoop.AudioSource);
+			ApplyLowPass(loop, newLoop);
+			newLoop.AudioSource.volume = 0;
+			Sounds.SlideVolume(newLoop.AudioSource, .5f, _defaultVolume);
+		}
 
-        private void PlayAmbientFromPassage(PreparedPassageLoopModel loop, float volume, AudioSource stereoAmbientSound)
-        {
-            stereoAmbientSound.transform.position = loop.Position;
-            PassageLoopModel newLoop = new()
-            {
-                AudioSource = stereoAmbientSound
-            };
-            newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
-            _passageLoops[loop.Passage] = newLoop;
-            UpdateSpatialBlend(loop.Passage, newLoop.AudioSource);
-            ApplyLowPass(loop, newLoop);
-        }
+		private void MoveAmbientToPassage(PreparedPassageLoopModel loop, float volume, AudioSource stereoAmbientSound)
+		{
+			stereoAmbientSound.transform.position = loop.Position;
+			PassageLoopModel newLoop = new()
+			{
+				AudioSource = stereoAmbientSound
+			};
+			newLoop.AudioSource.maxDistance = _passageLoopMaxDistance;
+			_passageLoops[loop.Passage] = newLoop;
+			UpdateSpatialBlend(loop.Passage, newLoop.AudioSource);
+			ApplyLowPass(loop, newLoop);
+		}
 
-        private void ApplyLowPass(PreparedPassageLoopModel preparedLoop, PassageLoopModel loop)
-        {
-            if (preparedLoop.Passage.State is PassageState.Closed or PassageState.Locked)
-            {
-                int frequency = preparedLoop.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverDoorLowpass;
-                Sounds.SetLowPass(loop.AudioSource, frequency);
-                loop.Muffled = true;
-                return;
-            }
+		private void ApplyLowPass(PreparedPassageLoopModel preparedLoop, PassageLoopModel loop)
+		{
+			if (preparedLoop.Passage.State is PassageState.Closed or PassageState.Locked)
+			{
+				int frequency = preparedLoop.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverDoorLowpass;
+				Sounds.SetLowPass(loop.AudioSource, frequency);
+				loop.Muffled = true;
+				return;
+			}
 
-            if (loop.Muffled)
-            {
-                Sounds.DisableLowpass(loop.AudioSource);
-                loop.AudioSource.outputAudioMixerGroup = null;
-                loop.Muffled = false;
-            }
-        }
+			if (loop.Muffled)
+			{
+				Sounds.DisableLowpass(loop.AudioSource);
+				loop.AudioSource.outputAudioMixerGroup = null;
+				loop.Muffled = false;
+			}
+		}
 
-        /// <summary>
-        /// Returns all passages leading to the specified zone.
-        /// </summary>
-        /// <param name="zone">The zone to which the passages should lead</param>
-        /// <returns> all passages leading to the specified zone</returns>
-        private IEnumerable<Passage> GetPassagesTo(Zone zone) => Passages.Where(p => p.Zones.Contains(zone));
+		/// <summary>
+		/// Returns all passages leading to the specified zone.
+		/// </summary>
+		/// <param name="zone">The zone to which the passages should lead</param>
+		/// <returns> all passages leading to the specified zone</returns>
+		private IEnumerable<Passage> GetPassagesTo(Zone zone) => Passages.Where(p => p.Zones.Contains(zone));
 
-        //protected new float OverDoorVolume => .05f * _defaultVolume;
+		//protected new float OverDoorVolume => .05f * _defaultVolume;
 
-        /// <summary>
-        /// Stops all isntances of background sound.
-        /// </summary>
-        /// <param name="fadeOut">Specifies if the loop is faded out</param>
-        private void StopAmbientSounds(bool fadeOut = false)
-        {
-            if (_ambientSource != null && _ambientSource.isPlaying)
-            {
-                Sounds.SlideVolume(_ambientSource, .5f, 0);
-                _ambientSource = null;
-            }
+		/// <summary>
+		/// Stops all isntances of background sound.
+		/// </summary>
+		/// <param name="fadeOut">Specifies if the loop is faded out</param>
+		private void StopAmbientSounds(bool fadeOut = false)
+		{
+			if (_ambientSource != null && _ambientSource.isPlaying)
+			{
+				Sounds.SlideVolume(_ambientSource, .5f, 0);
+				_ambientSource = null;
+			}
 
-            StopPassageLoops();
-        }
+			StopPassageLoops();
+		}
 
-        private void StopPassageLoops()
-        {
-            foreach (PassageLoopModel loop in _passageLoops.Values)
-                Sounds.SlideVolume(loop.AudioSource, .5f, 0);
+		private void StopPassageLoops()
+		{
+			foreach (PassageLoopModel loop in _passageLoops.Values)
+				Sounds.SlideVolume(loop.AudioSource, .5f, 0);
 
-            _passageLoops = new();
-        }
-    }
+			_passageLoops = new();
+		}
+	}
 }
