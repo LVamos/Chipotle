@@ -58,11 +58,11 @@ namespace Game.Audio
 
 		public static void SetRoomParameters(Zone zone) => _soundManager.SetRoomParameters(zone);
 
-		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f) => _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration);
+		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration, description);
 
-		public static AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000) => _soundManager.PlayMuffled(soundName, position, volume, loop, cutOffFrequency);
+		public static AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000, string description = null) => _soundManager.PlayMuffled(soundName, position, volume, loop, cutOffFrequency, description);
 
-		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration);
+		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration, description);
 
 		public static AudioMixerGroup MixerGroup => _soundManager.MixerGroup;
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }

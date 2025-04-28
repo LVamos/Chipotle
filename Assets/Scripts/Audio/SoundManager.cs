@@ -87,9 +87,10 @@ namespace Assets.Scripts.Audio
 			return;
 		}
 
-		public AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
+		public AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
+			source.name = description ?? "sound";
 			source.clip = Sounds.GetClip(soundName);
 			source.spatialize = false;
 			source.spatialBlend = 0;
@@ -173,9 +174,10 @@ namespace Assets.Scripts.Audio
 			source.outputAudioMixerGroup = null;
 		}
 
-		public AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000)
+		public AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000, string description = null)
 		{
 			AudioSource source = _soundPool.GetMuffledSource();
+			source.name = description ?? "sound";
 			AudioLowPassFilter lowPass = source.gameObject.GetComponent<AudioLowPassFilter>();
 			lowPass.cutoffFrequency = cutOffFrequency;
 			source.transform.position = position;
@@ -190,9 +192,10 @@ namespace Assets.Scripts.Audio
 			return source;
 		}
 
-		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f)
+		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
+			source.name = description ?? "sound";
 			source.transform.position = position;
 			source.clip = Sounds.GetClip(soundName);
 			source.spatialBlend = 1; // Full surround sound

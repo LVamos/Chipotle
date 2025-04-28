@@ -4,6 +4,7 @@ using Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 using Unity.VisualScripting;
 
@@ -15,8 +16,16 @@ namespace Assets.Scripts.Audio
 	{
 		private void LogPlayingSounds()
 		{
-			string[] soundNames = GetPlayingSounds().names;
-			string output = "Playing sounds: " + string.Join(',', soundNames);
+			(AudioSource[] sounds, string[] names) sounds = GetPlayingSounds();
+			string[] soundDescriptions = sounds.sounds.Select(s => s.name).ToArray();
+			StringBuilder builder = new("Playing sounds");
+			builder.AppendLine();
+			for (int i = 0; i < sounds.names.Length; i++)
+			{
+				builder.AppendLine($"{sounds.names[i]}; {soundDescriptions[i]}");
+			}
+
+			string output = builder.ToString();
 			System.Diagnostics.Debug.WriteLine(output);
 		}
 
@@ -26,7 +35,9 @@ namespace Assets.Scripts.Audio
 		/// <returns>(AudioSource[] sounds, string[] names)</returns>
 		private (AudioSource[] sounds, string[] names) GetPlayingSounds()
 		{
-			AudioSource[] playingSounds = _pool.Concat(_muffledPool).Where(a => a.isPlaying).ToArray();
+			AudioSource[] playingSounds = _pool.Concat(_muffledPool).Where(a => a.isPlaying && !a.isVirtual)
+.ToArray();
+
 			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
 			return (playingSounds, playingSoundNames);
 		}
@@ -89,11 +100,15 @@ namespace Assets.Scripts.Audio
 			foreach (AudioSource source in allSources)
 			{
 				if (!source.isPlaying)
-				{
-					source.transform.SetParent(null);
-					source.gameObject.SetActive(false);
-				}
+					Sleep(source);
 			}
+		}
+
+		private static void Sleep(AudioSource source)
+		{
+			source.name = "inactive sound";
+			source.transform.SetParent(null);
+			source.gameObject.SetActive(false);
 		}
 
 		private AudioSource AddMuffledSource()

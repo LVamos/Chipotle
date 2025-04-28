@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.Models
 {
-	public class PassageLoopModel
+	public class PortalAmbientModel
 	{
 		public bool Muffled;
 		public AudioSource AudioSource;

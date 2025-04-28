@@ -224,7 +224,7 @@ public static class sceneSetup
 	private static void InitializeVoiceOutput()
 	{
 		TolkTolk.Load();
-
+		return;
 		if (!_eventHandlerAssigned)
 		{
 			Application.logMessageReceived += HandleLog;

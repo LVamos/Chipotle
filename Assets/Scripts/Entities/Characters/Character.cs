@@ -232,7 +232,7 @@ namespace Game.Entities.Characters
 		protected void OnPositionChanged(PositionChanged message)
 		{
 			Area = message.TargetPosition; // Set new position.
-			transform.position = new Vector3(Area.Value.Center.x, 2, Area.Value.Center.y);
+			transform.position = Area.Value.Center.ToVector3(2);
 
 			_zone = message.TargetZone.Name.Indexed;
 
