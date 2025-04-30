@@ -245,7 +245,7 @@ namespace Game.Terrain
 		/// List of adjecting zones
 		/// </summary>
 		[ProtoIgnore]
-		public IEnumerable<Zone> Neighbours => _neighbours.Select(World.GetZone);
+		public Zone[] Neighbours => _neighbours.Select(World.GetZone).ToArray();
 
 		/// <summary>
 		/// Returns all open passages between this zone and the specified one..
@@ -735,6 +735,23 @@ namespace Game.Terrain
 		/// </summary>
 		public string AmbientSound;
 
+		protected bool TryStealAmbient(Zone previousZone)
+		{
+			// Coming from another zone.
+			if (previousZone == null
+								|| !SameAmbients(previousZone))
+				return false;
+
+			if (PlayerInHere())
+				_ambientSource = previousZone.ReleaseAmbientSource();
+			return true;
+		}
+
+		private bool SameAmbients(Zone zone) => string.Equals(zone.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase);
+
+		protected bool IsSameAmbientNearBy()
+=> Neighbours.Any(n => SameAmbients(n));
+
 		/// <summary>
 		/// Plays the background sound of this zone in a loop.
 		/// </summary>
@@ -744,9 +761,24 @@ namespace Game.Terrain
 			if (string.IsNullOrEmpty(AmbientSound))
 				return;
 
-			if (PlayerInHere())
-				PlayAmbient(previousZone);
-			else PlayAmbientFromExits(previousZone); // Player in a different zone. Play ambient sound from all exits.
+			if (previousZone != null && TryStealAmbient(previousZone))
+				return;
+
+			bool duplicatedAmbients = IsSameAmbientNearBy();
+			bool playerHere = PlayerInHere();
+
+			if (duplicatedAmbients)
+			{
+				if (playerHere)
+					PlayAmbient();
+			}
+			else
+			{
+				if (playerHere)
+					PlayAmbient();
+				else
+					PlayAmbientFromExits(previousZone);
+			}
 		}
 
 		/// <summary>
@@ -875,14 +907,6 @@ namespace Game.Terrain
 
 		private void PlayAmbient(Zone previousZone = null)
 		{
-			// The same sound already plaing in previous zone.
-			if (previousZone != null
-								&& string.Equals(previousZone.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase))
-			{
-				_ambientSource = previousZone.ReleaseAmbientSource();
-				return;
-			}
-
 			string description = $"2d ambient; {Name.Indexed}";
 			if (_portalAmbients.IsNullOrEmpty())
 			{
