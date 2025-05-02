@@ -14,6 +14,8 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
+		public static void SlideLowPass(AudioSource source, float duration, float targetFrequency) => _soundManager.SlideLowPass(source, duration, targetFrequency);
+
 		/// <summary>
 		/// Calculates low pass filter cut off frequency.
 		/// </summary>
@@ -66,7 +68,7 @@ namespace Game.Audio
 
 		public static AudioMixerGroup MixerGroup => _soundManager.MixerGroup;
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
-		public static void AdjustMasterVolume(float duration, float targetVolume) => _soundManager.AdjustMasterVolume(duration, targetVolume);
+		public static void SlideMasterVolume(float duration, float targetVolume) => _soundManager.SlideMasterVolume(duration, targetVolume);
 
 		public static void StopAll() => _soundManager.StopAllSounds();
 

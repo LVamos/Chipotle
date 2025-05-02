@@ -173,7 +173,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnLeftBycar(LeftBycar m)
 		{
 			AudioListener.volume = 0;
-			Sounds.AdjustMasterVolume(1, Sounds.DefaultMasterVolume);
+			Sounds.SlideMasterVolume(1, Sounds.DefaultMasterVolume);
 		}
 
 		/// <summary>

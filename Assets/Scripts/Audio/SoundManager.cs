@@ -17,13 +17,47 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundManager : MonoBehaviour
 	{
+		private Dictionary<AudioSource, Coroutine> _coroutines = new();
+		public void SlideLowPass(AudioSource source, float duration, float targetFrequency)
+		{
+			if (targetFrequency == source.volume)
+				return;
+
+			if (_coroutines.ContainsKey(source))
+			{
+				StopCoroutine(_coroutines[source]);
+				_coroutines.Remove(source);
+			}
+
+			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency));
+			_coroutines[source] = newCoroutine;
+		}
+
+		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency)
+		{
+			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
+			if (lowPass == null)
+				lowPass = _soundPool.EnableLowPass(source);
+
+			float startFrequency = lowPass.cutoffFrequency;
+
+			for (float t = 0; t < duration; t += Time.deltaTime)
+			{
+				lowPass.cutoffFrequency = Mathf.Lerp(startFrequency, targetFrequency, t / duration);
+				yield return null;
+			}
+			lowPass.cutoffFrequency = targetFrequency;
+			if (targetFrequency == 18000)
+				DisableLowPass(source);
+		}
+
 		public void Mute(float duration = _fadingDuration)
 		{
 			if (_muted)
 				return;
 
 			_muted = true;
-			AdjustMasterVolume(duration, 0.2f);
+			SlideMasterVolume(duration, 0.2f);
 		}
 
 		private const float _fullMasterVolume = 1;
@@ -35,7 +69,7 @@ namespace Assets.Scripts.Audio
 				return;
 
 			_muted = false;
-			AdjustMasterVolume(duration, _fullMasterVolume);
+			SlideMasterVolume(duration, _fullMasterVolume);
 		}
 
 		public AudioSource ConvertTo3d(AudioSource source, Vector3 position, int? lowPassFrequency = null)
@@ -64,22 +98,22 @@ namespace Assets.Scripts.Audio
 			if (targetVolume == sound.volume)
 				return;
 
-			StartCoroutine(Adjust());
+			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume));
+		}
 
-			IEnumerator Adjust()
+		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume)
+		{
+			float startVolume = sound.volume;
+
+			for (float t = 0; t < duration; t += Time.deltaTime)
 			{
-				float startVolume = sound.volume;
-
-				for (float t = 0; t < duration; t += Time.deltaTime)
-				{
-					sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
-					yield return null;
-				}
-				sound.volume = targetVolume;
-
-				if (targetVolume <= 0)
-					sound.Stop();
+				sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
+				yield return null;
 			}
+			sound.volume = targetVolume;
+
+			if (targetVolume <= 0)
+				sound.Stop();
 		}
 
 		private void Update()
@@ -160,7 +194,6 @@ namespace Assets.Scripts.Audio
 		public AudioSource DisableLowPass(AudioSource source)
 		{
 			_soundPool.DisableLowPass(source);
-			source.outputAudioMixerGroup = MixerGroup;
 			return source;
 		}
 
@@ -168,7 +201,10 @@ namespace Assets.Scripts.Audio
 		{
 			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
 			if (lowPass == null)
+			{
+				source.spatialize = false;
 				lowPass = _soundPool.EnableLowPass(source);
+			}
 
 			lowPass.cutoffFrequency = cutOffFrequency;
 			source.outputAudioMixerGroup = null;
@@ -245,8 +281,8 @@ namespace Assets.Scripts.Audio
 			set => AudioListener.volume = value;
 		}
 
-		private float stepSize;
-		private float targetVolume;
+		private float _masterVolumeStepSize;
+		private float _masterVolumeTargetVolume;
 
 		/// <summary>
 		/// Adjusts the volume of an audio source over a specified duration to a target volume.
@@ -254,32 +290,32 @@ namespace Assets.Scripts.Audio
 		/// <param name="source">An audio source to be adjusted</param>
 		/// <param name="duration">Duration of the adjustment</param>
 		/// <param name="targetVolume">Target volume</param>
-		public void AdjustMasterVolume(float duration, float newTargetVolume)
+		public void SlideMasterVolume(float duration, float newTargetVolume)
 		{
 			if (newTargetVolume == AudioListener.volume)
 				return;
 
-			targetVolume = newTargetVolume;
+			_masterVolumeTargetVolume = newTargetVolume;
 			float startVolume = AudioListener.volume;
 			int steps = Mathf.RoundToInt(duration * 100); // 100 kroků za sekundu
-			stepSize = (targetVolume - startVolume) / steps;
+			_masterVolumeStepSize = (_masterVolumeTargetVolume - startVolume) / steps;
 			float stepInterval = duration / steps;
 
-			CancelInvoke(nameof(AdjustStep));
-			InvokeRepeating(nameof(AdjustStep), 0, stepInterval);
+			CancelInvoke(nameof(MasterVolumeSlideStep));
+			InvokeRepeating(nameof(MasterVolumeSlideStep), 0, stepInterval);
 
 		}
 
-		private void AdjustStep()
+		private void MasterVolumeSlideStep()
 		{
-			if (Mathf.Abs(AudioListener.volume - targetVolume) < Mathf.Abs(stepSize))
+			if (Mathf.Abs(AudioListener.volume - _masterVolumeTargetVolume) < Mathf.Abs(_masterVolumeStepSize))
 			{
-				AudioListener.volume = targetVolume;
-				CancelInvoke(nameof(AdjustStep));
+				AudioListener.volume = _masterVolumeTargetVolume;
+				CancelInvoke(nameof(MasterVolumeSlideStep));
 				return;
 			}
 
-			AudioListener.volume += stepSize;
+			AudioListener.volume += _masterVolumeStepSize;
 		}
 
 		public void StopAllSounds()

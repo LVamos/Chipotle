@@ -604,7 +604,7 @@ namespace Game.Terrain
 			PreparedPortalAmbientModel preparedPortalAmbient = PreparedPortalAmbients.First(l => l.Passage == message.Sender);
 
 			PortalAmbientModel portalAmbient = _portalAmbients[message.Sender];
-			ApplyLowPass(preparedPortalAmbient, portalAmbient);
+			SetDoorOcclusion(preparedPortalAmbient, portalAmbient);
 		}
 
 		/// <summary>
@@ -743,8 +743,11 @@ namespace Game.Terrain
 				return false;
 
 			if (PlayerInHere())
+			{
 				_ambientSource = previousZone.ReleaseAmbientSource();
-			return true;
+				return true;
+			}
+			return false;
 		}
 
 		private bool SameAmbients(Zone zone) => string.Equals(zone.AmbientSound, AmbientSound, StringComparison.OrdinalIgnoreCase);
@@ -764,10 +767,8 @@ namespace Game.Terrain
 			if (previousZone != null && TryStealAmbient(previousZone))
 				return;
 
-			bool duplicatedAmbients = IsSameAmbientNearBy();
 			bool playerHere = PlayerInHere();
-
-			if (duplicatedAmbients)
+			if (playerHere && IsSameAmbientNearBy())
 			{
 				if (playerHere)
 					PlayAmbient();
@@ -839,6 +840,8 @@ namespace Game.Terrain
 		private const float _zoneSoundRadius = 100;
 		private const int _portalAmbientOpenDoorMaxDistance = 13;
 		private const int _portalAmbientClosedDoorMaxDistance = 10;
+		private const float _doorOpeningOcclusionDuration = 3;
+		private const float _doorClosingOcclusionDuration = .9f;
 
 		private void PlayAmbientFromExits(Zone previousZone = null)
 		{
@@ -960,7 +963,7 @@ namespace Game.Terrain
 			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
 			newPortalAmbient.AudioSource.rolloffMode = AudioRolloffMode.Linear;
 			UpdateSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
-			ApplyLowPass(preparedPortalAmbient, newPortalAmbient);
+			SetDoorOcclusion(preparedPortalAmbient, newPortalAmbient);
 			newPortalAmbient.AudioSource.volume = 0;
 			Sounds.SlideVolume(newPortalAmbient.AudioSource, .5f, _defaultVolume);
 		}
@@ -984,23 +987,26 @@ namespace Game.Terrain
 			newPortalAmbient.AudioSource.name = description;
 			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
 			UpdateSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
-			ApplyLowPass(preparedPortalAmbient, newPortalAmbient);
+			SetDoorOcclusion(preparedPortalAmbient, newPortalAmbient);
 		}
 
-		private void ApplyLowPass(PreparedPortalAmbientModel preparedPortalAmbient, PortalAmbientModel portalAmbient)
+		private void SetDoorOcclusion(PreparedPortalAmbientModel preparedPortalAmbient, PortalAmbientModel portalAmbient)
 		{
 			if (preparedPortalAmbient.Passage.State is PassageState.Closed or PassageState.Locked)
 			{
+				float volume = Sounds.GetOverDoorVolume(_defaultVolume);
+				Sounds.SlideVolume(portalAmbient.AudioSource, _doorClosingOcclusionDuration, volume);
 				int frequency = preparedPortalAmbient.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverDoorLowpass;
-				Sounds.SetLowPass(portalAmbient.AudioSource, frequency);
+				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorClosingOcclusionDuration, frequency);
 				portalAmbient.Muffled = true;
 				return;
 			}
 
+			// Door open
+			Sounds.SlideVolume(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, _defaultVolume);
 			if (portalAmbient.Muffled)
 			{
-				Sounds.DisableLowpass(portalAmbient.AudioSource);
-				portalAmbient.AudioSource.outputAudioMixerGroup = null;
+				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, 18000);
 				portalAmbient.Muffled = false;
 			}
 		}

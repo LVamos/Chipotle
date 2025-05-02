@@ -54,8 +54,8 @@ namespace Assets.Scripts.Audio
 		{
 			_muffledPool.Remove(source);
 			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
-				?? throw new LowPassFilterNotFoundException(source);
-			Destroy(lowPass);
+			?? throw new LowPassFilterNotFoundException(source);
+			DestroyImmediate(lowPass);
 			_pool.Add(source);
 			return source;
 		}
