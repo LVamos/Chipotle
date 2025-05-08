@@ -17,6 +17,20 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundManager : MonoBehaviour
 	{
+		public float GetLinearRolloffAttenuation(AudioSource source)
+		{
+			float distance = Vector3.Distance(source.transform.position, Camera.main.transform.position);
+			float min = source.minDistance;
+			float max = source.maxDistance;
+
+			if (distance <= min)
+				return 1f;
+			if (distance >= max)
+				return 0f;
+			return 1f - (distance - min) / (max - min);
+		}
+
+
 		private Dictionary<AudioSource, Coroutine> _coroutines = new();
 		public void SlideLowPass(AudioSource source, float duration, float targetFrequency)
 		{

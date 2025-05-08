@@ -1289,8 +1289,8 @@ namespace Game
 			Player = CharacterFactory.CreateChipotle();
 			Add(Player);
 
-			foreach (Zone l in _zones.Values)
-				l.Activate();
+			foreach (Zone z in _zones.Values)
+				z.Activate();
 
 			foreach (Passage p in _passages.Values)
 				p.Activate();

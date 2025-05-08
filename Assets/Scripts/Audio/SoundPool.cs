@@ -37,7 +37,6 @@ namespace Assets.Scripts.Audio
 		{
 			AudioSource[] playingSounds = _pool.Concat(_muffledPool).Where(a => a.isPlaying && !a.isVirtual)
 .ToArray();
-
 			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
 			return (playingSounds, playingSoundNames);
 		}

@@ -14,6 +14,7 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
+		public static float GetLinearRolloffAttenuation(AudioSource source) => _soundManager.GetLinearRolloffAttenuation(source);
 		public static void SlideLowPass(AudioSource source, float duration, float targetFrequency) => _soundManager.SlideLowPass(source, duration, targetFrequency);
 
 		/// <summary>
