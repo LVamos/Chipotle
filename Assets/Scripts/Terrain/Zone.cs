@@ -142,11 +142,11 @@ namespace Game.Terrain
 				Vector2? point = passage.Area.Value.GetAlignedPoint(player)
 				?? passage.Area.Value.GetClosestPoint(player);
 				source.transform.position = point.Value.ToVector3(2);
-				UpdateSpatialBlend(passage, source);
+				UpdatePortalAmbientSpatialBlend(passage, source);
 			}
 		}
 
-		private void UpdateSpatialBlend(Passage passage, AudioSource source)
+		private void UpdatePortalAmbientSpatialBlend(Passage passage, AudioSource source)
 		{
 			if (passage is Door)
 			{
@@ -587,8 +587,8 @@ namespace Game.Terrain
 		/// <param name="message"The message to be handled></param>
 		private void OnChipotlesCarMoved(ChipotlesCarMoved message)
 		{
-			if (message.Target.GetZones() != this)
-				StopAmbientSounds(true);
+			if (World.GetZone(message.Target.Center) != this)
+				StopAmbientSounds();
 		}
 
 		/// <summary>
@@ -604,6 +604,7 @@ namespace Game.Terrain
 			PreparedPortalAmbientModel preparedPortalAmbient = PreparedPortalAmbients.First(l => l.Passage == message.Sender);
 
 			PortalAmbientModel portalAmbient = _portalAmbients[message.Sender];
+			UpdatePortalAmbientVolume(preparedPortalAmbient, portalAmbient);
 			SetDoorOcclusion(preparedPortalAmbient, portalAmbient);
 		}
 
@@ -846,6 +847,8 @@ namespace Game.Terrain
 		private const float _portalAmbientClosedDoorMaxDistance = 4.5f;
 		private const float _doorOpeningOcclusionDuration = 3;
 		private const float _doorClosingOcclusionDuration = .5f;
+		private const int _ambient2dFadeDuration = 2;
+		private const float _ambient3dFadeDuration = .5f;
 
 		private void PlayAmbientFromExits(Zone previousZone = null)
 		{
@@ -859,7 +862,7 @@ namespace Game.Terrain
 			/* 
 			 * Player leaved this zone.
 			 */
-			if (previousZone == this)
+			if (previousZone == this && _ambientSource != null && _ambientSource.isPlaying)
 			{
 				// Change 2D ambient sound to 3D and place it in the nearest passage between this and new zone. Start playing 3D ambient sounds from other passages between this and the new zone.
 				List<Passage> passages = preparedPortalAmbients.Select(loop => loop.Passage).ToList();
@@ -917,7 +920,8 @@ namespace Game.Terrain
 			string description = $"2d ambient; {Name.Indexed}";
 			if (_portalAmbients.IsNullOrEmpty())
 			{
-				_ambientSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true, description: description);
+				_ambientSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description);
+				Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, _defaultVolume);
 				return;
 			}
 
@@ -951,26 +955,45 @@ namespace Game.Terrain
 			string description = GetPortalAmbientDescription(preparedPortalAmbient.Passage);
 			PortalAmbientModel newPortalAmbient = new()
 			{
-				AudioSource = Sounds.Play2d(AmbientSound, _defaultVolume, true, true, description: description)
+				AudioSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description)
 			};
 			newPortalAmbient.AudioSource.transform.position = preparedPortalAmbient.Position;
+			SetDistanceAttenuation(preparedPortalAmbient, newPortalAmbient);
+			UpdatePortalAmbientSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
+			UpdatePortalAmbientVolume(preparedPortalAmbient, newPortalAmbient);
+			SetDoorOcclusion(preparedPortalAmbient, newPortalAmbient);
+			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
+		}
 
+		private void SetDistanceAttenuation(PreparedPortalAmbientModel preparedPortalAmbient, PortalAmbientModel portalAmbient)
+		{
+			portalAmbient.AudioSource.rolloffMode = AudioRolloffMode.Linear;
 			if (preparedPortalAmbient.Passage is Door door)
 			{
 				if (door.State == PassageState.Open)
-					newPortalAmbient.AudioSource.maxDistance = _portalAmbientOpenDoorMaxDistance;
+					portalAmbient.AudioSource.maxDistance = _portalAmbientOpenDoorMaxDistance;
 				else
-					newPortalAmbient.AudioSource.maxDistance = _portalAmbientClosedDoorMaxDistance;
+					portalAmbient.AudioSource.maxDistance = _portalAmbientClosedDoorMaxDistance;
 			}
-			else newPortalAmbient.AudioSource.maxDistance = _portalAmbientMaxDistance;
+			else portalAmbient.AudioSource.maxDistance = _portalAmbientMaxDistance;
+		}
 
-			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
-			newPortalAmbient.AudioSource.rolloffMode = AudioRolloffMode.Linear;
-			UpdateSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
-			SetDoorOcclusion(preparedPortalAmbient, newPortalAmbient);
-			newPortalAmbient.AudioSource.volume = 0;
-			float targetVolume = Sounds.GetLinearRolloffAttenuation(newPortalAmbient.AudioSource);
-			Sounds.SlideVolume(newPortalAmbient.AudioSource, .5f, targetVolume);
+		private void UpdatePortalAmbientVolume(PreparedPortalAmbientModel preparedPortalAmbient, PortalAmbientModel portalAmbient)
+		{
+			float targetVolume = _defaultVolume;
+			float duration = _ambient2dFadeDuration;
+			if (preparedPortalAmbient.Passage is Door)
+			{
+				if (preparedPortalAmbient.Passage.State is PassageState.Closed or PassageState.Locked)
+				{
+					float defaultVolume = Sounds.GetOverDoorVolume(_defaultVolume);
+					targetVolume = Sounds.GetLinearRolloffAttenuation(portalAmbient.AudioSource, defaultVolume);
+					duration = _doorOpeningOcclusionDuration;
+				}
+				else duration = _doorClosingOcclusionDuration;
+			}
+
+			Sounds.SlideVolume(portalAmbient.AudioSource, duration, targetVolume);
 		}
 
 		protected string GetPortalAmbientDescription(Passage passage)
@@ -991,7 +1014,8 @@ namespace Game.Terrain
 			string description = GetPortalAmbientDescription(preparedPortalAmbient.Passage);
 			newPortalAmbient.AudioSource.name = description;
 			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
-			UpdateSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
+			UpdatePortalAmbientSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
+			UpdatePortalAmbientVolume(preparedPortalAmbient, newPortalAmbient);
 			SetDoorOcclusion(preparedPortalAmbient, newPortalAmbient);
 			newPortalAmbient.AudioSource.rolloffMode = AudioRolloffMode.Linear;
 		}
@@ -1000,8 +1024,6 @@ namespace Game.Terrain
 		{
 			if (preparedPortalAmbient.Passage.State is PassageState.Closed or PassageState.Locked)
 			{
-				float volume = Sounds.GetOverDoorVolume(_defaultVolume);
-				Sounds.SlideVolume(portalAmbient.AudioSource, _doorClosingOcclusionDuration, volume);
 				int frequency = preparedPortalAmbient.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverDoorLowpass;
 				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorClosingOcclusionDuration, frequency);
 				portalAmbient.Muffled = true;
@@ -1009,7 +1031,6 @@ namespace Game.Terrain
 			}
 
 			// Door open
-			Sounds.SlideVolume(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, _defaultVolume);
 			if (portalAmbient.Muffled)
 			{
 				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, 18000);
@@ -1030,11 +1051,11 @@ namespace Game.Terrain
 		/// Stops all isntances of background sound.
 		/// </summary>
 		/// <param name="fadeOut">Specifies if the loop is faded out</param>
-		private void StopAmbientSounds(bool fadeOut = false)
+		private void StopAmbientSounds()
 		{
 			if (_ambientSource != null && _ambientSource.isPlaying)
 			{
-				Sounds.SlideVolume(_ambientSource, .5f, 0);
+				Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, 0);
 				_ambientSource = null;
 			}
 

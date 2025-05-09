@@ -17,7 +17,7 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundManager : MonoBehaviour
 	{
-		public float GetLinearRolloffAttenuation(AudioSource source)
+		public float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume)
 		{
 			float distance = Vector3.Distance(source.transform.position, Camera.main.transform.position);
 			float min = source.minDistance;
@@ -27,7 +27,7 @@ namespace Assets.Scripts.Audio
 				return 1f;
 			if (distance >= max)
 				return 0f;
-			return 1f - (distance - min) / (max - min);
+			return defaultVolume - (distance - min) / (max - min);
 		}
 
 
