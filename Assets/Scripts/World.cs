@@ -166,25 +166,34 @@ namespace Game
 			}
 
 			// Check all objects, passages and characters in zones the given element intersects. Skip the given element.
-			foreach (Zone l in zones)
+			foreach (Zone z in zones)
 			{
-				if (l.IsWalkable(area))
+				bool probablyWalkable = z.IsWalkable(area);
+				if (!probablyWalkable)
 				{
-					Detect(l.Characters);
+					// make sure there is an item. If not, allow further collision detection.
+					Detect(z.Items);
+					if (!obstacles.Any())
+						probablyWalkable = true;
+				}
+
+				if (probablyWalkable)
+				{
+					Detect(z.Characters);
 					if (Enough())
 						return new(obstacles, false);
 
-					Detect(l.MovableItems);
+					Detect(z.MovableItems);
 					if (Enough())
 						return new(obstacles, false);
 
-					Detect(l.GetClosedDoors());
+					Detect(z.GetClosedDoors());
 					if (Enough())
 						return new(obstacles, false);
 				}
 				else
 				{
-					Detect(l.Items);
+					Detect(z.Items);
 					if (Enough())
 						return new(obstacles, false);
 				}
