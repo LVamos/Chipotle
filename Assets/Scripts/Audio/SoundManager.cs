@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.Models;
 
+using DavyKager;
+
 using Game.Audio;
 using Game.Terrain;
 
@@ -337,6 +339,11 @@ namespace Assets.Scripts.Audio
 			AudioSource[] sources = FindObjectsOfType<AudioSource>();
 			foreach (AudioSource soruce in sources)
 				soruce.Stop();
+		}
+
+		public void MuteSpeech()
+		{
+			Tolk.Silence();
 		}
 	}
 }

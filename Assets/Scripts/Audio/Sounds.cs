@@ -14,6 +14,7 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
+		public static void MuteSpeech() => _soundManager.MuteSpeech();
 		public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
 		public static void SlideLowPass(AudioSource source, float duration, float targetFrequency) => _soundManager.SlideLowPass(source, duration, targetFrequency);
 

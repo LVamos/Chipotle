@@ -116,7 +116,6 @@ public class AutoPlayBehaviour : MonoBehaviour
 		// Detekuj hlavní klávesu pouze při prvním stisknutí
 		KeyCode key = keyCodes.FirstOrDefault(k => Input.GetKeyDown(k) &&
 			k != KeyCode.LeftShift && k != KeyCode.RightShift &&
-			k != KeyCode.LeftControl && k != KeyCode.RightControl &&
 			k != KeyCode.LeftAlt && k != KeyCode.RightAlt);
 
 		// Když nebyla stisknuta žádná klávesa, vrátí se

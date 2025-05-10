@@ -17,7 +17,9 @@ namespace Game.UI
 	public abstract class VirtualWindow : MessagingObject
 	{
 
-		public virtual void Initialize() { }
+		public virtual void Initialize()
+		{
+		}
 
 
 		protected virtual void Avake()
@@ -79,6 +81,9 @@ namespace Game.UI
 		/// <param name="e">Event parameters</param>
 		public virtual void OnKeyDown(KeyShortcut shortcut)
 		{
+			if (shortcut.Control || shortcut.Key is KeyCode.LeftControl or KeyCode.RightControl)
+				Sounds.MuteSpeech();
+
 			Action action = null;
 			if (_shortcuts != null && _shortcuts.TryGetValue(shortcut, out action))
 				action();
