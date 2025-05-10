@@ -301,7 +301,7 @@ namespace Game.UI
 		{
 			Play(_selectionSound);
 			string text = string.Join(_divider, _items[Index]);
-			Tolk.Speak(text);
+			Tolk.Speak(text, true);
 		}
 
 		/// <summary>

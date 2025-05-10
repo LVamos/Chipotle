@@ -311,15 +311,19 @@ namespace Game.Entities.Characters.Chipotle
 			int count = message.Exits.Count;
 			if (count == 1)
 			{
-				Tolk.Speak(message.Exits[0][0], true);
+				string exit = GetExit(message.Exits[0]);
+				Tolk.Speak(exit, true);
 				return;
 			}
 
 			string number = count is >= 2 and <= 4
 				? "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: "
 				: "Je tu " + count.ToString() + " východů: ";
-			string[] exits = message.Exits.Select(e => string.Join(" ", e)).ToArray();
+			string[] exits =
+message.Exits.Select(e => GetExit(e)).ToArray();
 			Tolk.Speak(number + FormatStringList(exits, true) + ".", true);
+
+			string GetExit(List<string> exit) => string.Join(" ", exit);
 		}
 
 		/// <summary>
