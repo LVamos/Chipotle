@@ -93,7 +93,7 @@ namespace Game.Entities.Items
 		/// </summary>
 		[ProtoIgnore]
 		public IEnumerable<Zone> Zones => from name in _zones
-											   select World.GetZone(name);
+										  select World.GetZone(name);
 
 		/// <summary>
 		/// Finds all zones the object or the NPC intersects with and saves their names into _zones.
@@ -273,12 +273,12 @@ namespace Game.Entities.Items
 		/// Processes the EntityMoved message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnEntityMoved(CharacterMoved message)
+		protected void OnCharacterMoved(CharacterMoved message)
 		{
 			if (message.Sender != World.Player)
 				return;
 
-			UpdateNavigatingSound();
+			UpdateNavigatingSoundPosition();
 			UpdateLoop();
 			WatchPlayersMovement();
 		}
@@ -459,7 +459,7 @@ namespace Game.Entities.Items
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
 				case CharacterCameToZone le: OnZoneEntered(le); break;
-				case CharacterMoved em: OnEntityMoved(em); break;
+				case CharacterMoved em: OnCharacterMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;
 				case ObjectsCollided oc: OnObjectsCollided(oc); break;

@@ -252,10 +252,10 @@ namespace Assets.Scripts.Audio
 			source.clip = Sounds.GetClip(soundName);
 			source.spatialBlend = 1; // Full surround sound
 			source.spatialize = true;
-			source.spatializePostEffects = true;
+			source.spatializePostEffects = false;
 			source.outputAudioMixerGroup = Sounds.MixerGroup;
 			source.loop = loop;
-			source.dopplerLevel = 0;
+			source.dopplerLevel = 1;
 
 			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
 			resonance.bypassRoomEffects = false;

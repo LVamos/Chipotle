@@ -358,7 +358,8 @@ namespace Game.Terrain
 
 		public static string GetClockDirection(float degrees)
 		{
-			int clockDirection = (int)Math.Round(degrees) / 30;
+			int clockDirection = (int)Math.Round((degrees % 360) / 30);
+			clockDirection = clockDirection % 12;
 			string description = clockDirection switch
 			{
 				0 => "na dvanácti hodinách",

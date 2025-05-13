@@ -29,6 +29,8 @@ namespace Game.Terrain
 	{
 		private const int _navigationMaxDistance = 50;
 		private const float _navigationVolume = .5f;
+		private const float _navigationMinDistance = .6f;
+
 		[ProtoIgnore]
 		protected AudioSource _navigationAudio;
 
@@ -162,7 +164,7 @@ namespace Game.Terrain
 			bool keepNavigating = ShouldNavigationContinue();
 			ReportPosition(keepNavigating);
 			_navigating = keepNavigating;
-			UpdateNavigatingSound();
+			UpdateNavigatingSoundPosition();
 		}
 
 		/// <summary>
@@ -172,9 +174,10 @@ namespace Game.Terrain
 		protected virtual void ReportPosition(bool loop = false)
 		{
 			Vector2 position2d = GetClosestPointToPlayer();
-			Vector3 position3d = new(position2d.x, 2, position2d.y);
+			Vector3 position3d = new(position2d.x, 0, position2d.y);
 			_navigationAudio = Sounds.Play(_sounds["navigation"], position3d, _navigationVolume, loop);
 			_navigationAudio.maxDistance = _navigationMaxDistance;
+			_navigationAudio.minDistance = _navigationMinDistance;
 			_navigationAudio.rolloffMode = AudioRolloffMode.Linear;
 		}
 
@@ -251,7 +254,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Updates position and attenuation of navigating sound if the navigation is in progress.
 		/// </summary>
-		protected virtual void UpdateNavigatingSound()
+		protected virtual void UpdateNavigatingSoundPosition()
 		{
 			if (!_navigating)
 				return;
@@ -268,7 +271,8 @@ namespace Game.Terrain
 			Vector2? opposite = _area.Value.GetAlignedPoint(player);
 			if (opposite == null)
 				return; // Sound blocked, play it normally.
-
+						//test
+			return;
 			// Detect potentional acoustic obstacles and set up attenuate parameters
 			ObstacleType obstacle = World.DetectAcousticObstacles(new((Vector2)opposite));
 			bool muffled = obstacle is ObstacleType.Wall or ObstacleType.Object;
@@ -291,6 +295,30 @@ namespace Game.Terrain
 			}
 
 			_muffled = muffled;
+		}
+
+		/// <summary>
+		/// Returns true if the player is looking towards the given object (within a specified angle threshold).
+		/// </summary>
+		/// <param name="playerPosition">2D position of the player</param>
+		/// <param name="playerDirection">2D unit vector of player's orientation</param>
+		/// <param name="objectPosition">2D position of the target object</param>
+		/// <param name="maxAngleDegrees">Allowed view cone (in degrees), default is 60°</param>
+		public bool IsPlayerLookingAtMe(float maxAngleDegrees = 60f)
+		{
+			Vector2 playerPosition = World.Player.Area.Value.Center;
+			Vector2 myPosition = _area.Value.Center;
+			Vector2 toMe = myPosition - playerPosition;
+			if (toMe == Vector2.zero)
+				return true; // Player is exactly at the object's position
+
+			toMe.Normalize();
+
+			Vector2 playerDirection = World.Player.Orientation.UnitVector;
+			float dot = Vector2.Dot(playerDirection, toMe);
+			float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+
+			return angle <= maxAngleDegrees * 0.5f;
 		}
 
 		public override bool Equals(object obj)

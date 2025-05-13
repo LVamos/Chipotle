@@ -211,7 +211,7 @@ namespace Game.Terrain
             if (!_navigating || message.Sender != World.Player)
                 return;
 
-            UpdateNavigatingSound();
+            UpdateNavigatingSoundPosition();
         }
     }
 }

@@ -376,8 +376,8 @@ namespace Game.Entities.Characters.Chipotle
 
 			Character target = characters.Characters[option];
 
-			_navigatedObject = target;
-			_navigatedObject.TakeMessage(new StartNavigation(Owner));
+			_navigatedItem = target;
+			_navigatedItem.TakeMessage(new StartNavigation(Owner));
 		}
 
 		private NavigableCharactersModel GetNavigableCharacters()
@@ -565,8 +565,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnObjectNavigationStopped(NavigationStopped message)
 		{
-			if (message.Sender == _navigatedObject)
-				_navigatedObject = null;
+			if (message.Sender == _navigatedItem)
+				_navigatedItem = null;
 			else if (message.Sender == _navigatedExit)
 				_navigatedExit = null;
 		}
@@ -616,8 +616,8 @@ namespace Game.Entities.Characters.Chipotle
 
 					Item target = objects.Items[index];
 
-					_navigatedObject = target;
-					_navigatedObject.TakeMessage(new StartNavigation(Owner));
+					_navigatedItem = target;
+					_navigatedItem.TakeMessage(new StartNavigation(Owner));
 				});
 			int option = WindowHandler.Menu(parameters);
 		}
@@ -627,7 +627,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void StopNavigation()
 		{
-			_navigatedObject?.TakeMessage(new StopNavigation(Owner));
+			_navigatedItem?.TakeMessage(new StopNavigation(Owner));
 			_navigatedExit?.TakeMessage(new StopNavigation(Owner));
 		}
 
@@ -635,13 +635,13 @@ namespace Game.Entities.Characters.Chipotle
 		/// Checks if there's any navigation in progress.
 		/// </summary>
 		protected bool NavigationInProgress
-			=> _navigatedExit != null || _navigatedObject != null;
+			=> _navigatedExit != null || _navigatedItem != null;
 
 		/// <summary>
 		/// Objectt to which tthe NPC is currently navigated.
 		/// </summary>
 		[ProtoIgnore]
-		protected Entity _navigatedObject;
+		protected Entity _navigatedItem;
 
 		/// <summary>
 		/// Processes incoming messages.
@@ -1051,7 +1051,7 @@ namespace Game.Entities.Characters.Chipotle
 
 			foreach (string o in nearObjects)
 			{
-				if (_navigatedObject != null && _navigatedObject.Name.Indexed == o)
+				if (_navigatedItem != null && _navigatedItem.Name.Indexed == o)
 					continue;
 
 				// Announce new objects.
@@ -1203,6 +1203,7 @@ namespace Game.Entities.Characters.Chipotle
 			Orientation2D source = _orientation;
 			_orientation.Rotate(message.Degrees);
 			InnerMessage(new OrientationChanged(this, source, _orientation, message.Direction));
+
 			LogOrientationChange(source, _orientation, message.Degrees);
 		}
 
