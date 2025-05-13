@@ -395,7 +395,7 @@ namespace Game.Entities.Characters.Chipotle
 				float distance = World.GetDistance(Owner, character);
 				string distanceDescription = GetDistanceDescription(distance);
 				float compassDegrees = GetAngle(character);
-				string angleDescription = Angle.GetDescription(compassDegrees);
+				string angleDescription = Angle.GetRelativeDirection(compassDegrees, distance);
 
 				descriptions.Add($"{name} {distanceDescription} {angleDescription} ");
 			}
@@ -527,9 +527,9 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			(List<List<string>> descriptions, Passage[] exits) result = GetNavigableExits();
+			NavigableExitsModel result = GetNavigableExits();
 
-			if (result.descriptions.IsNullOrEmpty()) // No objects near by
+			if (result.Descriptions.IsNullOrEmpty()) // No objects near by
 			{
 				InnerMessage(new SayExitsResult(this));
 				return;
@@ -537,7 +537,7 @@ namespace Game.Entities.Characters.Chipotle
 
 			// Run the menu
 			MenuParametersDTO parameters = new(
-	items: result.descriptions,
+	items: result.Descriptions,
 	introText: "Východy",
 	divider: " ",
 	searchIndex: 2,
@@ -547,7 +547,7 @@ namespace Game.Entities.Characters.Chipotle
 		if (option == -1)
 			return;
 
-		_navigatedExit = result.exits[option];
+		_navigatedExit = result.Exits[option];
 		_navigatedExit.TakeMessage(new StartNavigation(Owner));
 	}
 );
@@ -722,7 +722,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (occupiedPassage != null)
 				InnerMessage(new SayExitsResult(this, occupiedPassage));
 			else
-				InnerMessage(new SayExitsResult(this, GetNavigableExits().descriptions));
+				InnerMessage(new SayExitsResult(this, GetNavigableExits().Descriptions));
 		}
 
 		/// <summary>
@@ -750,32 +750,36 @@ namespace Game.Entities.Characters.Chipotle
 				: roundedDistance == 1.5f ? " metr a půl " : centimeters == .5f ? $" {meters} a půl metrů " : $" {meters} metrů ";
 		}
 
+		protected List<string> GetExitDescription(Passage exit)
+		{
+			float distance = World.GetDistance(Owner, exit);
+			string distanceDescription = GetDistanceDescription(distance);
+			string type = exit.ToString();
+			string to = $"{exit.AnotherZone(Zone).To} ";
+			int index = to.IndexOf(' ');
+			string to1 = to.Substring(0, index);
+			string to2 = to.Substring(index + 1);
+			float angle = GetAngle(exit);
+			string angleDescription = Settings.UseClockDirections ? Angle.GetClockDirection(angle) : Angle.GetRelativeDirection(angle, distance);
+			List<string> data = new List<string>() { type, to1, to2, distanceDescription, angleDescription };
+			return data;
+		}
+
 		/// <summary>
 		/// Returns text descriptions of the specified exits including distance and position.
 		/// </summary>
 		/// <returns>A string array</returns>
-		private (List<List<string>> descriptions, Passage[] exits) GetNavigableExits()
+		private NavigableExitsModel GetNavigableExits()
 		{
-			IEnumerable<Passage> exits =
+			List<Passage> exits =
 				Zone.GetNearestExits(
 					_area.Value.Center,
-					_exitRadius);
+					_exitRadius)
+.ToList();
 			List<List<string>> descriptions =
-			(
-				from e in exits
-				let distance = World.GetDistance(Owner, e)
-				let distanceDescription = GetDistanceDescription(distance)
-				let type = e.ToString()
-				let to = e.AnotherZone(Zone).To + " "
-				let index = to.IndexOf(' ')
-				let to1 = to.Substring(0, index)
-				let to2 = to.Substring(index + 1)
-				let angle = GetAngle(e)
-				let angleDescription = Angle.GetDescription(angle)
-				select new List<string> { type, to1, to2, distanceDescription, angleDescription }
-			).ToList();
+			exits.Select(GetExitDescription).ToList();
 
-			return (descriptions, exits.ToArray());
+			return new(descriptions, exits.ToArray());
 		}
 
 		/// <summary>
@@ -947,11 +951,11 @@ namespace Game.Entities.Characters.Chipotle
 		private void HandleCollisions(List<object> elements)
 		{
 			// Check for door collisions first
-			if (HandleDoorCollision(elements))
-				return;
+			HandleDoorCollision(elements);
 
 			// Handle collisions with items and characters
-			HandleItemsAndCharactersCollisions(elements);
+			if (HandleItemsAndCharactersCollisions(elements))
+				return;
 
 			// Handle collisions with inaccessible terrain
 			HandleTerrainCollisions(elements);
@@ -972,32 +976,36 @@ namespace Game.Entities.Characters.Chipotle
 			return false;
 		}
 
-		private void HandleItemsAndCharactersCollisions(List<object> elements)
+		private bool HandleItemsAndCharactersCollisions(List<object> elements)
 		{
+			bool doorColided = elements.Any(e => e is Door);
 			IEnumerable<Entity> entities = elements.OfType<Entity>();
+			if (doorColided)
+				entities = entities.Where(e => e is Item i && i.Type != "zeď");
 			if (entities.IsNullOrEmpty())
-				return;
-
-			IEnumerable<IGrouping<string, Entity>> groupedElements = entities
-				.OfType<Entity>()
+				return false;
+			var entityList = entities.ToList();
+			IEnumerable<IGrouping<string, Entity>> groupedElements = entityList
 				.GroupBy(o => o.Name.Friendly);
 
 			foreach (IGrouping<string, Entity> group in groupedElements)
 			{
-				Entity closestElement = group.OrderBy(GetDistance)
+				Entity closest = group.OrderBy(GetDistance)
 					.First();
 
-				Vector2 contactPoint = GetContactPoint(closestElement);
-				ObjectsCollided collisionMessage = new(Owner, closestElement, contactPoint);
-				closestElement.TakeMessage(collisionMessage);
+				Vector2 contactPoint = GetContactPoint(closest);
+				ObjectsCollided collisionMessage = new(Owner, closest, contactPoint);
+				closest.TakeMessage(collisionMessage);
 				InnerMessage(collisionMessage);
 			}
 
-			foreach (MapElement element in elements)
+			foreach (Entity entity in entityList)
 			{
-				Vector2 contactPoint = GetContactPoint(element);
-				LogEntityCollision(element as Entity, contactPoint);
+				Vector2 contactPoint = GetContactPoint(entity);
+				LogEntityCollision(entity, contactPoint);
 			}
+
+			return true;
 
 			float GetDistance(MapElement element)
 				=> World.GetDistance(GetContactPoint(element), _area.Value.Center);
@@ -1096,7 +1104,7 @@ namespace Game.Entities.Characters.Chipotle
 				float distance = World.GetDistance(Owner, item);
 				string distanceDescription = GetDistanceDescription(distance);
 				float compassDegrees = GetAngle(item);
-				string angleDescription = Angle.GetDescription(compassDegrees);
+				string angleDescription = Angle.GetRelativeDirection(compassDegrees, distance);
 				descriptions.Add($"{name} {distanceDescription} {angleDescription}");
 			}
 

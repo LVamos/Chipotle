@@ -135,6 +135,7 @@ namespace Game
 				CollisionsModel result = DetectCollisions(ignoredElement, area);
 				if (result.OutOfMap)
 					return result;
+
 				if (!result.Obstacles.IsNullOrEmpty())
 					return result;
 			}
@@ -173,36 +174,28 @@ namespace Game
 				{
 					// make sure there is an item. If not, allow further collision detection.
 					Detect(z.Items);
-					if (!obstacles.Any())
-						probablyWalkable = true;
-				}
-
-				if (probablyWalkable)
-				{
-					Detect(z.Characters);
-					if (Enough())
-						return new(obstacles, false);
-
-					Detect(z.MovableItems);
-					if (Enough())
-						return new(obstacles, false);
-
-					Detect(z.GetClosedDoors());
 					if (Enough())
 						return new(obstacles, false);
 				}
-				else
-				{
-					Detect(z.Items);
-					if (Enough())
-						return new(obstacles, false);
-				}
+
+				Detect(z.Characters);
+				if (Enough())
+					return new(obstacles, false);
+
+				Detect(z.MovableItems);
+				if (Enough())
+					return new(obstacles, false);
+
+				Detect(z.GetClosedDoors());
+				if (Enough())
+					return new(obstacles, false);
 			}
 
 			bool outOfMap = area.IsOutOfMap();
 
 			if (!obstacles.Any())
 				obstacles = null;
+			else obstacles = obstacles.Distinct().ToList();
 			return new(obstacles, outOfMap);
 
 			void Detect(IEnumerable<MapElement> elements)

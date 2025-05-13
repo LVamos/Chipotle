@@ -49,25 +49,44 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="degrees">The angle in compass degrees to be described</param>
 		/// <returns>A word description in a string</returns>
-		public static string GetDescription(double degrees)
+		public static string GetRelativeDirection(double degrees, float distance)
 		{
-			if (degrees == 0)
+			if (distance < 3)
+			{
+				if (degrees == 0)
+					return " před tebou";
+				if (degrees is > 0 and < 90)
+					return " šikmo vpravo";
+				if (degrees == 90)
+					return " vpravo";
+				if (degrees is > 90 and < 180)
+					return " šikmo vpravo za tebou";
+				if (degrees == 180)
+					return " za tebou";
+				if (degrees is > 180 and < 270)
+					return " šikmo vlevo za tebou";
+				if (degrees == 270)
+					return " vlevo";
+				return " šikmo vlevo";
+			}
+
+			// For longer distance describe the direction less accurately.
+			if (degrees is > 325 or <= 35)
 				return " před tebou";
-			if (degrees is > 0 and < 90)
+			if (degrees is > 35 and <= 55)
 				return " šikmo vpravo";
-			if (degrees == 90)
+			if (degrees is > 55 and <= 125)
 				return " vpravo";
-			if (degrees is > 90 and < 180)
+			if (degrees is > 125 and <= 145)
 				return " šikmo vpravo za tebou";
-			if (degrees == 180)
+			if (degrees is > 145 and <= 215)
 				return " za tebou";
-			if (degrees is > 180 and < 270)
+			if (degrees is > 215 and <= 235)
 				return " šikmo vlevo za tebou";
-			if (degrees == 270)
+			if (degrees is > 235 and <= 305)
 				return " vlevo";
 			return " šikmo vlevo";
 		}
-
 
 		/// <summary>
 		/// Value of the angle in radians
@@ -336,5 +355,27 @@ namespace Game.Terrain
 		/// <returns>The angle in cartesian degrees</returns>
 		private static double RadiansToCartesianDegrees(double radians)
 			=> NormalizeDegrees((float)(radians * 180 / PI));
+
+		public static string GetClockDirection(float degrees)
+		{
+			int clockDirection = (int)Math.Round(degrees) / 30;
+			string description = clockDirection switch
+			{
+				0 => "na dvanácti hodinách",
+				1 => "na jedné hodině",
+				2 => "na dvou hodinách",
+				3 => "na třech hodinách",
+				4 => "na čtyřech hodinách",
+				5 => "na pěti hodinách",
+				6 => "na šesti hodinách",
+				7 => "na sedmi hodinách",
+				8 => "na osmi hodinách",
+				9 => "na devíti hodinách",
+				10 => "na deseti hodinách",
+				11 => "na jedenácti hodinách",
+				_ => throw new ArgumentOutOfRangeException(nameof(degrees), degrees, null)
+			};
+			return description;
+		}
 	}
 }
