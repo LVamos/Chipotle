@@ -736,18 +736,14 @@ namespace Game.Entities.Characters.Chipotle
 				return string.Empty;
 
 			// Round the distance so that its value corresponds to a multiple of 0.5.
-			float roundedDistance = (float)(Math.Round(distance * 2, MidpointRounding.AwayFromZero) / 2);
-			int meters = (int)roundedDistance;
-			float centimeters = roundedDistance - meters;
+			int steps = (int)Math.Round(distance / _stepLength);
 
 			// Compose output
-			return roundedDistance == .5f
-				? " půl metru "
-				: roundedDistance == 1
-				? " metr "
-				: centimeters == 0 && roundedDistance >= 2 && roundedDistance <= 4
-				? $" {meters} metry "
-				: roundedDistance == 1.5f ? " metr a půl " : centimeters == .5f ? $" {meters} a půl metrů " : $" {meters} metrů ";
+			if (steps == 1)
+				return "jeden krok";
+			if (steps is > 1 and < 5)
+				return $"{steps} kroky";
+			return $"{steps} kroků";
 		}
 
 		protected List<string> GetExitDescription(Passage exit)
