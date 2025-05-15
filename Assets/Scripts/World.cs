@@ -317,8 +317,8 @@ namespace Game
 				|| (playersZone != otherZone && (!neighbour || (neighbour && !accessible))))
 				return ObstacleType.Far;  // Inaudible
 
-			// Adjecting zones
 			Rectangle path = new(area.GetClosestPoint(Player.Area.Value.Center), Player.Area.Value.Center);
+			// Adjecting zones
 			ObstacleType obstacle = DetectObstacles(path);
 
 			if (neighbour && accessible)

@@ -39,6 +39,9 @@ namespace Game.Entities.Items
 	[ProtoInclude(111, typeof(VanillaCrunchCar))]
 	public class Item : Entity
 	{
+		private const float _doorOpeningOcclusionDuration = .5f;
+		private const float _doorClosingOcclusionDuration = .5f;
+
 		protected void LogCollision(Character character, Vector2 point)
 		{
 			string title = "Objekt zaznamenal náraz postavy";
@@ -69,9 +72,6 @@ namespace Game.Entities.Items
 
 		[ProtoIgnore]
 		protected AudioSource _placingAudio;
-
-		[ProtoIgnore]
-		protected AudioLowPassFilter _loopLowpass;
 
 		/// <summary>
 		/// React on placing on the ground.
@@ -225,6 +225,7 @@ namespace Game.Entities.Items
 				l.TakeMessage(new ObjectAppearedInZone(this, this, l));
 
 			// Play loop sound if any and if the player can hear it.
+			PlayLoop();
 			UpdateLoop();
 		}
 
@@ -233,8 +234,6 @@ namespace Game.Entities.Items
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		private void OnOrientationChanged(OrientationChanged message) => WatchPlayersMovement();
-
-		protected virtual void OnZoneEntered(CharacterCameToZone message) => UpdateLoop();
 
 		/// <summary>
 		/// Checks if there's a direct path from this object to the player.
@@ -253,7 +252,28 @@ namespace Game.Entities.Items
 		/// Handles the DoorManipulated message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnDoorManipulated(DoorManipulated message) => UpdateLoop();
+		protected void OnDoorManipulated(DoorManipulated message)
+		{
+			bool playerHere = World.Player.SameZone(this);
+			if (playerHere)
+				return;
+
+			bool doorClosed = message.Sender.State is PassageState.Closed or PassageState.Locked;
+			float duration;
+			ObstacleType obstacle;
+			if (doorClosed)
+			{
+				duration = _doorClosingOcclusionDuration;
+				obstacle = ObstacleType.Door;
+			}
+			else
+			{
+				duration = _doorOpeningOcclusionDuration;
+				obstacle = ObstacleType.None;
+			}
+
+			UpdateOcclusion(obstacle, duration);
+		}
 
 		/// <summary>
 		/// Stops sound loop of this object, if any.
@@ -304,8 +324,12 @@ namespace Game.Entities.Items
 
 		[ProtoIgnore]
 		private AudioSource _passByAudio;
-
+		private ObstacleType _occludingObstacle;
 		protected const float _intervalBetweenActions = .5f;
+		private const int _loopMaxDistance = 9;
+		private const float _loopMinDistance = .5f;
+		private const int _loopInitialFadeDuration = 2;
+		private const float _defaultOcclusionDuration = .5f;
 
 		/// <summary>
 		/// Destroys the object.
@@ -395,55 +419,68 @@ namespace Game.Entities.Items
 				return;
 
 			ObstacleType obstacle = World.DetectAcousticObstacles(_area.Value);
-			if (obstacle == ObstacleType.Far)
-				StopLoop();
-			else
-				PlayLoop(obstacle);// != ObstacleType.Wall ? obstacle: ObstacleType.Object);
+			UpdateOcclusion(obstacle);
 		}
 
-		/// <summary>
-		/// Plays sound loop of the object with sound attenuation.
-		/// </summary>
-		/// <param name="obstacle">Type of obstacle between player and this object</param>
-		protected void PlayLoop(ObstacleType obstacle = ObstacleType.None)
+		protected void UpdateOcclusion(ObstacleType obstacle = ObstacleType.None, float duration = _defaultOcclusionDuration)
 		{
-			return;
-			// Start the loop if not playing.
-			if (!_loopAudio.isPlaying)
-			{
-				_loopAudio.Play();
-				_loopAudio.loop = true;
-			}
+			if (_sounds["loop"] == null)
+				return;
 
-			// Start the sound attenuation if needed.
 			bool attenuate = obstacle is not ObstacleType.None and not ObstacleType.IndirectPath;
 			;
 			int cutoffFrequency = 0;
 			float volume = _defaultVolume;
 
+			if (_occludingObstacle == obstacle)
+				return;
+			_occludingObstacle = obstacle;
+
 			switch (obstacle)
 			{
 				case ObstacleType.Wall: cutoffFrequency = Game.Audio.Sounds.OverWallLowpass; volume = _overWallVolume; break;
-				case ObstacleType.Door: cutoffFrequency = Game.Audio.Sounds.OverDoorLowpass; volume = OverDoorVolume; break;
+				case ObstacleType.Door: cutoffFrequency = Sounds.OverDoorLowpass; volume = OverDoorVolume; break;
 				case ObstacleType.Object: cutoffFrequency = Game.Audio.Sounds.OverObjectLowpass; volume = OverObjectVolume; break;
 			}
 
 			if (attenuate)
 			{
-				_loopLowpass.cutoffFrequency = cutoffFrequency;
-				Sounds.SlideVolume(_loopAudio, .5f, volume);
+				Sounds.SlideVolume(_loopAudio, duration, volume);
+				Sounds.SlideLowPass(_loopAudio, duration, cutoffFrequency);
 			}
 			else
 			{
 				// Turn of attenuation
 				if (_muffled && !attenuate)
 				{
-					_loopLowpass.cutoffFrequency = 22000;
-					Sounds.SlideVolume(_loopAudio, .5f, _defaultVolume);
+					Sounds.SlideVolume(_loopAudio, duration, _defaultVolume);
+					Sounds.SlideLowPass(_loopAudio, duration, 22000);
 				}
 			}
 
 			_muffled = attenuate;
+		}
+
+		/// <summary>
+		/// Plays sound loop of the object with sound attenuation.
+		/// </summary>
+		/// <param name="obstacle">Type of obstacle between player and this object</param>
+		protected void PlayLoop()
+		{
+			string name = _sounds["loop"];
+			if (string.IsNullOrEmpty(name))
+				return;
+
+			Vector3 position = _area.Value.Center.ToVector3(GetSoundHeight());
+			string description = $"loop for {Name.Indexed} item";
+			_loopAudio = Sounds.Play(name, position, 0, true, true, description: description);
+			_loopAudio.maxDistance = _loopMaxDistance;
+			_loopAudio.minDistance = _loopMinDistance;
+			_loopAudio.rolloffMode = AudioRolloffMode.Linear;
+
+			// Slide volume
+			float targetVolume = Sounds.GetLinearRolloffAttenuation(_loopAudio, _defaultVolume);
+			Sounds.SlideVolume(_loopAudio, _loopInitialFadeDuration, targetVolume);
 		}
 
 		/// <summary>
@@ -458,7 +495,6 @@ namespace Game.Entities.Items
 				case PickUpItem m: OnPickUpObject(m); break;
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
-				case CharacterCameToZone le: OnZoneEntered(le); break;
 				case CharacterMoved em: OnCharacterMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;
@@ -476,9 +512,9 @@ namespace Game.Entities.Items
 		{
 			Rectangle? vacancy = FindVacancy(
 				message.Character.Area.Value,
-message.DirectionFromCharacter.Value,
-message.MaxDistanceFromCharacter
-);
+		message.DirectionFromCharacter.Value,
+		message.MaxDistanceFromCharacter
+		);
 			bool success = vacancy != null;
 
 			if (success)

@@ -36,7 +36,8 @@ namespace Assets.Scripts.Audio
 		private Dictionary<AudioSource, Coroutine> _coroutines = new();
 		public void SlideLowPass(AudioSource source, float duration, float targetFrequency)
 		{
-			if (targetFrequency == source.volume)
+			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
+			if (lowPass != null && targetFrequency == lowPass.cutoffFrequency)
 				return;
 
 			if (_coroutines.ContainsKey(source))
@@ -52,8 +53,7 @@ namespace Assets.Scripts.Audio
 		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency)
 		{
 			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
-			if (lowPass == null)
-				lowPass = _soundPool.EnableLowPass(source);
+			lowPass = _soundPool.EnableLowPass(source);
 
 			float startFrequency = lowPass.cutoffFrequency;
 
@@ -63,7 +63,7 @@ namespace Assets.Scripts.Audio
 				yield return null;
 			}
 			lowPass.cutoffFrequency = targetFrequency;
-			if (targetFrequency == 18000)
+			if (targetFrequency == 22000)
 				DisableLowPass(source);
 		}
 
@@ -255,7 +255,7 @@ namespace Assets.Scripts.Audio
 			source.spatializePostEffects = false;
 			source.outputAudioMixerGroup = Sounds.MixerGroup;
 			source.loop = loop;
-			source.dopplerLevel = 1;
+			source.dopplerLevel = 0;
 
 			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
 			resonance.bypassRoomEffects = false;

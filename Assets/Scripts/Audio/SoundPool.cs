@@ -1,12 +1,11 @@
 ﻿
 using Game;
+using Game.Audio;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-using Unity.VisualScripting;
 
 using UnityEngine;
 
@@ -44,7 +43,13 @@ namespace Assets.Scripts.Audio
 		public AudioLowPassFilter EnableLowPass(AudioSource source)
 		{
 			_pool.Remove(source);
-			AudioLowPassFilter lowPass = source.AddComponent<AudioLowPassFilter>();
+			source.outputAudioMixerGroup = null;
+			source.spatialize = false;
+			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
+			resonance.enabled = false;
+			resonance.bypassRoomEffects = true;
+			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
+			lowPass.enabled = true;
 			_muffledPool.Add(source);
 			return lowPass;
 		}
@@ -54,7 +59,12 @@ namespace Assets.Scripts.Audio
 			_muffledPool.Remove(source);
 			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
 			?? throw new LowPassFilterNotFoundException(source);
-			DestroyImmediate(lowPass);
+			lowPass.enabled = false;
+			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
+			resonance.enabled = true;
+			resonance.bypassRoomEffects = false;
+			source.outputAudioMixerGroup = Sounds.MixerGroup;
+			source.spatialize = true;
 			_pool.Add(source);
 			return source;
 		}
@@ -126,6 +136,8 @@ namespace Assets.Scripts.Audio
 			GameObject o = new("Sound");
 			AudioSource source = o.AddComponent<AudioSource>();
 			o.AddComponent<ResonanceAudioSource>();
+			AudioLowPassFilter lowPass = o.AddComponent<AudioLowPassFilter>();
+			lowPass.enabled = false;
 			o.SetActive(false);
 			_pool.Add(source);
 			return source;

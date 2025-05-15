@@ -1033,7 +1033,7 @@ namespace Game.Terrain
 			// Door open
 			if (portalAmbient.Muffled)
 			{
-				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, 18000);
+				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, 22000);
 				portalAmbient.Muffled = false;
 			}
 		}
