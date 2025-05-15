@@ -8,7 +8,7 @@
 		None,
 		Door,
 		Wall,
-		Object,
+		ItemOrCharacter,
 		Bushes,
 		IndirectPath,
 		Far

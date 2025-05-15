@@ -124,15 +124,15 @@ namespace Game
 		/// <param name="length">The length for which to detect collisions in meters</param>
 		/// <returns>A list of MapElements representing the obstacles detected on the track or null</returns>
 		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting zones for collision. The search ends at the position where collisions were detected.</remarks>
-		public static CollisionsModel DetectCollisionsOnTrack(MapElement ignoredElement, Vector2 direction, float length)
+		public static CollisionsModel DetectCollisionsOnTrack(MapElement ignoredElement, Rectangle initialPosition, Vector2 direction, float length, bool justFirstObstacle = false, bool checkTerrain = true, bool ignoreSubtleObjects = false)
 		{
 			int steps = (int)Math.Round(length / CollisionDetectionResolution);
-			Rectangle area = ignoredElement.Area.Value;
+			Rectangle area = initialPosition;
 
 			for (int i = 0; i < steps; i++)
 			{
 				area.Move(direction, CollisionDetectionResolution);
-				CollisionsModel result = DetectCollisions(ignoredElement, area);
+				CollisionsModel result = DetectCollisions(ignoredElement, area, justFirstObstacle, checkTerrain, ignoreSubtleObjects);
 				if (result.OutOfMap)
 					return result;
 
@@ -142,28 +142,33 @@ namespace Game
 			return new(null, false);
 		}
 
+		private const float _subtleObjectSizeThreshold = 0.04f;
+
 		/// <summary>
 		/// Detects collisions between the specified map element and other map elements.
 		/// </summary>
 		/// <param name="ignoredElement">The element to be moved.</param>
 		/// <param name="area">The map element to detect collisions for.</param>
 		/// <returns>List of MapElements or null</returns>
-		public static CollisionsModel DetectCollisions(MapElement ignoredElement, Rectangle area, bool justFirstObstacle = false)
+		public static CollisionsModel DetectCollisions(MapElement ignoredElement, Rectangle area, bool justFirstObstacle = false, bool checkTerrain = true, bool ignoreSubtleObjects = false)
 		{
 			List<object> obstacles = new();
 			List<Zone> zones = area.GetZones().ToList();
 
 			// Detect inaccesible terrain.
-			List<TileInfo> allTiles = area.GetTiles(TileMap.TileSize);
-			List<TileInfo> inaccessibleTiles = allTiles
-				.Where(t => !t.Tile.Walkable)
-				.Distinct().ToList();
-
-			if (inaccessibleTiles.Any())
+			if (checkTerrain)
 			{
-				obstacles.AddRange(inaccessibleTiles.Cast<object>());
-				if (justFirstObstacle)
-					return new(obstacles, false);
+				List<TileInfo> allTiles = area.GetTiles(TileMap.TileSize);
+				List<TileInfo> inaccessibleTiles = allTiles
+					.Where(t => !t.Tile.Walkable)
+					.Distinct().ToList();
+
+				if (inaccessibleTiles.Any())
+				{
+					obstacles.AddRange(inaccessibleTiles.Cast<object>());
+					if (justFirstObstacle)
+						return new(obstacles, false);
+				}
 			}
 
 			// Check all objects, passages and characters in zones the given element intersects. Skip the given element.
@@ -173,7 +178,7 @@ namespace Game
 				if (!probablyWalkable)
 				{
 					// make sure there is an item. If not, allow further collision detection.
-					Detect(z.Items);
+					Detect(z.Items, ignoreSubtleObjects);
 					if (Enough())
 						return new(obstacles, false);
 				}
@@ -198,11 +203,16 @@ namespace Game
 			else obstacles = obstacles.Distinct().ToList();
 			return new(obstacles, outOfMap);
 
-			void Detect(IEnumerable<MapElement> elements)
+			void Detect(IEnumerable<MapElement> elements, bool ignoreSubtleObjects = false)
 			{
-				IEnumerable<MapElement> newObstacles = elements
+				List<MapElement> newObstacles = elements
 					.Where(element => element.Area != null && element != ignoredElement)
-					.Where(e => e.Area.Value.Intersects(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value));
+					.Where(e => e.Area.Value.Intersects(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value))
+.ToList();
+				if (ignoreSubtleObjects)
+					newObstacles = newObstacles
+					.Where(o => o.Area.Value.Size > _subtleObjectSizeThreshold)
+					.ToList();
 
 				if (newObstacles.Any())
 					obstacles.AddRange(newObstacles);
@@ -302,71 +312,32 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The map element to be checked</param>
 		/// <returns>The corresponding obstacle type</returns>
-		public static ObstacleType DetectAcousticObstacles(Rectangle area)
+		public static ObstacleType DetectOcclusion(MapElement emmittingObject, bool ignoreSubtleObjects = true)
 		{
-			// If it's an object that is held by an 
+			//test
+			if (emmittingObject is Item i && i.Type == "akvárko")
+				Debug.Log("");
 
-			Zone playersZone = Player.Zone;
-			Vector2 closest = area.GetClosestPoint(World.Player.Area.Value.Center);
-			Zone otherZone = World.GetZone(closest);
-			bool neighbour = playersZone.IsNeighbour(otherZone);
-			bool accessible = otherZone.IsAccessible(playersZone);
+			Vector2 playerCenter = Player.Area.Value.Center;
+			Vector2 closestPoint = emmittingObject.Area.Value.GetClosestPoint(playerCenter);
+			float distance = GetDistance(closestPoint, playerCenter);
 
-			// Are the regions in inadjecting zones?
-			if (GetDistance(area.Center, Player.Area.Value.Center) > 100
-				|| (playersZone != otherZone && (!neighbour || (neighbour && !accessible))))
-				return ObstacleType.Far;  // Inaudible
+			// Emmit a ray to the player
+			Rectangle probe = Rectangle.FromCenter(closestPoint, .1f, .1f);
+			Vector2 direction = (playerCenter - closestPoint).normalized;
+			CollisionsModel result = DetectCollisionsOnTrack(emmittingObject, probe, direction, distance, false, false, false);
+			if (result.Obstacles == null)
+				return ObstacleType.None;
 
-			Rectangle path = new(area.GetClosestPoint(Player.Area.Value.Center), Player.Area.Value.Center);
-			// Adjecting zones
-			ObstacleType obstacle = DetectObstacles(path);
-
-			if (neighbour && accessible)
-			{
-				Passage atPassage = Player.Zone.IsAtPassage(area.Center);
-
-				if (obstacle == ObstacleType.IndirectPath && atPassage == null)
-					return ObstacleType.Wall;
-
-				if (atPassage != null)
-					return atPassage.State == PassageState.Closed ? ObstacleType.Door : ObstacleType.None;
-			}
-
-			return obstacle != ObstacleType.Wall ? obstacle : ObstacleType.Object;
-		}
-
-		/// <summary>
-		/// Checks if there are some obstacles between the specified points. The edge points arn't included.
-		/// </summary>
-		/// <param name="p1">First point</param>
-		/// <param name="p2">Second point</param>
-		/// <returns>ObstacleType</returns>
-		public static ObstacleType DetectObstacles(Rectangle path)
-		{
-			bool Intersects(Rectangle area)
-				=> area.Contains(path.UpperLeftCorner) || area.Contains(path.LowerRightCorner);
-
-			// Is it a line?
-			if (!path.IsLine)
-				return ObstacleType.IndirectPath;
-
-			// Detect doors.
-			if (
-				path.GetPassages()
-				.Any(p => !Intersects(p.Area.Value) && p.State == PassageState.Closed))
-				return ObstacleType.Door;
-
-			// Detect walls
-			if (
-				path.GetTiles()
-					.Where(t => !Intersects(new(t.Position)))
-					.Any(t => t.Tile.Terrain == TerrainType.Wall)
-				|| path.GetObjects().Any(o => !Intersects(o.Area.Value) && (o.Type == "zeď" || o.Name.Friendly == "zeď"))
-			)
+			if (result.Obstacles.Any(o => o is Item i && i.Type == "zeď"))
 				return ObstacleType.Wall;
 
-			// Detect objects
-			return path.GetObjects().Any(o => !Intersects(o.Area.Value)) ? ObstacleType.Object : ObstacleType.None;
+			if (result.Obstacles.Any(o => o is Door d && d.State is PassageState.Closed or PassageState.Locked))
+				return ObstacleType.Door;
+
+			if (result.Obstacles.Any(o => o is Entity))
+				return ObstacleType.ItemOrCharacter;
+			return ObstacleType.None;
 		}
 
 		/// <summary>

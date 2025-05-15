@@ -137,7 +137,7 @@ namespace Game.Entities.Characters.Components
 		protected virtual IEnumerable<Entity> GetItemsAndCharactersBefore(float radius)
 		{
 			Vector2 direction = GetStepDirection();
-			CollisionsModel collisions = World.DetectCollisionsOnTrack(Owner, direction, radius);
+			CollisionsModel collisions = World.DetectCollisionsOnTrack(Owner, _area.Value, direction, radius);
 			return collisions == null || collisions.Obstacles == null
 				? null
 				: collisions.Obstacles
@@ -558,7 +558,9 @@ namespace Game.Entities.Characters.Components
 
 			// If it isn't the player detect obstacles between him and this NPC.
 			Character player = World.Player;
-			ObstacleType obstacle = Owner != player ? World.DetectAcousticObstacles(_area.Value) : ObstacleType.None;
+			ObstacleType obstacle = ObstacleType.None;
+			if (Owner != player && Owner.Area != null) // Ignore until the NPC is initialized.
+				obstacle = World.DetectOcclusion(Owner);
 
 			// Announce changes
 			PositionChanged changed = new(this, sourcePosition, target, sourceZone, targetZone, obstacle, silently);

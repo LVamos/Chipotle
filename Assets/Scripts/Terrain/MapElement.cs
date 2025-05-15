@@ -271,18 +271,17 @@ namespace Game.Terrain
 			Vector2? opposite = _area.Value.GetAlignedPoint(player);
 			if (opposite == null)
 				return; // Sound blocked, play it normally.
-						//test
-			return;
+
 			// Detect potentional acoustic obstacles and set up attenuate parameters
-			ObstacleType obstacle = World.DetectAcousticObstacles(new((Vector2)opposite));
-			bool muffled = obstacle is ObstacleType.Wall or ObstacleType.Object;
+			ObstacleType obstacle = World.DetectOcclusion(this);
+			bool muffled = obstacle is ObstacleType.Wall or ObstacleType.ItemOrCharacter;
 
 			if (obstacle == ObstacleType.Wall)
 			{
 				Sounds.SetLowPass(_navigationAudio, Sounds.OverWallLowpass);
 				Sounds.SlideVolume(_navigationAudio, .5f, _overWallVolume);
 			}
-			else if (obstacle == ObstacleType.Object)
+			else if (obstacle == ObstacleType.ItemOrCharacter)
 			{
 				Sounds.SetLowPass(_navigationAudio, Sounds.OverObjectLowpass);
 				Sounds.SlideVolume(_navigationAudio, .5f, OverObjectVolume);

@@ -1445,7 +1445,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <returns>True if collisions were detected</returns>
 		protected bool DetectCollisions(Vector2 direction)
 		{
-			CollisionsModel collisions = World.DetectCollisionsOnTrack(Owner, direction, _stepLength);
+			CollisionsModel collisions = World.DetectCollisionsOnTrack(Owner, _area.Value, direction, _stepLength);
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 

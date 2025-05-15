@@ -29,7 +29,7 @@ namespace Game.Audio
 			{
 				ObstacleType.Wall => OverWallLowpass,
 				ObstacleType.Door => OverDoorLowpass,
-				ObstacleType.Object => OverObjectLowpass,
+				ObstacleType.ItemOrCharacter => OverObjectLowpass,
 				_ => 22000
 			};
 		}
@@ -47,7 +47,7 @@ namespace Game.Audio
 			{
 				ObstacleType.Wall => GetOverWallVolume(defaultVolume),
 				ObstacleType.Door => GetOverDoorVolume(defaultVolume),
-				ObstacleType.Object => GetOverObjectVolume(defaultVolume),
+				ObstacleType.ItemOrCharacter => GetOverObjectVolume(defaultVolume),
 				_ => fullVolume
 			};
 		}

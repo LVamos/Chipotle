@@ -236,19 +236,6 @@ namespace Game.Entities.Items
 		private void OnOrientationChanged(OrientationChanged message) => WatchPlayersMovement();
 
 		/// <summary>
-		/// Checks if there's a direct path from this object to the player.
-		/// </summary>
-		/// <returns>True if there's a direct path from this object to the player</returns>
-		protected ObstacleType GetObstacles()
-		{
-			Vector2 player = World.Player.Area.Value.Center;
-			Vector2 me = _area.Value.GetClosestPoint(player);
-			Rectangle path = new(me, player);
-
-			return World.DetectObstacles(path);
-		}
-
-		/// <summary>
 		/// Handles the DoorManipulated message.
 		/// </summary>
 		/// <param name="message">The message</param>
@@ -418,7 +405,11 @@ namespace Game.Entities.Items
 			if (string.IsNullOrEmpty(_sounds["loop"]))
 				return;
 
-			ObstacleType obstacle = World.DetectAcousticObstacles(_area.Value);
+			ObstacleType obstacle = World.DetectOcclusion(this);
+			//test
+			//if (Type == "akvárko")
+			//Tolk.Output(obstacle.ToString());
+
 			UpdateOcclusion(obstacle);
 		}
 
@@ -440,7 +431,7 @@ namespace Game.Entities.Items
 			{
 				case ObstacleType.Wall: cutoffFrequency = Game.Audio.Sounds.OverWallLowpass; volume = _overWallVolume; break;
 				case ObstacleType.Door: cutoffFrequency = Sounds.OverDoorLowpass; volume = OverDoorVolume; break;
-				case ObstacleType.Object: cutoffFrequency = Game.Audio.Sounds.OverObjectLowpass; volume = OverObjectVolume; break;
+				case ObstacleType.ItemOrCharacter: cutoffFrequency = Game.Audio.Sounds.OverObjectLowpass; volume = OverObjectVolume; break;
 			}
 
 			if (attenuate)

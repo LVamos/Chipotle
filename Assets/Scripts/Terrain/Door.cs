@@ -184,16 +184,11 @@ namespace Game.Terrain
 		protected void Play(string sound, Character character, Vector2 point)
 		{
 			// Set attenuation parameters
-			ObstacleType obstacle = character != World.Player ? World.DetectAcousticObstacles(character.Area.Value) : ObstacleType.None;
-
-			if (obstacle == ObstacleType.Far)
-			{
-				Zone l = World.Player.Zone;
-				if (Zones.First().IsBehindDoor(l) || Zones.Last().IsBehindDoor(l)) // Can be heart from the adjecting zone
-					obstacle = ObstacleType.Wall;
-				else
-					return; // Too far and inaudible
-			}
+			ObstacleType obstacle;
+			if (character != World.Player)
+				obstacle = World.DetectOcclusion(character);
+			else
+				obstacle = ObstacleType.None;
 
 			// Set attenuation parameters
 			float volume = _defaultVolume;
@@ -206,7 +201,7 @@ namespace Game.Terrain
 				case ObstacleType.Door:
 					volume = Sounds.GetOverDoorVolume(_defaultVolume);
 					break;
-				case ObstacleType.Object:
+				case ObstacleType.ItemOrCharacter:
 					volume = Sounds.GetOverObjectVolume(_defaultVolume); break;
 			}
 
