@@ -67,7 +67,7 @@ namespace Game.Entities.Characters.Components
             float height = transform.localScale.z;
             float width = transform.localScale.x;
 
-            Vector2[] points = World.GetFreePlacementsNear(Owner, area, height, width, minDistance, maxDistance, sameZone)
+            Vector2[] points = World.GetFreePlacementsNear(new() { Owner }, area, height, width, minDistance, maxDistance, sameZone)
                 .ToArray();
 
             return points;

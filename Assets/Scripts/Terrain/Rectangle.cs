@@ -22,6 +22,8 @@ namespace Game.Terrain
     [ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
     public struct Rectangle
     {
+        public bool KeepRounded { get; private set; }
+
         public static List<Vector2> GetPointsAround(Rectangle areaToAvoid, float minDistance, float maxDistance, float resolution, bool sameZone = true)
         {
             Rectangle maxArea = areaToAvoid;
@@ -43,14 +45,14 @@ namespace Game.Terrain
             return filteredPoints.ToList();
         }
 
-        public static Rectangle FromCenter(string value, float height, float width)
+        public static Rectangle FromCenter(string value, float height, float width, bool keepRounded = true)
         {
             if (string.IsNullOrEmpty(value))
                 throw new ArgumentNullException($"{nameof(value)} cann't be null.");
 
             List<float> coords = ParseCoords(value);
             Vector2 center = new(coords[0].Round(), coords[1].Round());
-            return FromCenter(center, height, width);
+            return FromCenter(center, height, width, keepRounded);
         }
 
         private float Left => UpperLeftCorner.x;
@@ -255,7 +257,10 @@ namespace Game.Terrain
         /// Checks if any points are outside of the map.
         /// </summary>
         /// <returns>True if any points are outside of the map, otherwise false.</returns>
-        public bool IsOutOfMap() => Corners.Any(p => World.GetZone(p) == null);
+        public bool IsOutOfMap()
+        {
+            return Corners.Any(p => World.Map[p] == null);
+        }
 
         /// <summary>
         /// Checks if all the plane is walkable.
@@ -302,16 +307,17 @@ namespace Game.Terrain
         /// <param name="upperLeft">The position of the upper left corner of the rectangle.</param>
         /// <param name="width">The width of the rectangle.</param>
         /// <param name="height">The height of the rectangle.</param>
-        public Rectangle(Vector2 upperLeft, float width, float height)
-            : this(upperLeft, new(upperLeft.x + width, upperLeft.y - height)) { }
+        public Rectangle(Vector2 upperLeft, float width, float height, bool keepRounded = true)
+            : this(upperLeft, new(upperLeft.x + width, upperLeft.y - height), keepRounded) { }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="upperLeft">Coordinates of the upper left corner of the rectangle</param>
         /// <param name="lowerRight">Coordinates of the lower right corner of the rectangle</param>
-        public Rectangle(Vector2 upperLeft, Vector2 lowerRight)
+        public Rectangle(Vector2 upperLeft, Vector2 lowerRight, bool keepRounded = true)
         {
+            KeepRounded = keepRounded;
             MinimumHeight = MinimumWidth = 0;
             _upperLeftCorner = new(upperLeft.x.Round(), upperLeft.y.Round());
             _lowerRightCorner = new(lowerRight.x.Round(), lowerRight.y.Round());
@@ -322,7 +328,7 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="upperLeft">Coordinates of the upper left corner of the rectangle</param>
         /// <remarks>It creates a square of size 1.</remarks>
-        public Rectangle(Vector2 upperLeft) : this(upperLeft, upperLeft)
+        public Rectangle(Vector2 upperLeft, bool keepRounded = true) : this(upperLeft, upperLeft, keepRounded)
         {
         }
 
@@ -330,8 +336,9 @@ namespace Game.Terrain
         /// constructor
         /// </summary>
         /// <param name="value">A string with four coordinates separated by comma</param>
-        public Rectangle(string value)
+        public Rectangle(string value, bool keepRounded = true)
         {
+            KeepRounded = keepRounded;
             if (string.IsNullOrEmpty(value))
                 throw new ArgumentNullException($"{nameof(value)} cann't be null.");
 
@@ -360,8 +367,9 @@ namespace Game.Terrain
         /// Copy constructor
         /// </summary>
         /// <param name="plane">Another plane to be copied</param>
-        public Rectangle(Rectangle plane)
+        public Rectangle(Rectangle plane, bool keepRounded = true)
         {
+            KeepRounded = keepRounded;
             _upperLeftCorner = plane.UpperLeftCorner;
             _lowerRightCorner = plane.LowerRightCorner;
             MinimumHeight = plane.MinimumHeight;
@@ -370,14 +378,14 @@ namespace Game.Terrain
 
         public Rectangle Rotate90() => FromCenter(Center, Width, Height);
 
-        public static Rectangle FromCenter(Vector2 center, float height, float width)
+        public static Rectangle FromCenter(Vector2 center, float height, float width, bool keepRounded = true)
         {
             float halfWidth = width / 2;
             float halfHeight = height / 2;
 
             Vector2 upperLeftCorner = new(center.x - halfWidth, center.y + halfHeight);
             Vector2 lowerRightCorner = new(center.x + halfWidth, center.y - halfHeight);
-            return new(upperLeftCorner, lowerRightCorner);
+            return new(upperLeftCorner, lowerRightCorner, keepRounded);
         }
 
         /// <summary>
@@ -436,6 +444,8 @@ namespace Game.Terrain
 
         private Vector2 Round(Vector2 coordinates)
         {
+            if (!KeepRounded)
+                return coordinates;
             return new(
                         coordinates.x.Round(),
                         coordinates.y.Round());
@@ -979,9 +989,10 @@ namespace Game.Terrain
         /// <param name="step">Specifies length of the transformation</param>
         public Rectangle Move(Vector2 direction, float step)
         {
-            direction = Round(direction * step);
-            UpperLeftCorner += direction;
-            LowerRightCorner += direction;
+            Vector2 newCenter = Center + direction * step;
+            float width = Width;
+            float height = Height;
+            this = Rectangle.FromCenter(newCenter, height, width);
             return this;
         }
 
