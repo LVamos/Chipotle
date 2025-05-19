@@ -410,11 +410,13 @@ namespace Game.Entities.Items
             //    return;
 
             //test
-            if (Name.Indexed == "hodiny w2")
-                Debug.Log("");
+            string clipboard = GUIUtility.systemCopyBuffer;
+            if (!string.IsNullOrEmpty(clipboard))
+                if (Name.Indexed == clipboard)
+                    System.Diagnostics.Debugger.Break();
 
             ObstacleType obstacle = World.DetectOcclusion(this);
-            if (Name.Indexed == "hodiny w2")
+            if (Name.Indexed == clipboard)
                 Tolk.Speak(obstacle.ToString());
             UpdateOcclusion(obstacle);
         }

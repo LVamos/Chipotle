@@ -130,41 +130,9 @@ namespace Game.Terrain
         /// <returns>The nearest point on the rectangle to the given point.</returns>
         public Vector2 GetClosestPoint(Vector2 point)
         {
-            // Snapping the X coordinate of the point to the range of X coordinates of the rectangle
-            float clampedX = Clamp(point.x, UpperLeftCorner.x, LowerRightCorner.x);
-
-            // Snapping the Y coordinate of the point to the Y coordinate range of the rectangle
-            float clampedY = Clamp(point.y, UpperLeftCorner.y, LowerRightCorner.y);
-
-            if (point.x >= LowerLeftCorner.x && point.x <= LowerRightCorner.x)
-                return point.y <= LowerRightCorner.y ? Round(new(point.x, LowerRightCorner.y)) : Round(new(point.x, UpperRightCorner.y));
-
-            if (point.y >= LowerLeftCorner.y && point.y <= UpperLeftCorner.y)
-                return point.x <= LowerLeftCorner.x ? new(LowerLeftCorner.x, point.y) : new(LowerRightCorner.x, point.y);
-
-            // Vypočítání vzdáleností od každé hrany
-            float distanceToLeft = point.x - UpperLeftCorner.x;
-            float distanceToRight = LowerRightCorner.x - point.x;
-            float distanceToTop = UpperLeftCorner.y - point.y;
-            float distanceToBottom = point.y - LowerRightCorner.y;
-
-            // Určení nejbližší hrany
-            float minDistance = Math.Min(Math.Min(distanceToLeft, distanceToRight), Math.Min(distanceToTop, distanceToBottom));
-
-            if (minDistance == distanceToLeft)
-                return new(UpperLeftCorner.x, clampedY);
-
-            if (minDistance == distanceToRight)
-                return new(LowerRightCorner.x, clampedY);
-
-            if (minDistance == distanceToTop)
-                return new(clampedX, UpperLeftCorner.y);
-
-            if (minDistance == distanceToBottom)
-                return new(clampedX, LowerRightCorner.y);
-
-            // Pokud bod leží přesně v rohu, vrátíme upnutý bod
-            return new(clampedX, clampedY);
+            float clampedX = Math.Max(UpperLeftCorner.x, Math.Min(point.x, LowerRightCorner.x));
+            float clampedY = Math.Max(LowerRightCorner.y, Math.Min(point.y, UpperLeftCorner.y));
+            return new Vector2(clampedX, clampedY);
         }
 
         /// <summary>
