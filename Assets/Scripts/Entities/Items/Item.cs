@@ -410,11 +410,11 @@ namespace Game.Entities.Items
             //    return;
 
             //test
-            if (Type == "akvárko")
+            if (Name.Indexed == "hodiny w2")
                 Debug.Log("");
 
             ObstacleType obstacle = World.DetectOcclusion(this);
-            if (Type == "akvárko")
+            if (Name.Indexed == "hodiny w2")
                 Tolk.Speak(obstacle.ToString());
             UpdateOcclusion(obstacle);
         }
