@@ -40,7 +40,6 @@ public class AutoPlayBehaviour : MonoBehaviour
 
 	public void Start()
 	{
-		Logger.Initialize(MainScript.LogPath);
 		Logger.LogInfo("Hra spuštěna");
 
 		// camera settings

@@ -2,7 +2,6 @@
 using Game;
 using Game.Audio;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +14,9 @@ namespace Assets.Scripts.Audio
 	{
 		private void LogPlayingSounds()
 		{
+			if (!Settings.LogPlayingSounds)
+				return;
+
 			(AudioSource[] sounds, string[] names) sounds = GetPlayingSounds();
 			string[] soundDescriptions = sounds.sounds.Select(s => s.name).ToArray();
 			StringBuilder builder = new("Playing sounds");
@@ -101,16 +103,24 @@ namespace Assets.Scripts.Audio
 
 		private void Update()
 		{
-			if (string.Equals(Settings.Configuration, "debug", StringComparison.OrdinalIgnoreCase)
-				&& Settings.LogPlayingSounds)
-				LogPlayingSounds();
+			LogPlayingSounds();
 
 			List<AudioSource> allSources = _pool.Concat(_muffledPool).ToList();
 			foreach (AudioSource source in allSources)
 			{
+				StopForbiddenSound(source);
 				if (!source.isPlaying)
 					Sleep(source);
 			}
+		}
+
+		private void StopForbiddenSound(AudioSource source)
+		{
+			if (!source.isPlaying)
+				return;
+
+			if (source.clip.name != Settings.AllowedSound)
+				source.Stop();
 		}
 
 		private static void Sleep(AudioSource source)

@@ -6,11 +6,13 @@
 	public enum ObstacleType
 	{
 		None,
-		Door,
+		ClosedDoor,
+		OpenDoor,
+		IndirectPath,
 		Wall,
 		ItemOrCharacter,
 		Bushes,
-		IndirectPath,
+		InDifferentZone,
 		Far
 	}
 }

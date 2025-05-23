@@ -198,8 +198,8 @@ namespace Game.Terrain
 				case ObstacleType.Wall:
 					volume = Sounds.GetOverWallVolume(_defaultVolume);
 					break;
-				case ObstacleType.Door:
-					volume = Sounds.GetOverDoorVolume(_defaultVolume);
+				case ObstacleType.ClosedDoor:
+					volume = Sounds.GetOverClosedDoorVolume(_defaultVolume);
 					break;
 				case ObstacleType.ItemOrCharacter:
 					volume = Sounds.GetOverObjectVolume(_defaultVolume); break;

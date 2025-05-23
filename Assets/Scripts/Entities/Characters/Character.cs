@@ -108,7 +108,10 @@ namespace Game.Entities.Characters
 			}
 
 			if (physics.StartPosition != null)
-				Area = new(physics.StartPosition.Value);
+			{
+				Area = physics.StartPosition;
+				transform.position = Area.Value.Center.ToVector3(2);
+			}
 
 			// Find intersecting zone
 			if (_area != null)
