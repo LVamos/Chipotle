@@ -16,7 +16,9 @@ namespace Game.Audio
 	{
 		public static void MuteSpeech() => _soundManager.MuteSpeech();
 		public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
-		public static void SlideLowPass(AudioSource source, float duration, float targetFrequency) => _soundManager.SlideLowPass(source, duration, targetFrequency);
+		public static float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(position, minDistance, maxDistance, defaultVolume);
+
+		public static void SlideLowPass(AudioSource source, float duration, int targetFrequency) => _soundManager.SlideLowPass(source, duration, targetFrequency);
 
 		/// <summary>
 		/// Calculates low pass filter cut off frequency.
@@ -52,7 +54,7 @@ namespace Game.Audio
 			};
 		}
 
-		public static void SlideVolume(AudioSource sound, float duration, float targetVolume) => _soundManager.SlideVolume(sound, duration, targetVolume);
+		public static void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true) => _soundManager.SlideVolume(sound, duration, targetVolume, stopWhenDone);
 
 		public static AudioSource DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 
@@ -68,7 +70,9 @@ namespace Game.Audio
 
 		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration, description);
 
-		public static AudioMixerGroup MixerGroup => _soundManager.MixerGroup;
+		public static AudioMixerGroup MasterGroup => _soundManager.MasterGroup;
+		//test
+		public static AudioMixerGroup MuffledGroup => _soundManager.MuffledGroup;
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
 		public static void SlideMasterVolume(float duration, float targetVolume) => _soundManager.SlideMasterVolume(duration, targetVolume);
 

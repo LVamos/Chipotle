@@ -791,7 +791,7 @@ namespace Game
 		public static Passage GetPassage(Vector2 point)
 		{
 			Zone zone = GetZone(point);
-			return zone?.Passages.FirstOrDefault(p => p.Area.Value.Contains(point));
+			return zone?.Exits.FirstOrDefault(p => p.Area.Value.Contains(point));
 		}
 
 		/// <summary>

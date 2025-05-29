@@ -8,11 +8,11 @@
 		None,
 		ClosedDoor,
 		OpenDoor,
+		InDifferentZone,
 		IndirectPath,
 		Wall,
 		ItemOrCharacter,
 		Bushes,
-		InDifferentZone,
 		Far
 	}
 }

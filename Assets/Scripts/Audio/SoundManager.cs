@@ -20,39 +20,46 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundManager : MonoBehaviour
 	{
-		public float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume)
+		public float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => GetLinearRolloffAttenuation(source.transform.position, source.minDistance, source.maxDistance, defaultVolume);
+		public float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume)
 		{
-			float distance = Vector3.Distance(source.transform.position, World.Player.transform.position);
-			float min = source.minDistance;
-			float max = source.maxDistance;
+			float distance = Vector3.Distance(position, World.Player.transform.position);
 
-			float t = (distance - min) / (max - min);
+			float t = (distance - minDistance) / (maxDistance - minDistance);
 			float attenuation = 1f - Mathf.Clamp01(t);
 			return defaultVolume * attenuation;
 		}
 
-		private Dictionary<AudioSource, Coroutine> _coroutines = new();
-		public void SlideLowPass(AudioSource source, float duration, float targetFrequency)
+		private Dictionary<AudioSource, Coroutine> _lowPassCoroutines = new();
+		public void SlideLowPass(AudioSource source, float duration, int targetFrequency)
 		{
+			//test
+			var ras = source.GetComponent<ResonanceAudioSource>();
+			if (source.clip.name.ToLower().Contains("fish"))
+				System.Diagnostics.Debugger.Break();
+
+			return;
+
 			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
+			if (lowPass == null)
+				lowPass = _soundPool.EnableLowPass(source);
 			if (lowPass != null && targetFrequency == lowPass.cutoffFrequency)
 				return;
 
-			if (_coroutines.ContainsKey(source))
+			Coroutine coroutine;
+			if (_lowPassCoroutines.TryGetValue(source, out coroutine))
 			{
-				StopCoroutine(_coroutines[source]);
-				_coroutines.Remove(source);
+				if (coroutine != null)
+					StopCoroutine(_lowPassCoroutines[source]);
+				_lowPassCoroutines.Remove(source);
 			}
 
-			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency));
-			_coroutines[source] = newCoroutine;
+			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency, lowPass));
+			_lowPassCoroutines[source] = newCoroutine;
 		}
 
-		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency)
+		private IEnumerator SlideLowPassStep(AudioSource source, float duration, int targetFrequency, AudioLowPassFilter lowPass)
 		{
-			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
-			lowPass = _soundPool.EnableLowPass(source);
-
 			float startFrequency = lowPass.cutoffFrequency;
 
 			for (float t = 0; t < duration; t += Time.deltaTime)
@@ -63,6 +70,10 @@ namespace Assets.Scripts.Audio
 			lowPass.cutoffFrequency = targetFrequency;
 			if (targetFrequency == 22000)
 				DisableLowPass(source);
+
+			// Remove the corutine
+			if (_lowPassCoroutines.ContainsKey(source))
+				_lowPassCoroutines.Remove(source);
 		}
 
 		public void Mute(float duration = _fadingDuration)
@@ -89,7 +100,7 @@ namespace Assets.Scripts.Audio
 		public AudioSource ConvertTo3d(AudioSource source, Vector3 position, int? lowPassFrequency = null)
 		{
 			source.spatialize = true;
-			source.outputAudioMixerGroup = MixerGroup;
+			source.outputAudioMixerGroup = MasterGroup;
 			source.spatialBlend = 1;
 			source.transform.position = position;
 			if (lowPassFrequency != null)
@@ -107,15 +118,19 @@ namespace Assets.Scripts.Audio
 			return source;
 		}
 
-		public void SlideVolume(AudioSource sound, float duration, float targetVolume)
+		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true)
 		{
+			//test
+			//if (sound.name.Contains("hodiny w1"))
+			//System.Diagnostics.Debugger.Break();
+
 			if (targetVolume == sound.volume)
 				return;
 
-			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume));
+			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone));
 		}
 
-		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume)
+		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true)
 		{
 			float startVolume = sound.volume;
 
@@ -126,7 +141,7 @@ namespace Assets.Scripts.Audio
 			}
 			sound.volume = targetVolume;
 
-			if (targetVolume <= 0)
+			if (stopWhenDone && targetVolume <= 0)
 				sound.Stop();
 		}
 
@@ -251,7 +266,7 @@ namespace Assets.Scripts.Audio
 			source.spatialBlend = 1; // Full surround sound
 			source.spatialize = true;
 			source.spatializePostEffects = false;
-			source.outputAudioMixerGroup = Sounds.MixerGroup;
+			source.outputAudioMixerGroup = Sounds.MasterGroup;
 			source.loop = loop;
 			source.dopplerLevel = 0;
 
@@ -276,9 +291,14 @@ namespace Assets.Scripts.Audio
 		private void Awake()
 		{
 			// Get mixer
-			AudioMixer mixer = Resources.Load<AudioMixer>("ResonanceAudioMixer") ?? throw new InvalidOperationException("Mixer not loaded");
-			MixerGroup = mixer.FindMatchingGroups("Master").FirstOrDefault() ?? throw new InvalidOperationException("Mixer group not loaded");
-
+			const string ResonanceMixer = "ResonanceAudioMixer";
+			const string LRMixer = "MixerLowResonance";
+			const string RLMixer = "MixerResonanceLow";
+			AudioMixer mixer = Resources.Load<AudioMixer>(RLMixer) ?? throw new InvalidOperationException("Mixer not loaded");
+			MasterGroup = mixer.FindMatchingGroups("Master").FirstOrDefault() ?? throw new InvalidOperationException("Master mixer group not loaded");
+			float c;
+			mixer.GetFloat("Cutoff freq", out c);
+			mixer.SetFloat("Cutoff freq", 800);
 			_soundPool = (new GameObject("Sound pool")).AddComponent<SoundPool>();
 			_roomObject = new("Resonance Audio room");
 			_resonanceRoom = _roomObject.AddComponent<ResonanceAudioRoom>();
@@ -287,8 +307,9 @@ namespace Assets.Scripts.Audio
 		private GameObject _roomObject;
 		private ResonanceAudioRoom _resonanceRoom;
 
-		public AudioMixerGroup MixerGroup { get; private set; }
-
+		public AudioMixerGroup MasterGroup { get; private set; }
+		//test
+		public AudioMixerGroup MuffledGroup { get; private set; }
 		public float MasterVolume
 		{
 			get => AudioListener.volume;

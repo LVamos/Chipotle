@@ -2,10 +2,9 @@
 
 namespace Assets.Scripts.Models
 {
-	public class PortalAmbientModel
+	public class PortalModel
 	{
 		public bool Muffled;
 		public AudioSource AudioSource;
-		public AudioLowPassFilter LowPassFilter;
 	}
 }

@@ -28,6 +28,34 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Zone : MapElement
 	{
+		protected ReadyPortalModel GetPortalByPassage(List<ReadyPortalModel> portals, Passage passage)
+		{
+			ReadyPortalModel result = portals
+				.First(loop => loop.Passage == passage);
+			return result;
+		}
+
+		private List<Passage> ReadyPortalsToPassages(List<ReadyPortalModel> portals)
+		{
+			List<Passage> result = portals
+				.Select(loop => loop.Passage)
+				.ToList();
+			return result;
+		}
+
+
+		protected ReadyPortalModel RemoveReadyPortalNearPlayer(List<ReadyPortalModel> portals)
+		{
+			List<Passage> passages = ReadyPortalsToPassages(portals);
+			Passage closestPassage = World.GetClosestElement(passages, World.Player) as Passage;
+			ReadyPortalModel closestPortal = GetPortalByPassage(portals, closestPassage);
+			portals.Remove(closestPortal);
+			return closestPortal;
+		}
+
+
+
+
 		public AudioSource ReleaseAmbientSource()
 		{
 			AudioSource source = _ambientSource;
@@ -38,7 +66,7 @@ namespace Game.Terrain
 		public IEnumerable<Door> GetClosedDoors()
 		{
 			return
-				Passages
+				Exits
 				.OfType<Door>()
 				.Where(d => d.State is PassageState.Closed or PassageState.Locked);
 		}
@@ -88,7 +116,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="target">The target zone</param>
 		/// <returns>enumeration of passages</returns>
-		public IEnumerable<Passage> GetExitsTo(Zone target) => Passages.Where(p => p.LeadsTo(target));
+		public List<Passage> GetExitsTo(Zone target) => Exits.Where(p => p.LeadsTo(target)).ToList();
 
 		/// <summary>
 		/// Indicates if a zone is inside a building or outside.
@@ -110,7 +138,7 @@ namespace Game.Terrain
 		/// Enumerates all accessible zones.
 		/// </summary>
 		/// <returns>All accessible zones</returns>
-		public IEnumerable<Zone> GetAccessibleZones() => Passages.Select(p => p.AnotherZone(this)).Distinct();
+		public IEnumerable<Zone> GetAccessibleZones() => Exits.Select(p => p.AnotherZone(this)).Distinct();
 
 		/// <summary>
 		/// Handles the EntityMoved message.
@@ -163,7 +191,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point to be checked</param>
 		/// <returns>The passage by in front or behind which the specified point lays or null if nothing found</returns>
-		public Passage GetPassageInFront(Vector2 point) => Passages.FirstOrDefault(p => p.IsInFrontOrBehind(point));
+		public Passage GetPassageInFront(Vector2 point) => Exits.FirstOrDefault(p => p.IsInFrontOrBehind(point));
 
 		/// <summary>
 		/// Checks if the specified entity is in any neighbour zone.
@@ -197,7 +225,7 @@ namespace Game.Terrain
 		/// Returns all open passages.
 		/// </summary>
 		/// <returns>Enumeration of all open passages</returns>
-		public IEnumerable<Passage> GetApertures() => Passages.Where(p => p.State == PassageState.Open);
+		public IEnumerable<Passage> GetApertures() => Exits.Where(p => p.State == PassageState.Open);
 
 		/// <summary>
 		/// Chekcs if the specified zone is accessible from this zone.
@@ -262,7 +290,7 @@ namespace Game.Terrain
 		public IEnumerable<Passage> GetNearestExits(Vector2 point, int radius)
 		{
 			return
-				from e in Passages
+				from e in Exits
 				where !e.Area.Value.Contains(point) && World.GetDistance(e.Area.Value.GetClosestPoint(point), point) <= radius
 				orderby e.Area.Value.GetDistanceFrom(point)
 				select e;
@@ -318,13 +346,13 @@ namespace Game.Terrain
 		/// All exits from the zone
 		/// </summary>
 		[ProtoIgnore]
-		public Passage[] Passages
+		public Passage[] Exits
 		{
 			get
 			{
-				_passages ??= new();
+				_exits ??= new();
 
-				return _passages.Select(World.GetPassage).Where(p => p != null)
+				return _exits.Select(World.GetPassage).Where(p => p != null)
 .ToArray();
 			}
 		}
@@ -372,7 +400,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// List of exits from this zone
 		/// </summary>
-		private HashSet<string> _passages = new();
+		private HashSet<string> _exits = new();
 
 		/// <summary>
 		/// Constructor
@@ -456,7 +484,7 @@ namespace Game.Terrain
 		/// Returns all adjecting zones to which it's possible to get from this zone.
 		/// </summary>
 		/// <returns>An enumeration of all adjecting accessible zones</returns>
-		public IEnumerable<Zone> GetZonesBehindDoor() => Passages.Select(p => p.AnotherZone(this));
+		public IEnumerable<Zone> GetZonesBehindDoor() => Exits.Select(p => p.AnotherZone(this));
 
 		/// <summary>
 		/// Checks if the specified game object is present in this zone in the moment.
@@ -477,7 +505,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="p">The passage to be checked</param>
 		/// <returns>True if the passage lays in this zone</returns>
-		public bool IsItHere(Passage p) => Passages.Contains(p);
+		public bool IsItHere(Passage p) => Exits.Contains(p);
 
 		/// <summary>
 		/// Gets a message from another messaging object and stores it for processing.
@@ -521,7 +549,7 @@ namespace Game.Terrain
 			if (IsItHere(p))
 				throw new InvalidOperationException("exit already registered");
 
-			_passages.Add(p.Name.Indexed);
+			_exits.Add(p.Name.Indexed);
 		}
 
 		/// <summary>
@@ -600,10 +628,10 @@ namespace Game.Terrain
 			if (!_portalAmbients.ContainsKey(message.Sender))
 				return;
 
-			List<PreparedPortalAmbientModel> PreparedPortalAmbients = PreparePassageLoops();
-			PreparedPortalAmbientModel preparedPortalAmbient = PreparedPortalAmbients.First(l => l.Passage == message.Sender);
+			List<ReadyPortalModel> PreparedPortalAmbients = PreparePassageLoops();
+			ReadyPortalModel preparedPortalAmbient = PreparedPortalAmbients.First(l => l.Passage == message.Sender);
 
-			PortalAmbientModel portalAmbient = _portalAmbients[message.Sender];
+			PortalModel portalAmbient = _portalAmbients[message.Sender];
 			UpdatePortalAmbientVolume(preparedPortalAmbient, portalAmbient);
 			SetDoorOcclusion(preparedPortalAmbient, portalAmbient);
 		}
@@ -626,10 +654,10 @@ namespace Game.Terrain
 		/// <param name="p">The passage to be removed</param>
 		public void Unregister(Passage p)
 		{
-			if (!Passages.Contains(p))
+			if (!Exits.Contains(p))
 				throw new InvalidOperationException("Unregistered passage");
 
-			_passages.Remove(p.Name.Indexed);
+			_exits.Remove(p.Name.Indexed);
 		}
 
 		/// <summary>
@@ -642,7 +670,7 @@ namespace Game.Terrain
 				World.Remove(o);
 
 			// Delete passages.
-			foreach (Passage p in Passages)
+			foreach (Passage p in Exits)
 				World.Remove(p);
 
 			// Delete character.
@@ -712,7 +740,7 @@ namespace Game.Terrain
 		/// <param name="message">The message to be sent</param>
 		private void MessagePassages(Message message)
 		{
-			foreach (Passage p in Passages)
+			foreach (Passage p in Exits)
 			{
 				if (p != message.Sender)
 					p.TakeMessage(message);
@@ -746,7 +774,7 @@ namespace Game.Terrain
 			if (PlayerInHere())
 			{
 				_ambientSource = previousZone.ReleaseAmbientSource();
-				StopPortalAmbients();
+				StopPortals();
 				return true;
 			}
 			return false;
@@ -775,7 +803,7 @@ namespace Game.Terrain
 				if (playerHere)
 					Play2dAmbient();
 				else if (SameAmbients(World.Player.Zone))
-					StopPortalAmbients();
+					StopPortals();
 				else PlayAmbientFromExits(previousZone);
 			}
 			else
@@ -816,7 +844,7 @@ namespace Game.Terrain
 		private void StopLoops()
 		{
 			Stop(ref _ambientSource);
-			foreach (PortalAmbientModel loop in _portalAmbients.Values)
+			foreach (PortalModel loop in _portalAmbients.Values)
 				Stop(ref loop.AudioSource);
 			_portalAmbients = new();
 
@@ -834,7 +862,7 @@ namespace Game.Terrain
 		/// Stores the identifiers of location audio loops played in passages.
 		/// </summary>
 		[ProtoIgnore]
-		private Dictionary<Passage, PortalAmbientModel> _portalAmbients = new();
+		private Dictionary<Passage, PortalModel> _portalAmbients = new();
 
 		private bool _reloaded;
 		private const float _portalAmbientMaxDistance = 9;
@@ -857,7 +885,7 @@ namespace Game.Terrain
 				return;
 
 			Zone playersZone = World.Player.Zone;
-			List<PreparedPortalAmbientModel> preparedPortalAmbients = PreparePassageLoops();
+			List<ReadyPortalModel> readyPortals = PreparePassageLoops();
 
 			/* 
 			 * Player leaved this zone.
@@ -865,26 +893,21 @@ namespace Game.Terrain
 			if (previousZone == this && _ambientSource != null && _ambientSource.isPlaying)
 			{
 				// Change 2D ambient sound to 3D and place it in the nearest passage between this and new zone. Start playing 3D ambient sounds from other passages between this and the new zone.
-				List<Passage> passages = preparedPortalAmbients.Select(loop => loop.Passage).ToList();
-				Passage closestPassage = World.GetClosestElement(passages, World.Player) as Passage;
-				PreparedPortalAmbientModel ClosestPortalAmbient;
-				ClosestPortalAmbient = preparedPortalAmbients.First(loop => loop.Passage == closestPassage);
-				preparedPortalAmbients.Remove(ClosestPortalAmbient);
-
-				MoveAmbientToPassage(ClosestPortalAmbient, _defaultVolume, _ambientSource);
+				ReadyPortalModel closestPortal = RemoveReadyPortalNearPlayer(readyPortals);
+				MoveAmbientToPassage(closestPortal, _defaultVolume, _ambientSource);
 			}
 
 			// Start playback in The remaining exits.
-			foreach (PreparedPortalAmbientModel loop in preparedPortalAmbients)
+			foreach (ReadyPortalModel loop in readyPortals)
 				PlayPortalAmbient(loop, _defaultVolume);
 		}
 
-		private List<PreparedPortalAmbientModel> PreparePassageLoops()
+		private List<ReadyPortalModel> PreparePassageLoops()
 		{
 			Zone playersZone = World.Player.Zone;
-			List<PreparedPortalAmbientModel> result = new();
+			List<ReadyPortalModel> result = new();
 
-			foreach (Passage passage in Passages)
+			foreach (Passage passage in Exits)
 			{
 				Vector2 position = default;
 				Vector2 player = World.Player.Area.Value.Center;
@@ -929,15 +952,15 @@ namespace Game.Terrain
 			 * Find a passage sound that is closest to the player, 
 			] * change it to full stereo, disable Low pass and stop the rest of the passage loops.
 			 */
-			PortalAmbientModel portalAmbient = TakeClosestPassageLoop();
+			PortalModel portalAmbient = TakeClosestPassageLoop();
 			Sounds.ConvertTo2d(portalAmbient.AudioSource, portalAmbient.Muffled);
 			_ambientSource = portalAmbient.AudioSource;
 			_ambientSource.name = description;
 
-			StopPortalAmbients();
+			StopPortals();
 		}
 
-		private PortalAmbientModel TakeClosestPassageLoop()
+		private PortalModel TakeClosestPassageLoop()
 		{
 			Passage closest = _portalAmbients.Keys
 				.OrderBy(p => p.Area.Value.GetDistanceFrom(World.Player.Area.Value))
@@ -945,15 +968,15 @@ namespace Game.Terrain
 			if (closest == null)
 				return null;
 
-			PortalAmbientModel loop = _portalAmbients[closest];
+			PortalModel loop = _portalAmbients[closest];
 			_portalAmbients.Remove(closest);
 			return loop;
 		}
 
-		private void PlayPortalAmbient(PreparedPortalAmbientModel preparedPortalAmbient, float volume)
+		private void PlayPortalAmbient(ReadyPortalModel preparedPortalAmbient, float volume)
 		{
 			string description = GetPortalAmbientDescription(preparedPortalAmbient.Passage);
-			PortalAmbientModel newPortalAmbient = new()
+			PortalModel newPortalAmbient = new()
 			{
 				AudioSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description)
 			};
@@ -965,7 +988,7 @@ namespace Game.Terrain
 			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
 		}
 
-		private void SetDistanceAttenuation(PreparedPortalAmbientModel preparedPortalAmbient, PortalAmbientModel portalAmbient)
+		private void SetDistanceAttenuation(ReadyPortalModel preparedPortalAmbient, PortalModel portalAmbient)
 		{
 			portalAmbient.AudioSource.rolloffMode = AudioRolloffMode.Linear;
 			if (preparedPortalAmbient.Passage is Door door)
@@ -978,7 +1001,7 @@ namespace Game.Terrain
 			else portalAmbient.AudioSource.maxDistance = _portalAmbientMaxDistance;
 		}
 
-		private void UpdatePortalAmbientVolume(PreparedPortalAmbientModel preparedPortalAmbient, PortalAmbientModel portalAmbient)
+		private void UpdatePortalAmbientVolume(ReadyPortalModel preparedPortalAmbient, PortalModel portalAmbient)
 		{
 			float targetVolume = _defaultVolume;
 			float duration = _ambient2dFadeDuration;
@@ -1003,10 +1026,10 @@ namespace Game.Terrain
 			return description;
 		}
 
-		private void MoveAmbientToPassage(PreparedPortalAmbientModel preparedPortalAmbient, float volume, AudioSource stereoAmbientSound)
+		private void MoveAmbientToPassage(ReadyPortalModel preparedPortalAmbient, float volume, AudioSource stereoAmbientSound)
 		{
 			stereoAmbientSound.transform.position = preparedPortalAmbient.Position;
-			PortalAmbientModel newPortalAmbient = new()
+			PortalModel newPortalAmbient = new()
 			{
 				AudioSource = stereoAmbientSound
 			};
@@ -1020,7 +1043,7 @@ namespace Game.Terrain
 			newPortalAmbient.AudioSource.rolloffMode = AudioRolloffMode.Linear;
 		}
 
-		private void SetDoorOcclusion(PreparedPortalAmbientModel preparedPortalAmbient, PortalAmbientModel portalAmbient)
+		private void SetDoorOcclusion(ReadyPortalModel preparedPortalAmbient, PortalModel portalAmbient)
 		{
 			if (preparedPortalAmbient.Passage.State is PassageState.Closed or PassageState.Locked)
 			{
@@ -1043,7 +1066,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="zone">The zone to which the passages should lead</param>
 		/// <returns> all passages leading to the specified zone</returns>
-		private IEnumerable<Passage> GetPassagesTo(Zone zone) => Passages.Where(p => p.Zones.Contains(zone));
+		private IEnumerable<Passage> GetPassagesTo(Zone zone) => Exits.Where(p => p.Zones.Contains(zone));
 
 		//protected new float OverDoorVolume => .05f * _defaultVolume;
 
@@ -1059,12 +1082,12 @@ namespace Game.Terrain
 				_ambientSource = null;
 			}
 
-			StopPortalAmbients();
+			StopPortals();
 		}
 
-		private void StopPortalAmbients()
+		private void StopPortals()
 		{
-			foreach (PortalAmbientModel loop in _portalAmbients.Values)
+			foreach (PortalModel loop in _portalAmbients.Values)
 				Sounds.SlideVolume(loop.AudioSource, .5f, 0);
 
 			_portalAmbients = new();

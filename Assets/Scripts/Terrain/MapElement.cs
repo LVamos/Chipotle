@@ -213,7 +213,7 @@ namespace Game.Terrain
 		/// Returns distance from this passage to the player.
 		/// </summary>
 		/// <returns>Distance in meters</returns>
-		protected float GetDistanceToPlayer() => World.GetDistance(this, World.Player);
+		public float GetDistanceToPlayer() => World.GetDistance(this, World.Player);
 
 		/// <summary>
 		/// Stops the sound navigation.
