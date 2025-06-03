@@ -1,6 +1,4 @@
-﻿using Assets.Scripts.Audio;
-
-using Game.Terrain;
+﻿using Game.Terrain;
 
 using System;
 using System.Collections.Generic;
@@ -14,6 +12,13 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
+		public static AudioMixerGroup GetGroup() => _soundManager.GetGroup();
+		public static void ReleaseGroup(AudioMixerGroup group) => _soundManager.ReleaseGroup(group);
+		public static float GetCutoff(AudioMixerGroup group) => _soundManager.GetCutoff(group);
+		public static void SetCutoff(AudioMixerGroup group, float cutoff) => _soundManager.SetCutoff(group, cutoff);
+
+
+		public static int LowPassFrequency { get => _soundManager.LowPassFrequency; set => _soundManager.LowPassFrequency = value; }
 		public static void MuteSpeech() => _soundManager.MuteSpeech();
 		public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
 		public static float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(position, minDistance, maxDistance, defaultVolume);
@@ -56,7 +61,7 @@ namespace Game.Audio
 
 		public static void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true) => _soundManager.SlideVolume(sound, duration, targetVolume, stopWhenDone);
 
-		public static AudioSource DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
+		public static void DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 
 		public static void SetLowPass(AudioSource source, int cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
 
@@ -70,9 +75,7 @@ namespace Game.Audio
 
 		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration, description);
 
-		public static AudioMixerGroup MasterGroup => _soundManager.MasterGroup;
-		//test
-		public static AudioMixerGroup MuffledGroup => _soundManager.MuffledGroup;
+		public static AudioMixerGroup ResonanceGroup => _soundManager.ResonanceGroup;
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
 		public static void SlideMasterVolume(float duration, float targetVolume) => _soundManager.SlideMasterVolume(duration, targetVolume);
 

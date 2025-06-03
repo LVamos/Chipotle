@@ -149,9 +149,6 @@ namespace Game.Entities.Items
 			// Start playback in The remaining exits.
 			foreach (ReadyPortalModel portal in readyPortals)
 				PlayPortal(portal, _defaultVolume);
-
-			foreach (Passage exit in _portals.Keys)
-				UpdatePortalOcclusion(_portals[exit], exit);
 		}
 
 		private const int _passageDistanceAttenuationThreshold = 5;
@@ -574,8 +571,8 @@ namespace Game.Entities.Items
 
 			Door door = message.Sender as Door;
 			//test
-			if (Name.Indexed == "akvárko w1" && door.Name.Indexed == "d chodba w1 ložnice w1")
-				System.Diagnostics.Debugger.Break();
+			//if (Name.Indexed == "akvárko w1" && door.Name.Indexed == "d chodba w1 ložnice w1")
+			//System.Diagnostics.Debugger.Break();
 			Zone myZone = GetZoneNearPlayer();
 			if (!door.LeadsTo(myZone))
 				return;

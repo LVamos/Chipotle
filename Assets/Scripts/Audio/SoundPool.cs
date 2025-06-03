@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Unity.VisualScripting;
-
 using UnityEditor;
 
 using UnityEngine;
@@ -46,34 +44,22 @@ namespace Assets.Scripts.Audio
 			return (playingSounds, playingSoundNames);
 		}
 
-		public AudioLowPassFilter EnableLowPass(AudioSource source)
+		public void EnableLowPass(AudioSource source)
 		{
 			//test
 			//if (source.clip.name.ToLower().Contains("fish"))
 			//System.Diagnostics.Debugger.Break();
 
 			_pool.Remove(source);
-			source.outputAudioMixerGroup = null;
-			source.spatialize = false;
-			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
-			Destroy(resonance);
-			AudioLowPassFilter lowPass = source.AddComponent<AudioLowPassFilter>();
 			_muffledPool.Add(source);
-			return lowPass;
+			Sounds.ResonanceGroup.audioMixer.SetFloat("Cutoff freq", 5000);
 		}
 
-		public AudioSource DisableLowPass(AudioSource source)
+		public void DisableLowPass(AudioSource source)
 		{
+			Sounds.ResonanceGroup.audioMixer.SetFloat("Cutoff freq", 22000);
 			_muffledPool.Remove(source);
-			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
-			?? throw new LowPassFilterNotFoundException(source);
-			Destroy(lowPass);
-			ResonanceAudioSource resonance = source.AddComponent<ResonanceAudioSource>();
-			resonance.bypassRoomEffects = false;
-			source.outputAudioMixerGroup = Sounds.MasterGroup;
-			source.spatialize = true;
 			_pool.Add(source);
-			return source;
 		}
 
 		public AudioSource GetMuffledSource()
