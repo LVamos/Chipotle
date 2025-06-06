@@ -32,7 +32,7 @@ namespace Game.Audio
 
 
 		private Dictionary<AudioSource, Coroutine> _lowPassCoroutines = new();
-		public void SlideLowPass(AudioSource source, float duration, float targetFrequency)
+		public void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
 		{
 			//test
 			//if (source.clip.name.ToLower().Contains("fish"))
@@ -40,7 +40,6 @@ namespace Game.Audio
 			if (source.outputAudioMixerGroup == null)
 				throw new LowPassFilterNotFoundException(source);
 
-			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>();
 			source.spatializePostEffects = true;
 
 			if (targetFrequency == GetLowPassFrequency(source))
@@ -54,18 +53,17 @@ namespace Game.Audio
 				_lowPassCoroutines.Remove(source);
 			}
 
-			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency));
+			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency, disableLowPassAfterwards));
 			_lowPassCoroutines[source] = newCoroutine;
 		}
 
 		public float GetLowPassFrequency(AudioSource source)
 		{
-			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
-				?? throw new LowPassFilterNotFoundException(source);
+			AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
 			return lowPass.cutoffFrequency;
 		}
 
-		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency)
+		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
 		{
 			AudioMixerGroup group = source.outputAudioMixerGroup;
 			float startFrequency = GetLowPassFrequency(source);
@@ -78,10 +76,10 @@ namespace Game.Audio
 			}
 			SetLowPassFrequency(source, targetFrequency);
 
-			if (targetFrequency >= 22000)
-				source.spatializePostEffects = false;
+			if (disableLowPassAfterwards)
+				_soundPool.DisableLowPass(source);
 
-			// Remove the corutine
+			// Remove the coroutine
 			if (_lowPassCoroutines.ContainsKey(source))
 				_lowPassCoroutines.Remove(source);
 		}
@@ -181,6 +179,8 @@ namespace Game.Audio
 				source.volume = volume;
 				source.Play();
 			}
+
+			_soundPool.SoundStartedPlaying(source);
 			return source;
 		}
 
@@ -230,24 +230,18 @@ namespace Game.Audio
 
 		private SoundPool _soundPool;
 
-		public void DisableLowPass(AudioSource source)
-		{
-			//test
-			return;
-			_soundPool.DisableLowPass(source);
-		}
+		public void DisableLowPass(AudioSource source) => _soundPool.DisableLowPass(source);
 
 
 		public void SetLowPassFrequency(AudioSource source, float cutOffFrequency)
 		{
-			AudioLowPassFilter lowPass = source.GetComponent<AudioLowPassFilter>()
-				?? throw new LowPassFilterNotFoundException(source);
+			AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
 			lowPass.cutoffFrequency = cutOffFrequency;
 		}
 
 		public AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000, string description = null)
 		{
-			AudioSource source = _soundPool.GetMuffledSource();
+			AudioSource source = _soundPool.GetSource();
 			source.name = description ?? "sound";
 			AudioLowPassFilter lowPass = source.gameObject.GetComponent<AudioLowPassFilter>();
 			lowPass.cutoffFrequency = cutOffFrequency;
@@ -259,6 +253,7 @@ namespace Game.Audio
 			source.loop = loop;
 			source.dopplerLevel = 0;
 			source.Play();
+			_soundPool.SoundStartedPlaying(source);
 
 			return source;
 		}
@@ -291,6 +286,7 @@ namespace Game.Audio
 
 			source.volume = volume;
 			source.Play();
+			_soundPool.SoundStartedPlaying(source);
 			return source;
 		}
 

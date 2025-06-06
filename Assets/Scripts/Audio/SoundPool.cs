@@ -1,6 +1,7 @@
 ﻿
 using Game;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,18 @@ namespace Assets.Scripts.Audio
 {
 	public class SoundPool : MonoBehaviour
 	{
+		public void SoundStartedPlaying(AudioSource source)
+		{
+			if (source == null)
+				throw new ArgumentNullException(nameof(source));
+			_pool.Remove(source);
+			_playingSources.Add(source);
+		}
+
+		public AudioLowPassFilter GetLowPass(AudioSource source) => _lowPasses[source];
+
+		private Dictionary<AudioSource, AudioLowPassFilter> _lowPasses = new();
+
 		private void LogPlayingSounds()
 		{
 			if (!Settings.LogPlayingSounds)
@@ -37,7 +50,7 @@ namespace Assets.Scripts.Audio
 		/// <returns>(AudioSource[] sounds, string[] names)</returns>
 		private (AudioSource[] sounds, string[] names) GetPlayingSounds()
 		{
-			AudioSource[] playingSounds = _pool.Concat(_muffledPool).Where(a => a.isPlaying && !a.isVirtual)
+			AudioSource[] playingSounds = _playingSources.Where(a => !a.isVirtual)
 .ToArray();
 			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
 			return (playingSounds, playingSoundNames);
@@ -45,63 +58,63 @@ namespace Assets.Scripts.Audio
 
 		public void EnableLowPass(AudioSource source)
 		{
-			//test
-			//if (source.clip.name.ToLower().Contains("fish"))
-			//System.Diagnostics.Debugger.Break();
+			AudioLowPassFilter lowPass = GetLowPass(source);
 
-			_pool.Remove(source);
-			_muffledPool.Add(source);
+			if (lowPass.enabled)
+				return;
+
 			source.spatializePostEffects = true;
+			lowPass.enabled = true;
 		}
 
 		public void DisableLowPass(AudioSource source)
 		{
-			_muffledPool.Remove(source);
-			_pool.Add(source);
+			AudioLowPassFilter lowPass = GetLowPass(source);
+			if (!lowPass.enabled)
+				return;
+
 			source.spatializePostEffects = false;
+			lowPass.enabled = false;
 		}
 
-		public AudioSource GetMuffledSource()
-		{
-			AudioSource source = _muffledPool.FirstOrDefault(s => !s.isPlaying);
-			if (source == null)
-				source = AddMuffledSource();
-			source.gameObject.SetActive(true);
-			return source;
-		}
-
+		private HashSet<AudioSource> _playingSources = new(_poolSize);
 		public AudioSource GetSource()
 		{
-			AudioSource source = _pool.FirstOrDefault(s => !s.isPlaying)
-				?? AddSource();
+			AudioSource source = _pool.FirstOrDefault();
+			if (source == null)
+				source = AddSource();
 
 			source.gameObject.SetActive(true);
+			_playingSources.Add(source);
 			return source;
 		}
 
-		private List<AudioSource> _pool = new();
-		private List<AudioSource> _muffledPool = new();
+		private HashSet<AudioSource> _pool = new(_poolSize);
 		private const int _poolSize = 20;
 
 		private void Start()
 		{
 			for (int i = 0; i < _poolSize; i++)
 				AddSource();
-			for (int i = 0; i < _poolSize; i++)
-				AddMuffledSource();
 		}
 
 		private void Update()
 		{
 			LogPlayingSounds();
-
-			List<AudioSource> allSources = _pool.Concat(_muffledPool).ToList();
-			foreach (AudioSource source in allSources)
+			HashSet<AudioSource> sourcesToRemove = new();
+			foreach (AudioSource source in _playingSources)
 			{
 				StopForbiddenSound(source);
 				if (!source.isPlaying)
+				{
 					Sleep(source);
+					sourcesToRemove.Add(source);
+					_pool.Add(source);
+				}
 			}
+
+			foreach (AudioSource source in sourcesToRemove)
+				_playingSources.Remove(source);
 		}
 
 		private void StopForbiddenSound(AudioSource source)
@@ -120,25 +133,16 @@ namespace Assets.Scripts.Audio
 			source.gameObject.SetActive(false);
 		}
 
-		private AudioSource AddMuffledSource()
-		{
-			GameObject o = new("Sound");
-			AudioSource source = o.AddComponent<AudioSource>();
-			o.AddComponent<ResonanceAudioSource>();
-			o.AddComponent<AudioLowPassFilter>();
-			o.SetActive(false);
-			_muffledPool.Add(source);
-			return source;
-		}
 
 		private AudioSource AddSource()
 		{
 			GameObject o = new("Sound");
 			AudioSource source = o.AddComponent<AudioSource>();
 			o.AddComponent<ResonanceAudioSource>();
-			o.AddComponent<AudioLowPassFilter>();
+			AudioLowPassFilter lowPass = o.AddComponent<AudioLowPassFilter>();
 			o.SetActive(false);
 			_pool.Add(source);
+			_lowPasses[source] = lowPass;
 			return source;
 		}
 	}
