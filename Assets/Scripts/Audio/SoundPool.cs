@@ -1,6 +1,5 @@
 ﻿
 using Game;
-using Game.Audio;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -52,14 +51,14 @@ namespace Assets.Scripts.Audio
 
 			_pool.Remove(source);
 			_muffledPool.Add(source);
-			Sounds.ResonanceGroup.audioMixer.SetFloat("Cutoff freq", 5000);
+			source.spatializePostEffects = true;
 		}
 
 		public void DisableLowPass(AudioSource source)
 		{
-			Sounds.ResonanceGroup.audioMixer.SetFloat("Cutoff freq", 22000);
 			_muffledPool.Remove(source);
 			_pool.Add(source);
+			source.spatializePostEffects = false;
 		}
 
 		public AudioSource GetMuffledSource()
@@ -137,6 +136,7 @@ namespace Assets.Scripts.Audio
 			GameObject o = new("Sound");
 			AudioSource source = o.AddComponent<AudioSource>();
 			o.AddComponent<ResonanceAudioSource>();
+			o.AddComponent<AudioLowPassFilter>();
 			o.SetActive(false);
 			_pool.Add(source);
 			return source;

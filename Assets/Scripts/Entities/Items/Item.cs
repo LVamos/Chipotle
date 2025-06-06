@@ -843,7 +843,6 @@ namespace Game.Entities.Items
 			if (Name.Indexed == "krb w1")
 				Debug.Log("");
 
-
 			float updatedVolume = Sounds.GetLinearRolloffAttenuation(_ambientSource, attenuationSetting.Volume);
 			Sounds.SlideVolume(source, duration, updatedVolume, false);
 			source.spatialBlend = attenuationSetting.SpatialBlend;

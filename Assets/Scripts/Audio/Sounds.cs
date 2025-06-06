@@ -12,13 +12,9 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
-		public static AudioMixerGroup GetGroup() => _soundManager.GetGroup();
-		public static void ReleaseGroup(AudioMixerGroup group) => _soundManager.ReleaseGroup(group);
-		public static float GetCutoff(AudioMixerGroup group) => _soundManager.GetCutoff(group);
-		public static void SetCutoff(AudioMixerGroup group, float cutoff) => _soundManager.SetCutoff(group, cutoff);
+		public static float GetLowPassFrequency(AudioSource source) => _soundManager.GetLowPassFrequency(source);
+		public static void SetLowPassFrequency(AudioSource source, float frequency) => _soundManager.SetLowPassFrequency(source, frequency);
 
-
-		public static int LowPassFrequency { get => _soundManager.LowPassFrequency; set => _soundManager.LowPassFrequency = value; }
 		public static void MuteSpeech() => _soundManager.MuteSpeech();
 		public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
 		public static float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(position, minDistance, maxDistance, defaultVolume);
@@ -63,9 +59,9 @@ namespace Game.Audio
 
 		public static void DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 
-		public static void SetLowPass(AudioSource source, int cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
+		public static void SetLowPass(AudioSource source, int cutOffFrequency) => _soundManager.SetLowPassFrequency(source, cutOffFrequency);
 
-		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
+		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPassFrequency(source, GetLowPassFrequency(obstacle));
 
 		public static void SetRoomParameters(Zone zone) => _soundManager.SetRoomParameters(zone);
 
