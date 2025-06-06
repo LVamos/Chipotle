@@ -59,12 +59,8 @@ namespace Assets.Scripts.Audio
 		public void EnableLowPass(AudioSource source)
 		{
 			AudioLowPassFilter lowPass = GetLowPass(source);
-
-			if (lowPass.enabled)
-				return;
-
-			source.spatializePostEffects = true;
 			lowPass.enabled = true;
+			source.spatializePostEffects = true;
 		}
 
 		public void DisableLowPass(AudioSource source)

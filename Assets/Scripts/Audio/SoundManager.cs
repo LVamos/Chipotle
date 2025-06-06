@@ -35,14 +35,14 @@ namespace Game.Audio
 		public void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
 		{
 			//test
-			//if (source.clip.name.ToLower().Contains("fish"))
-			//System.Diagnostics.Debugger.Break();
+			if (source.clip.name.ToLower().Contains("fire"))
+				Debug.Log("");
 			if (source.outputAudioMixerGroup == null)
 				throw new LowPassFilterNotFoundException(source);
 
-			source.spatializePostEffects = true;
+			_soundPool.EnableLowPass(source);
 
-			if (targetFrequency == GetLowPassFrequency(source))
+			if (targetFrequency == GetLowPass(source))
 				return;
 
 			Coroutine coroutine;
@@ -57,7 +57,7 @@ namespace Game.Audio
 			_lowPassCoroutines[source] = newCoroutine;
 		}
 
-		public float GetLowPassFrequency(AudioSource source)
+		public float GetLowPass(AudioSource source)
 		{
 			AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
 			return lowPass.cutoffFrequency;
@@ -65,16 +65,15 @@ namespace Game.Audio
 
 		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
 		{
-			AudioMixerGroup group = source.outputAudioMixerGroup;
-			float startFrequency = GetLowPassFrequency(source);
+			float startFrequency = GetLowPass(source);
 
 			for (float t = 0; t < duration; t += Time.deltaTime)
 			{
 				float value = (int)Mathf.Lerp(startFrequency, targetFrequency, t / duration);
-				SetLowPassFrequency(source, value);
+				SetLowPass(source, value);
 				yield return null;
 			}
-			SetLowPassFrequency(source, targetFrequency);
+			SetLowPass(source, targetFrequency);
 
 			if (disableLowPassAfterwards)
 				_soundPool.DisableLowPass(source);
@@ -112,7 +111,7 @@ namespace Game.Audio
 			source.spatialBlend = 1;
 			source.transform.position = position;
 			if (lowPassFrequency != null)
-				SetLowPassFrequency(source, lowPassFrequency.Value);
+				SetLowPass(source, lowPassFrequency.Value);
 			return source;
 		}
 
@@ -233,7 +232,7 @@ namespace Game.Audio
 		public void DisableLowPass(AudioSource source) => _soundPool.DisableLowPass(source);
 
 
-		public void SetLowPassFrequency(AudioSource source, float cutOffFrequency)
+		public void SetLowPass(AudioSource source, float cutOffFrequency)
 		{
 			AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
 			lowPass.cutoffFrequency = cutOffFrequency;

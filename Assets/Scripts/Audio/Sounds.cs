@@ -12,14 +12,14 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
-		public static float GetLowPassFrequency(AudioSource source) => _soundManager.GetLowPassFrequency(source);
-		public static void SetLowPassFrequency(AudioSource source, float frequency) => _soundManager.SetLowPassFrequency(source, frequency);
+		public static float GetLowPass(AudioSource source) => _soundManager.GetLowPass(source);
+		public static void SetLowPassFrequency(AudioSource source, float frequency) => _soundManager.SetLowPass(source, frequency);
 
 		public static void MuteSpeech() => _soundManager.MuteSpeech();
 		public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
 		public static float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(position, minDistance, maxDistance, defaultVolume);
 
-		public static void SlideLowPass(AudioSource source, float duration, int targetFrequency) => _soundManager.SlideLowPass(source, duration, targetFrequency);
+		public static void SlideLowPass(AudioSource source, float duration, int targetFrequency, bool disableLowPassAfterwards = false) => _soundManager.SlideLowPass(source, duration, targetFrequency, disableLowPassAfterwards);
 
 		/// <summary>
 		/// Calculates low pass filter cut off frequency.
@@ -59,9 +59,9 @@ namespace Game.Audio
 
 		public static void DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 
-		public static void SetLowPass(AudioSource source, int cutOffFrequency) => _soundManager.SetLowPassFrequency(source, cutOffFrequency);
+		public static void SetLowPass(AudioSource source, float cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
 
-		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPassFrequency(source, GetLowPassFrequency(obstacle));
+		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
 
 		public static void SetRoomParameters(Zone zone) => _soundManager.SetRoomParameters(zone);
 

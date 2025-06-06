@@ -52,7 +52,7 @@ namespace Game.Entities.Items
 			foreach (Passage exit in _portals.Keys)
 			{
 				PortalModel portal = _portals[exit];
-				UpdatePortalOcclusion(portal, exit);
+				UpdatePortalOcclusion(portal, exit, _enteringZoneOcclusionDuration);
 				UpdatePortalPosition(portal, exit);
 			}
 		}
@@ -78,6 +78,7 @@ namespace Game.Entities.Items
 			{
 				AudioSource = _ambientSource
 			};
+			_ambientSource = null;
 			newPortal.AudioSource.maxDistance = GetMaxDistance();
 			newPortal.AudioSource.name = GetPortalDescription(portal.Passage);
 			_portals[portal.Passage] = newPortal;
@@ -99,13 +100,15 @@ namespace Game.Entities.Items
 			return closestPortal;
 		}
 
+		private const int _enteringZoneOcclusionDuration = 1;
+
 		protected bool ReplaceAmbientLoopWithNearestPortal()
 		{
 			PortalModel portal = TryRemovePortalNearPlayer();
 			if (portal == null)
 				return false;
 
-			DisableOcclusion(portal.AudioSource);
+			DisableOcclusion(portal.AudioSource, _enteringZoneOcclusionDuration);
 			_ambientSource = portal.AudioSource;
 			_ambientSource.transform.position = GetAmbientPosition();
 			return true;
@@ -122,7 +125,7 @@ namespace Game.Entities.Items
 			return closestPortal;
 		}
 
-		private void PlayAmbientFromExits(Zone previousZone = null)
+		private void PlayAmbientFromExits()
 		{
 			//test
 			//if (Name.Indexed == "akvárko w1")
@@ -148,53 +151,45 @@ namespace Game.Entities.Items
 
 			// Start playback in The remaining exits.
 			foreach (ReadyPortalModel portal in readyPortals)
-				PlayPortal(portal, _defaultVolume);
+				PlayPortal(portal);
 		}
 
 		private const int _passageDistanceAttenuationThreshold = 5;
 
-		private void UpdatePortalOcclusion(PortalModel portal, Passage exit)
+		private void UpdatePortalOcclusion(PortalModel portal, Passage exit, float? duration = null)
 		{
 			int lowPass;
-			float duration;
+			float finalDuration;
 			PassageState state = exit.State;
 			bool toofar = exit.GetDistanceToPlayer() > _passageDistanceAttenuationThreshold;
 
 			if (state is PassageState.Closed or PassageState.Locked)
 			{
 				if (toofar)
-				{
-					//TEST
-					//if (Name.Indexed == "krb w1" && exit.Name.Indexed == "d chodba w1 obývák w1") System.Diagnostics.Debugger.Break();
 					lowPass = Sounds.OverWallLowpass;
-				}
 				else lowPass = Sounds.OverClosedDoorLowpass;
-				duration = _doorClosingOcclusionDuration;
+				finalDuration = duration != null ? duration.Value : _doorClosingOcclusionDuration;
 				//volume = Sounds.GetOverClosedDoorVolume(volume);
 			}
 			else
 			{
 				if (toofar)
 					lowPass = Sounds.OverClosedDoorLowpass;
-				//TEST
-				////if (Name.Indexed == "krb w1" && exit.Name.Indexed == "d chodba w1 obývák w1") System.Diagnostics.Debugger.Break();
-
-				else
-					lowPass = Sounds.OverOpenDoorLowpass;
-				duration = _doorOpeningOcclusionDuration;
+				else lowPass = Sounds.OverOpenDoorLowpass;
+				finalDuration = duration != null ? duration.Value : _doorOpeningOcclusionDuration;
 			}
 
 			if (portal.AudioSource.volume == 0)
 			{
-				float volume = Sounds.GetLinearRolloffAttenuation(transform.position, _ambientSource.minDistance, _ambientSource.maxDistance, _defaultVolume) * _portalLoopVolumeCoefficient;
-				Sounds.SlideVolume(portal.AudioSource, duration, volume);
+				float volume = Sounds.GetLinearRolloffAttenuation(transform.position, _ambientMinDistance, GetMaxDistance(), _defaultVolume) * _portalLoopVolumeCoefficient;
+				Sounds.SlideVolume(portal.AudioSource, finalDuration, volume);
 			}
 
 			//test
 			//if (exit.Name.Indexed == "d chodba w1 ložnice w1")
 			//	System.Diagnostics.Debugger.Break();
 
-			Sounds.SlideLowPass(portal.AudioSource, duration, lowPass);
+			Sounds.SlideLowPass(portal.AudioSource, finalDuration, lowPass);
 		}
 
 		private List<Passage> ReadyPortalsToPassages(List<ReadyPortalModel> portals)
@@ -205,7 +200,7 @@ namespace Game.Entities.Items
 			return result;
 		}
 
-		private void PlayPortal(ReadyPortalModel readyPortal, float volume)
+		private void PlayPortal(ReadyPortalModel readyPortal)
 		{
 			string description = GetPortalDescription(readyPortal.Passage);
 			string name = _sounds["loop"];
@@ -791,7 +786,15 @@ namespace Game.Entities.Items
 			}
 
 			if (lastObstacleBackup == ObstacleType.InDifferentZone && obstacle is not ObstacleType.Far and not ObstacleType.InDifferentZone)
+			{
+				//test
+				if (Name.Indexed == "krb w1")
+					Debug.Log("");
 				PlayAmbient();
+			}
+
+			if (obstacle is ObstacleType.Far or ObstacleType.InDifferentZone)
+				return;
 
 			if (_muffled)
 			{
@@ -835,21 +838,19 @@ namespace Game.Entities.Items
 		}
 
 		private void DisableOcclusion(AudioSource source, float duration = _defaultOcclusionDuration)
-			=> SetAttenuation(source, new(22000, _defaultVolume), duration);
-
-		private void SetAttenuation(AudioSource source, AttenuationModel attenuationSetting, float duration)
 		{
-			//test
-			if (Name.Indexed == "krb w1")
-				Debug.Log("");
+			SetAttenuation(source, new(22000, _defaultVolume), duration, true);
+		}
 
-			float updatedVolume = Sounds.GetLinearRolloffAttenuation(_ambientSource, attenuationSetting.Volume);
+		private void SetAttenuation(AudioSource source, AttenuationModel attenuationSetting, float duration, bool disableLowPassAfterwards = false)
+		{
+			float updatedVolume = Sounds.GetLinearRolloffAttenuation(source.transform.position, _ambientMinDistance, GetMaxDistance(), attenuationSetting.Volume);
 			Sounds.SlideVolume(source, duration, updatedVolume, false);
 			source.spatialBlend = attenuationSetting.SpatialBlend;
 
 			if (attenuationSetting.LowPassFrequency != null)
 			{
-				Sounds.SlideLowPass(source, duration, attenuationSetting.LowPassFrequency.Value);
+				Sounds.SlideLowPass(source, duration, attenuationSetting.LowPassFrequency.Value, disableLowPassAfterwards);
 				return;
 			}
 
