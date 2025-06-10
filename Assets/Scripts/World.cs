@@ -138,21 +138,7 @@ namespace Game
 					return result;
 
 				if (!result.Obstacles.IsNullOrEmpty())
-				{
-					//test
-					string clipboard = GUIUtility.systemCopyBuffer;
-					if (!string.IsNullOrEmpty(clipboard))
-						if (ignoredElements.Any(i => i.Name.Indexed == clipboard))
-						{
-							System.Diagnostics.Debugger.Break();
-							Item it = result.Obstacles[0] as Item;
-							Rectangle v = it.Area.Value;
-							bool intersects = v.Intersects(segment);
-							bool itemcontains = v.Contains(segment);
-							bool segmentContains = segment.Contains(v);
-						}
 					return result;
-				}
 			}
 			return new(null, false);
 		}
@@ -336,11 +322,6 @@ namespace Game
 		{
 			Vector2 playerCenter = Player.Area.Value.Center;
 			Vector2 closestPoint = emmittingObject.Area.Value.GetClosestPoint(playerCenter);
-			//test
-			string clipboard = GUIUtility.systemCopyBuffer;
-			if (!string.IsNullOrEmpty(clipboard))
-				if (emmittingObject.Name.Indexed == clipboard)
-					System.Diagnostics.Debugger.Break();
 
 			Rectangle ray = Rectangle.FromCenter(closestPoint, .1f, .1f, false);
 			float distance = GetDistance(ray.Center, playerCenter);

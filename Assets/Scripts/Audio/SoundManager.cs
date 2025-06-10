@@ -34,9 +34,6 @@ namespace Game.Audio
 		private Dictionary<AudioSource, Coroutine> _lowPassCoroutines = new();
 		public void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
 		{
-			//test
-			if (source.clip.name.ToLower().Contains("fire"))
-				Debug.Log("");
 			if (source.outputAudioMixerGroup == null)
 				throw new LowPassFilterNotFoundException(source);
 
@@ -127,10 +124,6 @@ namespace Game.Audio
 
 		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true)
 		{
-			//test
-			//if (sound.name.Contains("hodiny w1"))
-			//System.Diagnostics.Debugger.Break();
-
 			if (targetVolume == sound.volume)
 				return;
 

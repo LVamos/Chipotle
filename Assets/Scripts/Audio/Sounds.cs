@@ -19,7 +19,7 @@ namespace Game.Audio
 		public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
 		public static float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(position, minDistance, maxDistance, defaultVolume);
 
-		public static void SlideLowPass(AudioSource source, float duration, int targetFrequency, bool disableLowPassAfterwards = false) => _soundManager.SlideLowPass(source, duration, targetFrequency, disableLowPassAfterwards);
+		public static void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false) => _soundManager.SlideLowPass(source, duration, targetFrequency, disableLowPassAfterwards);
 
 		/// <summary>
 		/// Calculates low pass filter cut off frequency.
