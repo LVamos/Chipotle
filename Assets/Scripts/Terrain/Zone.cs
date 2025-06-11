@@ -978,7 +978,7 @@ namespace Game.Terrain
 			string description = GetPortalAmbientDescription(preparedPortalAmbient.Passage);
 			PortalModel newPortalAmbient = new()
 			{
-				AudioSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description)
+				AudioSource = Sounds.Play2d(AmbientSound, 0, true, description: description)
 			};
 			newPortalAmbient.AudioSource.transform.position = preparedPortalAmbient.Position;
 			SetDistanceAttenuation(preparedPortalAmbient, newPortalAmbient);
@@ -1045,9 +1045,13 @@ namespace Game.Terrain
 
 		private void SetDoorOcclusion(ReadyPortalModel preparedPortalAmbient, PortalModel portalAmbient)
 		{
+			//test
+			//if (preparedPortalAmbient.Passage.Name.Indexed == "vrata do garáže")
+			//		System.Diagnostics.Debugger.Break();
+
 			if (preparedPortalAmbient.Passage.State is PassageState.Closed or PassageState.Locked)
 			{
-				int frequency = preparedPortalAmbient.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverClosedDoorLowpass;
+				float frequency = preparedPortalAmbient.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverClosedDoorLowpass;
 				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorClosingOcclusionDuration, frequency);
 				portalAmbient.Muffled = true;
 				return;
@@ -1056,7 +1060,7 @@ namespace Game.Terrain
 			// Door open
 			if (portalAmbient.Muffled)
 			{
-				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, 22000);
+				Sounds.SlideLowPass(portalAmbient.AudioSource, _doorOpeningOcclusionDuration, 22000, true);
 				portalAmbient.Muffled = false;
 			}
 		}

@@ -34,9 +34,6 @@ namespace Game.Audio
 		private Dictionary<AudioSource, Coroutine> _lowPassCoroutines = new();
 		public void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
 		{
-			if (source.outputAudioMixerGroup == null)
-				throw new LowPassFilterNotFoundException(source);
-
 			_soundPool.EnableLowPass(source);
 
 			if (targetFrequency == GetLowPass(source))
