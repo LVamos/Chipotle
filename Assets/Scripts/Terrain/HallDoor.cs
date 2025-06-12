@@ -1,6 +1,4 @@
-﻿using Game.Entities.Characters;
-
-using ProtoBuf;
+﻿using ProtoBuf;
 
 using System.Collections.Generic;
 
@@ -27,9 +25,10 @@ namespace Game.Terrain
 		/// </summary>
 		protected override void Open(object sender, Vector2 point)
 		{
-			if (!World.GetItem("lavička w1").Used)
-				Rattle(sender as Character, point);
-			else base.Open(sender, point);
+			//test
+			//if (!World.GetItem("lavička w1").Used)
+			//	Rattle(sender as Character, point);
+			base.Open(sender, point);
 		}
 	}
 }

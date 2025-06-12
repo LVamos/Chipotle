@@ -147,18 +147,18 @@ namespace Game.Terrain
 		private void OnCharacterMoved(CharacterMoved message)
 		{
 			if (message.Sender == World.Player)
-				UpdatePortalAmbients();
+				UpdatePortals();
 		}
 
 		/// <summary>
 		/// Updates position of passage sound loops.
 		/// </summary>
-		private void UpdatePortalAmbients()
+		private void UpdatePortals()
 		{
-			foreach (Passage passage in _portalAmbients.Keys)
+			foreach (Passage passage in _portals.Keys)
 			{
 				Vector2 player = World.Player.Area.Value.Center;
-				AudioSource source = _portalAmbients[passage].AudioSource;
+				AudioSource source = _portals[passage].AudioSource;
 
 				// If the player is standing right in the passage locate the sound right on his position.
 				if (passage.Area.Value.Contains(player))
@@ -171,19 +171,35 @@ namespace Game.Terrain
 				?? passage.Area.Value.GetClosestPoint(player);
 				source.transform.position = point.Value.ToVector3(2);
 				UpdatePortalAmbientSpatialBlend(passage, source);
+				//test
+				if (passage.Name.Indexed == "dbp w1")
+					Debug.Log("");
+				if (source.volume <= 0)
+					UpdatePortalVolume(passage, _portals[passage]);
 			}
 		}
 
 		private void UpdatePortalAmbientSpatialBlend(Passage passage, AudioSource source)
 		{
+			float oldSpatialBlend = source.spatialBlend;
 			if (passage is Door)
 			{
 				source.spatialBlend = 1;
+				//test
+				source.outputAudioMixerGroup = Sounds.ResonanceGroup;
+				source.spatialize = true;
 				return;
 			}
 
 			int distance = (int)passage.Area.Value.GetDistanceFrom(World.Player.Area.Value);
 			source.spatialBlend = distance > 10 ? 1 : distance * .1f;
+
+			// Turn off spatialization if spaital blend was set to 1.
+			if (oldSpatialBlend >= 1)
+			{
+				source.spatialize = false;
+				source.outputAudioMixerGroup = null;
+			}
 		}
 
 		/// <summary>
@@ -625,14 +641,14 @@ namespace Game.Terrain
 		/// <param name="message">Source of the message</param>
 		private void OnDoorManipulated(DoorManipulated message)
 		{
-			if (!_portalAmbients.ContainsKey(message.Sender))
+			if (!_portals.ContainsKey(message.Sender))
 				return;
 
 			List<ReadyPortalModel> PreparedPortalAmbients = PreparePassageLoops();
 			ReadyPortalModel preparedPortalAmbient = PreparedPortalAmbients.First(l => l.Passage == message.Sender);
 
-			PortalModel portalAmbient = _portalAmbients[message.Sender];
-			UpdatePortalAmbientVolume(preparedPortalAmbient, portalAmbient);
+			PortalModel portalAmbient = _portals[message.Sender];
+			UpdatePortalVolume(preparedPortalAmbient.Passage, portalAmbient);
 			SetDoorOcclusion(preparedPortalAmbient, portalAmbient);
 		}
 
@@ -712,7 +728,7 @@ namespace Game.Terrain
 		/// </summary>
 		private void OnGameReloaded()
 		{
-			_portalAmbients = new();
+			_portals = new();
 			UpdateAmbientSounds();
 		}
 
@@ -791,6 +807,10 @@ namespace Game.Terrain
 		/// <param name="playerMoved">Specifies if the player just moved from one zone to another one.</param>
 		private void UpdateAmbientSounds(Zone previousZone = null)
 		{
+			//test
+			if (Name.Indexed == "bazén w1")
+				Debug.Log("");
+
 			if (string.IsNullOrEmpty(AmbientSound))
 				return;
 
@@ -844,9 +864,9 @@ namespace Game.Terrain
 		private void StopLoops()
 		{
 			Stop(ref _ambientSource);
-			foreach (PortalModel loop in _portalAmbients.Values)
+			foreach (PortalModel loop in _portals.Values)
 				Stop(ref loop.AudioSource);
-			_portalAmbients = new();
+			_portals = new();
 
 			void Stop(ref AudioSource source)
 			{
@@ -862,7 +882,7 @@ namespace Game.Terrain
 		/// Stores the identifiers of location audio loops played in passages.
 		/// </summary>
 		[ProtoIgnore]
-		private Dictionary<Passage, PortalModel> _portalAmbients = new();
+		private Dictionary<Passage, PortalModel> _portals = new();
 
 		private bool _reloaded;
 		private const float _portalAmbientMaxDistance = 9;
@@ -881,7 +901,7 @@ namespace Game.Terrain
 		private void PlayAmbientFromExits(Zone previousZone = null)
 		{
 			// Portal ambients already playing
-			if (previousZone != null && _portalAmbients != null && _portalAmbients.Any(p => p.Value.AudioSource.isPlaying))
+			if (previousZone != null && _portals != null && _portals.Any(p => p.Value.AudioSource.isPlaying))
 				return;
 
 			Zone playersZone = World.Player.Zone;
@@ -899,7 +919,7 @@ namespace Game.Terrain
 
 			// Start playback in The remaining exits.
 			foreach (ReadyPortalModel loop in readyPortals)
-				PlayPortalAmbient(loop, _defaultVolume);
+				PlayPortal(loop, _defaultVolume);
 		}
 
 		private List<ReadyPortalModel> PreparePassageLoops()
@@ -924,7 +944,10 @@ namespace Game.Terrain
 					Vector2? tmp = passage.Area.Value.GetAlignedPoint(player);
 					position = tmp != null ? tmp.Value : passage.Area.Value.GetClosestPoint(player);
 				}
-				Vector3 position3d = new(position.x, 2, position.y);
+
+				if (passage.LeadsTo(playersZone))
+					position = playersZone.Area.Value.GetAlignedPoint(position).Value;
+				Vector3 position3d = position.ToVector3(2);
 
 				// Make it quieter if the player is in a inadjecting zone behind a closed door.
 				Zone between = playersZone.GetZonesBehindDoor().FirstOrDefault(a => a.IsBehindDoor(this));
@@ -941,7 +964,7 @@ namespace Game.Terrain
 		private void Play2dAmbient(Zone previousZone = null)
 		{
 			string description = $"2d ambient; {Name.Indexed}";
-			if (_portalAmbients.IsNullOrEmpty())
+			if (_portals.IsNullOrEmpty())
 			{
 				_ambientSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description);
 				Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, _defaultVolume);
@@ -962,30 +985,29 @@ namespace Game.Terrain
 
 		private PortalModel TakeClosestPassageLoop()
 		{
-			Passage closest = _portalAmbients.Keys
+			Passage closest = _portals.Keys
 				.OrderBy(p => p.Area.Value.GetDistanceFrom(World.Player.Area.Value))
 				.FirstOrDefault();
 			if (closest == null)
 				return null;
 
-			PortalModel loop = _portalAmbients[closest];
-			_portalAmbients.Remove(closest);
+			PortalModel loop = _portals[closest];
+			_portals.Remove(closest);
 			return loop;
 		}
 
-		private void PlayPortalAmbient(ReadyPortalModel preparedPortalAmbient, float volume)
+		private void PlayPortal(ReadyPortalModel preparedPortalAmbient, float volume)
 		{
 			string description = GetPortalAmbientDescription(preparedPortalAmbient.Passage);
 			PortalModel newPortalAmbient = new()
 			{
-				AudioSource = Sounds.Play2d(AmbientSound, 0, true, description: description)
+				AudioSource = Sounds.Play(AmbientSound, preparedPortalAmbient.Position, 0, true, description: description)
 			};
-			newPortalAmbient.AudioSource.transform.position = preparedPortalAmbient.Position;
 			SetDistanceAttenuation(preparedPortalAmbient, newPortalAmbient);
 			UpdatePortalAmbientSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
-			UpdatePortalAmbientVolume(preparedPortalAmbient, newPortalAmbient);
+			UpdatePortalVolume(preparedPortalAmbient.Passage, newPortalAmbient);
 			SetDoorOcclusion(preparedPortalAmbient, newPortalAmbient);
-			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
+			_portals[preparedPortalAmbient.Passage] = newPortalAmbient;
 		}
 
 		private void SetDistanceAttenuation(ReadyPortalModel preparedPortalAmbient, PortalModel portalAmbient)
@@ -1001,13 +1023,13 @@ namespace Game.Terrain
 			else portalAmbient.AudioSource.maxDistance = _portalAmbientMaxDistance;
 		}
 
-		private void UpdatePortalAmbientVolume(ReadyPortalModel preparedPortalAmbient, PortalModel portalAmbient)
+		private void UpdatePortalVolume(Passage passage, PortalModel portalAmbient)
 		{
 			float targetVolume = _defaultVolume;
 			float duration = _ambient2dFadeDuration;
-			if (preparedPortalAmbient.Passage is Door)
+			if (passage is Door)
 			{
-				if (preparedPortalAmbient.Passage.State is PassageState.Closed or PassageState.Locked)
+				if (passage.State is PassageState.Closed or PassageState.Locked)
 				{
 					float defaultVolume = Sounds.GetOverClosedDoorVolume(_defaultVolume);
 					targetVolume = Sounds.GetLinearRolloffAttenuation(portalAmbient.AudioSource, defaultVolume);
@@ -1036,9 +1058,9 @@ namespace Game.Terrain
 			newPortalAmbient.AudioSource.maxDistance = _portalAmbientMaxDistance;
 			string description = GetPortalAmbientDescription(preparedPortalAmbient.Passage);
 			newPortalAmbient.AudioSource.name = description;
-			_portalAmbients[preparedPortalAmbient.Passage] = newPortalAmbient;
+			_portals[preparedPortalAmbient.Passage] = newPortalAmbient;
 			UpdatePortalAmbientSpatialBlend(preparedPortalAmbient.Passage, newPortalAmbient.AudioSource);
-			UpdatePortalAmbientVolume(preparedPortalAmbient, newPortalAmbient);
+			UpdatePortalVolume(preparedPortalAmbient.Passage, newPortalAmbient);
 			SetDoorOcclusion(preparedPortalAmbient, newPortalAmbient);
 			newPortalAmbient.AudioSource.rolloffMode = AudioRolloffMode.Linear;
 		}
@@ -1091,10 +1113,10 @@ namespace Game.Terrain
 
 		private void StopPortals()
 		{
-			foreach (PortalModel loop in _portalAmbients.Values)
+			foreach (PortalModel loop in _portals.Values)
 				Sounds.SlideVolume(loop.AudioSource, .5f, 0);
 
-			_portalAmbients = new();
+			_portals = new();
 		}
 	}
 }

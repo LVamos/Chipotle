@@ -88,7 +88,7 @@ namespace Game.Audio
 		/// <summary>
 		/// Volume used with sound attenuation.
 		/// </summary>
-		public static float GetOverClosedDoorVolume(float defaultVolume) => defaultVolume * .5f;
+		public static float GetOverClosedDoorVolume(float defaultVolume) => defaultVolume * .6f;
 		public static float GetOverOpenDoorVolume(float defaultVolume) => defaultVolume * .7f;
 
 		/// <summary>

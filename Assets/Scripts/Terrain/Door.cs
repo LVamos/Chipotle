@@ -240,6 +240,9 @@ namespace Game.Terrain
 		protected virtual void OnUseDoor(UseDoor message)
 		{
 			LogUsage(message.Sender, message.ManipulationPoint);
+			//test
+			if (State == PassageState.Locked)
+				State = PassageState.Closed;
 			if (State == PassageState.Locked)
 			{
 				Rattle(message.Sender as Character, message.ManipulationPoint);
