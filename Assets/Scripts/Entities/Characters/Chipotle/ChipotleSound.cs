@@ -316,12 +316,15 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			string number = count is >= 2 and <= 4
-				? "Jsou tu " + (count == 2 ? "dva" : count.ToString()) + " východy: "
-				: "Je tu " + count.ToString() + " východů: ";
+			string number;
+			if (count is >= 2 and <= 4)
+				number = (count == 2 ? "dva" : count.ToString()) + " východy: ";
+			else number = count.ToString() + " východů: ";
+
 			string[] exits =
 message.Exits.Select(e => GetExit(e)).ToArray();
-			Tolk.Speak(number + FormatStringList(exits, true) + ".", true);
+			string formatedList = FormatStringList(exits, true);
+			Tolk.Speak($"{number}{formatedList}.", true);
 
 			string GetExit(List<string> exit) => string.Join(" ", exit);
 		}
