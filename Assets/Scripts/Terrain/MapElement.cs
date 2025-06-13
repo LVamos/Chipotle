@@ -27,7 +27,7 @@ namespace Game.Terrain
 	[ProtoInclude(102, typeof(Passage))]
 	public abstract class MapElement : MessagingObject
 	{
-		private const int _navigationMaxDistance = 50;
+		private const int _navigationMaxDistance = 1000;
 		private const float _navigationVolume = .5f;
 		private const float _navigationMinDistance = .6f;
 

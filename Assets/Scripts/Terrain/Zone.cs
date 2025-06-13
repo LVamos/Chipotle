@@ -299,13 +299,32 @@ namespace Game.Terrain
 		/// <param name="point">The default point</param>
 		/// <param name="radius">distance in which exits from current zone are searched</param>
 		/// <returns>Enumeration of passages</returns>
-		public IEnumerable<Passage> GetNearestExits(Vector2 point, int radius)
+		public List<Passage> GetNearestExits(Vector2 point, int? radius = null)
 		{
-			return
-				from e in Exits
-				where !e.Area.Value.Contains(point) && World.GetDistance(e.Area.Value.GetClosestPoint(point), point) <= radius
-				orderby e.Area.Value.GetDistanceFrom(point)
-				select e;
+			IEnumerable<Passage> exits = null;
+
+			if (radius != null)
+			{
+				exits =
+					from e in Exits
+					let intersects = e.Area.Value.Contains(point)
+					let distance = e.Area.Value.GetDistanceFrom(point)
+					where !intersects && distance <= radius
+					orderby distance
+					select e;
+			}
+			else
+			{
+				exits =
+	from e in Exits
+	let intersects = e.Area.Value.Contains(point)
+	let distance = e.Area.Value.GetDistanceFrom(point)
+	where !intersects
+	orderby distance
+	select e;
+			}
+
+			return exits.ToList();
 		}
 
 		/// <summary>
