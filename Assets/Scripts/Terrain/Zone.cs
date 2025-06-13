@@ -163,7 +163,7 @@ namespace Game.Terrain
 				// If the player is standing right in the passage locate the sound right on his position.
 				if (passage.Area.Value.Contains(player))
 				{
-					source.transform.position = player.ToVector3(2);
+					source.transform.position = player.ToVector3(4);
 					continue;
 				}
 
@@ -171,9 +171,6 @@ namespace Game.Terrain
 				?? passage.Area.Value.GetClosestPoint(player);
 				source.transform.position = point.Value.ToVector3(2);
 				UpdatePortalAmbientSpatialBlend(passage, source);
-				//test
-				if (passage.Name.Indexed == "dbp w1")
-					Debug.Log("");
 				if (source.volume <= 0)
 					UpdatePortalVolume(passage, _portals[passage]);
 			}
@@ -185,7 +182,6 @@ namespace Game.Terrain
 			if (passage is Door)
 			{
 				source.spatialBlend = 1;
-				//test
 				source.outputAudioMixerGroup = Sounds.ResonanceGroup;
 				source.spatialize = true;
 				return;
@@ -194,7 +190,7 @@ namespace Game.Terrain
 			int distance = (int)passage.Area.Value.GetDistanceFrom(World.Player.Area.Value);
 			source.spatialBlend = distance > 10 ? 1 : distance * .1f;
 
-			// Turn off spatialization if spaital blend was set to 1.
+			// Turn off spatialization if spatial blend was set to 1.
 			if (oldSpatialBlend >= 1)
 			{
 				source.spatialize = false;
@@ -807,10 +803,6 @@ namespace Game.Terrain
 		/// <param name="playerMoved">Specifies if the player just moved from one zone to another one.</param>
 		private void UpdateAmbientSounds(Zone previousZone = null)
 		{
-			//test
-			if (Name.Indexed == "bazén w1")
-				Debug.Log("");
-
 			if (string.IsNullOrEmpty(AmbientSound))
 				return;
 
@@ -1067,10 +1059,6 @@ namespace Game.Terrain
 
 		private void SetDoorOcclusion(ReadyPortalModel preparedPortalAmbient, PortalModel portalAmbient)
 		{
-			//test
-			//if (preparedPortalAmbient.Passage.Name.Indexed == "vrata do garáže")
-			//		System.Diagnostics.Debugger.Break();
-
 			if (preparedPortalAmbient.Passage.State is PassageState.Closed or PassageState.Locked)
 			{
 				float frequency = preparedPortalAmbient.DoubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverClosedDoorLowpass;

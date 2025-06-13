@@ -1,8 +1,9 @@
-﻿using ProtoBuf;
+﻿using Game.Entities.Items;
+using Game.Messaging.Commands.Physics;
+
+using ProtoBuf;
 
 using System.Collections.Generic;
-
-using UnityEngine;
 
 namespace Game.Terrain
 {
@@ -12,6 +13,18 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class HallDoor : Door
 	{
+		protected override void OnUseDoor(UseDoor message)
+		{
+			if (State == PassageState.Locked)
+			{
+				Item bench = World.GetItem("lavička w1");
+				if (bench.Used)
+					State = PassageState.Closed;
+			}
+
+			base.OnUseDoor(message);
+		}
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -20,15 +33,5 @@ namespace Game.Terrain
 		/// <param name="zones">The zones connected by the door</param>
 		public override void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
 			=> base.Initialize(name, PassageState.Locked, area, zones);
-		/// <summary>
-		/// Opens the door if possible.
-		/// </summary>
-		protected override void Open(object sender, Vector2 point)
-		{
-			//test
-			//if (!World.GetItem("lavička w1").Used)
-			//	Rattle(sender as Character, point);
-			base.Open(sender, point);
-		}
 	}
 }

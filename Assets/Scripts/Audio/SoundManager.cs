@@ -136,8 +136,8 @@ namespace Game.Audio
 			{
 				sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
 				yield return null;
+				sound.volume = targetVolume;
 			}
-			sound.volume = targetVolume;
 
 			if (stopWhenDone && targetVolume <= 0)
 				sound.Stop();

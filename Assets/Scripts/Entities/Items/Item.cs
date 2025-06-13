@@ -187,7 +187,7 @@ namespace Game.Entities.Items
 			float finalVolume = volume * GetPortalVolumeCoefficient(exit);
 			if (playerBehindWall)
 				finalVolume *= _behindWallVolumeCoefficient;
-			Sounds.SlideVolume(portal.AudioSource, duration, finalVolume);
+			Sounds.SlideVolume(portal.AudioSource, duration, finalVolume, false);
 		}
 
 		protected float GetPortalVolumeCoefficient(Passage exit)
@@ -251,7 +251,7 @@ namespace Game.Entities.Items
 		private float GetPortalVolume(Passage exit)
 		{
 			float volume = _defaultVolume;
-			if (exit.State is PassageState.Closed or PassageState.Locked)
+			if (exit.State != PassageState.Open)
 				volume = Sounds.GetOverClosedDoorVolume(volume);
 			return volume;
 		}
@@ -737,9 +737,6 @@ namespace Game.Entities.Items
 		/// <param name="attenuated">Determines if the sound of the object should be played over a wall or other obstacles.</param>
 		protected void UpdateAmbientSounds()
 		{
-			//test
-			return;
-
 			if (string.IsNullOrEmpty(_sounds["loop"]))
 				return;
 			if (!PlayerInSoundRadius)

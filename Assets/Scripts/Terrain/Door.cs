@@ -148,9 +148,6 @@ namespace Game.Terrain
 		/// </summary>
 		protected void Close(object sender, Vector2 point)
 		{
-			if (!Area.Value.Walkable())
-				return;
-
 			State = PassageState.Closed;
 
 			AnnounceManipulation();
@@ -240,15 +237,20 @@ namespace Game.Terrain
 		protected virtual void OnUseDoor(UseDoor message)
 		{
 			LogUsage(message.Sender, message.ManipulationPoint);
+
+			// Prevent rapidly repeated actions
+			if (_manipulationTimer < _manipulationTimeLimit)
+				return;
+			_manipulationTimer = 0;
+
 			if (State == PassageState.Locked)
 			{
 				Rattle(message.Sender as Character, message.ManipulationPoint);
 				return;
 			}
 
-			if (State == PassageState.Closed && _manipulationTimer >= _manipulationTimeLimit)
+			if (State == PassageState.Closed)
 			{
-				_manipulationTimer = 0;
 				Open(message.Sender, message.ManipulationPoint);
 				return;
 			}
@@ -256,11 +258,7 @@ namespace Game.Terrain
 			// The door is open. Prevent closing it if player is standing in it.
 			if (_area.Value.Contains(World.Player.Area.Value.Center))
 			{
-				if (_manipulationTimer >= _manipulationTimeLimit)
-				{
-					_manipulationTimer = 0;
-					Play(_sounds["hit"], message.Sender as Character, message.ManipulationPoint);
-				}
+				Play(_sounds["hit"], message.Sender as Character, message.ManipulationPoint);
 				return;
 			}
 
@@ -270,11 +268,7 @@ namespace Game.Terrain
 				.ToArray();
 			if (obstacles.IsNullOrEmpty()) // No obstacles, close the door.
 			{
-				if (_manipulationTimer >= _manipulationTimeLimit)
-				{
-					_manipulationTimer = 0;
-					Close(message.Sender, message.ManipulationPoint);
-				}
+				Close(message.Sender, message.ManipulationPoint);
 				return;
 			}
 
@@ -312,7 +306,7 @@ namespace Game.Terrain
 			};
 		}
 
-		private void LogUsage(Character sender, Vector2 manipulationPoint)
+		protected void LogUsage(Character sender, Vector2 manipulationPoint)
 		{
 			string title = "Dveře reagují na použití";
 			string doorName = $"Název: {Name.Indexed}";
