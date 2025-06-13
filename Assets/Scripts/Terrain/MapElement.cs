@@ -27,7 +27,13 @@ namespace Game.Terrain
 	[ProtoInclude(102, typeof(Passage))]
 	public abstract class MapElement : MessagingObject
 	{
-		private const int _navigationMaxDistance = 1000;
+		protected float GetNavigationMaxDistance()
+		{
+			Rectangle zoneArea = World.GetZone(Center).Area.Value;
+			return Mathf.Max(zoneArea.Height, zoneArea.Width);
+		}
+
+		protected Vector2 Center { get => _area.Value.Center; }
 		private const float _navigationVolume = .5f;
 		private const float _navigationMinDistance = .6f;
 
@@ -164,7 +170,7 @@ namespace Game.Terrain
 			Vector2 position2d = GetClosestPointToPlayer();
 			Vector3 position3d = new(position2d.x, 0, position2d.y);
 			_navigationAudio = Sounds.Play(_sounds["navigation"], position3d, _navigationVolume, loop);
-			_navigationAudio.maxDistance = _navigationMaxDistance;
+			_navigationAudio.maxDistance = GetNavigationMaxDistance();
 			_navigationAudio.minDistance = _navigationMinDistance;
 			_navigationAudio.rolloffMode = AudioRolloffMode.Linear;
 		}
@@ -185,7 +191,7 @@ namespace Game.Terrain
 		{
 			float distance = GetDistanceToPlayer();
 			bool playerInHere = SameZone(World.Player);
-			return distance > 1 && distance <= _navigationMaxDistance && playerInHere;
+			return distance > 1 && playerInHere;
 		}
 
 		/// <summary>
