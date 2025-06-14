@@ -771,10 +771,8 @@ namespace Game.Entities.Items
 				return;
 			}
 
-			if (lastObstacleBackup == ObstacleType.InDifferentZone && obstacle is not ObstacleType.Far and not ObstacleType.InDifferentZone)
-			{
+			if (lastObstacleBackup is ObstacleType.InDifferentZone or ObstacleType.Far && obstacle is not ObstacleType.Far and not ObstacleType.InDifferentZone)
 				PlayAmbient();
-			}
 
 			if (obstacle is ObstacleType.Far or ObstacleType.InDifferentZone)
 				return;
