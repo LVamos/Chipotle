@@ -64,7 +64,7 @@ namespace Game.Entities.Items
 		protected string GetPortalDescription(Passage passage)
 		{
 			Zone[] zones = passage.Zones.ToArray();
-			string description = $"portal for {Name.Indexed}; passage between {zones[0].Name.Indexed} and {zones[1].Name.Indexed}";
+			string description = $"portal ({Name.Indexed}); zones: {zones[0].Name.Indexed}, {zones[1].Name.Indexed}";
 			return description;
 		}
 
@@ -77,7 +77,7 @@ namespace Game.Entities.Items
 				AudioSource = _ambientSource
 			};
 			_ambientSource = null;
-			newPortal.AudioSource.maxDistance = GetMaxDistance();
+			SetPortalAttenuation(newPortal);
 			newPortal.AudioSource.name = GetPortalDescription(portal.Passage);
 			_portals[portal.Passage] = newPortal;
 		}
@@ -219,7 +219,7 @@ namespace Game.Entities.Items
 			{
 				AudioSource = Sounds.Play(name, readyPortal.Position, 0, true, false, description: description)
 			};
-			SetAttenuation(newPortal.AudioSource);
+			SetPortalAttenuation(newPortal);
 
 			_portals[readyPortal.Passage] = newPortal;
 		}
@@ -859,7 +859,7 @@ namespace Game.Entities.Items
 
 			string name = _sounds["loop"];
 			_ambientSource = Sounds.Play(name, position, 0, true, false, description: description);
-			SetAttenuation(_ambientSource);
+			SetAmbientAttenuation(_ambientSource);
 		}
 
 		private Vector3 GetAmbientPosition()
@@ -867,7 +867,19 @@ namespace Game.Entities.Items
 			return _area.Value.Center.ToVector3(GetSoundHeight());
 		}
 
-		private void SetAttenuation(AudioSource source)
+		private void SetPortalAttenuation(PortalModel portal)
+		{
+			AudioSource source = portal.AudioSource;
+			source.maxDistance = GetMaxDistance();
+			float distance = Vector3.Distance(source.transform.position, transform.position);
+			source.maxDistance -= distance;
+
+			source.minDistance = _ambientMinDistance;
+			source.rolloffMode = _ambientRollofMode;
+		}
+
+
+		private void SetAmbientAttenuation(AudioSource source)
 		{
 			source.maxDistance = GetMaxDistance();
 			source.minDistance = _ambientMinDistance;
