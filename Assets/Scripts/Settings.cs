@@ -13,8 +13,6 @@ namespace Game
 {
 	public static class Settings
 	{
-		public static bool UseClockDirections;
-
 		/// <summary>
 		/// Saves the settings into a YAML file specified in <see cref="ConfigurationFileName"/>.
 		/// </summary>
