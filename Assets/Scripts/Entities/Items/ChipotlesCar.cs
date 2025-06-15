@@ -1,5 +1,4 @@
-﻿using Game.Audio;
-using Game.Entities.Characters;
+﻿using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
@@ -134,24 +133,31 @@ namespace Game.Entities.Items
 		{
 			base.OnObjectsUsed(message);
 
-			// When it's not allowed to use the car, play a knocking souund.
+			// When it's not allowed to use the car, play a knocking sound.
+			bool onDriveWay = _zones.Contains("příjezdová cesta w1");
+			bool walschAreaDone = WalshAreaObjectsUsed() && WalshAreaExplored();
+			bool onAsphaltRoad = Zones.Any(l => l.Name.Indexed == "asfaltka c1");
+			bool knock =
+				onDriveWay && !Moved && !walschAreaDone
+				|| onAsphaltRoad && !CarsonsBenchesUsed();
 			if (
-				_zones.Contains("příjezdová cesta w1") && !Moved && !(WalshAreaObjectsUsed() && WalshAreaExplored())
-				|| Zones.Any(l => l.Name.Indexed == "asfaltka c1") && !CarsonsBenchesUsed())
+				knock)
 			{
-				_actionAudio.clip = Sounds.GetClip("snd14");
-				_actionAudio.Play();
+				string soundName = "snd14";
+				PlayActionSound(message.ManipulationPoint, soundName);
+				return;
 			}
 
 			// If player didn't leave Walsh area but used required objects and went through all area
-			else if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
+			if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
 			{
 				AllowDestination(World.GetZone("ulice p1"));
 				DestinationMenu("cs20");
 				AllowDestination(World.GetZone("příjezdová cesta w1"));
+				return;
 			}
-			else
-				DestinationMenu(); // Let player seldct destination.
+
+			DestinationMenu(); // Let player seldct destination.
 		}
 
 		/// <summary>

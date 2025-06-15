@@ -708,10 +708,7 @@ namespace Game.Entities.Items
 			else if (!_quickActionsAllowed)
 			{
 				if (_actionAudio == null || !_actionAudio.isPlaying)
-				{
-					Vector3 position = message.ManipulationPoint.ToVector3(GetSoundHeight());
-					_actionAudio = Sounds.Play(_sounds["action"], position, _defaultVolume);
-				}
+					PlayActionSound(message.ManipulationPoint);
 			}
 
 			// Play the sound if predefined amount of time has passed since the last use.
@@ -724,6 +721,13 @@ namespace Game.Entities.Items
 			UsedOnce = !Used;
 			Used = true;
 			LogUssage(message.Sender, message.UsedObject, message.Target, message.ManipulationPoint);
+		}
+
+		protected void PlayActionSound(Vector2 manipulationPoint, string soundName = null)
+		{
+			Vector3 position = manipulationPoint.ToVector3(GetSoundHeight());
+			string finalSoundName = soundName ?? _sounds["action"];
+			_actionAudio = Sounds.Play(finalSoundName, position, _defaultVolume);
 		}
 
 		/// <summary>
