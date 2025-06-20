@@ -142,8 +142,8 @@ namespace Game.Terrain
 		/// <returns>The nearest point on the rectangle to the given point.</returns>
 		public Vector2 GetClosestPoint(Vector2 point)
 		{
-			float clampedX = Math.Max(UpperLeftCorner.x, Math.Min(point.x, LowerRightCorner.x));
-			float clampedY = Math.Max(LowerRightCorner.y, Math.Min(point.y, UpperLeftCorner.y));
+			float clampedX = Mathf.Max(MinX, Mathf.Min(point.x, MaxX));
+			float clampedY = Mathf.Max(MinY, Mathf.Min(point.y, MaxY));
 			return new Vector2(clampedX, clampedY);
 		}
 
