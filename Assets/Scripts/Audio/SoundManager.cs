@@ -357,7 +357,11 @@ namespace Game.Audio
 		{
 			AudioSource[] sounds = _soundPool.GetPlayingSounds().sounds;
 			foreach (AudioSource source in sounds)
-				SlideVolume(source, duration, 0, true);
+			{
+				if (duration > 0)
+					SlideVolume(source, duration, 0, true);
+				else source.Stop();
+			}
 
 			if (onDone != null)
 			{

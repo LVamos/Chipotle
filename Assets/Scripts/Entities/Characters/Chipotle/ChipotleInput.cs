@@ -92,6 +92,7 @@ namespace Game.Entities.Characters.Chipotle
 				new()
 				{
 					// Test commands
+					[new(KeyShortcut.Modifiers.Control, KeyCode.R)] = ResetGame,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.S)] = SayItemSize,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
 					[new(KeyCode.F5)] = CreatePredefinedSave,
@@ -134,6 +135,9 @@ namespace Game.Entities.Characters.Chipotle
 			);
 
 		}
+
+		private void ResetGame() => WindowHandler.ResetGame();
+
 
 		private void SayItemSize()
 		{

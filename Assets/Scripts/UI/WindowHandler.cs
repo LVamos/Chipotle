@@ -1,4 +1,8 @@
-﻿using System;
+﻿using DavyKager;
+
+using Game.Audio;
+
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -9,6 +13,13 @@ namespace Game.UI
 	/// </summary>
 	public static class WindowHandler
 	{
+		public static void ResetGame()
+		{
+			Tolk.Speak("Restartuju hru");
+			Sounds.StopAllSounds(0);
+			StartGame();
+		}
+
 		[DllImport("user32.dll")]
 		private static extern bool SetForegroundWindow(IntPtr hWnd);
 
