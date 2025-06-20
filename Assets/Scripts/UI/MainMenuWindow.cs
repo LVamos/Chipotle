@@ -1,5 +1,7 @@
 ﻿using DavyKager;
 
+using Game.Audio;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,7 +18,7 @@ namespace Game.UI
 	{
 		public static MainMenuWindow CreateInstance()
 		{
-			GameObject obj = new();
+			GameObject obj = new("Main menu window");
 			MainMenuWindow window = obj.AddComponent<MainMenuWindow>();
 			window.Initialize();
 			return window;
@@ -41,8 +43,8 @@ namespace Game.UI
 		{
 			base.OnActivate();
 
-			if (_voicingEnabled)
-				Tolk.Speak("Hlavní menu", true);
+			//if (_voicingEnabled)
+			//	Tolk.Speak("Hlavní menu", true);
 
 			RunMainMenu();
 		}
@@ -73,6 +75,9 @@ namespace Game.UI
 		/// </summary>
 		private bool _voicingEnabled = true;
 		private AudioSource _speakerTestAudio;
+		private List<List<string>> _usedItems;
+		private int _lastChoice;
+		private AudioSource _endJingleSource;
 
 		/// <summary>
 		/// Items including the Load game command
@@ -83,7 +88,7 @@ namespace Game.UI
 			new() {"Pokračovat ve hře" },
 			new() {"Test sluchátek" },
 			new() {"Návod" },
-			new() {"Konec}" }
+			new() {"Konec" }
 		};
 
 		/// <summary>
@@ -106,19 +111,25 @@ namespace Game.UI
 		/// </summary>
 		public void RunMainMenu()
 		{
-			string intro = _menuLoopAudio == null || !_menuLoopAudio.isPlaying ? "Hlavní menu" : String.Empty;
+			string intro = !_menuLoopAudio.IsPlaying() ? "Hlavní menu" : String.Empty;
 			PlayLoop();
 
-			List<List<string>> items = GameStateSaved() ? _itemsWithLoadGame : _items;
-			int choice = WindowHandler.Menu(new(items, intro));
-			choice = choice == -1 ? items.Count - 1 : choice;
-			switch (items[choice][0])
+			_usedItems = GameStateSaved() ? _itemsWithLoadGame : _items;
+			MenuParametersDTO parameters = new(_usedItems, intro, menuClosed: MenuClosed, defaultIndex: _lastChoice);
+			int choice = WindowHandler.Menu(parameters);
+		}
+
+		private void MenuClosed(int choice)
+		{
+			choice = choice == -1 ? _usedItems.Count - 1 : choice;
+			_lastChoice = choice;
+			switch (_usedItems[choice][0])
 			{
-				case "Nová hra": StartGame(); break;
+				case "Nová hra": StartCoroutine(StartGame()); break;
 				case "Pokračovat ve hře": LoadGame(); break;
 				case "Test sluchátek": SpeakerTest(); break;
 				case "Návod": Help(); RunMainMenu(); break;
-				default: ExitGame(); break;
+				default: StartCoroutine(nameof(ExitGame)); break;
 			}
 		}
 
@@ -134,6 +145,10 @@ namespace Game.UI
 		/// </summary>
 		private void LoadGame()
 		{
+			Tolk.Speak("To musim dodělat... píči už");
+			//todo dodělat
+			return;
+
 			StopLoop();
 			World.LoadGame();
 		}
@@ -141,9 +156,10 @@ namespace Game.UI
 		/// <summary>
 		/// Starts a new game.
 		/// </summary>
-		private void StartGame()
+		private IEnumerator StartGame()
 		{
-			StopLoop();
+			yield return StopLoop();
+			Settings.MainMenuAtStartup = false;
 			WindowHandler.StartGame();
 		}
 
@@ -151,17 +167,17 @@ namespace Game.UI
 		/// Fades the menu loop sound and plays a closing jingle.
 		/// </summary>
 		/// <param name="shortEnd">Specifies if the closing jingle should be short or long.</param>
-		private void StopLoop()
+		private IEnumerator StopLoop()
 		{
 			_voicingEnabled = false;
 
 			if (!Settings.PlayMenuLoop)
-				return;
+				yield break;
 
-			AdjustVolume(_menuLoopAudio, .5f, 0);
-			Play(_endSound);
+			Sounds.SlideVolume(_menuLoopAudio, .2f, 0, true);
+			_endJingleSource = Play(_endSound);
+			yield return WaitForSound(_endJingleSource);
 		}
-
 
 		/// <summary>
 		/// Starts the menu loop sound if the menu is newly created.
@@ -171,8 +187,8 @@ namespace Game.UI
 			if (!Settings.PlayMenuLoop)
 				return;
 
-			if (!_menuLoopAudio.isPlaying)
-				_menuLoopAudio.Play();
+			if (!_menuLoopAudio.IsPlaying())
+				_menuLoopAudio = Sounds.Play2d("MainMenuLoop", 1, true);
 		}
 
 		/// <summary>
@@ -180,30 +196,37 @@ namespace Game.UI
 		/// </summary>
 		public void SpeakerTest()
 		{
-			if (!_speakerTestAudio.isPlaying)
-				_speakerTestAudio.Play();
+			if (_speakerTestAudio.IsPlaying())
+				Sounds.SlideVolume(_speakerTestAudio, 0.5f, 0, true);
+			_speakerTestAudio = Sounds.Play2d("SpeakerTest");
 			RunMainMenu();
 		}
 
 		/// <summary>
 		/// closes the application.
 		/// </summary>
-		private void ExitGame()
+		private IEnumerator ExitGame()
 		{
-			AdjustVolume(_speakerTestAudio, .5f, 0);
+			if (_speakerTestAudio.IsPlaying())
+				Sounds.SlideVolume(_speakerTestAudio, .5f, 0, true);
 			MainScript.EnableJAWSKeyHook();
-			StopLoop();
-			StartCoroutine(Quit());
+			yield return StopLoop();
+			Quit();
+		}
 
-			IEnumerator Quit()
-			{
-				yield return new WaitForSeconds(7);
-				Application.Quit();
+		private IEnumerator WaitForSound(AudioSource source)
+		{
+			while (source.IsPlaying())
+				yield return new WaitForSeconds(0.1f);
+		}
+
+		void Quit()
+		{
+			Application.Quit();
 
 #if UNITY_EDITOR
-				UnityEditor.EditorApplication.isPlaying = false;
+			UnityEditor.EditorApplication.isPlaying = false;
 #endif
-			}
 		}
 
 		/// <summary>
@@ -211,6 +234,10 @@ namespace Game.UI
 		/// </summary>
 		private void Help()
 		{
+			Tolk.Speak("Jo, ještě musim vlastně napsat návod... ty vole fakt... mrdat želvu do ucha");
+			//todo dodělat
+			return;
+
 			Tolk.Speak("Otvírám nápovědu", true);
 			System.Diagnostics.Process.Start("help.html");
 		}

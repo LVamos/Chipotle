@@ -16,6 +16,7 @@ public class MenuParametersDTO
 	public string UpperEdgeSound { get; }
 	public string LowerEdgeSound { get; }
 	public Action<int> MenuClosed { get; }
+	public int DefaultIndex { get; }
 
 	public MenuParametersDTO(
 		List<List<string>> items,
@@ -30,7 +31,8 @@ public class MenuParametersDTO
 		string wrapUpSound = null,
 		string upperEdgeSound = null,
 		string lowerEdgeSound = null,
-		Action<int> menuClosed = null)
+		Action<int> menuClosed = null,
+		int defaultIndex = -1)
 	{
 		Items = items;
 		IntroText = introText;
@@ -45,5 +47,6 @@ public class MenuParametersDTO
 		UpperEdgeSound = upperEdgeSound;
 		LowerEdgeSound = lowerEdgeSound;
 		MenuClosed = menuClosed;
+		DefaultIndex = defaultIndex;
 	}
 }

@@ -48,10 +48,9 @@ namespace Assets.Scripts.Audio
 		/// Returns currently playing sounds.
 		/// </summary>
 		/// <returns>(AudioSource[] sounds, string[] names)</returns>
-		private (AudioSource[] sounds, string[] names) GetPlayingSounds()
+		public (AudioSource[] sounds, string[] names) GetPlayingSounds()
 		{
-			AudioSource[] playingSounds = _playingSources.Where(a => !a.isVirtual)
-.ToArray();
+			AudioSource[] playingSounds = _playingSources.ToArray();
 			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
 			return (playingSounds, playingSoundNames);
 		}

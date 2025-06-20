@@ -5,6 +5,7 @@ using DavyKager;
 
 using Game.Terrain;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -352,11 +353,22 @@ namespace Game.Audio
 			AudioListener.volume += _masterVolumeStepSize;
 		}
 
-		public void StopAllSounds()
+		private IEnumerator StopAllSoundsCoroutine(float duration, Action onDone)
 		{
-			AudioSource[] sources = FindObjectsOfType<AudioSource>();
-			foreach (AudioSource soruce in sources)
-				soruce.Stop();
+			AudioSource[] sounds = _soundPool.GetPlayingSounds().sounds;
+			foreach (AudioSource source in sounds)
+				SlideVolume(source, duration, 0, true);
+
+			if (onDone != null)
+			{
+				yield return new WaitForSeconds(duration);
+				onDone.Invoke();
+			}
+		}
+
+		public void StopAllSounds(float duration = .5f, Action onDone = null)
+		{
+			StartCoroutine(StopAllSoundsCoroutine(duration, onDone));
 		}
 
 		public void MuteSpeech()

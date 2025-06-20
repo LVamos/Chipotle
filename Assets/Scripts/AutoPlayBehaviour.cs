@@ -69,6 +69,8 @@ public class AutoPlayBehaviour : MonoBehaviour
 		Application.runInBackground = true;
 		Time.fixedDeltaTime = 1f / 30f;
 
+		Sounds.Initialize();
+
 		if (!Settings.MainMenuAtStartup)
 			WindowHandler.StartGame();
 		else

@@ -69,7 +69,7 @@ namespace Game.Entities.Characters
 		/// <summary>
 		/// Represents the inventory. The objects are stored as indexed names.
 		/// </summary>
-		protected HashSet<string> _inventory = new();
+		protected HashSet<string> _inventory;
 
 		/// <summary>
 		/// List of all entity components
@@ -93,6 +93,9 @@ namespace Game.Entities.Characters
 		public new void Initialize(Name name, string type, AI ai, Input input, Physics physics, Sound sound)
 		{
 			base.Initialize(name, type, null);
+			_inventory = new();
+			_visitedZones = null;
+			_zone = null;
 
 			Usable = true;
 			_components =

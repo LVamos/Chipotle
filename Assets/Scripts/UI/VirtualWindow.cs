@@ -2,7 +2,6 @@
 using Game.Messaging;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -116,38 +115,13 @@ namespace Game.UI
 
 		protected const float _defaultVolume = 1;
 
-		protected void Play(string soundName, float? volume = null)
+		protected AudioSource Play(string soundName, float? volume = null)
 		{
 			if (string.IsNullOrEmpty(soundName))
-				return;
+				return null;
 
-			GameObject obj = new();
-			AudioSource source = obj.AddComponent<AudioSource>();
-			source.clip = Sounds.GetClip(soundName);
-			source.spatialBlend = 0;
-			source.volume = volume != null ? volume.Value : _defaultVolume;
-			source.Play();
-			Destroy(obj, Sounds.GetClip(soundName).length); // Destroy the object after the sound is played.
-		}
-
-		protected void AdjustVolume(AudioSource sound, float duration, float targetVolume)
-		{
-			StartCoroutine(Adjust());
-
-			IEnumerator Adjust()
-			{
-				float startVolume = sound.volume;
-
-				for (float t = 0; t < duration; t += Time.deltaTime)
-				{
-					sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
-					yield return null;
-				}
-				sound.volume = targetVolume;
-
-				if (targetVolume <= 0)
-					sound.Stop();
-			}
+			float finalVolume = volume != null ? volume.Value : _defaultVolume;
+			return Sounds.Play2d(soundName, finalVolume);
 		}
 	}
 }

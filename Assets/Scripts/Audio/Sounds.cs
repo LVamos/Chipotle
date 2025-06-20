@@ -75,7 +75,7 @@ namespace Game.Audio
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
 		public static void SlideMasterVolume(float duration, float targetVolume) => _soundManager.SlideMasterVolume(duration, targetVolume);
 
-		public static void StopAll() => _soundManager.StopAllSounds();
+		public static void StopAllSounds(float duration = .5f, Action onDone = null) => _soundManager.StopAllSounds(duration, onDone);
 
 		public static void Initialize()
 		{
@@ -155,7 +155,7 @@ namespace Game.Audio
 		}
 
 		private static float? _volumeBackup;
-		public static void Mute(float duration = .5f) => _soundManager?.Mute();
+		public static void Mute(float duration = .5f) => _soundManager?.Mute(duration);
 
 		public static void Unmute(float duration = .5f) => _soundManager.Unmute();
 

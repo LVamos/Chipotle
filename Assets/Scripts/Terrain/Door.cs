@@ -95,6 +95,12 @@ namespace Game.Terrain
 		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door)
 		{
 			base.Initialize(name, area, zones);
+			_closingSound = null;
+			_lockedSound = null;
+			_manipulationTimer = 0;
+			_openingSound = null;
+			_pinchTimer = 0;
+
 
 			State = state;
 			Type = type;

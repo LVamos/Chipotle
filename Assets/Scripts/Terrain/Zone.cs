@@ -79,7 +79,7 @@ namespace Game.Terrain
 
 		public bool IsWalkable(Vector2 point) => !_nonpassables.Contains(point);
 
-		private HashSet<Vector2> _nonpassables = new();
+		private HashSet<Vector2> _nonpassables;
 		public void GatherNonwalkables(Item item)
 		{
 			if (item.CanBePicked())
@@ -421,17 +421,17 @@ namespace Game.Terrain
 		/// <summary>
 		/// List of NPCs present in this zone.
 		/// </summary>
-		private HashSet<string> _characters = new();
+		private HashSet<string> _characters;
 
 		/// <summary>
 		/// List of objects present in this zone.
 		/// </summary>
-		private HashSet<string> _items = new();
+		private HashSet<string> _items;
 
 		/// <summary>
 		/// List of exits from this zone
 		/// </summary>
-		private HashSet<string> _exits = new();
+		private HashSet<string> _exits;
 
 		/// <summary>
 		/// Constructor
@@ -448,6 +448,15 @@ namespace Game.Terrain
 		public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, string loop, float volume, ZoneMaterialsDefinitionModel materials = null)
 		{
 			base.Initialize(name, area);
+			_characters = new();
+			_ambientSource = null;
+			_exits = new();
+			_items = new();
+			_neighbours = null;
+			_nonpassables = new();
+			_portals = new();
+			_soundMode = default;
+			AmbientSound = null;
 
 			Description = description;
 			To = to;
@@ -486,7 +495,7 @@ namespace Game.Terrain
 				foreach (string name in _characters)
 				{
 					Character character = World.GetCharacter(name)
-						?? throw new ArgumentNullException($"Character {name} not found");
+					?? throw new ArgumentNullException($"Character {name} not found");
 					result.Add(character);
 				}
 				return result;
@@ -565,8 +574,8 @@ namespace Game.Terrain
 			if (message is ChipotlesCarMoved)
 				return; // Don't send this to other objects and entities.
 
-			MessageObjects(message);
-			MessageEntities(message);
+			MessageItems(message);
+			MessageCharacters(message);
 			MessagePassages(message);
 		}
 
@@ -593,7 +602,10 @@ namespace Game.Terrain
 		/// Adds an entity to zone.
 		/// </summary>
 		/// <param name="character">The entity to be added</param>
-		public void Register(Character character) => _characters.Add(character.Name.Indexed);
+		public void Register(Character character)
+		{
+			_characters.Add(character.Name.Indexed);
+		}
 
 		/// <summary>
 		/// Initializes the zone and starts its message loop.
@@ -717,7 +729,7 @@ namespace Game.Terrain
 		/// Sends a message to all game objects in the zone.
 		/// </summary>
 		/// <param name="message">The message to be sent</param>
-		protected void MessageObjects(Message message)
+		protected void MessageItems(Message message)
 		{
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
@@ -729,12 +741,12 @@ namespace Game.Terrain
 			}
 		}
 
-		private void MessageEntities(Message message)
+		private void MessageCharacters(Message message)
 		{
-			foreach (Character e in Characters)
+			foreach (Character c in Characters)
 			{
-				if (e != message.Sender)
-					e.TakeMessage(message);
+				if (c != message.Sender)
+					c?.TakeMessage(message);
 			}
 		}
 
@@ -893,7 +905,7 @@ namespace Game.Terrain
 		/// Stores the identifiers of location audio loops played in passages.
 		/// </summary>
 		[ProtoIgnore]
-		private Dictionary<Passage, PortalModel> _portals = new();
+		private Dictionary<Passage, PortalModel> _portals;
 
 		private bool _reloaded;
 		private const float _portalAmbientMaxDistance = 9;

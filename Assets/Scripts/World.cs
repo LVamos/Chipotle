@@ -23,6 +23,8 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
+using UnityEditor;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -435,17 +437,17 @@ namespace Game
 		/// <summary>
 		/// Registers an entity.
 		/// </summary>
-		/// <param name="e">The entity to be registered</param>
-		public static void Add(Character e)
+		/// <param name="c">The entity to be registered</param>
+		public static void Add(Character c)
 		{
 			// Do a null check and look if entity isn't already registered.
-			if (e == null)
-				throw new ArgumentNullException(nameof(e));
+			if (c == null)
+				throw new ArgumentNullException(nameof(c));
 
-			if (_characters.ContainsKey(e.Name.Indexed))
+			if (_characters.ContainsKey(c.Name.Indexed))
 				throw new ArgumentException("entity already registered");
 
-			_characters.Add(e.Name.Indexed, e);
+			_characters.Add(c.Name.Indexed, c);
 		}
 
 		/// <summary>
@@ -801,7 +803,6 @@ namespace Game
 			_zones = new(StringComparer.OrdinalIgnoreCase);
 			_characters = new(StringComparer.OrdinalIgnoreCase);
 			_passages = new(StringComparer.OrdinalIgnoreCase);
-			Sounds.Initialize();
 			GameObject obj = new();
 			_cutScenePlayer = obj.AddComponent<CutScenePlayer>();
 		}
@@ -887,7 +888,7 @@ namespace Game
 			}
 
 			// Stop all sounds
-			Sounds.StopAll();
+			Sounds.StopAllSounds();
 
 			string path = Path.Combine(saves[i], "game.sav");
 			LoadGame(path);
@@ -1181,20 +1182,19 @@ namespace Game
 				StopCutscene(null);
 		}
 
+		private const float _gameQuittingFadingDuration = 1;
+
 		/// <summary>
 		/// Terminates the application.
 		/// </summary>
 		public static void QuitGame()
 		{
-			//test hlavní menu zatím zakázat
-			return;
-
 			GameInProgress = false;
 			_cutSceneMessage = null;
-			Sounds.Mute(.5f);
-			SaveGame();
-			System.Threading.Thread.Sleep(1000);
-			WindowHandler.MainMenu();
+			Action onDone = () => WindowHandler.MainMenu();
+			Sounds.StopAllSounds(_gameQuittingFadingDuration, onDone);
+			//todo fix game saving
+			//SaveGame();
 		}
 
 		/// <summary>

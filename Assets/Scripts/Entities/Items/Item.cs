@@ -505,6 +505,18 @@ namespace Game.Entities.Items
 		public virtual void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
 		{
 			base.Initialize(name, type, area);
+			_actionAudio = null;
+			_ambientSource = null;
+			_cutscene = null;
+			_lastOccludingObstacle = default;
+			_loopPositionBackup = null;
+			_passByAudio = null;
+			_placingAudio = null;
+			_portals = null;
+			_zones = new();
+
+
+
 			Area = area;
 
 			Decorative = decorative;

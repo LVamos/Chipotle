@@ -124,6 +124,7 @@ namespace Game.UI
 			_upperEdgeSound = parameters.UpperEdgeSound;
 			_lowerEdgeSound = parameters.LowerEdgeSound;
 			_menuClosed = parameters.MenuClosed;
+			_index = parameters.DefaultIndex;
 
 			RegisterShortcuts(
 				(new KeyShortcut(KeyCode.End), LastItem),
