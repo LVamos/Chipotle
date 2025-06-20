@@ -105,6 +105,7 @@ namespace Game.UI
 		/// Name of the menu loop end sound
 		/// </summary>
 		private const string _shortEndSound = "MainMenuLongEnd";
+		private const int _jingleBeforeGameEndTrim = 5;
 
 		/// <summary>
 		/// Runs the main menu.
@@ -158,7 +159,7 @@ namespace Game.UI
 		/// </summary>
 		private IEnumerator StartGame()
 		{
-			yield return StopLoop();
+			yield return StopLoop(_jingleBeforeGameEndTrim);
 			Settings.MainMenuAtStartup = false;
 			WindowHandler.StartGame();
 		}
@@ -167,7 +168,7 @@ namespace Game.UI
 		/// Fades the menu loop sound and plays a closing jingle.
 		/// </summary>
 		/// <param name="shortEnd">Specifies if the closing jingle should be short or long.</param>
-		private IEnumerator StopLoop()
+		private IEnumerator StopLoop(float endTrim = 0)
 		{
 			_voicingEnabled = false;
 
@@ -176,7 +177,7 @@ namespace Game.UI
 
 			Sounds.SlideVolume(_menuLoopAudio, .2f, 0, true);
 			_endJingleSource = Play(_endSound);
-			yield return WaitForSound(_endJingleSource);
+			yield return WaitForSound(_endJingleSource, endTrim);
 		}
 
 		/// <summary>
@@ -214,10 +215,10 @@ namespace Game.UI
 			Quit();
 		}
 
-		private IEnumerator WaitForSound(AudioSource source)
+		private IEnumerator WaitForSound(AudioSource source, float endTrim)
 		{
-			while (source.IsPlaying())
-				yield return new WaitForSeconds(0.1f);
+			float waitTime = source.clip.length - endTrim;
+			yield return new WaitForSeconds(waitTime);
 		}
 
 		void Quit()
