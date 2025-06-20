@@ -536,6 +536,16 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			// Run the menu
+			List<List<string>> descriptions = new();
+			if (Settings.SayInnerZoneNames)
+			{
+				for (int i = 0; i < result.Descriptions.Count; i++)
+				{
+					descriptions.Add(result.Descriptions[i]);
+					descriptions[i].Add(result.TargetZones[i].Name.Indexed);
+				}
+			}
+			else descriptions = result.Descriptions;
 			MenuParametersDTO parameters = new(
 	items: result.Descriptions,
 	introText: "Východy",
@@ -722,7 +732,10 @@ namespace Game.Entities.Characters.Chipotle
 			if (occupiedPassage != null)
 				InnerMessage(new SayExitsResult(this, occupiedPassage));
 			else
-				InnerMessage(new SayExitsResult(this, GetNavigableExits().Descriptions));
+			{
+				NavigableExitsModel navigableExits = GetNavigableExits();
+				InnerMessage(new SayExitsResult(this, navigableExits.Descriptions, navigableExits.TargetZones));
+			}
 		}
 
 		/// <summary>
@@ -771,8 +784,11 @@ namespace Game.Entities.Characters.Chipotle
 				Zone.GetNearestExits(_area.Value.Center);
 			List<List<string>> descriptions =
 			exits.Select(GetExitDescription).ToList();
+			List<Zone> targetZones = exits
+				.Select(e => e.AnotherZone(Zone))
+				.ToList();
 
-			return new(descriptions, exits);
+			return new(descriptions, exits, targetZones);
 		}
 
 		/// <summary>

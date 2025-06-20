@@ -9,13 +9,15 @@ namespace Game.Models
 	/// </summary>
 	public class NavigableExitsModel
 	{
-		public List<List<string>> Descriptions { get; set; }
+		public readonly List<Zone> TargetZones;
+		public readonly List<List<string>> Descriptions;
 		public List<Passage> Exits { get; set; }
 
-		public NavigableExitsModel(List<List<string>> descriptions, List<Passage> exits)
+		public NavigableExitsModel(List<List<string>> descriptions, List<Passage> exits, List<Zone> targetZones)
 		{
 			Descriptions = descriptions;
 			Exits = exits;
+			TargetZones = targetZones;
 		}
 	}
 }

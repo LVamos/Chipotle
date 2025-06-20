@@ -13,6 +13,10 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static bool SayInnerItemNames;
+		public static bool SayInnerZoneNames;
+		public static bool SayInnerPassageNames;
+
 		/// <summary>
 		/// Saves the settings into a YAML file specified in <see cref="ConfigurationFileName"/>.
 		/// </summary>

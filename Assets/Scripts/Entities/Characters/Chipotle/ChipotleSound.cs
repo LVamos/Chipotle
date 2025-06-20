@@ -72,7 +72,13 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayZone message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnSayZoneName(SayZoneName message) => Tolk.Speak(Owner.Zone.Name.Friendly, true);
+		protected void OnSayZoneName(SayZoneName message)
+		{
+			string text = Owner.Zone.Name.Friendly;
+			if (Settings.SayInnerZoneNames)
+				text += " " + Owner.Zone.Name.Indexed;
+			Tolk.Speak(text, true);
+		}
 
 		/// <summary>
 		/// Reverb presets for individual zones
@@ -297,21 +303,26 @@ namespace Game.Entities.Characters.Chipotle
 					_ => null
 				};
 
-				string to = message.OccupiedPassage.AnotherZone(Owner.Zone).To;
+				Zone targetZone = message.OccupiedPassage.AnotherZone(Owner.Zone);
+				string to = targetZone.To;
+				if (Settings.SayInnerZoneNames)
+					to += " " + targetZone.Name.Indexed;
 				Tolk.Speak($"Stojíš {type}{to}", true);
 				return;
 			}
 
-			if (message.Exits.IsNullOrEmpty())
+			if (message.ExitDescriptions.IsNullOrEmpty())
 			{
 				Tolk.Speak("žádné východy nevidíš", true);
 				return;
 			}
 
-			int count = message.Exits.Count;
+			int count = message.ExitDescriptions.Count;
 			if (count == 1)
 			{
-				string exit = GetExit(message.Exits[0]);
+				string exit = GetExit(message.ExitDescriptions[0]);
+				if (Settings.SayInnerZoneNames)
+					exit += " " + message.TargetZones[0].Name.Indexed;
 				Tolk.Speak(exit, true);
 				return;
 			}
@@ -321,9 +332,18 @@ namespace Game.Entities.Characters.Chipotle
 				number = (count == 2 ? "dva" : count.ToString()) + " východy: ";
 			else number = count.ToString() + " východů: ";
 
-			string[] exits =
-message.Exits.Select(e => GetExit(e)).ToArray();
-			string formatedList = FormatStringList(exits, true);
+			List<string> exits = new();
+			if (Settings.SayInnerZoneNames)
+			{
+				for (int i = 0; i < message.ExitDescriptions.Count; i++)
+				{
+					string text = GetExit(message.ExitDescriptions[i]) + " " + message.TargetZones[i].Name.Indexed;
+					exits.Add(text);
+				}
+			}
+			else exits =
+message.ExitDescriptions.Select(e => GetExit(e)).ToList();
+			string formatedList = FormatStringList(exits.ToArray(), true);
 			Tolk.Speak($"{number}{formatedList}.", true);
 
 			string GetExit(List<string> exit) => string.Join(" ", exit);
