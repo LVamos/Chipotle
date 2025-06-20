@@ -1009,10 +1009,10 @@ namespace Game
 			XElement root = OpenMap().Root;
 			Initialize();
 			_zoneNodes = root.Element("localities").Elements("locality").ToList();
-
 			LoadTerrain(root);
 			LoadItemDescriptions(root);
 			LoadZonesAndItems(root, zoneObjects, itemObjects);
+
 			LoadPassages(root, passageObjects);
 		}
 
