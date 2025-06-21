@@ -4,6 +4,7 @@ using DavyKager;
 
 using Game.Audio;
 using Game.Entities.Characters.Components;
+using Game.Entities.Items;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Events;
 using Game.Messaging.Events.Characters;
@@ -418,7 +419,13 @@ message.ExitDescriptions.Select(e => GetExit(e)).ToList();
 		/// Processes the ObjectsCollided message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnObjectsCollided(ObjectsCollided message) => Tolk.Speak(message.Object.Name.Friendly);
+		private void OnObjectsCollided(ObjectsCollided message)
+		{
+			string text = message.Object.Name.Friendly;
+			if (Settings.SayInnerItemNames && message.Object is Item)
+				text += " " + message.Object.Name.Indexed;
+			Tolk.Speak(text);
+		}
 
 		/// <summary>
 		/// Processes the TurnoverDone message.

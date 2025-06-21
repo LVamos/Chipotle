@@ -1110,6 +1110,8 @@ namespace Game.Entities.Characters.Chipotle
 			foreach (Item item in items)
 			{
 				string name = item.Name.Friendly;
+				if (Settings.SayInnerItemNames)
+					name += " " + item.Name.Indexed;
 				float distance = World.GetDistance(Owner, item);
 				string distanceDescription = GetDistanceDescription(distance);
 				float compassDegrees = GetAngle(item);
