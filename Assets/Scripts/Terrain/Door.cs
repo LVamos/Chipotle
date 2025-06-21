@@ -95,6 +95,7 @@ namespace Game.Terrain
 		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door)
 		{
 			base.Initialize(name, area, zones);
+			TypeDescription = Type == DoorType.Door ? "dveře" : "vrata";
 			_closingSound = null;
 			_lockedSound = null;
 			_manipulationTimer = 0;
@@ -141,7 +142,7 @@ namespace Game.Terrain
 			string title = "Náraz do dveří";
 			string name = $"Název: {Name.Indexed}";
 			string characterMessage = $"Postava {character.Name.Indexed} v lokaci {character.Zone.Name.Indexed}";
-			string type = $"typ dveří: {ToString()}";
+			string type = $"typ dveří: {TypeDescription}";
 			string zones = $"Lokace: {_zones[0]}, {_zones[1]}";
 
 			Logger.LogInfo(title, name, zones, type, characterMessage);
@@ -165,7 +166,7 @@ namespace Game.Terrain
 		{
 			string title = "Dveře zavřeny";
 			string name = $"Název: {Name.Indexed}";
-			string type = $"typ dveří: {ToString()}";
+			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
 		}
@@ -317,7 +318,7 @@ namespace Game.Terrain
 			string title = "Dveře reagují na použití";
 			string doorName = $"Název: {Name.Indexed}";
 			string characterName = $"Postava: {sender.Name.Indexed}";
-			string doorType = $"typ dveří: {ToString()}";
+			string doorType = $"typ dveří: {TypeDescription}";
 			string doorState = $"Stav dveří: {GetStateDescription()}";
 			string point = $"Bod: {manipulationPoint.GetString()}";
 
@@ -334,7 +335,7 @@ namespace Game.Terrain
 		{
 			string title = "Lomcování dveřmi";
 			string name = $"Název: {Name.Indexed}";
-			string type = $"typ dveří: {ToString()}";
+			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
 		}
@@ -358,15 +359,9 @@ namespace Game.Terrain
 		{
 			string title = "Dveře otevřeny";
 			string name = $"Název: {Name.Indexed}";
-			string type = $"typ dveří: {ToString()}";
+			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
 		}
-
-		/// <summary>
-		/// Returns text description of the door.
-		/// </summary>
-		/// <returns>text description of the door</returns>
-		public override string ToString() => Type == DoorType.Door ? "dveře" : "vrata";
 	}
 }

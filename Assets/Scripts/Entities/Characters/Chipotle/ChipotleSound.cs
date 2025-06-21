@@ -168,7 +168,7 @@ namespace Game.Entities.Characters.Chipotle
 				case SayExitsResult ser: OnSayExitsResult(ser); break;
 				case SayObjectsResult sor: OnSayObjectsResult(sor); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
-				case DoorHit dh: OnEntityHitDoor(dh); break;
+				case DoorHit dh: OnDoorHit(dh); break;
 				case OrientationChanged ocd: OnOrientationChanged(ocd); break;
 				case PositionChanged pcd: OnPositionChanged(pcd); break;
 				case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
@@ -296,7 +296,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			if (message.OccupiedPassage != null)
 			{
-				string type = message.OccupiedPassage.ToString() switch
+				string type = message.OccupiedPassage.TypeDescription switch
 				{
 					"průchod" => "v průchodu",
 					"dveře" => "ve dveřích",
@@ -393,7 +393,10 @@ message.ExitDescriptions.Select(e => GetExit(e)).ToList();
 		/// Processes the EntityHitDoor message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnEntityHitDoor(DoorHit message) => Tolk.Speak("dveře");
+		private void OnDoorHit(DoorHit message)
+		{
+			Tolk.Speak("dveře");
+		}
 
 		/// <summary>
 		/// Processes the TerrainCollided message.

@@ -36,7 +36,9 @@ namespace Game.Terrain
 		/// Returns text description of the passage.
 		/// </summary>
 		/// <returns>text description of the passage</returns>
-		public override string ToString() => "průchod";
+		public override string ToString() => $"{TypeDescription}: {_zones[0]}, {_zones[1]}; {Name.Indexed}";
+
+		public string TypeDescription { get; protected set; }
 
 		/// <summary>
 		/// Checks if the specified point lays in front or behind the passage.
@@ -118,6 +120,7 @@ namespace Game.Terrain
 		public virtual void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
 		{
 			base.Initialize(name, area);
+			TypeDescription = "průchod";
 			_playersZone = null;
 			_zones = null;
 

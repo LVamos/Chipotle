@@ -763,7 +763,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			float distance = World.GetDistance(Owner, exit);
 			string distanceDescription = GetDistanceDescription(distance);
-			string type = exit.ToString();
+			string type = exit.TypeDescription;
 			string to = $"{exit.AnotherZone(Zone).To} ";
 			int index = to.IndexOf(' ');
 			string to1 = to.Substring(0, index);

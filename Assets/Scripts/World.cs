@@ -41,6 +41,28 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
+		/// <summary>
+		/// Generates a text representation of the specified distance in Czech.
+		/// </summary>
+		/// <param name="distance">The distance in meters to be described</param>
+		/// <returns>The text representation of the specified distance</returns>
+		public static string GetDistanceDescription(float distance, float stepLength)
+		{
+			if (distance <= stepLength)
+				return string.Empty;
+
+			// Round the distance so that its value corresponds to a multiple of 0.5.
+			int steps = (int)Mathf.Round(distance / stepLength);
+
+			// Compose output
+			if (steps == 1)
+				return "jeden krok";
+			if (steps is > 1 and < 5)
+				return $"{steps} kroky";
+			return $"{steps} kroků";
+		}
+
+
 		public static IEnumerable<Vector2> GetFreePlacementsNear(List<MapElement> ignoredElements, Rectangle areaToAvoid, float height, float width, float minDistance, float maxDistance, bool sameZone = true)
 		{
 			Rectangle maxArea = areaToAvoid;
