@@ -764,7 +764,7 @@ namespace Game.Entities.Characters.Chipotle
 			float distance = World.GetDistance(Owner, exit);
 			string distanceDescription = GetDistanceDescription(distance);
 			string type = exit.TypeDescription;
-			string to = $"{exit.AnotherZone(Zone).To} ";
+			string to = GetPassageDestination(exit);
 			int index = to.IndexOf(' ');
 			string to1 = to.Substring(0, index);
 			string to2 = to.Substring(index + 1);
@@ -773,6 +773,8 @@ namespace Game.Entities.Characters.Chipotle
 			List<string> data = new List<string>() { type, to1, to2, distanceDescription, angleDescription };
 			return data;
 		}
+
+		private string GetPassageDestination(Passage exit) => $"{exit.AnotherZone(Zone).To} ";
 
 		/// <summary>
 		/// Returns text descriptions of the specified exits including distance and position.
@@ -976,7 +978,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (door != null)
 			{
 				Vector2 contactPoint = door.Area.Value.GetClosestPoint(_area.Value.Center);
-				DoorHit doorHitMessage = new(Owner, door, contactPoint);
+				DoorHit doorHitMessage = new(Owner, door, contactPoint, GetPassageDestination(door));
 				door.TakeMessage(doorHitMessage);
 				InnerMessage(doorHitMessage);
 				LogDoorCollision(door);

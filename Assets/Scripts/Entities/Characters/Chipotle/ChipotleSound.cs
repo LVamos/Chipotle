@@ -395,9 +395,10 @@ message.ExitDescriptions.Select(e => GetExit(e)).ToList();
 		/// <param name="message">The message to be processed</param>
 		private void OnDoorHit(DoorHit message)
 		{
-			string text = "dveře";
+			Door door = message.Door;
+			string text = $"{door.TypeDescription} {message.Destination}";
 			if (Settings.SayInnerPassageNames)
-				text = " " + message.Door.ToString();
+				text += " " + door.Name.Indexed;
 			Tolk.Speak(text);
 		}
 

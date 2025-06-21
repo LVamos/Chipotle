@@ -16,6 +16,8 @@ namespace Game.Messaging.Events.Physics
 	[Serializable]
 	public class DoorHit : Message
 	{
+		public readonly string Destination;
+
 		/// <summary>
 		/// The door to which an NPC bumped.
 		/// </summary>
@@ -32,10 +34,11 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="sender"></param>
 		/// <param name="door"></param>
 		/// <param name="point"></param>
-		public DoorHit(object sender, Door door, Vector2 point) : base(sender)
+		public DoorHit(object sender, Door door, Vector2 point, string destination) : base(sender)
 		{
 			Door = door;
 			Point = point;
+			Destination = destination;
 		}
 	}
 }
