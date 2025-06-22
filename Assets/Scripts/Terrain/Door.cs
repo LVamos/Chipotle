@@ -73,12 +73,12 @@ namespace Game.Terrain
 		/// <summary>
 		/// Sound of the door being opened
 		/// </summary>
-		protected string _openingSound = "snd23";
+		protected string _openingSound;
 
 		/// <summary>
 		/// Sound of the door being closed
 		/// </summary>
-		protected string _closingSound = "snd24";
+		protected string _closingSound;
 
 		/// <summary>
 		/// Sound of the door being opened
@@ -96,10 +96,10 @@ namespace Game.Terrain
 		{
 			base.Initialize(name, area, zones);
 			TypeDescription = Type == DoorType.Door ? "dveře" : "vrata";
-			_closingSound = null;
+			_closingSound = "snd24";
 			_lockedSound = null;
 			_manipulationTimer = 0;
-			_openingSound = null;
+			_openingSound = "snd23";
 			_pinchTimer = 0;
 
 
@@ -107,7 +107,7 @@ namespace Game.Terrain
 			Type = type;
 			_sounds["hit"] = "KitchenDoorCrash";
 			_sounds["rattle"] = "DoorKnobRattle";
-			_defaultVolume = .4f;
+			_defaultVolume = .2f;
 		}
 
 		/// <summary>

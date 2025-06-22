@@ -59,7 +59,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Volume for foot steps
 		/// </summary>
-		protected float _walkVolume = 1;
+		protected float _walkVolume = .5f;
 		protected bool _announceWalls;
 
 		/// <summary>
