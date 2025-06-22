@@ -1,2 +1,0 @@
-C:\Users\lukas\source\repos\Chipotle\Hra\Chipotle\Sound\Sound\obj\Debug\Sound.csproj.AssemblyReference.cache
-C:\Users\lukas\source\repos\Chipotle\Hra\Chipotle\Sound\Sound\obj\Debug\Sound.csproj.CoreCompileInputs.cache
