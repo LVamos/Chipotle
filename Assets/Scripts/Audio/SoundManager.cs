@@ -8,7 +8,6 @@ using Game.Terrain;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.Audio;
@@ -282,7 +281,7 @@ namespace Game.Audio
 			return source;
 		}
 
-		private async Task Awake()
+		private void Awake()
 		{
 			LoadMixer();
 			CreateSoundPool();

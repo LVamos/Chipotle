@@ -734,13 +734,13 @@ namespace Game
 		/// <returns>Enumeration of doors</returns>
 		public static IEnumerable<Door> GetNearestDoors(Vector2 point, float maxDistance)
 		{
-			return
-				from passage in GetNearestPassages(point)
-				where passage is Door
-				let door = passage as Door
-				let distance = door.Area.Value.GetDistanceFrom(point)
-				where distance <= maxDistance
-				select door;
+			IEnumerable<Door> doors = GetNearestPassages(point).OfType<Door>();
+			IEnumerable<Door> result =
+							from door in doors
+							let distance = door.Area.Value.GetDistanceFrom(point)
+							where distance <= maxDistance
+							select door;
+			return result;
 		}
 		/// <summary>
 		/// searches for a simple game object by name.

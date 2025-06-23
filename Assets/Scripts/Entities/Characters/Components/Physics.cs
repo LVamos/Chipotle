@@ -656,9 +656,14 @@ namespace Game.Entities.Characters.Components
 
 			// Vypočítáme relativní úhel mezi orientací postavy a cílem
 			float relativeAngle = (angleDegrees - characterAngleDegrees + 360) % 360;
+			if (relativeAngle < 0f)
+				relativeAngle += 360f;
+			if (relativeAngle >= 359.9999f)
+				relativeAngle = 0f;
 
 			return relativeAngle;
 		}
+
 		/// <summary>
 		/// Rounds the given number to the nearest 90.
 		/// </summary>
