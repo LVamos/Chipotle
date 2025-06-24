@@ -850,13 +850,15 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToMariottisOffice() => JumpNear(World.GetItem("křeslo v6").Area.Value);
 
+		private Vector2 PointInSweeneysHall = new Vector2(1399.4f, 956.7f);
+
 		/// <summary>
 		/// Chipotle and Tuttle NPCs relocate from the Easterby street (ulice p1) zone to the
 		/// Sweeney's hall (hala s1) zone.
 		/// </summary>
 		private void JumpToSweeneysHall()
 		{
-			JumpNear(World.GetItem("skříň s1").Area.Value);
+			JumpTo(PointInSweeneysHall, true);
 			World.PlayCutscene(Owner, "cs41");
 		}
 
@@ -1427,16 +1429,19 @@ namespace Game.Entities.Characters.Chipotle
 		/// <remarks>The Detective Chiptole and Tuttle NPCs should move with the car afterwards.</remarks>
 		private void WatchSweeneysRoom()
 		{
+			bool tableUsed = Used("stůl s1") || Used("stůl s5");
 			if (
-				World.GetItem("trezor s1").Used
-				&& (World.GetItem("stůl s1").Used || World.GetItem("stůl s5").Used)
-				&& World.GetItem("počítač s1").Used
-				&& World.GetItem("mobil s1").Used
+				Used("trezor s1")
+				&& tableUsed
+				&& Used("počítač s1")
+				&& Used("mobil s1")
 			)
 			{
 				Car.TakeMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
 				World.PlayCutscene(Owner, "cs19");
 			}
+
+			bool Used(string itemName) => World.GetItem(itemName).Used;
 		}
 
 		/// <summary>

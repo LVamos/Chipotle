@@ -210,7 +210,9 @@ namespace Game.Entities.Characters.Tuttle
 		/// The Tuttle and Sweeney NPCs relocate from the Sweeney's hall (hala s1) zone to his
 		/// room (pokoj s1) zone.
 		/// </summary>
-		private void JumpToSweeneysRoom() => JumpNear(World.GetItem("skříň s2").Area.Value);
+		private void JumpToSweeneysRoom() => JumpTo(PointInSweeneysRoom);
+
+		private Vector2 PointInSweeneysRoom = new Vector2(1402.3f, 955);
 
 		/// <summary>
 		/// Processes the ChipotlesCarMoved message.

@@ -1,6 +1,7 @@
 ﻿using Game.Terrain;
 
 using System;
+using System.Runtime.CompilerServices;
 
 using Rectangle = Game.Terrain.Rectangle;
 
@@ -13,6 +14,9 @@ namespace Game.Messaging.Events.Movement
 	[Serializable]
 	public class PositionChanged : CharacterMoved
 	{
+		public readonly int Line;
+		public readonly string Member;
+		public readonly string File;
 		/// <summary>
 		/// Describes type of obstacle between the entity and the player if any.
 		/// </summary>
@@ -33,12 +37,25 @@ namespace Game.Messaging.Events.Movement
 		/// <param name="targetZone">Target zone of the NPC</param>
 		/// <param name="obstacle">Describes type of obstacle between the entity and the player if any</param>
 		/// <param name="silently">Determines if the fott steps of the NPC should be audible</param>
-		public PositionChanged(object sender, Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone, ObstacleType obstacle = ObstacleType.None, bool silently = false)
+		public PositionChanged(
+			object sender,
+			Rectangle? sourcePosition,
+			Rectangle targetPosition,
+			Zone sourceZone,
+			Zone targetZone,
+			ObstacleType obstacle = ObstacleType.None,
+			bool silently = false,
+					[CallerLineNumber] int line = 0,
+		[CallerMemberName] string member = "",
+		[CallerFilePath] string file = ""
+			)
 			: base(sender, sourcePosition, targetPosition, sourceZone, targetZone)
 		{
 			Obstacle = obstacle;
 			Silently = silently;
-
+			Line = line;
+			Member = member;
+			File = file;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 using UnityEngine;
 
@@ -14,6 +15,10 @@ namespace Game.Messaging.Commands.Movement
 	[Serializable]
 	public class SetPosition : Message
 	{
+		public readonly int Line;
+		public readonly string Member;
+		public readonly string File;
+
 		/// <summary>
 		/// specifies if some walk sounds should be played.
 		/// </summary>
@@ -30,10 +35,20 @@ namespace Game.Messaging.Commands.Movement
 		/// <param name="sender">source of the message</param>
 		/// <param name="target">The location to which the NPC moves</param>
 		/// <param name="silently">Specifies if some walk sounds should be played.</param>
-		public SetPosition(object sender, Vector2 target, bool silently = false) : base(sender)
+		public SetPosition(
+			object sender,
+			Vector2 target,
+			bool silently = false,
+					[CallerLineNumber] int line = 0,
+		[CallerMemberName] string member = "",
+		[CallerFilePath] string file = ""
+			) : base(sender)
 		{
 			Target = target;
 			Silently = silently;
+			Line = line;
+			Member = member;
+			File = file;
 		}
 	}
 }

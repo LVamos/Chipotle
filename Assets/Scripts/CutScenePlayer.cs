@@ -1,8 +1,6 @@
 ﻿using Game;
 using Game.Audio;
 
-using System.Collections;
-
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -16,7 +14,7 @@ namespace Assets.Scripts
 				return;
 
 			_audio.volume = 0;
-			AdjustVolume(duration, volume);
+			Sounds.SlideVolume(_audio, duration, volume);
 		}
 		public float Position => _audio.time;
 
@@ -33,28 +31,6 @@ namespace Assets.Scripts
 		public bool Finished => _audio != null && _audio.clip != null && !Paused && Mathf.Approximately(_audio.time, _audio.clip.length);
 
 		public bool Paused { get; set; }
-		protected void AdjustVolume(float duration, float targetVolume)
-		{
-			if (targetVolume == _audio.volume)
-				return;
-
-			StartCoroutine(Ajust());
-
-			IEnumerator Ajust()
-			{
-				float startVolume = _audio.volume;
-
-				for (float t = 0; t < duration; t += Time.deltaTime)
-				{
-					_audio.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
-					yield return null;
-				}
-				_audio.volume = targetVolume;
-
-				if (targetVolume <= 0)
-					_audio.Stop();
-			}
-		}
 
 		public bool IsPlaying => _audio.isPlaying;
 
@@ -65,7 +41,7 @@ namespace Assets.Scripts
 
 			if (Paused)
 				_audio.Stop();
-			AdjustVolume(.5f, 0);
+			Sounds.SlideVolume(_audio, .5f, 0, true);
 			Paused = false;
 		}
 
