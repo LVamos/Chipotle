@@ -1368,7 +1368,8 @@ namespace Game.Entities.Characters.Chipotle
 			// Jump to target zone
 			float height = transform.localScale.y;
 			float width = transform.localScale.x;
-			Vector2? target = World.GetFreePlacementsNear(null, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
+			List<MapElement> ignored = new() { Owner };
+			Vector2? target = World.GetFreePlacementsNear(ignored, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
 				.FirstOrDefault();
 			if (target == null)
 				throw new InvalidOperationException("No walkable tile found.");

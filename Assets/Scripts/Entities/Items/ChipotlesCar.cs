@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using UnityEngine;
+
 using Message = Game.Messaging.Message;
 using Rectangle = Game.Terrain.Rectangle;
 
@@ -53,14 +55,15 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Maps all possible movements among zones.
 		/// </summary>
-		private readonly Dictionary<string, string> _destinations = new() // zone inner name/rectangle coordinates
+		private readonly Dictionary<string, Vector2> _destinations = new(
+StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordinates
 		{
-			["ulice p1"] = "1810, 1123, 1812, 1119", // at Christine's
-			["ulice h1"] = "1539, 1000, 1543, 998", // At the pub
-			["ulice s1"] = "1324, 1036, 1328, 1034", // In safe distance from Sweeney's house
-			["příjezdová cesta w1"] = "1025, 1036, 1027, 1032", // At a fence
-			["ulice v1"] = "2006, 1087, 2008, 1083", // On park place next to Vanilla crunch
-			["asfaltka c1"] = "1207, 984, 1209, 980" // At the edge of "cesta c1"
+			["ulice p1"] = new(1787.1f, 1102), // at Christine's
+			["ulice h1"] = new(1543.4f, 1058.9f), // At the pub
+			["ulice s1"] = new(1350.1f, 962), // In safe distance from Sweeney's house
+			["příjezdová cesta w1"] = new(1032.7f, 1031.1f), // At a fence
+			["ulice v1"] = new(1786, 1123), // On park place next to Vanilla crunch
+			["asfaltka c1"] = new(1786, 1123) // At the edge of "cesta c1"
 		};
 
 		/// <summary>
@@ -110,7 +113,7 @@ namespace Game.Entities.Items
 		{
 			switch (message)
 			{
-				case MoveChipotlesCar mc: OnMoveChipotlesCar(mc); break;
+				case MoveChipotlesCar m: OnMoveChipotlesCar(m); break;
 				case UnblockZone ul: OnUnblockZone(ul); break;
 				default: base.HandleMessage(message); break;
 			}
@@ -253,7 +256,11 @@ namespace Game.Entities.Items
 		/// </remarks>
 		/// <completionlist cref="_destinations"/>
 		private void Move(Zone zone)
-			=> Move(new Rectangle(_destinations[zone.Name.Indexed]));
+		{
+			Vector2 point = _destinations[zone.Name.Indexed];
+			Rectangle area = Rectangle.FromCenter(point, _area.Value.Height, _area.Value.Width);
+			Move(area);
+		}
 
 		/// <summary>
 		/// Moves the object to the specified zone.

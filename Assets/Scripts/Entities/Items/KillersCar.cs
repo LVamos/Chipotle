@@ -1,5 +1,6 @@
 ﻿using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Physics;
+using Game.Terrain;
 
 using ProtoBuf;
 
@@ -54,7 +55,9 @@ namespace Game.Entities.Items
 			else
 			{
 				_cutscene = "cs8";
-				ChipotlesCar.TakeMessage(new MoveChipotlesCar(this, World.GetZone("ullice h1")));
+				Zone destination = World.GetZone("ulice h1");
+				MoveChipotlesCar newMessage = new(this, destination);
+				ChipotlesCar.TakeMessage(newMessage);
 			}
 
 			base.OnObjectsUsed(message);

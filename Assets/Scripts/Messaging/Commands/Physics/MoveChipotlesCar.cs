@@ -1,5 +1,7 @@
-﻿using System;
-using Game.Terrain;
+﻿using Game.Terrain;
+
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Game.Messaging.Commands.Physics
 {
@@ -10,6 +12,11 @@ namespace Game.Messaging.Commands.Physics
 	[Serializable]
 	public class MoveChipotlesCar : Message
 	{
+		public readonly int Line;
+		public readonly string Member;
+		public readonly string File;
+
+
 		/// <summary>
 		/// The zone to which the car will move.
 		/// </summary>
@@ -20,6 +27,18 @@ namespace Game.Messaging.Commands.Physics
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="destination">The zone to which the car will move</param>
-		public MoveChipotlesCar(object sender, Zone destination) : base(sender) => Destination = destination;
+		public MoveChipotlesCar(
+			object sender,
+			Zone destination,
+								[CallerLineNumber] int line = 0,
+		[CallerMemberName] string member = "",
+		[CallerFilePath] string file = ""
+			) : base(sender)
+		{
+			Destination = destination;
+			Line = line;
+			Member = member;
+			File = file;
+		}
 	}
 }
