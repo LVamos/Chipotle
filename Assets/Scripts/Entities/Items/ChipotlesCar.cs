@@ -70,9 +70,12 @@ namespace Game.Entities.Items
 		/// <param name="area">Coordinates of the area that the object occupies</param>
 
 		public override void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
-					=> base.Initialize(name: name, area: area, type: type, decorative: decorative, pickable: pickable,
-				usable: usable, stopWhenPlayerMoves: true);
+		{
+			base.Initialize(name: name, area: area, type: type, decorative: decorative, pickable: pickable,
+					usable: usable, stopWhenPlayerMoves: true);
 
+			_allowedDestinations = new();
+		}
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC
 		/// </summary>
