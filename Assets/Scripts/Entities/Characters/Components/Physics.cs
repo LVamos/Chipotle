@@ -215,15 +215,15 @@ namespace Game.Entities.Characters.Components
 				return new();
 
 			// Some items are before the NPC but they can't be picked.
-			List<Items.Item> pickableItems = items
+			List<Item> pickableItems = items
 				.Where(i => i.CanBePicked())
 				.ToList();
 			if (pickableItems.IsNullOrEmpty())
 			{
 				// If there are only decorative items in front of the character, we return the Unpickable result.
-				return items.Any(i => i.Decorative)
-					? new(null, PickableItemsModel.ResultType.Unpickable)
-					: new(null, PickableItemsModel.ResultType.Unpickable);
+				if (items.Any(i => i.Decorative))
+					return new(null, PickableItemsModel.ResultType.Unpickable);
+				return new(null, PickableItemsModel.ResultType.Unpickable);
 			}
 
 			// Check if there are any items that are reachable from distance of _objectManipulationRadius.

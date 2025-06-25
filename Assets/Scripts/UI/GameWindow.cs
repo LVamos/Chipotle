@@ -125,18 +125,26 @@ namespace Game.UI
 
 		private void OnSelectItemToPick(SelectItemToPick message)
 		{
-			List<MapElement> mapElements = message.Items.Cast<MapElement>().ToList();
 			const string prompt = "Co chceš sebrat?";
-			Item selectedItem = ElementSelectionMenu(mapElements, prompt) as Item;
+			List<Entity> entities = message.Items.Cast<Entity>().ToList();
+			List<List<string>> names = GetFriendlyNames(entities);
+			Action<int> action =
+				(option) => HandlePickingMenu(message.Sender as MessagingObject, message.Items, option);
+			MenuParametersDTO parameters = new(
+							names,
+							prompt,
+							wrappingAllowed: false,
+							menuClosed: action);
+			WindowHandler.Menu(parameters);
+		}
 
-			if (selectedItem == null)
+		private void HandlePickingMenu(MessagingObject sender, List<Item> objects, int option)
+		{
+			if (option == -1 || sender == null)
 				return;
 
-			// Send message to the characterr.
-			PickUpItem newMessage = new(this, selectedItem);
-			MessagingObject sender = message.Sender as MessagingObject;
-			sender.TakeMessage(newMessage);
-
+			PickUpItem message = new(this, objects[option]);
+			sender.TakeMessage(message);
 		}
 
 		private MapElement ElementSelectionMenu(List<MapElement> objects, string prompt)
@@ -195,6 +203,7 @@ namespace Game.UI
 
 		private List<List<string>> GetFriendlyNames(List<Entity> objects)
 		{
+
 			List<List<string>> names =
 							objects.Select(o => new List<string>() { o.Name.Friendly })
 								.ToList();
