@@ -82,6 +82,16 @@ namespace Game.UI
 			InventoryMenu.Run(parameters);
 		}
 
+		private void HandleExploringMenu(MessagingObject sender, List<Entity> objects, int option)
+		{
+			if (option == -1 || sender == null)
+				return;
+
+			ExploreObject message = new(this, objects[option]);
+			sender.TakeMessage(message);
+		}
+
+
 		private void HandleInteractionMenu(MessagingObject sender, List<Entity> objects, int option)
 		{
 			if (option == -1 || sender == null)
@@ -157,9 +167,7 @@ namespace Game.UI
 			const string prompt = "Co chceš použít?";
 
 			// Copy friendly names from the given objects into an array.
-			List<List<string>> names =
-				message.Objects.Select(o => new List<string>() { o.Name.Friendly })
-					.ToList();
+			List<List<string>> names = GetFriendlyNames(message.Objects);
 
 			MenuParametersDTO parameters = new(
 				names,
@@ -175,16 +183,22 @@ namespace Game.UI
 		/// <param name="message">The message to be handled</param>
 		private void OnSelectObjectToExplore(SelectObjectToExplore message)
 		{
-			List<MapElement> mapElements = message.Objects.Cast<MapElement>().ToList();
 			const string prompt = "Co chceš prozkoumat?";
-			Entity selectedObject = ElementSelectionMenu(mapElements, prompt) as Entity;
+			List<List<string>> names = GetFriendlyNames(message.Objects);
+			MenuParametersDTO parameters = new(
+							names,
+							prompt,
+							wrappingAllowed: false,
+							menuClosed: (option) => HandleExploringMenu(message.Sender as MessagingObject, message.Objects, option));
+			WindowHandler.Menu(parameters);
+		}
 
-			if (selectedObject == null)
-				return;
-
-			// Send message to the characterr.
-			ExploreObject newMessage = new(this, selectedObject);
-			(message.Sender as MessagingObject).TakeMessage(newMessage);
+		private List<List<string>> GetFriendlyNames(List<Entity> objects)
+		{
+			List<List<string>> names =
+							objects.Select(o => new List<string>() { o.Name.Friendly })
+								.ToList();
+			return names;
 		}
 
 		/// <summary>
