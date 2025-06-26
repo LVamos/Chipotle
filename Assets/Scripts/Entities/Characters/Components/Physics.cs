@@ -31,6 +31,8 @@ namespace Game.Entities.Characters.Components
 	[ProtoInclude(100, typeof(ChipotlePhysics))]
 	public class Physics : CharacterComponent
 	{
+		public Vector2 Center { get => _area.Value.Center; }
+
 		private void FixedUpdate()
 		{
 			if (World.GameInProgress)
@@ -690,6 +692,11 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected Vector2 FindManipulationPoint(MapElement element)
 		{
+			// If the element is an item held by the NPC, use center of the NPC due to sound realism.
+			if (element is Item i && i.HeldBy == Owner)
+				return Center;
+
+			// Find an alligned point near the NPC.
 			Vector2? point = element.Area.Value.GetAlignedPoint(_area.Value.Center);
 			if (point == null)
 				point = element.Area.Value.GetClosestPoint(_area.Value.Center);
