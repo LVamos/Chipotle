@@ -623,7 +623,7 @@ namespace Game.Terrain
 			switch (message)
 			{
 				case ItemLeftZone m: OnObjectDisappearedFromZone(m); break;
-				case ItemAppearedInZone m: OnObjectAppearedInZone(m); break;
+				case ItemAppearedInZone m: OnItemAppearedInZone(m); break;
 				case ChipotlesCarMoved ccmv: OnChipotlesCarMoved(ccmv); break;
 				case CharacterMoved em: OnCharacterMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
@@ -644,7 +644,7 @@ namespace Game.Terrain
 		/// Handles a message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		private void OnObjectAppearedInZone(ItemAppearedInZone message)
+		private void OnItemAppearedInZone(ItemAppearedInZone message)
 		{
 			Register(message.Item);
 			GatherNonwalkables(message.Item);
