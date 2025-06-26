@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Models;
 
 using Game.Audio;
-using Game.Entities;
 using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
@@ -623,8 +622,8 @@ namespace Game.Terrain
 		{
 			switch (message)
 			{
-				case ObjectDisappearedFromZone m: OnObjectDisappearedFromZone(m); break;
-				case ObjectAppearedInZone m: OnObjectAppearedInZone(m); break;
+				case ItemLeftZone m: OnObjectDisappearedFromZone(m); break;
+				case ItemAppearedInZone m: OnObjectAppearedInZone(m); break;
 				case ChipotlesCarMoved ccmv: OnChipotlesCarMoved(ccmv); break;
 				case CharacterMoved em: OnCharacterMoved(em); break;
 				case DoorManipulated dm: OnDoorManipulated(dm); break;
@@ -639,16 +638,16 @@ namespace Game.Terrain
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnObjectDisappearedFromZone(ObjectDisappearedFromZone m) => Unregister(m.Object);
+		private void OnObjectDisappearedFromZone(ItemLeftZone m) => Unregister(m.Item);
 
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		private void OnObjectAppearedInZone(ObjectAppearedInZone message)
+		private void OnObjectAppearedInZone(ItemAppearedInZone message)
 		{
-			Register(message.Object);
-			GatherNonwalkables(message.Object);
+			Register(message.Item);
+			GatherNonwalkables(message.Item);
 		}
 
 		/// <summary>
@@ -681,8 +680,8 @@ namespace Game.Terrain
 		/// <summary>
 		/// Immediately removes a game object from list of present objects.
 		/// </summary>
-		/// <param name="o"></param>
-		private void Unregister(Entity o) => _items.Remove(o.Name.Indexed);
+		/// <param name="i"></param>
+		private void Unregister(Item i) => _items.Remove(i.Name.Indexed);
 
 		/// <summary>
 		/// Immediately removes an entity from list of present entities.

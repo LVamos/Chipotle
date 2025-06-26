@@ -415,9 +415,10 @@ namespace Game.Entities.Items
 		/// Zones intersecting with this object.
 		/// </summary>
 		[ProtoIgnore]
-		public List<Zone> Zones => (from name in _zones
-									select World.GetZone(name))
-										  .ToList();
+		public List<Zone> Zones
+		{
+			get => _zones.Select(World.GetZone).ToList();
+		}
 
 		/// <summary>
 		/// Finds all zones the object or the NPC intersects with and saves their names into _zones.
@@ -559,7 +560,7 @@ namespace Game.Entities.Items
 			// Add the object to intersecting zones
 			FindZones();
 			foreach (Zone l in Zones)
-				l.TakeMessage(new ObjectAppearedInZone(this, this, l));
+				l.TakeMessage(new ItemAppearedInZone(this, this, l));
 
 			// Play loop sound if any and if the player can hear it.
 			PlayAmbient();
@@ -678,7 +679,7 @@ namespace Game.Entities.Items
 
 			// Inform zones that the object disappeared.
 			foreach (Zone l in Zones)
-				l.TakeMessage(new ObjectDisappearedFromZone(this, this, l));
+				l.TakeMessage(new ItemLeftZone(this, this, l));
 		}
 
 		/// <summary>
@@ -946,6 +947,17 @@ namespace Game.Entities.Items
 			{
 				HeldBy = null;
 				Area = vacancy;
+
+				//Register the item in target zones.
+				_zones = new();
+				List<Zone> zones = World.GetZones(_area.Value).ToList();
+				foreach (Zone zone in zones)
+				{
+					ItemAppearedInZone appearedMessage = new(this, this, zone);
+					zone.TakeMessage(appearedMessage);
+					_zones.Add(zone.Name.Indexed);
+				}
+
 				Placed();
 			}
 

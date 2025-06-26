@@ -6,12 +6,12 @@ namespace Game.Messaging.Events.Physics
 	/// <summary>
 	/// Informs that a game object appeared in a zone.
 	/// </summary>
-	public class ObjectAppearedInZone : Message
+	public class ItemAppearedInZone : Message
 	{
 		/// <summary>
 		/// The object that appeared in the zone.
 		/// </summary>
-		public readonly Item Object;
+		public readonly Item Item;
 
 		/// <summary>
 		/// The zone the object apeared in
@@ -22,11 +22,11 @@ namespace Game.Messaging.Events.Physics
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		/// <param name="object">The object that appeared in the zone</param>
+		/// <param name="item">The object that appeared in the zone</param>
 		/// <param name="zone">The concerning zone</param>
-		public ObjectAppearedInZone(object sender, Item @object, Zone zone) : base(sender)
+		public ItemAppearedInZone(object sender, Item item, Zone zone) : base(sender)
 		{
-			Object = @object;
+			Item = item;
 			Zone = zone;
 		}
 	}

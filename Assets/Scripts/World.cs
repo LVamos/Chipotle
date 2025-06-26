@@ -230,9 +230,11 @@ namespace Game
 
 			void Detect(IEnumerable<MapElement> elements, bool ignoreSubtleObjects = false, bool ignoreItems = false)
 			{
+				bool IsIgnoredElement(MapElement element) => ignoredElements != null && ignoredElements.Contains(element);
+
 				List<MapElement> newObstacles = elements
 					.Where(element => element.Area != null
-					&& ignoredElements.All(e => e.Name.Indexed != element.Name.Indexed))
+					&& !IsIgnoredElement(element))
 					.Where(e => e.Area.Value.Intersects(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value))
 .ToList();
 				if (ignoreSubtleObjects)
