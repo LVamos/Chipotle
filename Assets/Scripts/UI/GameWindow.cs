@@ -56,16 +56,16 @@ namespace Game.UI
 		/// <param name="message">The message to be handled</param>
 		private void OnSelectObjectToApply(SelectObjectToApply message)
 		{
-			List<MapElement> mapElements = message.Objects.Cast<MapElement>()
-				.ToList();
 			const string prompt = "Na co to chceš použít?";
-			Entity selectedObject = ElementSelectionMenu(mapElements, prompt) as Entity;
-			if (selectedObject == null)
-				return;
-
-			// Send message to the characterr.
-			ApplyItemToTarget newMessage = new(this, message.ItemToApply, selectedObject);
-			(message.Sender as MessagingObject).TakeMessage(newMessage);
+			List<List<string>> names = GetFriendlyNames(message.Objects);
+			Action<int> action =
+				(option) => HandleApplyItemMenu(message.Sender as MessagingObject, message.Objects, option, message.ItemToApply);
+			MenuParametersDTO parameters = new(
+							names,
+							prompt,
+							wrappingAllowed: false,
+							menuClosed: action);
+			WindowHandler.Menu(parameters);
 		}
 
 		/// <summary>
@@ -137,6 +137,16 @@ namespace Game.UI
 							menuClosed: action);
 			WindowHandler.Menu(parameters);
 		}
+
+		private void HandleApplyItemMenu(MessagingObject sender, List<Entity> objects, int option, Item itemToApply)
+		{
+			if (option == -1 || sender == null)
+				return;
+
+			ApplyItemToTarget message = new(this, itemToApply, objects[0]);
+			sender.TakeMessage(message);
+		}
+
 
 		private void HandlePickingMenu(MessagingObject sender, List<Item> objects, int option)
 		{
