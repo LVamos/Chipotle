@@ -831,8 +831,11 @@ namespace Game.Entities.Characters.Chipotle
 			Random r = new();
 			_phoneInterval = r.Next(30000, 120000);
 			_phoneDeltaTime = 0;
-			JumpNear(World.GetItem("zvonek p1").Area.Value);
+
+			JumpTo(_pointNearChristinesBell);
 		}
+
+		private Vector2 _pointNearChristinesBell = new(1787.1f, 1109);
 
 		/// <summary>
 		/// The Detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)
@@ -840,15 +843,19 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void JumpToChristinesHall()
 		{
-			JumpNear(World.GetItem("zeď p700").Area.Value);
+			JumpTo(_pointInChristinesHall);
 			World.PlayCutscene(Owner, "cs38");
 		}
+
+		private Vector2 _pointInChristinesHall = new(1773.9f, 1119.2f);
 
 		/// <summary>
 		/// Relocates the NPC from the hall in Vanilla crunch company (hala v1) into the Mariotti's
 		/// office (kancelář v1) zone.
 		/// </summary>
-		private void JumpToMariottisOffice() => JumpNear(World.GetItem("křeslo v6").Area.Value);
+		private void JumpToMariottisOffice() => JumpTo(_pointNearMariottisArmChair);
+
+		private Vector2 _pointNearMariottisArmChair = new(2009.8f, 1123.8f);
 
 		private Vector2 PointInSweeneysHall = new Vector2(1399.4f, 956.7f);
 
@@ -866,7 +873,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// Relocates the NPC from the Mariotti's office (kancelář v1) into the garage of the
 		/// vanilla crunch company (garáž v1) zone.
 		/// </summary>
-		private void JumpToVanillaCrunchGarage() => JumpNear(World.GetItem("zeď v6").Area.Value);
+		private void JumpToVanillaCrunchGarage() => JumpTo(_pointOnEdgeOfMariottisGarage);
+
+		private Vector2 _pointOnEdgeOfMariottisGarage = new(2006, 1166.1f);
 
 		/// <summary>
 		/// Stores indexes of regions visited by the NPC.

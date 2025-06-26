@@ -192,15 +192,19 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToBelvedereStreet()
 		{
-			JumpNear(World.GetItem("zvonek p1").Area.Value);
+			JumpTo(_pointNearChristinesBell);
 			StartFollowingPlayer();
 		}
+
+		private Vector2 _pointNearChristinesBell = new(1789.1f, 1110);
 
 		/// <summary>
 		/// The detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)
 		/// zone to the Christine's hall (hala p1) zone.
 		/// </summary>
-		private void JumpToChristinesHall() => JumpNear(World.GetItem("botník p1").Area.Value);
+		private void JumpToChristinesHall() => JumpTo(_pointInChristinesHall);
+
+		private Vector2 _pointInChristinesHall = new(1772.4f, 1119.6f);
 
 		/// <summary>
 		/// Stops following the player.

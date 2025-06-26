@@ -8,6 +8,8 @@ using ProtoBuf;
 using System.Collections.Generic;
 using System.Linq;
 
+using UnityEngine;
+
 using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Bartender
@@ -50,9 +52,10 @@ namespace Game.Entities.Characters.Bartender
 		public override void Activate()
 		{
 			base.Activate();
-			JumpNear(World.GetItem("pult h2").Area.Value); // At the bar in the pub
+			JumpTo(_pointNearCounter);
 		}
 
+		private Vector2 _pointNearCounter = new(1556.9f, 1073.2f);
 		/// <summary>
 		/// Runs a message handler for the specified message.
 		/// </summary>

@@ -3,6 +3,8 @@ using Game.Messaging.Events.Sound;
 
 using ProtoBuf;
 
+using UnityEngine;
+
 using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Christine
@@ -19,8 +21,10 @@ namespace Game.Entities.Characters.Christine
 		public override void Activate()
 		{
 			base.Activate();
-			JumpNear(World.GetItem("stůl p1").Area.Value); // At a table in her dining room
+			JumpTo(_pointNearDiningTable);
 		}
+
+		private Vector2 _pointNearDiningTable = new(1775.8f, 1114.7f);
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -54,7 +58,9 @@ namespace Game.Entities.Characters.Christine
 		/// </summary>
 		private void JumpToBedroom()
 		{
-			JumpNear(World.GetItem("zrcadlo p1").Area.Value);
+			JumpTo(_pointNearBedroomMirror);
 		}
+
+		private Vector2 _pointNearBedroomMirror = new(1769.3f, 1119.9f);
 	}
 }

@@ -8,6 +8,8 @@ using ProtoBuf;
 
 using System.Linq;
 
+using UnityEngine;
+
 using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Carson
@@ -37,8 +39,10 @@ namespace Game.Entities.Characters.Carson
 		{
 			base.Activate();
 
-			JumpNear(World.GetItem("stůl c1").Area.Value); // At a table in his garden
+			JumpTo(_pointNearTable);
 		}
+
+		private Vector2 _pointNearTable = new(1225, 1019.4f);
 
 		/// <summary>
 		/// Runs a message handler for the specified message.

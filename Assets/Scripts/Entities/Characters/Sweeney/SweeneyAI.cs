@@ -3,6 +3,8 @@ using Game.Messaging.Events.Sound;
 
 using ProtoBuf;
 
+using UnityEngine;
+
 using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Sweeney
@@ -19,8 +21,10 @@ namespace Game.Entities.Characters.Sweeney
 		public override void Activate()
 		{
 			base.Activate();
-			JumpNear(World.GetItem("stůl s1").Area.Value);
+			JumpTo(_pointNearTable);
 		}
+
+		private Vector2 _pointNearTable = new(1402.3f, 955.7f);
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -55,7 +59,8 @@ namespace Game.Entities.Characters.Sweeney
 		/// </summary>
 		private void JumpToSweeneysRoom()
 		{
-			JumpNear(World.GetItem("postel s1").Area.Value);
+			JumpTo(_pointNearBed);
 		}
+		private Vector2 _pointNearBed = new(1404.1f, 955.7f);
 	}
 }

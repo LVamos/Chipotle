@@ -1299,11 +1299,11 @@ namespace Game
 			foreach (Item i in _items.Values)
 				i.Activate();
 			Add(CharacterFactory.CreateTuttle());
-			//Add(CharacterFactory.CreateCarson());
-			//Add(CharacterFactory.CreateBartender());
-			//Add(CharacterFactory.CreateChristine());
-			//Add(CharacterFactory.CreateSweeney());
-			//Add(CharacterFactory.CreateMariotti());
+			Add(CharacterFactory.CreateCarson());
+			Add(CharacterFactory.CreateBartender());
+			Add(CharacterFactory.CreateChristine());
+			Add(CharacterFactory.CreateSweeney());
+			Add(CharacterFactory.CreateMariotti());
 
 			// start the remaining characters
 			foreach (Character c in _characters.Values.Where(c => c != Player))

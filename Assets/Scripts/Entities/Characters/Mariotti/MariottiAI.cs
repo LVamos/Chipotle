@@ -2,6 +2,9 @@
 
 using ProtoBuf;
 
+using UnityEngine;
+
+
 namespace Game.Entities.Characters.Mariotti
 {
 	/// <summary>
@@ -16,7 +19,9 @@ namespace Game.Entities.Characters.Mariotti
 		public override void Activate()
 		{
 			base.Activate();
-			JumpNear(World.GetItem("mrazák v1").Area.Value); // At the reffrigerator in the office
+			JumpTo(_pointNearFreezer);
 		}
+
+		private Vector2 _pointNearFreezer = new(2013.3f, 1129.1f);
 	}
 }
