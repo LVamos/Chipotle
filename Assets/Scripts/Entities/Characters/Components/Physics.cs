@@ -540,6 +540,11 @@ namespace Game.Entities.Characters.Components
 		protected bool _restartApproaching;
 
 		/// <summary>
+		/// Represents the inventory. The objects are stored as indexed names.
+		/// </summary>
+		protected HashSet<string> _inventory = new();
+
+		/// <summary>
 		/// Immediately changes position of the NPC.
 		/// </summary>
 		/// <param name="target">Coordinates of the target position</param>
@@ -633,9 +638,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="target">Another map element</param>
 		/// <returns>An angle in compass degrees</returns>
-		protected float GetAngle(MapElement target)
+		protected float GetAngle(Rectangle target)
 		{
-			Vector2 targetPoint = target.Area.Value.GetClosestPoint(_area.Value.Center);
+			Vector2 targetPoint = target.GetClosestPoint(_area.Value.Center);
 			Vector2 characterPosition = _area.Value.Center;
 			Vector2 characterOrientation = _orientation.UnitVector;
 
@@ -644,19 +649,19 @@ namespace Game.Entities.Characters.Components
 			// Normalizujeme směrový vektor k cíli
 			targetDirection.Normalize();
 
-			// Vypočítáme úhel mezi severem (0, -1) a směrem k cíli
+			// Calculate the angle between north (0, -1) and toward the goal
 			float angleToNorth = (float)Math.Atan2(-targetDirection.x, -targetDirection.y);
 
-			// Převedeme úhel na stupně a upravíme pro kompasový formát
+			// convert an angle to degrees and adjust for a compass format
 			float angleDegrees = angleToNorth * Mathf.Rad2Deg;
 			angleDegrees = (angleDegrees + 360) % 360;
 
-			// Vypočítáme úhel orientace postavy vzhledem k severu
+			// Calculate the angle of the character orientation of the north
 			float characterAngle = (float)Math.Atan2(-characterOrientation.x, -characterOrientation.y);
 			float characterAngleDegrees = characterAngle * Mathf.Rad2Deg;
 			characterAngleDegrees = (characterAngleDegrees + 360) % 360;
 
-			// Vypočítáme relativní úhel mezi orientací postavy a cílem
+			// Calculate the relative angle between the character orientation and the target
 			float relativeAngle = (angleDegrees - characterAngleDegrees + 360) % 360;
 			if (relativeAngle < 0f)
 				relativeAngle += 360f;
@@ -684,7 +689,7 @@ namespace Game.Entities.Characters.Components
 
 			return
 				World.GetNearestDoors(_area.Value.Center, radius)
-					.FirstOrDefault(d => GetAngle(d) == 0);
+					.FirstOrDefault(d => GetAngle(d.Area.Value) == 0);
 		}
 
 		/// <summary>
@@ -1179,6 +1184,89 @@ namespace Game.Entities.Characters.Components
 			string resultDescription = $"Výsledek: {result}";
 
 			Logger.LogInfo(title, itemName, resultDescription);
+		}
+
+		protected bool PlaceItemInFront(Item item)
+		{
+			if (!_inventory.Contains(item.Name.Indexed))
+				throw new InvalidOperationException($"Item {item.Name.Indexed} isn't in inventary");
+
+			Rectangle? place = FindVacancyForItem(item);
+			if (place == null)
+			{
+				InnerMessage(new PlaceItemResult(this, item, false));
+				return false;
+			}
+
+			_inventory.Remove(item.Name.Indexed);
+			InnerMessage(new PlaceItemResult(this, item, true));
+			PlaceItem placeMessage = new(Owner, item, Owner, place);
+			item.TakeMessage(placeMessage);
+			return true;
+		}
+		/// <summary>
+		/// Tries to find a free spot on the ground to place the object on.
+		/// </summary>
+		/// <param name="lowerLeftCorner">A point that should intersect with the placed object</param>
+		/// <returns>An area the object could be placed on</returns>
+		protected Rectangle? FindVacancyForItem(Item item)
+		{
+			float height = item.Dimensions.height;
+			float width = item.Dimensions.width;
+			List<Rectangle> positions = new()
+			{
+Rectangle.FromCenter(Center, height, width),
+Rectangle.FromCenter(Center, width, height)
+			};
+
+			return FindVacancy(positions[0]) ?? FindVacancy(positions[1]);
+
+			Rectangle? FindVacancy(Rectangle rectangle)
+			{
+				// Move the rectangle in front of the character
+				float step = 0.1f;
+				float distance;
+
+				// Move the rectangle in front of the chracter.
+				do
+				{
+					rectangle = rectangle.Move(_orientation.UnitVector, step);
+					distance = rectangle.GetDistanceFrom(_area.Value);
+				}
+				while (distance < 0.1f);
+				if (ValidatePosition(rectangle))
+					return rectangle;
+
+				// Try moving the rectangle to the left and to the right untill it fits.
+				float offset = Mathf.Max(height, width) + .1f;
+				int steps = Mathf.CeilToInt(offset / step) + 1;
+				Vector2 sideDirection1 = Vector2.Perpendicular(_orientation.UnitVector);
+				Vector2 sideDirection2 = new(_orientation.UnitVector.y, -_orientation.UnitVector.x);
+
+				return TryLateralDirection(rectangle, sideDirection1, offset, steps, step)
+								?? TryLateralDirection(rectangle, sideDirection2, offset, steps, step);
+
+				bool ValidatePosition(Rectangle rectangle)
+				{
+					CollisionsModel result = World.DetectCollisions(null, rectangle, justFirstObstacle: true);
+
+					float compassAngle = GetAngle(rectangle);
+					return compassAngle == 0 && !result.OutOfMap && result.Obstacles == null;
+				}
+			}
+
+			Rectangle? TryLateralDirection(Rectangle rectangle, Vector2 direction, float offset, int steps, float step)
+			{
+				Rectangle tempRectangle = rectangle;
+				for (int i = 0; i < steps; i++)
+				{
+					tempRectangle = tempRectangle.Move(direction, step);
+					CollisionsModel result = World.DetectCollisions(null, tempRectangle, justFirstObstacle: true);
+					if (!result.OutOfMap && result.Obstacles == null)
+						return rectangle;
+				}
+				return null;
+			}
 		}
 	}
 }

@@ -29,7 +29,7 @@ namespace Game.Entities.Characters
 		private void OnPlaceItemResult(PlaceItemResult message)
 		{
 			if (message.Success)
-				_inventory.Remove(message.Sender.Name.Indexed);
+				_inventory.Remove(message.Item.Name.Indexed);
 		}
 
 		/// <summary>

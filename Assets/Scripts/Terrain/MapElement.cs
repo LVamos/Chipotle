@@ -33,7 +33,7 @@ namespace Game.Terrain
 			return Mathf.Max(zoneArea.Height, zoneArea.Width);
 		}
 
-		protected Vector2 Center { get => _area.Value.Center; }
+		public Vector2 Center { get => _area.Value.Center; }
 		private const float _navigationVolume = .5f;
 		private const float _navigationMinDistance = .6f;
 

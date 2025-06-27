@@ -1,9 +1,8 @@
 ﻿using Game.Entities.Characters;
 using Game.Entities.Items;
+using Game.Terrain;
 
 using System;
-
-using UnityEngine;
 
 namespace Game.Messaging.Commands.Physics
 {
@@ -12,18 +11,13 @@ namespace Game.Messaging.Commands.Physics
 	/// </summary>
 	public class PlaceItem : Message
 	{
+		public readonly Rectangle? Target;
 		public readonly Character Character;
 
-		public readonly float MaxDistanceFromCharacter;
 		/// <summary>
 		/// The object that should be put on the ground.
 		/// </summary>
 		public readonly Item Item;
-
-		/// <summary>
-		/// A point near which the object should be placed.
-		/// </summary>
-		public readonly Vector2? DirectionFromCharacter;
 
 		/// <summary>
 		/// Constructor
@@ -36,14 +30,12 @@ namespace Game.Messaging.Commands.Physics
 			object sender,
 			Item item,
 			Character character = null,
-			Vector2? directionFromCharacter = null,
-			float maxDistanceFromCharacter = 0
+			Rectangle? target = null
 			) : base(sender)
 		{
 			Item = item ?? throw new ArgumentNullException(nameof(item));
 			Character = character;
-			DirectionFromCharacter = directionFromCharacter;
-			MaxDistanceFromCharacter = maxDistanceFromCharacter;
+			Target = target;
 		}
 	}
 }

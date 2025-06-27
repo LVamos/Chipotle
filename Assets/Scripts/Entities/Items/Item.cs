@@ -2,7 +2,6 @@
 
 using Game.Audio;
 using Game.Entities.Characters;
-using Game.Messaging;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.GameManagement;
@@ -13,6 +12,7 @@ using Game.Terrain;
 
 using ProtoBuf;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -935,79 +935,34 @@ namespace Game.Entities.Items
 		/// <param name="message">Source of the message</param>
 		private void OnPlaceItem(PlaceItem message)
 		{
-			Rectangle? vacancy = FindVacancy(
-				message.Character.Area.Value,
-		message.DirectionFromCharacter.Value,
-		message.MaxDistanceFromCharacter
-		);
-			bool success = vacancy != null;
+			if (message.Target == null)
+				throw new ArgumentNullException(nameof(message.Target));
 
-			if (success)
+			HeldBy = null;
+			Area = message.Target;
+
+			//Register the item in target zones.
+			_zones = new();
+			List<Zone> zones = World.GetZones(_area.Value).ToList();
+			foreach (Zone zone in zones)
 			{
-				HeldBy = null;
-				Area = vacancy;
-
-				//Register the item in target zones.
-				_zones = new();
-				List<Zone> zones = World.GetZones(_area.Value).ToList();
-				foreach (Zone zone in zones)
-				{
-					ItemAppearedInZone appearedMessage = new(this, this, zone);
-					zone.TakeMessage(appearedMessage);
-					_zones.Add(zone.Name.Indexed);
-				}
-
-				Placed();
+				ItemAppearedInZone appearedMessage = new(this, this, zone);
+				zone.TakeMessage(appearedMessage);
+				_zones.Add(zone.Name.Indexed);
 			}
 
-			MessagingObject sender = (message.Sender as MessagingObject);
-			sender.TakeMessage(new PlaceItemResult(this, success));
-			LogPlacement(message.Sender as Character, message.DirectionFromCharacter, success);
+			Placed();
+			LogPlacement(message.Sender as Character, message.Target.Value);
 		}
 
-		protected void LogPlacement(Character character, Vector2? position, bool success)
+		protected void LogPlacement(Character character, Rectangle position)
 		{
 			string title = "Objekt zaznamenal pokus o položení";
 			string itemName = $"Objekt: {Name.Indexed}";
-			string resultDescription = $"Výsledek: {(success ? "úspěch" : "neúspěch")}";
 			string pointOfPlacement = string.Empty;
-			if (position != null)
-				pointOfPlacement = $"Bod umístění: {position.Value.GetString()}";
+			pointOfPlacement = $"Bod umístění: {position.ToString()}";
 
-			Logger.LogInfo(title, itemName, resultDescription);
-		}
-
-		/// <summary>
-		/// Tries to find a free spot on the ground to place the object on.
-		/// </summary>
-		/// <param name="lowerLeftCorner">A point that should intersect with the placed object</param>
-		/// <returns>An area the object could be placed on</returns>
-		protected Rectangle? FindVacancy(Rectangle characterArea, Vector2 directionFromCharacter, float maxDistanceFromCharacter)
-		{
-			float offset = characterArea.Height / 2;
-			List<Rectangle> positions = new()
-			{
-Rectangle.FromCenter(characterArea.Center, Dimensions.height, Dimensions.width),
-Rectangle.FromCenter(characterArea.Center, Dimensions.width, Dimensions.height)
-			};
-
-			return TryFindPosition(positions[0]) ?? TryFindPosition(positions[1]);
-
-			Rectangle? TryFindPosition(Rectangle rectangle)
-			{
-				rectangle.Move(directionFromCharacter, offset); // Move the rectangle to the edge of the character
-				float step = 0.1f;
-				do
-				{
-					CollisionsModel result = World.DetectCollisions(null, rectangle);
-					if ((!result.OutOfMap && result.Obstacles == null))
-						return rectangle;
-					rectangle.Move(directionFromCharacter, step);
-				}
-				while (rectangle.GetDistanceFrom(characterArea) <= maxDistanceFromCharacter);
-
-				return null;
-			}
+			Logger.LogInfo(title, itemName);
 		}
 
 		/// <summary>

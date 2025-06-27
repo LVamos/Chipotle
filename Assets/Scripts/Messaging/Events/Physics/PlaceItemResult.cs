@@ -14,7 +14,9 @@ namespace Game.Messaging.Events.Physics
 		/// <summary>
 		/// Soruce fo the message.
 		/// </summary>
-		public new readonly Item Sender;
+		public new readonly object Sender;
+
+		public readonly Item Item;
 
 		/// <summary>
 		/// Constructor
@@ -22,9 +24,10 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="sender">Source of the message</param>
 		/// <param name="result">Result of the operation</param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public PlaceItemResult(Item sender, bool success = false) : base(sender)
+		public PlaceItemResult(object sender, Item item, bool success = false) : base(sender)
 		{
 			Sender = sender ?? throw new ArgumentNullException(nameof(sender));
+			Item = item;
 			Success = success;
 		}
 	}

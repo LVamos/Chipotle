@@ -104,11 +104,6 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		protected const int _inventoryLimit = 5;
 
-		/// <summary>
-		/// Represents the inventory. The objects are stored as indexed names.
-		/// </summary>
-		protected HashSet<string> _inventory = new();
-
 		protected override Vector2 GetStepDirection()
 		{
 			Orientation2D finalOrientation = _orientation;
@@ -248,8 +243,6 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
-				case PlaceItemResult m:
-					OnPlaceItemResult(m); break;
 				case PlaceItem m: OnPlaceItem(m); break;
 				case ApplyItemToTarget m:
 					OnApplyItemToTarget(m); break;
@@ -281,22 +274,9 @@ namespace Game.Entities.Characters.Chipotle
 			}
 		}
 
-		private void OnPlaceItemResult(PlaceItemResult message)
-		{
-			if (message.Success)
-				_inventory.Remove(message.Sender.Name.Indexed);
-		}
-
 		private void OnPlaceItem(PlaceItem message)
 		{
-			PlaceItem newMessage = new(
-				Owner,
-				message.Item,
-				Owner,
-				Owner.Orientation.UnitVector,
-				_stepLength
-				);
-			message.Item.TakeMessage(newMessage);
+			PlaceItemInFront(message.Item);
 		}
 
 		/// <summary>
@@ -394,7 +374,7 @@ namespace Game.Entities.Characters.Chipotle
 				string name = character.Name.Friendly;
 				float distance = World.GetDistance(Owner, character);
 				string distanceDescription = GetDistanceDescription(distance);
-				float compassDegrees = GetAngle(character);
+				float compassDegrees = GetAngle(character.Area.Value);
 				string angleDescription = Angle.GetRelativeDirection(compassDegrees, distance);
 
 				descriptions.Add($"{name} {distanceDescription} {angleDescription} ");
@@ -768,7 +748,7 @@ namespace Game.Entities.Characters.Chipotle
 			int index = to.IndexOf(' ');
 			string to1 = to.Substring(0, index);
 			string to2 = to.Substring(index + 1);
-			float angle = GetAngle(exit);
+			float angle = GetAngle(exit.Area.Value);
 			string angleDescription = Angle.GetClockDirection(angle);
 			List<string> data = new List<string>() { type, to1, to2, distanceDescription, angleDescription };
 			return data;
@@ -1127,7 +1107,7 @@ namespace Game.Entities.Characters.Chipotle
 					name += " " + item.Name.Indexed;
 				float distance = World.GetDistance(Owner, item);
 				string distanceDescription = GetDistanceDescription(distance);
-				float compassDegrees = GetAngle(item);
+				float compassDegrees = GetAngle(item.Area.Value);
 				string angleDescription = Angle.GetClockDirection(compassDegrees);
 				descriptions.Add($"{name} {distanceDescription} {angleDescription}");
 			}
