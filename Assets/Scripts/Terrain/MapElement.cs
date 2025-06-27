@@ -27,16 +27,10 @@ namespace Game.Terrain
 	[ProtoInclude(102, typeof(Passage))]
 	public abstract class MapElement : MessagingObject
 	{
-		protected float GetNavigationMaxDistance()
-		{
-			Rectangle zoneArea = World.GetZone(Center).Area.Value;
-			return Mathf.Max(zoneArea.Height, zoneArea.Width);
-		}
-
 		public Vector2 Center { get => _area.Value.Center; }
 		private const float _navigationVolume = .5f;
-		private const float _navigationMinDistance = .6f;
-
+		private const float _beaconMinDistance = .6f;
+		private const float _beaconMaxDistance = 50;
 		[ProtoIgnore]
 		protected AudioSource _navigationAudio;
 
@@ -82,6 +76,7 @@ namespace Game.Terrain
 		/// Enables or disables sound attenuation.
 		/// </summary>
 		protected bool _muffled;
+		protected const AudioRolloffMode _beaconRolloffMode = AudioRolloffMode.Logarithmic;
 
 		/// <summary>
 		/// Constructor
@@ -170,9 +165,14 @@ namespace Game.Terrain
 			Vector2 position2d = GetClosestPointToPlayer();
 			Vector3 position3d = new(position2d.x, 0, position2d.y);
 			_navigationAudio = Sounds.Play(_sounds["navigation"], position3d, _navigationVolume, loop);
-			_navigationAudio.maxDistance = GetNavigationMaxDistance();
-			_navigationAudio.minDistance = _navigationMinDistance;
-			_navigationAudio.rolloffMode = AudioRolloffMode.Linear;
+			_navigationAudio.maxDistance = _beaconMaxDistance;
+			_navigationAudio.minDistance = _beaconMinDistance;
+			_navigationAudio.rolloffMode = _beaconRolloffMode;
+		}
+
+		protected virtual AudioRolloffMode GetBeaconRollofMethod()
+		{
+			return AudioRolloffMode.Linear;
 		}
 
 		/// <summary>
