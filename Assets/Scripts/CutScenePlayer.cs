@@ -7,16 +7,18 @@ namespace Assets.Scripts
 {
 	public class CutScenePlayer : MonoBehaviour
 	{
-		public float Volume => _audio.volume;
-		public void FadeIn(float duration, float volume)
+		private void Update()
 		{
-			if (_audio == null)
-				return;
-
-			_audio.volume = 0;
-			Sounds.SlideVolume(_audio, duration, volume);
+			if (!_audio.isPlaying && _audio.time > 0)
+				_audio.clip = null;
 		}
-		public float Position => _audio.time;
+
+		private void Awake()
+		{
+			_audio = gameObject.AddComponent<AudioSource>();
+		}
+
+		public float Volume => _audio.volume; public float Position => _audio.time;
 
 		public void Revind(int seconds)
 		{
@@ -33,24 +35,22 @@ namespace Assets.Scripts
 		public bool Paused { get; set; }
 
 		public bool IsPlaying => _audio.isPlaying;
-
+		public bool IsStopped => !IsPlaying && _audio.time == 0;
 		public void Stop()
 		{
-			if (!Settings.PlayCutscenes)
+			if (!Settings.PlayCutscenes || _audio == null || _audio.clip == null)
 				return;
 
-			if (Paused)
-				_audio.Stop();
-			Sounds.SlideVolume(_audio, .5f, 0, true);
+			if (!Paused)
+				Sounds.SlideVolume(_audio, 1, 0, true);
 			Paused = false;
 		}
 
 		public void Resume()
 		{
-			if (_audio == null)
-				return;
-
-			_audio.UnPause();
+			_audio.loop = false;
+			_audio.time = _pauseTime - 3;
+			Sounds.SlideVolume(_audio, 2, 1);
 			Paused = false;
 		}
 
@@ -59,7 +59,9 @@ namespace Assets.Scripts
 			if (_audio == null || Paused)
 				return;
 
-			_audio.Pause();
+			_pauseTime = _audio.time;
+			Sounds.SlideVolume(_audio, 2, 0.00021f);
+			_audio.loop = true;
 			Paused = true;
 		}
 
@@ -68,10 +70,15 @@ namespace Assets.Scripts
 			if (!Settings.PlayCutscenes)
 				return;
 
-			_audio = Sounds.Play2d(cutSceneName);
+			_audio.clip = Sounds.GetClip(cutSceneName);
+			_audio.spatialize = false;
+			_audio.spatialBlend = 0;
+			_audio.volume = 1;
+			_audio.Play();
 			Paused = false;
 		}
 
 		private AudioSource _audio;
+		private float _pauseTime;
 	}
 }

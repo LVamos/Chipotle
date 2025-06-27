@@ -321,12 +321,10 @@ namespace Game
 		/// </summary>
 		public static void ResumeCutscene()
 		{
-			if (_cutScenePlayer == null)
+			if (_cutScenePlayer == null || _cutSceneMessage == null)
 				return;
 
-			_cutScenePlayer.Revind(2);
 			_cutScenePlayer.Resume();
-			_cutScenePlayer.FadeIn(.5f, Sounds.DefaultMasterVolume);
 		}
 
 		/// <summary>
@@ -334,10 +332,7 @@ namespace Game
 		/// </summary>
 		public static void PauseCutscene()
 		{
-			if (_cutScenePlayer == null)
-				return;
-
-			_cutScenePlayer.Pause();
+			_cutScenePlayer?.Pause();
 		}
 
 		/// <summary>
