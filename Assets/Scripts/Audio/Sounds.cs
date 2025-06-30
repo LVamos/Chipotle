@@ -123,9 +123,9 @@ namespace Game.Audio
 		/// </summary>
 		public static void LoadClips()
 		{
-			List<string> files = Directory.EnumerateFiles(MainScript.SoundPath, "*.*", SearchOption.AllDirectories)
-				.Where(f => new[] { ".mp3", ".wav", ".flac", ".ogg" }
-					.Contains(Path.GetExtension(f).ToLower()))
+			string soundListPath = Path.Combine(MainScript.SoundPath, "soundList").Replace("\\", "/");
+			TextAsset soundList = Resources.Load<TextAsset>(soundListPath);
+			List<string> files = soundList.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
 				.ToList();
 			HashSet<string> usedNames = new();
 

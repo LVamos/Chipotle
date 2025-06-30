@@ -1,3 +1,4 @@
+using Assets.Editor;
 using Assets.Scripts;
 using Assets.Scripts.Entities.Items;
 
@@ -212,6 +213,12 @@ public static class sceneSetup
 		ValidateScene();
 		DeleteObjects();
 		LoadMap();
+		CollectSounds();
+	}
+
+	private static void CollectSounds()
+	{
+		SoundLoader.LoadSoundFiles();
 	}
 
 	private static void ValidateScene()

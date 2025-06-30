@@ -1077,7 +1077,7 @@ namespace Game
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
-			string yaml = File.ReadAllText(MainScript.MaterialsPath);
+			string yaml = Resources.Load<TextAsset>(MainScript.MaterialsPath).text;
 			Dictionary<string, ZoneMaterialsDefinitionModel> materials = deserializer.Deserialize<Dictionary<string, ZoneMaterialsDefinitionModel>>(yaml);
 			return new Dictionary<string, ZoneMaterialsDefinitionModel>(materials, StringComparer.OrdinalIgnoreCase);
 		}
@@ -1162,8 +1162,9 @@ namespace Game
 
 		private static XDocument OpenMap()
 		{
-			string mapPath = Path.Combine(MainScript.MapPath, Settings.MapName + ".xml");
-			return XDocument.Load(mapPath);
+			string mapPath = Path.Combine(MainScript.MapPath, Settings.MapName).Replace("\\", "/");
+			TextAsset mapAsset = Resources.Load<TextAsset>(mapPath);
+			return XDocument.Parse(mapAsset.text);
 		}
 
 		public static void LoadTerrain(XElement root)

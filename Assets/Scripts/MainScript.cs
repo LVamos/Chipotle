@@ -25,29 +25,29 @@ namespace Game
 	public static class MainScript
 	{
 		public static bool GameLoaded;
-		public static string SoundPath => Path.Combine(DataPath, "Sounds");
+		public static string SoundPath = "Data/Sounds";
 
 		/// <summary>
 		/// Path to a YAML file with item definitions.
 		/// </summary>
-		public static string ItemsPath => Path.Combine(DataPath, @"Items\items.yaml");
+		public static string ItemsPath => Path.Combine(DataPath, "Items/items").Replace("\\", "/");
 
 		/// <summary>
 		/// Path to a YAML file with passage definitions.
 		/// </summary>
-		public static string PassagesPath => Path.Combine(DataPath, @"Passages\passages.yaml");
+		public static string PassagesPath => Path.Combine(DataPath, "Passages/passages").Replace("\\", "/");
 
-		public static string MaterialsPath => Path.Combine(DataPath, @"Materials\materials.yaml");
+		public static string MaterialsPath => Path.Combine(DataPath, "Materials/materials").Replace("\\", "/");
 
 		/// <summary>
 		/// Path to a map file
 		/// </summary>
-		public static string MapPath => Path.Combine(DataPath, "Map");
+		public static string MapPath => Path.Combine(DataPath, "Map").Replace("\\", "/");
 
 		/// <summary>
 		/// Path to config folder.
 		/// </summary>
-		public static string ConfigPath => Path.Combine(DataPath, "Config");
+		public static string ConfigPath = @"Assets\Resources\Data\Config";
 
 		private static string GetUserInfo()
 		{
@@ -113,7 +113,7 @@ namespace Game
 		/// <summary>
 		/// Current version of the game
 		/// </summary>
-		public static string Version = "0.17";
+		public static string Version = "v0.21 alfa";
 
 		/// <summary>
 		/// Sends an e-mail message to my Gmail account.
@@ -177,7 +177,7 @@ namespace Game
 		/// <summary>
 		/// Path to data folder
 		/// </summary>
-		public static readonly string DataPath = @"Assets\Resources\Data\";
+		public static readonly string DataPath = "Data";
 		public static readonly string LogPath = @"Assets\Resources\Data\Logs\log.html";
 
 		/// <summary>

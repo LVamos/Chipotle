@@ -5,7 +5,6 @@ using Game.Models;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 using UnityEngine;
 
@@ -48,7 +47,7 @@ namespace Assets.Scripts.Entities.Items
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
-			string yamlText = File.ReadAllText(MainScript.ItemsPath);
+			string yamlText = Resources.Load<TextAsset>(MainScript.ItemsPath).text;
 			YamlItemsModel items = deserializer.Deserialize<YamlItemsModel>(yamlText);
 
 			foreach (YamlItemModel item in items.Items)

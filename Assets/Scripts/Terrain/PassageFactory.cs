@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 using UnityEngine;
@@ -34,7 +33,7 @@ namespace Game.Terrain
 				.WithNamingConvention(PascalCaseNamingConvention.Instance)
 				.Build();
 
-			var yamlText = File.ReadAllText(MainScript.PassagesPath);
+			var yamlText = Resources.Load<TextAsset>(MainScript.PassagesPath).text;
 			Dictionary<string, string> types = deserializer.Deserialize<Dictionary<string, string>>(yamlText);
 			if (types.Any(p => string.IsNullOrWhiteSpace(p.Key) || string.IsNullOrWhiteSpace(p.Value)))
 				throw new ArgumentException("Invalid record.");
