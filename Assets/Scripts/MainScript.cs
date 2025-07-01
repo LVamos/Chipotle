@@ -384,8 +384,20 @@ Application.Quit();
 			}
 			EnableJAWSKeyHook();
 
-			GameObject obj = new();
-			obj.AddComponent<AutoPlayBehaviour>();
+			AddStartup();
+			AddKeyboardHandler();
+		}
+
+		private static void AddKeyboardHandler()
+		{
+			GameObject obj = new(nameof(KeyboardHandler));
+			obj.AddComponent<KeyboardHandler>();
+		}
+
+		private static void AddStartup()
+		{
+			GameObject obj = new(nameof(Startup));
+			obj.AddComponent<Startup>();
 		}
 
 		public static Scene Scene { get; set; }
