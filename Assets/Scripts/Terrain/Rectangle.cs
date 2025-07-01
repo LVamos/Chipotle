@@ -140,10 +140,33 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point to calculate the nearest point on the rectangle.</param>
 		/// <returns>The nearest point on the rectangle to the given point.</returns>
-		public Vector2 GetClosestPoint(Vector2 point)
+		/// <summary>
+		/// Returns the closest point on the rectangle to the given point, ignoring a margin from each edge.
+		/// </summary>
+		/// <param name="point">The point to find the closest point to.</param>
+		/// <param name="margin">The margin to ignore from each side of the rectangle.</param>
+		public Vector2 GetClosestPoint(Vector2 point, float margin = 0)
 		{
-			float clampedX = Mathf.Max(MinX, Mathf.Min(point.x, MaxX));
-			float clampedY = Mathf.Max(MinY, Mathf.Min(point.y, MaxY));
+			float innerMinX = MinX + margin;
+			float innerMaxX = MaxX - margin;
+			float innerMinY = MinY + margin;
+			float innerMaxY = MaxY - margin;
+
+			// If the margin is too big, collapse the rectangle to a point or line
+			if (innerMinX > innerMaxX)
+			{
+				float centerX = (MinX + MaxX) * 0.5f;
+				innerMinX = innerMaxX = centerX;
+			}
+			if (innerMinY > innerMaxY)
+			{
+				float centerY = (MinY + MaxY) * 0.5f;
+				innerMinY = innerMaxY = centerY;
+			}
+
+			float clampedX = Mathf.Clamp(point.x, innerMinX, innerMaxX);
+			float clampedY = Mathf.Clamp(point.y, innerMinY, innerMaxY);
+
 			return new Vector2(clampedX, clampedY);
 		}
 

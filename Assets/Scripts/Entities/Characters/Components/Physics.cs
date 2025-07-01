@@ -638,9 +638,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="target">Another map element</param>
 		/// <returns>An angle in compass degrees</returns>
-		protected float GetAngle(Rectangle target)
+		protected float GetAngle(Rectangle target, float margin)
 		{
-			Vector2 targetPoint = target.GetClosestPoint(_area.Value.Center);
+			Vector2 targetPoint = target.GetClosestPoint(Center, margin);
 			Vector2 characterPosition = _area.Value.Center;
 			Vector2 characterOrientation = _orientation.UnitVector;
 
@@ -689,7 +689,7 @@ namespace Game.Entities.Characters.Components
 
 			return
 				World.GetNearestDoors(_area.Value.Center, radius)
-					.FirstOrDefault(d => GetAngle(d.Area.Value) == 0);
+					.FirstOrDefault(d => GetAngle(d.Area.Value, GetPassageMargin()) == 0);
 		}
 
 		/// <summary>
@@ -1250,7 +1250,7 @@ Rectangle.FromCenter(Center, width, height)
 				{
 					CollisionsModel result = World.DetectCollisions(null, rectangle, justFirstObstacle: true);
 
-					float compassAngle = GetAngle(rectangle);
+					float compassAngle = GetAngle(rectangle, 0);
 					return compassAngle == 0 && !result.OutOfMap && result.Obstacles == null;
 				}
 			}
@@ -1267,6 +1267,13 @@ Rectangle.FromCenter(Center, width, height)
 				}
 				return null;
 			}
+		}
+
+		protected float GetPassageMargin()
+		{
+			float height = _area.Value.Height;
+			float width = _area.Value.Width;
+			return Mathf.Max(height, width) * .5f;
 		}
 	}
 }

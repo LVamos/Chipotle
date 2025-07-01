@@ -27,6 +27,8 @@ namespace Game.Terrain
 	[ProtoInclude(102, typeof(Passage))]
 	public abstract class MapElement : MessagingObject
 	{
+		protected float _beaconMargin;
+
 		public Vector2 Center { get => _area.Value.Center; }
 		private const float _navigationVolume = .5f;
 		private const float _beaconMinDistance = .6f;
@@ -37,7 +39,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Returns pooint that belongs to this object and is tho most close to tthe player.
 		/// </summary>
-		public Vector2 GetClosestPointToPlayer() => _area.Value.GetClosestPoint(World.Player.Area.Value.Center);
+		public Vector2 GetClosestPointToPlayer(float margin) => _area.Value.GetClosestPoint(World.Player.Center, margin);
 
 		/// <summary>
 		/// Dimensions of the map element.
@@ -87,6 +89,7 @@ namespace Game.Terrain
 		{
 			Name = name ?? throw new ArgumentException(nameof(name));
 			Area = area;
+			_beaconMargin = 0;
 		}
 
 		/// <summary>
@@ -148,10 +151,10 @@ namespace Game.Terrain
 		/// <summary>
 		/// Starts sound navigation.
 		/// </summary>
-		protected void StartNavigation()
+		protected void StartNavigation(float margin)
 		{
 			bool keepNavigating = ShouldNavigationContinue();
-			ReportPosition(keepNavigating);
+			ReportPosition(keepNavigating, margin);
 			_navigating = keepNavigating;
 			UpdateNavigatingSoundPosition();
 		}
@@ -160,9 +163,9 @@ namespace Game.Terrain
 		/// Plays a navigation sound on position of the object.
 		/// </summary>
 		/// <param name="loop">Specifies if the navigating soudn should be played in loop</param>
-		protected virtual void ReportPosition(bool loop = false)
+		protected virtual void ReportPosition(bool loop, float margin)
 		{
-			Vector2 position2d = GetClosestPointToPlayer();
+			Vector2 position2d = GetClosestPointToPlayer(margin);
 			Vector3 position3d = new(position2d.x, 0, position2d.y);
 			_navigationAudio = Sounds.Play(_sounds["navigation"], position3d, _navigationVolume, loop);
 			_navigationAudio.maxDistance = _beaconMaxDistance;
@@ -185,8 +188,11 @@ namespace Game.Terrain
 		/// Processes the StartNavigation message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnStartNavigation(StartNavigation message) => StartNavigation();
-
+		protected void OnStartNavigation(StartNavigation message)
+		{
+			_beaconMargin = message.Margin;
+			StartNavigation(_beaconMargin);
+		}
 		protected bool ShouldNavigationContinue()
 		{
 			float distance = GetDistanceToPlayer();
@@ -226,6 +232,7 @@ namespace Game.Terrain
 		/// </summary>
 		protected void StopNavigation()
 		{
+			_beaconMargin = 0;
 			_navigationAudio.loop = false;
 			_navigationAudio = null;
 			_navigating = false;
@@ -245,6 +252,7 @@ namespace Game.Terrain
 			bool result = mine.Any(l => its.Contains(l));
 			return result;
 		}
+
 		/// <summary>
 		/// Updates position and attenuation of navigating sound if the navigation is in progress.
 		/// </summary>
@@ -256,7 +264,7 @@ namespace Game.Terrain
 			/* 
              * To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player. 
              */
-			Vector2 position2d = GetClosestPointToPlayer();
+			Vector2 position2d = GetClosestPointToPlayer(_beaconMargin);
 			Vector3 position3d = new(position2d.x, 2, position2d.y);
 			_navigationAudio.transform.position = position3d;
 
@@ -325,7 +333,7 @@ namespace Game.Terrain
 
 		public Zone GetZoneNearPlayer()
 		{
-			Vector2 closestPoint = GetClosestPointToPlayer();
+			Vector2 closestPoint = GetClosestPointToPlayer(0);
 			Zone myZone = World.GetZone(closestPoint);
 			return myZone;
 		}

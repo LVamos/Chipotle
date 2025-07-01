@@ -8,10 +8,15 @@ namespace Game.Messaging.Commands.GameInfo
 	[Serializable]
 	public class StartNavigation : Message
 	{
+		public readonly float Margin;
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		public StartNavigation(object sender) : base(sender) { }
+		public StartNavigation(object sender, float margin = 0) : base(sender)
+		{
+			Margin = margin;
+		}
 	}
 }

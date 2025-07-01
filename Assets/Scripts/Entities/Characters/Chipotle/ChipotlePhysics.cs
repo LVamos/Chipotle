@@ -374,7 +374,7 @@ namespace Game.Entities.Characters.Chipotle
 				string name = character.Name.Friendly;
 				float distance = World.GetDistance(Owner, character);
 				string distanceDescription = GetDistanceDescription(distance);
-				float compassDegrees = GetAngle(character.Area.Value);
+				float compassDegrees = GetAngle(character.Area.Value, GetPassageMargin());
 				string angleDescription = Angle.GetRelativeDirection(compassDegrees, distance);
 
 				descriptions.Add($"{name} {distanceDescription} {angleDescription} ");
@@ -538,7 +538,7 @@ namespace Game.Entities.Characters.Chipotle
 			return;
 
 		_navigatedExit = result.Exits[option];
-		_navigatedExit.TakeMessage(new StartNavigation(Owner));
+		_navigatedExit.TakeMessage(new StartNavigation(Owner, GetPassageMargin()));
 	}
 );
 			WindowHandler.Menu(parameters);
@@ -748,7 +748,7 @@ namespace Game.Entities.Characters.Chipotle
 			int index = to.IndexOf(' ');
 			string to1 = to.Substring(0, index);
 			string to2 = to.Substring(index + 1);
-			float angle = GetAngle(exit.Area.Value);
+			float angle = GetAngle(exit.Area.Value, GetPassageMargin());
 			string angleDescription = Angle.GetClockDirection(angle);
 			List<string> data = new List<string>() { type, to1, to2, distanceDescription, angleDescription };
 			return data;
@@ -1107,7 +1107,7 @@ namespace Game.Entities.Characters.Chipotle
 					name += " " + item.Name.Indexed;
 				float distance = World.GetDistance(Owner, item);
 				string distanceDescription = GetDistanceDescription(distance);
-				float compassDegrees = GetAngle(item.Area.Value);
+				float compassDegrees = GetAngle(item.Area.Value, GetPassageMargin());
 				string angleDescription = Angle.GetClockDirection(compassDegrees);
 				descriptions.Add($"{name} {distanceDescription} {angleDescription}");
 			}
