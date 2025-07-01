@@ -1461,15 +1461,55 @@ namespace Game.Entities.Characters.Chipotle
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
-			// Stop walking.
 			_walking = false;
 			_startWalkMessage = null;
 
 			if (collisions.OutOfMap)
 				LogOutOfMapAttempt(_area.Value.Center);
 			if (collisions.Obstacles != null)
+			{
+				Door doorInWay = GetDoorBefore(false);
+				if (doorInWay is { State: PassageState.Open } && SlipThroughDoor(doorInWay))
+					return false;
+
 				HandleCollisions(collisions.Obstacles);
+			}
 			return true;
 		}
+
+		protected bool SlipThroughDoor(Door door)
+		{
+			Vector2 pointOnDoor = door.Area.Value.GetAlignedPoint(Center).Value;
+			Rectangle defaultPosition = Rectangle.FromCenter(pointOnDoor, _area.Value.Height, _area.Value.Width);
+			List<Vector2> lateralDirections = _orientation.GetPerpendiculars();
+
+			// Move to the left or right side of the door and try to find a unblocked position.
+			foreach (Vector2 direction in lateralDirections)
+			{
+				Rectangle newPosition = defaultPosition;
+				do
+				{
+					newPosition = _area.Value.Move(direction, .1f);
+					if (!IsWalkable(newPosition))
+						continue; // The position is blocked, try the next one.
+
+					// The position is free, move there.
+					_area = _area.Value.WithUpdatedCenter(newPosition.Center);
+					MakeStep();
+					return true;
+				} while (door.Area.Value.Intersects(newPosition));
+			}
+			return false;
+
+			bool IsWalkable(Rectangle newPosition)
+			{
+				List<MapElement> me = new() { Owner };
+				List<object> obstacles = World.DetectCollisions(me, newPosition).Obstacles;
+				if (!obstacles.IsNullOrEmpty())
+					return false;
+				return true;
+			}
+		}
+
 	}
 }

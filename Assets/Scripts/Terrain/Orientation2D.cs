@@ -16,6 +16,21 @@ namespace Game.Terrain
 	public struct Orientation2D
 	{
 		/// <summary>
+		/// Returns a list of two normalized perpendicular vectors (left and right) to the given 2D direction vector.
+		/// </summary>
+		/// <param name="direction">The original 2D direction vector (does not have to be normalized).</param>
+		/// <returns>List containing two perpendicular vectors: [left, right].</returns>
+		public List<Vector2> GetPerpendiculars()
+		{
+			Vector2 direction = UnitVector;
+			Vector2 left = new(-direction.y, direction.x);
+			Vector2 right = new(direction.y, -direction.x);
+
+			return new() { left, right };
+		}
+
+
+		/// <summary>
 		///  The orientation in compass-like degrees
 		/// </summary>
 		public int CompassDegrees => _compassDegrees;

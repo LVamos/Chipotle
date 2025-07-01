@@ -23,6 +23,24 @@ namespace Game.Terrain
 	public struct Rectangle
 	{
 		/// <summary>
+		/// Returns a new Rectangle with its center partially updated to match the given position.
+		/// Only the coordinates that differ from the current center will be updated.
+		/// </summary>
+		/// <param name="newPosition">The target position to update the center towards.</param>
+		/// <returns>A new Rectangle with updated center.</returns>
+		public Rectangle WithUpdatedCenter(Vector2 newPosition)
+		{
+			Vector2 currentCenter = Center;
+
+			float newX = newPosition.x != currentCenter.x ? newPosition.x : currentCenter.x;
+			float newY = newPosition.y != currentCenter.y ? newPosition.y : currentCenter.y;
+
+			Vector2 newCenter = new(newX, newY);
+
+			return FromCenter(newCenter, Height, Width);
+		}
+
+		/// <summary>
 		/// Clamps a point so it stays within the rectangle's boundaries.
 		/// </summary>
 		/// <param name="point">The point to be clamped.</param>
