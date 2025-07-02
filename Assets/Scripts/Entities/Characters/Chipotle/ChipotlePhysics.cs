@@ -125,6 +125,7 @@ namespace Game.Entities.Characters.Chipotle
 			Vector2 position = Settings.TestChipotleStartPosition.HasValue ? Settings.TestChipotleStartPosition.Value
 				: new(1032, 1034);
 			StartPosition = Rectangle.FromCenter(position, dimensions.z, dimensions.x);
+			_area = null;
 		}
 
 		/// <summary>

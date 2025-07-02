@@ -1282,6 +1282,7 @@ namespace Game
 				throw;
 			}
 			MainScript.GameLoaded = true;
+			Camera.main.transform.rotation = Quaternion.identity;
 			Player = CharacterFactory.CreateChipotle();
 			Add(Player);
 			Player.Activate();

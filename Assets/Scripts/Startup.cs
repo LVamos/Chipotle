@@ -14,7 +14,22 @@ public class Startup : MonoBehaviour
 	public void Start()
 	{
 		Logger.LogInfo("Hra spuštěna");
+		SetCamera(); Application.runInBackground = true;
+		Time.fixedDeltaTime = 1f / 30f;
+		Sounds.Initialize();
+		MainMenu();
+	}
 
+	private static void MainMenu()
+	{
+		if (!Settings.MainMenuAtStartup)
+			WindowHandler.StartGame();
+		else
+			WindowHandler.MainMenu();
+	}
+
+	private static void SetCamera()
+	{
 		if (Camera.main == null)
 		{
 			GameObject newCamera = new()
@@ -38,15 +53,6 @@ public class Startup : MonoBehaviour
 
 		Camera.main.clearFlags = CameraClearFlags.Nothing;
 		Camera.main.cullingMask = 0;
-		Application.runInBackground = true;
-		Time.fixedDeltaTime = 1f / 30f;
-
-		Sounds.Initialize();
-
-		if (!Settings.MainMenuAtStartup)
-			WindowHandler.StartGame();
-		else
-			WindowHandler.MainMenu();
 	}
 
 	public void Update()

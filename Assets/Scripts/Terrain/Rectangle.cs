@@ -852,7 +852,7 @@ namespace Game.Terrain
 		{
 			Rectangle copy = this;
 
-			// Je bod rovnoběžný s některou hranou?
+			// Is the point parallel to any edge?
 			bool alignedVertically = point.x >= MinX && point.x <= MaxX;
 			bool alignedHorizontally = point.y >= MinY && point.y <= MaxY;
 

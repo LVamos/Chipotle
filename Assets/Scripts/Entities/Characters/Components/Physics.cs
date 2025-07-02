@@ -702,9 +702,9 @@ namespace Game.Entities.Characters.Components
 				return Center;
 
 			// Find an alligned point near the NPC.
-			Vector2? point = element.Area.Value.GetAlignedPoint(_area.Value.Center);
+			Vector2? point = element.Area.Value.GetAlignedPoint(Center);
 			if (point == null)
-				point = element.Area.Value.GetClosestPoint(_area.Value.Center);
+				point = element.Area.Value.GetClosestPoint(Center);
 			return point.Value;
 		}
 
