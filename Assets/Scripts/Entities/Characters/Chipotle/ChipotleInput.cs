@@ -220,12 +220,24 @@ namespace Game.Entities.Characters.Chipotle
 			// Run the menu
 			List<List<string>> items = commands.Select(c => new List<string>() { c.name }).ToList();
 			World.GameInProgress = false;
-			int item = WindowHandler.Menu(new(items, "Menu", " ", 0, false));
 
-			World.GameInProgress = true;
-			if (item > 0)
-				commands[item].command();
+
+			MenuParametersDTO parameters = new(
+				items,
+				"Menu",
+				" ",
+				0,
+				false,
+				menuClosed: (option) =>
+				{
+					World.GameInProgress = true;
+					if (option >= 0)
+						commands[option].command();
+				});
+			WindowHandler.Menu(parameters);
 		}
+
+
 
 		/// <summary>
 		/// Runs the inventory menu.
