@@ -317,7 +317,7 @@ namespace Game.Entities.Items
 
 		protected Vector3 GetPointForPortal(Passage exit)
 		{
-			Vector2 exitPoint = exit.GetClosestPointToPlayer(0);
+			Vector2 exitPoint = exit.GetClosestPointToPlayer();
 			float distance = _area.Value.GetDistanceFrom(exitPoint);
 			Zone myZone = GetZoneNearPlayer();
 
@@ -336,7 +336,7 @@ namespace Game.Entities.Items
 		public ObstacleType DetectOcclusion()
 		{
 			Zone playersZone = World.Player.Zone;
-			Vector2 closestPoint = GetClosestPointToPlayer(0);
+			Vector2 closestPoint = GetClosestPointToPlayer();
 			Zone myZone = World.GetZone(closestPoint);
 
 			// If the item is in the same zone as the player, use raycasting.
@@ -1009,6 +1009,6 @@ namespace Game.Entities.Items
 		/// Handles the ReportPosition message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		private void OnReportPosition(ReportPosition message) => ReportPosition(false, 0);
+		private void OnReportPosition(ReportPosition message) => ReportPosition(false);
 	}
 }

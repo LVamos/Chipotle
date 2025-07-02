@@ -638,11 +638,11 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="target">Another map element</param>
 		/// <returns>An angle in compass degrees</returns>
-		protected float GetAngle(Rectangle target, float margin)
+		protected float GetAngle(Rectangle target, Vector2? direction = null)
 		{
-			Vector2 targetPoint = target.GetClosestPoint(Center, margin);
+			Vector2 targetPoint = target.GetClosestPoint(Center);
 			Vector2 characterPosition = _area.Value.Center;
-			Vector2 characterOrientation = _orientation.UnitVector;
+			Vector2 orientation = direction != null ? direction.Value : _orientation.UnitVector;
 
 			Vector2 targetDirection = targetPoint - characterPosition;
 
@@ -657,7 +657,7 @@ namespace Game.Entities.Characters.Components
 			angleDegrees = (angleDegrees + 360) % 360;
 
 			// Calculate the angle of the character orientation of the north
-			float characterAngle = (float)Math.Atan2(-characterOrientation.x, -characterOrientation.y);
+			float characterAngle = (float)Math.Atan2(-orientation.x, -orientation.y);
 			float characterAngleDegrees = characterAngle * Mathf.Rad2Deg;
 			characterAngleDegrees = (characterAngleDegrees + 360) % 360;
 
@@ -682,13 +682,13 @@ namespace Game.Entities.Characters.Components
 		/// Returns the nearest door in front of the NPC.
 		/// </summary>
 		/// <returns>A door</returns>
-		protected Door GetDoorBefore(bool inOneStep = false)
+		protected Door GetDoorBefore(Vector2? direction = null, bool inOneStep = false)
 		{
 			float radius = inOneStep ? _stepLength : _doorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
-			Vector2 direction = GetStepDirection();
+			Vector2 finalDirection = direction != null ? direction.Value : GetStepDirection();
 
 			Door door = World.GetNearestDoors(_area.Value.Center, radius)
-					.FirstOrDefault(d => GetAngle(d.Area.Value, 0) == 0);
+					.FirstOrDefault(d => GetAngle(d.Area.Value, finalDirection) == 0);
 			return door;
 		}
 
@@ -1250,7 +1250,7 @@ Rectangle.FromCenter(Center, width, height)
 				{
 					CollisionsModel result = World.DetectCollisions(null, rectangle, justFirstObstacle: true);
 
-					float compassAngle = GetAngle(rectangle, 0);
+					float compassAngle = GetAngle(rectangle);
 					return compassAngle == 0 && !result.OutOfMap && result.Obstacles == null;
 				}
 			}
