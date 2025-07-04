@@ -221,7 +221,6 @@ namespace Game.Entities.Characters.Chipotle
 			List<List<string>> items = commands.Select(c => new List<string>() { c.name }).ToList();
 			World.GameInProgress = false;
 
-
 			MenuParametersDTO parameters = new(
 				items,
 				"Menu",
