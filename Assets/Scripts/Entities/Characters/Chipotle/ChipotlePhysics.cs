@@ -61,7 +61,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		protected void OnExploreObject(ExploreObject m)
+		protected void OnExploreObject(ExploreItem m)
 		{
 			if (m.Object != null)
 			{
@@ -250,7 +250,7 @@ namespace Game.Entities.Characters.Chipotle
 				case SayCharacters m: OnSayCharacters(m); break;
 				case ListCharacters m: OnListCharacters(m); break;
 				case SayItemSize m: OnSayItemSize(m); break;
-				case ExploreObject m: OnExploreObject(m); break;
+				case ExploreItem m: OnExploreObject(m); break;
 				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
 				case RunInventoryMenu m: OnRunInventoryMenu(m); break;
 				case PickUpItem m: OnPickUpObject(m); break;

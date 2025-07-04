@@ -11,7 +11,7 @@ namespace Game.Messaging.Commands.Physics
 	/// If the object is empty, it means that physics has yet to find out if there are any k objects in front of the character.
 	/// </remarks>	
 	[Serializable]
-	public class ExploreObject : Message
+	public class ExploreItem : Message
 	{
 		/// <summary>
 		/// The object to be explored
@@ -23,7 +23,7 @@ namespace Game.Messaging.Commands.Physics
 		/// </summary>
 		/// <param name="sender">Sender of the message</param>
 		/// <param name="obj">The object to be explored</param>
-		public ExploreObject(object sender, Entity obj = null) : base(sender)
+		public ExploreItem(object sender, Entity obj = null) : base(sender)
 		{
 			Object = obj;
 		}

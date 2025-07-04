@@ -5,6 +5,7 @@ using Game.Entities.Items;
 using Game.Messaging;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
+using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Input;
 using Game.Terrain;
 
@@ -24,6 +25,65 @@ namespace Game.UI
 	[Serializable]
 	public class GameWindow : VirtualWindow
 	{
+		private Dictionary<string, string> _gameMenuOptions = new()
+{
+	{ "Prozkoumej předmět: pé", "ResearchItem" },
+	{ "Rozhlédni se: r", "SayZoneDescription" },
+	{ "inventář: I", "RunInventoryMenu" },
+	{ "použij předmět nebo dveře: entr", "Interact" },
+	{ "Vezmi předmět: šift entr", "PickUpItem" },
+	{ "Jdi dopředu: horní šipka", "StepForward" },
+	{ "Jdi dozadu: dolní šipka", "StepBack" },
+	{ "Jdi doleva: šift levá šipka", "StepLeft" },
+	{ "Jdi doprava: šift pravá šipka", "StepRight" },
+	{ "Otoč se trochu doleva: levá šipka", "TurnLeft" },
+	{ "Otoč se trochu doprava: pravá šipka", "TurnRight" },
+	{ "Otoč se ostře doleva: kontrol levá šipka", "TurnSharplyLeft" },
+	{ "Otoč se ostře doprava: kontrol pravá šipka", "TurnSharplyRight" },
+	{ "Otoč se čelem vzad: kontrol dolní šipka", "TurnAround" },
+	{ "okolní předměty: O", "SayItems" },
+	{ "Naveď mě k předmětu: šift O", "ListItems" },
+	{ "východy: Vé", "SayExits" },
+	{ "Naveď mě k východu: šift vé", "ListExits" },
+	{ "kde jsem: ká", "SayZoneName" },
+	{ "Byl jsem tu: bé", "SayVisitedRegion" },
+	{ "Rozměry lokace: el", "SayZoneSize" },
+	{ "kompas: Es", "SayOrientation" },
+	{ "souřadnice: Cé", "SayAbsoluteCoordinates" },
+	{ "Poslat zprávu autorovi: Kontrol zet", "SendFeedback" },
+	{ "hlavní menu: Iskejp", "QuitGame" },
+};
+
+
+		/// <summary>
+		/// Runs the game menu
+		/// </summary>
+		private void OnOpenGameMenu(OpenGameMenu message)
+		{
+			// Run the menu
+			List<List<string>> items = _gameMenuOptions.Select(c => new List<string>() { c.Key }).ToList();
+			Action<int> menuHandler = (option) =>
+			{
+				HandleGameMenu(items, option, message.Sender as MessagingObject);
+			};
+			MenuParametersDTO parameters = new(
+				items,
+				"Menu",
+				" ",
+				0,
+				false,
+				menuClosed: menuHandler);
+			WindowHandler.Menu(parameters);
+		}
+
+		private void HandleGameMenu(List<List<string>> items, int option, MessagingObject initiator)
+		{
+			string optionDescription = items[option][0];
+			string optionId = _gameMenuOptions[optionDescription];
+			GameMenuOptionselected message = new(this, optionId);
+			initiator.TakeMessage(message);
+		}
+
 		public static GameWindow CreateInstance()
 		{
 			GameObject obj = new();
@@ -42,6 +102,7 @@ namespace Game.UI
 
 			switch (message)
 			{
+				case OpenGameMenu m: OnOpenGameMenu(m); break;
 				case SelectObjectToApply m: OnSelectObjectToApply(m); break;
 				case selectInventoryAction m: OnselectInventoryAction(m); break;
 				case SelectItemToPick m: OnSelectItemToPick(m); break;
@@ -87,7 +148,7 @@ namespace Game.UI
 			if (option == -1 || sender == null)
 				return;
 
-			ExploreObject message = new(this, objects[option]);
+			ExploreItem message = new(this, objects[option]);
 			sender.TakeMessage(message);
 		}
 

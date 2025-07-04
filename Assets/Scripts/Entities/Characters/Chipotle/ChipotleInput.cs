@@ -6,6 +6,7 @@ using Game.Messaging.Commands.GameManagement;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
+using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Input;
 using Game.Messaging.Events.Sound;
 using Game.Terrain;
@@ -30,6 +31,42 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleInput : Input
 	{
+		public override void Initialize()
+		{
+			base.Initialize();
+
+			_gameMenuCommands = new Dictionary<string, Action>
+			{
+				{ "ResearchItem", ExploreItem },
+				{ "SayZoneDescription", SayZoneDescription },
+				{ "RunInventoryMenu", RunInventoryMenu },
+				{ "Interact", Interact },
+				{ "PickUpItem", PickUpItem },
+				{ "StepForward", StepForward },
+				{ "StepBack", StepBack },
+				{ "StepLeft", StepLeft },
+				{ "StepRight", StepRight },
+				{ "TurnLeft", TurnLeft },
+				{ "TurnRight", TurnRight },
+				{ "TurnSharplyLeft", TurnSharplyLeft },
+				{ "TurnSharplyRight", TurnSharplyRight },
+				{ "TurnAround", TurnAround },
+				{ "SayItems", SayItems },
+				{ "ListItems", ListItems },
+				{ "SayExits", SayExits },
+				{ "ListExits", ListExits },
+				{ "SayZoneName", SayZoneName },
+				{ "SayVisitedRegion", SayVisitedRegion },
+				{ "SayZoneSize", SayZoneSize },
+				{ "SayOrientation", SayOrientation },
+				{ "SayAbsoluteCoordinates", SayAbsoluteCoordinates },
+				{ "SendFeedback", MainScript.SendFeedback },
+				{ "QuitGame", World.QuitGame },
+			};
+		}
+
+		private Dictionary<string, Action> _gameMenuCommands;
+
 		private void Update() => WatchClipboard();
 
 		private void WatchClipboard()
@@ -52,6 +89,13 @@ namespace Game.Entities.Characters.Chipotle
 
 		private string _lastClipboardText;
 
+		private void OnGameMenuOptionselected(GameMenuOptionselected message)
+		{
+			Action action = _gameMenuCommands[message.OptionId];
+			action();
+			World.GameInProgress = true;
+		}
+
 		/// <summary>
 		/// Runs a message handler for the specified message.
 		/// </summary>
@@ -60,6 +104,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
+				case GameMenuOptionselected m: OnGameMenuOptionselected(m); break;
 				case KeyReleased kr: OnKeyUp(kr); break;
 				case KeyPressed m: OnKeyDown(m); break;
 				default: base.HandleMessage(message); break;
@@ -106,14 +151,14 @@ namespace Game.Entities.Characters.Chipotle
 					// Other commands
 					[new(KeyCode.Q)] = SayCharacters,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.Q)] = ListCharacters,
-					[new(KeyCode.P)] = ResearchObject,
+					[new(KeyCode.P)] = ExploreItem,
 					[new(KeyCode.R)] = SayZoneDescription,
 					[new(KeyCode.I)] = RunInventoryMenu,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.Return)] = PickUpObject,
+					[new(KeyShortcut.Modifiers.Shift, KeyCode.Return)] = PickUpItem,
 					[new(KeyCode.Tab)] = GameMenu,
 					[new(KeyCode.L)] = SayZoneSize,
 					[new(false, true, false, KeyCode.V)] = ListExits,
-					[new(false, true, false, KeyCode.O)] = ListObjects,
+					[new(false, true, false, KeyCode.O)] = ListItems,
 					[new(KeyCode.S)] = SayOrientation,
 					[new(KeyCode.V)] = SayExits,
 					[new(KeyCode.Space)] = StopCutscene,
@@ -121,7 +166,7 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyCode.B)] = SayVisitedRegion,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.LeftArrow)] = GoLeft,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.RightArrow)] = GoRight,
-					[new(KeyCode.O)] = SayObjects,
+					[new(KeyCode.O)] = SayItems,
 					[new(KeyCode.K)] = SayZoneName,
 					[new(KeyCode.UpArrow)] = GoForward,
 					[new(KeyCode.DownArrow)] = GoBack,
@@ -148,14 +193,14 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Instruucts the sound component to read description of the current zone.
 		/// </summary>
-		private void ResearchObject() => InnerMessage(new ExploreObject(this));
+		private void ExploreItem() => InnerMessage(new ExploreItem(this));
 
 		private void SayZoneDescription() => InnerMessage(new SayZoneDescription(this));
 
 		/// <summary>
 		/// Performs the command to pick up an object off the ground.
 		/// </summary>
-		private void PickUpObject() => InnerMessage(new PickUpItem(this));
+		private void PickUpItem() => InnerMessage(new PickUpItem(this));
 
 		/// <summary>
 		/// Creates a predefined save.
@@ -178,7 +223,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Lists navigable objects.
 		/// </summary>
-		protected void ListObjects() => InnerMessage(new ListObjects(this));
+		protected void ListItems() => InnerMessage(new ListObjects(this));
 
 		/// <summary>
 		/// Runs the game menu
@@ -186,57 +231,9 @@ namespace Game.Entities.Characters.Chipotle
 		private void GameMenu()
 		{
 			InnerMessage(new StopWalk(this)); // Stop Chipotle if he's going somewhere.
-
-			// Prepare the menu
-			(string name, Action command)[] commands =
-			{
-				("Prozkoumej objekt: pé", ResearchObject),
-				("Rozhlédni se: r", SayZoneDescription),
-				("inventář: I", RunInventoryMenu),
-				("použij objekt nebo dveře: entr", Interact),
-				("Vezmi objekt: šift entr", PickUpObject),
-				("Jdi dopředu: horní šipka", StepForward),
-				("Jdi dozadu: dolní šipka", StepBack),
-				("Jdi doleva: šift levá šipka", StepLeft),
-				("Jdi doprava: šift pravá šipka", StepRight),
-				("Otoč se trochu doleva: levá šipka", TurnLeft),
-				("Otoč se trochu doprava: pravá šipka", TurnRight),
-				("Otoč se ostře doleva: kontrol levá šipka", TurnSharplyLeft),
-				("Otoč se ostře doprava: kontrol pravá šipka", TurnSharplyRight),
-				("Otoč se čelem vzad: kontrol dolní šipka", TurnAround),
-				("okolní objekty: O", SayObjects),
-				("Naveď mě k objektu: šift O", ListObjects),
-				("východy z lokace: Vé", SayExits),
-				("Naveď mě k východu: šift vé", ListExits),
-				("kde jsem: ká", SayZoneName),
-				("Byl jsem tu: bé", SayVisitedRegion),
-				("Rozměry lokace: el", SayZoneSize),
-				("kompas: Es", SayOrientation),
-				("souřadnice: Cé", SayAbsoluteCoordinates),
-				("Poslat zprávu autorovi: Kontrol zet", MainScript.SendFeedback),
-				("hlavní menu: Iskejp", World.QuitGame),
-			};
-
-			// Run the menu
-			List<List<string>> items = commands.Select(c => new List<string>() { c.name }).ToList();
-			World.GameInProgress = false;
-
-			MenuParametersDTO parameters = new(
-				items,
-				"Menu",
-				" ",
-				0,
-				false,
-				menuClosed: (option) =>
-				{
-					World.GameInProgress = true;
-					if (option >= 0)
-						commands[option].command();
-				});
-			WindowHandler.Menu(parameters);
+			OpenGameMenu message = new(Owner);
+			WindowHandler.ActiveWindow.TakeMessage(message);
 		}
-
-
 
 		/// <summary>
 		/// Runs the inventory menu.
@@ -464,7 +461,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
 		/// </summary>
-		private void SayObjects() => InnerMessage(new SayObjects(this));
+		private void SayItems() => InnerMessage(new SayObjects(this));
 
 		/// <summary>
 		/// Stops the currently playing cutscene.
