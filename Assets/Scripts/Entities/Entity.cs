@@ -42,7 +42,7 @@ namespace Game.Entities
 		/// <summary>
 		/// Returns current description of the object.
 		/// </summary>
-		public string Description => World.GetObjectDescription(this, _descriptionID);
+		public string Description { get => World.GetObjectDescription(this, _descriptionID); }
 		/// <summary>
 		/// Indicates if the item can be used by an NPC.
 		/// </summary>
