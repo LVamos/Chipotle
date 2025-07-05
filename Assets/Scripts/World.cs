@@ -260,7 +260,14 @@ namespace Game
 		/// <param name="object">A character or object</param>
 		/// <param name="id">Numeric identifier of the requested caption</param>
 		/// <returns>A string containing the requested description</returns>
-		public static string GetObjectDescription(Entity @object, int id) => _objectDescriptions.ContainsKey(@object.Type) ? _objectDescriptions[@object.Type][id] : "popis chybí";
+		public static string GetObjectDescription(Entity @object, int id)
+		{
+			string[] result = null;
+			if (_objectDescriptions.TryGetValue(@object.Type, out result))
+				return result[id];
+
+			return "popis chybí";
+		}
 
 		/// <summary>
 		/// Contains descriptions for object templates.
