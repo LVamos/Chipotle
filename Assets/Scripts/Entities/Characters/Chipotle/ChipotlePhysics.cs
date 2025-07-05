@@ -60,16 +60,12 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
-		/// <param name="m">The message to be handled</param>
-		protected void OnExploreItem(ExploreItem m)
+		/// <param name="message">The message to be handled</param>
+		protected void OnExploreItem(ExploreItem message)
 		{
-			//test
-			List<Item> items = World.GetNearestObjects(Center).ToList();
-			List<string> itemsWithoutDescriptions = items.Where(i => i.Description)
-
-			if (m.Object != null)
+			if (message.Object != null)
 			{
-				InnerMessage(new SayObjectDescription(this, m.Object));
+				InnerMessage(new SayObjectDescription(this, message.Object));
 				return; // This should be handled by the sound component.
 			}
 
@@ -77,20 +73,34 @@ namespace Game.Entities.Characters.Chipotle
 			IEnumerable<Entity> objects = GetItemsAndCharactersBefore(_objectManipulationRadius);
 			if (objects.IsNullOrEmpty())
 			{
-				InnerMessage(new SayObjectDescription(this, null)); // The sound component will announce that nothing is standing before the player.
+				NothingFound();
 				return;
 			}
 
 			if (objects.Count() == 1)
 			{
 				Entity obj = objects.First();
-				obj.TakeMessage(new ObjectResearched(Owner)); // Announce the object or character that it was researched.
+
+				// If there's a door and a wall in front in the same moment, announce that nothing was found.
+				if (obj is Item i && i.Type == "zeď")
+				{
+					Door door = GetDoorBefore(null, false, Zone);
+					if (door != null)
+					{
+						NothingFound();
+						return;
+					}
+				}
+
+				obj.TakeMessage(new ObjectExplored(Owner)); // Announce the object or character that it was researched.
 				InnerMessage(new SayObjectDescription(this, obj)); // A command for sound component.be spoken.
 				return;
 			}
 
 			// More objects awailable. Run the menu to select an object to be explored.
 			WindowHandler.ActiveWindow.TakeMessage(new SelectObjectToExplore(Owner, objects.ToList()));
+
+			void NothingFound() => InnerMessage(new SayObjectDescription(this, null));
 		}
 
 		/// <summary>

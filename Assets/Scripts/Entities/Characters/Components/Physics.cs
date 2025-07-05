@@ -382,7 +382,10 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Stores reference to a zone in which the NPC is currently located.
 		/// </summary>
-		public Zone Zone => _area == null ? null : World.GetZone(_area.Value.Center);
+		public Zone Zone
+		{
+			get => _area == null ? null : World.GetZone(Center);
+		}
 
 		/// <summary>
 		/// Current orientation of the NPC
