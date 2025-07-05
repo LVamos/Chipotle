@@ -612,7 +612,7 @@ namespace Game.Entities.Characters.Chipotle
 
 			MenuParametersDTO parameters = new(
 				items: descriptions,
-				introText: "Okolní objekty",
+				introText: "Okolní předměty",
 				wrappingAllowed: false,
 				menuClosed: (index) =>
 				{

@@ -673,8 +673,8 @@ namespace Game.Entities.Items
 		{
 			base.DestroyObject();
 
-			if (_ambientSource.isPlaying)
-				_ambientSource.Stop();
+			StopAmbientSounds();
+			_messagingEnabled = false;
 
 			// Inform zones that the object disappeared.
 			foreach (Zone l in Zones)
