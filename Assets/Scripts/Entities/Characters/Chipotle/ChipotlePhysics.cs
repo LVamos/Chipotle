@@ -1224,7 +1224,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			Door door = GetDoorBefore();
+			Door door = GetDoorBefore(null, false, Zone);
 			UsableObjectsModel objects = GetUsableItemsAndCharactersBefore(_objectManipulationRadius);
 
 			if (door != null)
