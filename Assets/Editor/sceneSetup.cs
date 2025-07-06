@@ -97,7 +97,7 @@ public static class sceneSetup
 		XDocument document = null;
 		try
 		{
-			string mapPath = Path.Combine(MainScript.MapPath, "chipotle.xml");
+			string mapPath = @"Assets\Resources\Data\Map\chipotle.xml";
 			document = XDocument.Load(mapPath);
 		}
 		catch (FileNotFoundException)
