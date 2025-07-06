@@ -32,6 +32,12 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleSound : Sound
 	{
+		public override void Initialize()
+		{
+			base.Initialize();
+			_announceWalls = true;
+		}
+
 		protected override AudioSource PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None)
 		{
 			AudioSource source = base.PlayStep(position, obstacle);
@@ -48,8 +54,6 @@ namespace Game.Entities.Characters.Chipotle
 			source.transform.SetParent(Owner.transform, true);
 			return source;
 		}
-
-		private void start() => _announceWalls = true;
 
 		public void OnSaySize(SaySize message)
 		{
