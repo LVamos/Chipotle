@@ -97,7 +97,7 @@ namespace Game.Entities.Characters.Tuttle
 			{
 				case ObjectsCollided m: OnObjectsCollided(m); break;
 				case PinchedInDoor h: OnPinchedInDoor(h); break;
-				case CharacterStateChanged tsc: OnCharacterStateChanged(tsc); break;
+				case StateChanged tsc: OnCharacterStateChanged(tsc); break;
 				case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;

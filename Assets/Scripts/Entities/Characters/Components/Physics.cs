@@ -457,8 +457,8 @@ namespace Game.Entities.Characters.Components
 					OnStartFollowingPlayer(m);
 					break;
 
-				case CharacterStateChanged m:
-					OnCharacterStateChanged(m);
+				case StateChanged m:
+					OnStateChanged(m);
 					break;
 
 				case GotoPoint m:
@@ -879,10 +879,11 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// sets state of the NPC and announces the change to other components.
 		/// </summary>
-		protected void SetState(CharacterState state)
+		protected void SetState(CharacterState state, bool informComponents = true)
 		{
 			_state = state;
-			InnerMessage(new CharacterStateChanged(this, state));
+			if (informComponents)
+				InnerMessage(new StateChanged(this, state));
 		}
 
 		/// <summary>
@@ -991,7 +992,7 @@ namespace Game.Entities.Characters.Components
 		/// Handles the CharacterStateChanged message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnCharacterStateChanged(CharacterStateChanged message) => _state = message.State;
+		protected void OnStateChanged(StateChanged message) => SetState(message.State, false);
 
 		/// <summary>
 		/// Processes the StartFollowing message.

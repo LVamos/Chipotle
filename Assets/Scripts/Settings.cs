@@ -13,6 +13,7 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float TileSize;
 		public static bool SayInnerItemNames;
 		public static bool SayInnerZoneNames;
 		public static bool SayInnerPassageNames;
@@ -64,6 +65,13 @@ namespace Game
 					continue;
 
 				object value = settingsDictionary[field.Name];
+
+				if (field.FieldType == typeof(float))
+				{
+					float floatValue = Convert.ToSingle(value, CultureInfo.InvariantCulture);
+					field.SetValue(null, floatValue);
+					continue;
+				}
 
 				// Special case for Vector2? because YamlDotNet may not correctly deserialize complex types
 				if (field.FieldType != typeof(Vector2?))

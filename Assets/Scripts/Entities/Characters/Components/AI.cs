@@ -126,7 +126,7 @@ namespace Game.Entities.Characters.Components
 		/// Handles the TuttleStateChanged message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnCharacterStateChanged(CharacterStateChanged message) => _state = message.State;
+		protected void OnCharacterStateChanged(StateChanged message) => _state = message.State;
 
 		/// <summary>
 		/// Processes the PositionChanged message.
@@ -140,7 +140,7 @@ namespace Game.Entities.Characters.Components
 		protected void SetState(CharacterState state)
 		{
 			_state = state;
-			InnerMessage(new CharacterStateChanged(this, state));
+			InnerMessage(new StateChanged(this, state));
 		}
 
 		/// <summary>
