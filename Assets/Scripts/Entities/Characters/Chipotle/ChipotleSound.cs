@@ -86,61 +86,6 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Reverb presets for individual zones
-		/// </summary>
-		private Dictionary<string, (string name, float gain)> _reverbPresets = new()
-		{
-			["chata c1"] = ("drivingincarsports", .1f),
-			["obývák s1"] = ("livingroom", .9f),
-			["asfaltka c1"] = ("plain", .1f),
-			["cesta c1"] = ("pipesmall", .08f),
-			["zahrada c1"] = ("outdoorsbackyard", .1f),
-			["dvorek s1"] = ("outdoorsbackyard", .1f),
-			["garáž s1"] = ("parkinglot", .1f),
-			["hala s1"] = ("castlecupboard", .13f),
-			["chodbička w1"] = ("castlecupboard", .13f),
-			["koupelna s1"] = ("prefabcaravan", .1f),
-			["kuchyň s1"] = ("carpettedhallway", .1f),
-			["pokoj s1"] = ("carpettedhallway", .1f),
-			["ulice s1"] = ("prefabouthouse", .2f),
-			["chodba h1"] = ("woodenshortpassage", .15f),
-			["ulice h1"] = ("prefabouthouse", .2f),
-			["výčep h1"] = ("castlesmallroom", .15f),
-			["záchod h2"] = ("icepalacecupboard", .05f),
-			["záchod h3"] = ("drivingincarracer", .17f),
-			["záchod h4"] = ("drivingincarsports", .1f),
-			["balkon p1"] = ("prefabouthouse", .1f),
-			["garáž p1"] = ("parkinglot", .09f),
-			["hala p1"] = ("carpettedhallway", .5f),
-			["jídelna p1"] = ("castlecupboard", .13f),
-			["koupelna p1"] = ("prefabcaravan", .1f),
-			["kuchyň p1"] = ("prefabpractiseroom", .1f),
-			["ložnice p1"] = ("carpettedhallway", .6f),
-			["obývák p1"] = ("livingroom", .9f),
-			["ulice p1"] = ("prefabouthouse", .13f),
-			["záchod p1"] = ("drivingincarsports", .7f),
-			["bazén w1"] = ("SportFullStadium", .02f),
-			["garáž w1"] = ("parkinglot", .13f),
-			["hala w1"] = ("woodengalleoncourtyard", .05f),
-			["chodba w1"] = ("castlelongpassage", .02f),
-			["jídelna w1"] = ("castlesmallroom", .01f),
-			["koupelna w1"] = ("sportsmallswimmingpool", .02f),
-			["kuchyň w1"] = ("room", .2f),
-			["ložnice w1"] = ("paddedcell", .1f),
-			["obývák w1"] = ("livingroom", .6f),
-			["pokoj pro hosty w1"] = ("paddedcell", .1f),
-			["příjezdová cesta w1"] = ("sewerpipe", .1f),
-			["salón w1"] = ("castlecupboard", .05f),
-			["sklep w1"] = ("dustyroom", .1f),
-			["terasa w1"] = ("icepalacecourtyard", .02f),
-			["garáž v1"] = ("parkinglot", .2f),
-			["hala v1"] = ("prefabworkshop", .11f),
-			["chodba v1"] = ("castleshortpassage", .06f),
-			["kancelář v1"] = ("paddedcell", .2f),
-			["ulice v1"] = ("prefabouthouse", .3f)
-		};
-
-		/// <summary>
 		/// Runs a message handler for the specified message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
