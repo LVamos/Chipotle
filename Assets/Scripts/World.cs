@@ -410,7 +410,7 @@ namespace Game
 		/// </summary>
 		private static readonly Dictionary<string, (string sound, float volume)> _zoneLoops = new(StringComparer.OrdinalIgnoreCase)
 		{
-			["chodba h1"] = ("ElectricalBoxLoop", 1),
+			["chodba h1"] = ("ElectricalBoxLoop", .5f),
 			["balkon p1"] = ("BelvedereStreetLoop", 1),
 			["terasa w1"] = ("PoolLoop", .4f),
 			["výčep h1"] = ("CzechPubLoop", .7f),
@@ -1376,6 +1376,13 @@ namespace Game
 		{
 			while (!_delayedActions.IsNullOrEmpty())
 				_delayedActions.Dequeue()();
+		}
+
+		public static void MessageCharacters(Message message)
+		{
+			IEnumerable<object> characters = _characters.Values.Except(new[] { message.Sender });
+			foreach (Character character in characters)
+				character.TakeMessage(message);
 		}
 	}
 }
