@@ -73,3 +73,4 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 /Assets/Editor/log.txt
 /debug.log
+/Assets/Scenes/SampleScene.unity
