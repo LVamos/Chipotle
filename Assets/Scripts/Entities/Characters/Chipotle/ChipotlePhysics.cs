@@ -258,6 +258,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
+				case CharacterMoved m: return;
 				case PlaceItem m: OnPlaceItem(m); break;
 				case ApplyItemToTarget m:
 					OnApplyItemToTarget(m); break;

@@ -890,7 +890,7 @@ namespace Game.Entities.Characters.Components
 		/// Processes the EntityMoved message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnCharacterMoved(CharacterMoved message)
+		private void OnCharacterMoved(CharacterMoved message)
 		{
 			// Test if the component has been initialized.
 			if (_area == null || _state != CharacterState.WatchingPlayer || message.Sender != _player)
