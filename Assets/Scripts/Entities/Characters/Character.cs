@@ -262,20 +262,21 @@ namespace Game.Entities.Characters
 				zones.UnionWith(temp);
 			}
 
-			CharacterMoved moved = new(this, message.SourcePosition, message.TargetPosition, message.SourceZone, message.TargetZone);
 			CharacterLeftZone left = new(this, this, message.SourceZone, message.TargetZone);
 			CharacterCameToZone came = new(this, this, message.TargetZone, message.SourceZone);
 
 			foreach (Zone zone in zones)
 			{
-				zone.TakeMessage(moved);
-
 				if (message.SourceZone != null && message.SourceZone != message.TargetZone)
 					zone.TakeMessage(left);
 
 				if (message.SourceZone != message.TargetZone)
 					zone.TakeMessage(came);
 			}
+
+			// todo Implement listener pattern
+			CharacterMoved moved = new(this, message.SourcePosition, message.TargetPosition, message.SourceZone, message.TargetZone);
+			World.MessageCharacters(moved);
 		}
 
 		/// <summary>
