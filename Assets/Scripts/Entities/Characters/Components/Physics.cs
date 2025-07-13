@@ -102,6 +102,8 @@ namespace Game.Entities.Characters.Components
 		/// Specifies the maximum distance allowed for path finding.
 		/// </summary>
 		protected const int _maxPathFindingDistance = 60;
+		private const int _tightZoneThreshold = 2;
+
 		protected virtual Vector2 GetStepDirection() => _orientation.UnitVector;
 
 		/// <summary>
@@ -839,6 +841,9 @@ namespace Game.Entities.Characters.Components
 					return null;
 			}
 
+			if (IsZoneTight(targetZone))
+				return null;
+
 			Queue<Vector2> path1 = World.FindPath(start, goal1.Value, sameZone, withStart, withGoal, Height, Width, Owner);
 			if (path1 == null)
 				return null;
@@ -855,6 +860,13 @@ namespace Game.Entities.Characters.Components
 			}
 
 			return path1;
+		}
+
+		protected bool IsZoneTight(Zone zone)
+		{
+			float depth = zone.Area.Value.Height;
+			float width = zone.Area.Value.Width;
+			return depth <= _tightZoneThreshold || width <= _tightZoneThreshold;
 		}
 
 		private Vector2? FindPointBehindPassage(Zone targetZone)
