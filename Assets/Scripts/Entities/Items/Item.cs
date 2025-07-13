@@ -44,7 +44,7 @@ namespace Game.Entities.Items
 		private void UpdatePortals()
 		{
 			if (_portals == null)
-				PlayAmbientFromExits();
+				PlayPortals();
 
 			foreach (Passage exit in _portals.Keys)
 			{
@@ -122,7 +122,7 @@ namespace Game.Entities.Items
 			return closestPortal;
 		}
 
-		private void PlayAmbientFromExits()
+		private void PlayPortals()
 		{
 			// Portal ambients already playing
 			if (_portals != null)
@@ -588,6 +588,8 @@ namespace Game.Entities.Items
 			if (IsPlayerHere())
 				return;
 
+			if (_portals == null)
+				UpdateAmbientSounds();
 			UpdatePortalOcclusion(_portals[door], door);
 		}
 
@@ -782,6 +784,7 @@ namespace Game.Entities.Items
 				UpdatePortals();
 				return;
 			}
+
 			if (obstacle == ObstacleType.Far)
 			{
 				StopAmbientSounds();
