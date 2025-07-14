@@ -1384,5 +1384,11 @@ namespace Game
 			foreach (Character character in characters)
 				character.TakeMessage(message);
 		}
+
+		public static void MessageZones(Message message)
+		{
+			foreach (Zone zone in _zones.Values)
+				zone.TakeMessage(message);
+		}
 	}
 }

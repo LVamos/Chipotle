@@ -94,7 +94,7 @@ namespace Game.Entities.Characters
 		{
 			base.Initialize(name, type, null);
 			_inventory = new();
-			_visitedZones = null;
+			_visitedZones = new();
 			_zone = null;
 
 			Usable = true;
@@ -237,55 +237,48 @@ namespace Game.Entities.Characters
 		/// <param name="message">The message to be processed</param>
 		protected void OnPositionChanged(PositionChanged message)
 		{
-			Area = message.TargetPosition; // Set new position.
-			transform.position = Area.Value.Center.ToVector3(2);
+			Rectangle targetPosition = message.TargetPosition;
+			SetPosition(targetPosition, message.TargetZone);
+			RecordZone(message.SourceZone, message.TargetZone);
+			AnnounceZoneChange(message.SourceZone, message.TargetZone);
+			AnnouncePosition(message.SourcePosition, targetPosition, message.SourceZone, message.TargetZone);
+		}
 
-			_zone = message.TargetZone.Name.Indexed;
+		private void AnnounceZoneChange(Zone sourceZone, Zone targetZone)
+		{
+			CharacterLeftZone left = new(this, this, sourceZone, targetZone);
+			CharacterCameToZone came = new(this, this, targetZone, sourceZone);
 
-			// Record visited zone.
-			if (message.SourceZone != null && message.SourceZone != message.TargetZone)
-				RecordZone(message.SourceZone);
+			if (sourceZone != null && sourceZone != targetZone)
+				World.MessageZones(left);
 
-			// Inform all adjecting zones
-			HashSet<Zone> zones = new();
-			if (message.SourceZone != null && message.SourceZone != message.TargetZone)
-			{
-				zones.Add(message.SourceZone);
-				HashSet<Zone> temp = new(message.SourceZone.Neighbours);
-				zones.UnionWith(temp);
-			}
+			if (sourceZone != targetZone)
+				World.MessageZones(came);
+		}
 
-			if (message.TargetZone != null)
-			{
-				zones.Add(message.TargetZone);
-				HashSet<Zone> temp = new(message.TargetZone.Neighbours);
-				zones.UnionWith(temp);
-			}
-
-			CharacterLeftZone left = new(this, this, message.SourceZone, message.TargetZone);
-			CharacterCameToZone came = new(this, this, message.TargetZone, message.SourceZone);
-
-			foreach (Zone zone in zones)
-			{
-				if (message.SourceZone != null && message.SourceZone != message.TargetZone)
-					zone.TakeMessage(left);
-
-				if (message.SourceZone != message.TargetZone)
-					zone.TakeMessage(came);
-			}
-
+		private void AnnouncePosition(Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone)
+		{
 			// todo Implement listener pattern
-			CharacterMoved moved = new(this, message.SourcePosition, message.TargetPosition, message.SourceZone, message.TargetZone);
+			CharacterMoved moved = new(this, sourcePosition, targetPosition, sourceZone, targetZone);
 			World.MessageCharacters(moved);
+			World.MessageZones(moved);
+		}
+
+		private void SetPosition(Rectangle position, Zone zone)
+		{
+			Area = position;
+			transform.position = Center.ToVector3(2);
+			_zone = zone.Name.Indexed;
+
 		}
 
 		/// <summary>
 		/// Records the current zone as visited.
 		/// </summary>
-		protected void RecordZone(Zone zone)
+		protected void RecordZone(Zone sourceZone, Zone targetZone)
 		{
-			if (!VisitedZones.Contains(zone))
-				_visitedZones.Add(zone.Name.Indexed);
+			if (sourceZone != null && sourceZone != targetZone)
+				_visitedZones.Add(sourceZone.Name.Indexed);
 		}
 
 		/// <summary>
