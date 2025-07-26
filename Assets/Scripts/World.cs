@@ -41,6 +41,46 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
+		public static bool ZoneHasPath(Zone start, Zone goal)
+		{
+			if (start == goal)
+				return true;
+			if (start == null)
+				throw new ArgumentNullException(nameof(start));
+			if (goal == null)
+				throw new ArgumentNullException(nameof(goal));
+
+			Queue<Zone> queue = new Queue<Zone>();
+			HashSet<Zone> visited = new HashSet<Zone>();
+
+			queue.Enqueue(start);
+			visited.Add(start);
+
+			while (queue.Count > 0)
+			{
+				Zone current = queue.Dequeue();
+
+				if (current == goal)
+					return true;
+
+				foreach (Passage passage in current.Exits)
+				{
+					if (!passage.Open)
+						continue;
+
+					Zone neighbor = passage.AnotherZone(current);
+					if (neighbor == null || visited.Contains(neighbor))
+						continue;
+
+					visited.Add(neighbor);
+					queue.Enqueue(neighbor);
+				}
+			}
+
+			return false;
+		}
+
+
 		/// <summary>
 		/// Generates a text representation of the specified distance in Czech.
 		/// </summary>
@@ -638,14 +678,23 @@ namespace Game
 		/// </summary>
 		/// <param name="point">The point whose surroundings should be explored</param>
 		/// <returns>Enumeration of the found zones</returns>
-		public static IEnumerable<Zone> GetNearestZones(Vector2 point)
+		public static List<Zone> GetNearestZones(Vector2 point, float? radius = null, bool includeDefaultZone = false)
 		{
-			return
-				(from l in _zones.Values
-				 where l != GetZone(point)
-				 orderby l.Area.Value.GetDistanceFrom(point)
-				 select l)
-				.Distinct();
+			Zone defaultZone = GetZone(point);
+
+			List<Zone> zones =
+	(from zone in _zones.Values
+	 where zone != defaultZone
+	 let distance = zone.Area.Value.GetDistanceFrom(point)
+	 where radius == null || distance <= radius.Value
+	 orderby distance
+	 select zone)
+	.ToList();
+
+			if (includeDefaultZone)
+				zones.Add(defaultZone);
+
+			return zones;
 		}
 
 		/// <summary>

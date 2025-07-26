@@ -692,7 +692,7 @@ namespace Game.Entities.Characters.Components
 			float radius = inOneStep ? _stepLength : _doorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
 			Vector2 finalDirection = direction != null ? direction.Value : GetStepDirection();
 
-			List<Door> doors = World.GetNearestDoors(_area.Value.Center, radius)
+			List<Door> doors = World.GetNearestDoors(Center, radius)
 					.Where(d => GetAngle(d.Area.Value, finalDirection) == 0)
 					.ToList();
 

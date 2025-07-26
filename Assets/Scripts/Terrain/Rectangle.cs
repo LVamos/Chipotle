@@ -753,13 +753,12 @@ namespace Game.Terrain
 		public HashSet<Vector2> GetPoints(float resolution = 0.1f)
 		{
 			Vector2 upperLeft = World.Map.SnapToGrid(UpperLeftCorner);
-			Vector2 upperRight = World.Map.SnapToGrid(UpperRightCorner);
 			Vector2 lowerRight = World.Map.SnapToGrid(LowerRightCorner);
 
 			float startX = upperLeft.x;
 			float endX = lowerRight.x;
 			float startY = lowerRight.y;
-			float endY = upperRight.y;
+			float endY = upperLeft.y;
 
 			int stepsX = (int)Math.Round((endX - startX) / resolution) + 1;
 			int stepsY = (int)Math.Round((endY - startY) / resolution) + 1;

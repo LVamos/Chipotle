@@ -21,6 +21,8 @@ namespace Game.Terrain
 	[ProtoInclude(100, typeof(Door))]
 	public class Passage : MapElement
 	{
+		public bool Open { get => State == PassageState.Open; }
+
 		public List<Vector2> GetPointsOfZone(Zone zone)
 		{
 			HashSet<Vector2> points = _area.Value.GetPoints();

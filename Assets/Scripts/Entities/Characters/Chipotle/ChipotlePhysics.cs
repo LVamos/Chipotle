@@ -1485,7 +1485,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (collisions.Obstacles != null)
 			{
 				Door doorInWay = GetDoorBefore(direction, false);
-				if (doorInWay is { State: PassageState.Open } && SlipThroughDoor(doorInWay))
+				if (doorInWay is { Open: true } && SlipThroughDoor(doorInWay))
 					return false;
 
 				HandleCollisions(collisions.Obstacles);
@@ -1505,9 +1505,11 @@ namespace Game.Entities.Characters.Chipotle
 				Rectangle newPosition = defaultPosition;
 				do
 				{
-					newPosition = _area.Value.Move(direction, .1f);
 					if (!IsWalkable(newPosition))
+					{
+						newPosition = _area.Value.Move(direction, .1f);
 						continue; // The position is blocked, try the next one.
+					}
 
 					// The position is free, move there.
 					_area = _area.Value.WithUpdatedCenter(newPosition.Center);

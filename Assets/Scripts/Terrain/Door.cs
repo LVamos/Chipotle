@@ -174,9 +174,10 @@ namespace Game.Terrain
 		private void AnnounceManipulation()
 		{
 			DoorManipulated message = new(this);
-			IEnumerable<Zone> accessibles = Zones.First().GetAccessibleZones().Concat(Zones.Last().GetAccessibleZones()).Distinct();
-			foreach (Zone l in accessibles)
-				l.TakeMessage(message);
+			List<Zone> zones = World.GetNearestZones(Center, 100, true);
+
+			foreach (Zone zone in zones)
+				zone.TakeMessage(message);
 		}
 
 		/// <summary>
