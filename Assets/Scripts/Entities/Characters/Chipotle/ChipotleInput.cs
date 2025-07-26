@@ -139,16 +139,17 @@ namespace Game.Entities.Characters.Chipotle
 					// Test commands
 					[new(KeyShortcut.Modifiers.Control, KeyCode.R)] = ResetGame,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.S)] = SayItemSize,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
-					[new(KeyCode.F5)] = CreatePredefinedSave,
 					[new(KeyCode.C)] = SayRelativeCoordinates,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.T)] = SayTuttlesPosition,
 					[new(KeyCode.F10)] = JumpToZone,
 					[new(KeyCode.F11)] = SaveStartPosition,
-					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
+					[new(KeyShortcut.Modifiers.Shift, KeyCode.F11)] = RestoreStartPosition,
 					[new(KeyCode.F12)] = () => GoToClipboardCoords(),
 
 					// Other commands
+					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
+					[new(KeyShortcut.Modifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
+					[new(KeyCode.F5)] = CreatePredefinedSave,
 					[new(KeyCode.Q)] = SayCharacters,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.Q)] = ListCharacters,
 					[new(KeyCode.P)] = ExploreItem,
@@ -333,16 +334,24 @@ namespace Game.Entities.Characters.Chipotle
 			if (!Settings.TestCommandsEnabled)
 				return;
 
-			Settings.TestChipotleStartPosition = Owner.Area.Value.UpperLeftCorner;
+			Settings.TestChipotleStartPosition = Owner.Center;
 			Settings.SaveSettings();
 			Tolk.Speak("Startovní pozice uložena", true);
 		}
 
-		private void SayAbsoluteCoordinates()
+		private void RestoreStartPosition()
 		{
 			if (!Settings.TestCommandsEnabled)
 				return;
 
+			Settings.TestChipotleStartPosition = null;
+			Settings.SaveSettings();
+			Tolk.Speak("Startovní pozice obnovena", true);
+		}
+
+
+		private void SayAbsoluteCoordinates()
+		{
 			Vector2 coords = Owner.Area.Value.Center;
 			string result = coords.GetString();
 			GUIUtility.systemCopyBuffer = result;
