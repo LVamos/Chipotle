@@ -141,7 +141,6 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.S)] = SayItemSize,
 					[new(KeyCode.C)] = SayRelativeCoordinates,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.T)] = SayTuttlesPosition,
-					[new(KeyCode.F10)] = JumpToZone,
 					[new(KeyCode.F11)] = SaveStartPosition,
 					[new(KeyShortcut.Modifiers.Shift, KeyCode.F11)] = RestoreStartPosition,
 					[new(KeyCode.F12)] = () => GoToClipboardCoords(),
@@ -295,35 +294,6 @@ namespace Game.Entities.Characters.Chipotle
 			string position = tuttle.Area.Value.Center.ToString();
 			string zone = tuttle.Zone.Name.Indexed;
 			Tolk.Speak(distance + Environment.NewLine + zone + " " + position, true);
-		}
-
-		/// <summary>
-		/// Opens a menu with all zones and jumps to the nearest walkable position in the selected zone.
-		/// </summary>
-		private void JumpToZone()
-		{
-			if (!Settings.TestCommandsEnabled)
-				return;
-
-			Vector2 me = Owner.Area.Value.Center;
-			List<List<string>> items =
-			(
-				from l in World.GetZones()
-				orderby l.Name.Indexed
-				select (new List<string> { l.Name.Indexed })
-			).ToList();
-
-			int item = WindowHandler.Menu(new(items, "Vyber lokaci"));
-			if (item == -1)
-				return;
-
-			Zone zone = World.GetZone(items[item][0]);
-			Vector2 point = zone.Area.Value.GetWalkableTiles().First().Position;
-			InnerMessage(new SetPosition(this, point));
-
-			// Move Tuttle
-			point = zone.Area.Value.GetWalkableTiles().First(t => t.Position != point).Position;
-			World.GetCharacter("tuttle").TakeMessage(new SetPosition(null, point));
 		}
 
 		/// <summary>

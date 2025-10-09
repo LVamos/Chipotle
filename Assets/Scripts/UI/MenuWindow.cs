@@ -23,7 +23,7 @@ namespace Game.UI
 			_menuClosed?.Invoke(Index);
 		}
 
-		public static MenuWindow CreateInstance(MenuParametersDTO parameters)
+		public static MenuWindow CreateInstance(MenuParameters parameters)
 		{
 			GameObject obj = new();
 			MenuWindow instance = obj.AddComponent<MenuWindow>();
@@ -109,7 +109,7 @@ namespace Game.UI
 		/// <param name="lowerEdgeSound">
 		/// Name of a sound to be played when cursor gets to lower edge of the menu
 		/// </param>
-		public void Initialize(MenuParametersDTO parameters)
+		public void Initialize(MenuParameters parameters)
 		{
 			_items = parameters.Items;
 			_introText = parameters.IntroText;

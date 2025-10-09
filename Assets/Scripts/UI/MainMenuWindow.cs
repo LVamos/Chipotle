@@ -116,7 +116,7 @@ namespace Game.UI
 			PlayLoop();
 
 			_usedItems = GameStateSaved() ? _itemsWithLoadGame : _items;
-			MenuParametersDTO parameters = new(_usedItems, intro, menuClosed: MenuClosed, defaultIndex: _lastChoice);
+			MenuParameters parameters = new(_usedItems, intro, menuClosed: MenuClosed, defaultIndex: _lastChoice);
 			int choice = WindowHandler.Menu(parameters);
 		}
 

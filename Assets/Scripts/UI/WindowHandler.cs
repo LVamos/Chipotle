@@ -75,7 +75,7 @@ namespace Game.UI
 		/// <param name="upperEdgeSound">Name of a sound to be played when cursor gets to upper edge of the menu</param>
 		/// <param name="lowerEdgeSound">Name of a sound to be played when cursor gets to lower edge of the menu</param>
 		/// <returns>Tuple with index of selected item and value of selected item</returns>
-		public static int Menu(MenuParametersDTO parameters)
+		public static int Menu(MenuParameters parameters)
 		{
 			MenuWindow menu = MenuWindow.CreateInstance(parameters);
 

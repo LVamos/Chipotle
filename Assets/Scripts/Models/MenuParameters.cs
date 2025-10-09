@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class MenuParametersDTO
+public class MenuParameters
 {
 	public List<List<string>> Items { get; }
 	public string IntroText { get; }
@@ -18,7 +18,7 @@ public class MenuParametersDTO
 	public Action<int> MenuClosed { get; }
 	public int DefaultIndex { get; }
 
-	public MenuParametersDTO(
+	public MenuParameters(
 		List<List<string>> items,
 		string introText,
 		string divider = " ",

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Models;
+﻿using Assets.Scripts.Debug;
+using Assets.Scripts.Models;
 
 using Game.Entities;
 using Game.Entities.Items;
@@ -12,6 +13,8 @@ using Game.Terrain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using UnityEditorInternal;
 
 using UnityEngine;
 
@@ -66,7 +69,7 @@ namespace Game.UI
 			{
 				HandleGameMenu(items, option, message.Sender as MessagingObject);
 			};
-			MenuParametersDTO parameters = new(
+			MenuParameters parameters = new(
 				items,
 				"Menu",
 				" ",
@@ -86,11 +89,20 @@ namespace Game.UI
 
 		public static GameWindow CreateInstance()
 		{
-			GameObject obj = new();
+			GameObject obj = new("GameWindow");
 			GameWindow window = obj.AddComponent<GameWindow>();
 			window.Initialize();
 			return window;
 		}
+
+		private void CreateDebugManager()
+		{
+			GameObject obj = new(nameof(DebugManager));
+			_debugManager = obj.AddComponent<DebugManager>();
+			_debugManager.Initialize();
+		}
+
+		private DebugManager _debugManager;
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -121,7 +133,7 @@ namespace Game.UI
 			List<List<string>> names = GetFriendlyNames(message.Objects);
 			Action<int> action =
 				(option) => HandleApplyItemMenu(message.Sender as MessagingObject, message.Objects, option, message.ItemToApply);
-			MenuParametersDTO parameters = new(
+			MenuParameters parameters = new(
 							names,
 							prompt,
 							wrappingAllowed: false,
@@ -191,7 +203,7 @@ namespace Game.UI
 			List<List<string>> names = GetFriendlyNames(entities);
 			Action<int> action =
 				(option) => HandlePickingMenu(message.Sender as MessagingObject, message.Items, option);
-			MenuParametersDTO parameters = new(
+			MenuParameters parameters = new(
 							names,
 							prompt,
 							wrappingAllowed: false,
@@ -228,7 +240,7 @@ namespace Game.UI
 				objects.Select(o => new List<string>() { o.Name.Friendly })
 					.ToList();
 
-			MenuParametersDTO parameters = null;
+			MenuParameters parameters = null;
 			int option = WindowHandler.Menu(parameters);
 
 			if (option == -1)
@@ -248,7 +260,7 @@ namespace Game.UI
 			// Copy friendly names from the given objects into an array.
 			List<List<string>> names = GetFriendlyNames(message.Objects);
 
-			MenuParametersDTO parameters = new(
+			MenuParameters parameters = new(
 				names,
 				prompt,
 				wrappingAllowed: false,
@@ -264,7 +276,7 @@ namespace Game.UI
 		{
 			const string prompt = "Co chceš prozkoumat?";
 			List<List<string>> names = GetFriendlyNames(message.Objects);
-			MenuParametersDTO parameters = new(
+			MenuParameters parameters = new(
 							names,
 							prompt,
 							wrappingAllowed: false,
@@ -286,6 +298,8 @@ namespace Game.UI
 		/// </summary>
 		public void Initialize()
 		{
+			CreateDebugManager();
+
 			_messagingEnabled = true;
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),
@@ -301,6 +315,7 @@ namespace Game.UI
 		{
 			base.OnKeyDown(shortcut);
 
+			_debugManager.OnKeyDown(shortcut);
 			if (World.GameInProgress)
 				World.Player.TakeMessage(new KeyPressed(this, shortcut));
 		}
@@ -311,6 +326,7 @@ namespace Game.UI
 		/// <param name="shortcut">The message to be handled</param>
 		public override void OnKeyUp(KeyShortcut shortcut)
 		{
+			_debugManager.OnKeyUp(shortcut);
 			if (World.GameInProgress && World.Player != null)
 				World.Player.TakeMessage(new KeyReleased(this, shortcut));
 		}

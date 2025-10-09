@@ -364,7 +364,7 @@ namespace Game.Entities.Characters.Chipotle
 				characters.Descriptions
 					.Select(d => new List<string> { d }).ToList();
 
-			MenuParametersDTO parameters = new(descriptions, "Okolní postavy", " ", 0, false);
+			MenuParameters parameters = new(descriptions, "Okolní postavy", " ", 0, false);
 			int option = WindowHandler.Menu(parameters);
 
 			if (option == -1)
@@ -542,7 +542,7 @@ namespace Game.Entities.Characters.Chipotle
 				}
 			}
 			else descriptions = result.Descriptions;
-			MenuParametersDTO parameters = new(
+			MenuParameters parameters = new(
 	items: result.Descriptions,
 	introText: "Východy",
 	divider: " ",
@@ -611,7 +611,7 @@ namespace Game.Entities.Characters.Chipotle
 				objects.Descriptions
 					.Select(d => new List<string> { d }).ToList();
 
-			MenuParametersDTO parameters = new(
+			MenuParameters parameters = new(
 				items: descriptions,
 				introText: "Okolní předměty",
 				wrappingAllowed: false,

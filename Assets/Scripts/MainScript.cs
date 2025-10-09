@@ -49,6 +49,8 @@ namespace Game
 		/// </summary>
 		public static string ConfigPath = @"Assets\Resources\Data\Config";
 
+		public static string DebugPath = @"Assets\Resources\Data\Debug";
+
 		private static string GetUserInfo()
 		{
 			StringBuilder text = new();
