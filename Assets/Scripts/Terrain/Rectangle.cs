@@ -952,9 +952,9 @@ namespace Game.Terrain
 		/// Enumerates all walkable intersecting tiles.
 		/// </summary>
 		/// <returns>all walkable intersecting tiles</returns>
-		public IEnumerable<TileInfo> GetWalkableTiles()
+		public IEnumerable<TileInfo> GetWalkableTiles(float resolution = .1f)
 		{
-			return GetTiles()
+			return GetTiles(resolution)
 						.Where(t => World.IsWalkable(t.Position));
 		}
 
