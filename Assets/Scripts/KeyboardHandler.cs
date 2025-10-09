@@ -11,10 +11,24 @@ using UnityEngine;
 /// </summary>
 public class KeyboardHandler : MonoBehaviour
 {
+	private void HandleCharacterInput()
+	{
+		if (string.IsNullOrEmpty(Input.inputString))
+			return;
+
+		// Input.inputString can contain multiple characters in a single frame.
+		foreach (char c in Input.inputString)
+		{
+			if (char.IsLetterOrDigit(c))
+				WindowHandler.OnKeyPress(c);
+		}
+	}
+
 	private void Update()
 	{
 		HandleKeyDown();
 		HandleKeyUp();
+		HandleCharacterInput();
 	}
 
 	private void HandleKeyDown()
