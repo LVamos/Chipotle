@@ -1,7 +1,10 @@
-﻿using Settings = Game.Settings;
-using DavyKager;
+﻿using DavyKager;
+
+using game.debug;
 
 using Game;
+using Game.Controls;
+using Game.Controls.DualSense;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Movement;
@@ -10,8 +13,10 @@ using Game.UI;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,16 +25,34 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Assets.Scripts.Debug
+using Settings = Game.Settings;
+
+namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		[DebugCommand(DebugCommand.OpenLog)]
+		public void OpenLog() => Logger.OpenLog();
+
+		public override void OnKeyDown(KeyboardInput shortcut)
+		{
+			base.OnKeyDown(shortcut);
+
+			Action action = null;
+			if (_keyboardCommands.TryGetValue(shortcut, out action))
+				action();
+		}
+
+		private Dictionary<KeyboardInput, Action> _keyboardCommands = new();
+		private Dictionary<DualSenseInput, Action> _gamepadCommands = new();
+
 		private Character Tuttle => World.GetCharacter("tuttle");
 		private Character Player => Player;
 
 		/// <summary>
 		/// A test method that saves current position as start position.
 		/// </summary>
+		[DebugCommand(DebugCommand.SaveStartPosition)]
 		private void SaveStartPosition()
 		{
 			Settings.TestChipotleStartPosition = Player.Center;
@@ -40,6 +63,7 @@ namespace Assets.Scripts.Debug
 		/// <summary>
 		/// Test function to announce Tuttle's position
 		/// </summary>
+		[DebugCommand(DebugCommand.SayTuttlesPosition)]
 		private void SayTuttlesPosition()
 		{
 			string distance = World.GetDistance(Tuttle, Player).ToString();
@@ -51,20 +75,24 @@ namespace Assets.Scripts.Debug
 		/// <summary>
 		/// Reports current position of the player in relative coordinates.
 		/// </summary>
+		[DebugCommand(DebugCommand.SayRelativeCoordinates)]
 		private void SayRelativeCoordinates()
 		{
 			SayCoordinates message = new(this);
 			Player.TakeMessage(message);
 		}
 
+		[DebugCommand(DebugCommand.SayItemSize)]
 		private void SayItemSize()
 		{
 			SayItemSize message = new(this);
 			Player.TakeMessage(message);
 		}
 
+		[DebugCommand(DebugCommand.ResetGame)]
 		private void ResetGame() => WindowHandler.ResetGame();
 
+		[DebugCommand(DebugCommand.RestoreStartPosition)]
 		private void RestoreStartPosition()
 		{
 			if (!Settings.TestCommandsEnabled)
@@ -77,30 +105,11 @@ namespace Assets.Scripts.Debug
 
 		private string _lastClipboardText;
 
-		private void Update() => WatchClipboard();
-
-		private void WatchClipboard()
-		{
-			return;
-			// Jump to coords in clipboard whenever the clipboard content changes.
-			if (!Settings.TestCommandsEnabled)
-				return;
-
-			string clipboard = GUIUtility.systemCopyBuffer;
-			if (clipboard != _lastClipboardText)
-			{
-				if (GoToClipboardCoords())
-				{
-					_lastClipboardText = clipboard;
-					WindowHandler.FocusGameWindow();
-				}
-			}
-		}
-
 		/// <summary>
 		/// Test method that moves Chipotle to coords taken from clipboard
 		/// </summary>
-		private bool GoToClipboardCoords()
+		[DebugCommand(DebugCommand.GoToClipboardCoords)]
+		private void GoToClipboardCoords()
 		{
 			try
 			{
@@ -108,15 +117,15 @@ namespace Assets.Scripts.Debug
 				Vector2 target = coords.ToVector2();
 				SetPosition message = new(this, target);
 				Player.TakeMessage(message);
-				return true;
+				return;
 			}
 			catch (Exception)
 			{
-				return false;
 			}
 		}
 
 		private const string _walkablePointsPath = "WalkablePoints.yaml";
+		private const string _commandMapPath = "DebugCommands.yaml";
 
 		private Dictionary<string, List<Vector2>> _walkablePoints;
 
@@ -124,23 +133,73 @@ namespace Assets.Scripts.Debug
 		{
 			base.Initialize();
 			LoadWalkablePoints();
-			LoadKeyboardShortcuts();
+			LoadCommands();
 		}
 
-		private void LoadKeyboardShortcuts()
+		private void LoadCommands()
 		{
-			RegisterShortcuts
-							(
-												(new(KeyboardInput.Modifiers.Shift, KeyCode.S), SayItemSize),
-								(new(KeyCode.C), SayRelativeCoordinates),
-								(new(KeyboardInput.Modifiers.Shift, KeyCode.T), SayTuttlesPosition),
-								(new(KeyCode.F11), SaveStartPosition),
-								(new(KeyboardInput.Modifiers.Control, KeyCode.R), ResetGame),
-								(new(KeyboardInput.Modifiers.Shift, KeyCode.F11), RestoreStartPosition),
+			string path = Path.Combine(MainScript.DebugPath, _commandMapPath);
+			if (!File.Exists(path))
+			{
+				Logger.LogError($"Definice testovacích příkazů nenalezena: {path}");
+				return;
+			}
 
-								(new(KeyCode.F10), JumpToZoneMenu),
-								(new(KeyCode.F12), () => GoToClipboardCoords())
-							);
+			try
+			{
+				string yamlText = File.ReadAllText(path);
+
+				var deserializer = new DeserializerBuilder()
+					.WithNamingConvention(PascalCaseNamingConvention.Instance)
+					.Build();
+
+				// Deserialize YAML into a dictionary: DebugCommand name → Keyboard & DualSense bindings
+				var rawMap = deserializer.Deserialize<Dictionary<string, DebugCommandBindings>>(yamlText);
+
+				// Get all DebugManager methods with DebugCommand attribute
+				var methods = typeof(DebugManager).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+				var commandMethods = methods
+					.Select(m => new
+					{
+						Method = m,
+						Attr = m.GetCustomAttribute<DebugCommandAttribute>()
+					})
+					.Where(x => x.Attr != null)
+					.ToDictionary(x => x.Attr.Command, x => (Action)Delegate.CreateDelegate(typeof(Action), this, x.Method));
+
+				// Clear old dictionaries
+				_keyboardCommands.Clear();
+				_gamepadCommands.Clear();
+
+				foreach (var kvp in rawMap)
+				{
+					// Convert string key to DebugCommand enum
+					if (!Enum.TryParse<DebugCommand>(kvp.Key, out var command))
+						continue;
+
+					// Skip if there is no method for this DebugCommand
+					if (!commandMethods.TryGetValue(command, out var action))
+						continue;
+
+					// Add keyboard input to dictionary if present
+					if (!string.IsNullOrEmpty(kvp.Value.Keyboard))
+					{
+						var keyboardInput = new KeyboardInput(kvp.Value.Keyboard);
+						_keyboardCommands[keyboardInput] = action;
+					}
+
+					// Add DualSense input to dictionary if present
+					if (!string.IsNullOrEmpty(kvp.Value.DualSense))
+					{
+						var gamepadInput = new DualSenseInput(kvp.Value.DualSense);
+						_gamepadCommands[gamepadInput] = action;
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.LogError("Chyba při načítánídefinice testovacích příkazů", e.ToString());
+			}
 		}
 
 		private void LoadWalkablePoints()
@@ -153,12 +212,12 @@ namespace Assets.Scripts.Debug
 			string yaml = File.ReadAllText(path);
 			var raw = deserializer.Deserialize<Dictionary<string, List<float[]>>>(yaml);
 			_walkablePoints = raw.ToDictionary(k => k.Key, v => v.Value.Select(p => new Vector2(p[0], p[1])).ToList());
-
 		}
 
 		/// <summary>
 		/// Opens a menu with all zones and jumps to the nearest walkable position in the selected zone.
 		/// </summary>
+		[DebugCommand(DebugCommand.JumpToZoneMenu)]
 		private void JumpToZoneMenu()
 		{
 			IEnumerable<Zone> zones = World.GetZones();

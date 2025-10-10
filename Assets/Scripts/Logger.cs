@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,21 @@ using System.Text;
 /// </summary>
 public static class Logger
 {
+	public static void OpenLog()
+	{
+		try
+		{
+			ProcessStartInfo info = new()
+			{
+				FileName = _filePath,
+				UseShellExecute = true
+			};
+
+			Process.Start(info);
+		}
+		catch (Exception) { }
+	}
+
 	/// <summary>
 	/// The file path to which logs will be written.
 	/// </summary>

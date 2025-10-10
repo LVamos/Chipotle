@@ -1,5 +1,6 @@
 ﻿using DavyKager;
 
+using Game.Controls;
 using Game.Messaging.Commands;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.GameManagement;
@@ -110,14 +111,14 @@ namespace Game.Entities.Characters.Chipotle
 				new()
 				{
 					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
-					[new(KeyboardInput.Modifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
+					[new(KeyboardModifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
 					[new(KeyCode.F5)] = CreatePredefinedSave,
 					[new(KeyCode.Q)] = SayCharacters,
-					[new(KeyboardInput.Modifiers.Shift, KeyCode.Q)] = ListCharacters,
+					[new(KeyboardModifiers.Shift, KeyCode.Q)] = ListCharacters,
 					[new(KeyCode.P)] = ExploreItem,
 					[new(KeyCode.R)] = SayZoneDescription,
 					[new(KeyCode.I)] = RunInventoryMenu,
-					[new(KeyboardInput.Modifiers.Shift, KeyCode.Return)] = PickUpItem,
+					[new(KeyboardModifiers.Shift, KeyCode.Return)] = PickUpItem,
 					[new(KeyCode.Tab)] = GameMenu,
 					[new(KeyCode.L)] = SayZoneSize,
 					[new(false, true, false, KeyCode.V)] = ListExits,
@@ -127,17 +128,17 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyCode.Space)] = StopCutscene,
 					[new(KeyCode.T)] = TerrainInfo,
 					[new(KeyCode.B)] = SayVisitedRegion,
-					[new(KeyboardInput.Modifiers.Shift, KeyCode.LeftArrow)] = GoLeft,
-					[new(KeyboardInput.Modifiers.Shift, KeyCode.RightArrow)] = GoRight,
+					[new(KeyboardModifiers.Shift, KeyCode.LeftArrow)] = GoLeft,
+					[new(KeyboardModifiers.Shift, KeyCode.RightArrow)] = GoRight,
 					[new(KeyCode.O)] = SayItems,
 					[new(KeyCode.K)] = SayZoneName,
 					[new(KeyCode.UpArrow)] = GoForward,
 					[new(KeyCode.DownArrow)] = GoBack,
 					[new(KeyCode.LeftArrow)] = TurnLeft,
 					[new(KeyCode.RightArrow)] = TurnRight,
-					[new(KeyboardInput.Modifiers.Control, KeyCode.LeftArrow)] = TurnSharplyLeft,
-					[new(KeyboardInput.Modifiers.Control, KeyCode.RightArrow)] = TurnSharplyRight,
-					[new(KeyboardInput.Modifiers.Control, KeyCode.DownArrow)] = TurnAround,
+					[new(KeyboardModifiers.Control, KeyCode.LeftArrow)] = TurnSharplyLeft,
+					[new(KeyboardModifiers.Control, KeyCode.RightArrow)] = TurnSharplyRight,
+					[new(KeyboardModifiers.Control, KeyCode.DownArrow)] = TurnAround,
 					[new(KeyCode.Return)] = Interact,
 				}
 			);

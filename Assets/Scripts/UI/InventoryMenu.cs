@@ -2,6 +2,7 @@
 
 using DavyKager;
 
+using Game.Controls;
 using Game.Entities.Items;
 using Game.Models;
 
@@ -78,8 +79,8 @@ namespace Game.UI
 			// Add new key shortcuts
 			RegisterShortcuts(
 				(new(KeyCode.Return), UseObject),
-				(new(KeyboardInput.Modifiers.Control, KeyCode.Return), PlaceItem),
-				(new(KeyboardInput.Modifiers.ControlShift, KeyCode.Return), ApplyItemToTarget)
+				(new(KeyboardModifiers.Control, KeyCode.Return), PlaceItem),
+				(new(KeyboardModifiers.ControlShift, KeyCode.Return), ApplyItemToTarget)
 			);
 		}
 

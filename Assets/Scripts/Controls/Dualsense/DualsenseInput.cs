@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Game.Controls
+namespace Game.Controls.DualSense
 {
 
 	/// <summary>
@@ -62,58 +62,5 @@ namespace Game.Controls
 				return dir;
 			throw new ArgumentException($"Invalid stick direction: {suffix}");
 		}
-	}
-
-	/// <summary>
-	/// All discrete buttons on the DualSense controller.
-	/// </summary>
-	public enum DualSenseButton
-	{
-		Cross,      // X
-		Circle,
-		Square,
-		Triangle,
-		DPadUp,
-		DPadDown,
-		DPadLeft,
-		DPadRight,
-		L1,
-		R1,
-		L3,
-		R3,
-		Options,
-		Create,
-		PS,
-		TouchpadButton,
-		Mute
-	}
-
-	/// <summary>
-	/// The two analog sticks on the controller.
-	/// </summary>
-	public enum DualSenseStick
-	{
-		Left,
-		Right
-	}
-
-	/// <summary>
-	/// Possible stick movement directions.
-	/// </summary>
-	public enum DualSenseStickDirection
-	{
-		Up,
-		Down,
-		Left,
-		Right
-	}
-
-	/// <summary>
-	/// Analog triggers.
-	/// </summary>
-	public enum DualSenseTrigger
-	{
-		L2,
-		R2
 	}
 }

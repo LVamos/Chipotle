@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Game.Controls;
+
+using System;
 
 using UnityEngine;
 
@@ -10,6 +12,56 @@ namespace Game.UI
 	[Serializable]
 	public struct KeyboardInput
 	{
+		/// <summary>
+		/// Constructor that parses a keyboard shortcut from a string (e.g. "Ctrl+Alt+F1" or "Shift+S").
+		/// </summary>
+		/// <param name="input">String representation of the shortcut</param>
+		/// <exception cref="ArgumentException">Thrown if the key name is invalid</exception>
+		public KeyboardInput(string input)
+		{
+			if (string.IsNullOrWhiteSpace(input))
+				throw new ArgumentException("KeyboardInput string cannot be null or empty.", nameof(input));
+
+			Control = false;
+			Shift = false;
+			Alt = false;
+			Key = KeyCode.None;
+
+			// Split by '+' and trim whitespace
+			var parts = input.Split('+', StringSplitOptions.RemoveEmptyEntries);
+
+			foreach (var part in parts)
+			{
+				var token = part.Trim();
+
+				if (token.Equals("Ctrl", StringComparison.OrdinalIgnoreCase) ||
+					token.Equals("Control", StringComparison.OrdinalIgnoreCase))
+				{
+					Control = true;
+				}
+				else if (token.Equals("Shift", StringComparison.OrdinalIgnoreCase))
+				{
+					Shift = true;
+				}
+				else if (token.Equals("Alt", StringComparison.OrdinalIgnoreCase))
+				{
+					Alt = true;
+				}
+				else
+				{
+					// Try to parse as KeyCode (UnityEngine)
+					if (Enum.TryParse<KeyCode>(token, true, out var parsedKey))
+					{
+						Key = parsedKey;
+					}
+					else
+					{
+						throw new ArgumentException($"Invalid key name: '{token}' in '{input}'");
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Indicates whether alt key was pressed.
 		/// </summary>
@@ -35,11 +87,11 @@ namespace Game.UI
 		/// </summary>
 		/// <param name="modifiers">Key modifiers</param>
 		/// <param name="key">The pressed key</param>
-		public KeyboardInput(Modifiers modifiers, KeyCode key)
+		public KeyboardInput(KeyboardModifiers modifiers, KeyCode key)
 		{
-			Control = modifiers.HasFlag(Modifiers.Control);
-			Alt = modifiers.HasFlag(Modifiers.Alt);
-			Shift = modifiers.HasFlag(Modifiers.Shift);
+			Control = modifiers.HasFlag(KeyboardModifiers.Control);
+			Alt = modifiers.HasFlag(KeyboardModifiers.Alt);
+			Shift = modifiers.HasFlag(KeyboardModifiers.Shift);
 			Key = key;
 		}
 
@@ -65,48 +117,6 @@ namespace Game.UI
 		public KeyboardInput(KeyCode key) : this(false, false, false, key)
 		{
 		}
-
-		/// <summary>
-		/// set of key modifiers
-		/// </summary>
-		[Flags]
-		public enum Modifiers
-		{
-			/// <summary>
-			/// Alt key
-			/// </summary>
-			Alt = 1,
-
-			/// <summary>
-			/// Control key
-			/// </summary>
-			Control = 2,
-
-			/// <summary>
-			/// Shift key
-			/// </summary>
-			Shift = 4,
-
-			/// <summary>
-			/// Alt and shift keys
-			/// </summary>
-			AltShift = Alt | Shift,
-
-			/// <summary>
-			/// Control and alt keys
-			/// </summary>
-			ControlAlt = Control | Alt,
-
-			/// <summary>
-			/// Control and shift keys
-			/// </summary>
-			ControlShift = Control | Shift,
-
-			/// <summary>
-			/// Control, alt and shift keys
-			/// </summary>
-			ControlAltShift = Control | Alt | Shift
-		};
 
 		/// <summary>
 		/// Overloads the != operator.

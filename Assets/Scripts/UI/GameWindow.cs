@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Debug;
+﻿using Game.Debug;
 using Assets.Scripts.Models;
 
 using Game.Entities;
@@ -19,6 +19,7 @@ using UnityEditorInternal;
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
+using Game.Controls;
 
 namespace Game.UI
 {
@@ -303,7 +304,7 @@ namespace Game.UI
 			_messagingEnabled = true;
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),
-				(new(KeyboardInput.Modifiers.Control, KeyCode.Y), MainScript.SendFeedback)
+				(new(KeyboardModifiers.Control, KeyCode.Y), MainScript.SendFeedback)
 			);
 		}
 
