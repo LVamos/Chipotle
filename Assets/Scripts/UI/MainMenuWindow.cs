@@ -247,7 +247,7 @@ namespace Game.UI
 		/// Handles the KeyDown message.
 		/// </summary>
 		/// <param name="shortcut">The message</param>
-		public override void OnKeyDown(KeyShortcut shortcut)
+		public override void OnKeyDown(KeyboardInput shortcut)
 		{
 			if (_speakerTestAudio.isPlaying)
 				_speakerTestAudio.Stop();

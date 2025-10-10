@@ -127,14 +127,14 @@ namespace Game.UI
 			_index = parameters.DefaultIndex;
 
 			RegisterShortcuts(
-				(new KeyShortcut(KeyCode.End), LastItem),
-				(new KeyShortcut(KeyCode.Home), FirstItem),
-				(new KeyShortcut(KeyCode.UpArrow), PreviousItem),
-				(new KeyShortcut(KeyCode.LeftArrow), PreviousItem),
-				(new KeyShortcut(KeyCode.DownArrow), NextItem),
-				(new KeyShortcut(KeyCode.RightArrow), NextItem),
-				(new KeyShortcut(KeyCode.Return), ActivateItem),
-				(new KeyShortcut(KeyCode.Escape), Quit)
+				(new KeyboardInput(KeyCode.End), LastItem),
+				(new KeyboardInput(KeyCode.Home), FirstItem),
+				(new KeyboardInput(KeyCode.UpArrow), PreviousItem),
+				(new KeyboardInput(KeyCode.LeftArrow), PreviousItem),
+				(new KeyboardInput(KeyCode.DownArrow), NextItem),
+				(new KeyboardInput(KeyCode.RightArrow), NextItem),
+				(new KeyboardInput(KeyCode.Return), ActivateItem),
+				(new KeyboardInput(KeyCode.Escape), Quit)
 			);
 		}
 

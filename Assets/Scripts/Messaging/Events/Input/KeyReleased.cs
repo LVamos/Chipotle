@@ -6,6 +6,6 @@ namespace Game.Messaging.Events.Input
 	[Serializable]
 	public class KeyReleased : KeyPressed
 	{
-		public KeyReleased(object sender, KeyShortcut shortcut) : base(sender, shortcut) { }
+		public KeyReleased(object sender, KeyboardInput shortcut) : base(sender, shortcut) { }
 	}
 }

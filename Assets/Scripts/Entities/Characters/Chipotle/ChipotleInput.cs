@@ -67,28 +67,6 @@ namespace Game.Entities.Characters.Chipotle
 
 		private Dictionary<string, Action> _gameMenuCommands;
 
-		private void Update() => WatchClipboard();
-
-		private void WatchClipboard()
-		{
-			return;
-			// Jump to coords in clipboard whenever the clipboard content changes.
-			if (!Settings.TestCommandsEnabled)
-				return;
-
-			string clipboard = GUIUtility.systemCopyBuffer;
-			if (clipboard != _lastClipboardText)
-			{
-				if (GoToClipboardCoords())
-				{
-					_lastClipboardText = clipboard;
-					WindowHandler.FocusGameWindow();
-				}
-			}
-		}
-
-		private string _lastClipboardText;
-
 		private void OnGameMenuOptionselected(GameMenuOptionselected message)
 		{
 			Action action = _gameMenuCommands[message.OptionId];
@@ -112,11 +90,6 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Reports current position of the player in relative coordinates.
-		/// </summary>
-		private void SayRelativeCoordinates() => InnerMessage(new SayCoordinates(this));
-
-		/// <summary>
 		/// Sends the ListCharacter message.
 		/// </summary>
 		private void ListCharacters() => InnerMessage(new ListCharacters(this));
@@ -136,25 +109,15 @@ namespace Game.Entities.Characters.Chipotle
 			AddShortcuts(
 				new()
 				{
-					// Test commands
-					[new(KeyShortcut.Modifiers.Control, KeyCode.R)] = ResetGame,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.S)] = SayItemSize,
-					[new(KeyCode.C)] = SayRelativeCoordinates,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.T)] = SayTuttlesPosition,
-					[new(KeyCode.F11)] = SaveStartPosition,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.F11)] = RestoreStartPosition,
-					[new(KeyCode.F12)] = () => GoToClipboardCoords(),
-
-					// Other commands
 					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
+					[new(KeyboardInput.Modifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
 					[new(KeyCode.F5)] = CreatePredefinedSave,
 					[new(KeyCode.Q)] = SayCharacters,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.Q)] = ListCharacters,
+					[new(KeyboardInput.Modifiers.Shift, KeyCode.Q)] = ListCharacters,
 					[new(KeyCode.P)] = ExploreItem,
 					[new(KeyCode.R)] = SayZoneDescription,
 					[new(KeyCode.I)] = RunInventoryMenu,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.Return)] = PickUpItem,
+					[new(KeyboardInput.Modifiers.Shift, KeyCode.Return)] = PickUpItem,
 					[new(KeyCode.Tab)] = GameMenu,
 					[new(KeyCode.L)] = SayZoneSize,
 					[new(false, true, false, KeyCode.V)] = ListExits,
@@ -164,30 +127,21 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyCode.Space)] = StopCutscene,
 					[new(KeyCode.T)] = TerrainInfo,
 					[new(KeyCode.B)] = SayVisitedRegion,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.LeftArrow)] = GoLeft,
-					[new(KeyShortcut.Modifiers.Shift, KeyCode.RightArrow)] = GoRight,
+					[new(KeyboardInput.Modifiers.Shift, KeyCode.LeftArrow)] = GoLeft,
+					[new(KeyboardInput.Modifiers.Shift, KeyCode.RightArrow)] = GoRight,
 					[new(KeyCode.O)] = SayItems,
 					[new(KeyCode.K)] = SayZoneName,
 					[new(KeyCode.UpArrow)] = GoForward,
 					[new(KeyCode.DownArrow)] = GoBack,
 					[new(KeyCode.LeftArrow)] = TurnLeft,
 					[new(KeyCode.RightArrow)] = TurnRight,
-					[new(KeyShortcut.Modifiers.Control, KeyCode.LeftArrow)] = TurnSharplyLeft,
-					[new(KeyShortcut.Modifiers.Control, KeyCode.RightArrow)] = TurnSharplyRight,
-					[new(KeyShortcut.Modifiers.Control, KeyCode.DownArrow)] = TurnAround,
+					[new(KeyboardInput.Modifiers.Control, KeyCode.LeftArrow)] = TurnSharplyLeft,
+					[new(KeyboardInput.Modifiers.Control, KeyCode.RightArrow)] = TurnSharplyRight,
+					[new(KeyboardInput.Modifiers.Control, KeyCode.DownArrow)] = TurnAround,
 					[new(KeyCode.Return)] = Interact,
 				}
 			);
 
-		}
-
-		private void ResetGame() => WindowHandler.ResetGame();
-
-
-		private void SayItemSize()
-		{
-			if (Settings.TestCommandsEnabled)
-				InnerMessage(new SayItemSize(this));
 		}
 
 		/// <summary>
@@ -281,72 +235,12 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void SayZoneSize() => InnerMessage(new SayZoneSize(this));
 
-		/// <summary>
-		/// Test function to announce Tuttle's position
-		/// </summary>
-		private void SayTuttlesPosition()
-		{
-			if (!Settings.TestCommandsEnabled)
-				return;
-
-			Character tuttle = World.GetCharacter("tuttle");
-			string distance = World.GetDistance(tuttle, Owner).ToString();
-			string position = tuttle.Area.Value.Center.ToString();
-			string zone = tuttle.Zone.Name.Indexed;
-			Tolk.Speak(distance + Environment.NewLine + zone + " " + position, true);
-		}
-
-		/// <summary>
-		/// A test method that saves current position as start position.
-		/// </summary>
-		private void SaveStartPosition()
-		{
-			if (!Settings.TestCommandsEnabled)
-				return;
-
-			Settings.TestChipotleStartPosition = Owner.Center;
-			Settings.SaveSettings();
-			Tolk.Speak("Startovní pozice uložena", true);
-		}
-
-		private void RestoreStartPosition()
-		{
-			if (!Settings.TestCommandsEnabled)
-				return;
-
-			Settings.TestChipotleStartPosition = null;
-			Settings.SaveSettings();
-			Tolk.Speak("Startovní pozice obnovena", true);
-		}
-
-
 		private void SayAbsoluteCoordinates()
 		{
 			Vector2 coords = Owner.Area.Value.Center;
 			string result = coords.GetString();
 			GUIUtility.systemCopyBuffer = result;
 			InnerMessage(new SayCoordinates(this, false));
-		}
-
-		/// <summary>
-		/// Test method that moves Chipotle to coords taken from clipboard
-		/// </summary>
-		private bool GoToClipboardCoords()
-		{
-			if (!Settings.TestCommandsEnabled)
-				return false;
-
-			try
-			{
-				string coords = GUIUtility.systemCopyBuffer;
-				Vector2 target = coords.ToVector2();
-				InnerMessage(new SetPosition(this, target));
-				return true;
-			}
-			catch (Exception)
-			{
-				return false;
-			}
 		}
 
 		/// <summary>
@@ -375,7 +269,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (_cutsceneInProgress)
 				return;
 
-			HashSet<KeyShortcut> walkCommands = new()
+			HashSet<KeyboardInput> walkCommands = new()
 			{
 				new (KeyCode.LeftShift),
 				new (KeyCode.RightShift),
@@ -501,7 +395,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected override void OnKeyDown(KeyPressed message)
 		{
 			if (_cutsceneInProgress
-				&& message.Shortcut != new KeyShortcut(KeyCode.Space))
+				&& message.Shortcut != new KeyboardInput(KeyCode.Space))
 				return;
 
 			base.OnKeyDown(message);

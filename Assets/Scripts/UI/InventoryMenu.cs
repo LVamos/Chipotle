@@ -78,8 +78,8 @@ namespace Game.UI
 			// Add new key shortcuts
 			RegisterShortcuts(
 				(new(KeyCode.Return), UseObject),
-				(new(KeyShortcut.Modifiers.Control, KeyCode.Return), PlaceItem),
-				(new(KeyShortcut.Modifiers.ControlShift, KeyCode.Return), ApplyItemToTarget)
+				(new(KeyboardInput.Modifiers.Control, KeyCode.Return), PlaceItem),
+				(new(KeyboardInput.Modifiers.ControlShift, KeyCode.Return), ApplyItemToTarget)
 			);
 		}
 

@@ -87,14 +87,14 @@ namespace Game.UI
 		/// Delegates event to event handler of active window
 		/// </summary>
 		/// <param name="shortcut">Event parameters</param>
-		public static void OnKeyDown(KeyShortcut shortcut)
+		public static void OnKeyDown(KeyboardInput shortcut)
 			=> ActiveWindow?.OnKeyDown(shortcut);
 
 		/// <summary>
 		/// Sends the KeyUp event to the current active window.
 		/// </summary>
 		/// <param name="e">Event parameters</param>
-		public static void OnKeyUp(KeyShortcut shortcut)
+		public static void OnKeyUp(KeyboardInput shortcut)
 			=> ActiveWindow?.OnKeyUp(shortcut);
 
 		/// <summary>

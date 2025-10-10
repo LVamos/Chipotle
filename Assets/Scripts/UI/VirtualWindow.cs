@@ -44,7 +44,7 @@ namespace Game.UI
 		/// <summary>
 		/// Key commands and their handlers
 		/// </summary>
-		protected Dictionary<KeyShortcut, Action> _shortcuts = new();
+		protected Dictionary<KeyboardInput, Action> _shortcuts = new();
 
 		/// <summary>
 		/// Indicates if the window is closed
@@ -78,7 +78,7 @@ namespace Game.UI
 		/// KeyDown event handler
 		/// </summary>
 		/// <param name="e">Event parameters</param>
-		public virtual void OnKeyDown(KeyShortcut shortcut)
+		public virtual void OnKeyDown(KeyboardInput shortcut)
 		{
 			if (shortcut.Control || shortcut.Key is KeyCode.LeftControl or KeyCode.RightControl)
 				Sounds.MuteSpeech();
@@ -99,7 +99,7 @@ namespace Game.UI
 		/// </summary>
 		/// <param name="e">Event parameters</param>
 		/// <remarks>Must be implemented in descendants.</remarks>
-		public virtual void OnKeyUp(KeyShortcut shortcut)
+		public virtual void OnKeyUp(KeyboardInput shortcut)
 		{ }
 
 		/// <summary>
@@ -107,9 +107,9 @@ namespace Game.UI
 		/// </summary>
 		/// <remarks>If a shortcut is already registered it'll be overriden.</remarks>
 		/// <param name="shortcuts">Set of shortcuts to be registered</param>
-		protected void RegisterShortcuts(params (KeyShortcut shortcut, Action action)[] shortcuts)
+		protected void RegisterShortcuts(params (KeyboardInput shortcut, Action action)[] shortcuts)
 		{
-			foreach ((KeyShortcut shortcut, Action action) shortcut in shortcuts)
+			foreach ((KeyboardInput shortcut, Action action) shortcut in shortcuts)
 				_shortcuts[shortcut.shortcut] = shortcut.action;
 		}
 

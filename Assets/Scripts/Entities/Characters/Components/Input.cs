@@ -29,7 +29,7 @@ namespace Game.Entities.Characters.Components
 		/// Registered keyboard shortcuts and corresponding actions
 		/// </summary>
 		[ProtoIgnore]
-		protected Dictionary<KeyShortcut, Action> _shortcuts;
+		protected Dictionary<KeyboardInput, Action> _shortcuts;
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -68,6 +68,6 @@ namespace Game.Entities.Characters.Components
 		/// Registers keyboard shortcuts and corresponding actions.
 		/// </summary>
 		/// <param name="shortcuts">Set of shortcuts to be registered</param>
-		protected void AddShortcuts(Dictionary<KeyShortcut, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+		protected void AddShortcuts(Dictionary<KeyboardInput, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
 	}
 }

@@ -303,7 +303,7 @@ namespace Game.UI
 			_messagingEnabled = true;
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),
-				(new(KeyShortcut.Modifiers.Control, KeyCode.Y), MainScript.SendFeedback)
+				(new(KeyboardInput.Modifiers.Control, KeyCode.Y), MainScript.SendFeedback)
 			);
 		}
 
@@ -311,7 +311,7 @@ namespace Game.UI
 		/// Processes the KeyDown message.
 		/// </summary>
 		/// <param name="e">The message to be handled</param>
-		public override void OnKeyDown(KeyShortcut shortcut)
+		public override void OnKeyDown(KeyboardInput shortcut)
 		{
 			base.OnKeyDown(shortcut);
 
@@ -324,7 +324,7 @@ namespace Game.UI
 		/// Processes the KeyUpmessage.
 		/// </summary>
 		/// <param name="shortcut">The message to be handled</param>
-		public override void OnKeyUp(KeyShortcut shortcut)
+		public override void OnKeyUp(KeyboardInput shortcut)
 		{
 			_debugManager.OnKeyUp(shortcut);
 			if (World.GameInProgress && World.Player != null)

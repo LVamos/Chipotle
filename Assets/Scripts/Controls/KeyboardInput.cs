@@ -8,7 +8,7 @@ namespace Game.UI
 	/// Represents a keyboard shortcut.
 	/// </summary>
 	[Serializable]
-	public struct KeyShortcut
+	public struct KeyboardInput
 	{
 		/// <summary>
 		/// Indicates whether alt key was pressed.
@@ -35,7 +35,7 @@ namespace Game.UI
 		/// </summary>
 		/// <param name="modifiers">Key modifiers</param>
 		/// <param name="key">The pressed key</param>
-		public KeyShortcut(Modifiers modifiers, KeyCode key)
+		public KeyboardInput(Modifiers modifiers, KeyCode key)
 		{
 			Control = modifiers.HasFlag(Modifiers.Control);
 			Alt = modifiers.HasFlag(Modifiers.Alt);
@@ -50,7 +50,7 @@ namespace Game.UI
 		/// <param name="shift">Specifies if the shift key was pressed</param>
 		/// <param name="alt">Specifies if the alt key was pressed</param>
 		/// <param name="key">Value of pressed keys</param>
-		public KeyShortcut(bool control, bool shift, bool alt, KeyCode key)
+		public KeyboardInput(bool control, bool shift, bool alt, KeyCode key)
 		{
 			Control = control;
 			Shift = shift;
@@ -62,7 +62,7 @@ namespace Game.UI
 		/// Constructor
 		/// </summary>
 		/// <param name="key">Value of pressed key</param>
-		public KeyShortcut(KeyCode key) : this(false, false, false, key)
+		public KeyboardInput(KeyCode key) : this(false, false, false, key)
 		{
 		}
 
@@ -114,7 +114,7 @@ namespace Game.UI
 		/// <param name="k1">First operand</param>
 		/// <param name="k2">second operand</param>
 		/// <returns>True if the operands are inequal</returns>
-		public static bool operator !=(KeyShortcut k1, KeyShortcut k2)
+		public static bool operator !=(KeyboardInput k1, KeyboardInput k2)
 			=> !(k1 == k2);
 
 		/// <summary>
@@ -123,7 +123,7 @@ namespace Game.UI
 		/// <param name="k1">First operand</param>
 		/// <param name="k2">second operand</param>
 		/// <returns>True if the operands are equal</returns>
-		public static bool operator ==(KeyShortcut k1, KeyShortcut k2)
+		public static bool operator ==(KeyboardInput k1, KeyboardInput k2)
 			=> (k1.Control == k2.Control && k1.Shift == k2.Shift && k1.Alt == k2.Alt && k1.Key == k2.Key);
 
 		/// <summary>
@@ -132,7 +132,7 @@ namespace Game.UI
 		/// <param name="obj">Another object to be checked</param>
 		/// <returns>True if both instances are equal</returns>
 		public override bool Equals(System.Object obj)
-			=> (obj is KeyShortcut shortcut && this == shortcut);
+			=> (obj is KeyboardInput shortcut && this == shortcut);
 
 		/// <summary>
 		/// Returns a hash code for the instance.

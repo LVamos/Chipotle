@@ -12,14 +12,14 @@ namespace Game.Messaging.Events.Input
 		/// <summary>
 		/// The key combination that was pressed
 		/// </summary>
-		public readonly KeyShortcut Shortcut;
+		public readonly KeyboardInput Shortcut;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
 		/// <param name="shortcut">The key combination that was pressed</param>
-		public KeyPressed(object sender, KeyShortcut shortcut) : base(sender)
+		public KeyPressed(object sender, KeyboardInput shortcut) : base(sender)
 			=> Shortcut = shortcut;
 	}
 }

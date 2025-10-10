@@ -46,7 +46,7 @@ public class KeyboardHandler : MonoBehaviour
 		if (key == KeyCode.None)
 			return;
 
-		KeyShortcut shortcut = new(shift: shift, alt: alt, control: ctrl, key: key);
+		KeyboardInput shortcut = new(shift: shift, alt: alt, control: ctrl, key: key);
 		WindowHandler.OnKeyDown(shortcut);
 	}
 
@@ -68,7 +68,7 @@ public class KeyboardHandler : MonoBehaviour
 		if (key == KeyCode.None)
 			return;
 
-		KeyShortcut shortcut = new(shift: shift, alt: alt, control: ctrl, key: key);
+		KeyboardInput shortcut = new(shift: shift, alt: alt, control: ctrl, key: key);
 		WindowHandler.OnKeyUp(shortcut);
 	}
 }
