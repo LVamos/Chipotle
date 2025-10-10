@@ -25,15 +25,15 @@ namespace Game.Controls
 			Trigger = null;
 			TriggerThreshold = null;
 
-			if (Enum.TryParse(identifier, true, out DualSenseButton btn))
+			if (Enum.TryParse(identifier, true, out DualSenseButton button))
 			{
-				Button = btn;
+				Button = button;
 				return;
 			}
 
-			if (Enum.TryParse(identifier, true, out DualSenseTrigger trg))
+			if (Enum.TryParse(identifier, true, out DualSenseTrigger trigger))
 			{
-				Trigger = trg;
+				Trigger = trigger;
 				TriggerThreshold = 1.0f; // full press by default
 				return;
 			}
