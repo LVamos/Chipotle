@@ -13,6 +13,13 @@ namespace Game.UI
 	/// </summary>
 	public static class WindowHandler
 	{
+		public static void OpenDebugSettings()
+		{
+			var window = DebugSettingsWindow.CreateInstance();
+			OpenModalWindow(window);
+		}
+
+
 		public static void ResetGame()
 		{
 			Tolk.Speak("Restartuju hru");

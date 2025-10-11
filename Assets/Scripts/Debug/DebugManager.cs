@@ -31,6 +31,9 @@ namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		[DebugCommand(DebugCommand.OpenSettings)]
+		public void OpenSettings() => WindowHandler.OpenDebugSettings();
+
 		[DebugCommand(DebugCommand.OpenLog)]
 		public void OpenLog() => Logger.OpenLog();
 

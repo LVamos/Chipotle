@@ -12,6 +12,42 @@ namespace Game.UI
 	/// </summary>
 	public class MenuWindow : VirtualWindow
 	{
+		/// <summary>
+		/// Searches for the first item that starts with the given prefix, starting at 'start' and wrapping once.
+		/// </summary>
+		private int FindMatch(int start, string prefix)
+		{
+			if (string.IsNullOrEmpty(prefix))
+				return -1;
+
+			int count = _items.Count;
+
+			// First pass: from start to end
+			for (int i = start; i < count; i++)
+			{
+				string item = _items[i][_searchIndex]?.PrepareForIndexing();
+				if (!string.IsNullOrEmpty(item) && item.StartsWith(prefix))
+					return i;
+			}
+
+			// Second pass: from 0 to start-1
+			for (int i = 0; i < start; i++)
+			{
+				string item = _items[i][_searchIndex]?.PrepareForIndexing();
+				if (!string.IsNullOrEmpty(item) && item.StartsWith(prefix))
+					return i;
+			}
+
+			return -1;
+		}
+
+		private string _typeSearchBuffer = string.Empty;
+
+
+		private const float _typeTimeout = 1f; // seconds
+
+		private float _lastTypeAt;
+
 		public override void Close()
 		{
 			FinalizeMenu();
@@ -325,19 +361,41 @@ namespace Game.UI
 		}
 
 		/// <summary>
-		/// Finds an item beginning with the specified letter and moves the cursor to it.
+		/// Finds an item using incremental type-to-select (Windows ListView-like).
+		/// - Builds a time-limited search buffer (prefix match, case-insensitive).
+		/// - Typing the same single character within timeout cycles through matches.
+		/// - Search starts after the current item and wraps to the top.
 		/// </summary>
-		/// <param name="letter">First letter of the requested item</param>
+		/// <param name="letter">Pressed character</param>
 		protected void Navigate(char letter)
 		{
-			int result = -1;
-			for (int i = 0; i < _items.Count && result == -1; i++)
-			{
-				string item = _items[i][_searchIndex].PrepareForIndexing();
+			if (_items == null || _items.Count == 0)
+				return;
 
-				if (item[0] == letter)
-					result = i;
+			// Reset buffer when timed out
+			float now = Time.unscaledTime;
+			bool within = now - _lastTypeAt <= _typeTimeout;
+			_lastTypeAt = now;
+
+			char ch = char.ToLowerInvariant(letter);
+			if (!within)
+				_typeSearchBuffer = string.Empty;
+
+			// Cycle on repeated single character within timeout, otherwise extend buffer
+			string search;
+			if (within && _typeSearchBuffer.Length == 1 && _typeSearchBuffer[0] == ch)
+				search = _typeSearchBuffer; // cycle through same-first-letter items
+			else
+			{
+				if (!within)
+					_typeSearchBuffer = string.Empty;
+				_typeSearchBuffer += ch;
+				search = _typeSearchBuffer;
 			}
+
+			// Start from the next item after current selection
+			int start = IndexOffEdge() ? 0 : Index + 1;
+			int result = FindMatch(start, search);
 
 			if (result != -1)
 			{
@@ -345,5 +403,6 @@ namespace Game.UI
 				SayItem();
 			}
 		}
+
 	}
 }

@@ -8,6 +8,7 @@ namespace Game.Debug
 {
 	public enum DebugCommand
 	{
+		OpenSettings,
 		OpenLog,
 		SayItemSize,
 		SayRelativeCoordinates,
