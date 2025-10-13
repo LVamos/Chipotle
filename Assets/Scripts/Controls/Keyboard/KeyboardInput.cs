@@ -4,7 +4,7 @@ using System;
 
 using UnityEngine;
 
-namespace Game.UI
+namespace Game.Controls.Keyboard
 {
 	/// <summary>
 	/// Represents a keyboard shortcut.

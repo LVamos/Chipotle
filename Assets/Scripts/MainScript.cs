@@ -1,6 +1,7 @@
 using DavyKager;
 
 using Game.Audio;
+using Game.UI;
 
 using Microsoft.VisualBasic;
 
@@ -24,6 +25,9 @@ namespace Game
 	/// </summary>
 	public static class MainScript
 	{
+		public const string MacroPath = @"Assets\Resources\Data\Debug\Macros";
+
+
 		public static bool GameLoaded;
 		public static string SoundPath = "Data/Sounds";
 
@@ -372,6 +376,7 @@ Application.Quit();
 
 			try
 			{
+				WindowHandler.Initialize();
 				Logger.Initialize(MainScript.LogPath);
 				Tolk.Load();
 				Tolk.TrySAPI(false);

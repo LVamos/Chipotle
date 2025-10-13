@@ -1,10 +1,17 @@
 ﻿using DavyKager;
 
 using Game.Audio;
+using Game.Controls.Keyboard;
+using Game.Debug;
+
+using Microsoft.VisualBasic;
+using Microsoft.VisualBasic;
 
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+
+using UnityEditor;
 
 namespace Game.UI
 {
@@ -13,6 +20,21 @@ namespace Game.UI
 	/// </summary>
 	public static class WindowHandler
 	{
+		public static void Initialize() => CreateDebugManager();
+
+		private static void CreateDebugManager() => _debugManager = DebugManager.CreateInstance();
+
+		public static string InputBox(string prompt, string title, string defaultValue = "")
+		{
+			string input = null;
+			try
+			{
+				input = Interaction.InputBox(prompt, title, defaultValue);
+			}
+			catch (Exception) { }
+			return input;
+		}
+
 		public static void OpenDebugSettings()
 		{
 			var window = DebugSettingsWindow.CreateInstance();
@@ -95,14 +117,22 @@ namespace Game.UI
 		/// </summary>
 		/// <param name="shortcut">Event parameters</param>
 		public static void OnKeyDown(KeyboardInput shortcut)
-			=> ActiveWindow?.OnKeyDown(shortcut);
+		{
+			_debugManager.OnKeyDown(shortcut);
+			ActiveWindow?.OnKeyDown(shortcut);
+		}
 
 		/// <summary>
 		/// Sends the KeyUp event to the current active window.
 		/// </summary>
 		/// <param name="e">Event parameters</param>
 		public static void OnKeyUp(KeyboardInput shortcut)
-			=> ActiveWindow?.OnKeyUp(shortcut);
+		{
+			_debugManager.OnKeyUp(shortcut);
+			ActiveWindow?.OnKeyUp(shortcut);
+		}
+
+		private static DebugManager _debugManager;
 
 		/// <summary>
 		/// Opens virtual modal window

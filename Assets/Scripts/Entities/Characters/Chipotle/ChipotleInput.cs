@@ -1,6 +1,7 @@
 ﻿using DavyKager;
 
 using Game.Controls;
+using Game.Controls.Keyboard;
 using Game.Messaging.Commands;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.GameManagement;

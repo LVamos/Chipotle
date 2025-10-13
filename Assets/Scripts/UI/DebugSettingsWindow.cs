@@ -1,6 +1,7 @@
 using DavyKager;
 
 using Game;
+using Game.Controls.Keyboard;
 
 using Microsoft.VisualBasic;
 
@@ -70,9 +71,7 @@ namespace Game.UI
 		private void PopulateList()
 		{
 			_entries = new List<SettingEntry>();
-
 			List<List<string>> items = new List<List<string>>();
-
 			BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
 			Type settingsType = typeof(Settings);
 
@@ -96,28 +95,6 @@ namespace Game.UI
 					DataType = fieldType,
 					Getter = () => f.GetValue(null),
 					Setter = v => f.SetValue(null, v)
-				};
-				_entries.Add(entry);
-				items.Add(new List<string> { entry.Name, FormatValue(entry.Getter()) });
-			}
-
-			// Properties (public set required)
-			PropertyInfo[] props = settingsType.GetProperties(flags);
-			foreach (PropertyInfo p in props)
-			{
-				if (p.GetMethod == null || p.SetMethod == null || !p.SetMethod.IsPublic)
-					continue;
-
-				Type propType = p.PropertyType;
-				if (!supported.Contains(propType))
-					continue;
-
-				SettingEntry entry = new()
-				{
-					Name = p.Name,
-					DataType = propType,
-					Getter = () => p.GetValue(null, null),
-					Setter = v => p.SetValue(null, v, null)
 				};
 				_entries.Add(entry);
 				items.Add(new List<string> { entry.Name, FormatValue(entry.Getter()) });

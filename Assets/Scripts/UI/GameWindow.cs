@@ -20,6 +20,7 @@ using UnityEngine;
 
 using Message = Game.Messaging.Message;
 using Game.Controls;
+using Game.Controls.Keyboard;
 
 namespace Game.UI
 {
@@ -96,14 +97,6 @@ namespace Game.UI
 			return window;
 		}
 
-		private void CreateDebugManager()
-		{
-			GameObject obj = new(nameof(DebugManager));
-			_debugManager = obj.AddComponent<DebugManager>();
-			_debugManager.Initialize();
-		}
-
-		private DebugManager _debugManager;
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -299,8 +292,6 @@ namespace Game.UI
 		/// </summary>
 		public void Initialize()
 		{
-			CreateDebugManager();
-
 			_messagingEnabled = true;
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),
@@ -316,7 +307,6 @@ namespace Game.UI
 		{
 			base.OnKeyDown(shortcut);
 
-			_debugManager.OnKeyDown(shortcut);
 			if (World.GameInProgress)
 				World.Player.TakeMessage(new KeyPressed(this, shortcut));
 		}
@@ -327,7 +317,6 @@ namespace Game.UI
 		/// <param name="shortcut">The message to be handled</param>
 		public override void OnKeyUp(KeyboardInput shortcut)
 		{
-			_debugManager.OnKeyUp(shortcut);
 			if (World.GameInProgress && World.Player != null)
 				World.Player.TakeMessage(new KeyReleased(this, shortcut));
 		}

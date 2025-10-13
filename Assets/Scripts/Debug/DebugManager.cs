@@ -5,11 +5,14 @@ using game.debug;
 using Game;
 using Game.Controls;
 using Game.Controls.DualSense;
+using Game.Controls.Keyboard;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Movement;
 using Game.Terrain;
 using Game.UI;
+
+using Microsoft.VisualBasic;
 
 using System;
 using System.Collections.Generic;
@@ -31,6 +34,139 @@ namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		public static DebugManager CreateInstance()
+		{
+			GameObject obj = new(nameof(DebugManager));
+			var manager = obj.AddComponent<DebugManager>();
+			manager.Initialize();
+			return manager;
+		}
+
+		/// <summary>
+		/// Methods considered as macro-control (used to filter them out from recording)
+		/// </summary>
+		private HashSet<MethodInfo> _macroControlMethods;
+
+		private MacroRecorder _macroRecorder;
+		private MacroPlayer _macroPlayer;
+
+		private void BuildMacroControlSet()
+		{
+			_macroControlMethods.Clear();
+			var flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+			TryAddMacroMethod(flags, nameof(StartMacroRecording));
+			TryAddMacroMethod(flags, nameof(StopMacroRecording));
+			TryAddMacroMethod(flags, nameof(PlayMacroPrompt));
+			TryAddMacroMethod(flags, nameof(PlayMacroByName));
+		}
+
+		private void InitMacroSupport()
+		{
+			_macroRecorder = gameObject.AddComponent<MacroRecorder>();
+			_macroPlayer = gameObject.AddComponent<MacroPlayer>();
+			_macroPlayer.Sender = this;
+
+			_macroControlMethods = new HashSet<MethodInfo>();
+			BuildMacroControlSet();
+		}
+
+		private bool IsMacroControlShortcut(KeyboardInput shortcut)
+		{
+			if (_keyboardCommands.TryGetValue(shortcut, out var action) && action != null)
+			{
+				var mi = action.Method;
+				if (_macroControlMethods.Contains(mi))
+					return true;
+			}
+			return false;
+		}
+
+		[DebugCommand(DebugCommand.PlayMacroPrompt)]
+		private void PlayMacroPrompt()
+		{
+			if (_macroRecorder != null && _macroRecorder.IsRecording)
+				return;
+
+			// English: Gather macro files from configured macro folder
+			string folder = MainScript.MacroPath;
+			if (!Directory.Exists(folder))
+			{
+				Tolk.Speak("Složka s makry neexistuje", true);
+				return;
+			}
+
+			// English: Get *.txt macro files and strip extensions
+			string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.TopDirectoryOnly);
+			List<string> names = files
+				.Select(Path.GetFileNameWithoutExtension)
+				.Where(n => !string.IsNullOrWhiteSpace(n))
+				.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase)
+				.ToList();
+
+			if (names.Count == 0)
+			{
+				Tolk.Speak("Žádná makra nenalezena", true);
+				return;
+			}
+
+			// English: Build menu items (single-column, macro names)
+			List<List<string>> items = names.Select(n => new List<string> { n }).ToList();
+
+			// English: Open menu and run selected macro in the callback
+			MenuParameters parameters = new(
+				items: items,
+				introText: "Vyber makro",
+				wrappingAllowed: false,
+				menuClosed: (index) =>
+				{
+					if (index == -1)
+						return;
+
+					string selected = items[index][0];
+					PlayMacroByName(selected);
+				}
+			);
+			WindowHandler.Menu(parameters);
+		}
+
+		[DebugCommand(DebugCommand.StartMacroRecording)]
+		private void StartMacroRecording()
+		{
+			if (_macroPlayer != null && _macroPlayer.IsPlaying)
+				return;
+
+			_macroRecorder?.StartRecording();
+		}
+
+		[DebugCommand(DebugCommand.StopMacroRecording)]
+		private void StopMacroRecording()
+		{
+			_macroRecorder?.StopAndSave();
+		}
+
+		private void TryAddMacroMethod(BindingFlags flags, string name)
+		{
+			MethodInfo mi = GetType().GetMethod(name, flags);
+			if (mi != null) _macroControlMethods.Add(mi);
+		}
+
+
+
+
+		private void PlayMacroByName(string name = null)
+		{
+			if (_macroRecorder != null && _macroRecorder.IsRecording)
+				return;
+
+			if (string.IsNullOrWhiteSpace(name))
+				return;
+
+			_macroPlayer?.Play(name);
+		}
+
+
+
+
 		[DebugCommand(DebugCommand.OpenSettings)]
 		public void OpenSettings() => WindowHandler.OpenDebugSettings();
 
@@ -41,16 +177,30 @@ namespace Game.Debug
 		{
 			base.OnKeyDown(shortcut);
 
+			if (_macroRecorder != null && _macroRecorder.IsRecording && !IsMacroControlShortcut(shortcut))
+				_macroRecorder.FeedKeyDown(shortcut);
+
 			Action action = null;
 			if (_keyboardCommands.TryGetValue(shortcut, out action))
 				action();
+		}
+
+		/// <summary>
+		/// KeyUp event handler. Forwards the shortcut to MacroRecorder when recording and not a macro-control shortcut.
+		/// </summary>
+		public override void OnKeyUp(KeyboardInput shortcut)
+		{
+			base.OnKeyUp(shortcut);
+
+			if (_macroRecorder != null && _macroRecorder.IsRecording && !IsMacroControlShortcut(shortcut))
+				_macroRecorder.FeedKeyUp(shortcut);
 		}
 
 		private Dictionary<KeyboardInput, Action> _keyboardCommands = new();
 		private Dictionary<DualSenseInput, Action> _gamepadCommands = new();
 
 		private Character Tuttle => World.GetCharacter("tuttle");
-		private Character Player => Player;
+		private Character Player => World.Player;
 
 		/// <summary>
 		/// A test method that saves current position as start position.
@@ -137,6 +287,7 @@ namespace Game.Debug
 			base.Initialize();
 			LoadWalkablePoints();
 			LoadCommands();
+			InitMacroSupport();
 		}
 
 		private void LoadCommands()

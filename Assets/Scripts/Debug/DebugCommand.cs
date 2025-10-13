@@ -8,6 +8,9 @@ namespace Game.Debug
 {
 	public enum DebugCommand
 	{
+		StopMacroRecording,
+		StartMacroRecording,
+		PlayMacroPrompt,
 		OpenSettings,
 		OpenLog,
 		SayItemSize,
