@@ -6,6 +6,7 @@ using Game;
 using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
+using Game.Debug.integration;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Movement;
@@ -34,6 +35,18 @@ namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		private void CreatePipeServer()
+		{
+			GameObject obj = new(nameof(MapEditorPipeServer));
+			_pipeServer = obj.AddComponent<MapEditorPipeServer>();
+			_pipeServer.StartServer();
+		}
+
+		MapEditorPipeServer _pipeServer;
+
+		[DebugCommand(DebugCommand.OpenEditorOnPoint)]
+		private void OpenEditorOnPoint() => _pipeServer.SendJumpToCoordinates(Player.Center);
+
 		public static DebugManager CreateInstance()
 		{
 			GameObject obj = new(nameof(DebugManager));
@@ -268,13 +281,15 @@ namespace Game.Debug
 			{
 				string coords = GUIUtility.systemCopyBuffer;
 				Vector2 target = coords.ToVector2();
-				SetPosition message = new(this, target);
-				Player.TakeMessage(message);
-				return;
+				GoToCoords(target);
 			}
-			catch (Exception)
-			{
-			}
+			catch (Exception) { }
+		}
+
+		public void GoToCoords(Vector2 coords)
+		{
+			SetPosition message = new(this, coords);
+			Player.TakeMessage(message);
 		}
 
 		private const string _walkablePointsPath = "WalkablePoints.yaml";
@@ -288,6 +303,7 @@ namespace Game.Debug
 			LoadWalkablePoints();
 			LoadCommands();
 			InitMacroSupport();
+			CreatePipeServer();
 		}
 
 		private void LoadCommands()

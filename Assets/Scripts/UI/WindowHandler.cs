@@ -22,7 +22,7 @@ namespace Game.UI
 	{
 		public static void Initialize() => CreateDebugManager();
 
-		private static void CreateDebugManager() => _debugManager = DebugManager.CreateInstance();
+		private static void CreateDebugManager() => DebugManager = DebugManager.CreateInstance();
 
 		public static string InputBox(string prompt, string title, string defaultValue = "")
 		{
@@ -118,7 +118,7 @@ namespace Game.UI
 		/// <param name="shortcut">Event parameters</param>
 		public static void OnKeyDown(KeyboardInput shortcut)
 		{
-			_debugManager.OnKeyDown(shortcut);
+			DebugManager.OnKeyDown(shortcut);
 			ActiveWindow?.OnKeyDown(shortcut);
 		}
 
@@ -128,11 +128,11 @@ namespace Game.UI
 		/// <param name="e">Event parameters</param>
 		public static void OnKeyUp(KeyboardInput shortcut)
 		{
-			_debugManager.OnKeyUp(shortcut);
+			DebugManager.OnKeyUp(shortcut);
 			ActiveWindow?.OnKeyUp(shortcut);
 		}
 
-		private static DebugManager _debugManager;
+		public static DebugManager DebugManager;
 
 		/// <summary>
 		/// Opens virtual modal window
