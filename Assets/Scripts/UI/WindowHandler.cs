@@ -20,8 +20,11 @@ namespace Game.UI
 	/// </summary>
 	public static class WindowHandler
 	{
-		public static void Initialize() => CreateDebugManager();
-
+		public static void Initialize()
+		{
+			CreateDebugManager();
+			GlobalFocusHotkey.Install();
+		}
 		private static void CreateDebugManager() => DebugManager = DebugManager.CreateInstance();
 
 		public static string InputBox(string prompt, string title, string defaultValue = "")
