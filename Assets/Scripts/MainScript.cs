@@ -376,8 +376,8 @@ Application.Quit();
 
 			try
 			{
-				WindowHandler.Initialize();
 				Logger.Initialize(MainScript.LogPath);
+				WindowHandler.Initialize();
 				Tolk.Load();
 				Tolk.TrySAPI(false);
 				DisableJAWSKeyHook();

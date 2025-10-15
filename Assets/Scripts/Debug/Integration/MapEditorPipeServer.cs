@@ -112,13 +112,27 @@ namespace Game.Debug.integration
 			if (string.IsNullOrWhiteSpace(line)) return;
 
 			string trimmed = line.Trim();
-			if (TryParseJumpToCoordinates(trimmed, out var coords))
+			Vector2 coords = default;
+			if (TryParseJumpToCoordinates(trimmed, out coords))
 				EnqueueMainThread(() => InvokeGoToCoords(coords));
+			else if (TryParseMoveTuttleToCoordinates(trimmed, out coords))
+				EnqueueMainThread(() => InvokeMoveTuttleToCoords(coords));
+
+		}
+
+		private void InvokeMoveTuttleToCoords(Vector2 coordinates)
+		{
+			try
+			{
+				WindowHandler.DebugManager.MoveTuttleToCoords(coordinates);
+				WindowHandler.FocusGameWindow();
+			}
+			catch { }
 		}
 
 		private void EnqueueMainThread(Action action) => _mainThreadActions.Enqueue(action);
 
-		private bool TryParseJumpToCoordinates(string message, out UnityEngine.Vector2 coordinates)
+		private bool TryParseJumpToCoordinates(string message, out Vector2 coordinates)
 		{
 			coordinates = default;
 
@@ -131,11 +145,28 @@ namespace Game.Debug.integration
 			if (!float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float x)) return false;
 			if (!float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float y)) return false;
 
-			coordinates = new UnityEngine.Vector2(x, y);
+			coordinates = new Vector2(x, y);
 			return true;
 		}
 
-		private void InvokeGoToCoords(UnityEngine.Vector2 coordinates)
+		private bool TryParseMoveTuttleToCoordinates(string message, out Vector2 coordinates)
+		{
+			coordinates = default;
+
+			if (!message.StartsWith("MoveTuttleToCoords", StringComparison.OrdinalIgnoreCase))
+				return false;
+
+			string[] parts = message.Split(';');
+			if (parts.Length < 3) return false;
+
+			if (!float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float x)) return false;
+			if (!float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float y)) return false;
+
+			coordinates = new Vector2(x, y);
+			return true;
+		}
+
+		private void InvokeGoToCoords(Vector2 coordinates)
 		{
 			try
 			{
@@ -145,7 +176,7 @@ namespace Game.Debug.integration
 			catch { }
 		}
 
-		public void SendJumpToCoordinates(UnityEngine.Vector2 coordinates)
+		public void SendJumpToCoordinates(Vector2 coordinates)
 		{
 			string message = $"JumpToCoordinates;{coordinates.x.ToString(CultureInfo.InvariantCulture)};{coordinates.y.ToString(CultureInfo.InvariantCulture)}";
 			SendCommand(message);

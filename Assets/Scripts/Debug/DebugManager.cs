@@ -35,6 +35,28 @@ namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		[DebugCommand(DebugCommand.OpenTuttleInEditor)]
+		private void OpenTuttleInEditor()
+		{
+			_pipeServer.SendJumpToCoordinates(Tuttle.Center);
+		}
+
+		[DebugCommand(DebugCommand.MoveTuttleToClipboardCoords)]
+		public void MoveTuttleToClipboardCoords()
+		{
+			try
+			{
+				MoveTuttleToCoords(GUIUtility.systemCopyBuffer.ToVector2());
+			}
+			catch (Exception) { }
+		}
+
+		public void MoveTuttleToCoords(Vector2 coords)
+		{
+			SetPosition message = new(this, coords);
+			Tuttle.TakeMessage(message);
+		}
+
 		private void CreatePipeServer()
 		{
 			GameObject obj = new(nameof(MapEditorPipeServer));

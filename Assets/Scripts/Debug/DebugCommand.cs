@@ -21,6 +21,8 @@ namespace Game.Debug
 		ResetGame,
 		RestoreStartPosition,
 		JumpToZoneMenu,
-		GoToClipboardCoords
+		GoToClipboardCoords,
+		MoveTuttleToClipboardCoords,
+		OpenTuttleInEditor
 	}
 }
