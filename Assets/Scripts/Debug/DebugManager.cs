@@ -35,17 +35,32 @@ namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		Vector2? _lastPlayerPosition;
+
+		private void Update()
+		{
+			if (!Settings.TestCommandsEnabled)
+				return;
+
+			if (_lastPlayerPosition != Player.Center)
+			{
+				_lastPlayerPosition = Player.Center;
+				if (DebugPointManager.GetPoints().TryGetValue(Player.Center, out string name))
+					Tolk.Speak(name, true);
+			}
+		}
+
 		[DebugCommand(DebugCommand.JumpToDebugPoint)]
 		private void JumpToDebugPoint()
 		{
-			List<DebugPoint> points = DebugPointManager.LoadPoints();
+			Dictionary<Vector2, string> points = DebugPointManager.GetPoints();
 			if (points == null || points.Count == 0)
 			{
 				Tolk.Speak("Žádné uložené body", true);
 				return;
 			}
 
-			List<List<string>> items = points.Select(p => new List<string> { p.Name }).ToList();
+			List<List<string>> items = points.Values.Select(p => new List<string> { p }).ToList();
 
 			MenuParameters parameters = new(
 				items: items,
@@ -54,8 +69,8 @@ namespace Game.Debug
 				menuClosed: (index) =>
 				{
 					if (index == -1) return;
-					DebugPoint selected = points[index];
-					GoToCoords(selected.Position);
+					Vector2 selected = points.Keys.ElementAt(index);
+					GoToCoords(selected);
 				}
 			);
 			WindowHandler.Menu(parameters);
@@ -315,7 +330,6 @@ namespace Game.Debug
 			Tolk.Speak("Startovní pozice obnovena", true);
 		}
 
-		private string _lastClipboardText;
 
 		/// <summary>
 		/// Test method that moves Chipotle to coords taken from clipboard
