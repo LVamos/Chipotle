@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Game.Debug
+﻿namespace Game.Debug
 {
 	public enum DebugCommand
 	{
@@ -23,6 +17,8 @@ namespace Game.Debug
 		JumpToZoneMenu,
 		GoToClipboardCoords,
 		MoveTuttleToClipboardCoords,
-		OpenTuttleInEditor
+		OpenTuttleInEditor,
+		PlaceDebugPoint,
+		JumpToDebugPoint
 	}
 }

@@ -35,6 +35,33 @@ namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		[DebugCommand(DebugCommand.JumpToDebugPoint)]
+		private void JumpToDebugPoint()
+		{
+			List<DebugPoint> points = DebugPointManager.LoadPoints();
+			if (points == null || points.Count == 0)
+			{
+				Tolk.Speak("Žádné uložené body", true);
+				return;
+			}
+
+			List<List<string>> items = points.Select(p => new List<string> { p.Name }).ToList();
+
+			MenuParameters parameters = new(
+				items: items,
+				introText: "Vyber bod",
+				wrappingAllowed: false,
+				menuClosed: (index) =>
+				{
+					if (index == -1) return;
+					DebugPoint selected = points[index];
+					GoToCoords(selected.Position);
+				}
+			);
+			WindowHandler.Menu(parameters);
+		}
+
+
 		[DebugCommand(DebugCommand.OpenTuttleInEditor)]
 		private void OpenTuttleInEditor()
 		{
@@ -69,10 +96,13 @@ namespace Game.Debug
 		[DebugCommand(DebugCommand.OpenEditorOnPoint)]
 		private void OpenEditorOnPoint() => _pipeServer.SendJumpToCoordinates(Player.Center);
 
+		[DebugCommand(DebugCommand.PlaceDebugPoint)]
+		public void PlaceDebugPoint() => DebugPointManager.PlaceDebugPoint();
+
 		public static DebugManager CreateInstance()
 		{
 			GameObject obj = new(nameof(DebugManager));
-			var manager = obj.AddComponent<DebugManager>();
+			DebugManager manager = obj.AddComponent<DebugManager>();
 			manager.Initialize();
 			GlobalFocusHotkey.Install();
 			return manager;
@@ -89,7 +119,7 @@ namespace Game.Debug
 		private void BuildMacroControlSet()
 		{
 			_macroControlMethods.Clear();
-			var flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 			TryAddMacroMethod(flags, nameof(StartMacroRecording));
 			TryAddMacroMethod(flags, nameof(StopMacroRecording));
 			TryAddMacroMethod(flags, nameof(PlayMacroPrompt));
@@ -108,9 +138,9 @@ namespace Game.Debug
 
 		private bool IsMacroControlShortcut(KeyboardInput shortcut)
 		{
-			if (_keyboardCommands.TryGetValue(shortcut, out var action) && action != null)
+			if (_keyboardCommands.TryGetValue(shortcut, out Action action) && action != null)
 			{
-				var mi = action.Method;
+				MethodInfo mi = action.Method;
 				if (_macroControlMethods.Contains(mi))
 					return true;
 			}
@@ -186,9 +216,6 @@ namespace Game.Debug
 			if (mi != null) _macroControlMethods.Add(mi);
 		}
 
-
-
-
 		private void PlayMacroByName(string name = null)
 		{
 			if (_macroRecorder != null && _macroRecorder.IsRecording)
@@ -199,9 +226,6 @@ namespace Game.Debug
 
 			_macroPlayer?.Play(name);
 		}
-
-
-
 
 		[DebugCommand(DebugCommand.OpenSettings)]
 		public void OpenSettings() => WindowHandler.OpenDebugSettings();
@@ -342,16 +366,16 @@ namespace Game.Debug
 			{
 				string yamlText = File.ReadAllText(path);
 
-				var deserializer = new DeserializerBuilder()
+				IDeserializer deserializer = new DeserializerBuilder()
 					.WithNamingConvention(PascalCaseNamingConvention.Instance)
 					.Build();
 
 				// Deserialize YAML into a dictionary: DebugCommand name → Keyboard & DualSense bindings
-				var rawMap = deserializer.Deserialize<Dictionary<string, DebugCommandBindings>>(yamlText);
+				Dictionary<string, DebugCommandBindings> rawMap = deserializer.Deserialize<Dictionary<string, DebugCommandBindings>>(yamlText);
 
 				// Get all DebugManager methods with DebugCommand attribute
-				var methods = typeof(DebugManager).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-				var commandMethods = methods
+				MethodInfo[] methods = typeof(DebugManager).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+				Dictionary<DebugCommand, Action> commandMethods = methods
 					.Select(m => new
 					{
 						Method = m,
@@ -364,27 +388,27 @@ namespace Game.Debug
 				_keyboardCommands.Clear();
 				_gamepadCommands.Clear();
 
-				foreach (var kvp in rawMap)
+				foreach (KeyValuePair<string, DebugCommandBindings> kvp in rawMap)
 				{
 					// Convert string key to DebugCommand enum
-					if (!Enum.TryParse<DebugCommand>(kvp.Key, out var command))
+					if (!Enum.TryParse<DebugCommand>(kvp.Key, out DebugCommand command))
 						continue;
 
 					// Skip if there is no method for this DebugCommand
-					if (!commandMethods.TryGetValue(command, out var action))
+					if (!commandMethods.TryGetValue(command, out Action action))
 						continue;
 
 					// Add keyboard input to dictionary if present
 					if (!string.IsNullOrEmpty(kvp.Value.Keyboard))
 					{
-						var keyboardInput = new KeyboardInput(kvp.Value.Keyboard);
+						KeyboardInput keyboardInput = new KeyboardInput(kvp.Value.Keyboard);
 						_keyboardCommands[keyboardInput] = action;
 					}
 
 					// Add DualSense input to dictionary if present
 					if (!string.IsNullOrEmpty(kvp.Value.DualSense))
 					{
-						var gamepadInput = new DualSenseInput(kvp.Value.DualSense);
+						DualSenseInput gamepadInput = new DualSenseInput(kvp.Value.DualSense);
 						_gamepadCommands[gamepadInput] = action;
 					}
 				}
@@ -403,7 +427,7 @@ namespace Game.Debug
 
 			string path = Path.Combine(MainScript.DebugPath, _walkablePointsPath);
 			string yaml = File.ReadAllText(path);
-			var raw = deserializer.Deserialize<Dictionary<string, List<float[]>>>(yaml);
+			Dictionary<string, List<float[]>> raw = deserializer.Deserialize<Dictionary<string, List<float[]>>>(yaml);
 			_walkablePoints = raw.ToDictionary(k => k.Key, v => v.Value.Select(p => new Vector2(p[0], p[1])).ToList());
 		}
 

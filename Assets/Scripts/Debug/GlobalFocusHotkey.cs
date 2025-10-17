@@ -38,10 +38,23 @@ namespace Game.Debug
 		/// </summary>
 		public static void Install()
 		{
-			if (_hookId != IntPtr.Zero) return;
+			try
+			{
+				if (_hookId != IntPtr.Zero) return;
 
-			_callback = HookCallback;
-			_hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _callback, GetModuleHandle(null), 0);
+				_callback = HookCallback;
+				_hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _callback, GetModuleHandle(null), 0);
+
+				if (_hookId == IntPtr.Zero)
+				{
+					int errorCode = Marshal.GetLastWin32Error();
+					UnityEngine.Debug.LogWarning($"Failed to install keyboard hook. Error code: {errorCode}");
+				}
+			}
+			catch (Exception ex)
+			{
+				UnityEngine.Debug.LogError($"Exception while installing keyboard hook: {ex}");
+			}
 		}
 
 		/// <summary>
@@ -49,28 +62,60 @@ namespace Game.Debug
 		/// </summary>
 		public static void Uninstall()
 		{
-			if (_hookId == IntPtr.Zero) return;
+			try
+			{
+				if (_hookId == IntPtr.Zero) return;
 
-			UnhookWindowsHookEx(_hookId);
-			_hookId = IntPtr.Zero;
-			_callback = null;
+				bool success = UnhookWindowsHookEx(_hookId);
+				if (!success)
+				{
+					int errorCode = Marshal.GetLastWin32Error();
+					UnityEngine.Debug.LogWarning($"Failed to uninstall keyboard hook. Error code: {errorCode}");
+				}
+
+				_hookId = IntPtr.Zero;
+				_callback = null;
+			}
+			catch (Exception ex)
+			{
+				UnityEngine.Debug.LogError($"Exception while uninstalling keyboard hook: {ex}");
+			}
 		}
 
 		private static IntPtr HookCallback(int code, IntPtr wParam, IntPtr lParam)
 		{
-			if (code >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
+			try
 			{
-				KBDLLHOOKSTRUCT data = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
-				if (data.vkCode == VK_C)
+				if (code >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
 				{
-					bool shift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-					bool control = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-					bool alt = (GetKeyState(VK_MENU) & 0x8000) != 0;
+					KBDLLHOOKSTRUCT data = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
+					if (data.vkCode == VK_C)
+					{
+						bool shift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+						bool control = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+						bool alt = (GetKeyState(VK_MENU) & 0x8000) != 0;
 
-					if (shift && control && alt)
-						WindowHandler.FocusGameWindow();
+						if (shift && control && alt)
+						{
+							try
+							{
+								WindowHandler.FocusGameWindow();
+							}
+							catch (Exception ex)
+							{
+								// Log but don't throw - we're in a hook callback
+								UnityEngine.Debug.LogError($"Error in FocusGameWindow: {ex}");
+							}
+						}
+					}
 				}
 			}
+			catch (Exception ex)
+			{
+				// Never throw from a hook callback - it will crash the app
+				UnityEngine.Debug.LogError($"Error in keyboard hook: {ex}");
+			}
+
 			return CallNextHookEx(_hookId, code, wParam, lParam);
 		}
 

@@ -27,7 +27,6 @@ namespace Game
 	{
 		public const string MacroPath = @"Assets\Resources\Data\Debug\Macros";
 
-
 		public static bool GameLoaded;
 		public static string SoundPath = "Data/Sounds";
 
@@ -202,7 +201,22 @@ namespace Game
 		/// <param name="ex">The exception</param>
 		public static void OnError(Exception ex, string message = null)
 		{
-			GUIUtility.systemCopyBuffer = ex.ToString();
+			if (ex == null)
+			{
+				LogException(new Exception("OnError called with null exception. Message: " + (message ?? "none")));
+				ex = new Exception("Unknown error occurred");
+			}
+
+			try
+			{
+				GUIUtility.systemCopyBuffer = ex.ToString();
+			}
+			catch (Exception copyEx)
+			{
+				// If copying to clipboard fails, just log it
+				LogException(new Exception("Failed to copy exception to clipboard", copyEx));
+			}
+
 			if (Settings.ThrowExceptions)
 				throw ex;
 			LogException(ex);
@@ -372,7 +386,14 @@ Application.Quit();
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		public static void AfterSceneLoad()
 		{
-			AppDomain.CurrentDomain.UnhandledException += (sender, e) => OnError((Exception)e.ExceptionObject);
+			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+			{
+				Exception ex = e.ExceptionObject as Exception;
+				if (ex == null && e.ExceptionObject != null)
+					ex = new Exception($"Non-exception object thrown: {e.ExceptionObject}");
+
+				OnError(ex, sender?.ToString());
+			};
 
 			try
 			{
