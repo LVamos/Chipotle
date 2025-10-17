@@ -23,8 +23,8 @@ namespace Game.UI
 		public static void Initialize()
 		{
 			CreateDebugManager();
-			GlobalFocusHotkey.Install();
 		}
+
 		private static void CreateDebugManager() => DebugManager = DebugManager.CreateInstance();
 
 		public static string InputBox(string prompt, string title, string defaultValue = "")

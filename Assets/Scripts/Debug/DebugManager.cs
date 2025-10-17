@@ -104,7 +104,6 @@ namespace Game.Debug
 			GameObject obj = new(nameof(DebugManager));
 			DebugManager manager = obj.AddComponent<DebugManager>();
 			manager.Initialize();
-			GlobalFocusHotkey.Install();
 			return manager;
 		}
 
