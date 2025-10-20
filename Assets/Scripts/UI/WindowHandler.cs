@@ -13,6 +13,8 @@ using System.Runtime.InteropServices;
 
 using UnityEditor;
 
+using UnityEditorInternal;
+
 namespace Game.UI
 {
 	/// <summary>
@@ -76,7 +78,10 @@ namespace Game.UI
 		/// </summary>
 		/// <param name="letter">The key that was pressed</param>
 		public static void OnKeyPress(char letter)
-			=> ActiveWindow.OnKeyPress(letter);
+		{
+			DebugManager.OnKeyPress(letter);
+			ActiveWindow.OnKeyPress(letter);
+		}
 
 		/// <summary>
 		/// Currently focused window

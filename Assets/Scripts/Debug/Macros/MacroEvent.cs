@@ -4,12 +4,13 @@ using Game.UI;
 namespace Game.Debug
 {
 	/// <summary>
-	/// One recorded key-down with relative delay
+	/// One recorded keyboard event with relative delay
 	/// </summary>
 	public struct MacroEvent
 	{
 		public int DelayMilliseconds;
-		public bool IsKeyDown;
+		public MacroEventType EventType;
 		public KeyboardInput Shortcut;
+		public char Character;
 	}
 }

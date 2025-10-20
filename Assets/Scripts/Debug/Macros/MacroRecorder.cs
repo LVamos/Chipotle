@@ -17,7 +17,7 @@ using UnityEngine;
 namespace Game.Debug
 {
 	/// <summary>
-	/// Records keyboard KeyDown events with inter-event delays and saves them to a text file.
+	/// Records keyboard KeyDown, KeyUp and KeyPress events with inter-event delays and saves them to a text file.
 	/// </summary>
 	public class MacroRecorder : MonoBehaviour
 	{
@@ -73,14 +73,26 @@ namespace Game.Debug
 				string path = Path.Combine(MainScript.MacroPath, name + ".txt");
 				using (var writer = new StreamWriter(path, false))
 				{
-					writer.WriteLine("MACRO;v1");
+					writer.WriteLine("MACRO;v2");
 					foreach (MacroEvent @event in _buffer)
 					{
-						// delayMs;D|U;KeyCode;Shift;Control;Alt
+						// delayMs;EventType;KeyCode|Char;Shift;Control;Alt
+						string eventType = @event.EventType switch
+						{
+							MacroEventType.KeyDown => "D",
+							MacroEventType.KeyUp => "U",
+							MacroEventType.KeyPress => "P",
+							_ => "D"
+						};
+
+						string keyOrChar = @event.EventType == MacroEventType.KeyPress
+							? @event.Character.ToString()
+							: @event.Shortcut.Key.ToString();
+
 						writer.WriteLine(string.Join(";",
 							@event.DelayMilliseconds.ToString(CultureInfo.InvariantCulture),
-							@event.IsKeyDown ? "D" : "U",
-							@event.Shortcut.Key.ToString(),
+							eventType,
+							keyOrChar,
 							@event.Shortcut.Shift ? "True" : "False",
 							@event.Shortcut.Control ? "True" : "False",
 							@event.Shortcut.Alt ? "True" : "False"
@@ -104,18 +116,19 @@ namespace Game.Debug
 		/// Feeds a KeyDown event (called by DebugManager).
 		/// </summary>
 		/// <param name="shortcut">The keyboard input to record.</param>
-		public void FeedKeyDown(KeyboardInput shortcut) => Feed(shortcut, true);
+		public void FeedKeyDown(KeyboardInput shortcut) => Feed(shortcut, MacroEventType.KeyDown);
 
 		/// <summary>
 		/// Feeds a KeyUp event (called by DebugManager).
 		/// </summary>
 		/// <param name="shortcut">The keyboard input to record.</param>
-		public void FeedKeyUp(KeyboardInput shortcut) => Feed(shortcut, false);
+		public void FeedKeyUp(KeyboardInput shortcut) => Feed(shortcut, MacroEventType.KeyUp);
 
 		/// <summary>
-		/// Records one macro event with computed delay since last recorded event.
+		/// Feeds a KeyPress event (called by DebugManager).
 		/// </summary>
-		private void Feed(KeyboardInput shortcut, bool isKeyDown)
+		/// <param name="character">The character that was pressed.</param>
+		public void FeedKeyPress(char character)
 		{
 			if (!IsRecording)
 				return;
@@ -134,7 +147,36 @@ namespace Game.Debug
 			MacroEvent macroEvent = new MacroEvent
 			{
 				DelayMilliseconds = delay,
-				IsKeyDown = isKeyDown,
+				EventType = MacroEventType.KeyPress,
+				Character = character,
+				Shortcut = new KeyboardInput(KeyCode.None)
+			};
+			_buffer.Add(macroEvent);
+		}
+
+		/// <summary>
+		/// Records one macro event with computed delay since last recorded event.
+		/// </summary>
+		private void Feed(KeyboardInput shortcut, MacroEventType eventType)
+		{
+			if (!IsRecording)
+				return;
+
+			if (_stopwatch == null)
+			{
+				_stopwatch = new Stopwatch();
+				_stopwatch.Start();
+				_lastTimeStamp = 0L;
+			}
+
+			long now = _stopwatch.ElapsedMilliseconds;
+			int delay = (int)Math.Max(0L, now - _lastTimeStamp);
+			_lastTimeStamp = now;
+
+			MacroEvent macroEvent = new MacroEvent
+			{
+				DelayMilliseconds = delay,
+				EventType = eventType,
 				Shortcut = shortcut
 			};
 			_buffer.Add(macroEvent);

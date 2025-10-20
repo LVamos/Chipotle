@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -58,7 +59,15 @@ namespace Game.Terrain
 			if (zones.IsNullOrEmpty() || zones.Count() != 2)
 				throw new ArgumentException("Invalid zones.");
 
-			Passage passage = obj.GetComponent<Passage>();
+			Passage passage = null;
+			if (_types.TryGetValue(name.Indexed, out Type passageType))
+			{
+				passage = obj.GetComponent(passageType) as Passage;
+				passage.Initialize(name, area, zones);
+				return passage;
+			}
+
+			passage = obj.GetComponent<Passage>();
 
 			if (passage is not Passage && passage is not Door)
 				passage.Initialize(name, area, zones);

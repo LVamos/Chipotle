@@ -35,6 +35,12 @@ namespace Game.Debug
 {
 	public class DebugManager : VirtualWindow
 	{
+		public override void OnKeyPress(char letter)
+		{
+			if (_macroRecorder != null && _macroRecorder.IsRecording)
+				_macroRecorder.FeedKeyPress(letter);
+		}
+
 		Vector2? _lastPlayerPosition;
 
 		private void Update()

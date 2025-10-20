@@ -18,7 +18,7 @@ using UnityEngine;
 namespace Game.Debug
 {
 	/// <summary>
-	/// Plays a recorded macro by sending KeyPressed messages to World.Player with preserved delays.
+	/// Plays a recorded macro by sending KeyDown, KeyUp and KeyPress events with preserved delays.
 	/// </summary>
 	public class MacroPlayer : MonoBehaviour
 	{
@@ -77,37 +77,83 @@ namespace Game.Debug
 			{
 				List<MacroEvent> events = new();
 				string[] lines = File.ReadAllLines(path);
+				int version = 1;
+
 				foreach (string line in lines)
 				{
 					if (line.StartsWith("MACRO"))
+					{
+						string[] versionParts = line.Split(new[] { ';' }, StringSplitOptions.None);
+						if (versionParts.Length > 1 && versionParts[1].StartsWith("v"))
+							int.TryParse(versionParts[1].Substring(1), out version);
 						continue;
+					}
 
 					string[] parts = line.Split(new[] { ';' }, StringSplitOptions.None);
 					int delay = int.Parse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture);
 
-					bool isKeyDown = false;
-					int offset = 0;
-					if (parts.Length == 6)
+					if (version == 1)
 					{
-						isKeyDown = string.Equals(parts[1], "D", StringComparison.OrdinalIgnoreCase);
-						offset = 1;
+						// Old format: delayMs;D|U;KeyCode;Shift;Control;Alt
+						bool isKeyDown = false;
+						int offset = 0;
+						if (parts.Length == 6)
+						{
+							isKeyDown = string.Equals(parts[1], "D", StringComparison.OrdinalIgnoreCase);
+							offset = 1;
+						}
+
+						string keyString = parts[1 + offset];
+						bool shift = bool.Parse(parts[2 + offset]);
+						bool control = bool.Parse(parts[3 + offset]);
+						bool alt = bool.Parse(parts[4 + offset]);
+
+						KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyString, true);
+						KeyboardInput shortcut = new KeyboardInput(control, shift, alt, key);
+
+						MacroEvent @event = new MacroEvent
+						{
+							DelayMilliseconds = Math.Max(0, delay),
+							EventType = isKeyDown ? MacroEventType.KeyDown : MacroEventType.KeyUp,
+							Shortcut = shortcut
+						};
+						events.Add(@event);
 					}
-
-					string keyString = parts[1 + offset];
-					bool shift = bool.Parse(parts[2 + offset]);
-					bool control = bool.Parse(parts[3 + offset]);
-					bool alt = bool.Parse(parts[4 + offset]);
-
-					KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyString, true);
-					KeyboardInput shortcut = new KeyboardInput(control, shift, alt, key);
-
-					MacroEvent @event = new MacroEvent
+					else
 					{
-						DelayMilliseconds = Math.Max(0, delay),
-						IsKeyDown = isKeyDown,
-						Shortcut = shortcut
-					};
-					events.Add(@event);
+						// New format: delayMs;D|U|P;KeyCode|Char;Shift;Control;Alt
+						MacroEventType eventType = parts[1].ToUpperInvariant() switch
+						{
+							"D" => MacroEventType.KeyDown,
+							"U" => MacroEventType.KeyUp,
+							"P" => MacroEventType.KeyPress,
+							_ => MacroEventType.KeyDown
+						};
+
+						string keyOrChar = parts[2];
+						bool shift = bool.Parse(parts[3]);
+						bool control = bool.Parse(parts[4]);
+						bool alt = bool.Parse(parts[5]);
+
+						MacroEvent @event = new MacroEvent
+						{
+							DelayMilliseconds = Math.Max(0, delay),
+							EventType = eventType
+						};
+
+						if (eventType == MacroEventType.KeyPress)
+						{
+							@event.Character = keyOrChar.Length > 0 ? keyOrChar[0] : '\0';
+							@event.Shortcut = new KeyboardInput(KeyCode.None);
+						}
+						else
+						{
+							KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyOrChar, true);
+							@event.Shortcut = new KeyboardInput(control, shift, alt, key);
+						}
+
+						events.Add(@event);
+					}
 				}
 				return events;
 			}
@@ -129,10 +175,18 @@ namespace Game.Debug
 
 				try
 				{
-					if (@event.IsKeyDown)
-						WindowHandler.OnKeyDown(@event.Shortcut);
-					else
-						WindowHandler.OnKeyUp(@event.Shortcut);
+					switch (@event.EventType)
+					{
+						case MacroEventType.KeyDown:
+							WindowHandler.OnKeyDown(@event.Shortcut);
+							break;
+						case MacroEventType.KeyUp:
+							WindowHandler.OnKeyUp(@event.Shortcut);
+							break;
+						case MacroEventType.KeyPress:
+							WindowHandler.OnKeyPress(@event.Character);
+							break;
+					}
 				}
 				catch { }
 			}

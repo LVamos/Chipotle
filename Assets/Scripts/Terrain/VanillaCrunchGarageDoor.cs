@@ -42,7 +42,8 @@ namespace Game.Terrain
 		/// <param name="message">The message to be processed</param>
 		private void OnZoneEntered(CharacterCameToZone message)
 		{
-			if (message.CurrentZone == World.GetZone("garáž v1") && message.Character == World.Player)
+			Zone garage = World.GetZone("garáž v1");
+			if (message.CurrentZone == garage && message.Character == World.Player)
 				State = PassageState.Closed;
 		}
 	}
