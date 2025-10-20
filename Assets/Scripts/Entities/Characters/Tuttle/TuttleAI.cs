@@ -85,6 +85,8 @@ namespace Game.Entities.Characters.Tuttle
 			// scenarios for debugging purposes
 			if (!Settings.SendTuttleToPool && Settings.LetTuttleFollowChipotle)
 				SetState(CharacterState.WatchingPlayer);
+			else if (!Settings.SendTuttleToPool && !Settings.LetTuttleFollowChipotle)
+				SetState(CharacterState.Waiting);
 		}
 
 		/// <summary>
