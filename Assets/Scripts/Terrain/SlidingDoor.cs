@@ -51,7 +51,7 @@ namespace Game.Terrain
 		{
 			base.Initialize(name, PassageState.Closed, area, zones);
 			State = PassageState.Locked;
-			_openingSound = _closingSound = "SlidingDoor";
+			_openingSound = _closingSound = "SlidingDoor1";
 		}
 
 		/// <summary>
