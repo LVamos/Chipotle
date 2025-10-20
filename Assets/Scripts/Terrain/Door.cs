@@ -84,6 +84,8 @@ namespace Game.Terrain
 		/// Sound of the door being opened
 		/// </summary>
 		protected string _lockedSound;
+		private AudioSource _openingSource;
+		private AudioSource _closingSource;
 
 		/// <summary>
 		/// constructor
@@ -158,7 +160,9 @@ namespace Game.Terrain
 			State = PassageState.Closed;
 
 			AnnounceManipulation();
-			Play(_closingSound, sender as Character, point);
+			if (_openingSource != null && _openingSource.isPlaying)
+				Sounds.SlideVolume(_openingSource, .5f, 0, true);
+			_closingSource = Play(_closingSound, sender as Character, point);
 			LogClosing();
 		}
 
@@ -186,7 +190,7 @@ namespace Game.Terrain
 		/// <param name="sound">Name of the sound to be played</param>
 		/// <param name="position"></param>
 		/// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
-		protected void Play(string sound, Character character, Vector2 point)
+		protected AudioSource Play(string sound, Character character, Vector2 point)
 		{
 			// Set attenuation parameters
 			ObstacleType obstacle;
@@ -212,7 +216,7 @@ namespace Game.Terrain
 
 			// Play the sound
 			Vector3 position = new(point.x, 1.5f, point.y);
-			Sounds.Play(sound, position, volume);
+			return Sounds.Play(sound, position, volume);
 		}
 
 		/// <summary>
@@ -352,7 +356,9 @@ namespace Game.Terrain
 			State = PassageState.Open;
 
 			AnnounceManipulation();
-			Play(_openingSound, sender as Character, point);
+			if (_closingSource != null && _closingSource.isPlaying)
+				Sounds.SlideVolume(_closingSource, .5f, 0, true);
+			_openingSource = Play(_openingSound, sender as Character, point);
 			LogOpening();
 		}
 
