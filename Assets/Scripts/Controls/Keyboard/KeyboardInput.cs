@@ -1,6 +1,7 @@
 ﻿using Game.Controls;
 
 using System;
+using System.Text;
 
 using UnityEngine;
 
@@ -12,6 +13,20 @@ namespace Game.Controls.Keyboard
 	[Serializable]
 	public struct KeyboardInput
 	{
+		public override string ToString()
+		{
+			StringBuilder builder = new();
+			if (Control)
+				builder.Append("ctrl ");
+			if (Alt)
+				builder.Append("alt ");
+			if (Shift)
+				builder.Append("shift ");
+			if (Key != KeyCode.None)
+				builder.Append(Key.ToString());
+			return builder.ToString();
+		}
+
 		/// <summary>
 		/// Constructor that parses a keyboard shortcut from a string (e.g. "Ctrl+Alt+F1" or "Shift+S").
 		/// </summary>
