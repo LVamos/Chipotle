@@ -22,23 +22,26 @@ namespace Game.Terrain
 		/// Processes the EntityMoved message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnEntityMoved(CharacterMoved message)
+		protected override void OnCharacterMoved(CharacterMoved message)
 		{
-			base.OnEntityMoved(message);
+			base.OnCharacterMoved(message);
 
-			Character entity = message.Sender as Character;
-			bool opposite = IsInFrontOrBehind(entity.Area.Value.Center);
-			bool near = _area.Value.GetDistanceFrom(entity.Area.Value.Center) <= _minDistance;
+			Character npc = message.Sender as Character;
+			if (npc != World.Player)
+				return;
+
+			Vector2 center = npc.Center;
+			bool opposite = IsInFrontOrBehind(center);
+			bool near = _area.Value.GetDistanceFrom(center) <= _minDistance;
 
 			// Find point from which the door sound should be heart.
-			Vector2 center = entity.Area.Value.Center;
-			Vector2? tmp = _area.Value.GetAlignedPoint(center);
-			Vector2 point = tmp.HasValue ? (Vector2)tmp : _area.Value.GetClosestPoint(entity.Area.Value.Center);
-
+			Vector2? point = _area.Value.GetAlignedPoint(center);
+			if (point == null)
+				point = _area.Value.GetClosestPoint(center);
 			if (opposite && near && (State == PassageState.Closed || State == PassageState.Locked))
-				Open(entity, point);
+				Open(npc, point.Value);
 			else if (!near && State == PassageState.Open)
-				Close(entity, point);
+				Close(npc, point.Value);
 		}
 
 		/// <summary>
@@ -67,7 +70,7 @@ namespace Game.Terrain
 		{
 			switch (message)
 			{
-				case CharacterMoved em: OnEntityMoved(em); break;
+				case CharacterMoved em: OnCharacterMoved(em); break;
 				default: base.HandleMessage(message); break;
 			}
 		}

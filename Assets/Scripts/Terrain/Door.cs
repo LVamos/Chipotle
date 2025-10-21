@@ -358,6 +358,7 @@ namespace Game.Terrain
 			AnnounceManipulation();
 			if (_closingSource != null && _closingSource.isPlaying)
 				Sounds.SlideVolume(_closingSource, .5f, 0, true);
+
 			_openingSource = Play(_openingSound, sender as Character, point);
 			LogOpening();
 		}

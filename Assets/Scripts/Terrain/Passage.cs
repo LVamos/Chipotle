@@ -206,7 +206,7 @@ namespace Game.Terrain
 			base.HandleMessage(message);
 			switch (message)
 			{
-				case CharacterMoved em: OnEntityMoved(em); break;
+				case CharacterMoved em: OnCharacterMoved(em); break;
 			}
 		}
 
@@ -214,7 +214,7 @@ namespace Game.Terrain
 		/// Processes the EntityMoved message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnEntityMoved(CharacterMoved message)
+		protected virtual void OnCharacterMoved(CharacterMoved message)
 		{
 			if (!_navigating || message.Sender != World.Player)
 				return;

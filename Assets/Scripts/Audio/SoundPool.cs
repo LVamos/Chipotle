@@ -18,6 +18,10 @@ namespace Assets.Scripts.Audio
 		{
 			if (source == null)
 				throw new ArgumentNullException(nameof(source));
+
+			if (!source.isActiveAndEnabled)
+				source.gameObject.SetActive(true);
+
 			_pool.Remove(source);
 			_playingSources.Add(source);
 		}
@@ -79,8 +83,6 @@ namespace Assets.Scripts.Audio
 			if (source == null)
 				source = AddSource();
 
-			source.gameObject.SetActive(true);
-			_playingSources.Add(source);
 			return source;
 		}
 
