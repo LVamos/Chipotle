@@ -116,7 +116,6 @@ namespace Game.Audio
 			source.spatialize = false;
 			source.outputAudioMixerGroup = null;
 			source.spatialBlend = 0;
-			_soundPool.DisableLowPass(source);
 			return source;
 		}
 

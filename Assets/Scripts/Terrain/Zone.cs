@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.Models;
 
+using DavyKager;
+
 using Game.Audio;
 using Game.Entities.Characters;
 using Game.Entities.Items;
@@ -770,6 +772,10 @@ namespace Game.Terrain
 		/// <param name="message">The message</param>
 		private void OnCharacterCameToZone(CharacterCameToZone message)
 		{
+			//test
+			if (message.Character == World.Player && message.CurrentZone.Name.Indexed == "balkon p1" && Name.Indexed == "balkon p1")
+				Tolk.Speak("");
+
 			if (message.CurrentZone == this)
 			{
 				Register(message.Character);
@@ -1008,6 +1014,7 @@ namespace Game.Terrain
 			Sounds.ConvertTo2d(portalAmbient.AudioSource, true);
 			_ambientSource = portalAmbient.AudioSource;
 			_ambientSource.name = description;
+			Sounds.SlideVolume(_ambientSource, 1, .5f);
 
 			StopPortals();
 		}
