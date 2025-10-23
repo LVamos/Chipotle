@@ -55,7 +55,7 @@ namespace Game.Audio
 			};
 		}
 
-		public static void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false) => _soundManager.SlideVolume(sound, duration, targetVolume, stopWhenDone, pauseWhenDone);
+		public static void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null) => _soundManager.SlideVolume(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone);
 
 		public static void DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 

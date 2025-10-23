@@ -32,7 +32,8 @@ namespace Game.Debug.integration
 
 		public void StartServer()
 		{
-			if (_isRunning) return;
+			if (_isRunning)
+				return;
 
 			_isRunning = true;
 
@@ -98,7 +99,7 @@ namespace Game.Debug.integration
 				{
 					string line = _reader.ReadLine();
 					if (line != null) ProcessLine(line);
-					else Thread.Sleep(10);
+					else Thread.Sleep(20);
 				}
 			}
 			catch (Exception)

@@ -773,7 +773,7 @@ namespace Game.Terrain
 		private void OnCharacterCameToZone(CharacterCameToZone message)
 		{
 			//test
-			if (message.Character == World.Player && message.CurrentZone.Name.Indexed == "balkon p1" && Name.Indexed == "balkon p1")
+			if (message.Character == World.Player && Name.Indexed == "ulice v1")
 				Tolk.Speak("");
 
 			if (message.CurrentZone == this)
@@ -858,14 +858,14 @@ namespace Game.Terrain
 					Play2dAmbient();
 				else if (SameAmbients(World.Player.Zone))
 					StopPortals();
-				else PlayPortals(previousZone);
+				else
+					PlayPortals(previousZone);
 			}
 			else
 			{
 				if (playerHere)
 					Play2dAmbient();
-				else
-					PlayPortals(previousZone);
+				else PlayPortals(previousZone);
 			}
 		}
 
@@ -949,7 +949,14 @@ namespace Game.Terrain
 			{
 				// Change 2D ambient sound to 3D and place it in the nearest passage between this and new zone. Start playing 3D ambient sounds from other passages between this and the new zone.
 				ReadyPortalModel closestPortal = RemoveReadyPortalNearPlayer(readyPortals);
-				MoveAmbientToPassage(closestPortal, _defaultVolume, _ambientSource);
+
+				if (!playersZone.SameAmbients(this))
+				{
+					Action action = () => MoveAmbientToPassage(closestPortal, _defaultVolume, _ambientSource);
+					if (!playersZone.IsAccessible(this))
+						Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, 0, false, false, action);
+					else action();
+				}
 			}
 
 			// Start playback in The remaining exits.
@@ -1014,7 +1021,7 @@ namespace Game.Terrain
 			Sounds.ConvertTo2d(portalAmbient.AudioSource, true);
 			_ambientSource = portalAmbient.AudioSource;
 			_ambientSource.name = description;
-			Sounds.SlideVolume(_ambientSource, 1, .5f);
+			Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, _defaultVolume);
 
 			StopPortals();
 		}
@@ -1060,18 +1067,25 @@ namespace Game.Terrain
 			portalAmbient.AudioSource.minDistance = .5f; // 3D sound
 		}
 
-		private void SetPortalVolume(Passage passage, PortalModel portalAmbient)
+		private float GetPortalVolume(Passage passage, PortalModel portalAmbient)
 		{
 			float targetVolume = _defaultVolume;
+			if (!passage.Open)
+			{
+				float defaultVolume = Sounds.GetOverClosedDoorVolume(_defaultVolume);
+				targetVolume = Sounds.GetLinearRolloffAttenuation(portalAmbient.AudioSource, defaultVolume);
+			}
+			return targetVolume;
+		}
+
+		private void SetPortalVolume(Passage passage, PortalModel portalAmbient)
+		{
+			float targetVolume = GetPortalVolume(passage, portalAmbient);
 			float duration = _ambient2dFadeDuration;
 			if (passage is Door)
 			{
-				if (passage.State is PassageState.Closed or PassageState.Locked)
-				{
-					float defaultVolume = Sounds.GetOverClosedDoorVolume(_defaultVolume);
-					targetVolume = Sounds.GetLinearRolloffAttenuation(portalAmbient.AudioSource, defaultVolume);
+				if (!passage.Open)
 					duration = _doorOpeningOcclusionDuration;
-				}
 				else duration = _doorClosingOcclusionDuration;
 			}
 

@@ -590,7 +590,8 @@ namespace Game.Entities.Items
 
 			if (_portals == null)
 				UpdateAmbientSounds();
-			UpdatePortalOcclusion(_portals[door], door);
+			if (_portals != null)
+				UpdatePortalOcclusion(_portals[door], door);
 		}
 
 		private bool IsPlayerHere()

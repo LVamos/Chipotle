@@ -119,15 +119,18 @@ namespace Game.Audio
 			return source;
 		}
 
-		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false)
+		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
 		{
 			if (targetVolume == sound.volume)
+			{
+				actionWhenDone?.Invoke();
 				return;
+			}
 
-			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone, pauseWhenDone));
+			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone));
 		}
 
-		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false)
+		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
 		{
 			float startVolume = sound.volume;
 
@@ -135,8 +138,8 @@ namespace Game.Audio
 			{
 				sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
 				yield return null;
-				sound.volume = targetVolume;
 			}
+			sound.volume = targetVolume;
 
 			if (targetVolume <= 0)
 			{
@@ -144,6 +147,7 @@ namespace Game.Audio
 					sound.Stop();
 				else if (pauseWhenDone)
 					sound.Pause();
+				actionWhenDone?.Invoke();
 			}
 		}
 
