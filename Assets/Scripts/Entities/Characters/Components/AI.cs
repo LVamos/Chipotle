@@ -4,6 +4,7 @@ using Game.Entities.Characters.Christine;
 using Game.Entities.Characters.Mariotti;
 using Game.Entities.Characters.Sweeney;
 using Game.Entities.Characters.Tuttle;
+using Game.Messaging;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Characters;

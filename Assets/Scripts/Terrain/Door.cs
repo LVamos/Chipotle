@@ -177,7 +177,7 @@ namespace Game.Terrain
 
 		private void AnnounceManipulation()
 		{
-			DoorManipulated message = new(this);
+			DoorUsed message = new(this);
 			List<Zone> zones = World.GetNearestZones(Center, 100, true);
 
 			foreach (Zone zone in zones)

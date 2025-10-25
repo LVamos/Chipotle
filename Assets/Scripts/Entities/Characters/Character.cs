@@ -1,5 +1,6 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Entities.Items;
+using Game.Messaging;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
@@ -11,6 +12,8 @@ using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using UnityEditor;
 
 using UnityEngine;
 
@@ -72,11 +75,6 @@ namespace Game.Entities.Characters
 		protected HashSet<string> _inventory;
 
 		/// <summary>
-		/// List of all entity components
-		/// </summary>
-		protected CharacterComponent[] _components;
-
-		/// <summary>
 		/// List of all zones visited by the NPC
 		/// </summary>
 		protected HashSet<string> _visitedZones;
@@ -106,7 +104,7 @@ namespace Game.Entities.Characters
 			foreach (CharacterComponent c in _components)
 			{
 				c.Initialize();
-				c.AssignToEntity(name.Indexed);
+				c.SetParent(name.Indexed);
 
 			}
 
@@ -178,18 +176,6 @@ namespace Game.Entities.Characters
 		}
 
 		/// <summary>
-		/// Takes an incoming message and saves it into the message queue.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		public override void TakeMessage(Message message)
-		{
-			base.TakeMessage(message);
-
-			if (_messagingEnabled)
-				SendInnerMessage(message);
-		}
-
-		/// <summary>
 		/// Initializes the NPC and starts its message loop.
 		/// </summary>
 		public override void Activate()
@@ -198,10 +184,10 @@ namespace Game.Entities.Characters
 
 			void startComponent(Type type)
 			{
-				CharacterComponent c = _components.FirstOrDefault(c => IsOfTypeOrSubclass(c, type));
+				MessagingObject c = _components.FirstOrDefault(c => IsOfTypeOrSubclass(c, type));
 				c?.Activate();
 
-				bool IsOfTypeOrSubclass(CharacterComponent component, Type type)
+				bool IsOfTypeOrSubclass(MessagingObject component, Type type)
 				{
 					Type componentType = component.GetType();
 					return componentType.IsSubclassOf(type) || componentType == type;
@@ -282,35 +268,9 @@ namespace Game.Entities.Characters
 		}
 
 		/// <summary>
-		/// Sends a message to al components.
-		/// </summary>
-		/// <param name="message">Message to redistribute</param>
-		protected virtual void SendInnerMessage(Message message)
-		{
-			foreach (CharacterComponent c in _components)
-			{
-				if (c != message.Sender || message is Reloaded)
-					c.TakeMessage(message);
-			}
-		}
-
-		/// <summary>
-		/// Checks if a message came from inside the NPC.
-		/// </summary>
-		/// <param name="message">The message to check</param>
-		/// <returns>True if the message came from inside the NPC</returns>
-		private bool IsInternal(Message message) => message.Sender is CharacterComponent c && c.Owner == this;
-
-		/// <summary>
 		/// Processes the Destroy message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private new void OnDestroyObject(DestroyObject message)
-		{
-			if (!IsInternal(message))
-				throw new InvalidOperationException("This message can be sent only from an inner component.");
-
-			DestroyObject();
-		}
+		private new void OnDestroyObject(DestroyObject message) => DestroyObject();
 	}
 }

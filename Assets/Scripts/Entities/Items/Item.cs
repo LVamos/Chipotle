@@ -576,7 +576,7 @@ namespace Game.Entities.Items
 		/// Handles the DoorManipulated message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnDoorManipulated(DoorManipulated message)
+		protected void OnDoorUsed(DoorUsed message)
 		{
 			if (_sounds["loop"] == null)
 				return;
@@ -925,7 +925,7 @@ namespace Game.Entities.Items
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
 				case CharacterMoved em: OnCharacterMoved(em); break;
-				case DoorManipulated dm: OnDoorManipulated(dm); break;
+				case DoorUsed dm: OnDoorUsed(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;
 				case ObjectsCollided oc: OnObjectsCollided(oc); break;
 				case ObjectsUsed uo: OnObjectsUsed(uo); break;

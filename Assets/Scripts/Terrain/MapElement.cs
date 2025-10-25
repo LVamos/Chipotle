@@ -5,6 +5,7 @@ using Game.Messaging.Commands;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
+using Game.Messaging.Events.GameManagement;
 
 using ProtoBuf;
 
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using Message = Game.Messaging.Message;
 
@@ -27,6 +29,15 @@ namespace Game.Terrain
 	[ProtoInclude(102, typeof(Passage))]
 	public abstract class MapElement : MessagingObject
 	{
+		public override void TakeMessage(Message message)
+		{
+			base.TakeMessage(message);
+			if (_messagingEnabled && _components != null && _components.Any())
+				Broadcast(message);
+		}
+
+		protected MessagingObject[] _components;
+
 		public Vector2 Center { get => _area.Value.Center; }
 		private const float _navigationVolume = .5f;
 		private const float _beaconMinDistance = .6f;
@@ -213,6 +224,11 @@ namespace Game.Terrain
 		{
 			base.GameUpdate();
 			WatchNavigation();
+
+			if (_components == null)
+				return;
+			foreach (MessagingObject component in _components)
+				component.GameUpdate();
 		}
 
 		/// <summary>
@@ -329,6 +345,19 @@ namespace Game.Terrain
 			Vector2 closestPoint = GetClosestPointToPlayer();
 			Zone myZone = World.GetZone(closestPoint);
 			return myZone;
+		}
+
+		/// <summary>
+		/// Sends a message to al components.
+		/// </summary>
+		/// <param name="message">Message to redistribute</param>
+		protected void Broadcast(Message message)
+		{
+			foreach (MessagingObject c in _components)
+			{
+				if (c != message.Sender || message is Reloaded)
+					c.TakeMessage(message);
+			}
 		}
 	}
 }

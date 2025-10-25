@@ -17,7 +17,7 @@ namespace Game.Entities.Characters.Components
 	[ProtoInclude(101, typeof(Physics))]
 	[ProtoInclude(102, typeof(Sound))]
 	[ProtoInclude(103, typeof(Input))]
-	public abstract class CharacterComponent : MessagingObject
+	public abstract class CharacterComponent : GameComponent<Character>
 	{
 		public virtual void Initialize()
 		{
@@ -33,11 +33,6 @@ namespace Game.Entities.Characters.Components
 		}
 
 		/// <summary>
-		/// Indexed name of the owner fo this component.
-		/// </summary>
-		protected string _ownerName;
-
-		/// <summary>
 		/// Backing field for the Onwer property.
 		/// </summary>
 		[ProtoIgnore]
@@ -47,7 +42,7 @@ namespace Game.Entities.Characters.Components
 		/// A reference to the parent NPC
 		/// </summary>
 		[ProtoIgnore]
-		public Character Owner
+		public override Character Owner
 		{
 			get
 			{
@@ -59,7 +54,7 @@ namespace Game.Entities.Characters.Components
 			}
 		}
 
-		public void AssignToEntity(string name)
+		public void SetParent(string name)
 		{
 			_ownerName = name
 						 ?? throw new ArgumentException(nameof(name));

@@ -8,13 +8,13 @@ namespace Game.Messaging.Events.Physics
 	/// Indicates that a door was opened or closed.
 	/// </summary>
 	[Serializable]
-	public class DoorManipulated : Message
+	public class DoorUsed : Message
 	{
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		public DoorManipulated(Door sender) : base(sender)
+		public DoorUsed(Door sender) : base(sender)
 		{
 			Sender = sender;
 		}
