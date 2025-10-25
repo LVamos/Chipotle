@@ -125,7 +125,7 @@ namespace Game.Audio
 		}
 
 		private bool PlayerInSoundRadius
-		{ get => _owner.GetDistanceToPlayer() <= _zoneSoundRadius; }
+		{ get => _owner.GetDistanceToPlayer() <= Settings.ZoneSoundRadius; }
 
 
 		/// <summary>
@@ -271,20 +271,6 @@ namespace Game.Audio
 		[ProtoIgnore]
 		private Dictionary<Passage, PortalModel> _portals;
 
-		private const float _portalAmbientMaxDistance = 19;
-
-		/// <summary>
-		/// The maximum distance the player is from the zone at which it makes sense to play the location audio.
-		/// </summary>
-		private const float _zoneSoundRadius = 100;
-		private const int _portalAmbientOpenDoorMaxDistance = 13;
-		private const float _portalAmbientClosedDoorMaxDistance = 4.5f;
-		private const float _doorOpeningOcclusionDuration = 3;
-		private const float _doorClosingOcclusionDuration = .5f;
-		private const int _ambient2dFadeDuration = 2;
-		private const float _ambient3dFadeDuration = .5f;
-		private const int _portalAttenuationDistanceLimit = 100;
-
 		private void PlayPortals(Zone previousZone = null)
 		{
 			// Portal ambients already playing
@@ -306,7 +292,7 @@ namespace Game.Audio
 				{
 					Action action = () => MoveAmbientToPassage(closestPortal, _defaultVolume, _ambientSource);
 					if (!playersZone.IsAccessible(_owner))
-						Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, 0, false, false, action);
+						Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, 0, false, false, action);
 					else action();
 				}
 			}
@@ -361,7 +347,7 @@ namespace Game.Audio
 			if (_portals.IsNullOrEmpty())
 			{
 				_ambientSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description);
-				Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, _defaultVolume);
+				Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, _defaultVolume);
 				return;
 			}
 
@@ -373,7 +359,7 @@ namespace Game.Audio
 			Sounds.ConvertTo2d(portalAmbient.AudioSource, true);
 			_ambientSource = portalAmbient.AudioSource;
 			_ambientSource.name = description;
-			Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, _defaultVolume);
+			Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, _defaultVolume);
 
 			StopPortals();
 		}
@@ -410,11 +396,11 @@ namespace Game.Audio
 			if (preparedPortalAmbient.Passage is Door door)
 			{
 				if (door.State == PassageState.Open)
-					portalAmbient.AudioSource.maxDistance = _portalAmbientOpenDoorMaxDistance;
+					portalAmbient.AudioSource.maxDistance = Settings.PortalAmbientOpenDoorMaxDistance;
 				else
-					portalAmbient.AudioSource.maxDistance = _portalAmbientClosedDoorMaxDistance;
+					portalAmbient.AudioSource.maxDistance = Settings.PortalAmbientClosedDoorMaxDistance;
 			}
-			else portalAmbient.AudioSource.maxDistance = _portalAmbientMaxDistance;
+			else portalAmbient.AudioSource.maxDistance = Settings.PortalAmbientMaxDistance;
 
 			portalAmbient.AudioSource.minDistance = .5f; // 3D sound
 		}
@@ -433,12 +419,12 @@ namespace Game.Audio
 		private void SetPortalVolume(Passage passage, PortalModel portalAmbient)
 		{
 			float targetVolume = GetPortalVolume(passage, portalAmbient);
-			float duration = _ambient2dFadeDuration;
+			float duration = Settings.Ambient2dFadeDuration;
 			if (passage is Door)
 			{
 				if (!passage.Open)
-					duration = _doorOpeningOcclusionDuration;
-				else duration = _doorClosingOcclusionDuration;
+					duration = Settings.DoorOpeningOcclusionDuration;
+				else duration = Settings.DoorClosingOcclusionDuration;
 			}
 
 			Sounds.SlideVolume(portalAmbient.AudioSource, duration, targetVolume);
@@ -458,7 +444,7 @@ namespace Game.Audio
 			{
 				AudioSource = stereoAmbientSound
 			};
-			newPortalAmbient.AudioSource.maxDistance = _portalAmbientMaxDistance;
+			newPortalAmbient.AudioSource.maxDistance = Settings.PortalAmbientMaxDistance;
 			string description = GetPortalAmbientDescription(preparedPortalAmbient.Passage);
 			newPortalAmbient.AudioSource.name = description;
 			_portals[preparedPortalAmbient.Passage] = newPortalAmbient;
@@ -474,7 +460,7 @@ namespace Game.Audio
 
 			if (passage is Passage)
 			{
-				if (passage.GetDistanceToPlayer() > _portalAttenuationDistanceLimit)
+				if (passage.GetDistanceToPlayer() > Settings.PortalAttenuationDistanceLimit)
 					return;
 
 				Zone startZone = passage.AnotherZone(_owner);
@@ -503,14 +489,14 @@ namespace Game.Audio
 			void Closed(bool doubleAttenuation)
 			{
 				float frequency = doubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverClosedDoorLowpass;
-				Sounds.SlideLowPass(portal.AudioSource, _doorClosingOcclusionDuration, frequency);
+				Sounds.SlideLowPass(portal.AudioSource, Settings.DoorClosingOcclusionDuration, frequency);
 			}
 
 			void Open(bool attenuate)
 			{
 				if (attenuate)
-					Sounds.SlideLowPass(portal.AudioSource, _doorOpeningOcclusionDuration, Sounds.OverOpenDoorLowpass);
-				else Sounds.SlideLowPass(portal.AudioSource, _doorOpeningOcclusionDuration, 22000, true);
+					Sounds.SlideLowPass(portal.AudioSource, Settings.DoorOpeningOcclusionDuration, Sounds.OverOpenDoorLowpass);
+				else Sounds.SlideLowPass(portal.AudioSource, Settings.DoorOpeningOcclusionDuration, 22000, true);
 			}
 		}
 
@@ -523,7 +509,7 @@ namespace Game.Audio
 		{
 			if (_ambientSource != null && _ambientSource.isPlaying)
 			{
-				Sounds.SlideVolume(_ambientSource, _ambient2dFadeDuration, 0);
+				Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, 0);
 				_ambientSource = null;
 			}
 
