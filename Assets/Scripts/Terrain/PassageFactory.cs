@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Game.Serialization;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -30,12 +32,8 @@ namespace Game.Terrain
 		/// </summary>
 		public static void LoadPassages()
 		{
-			var deserializer = new DeserializerBuilder()
-				.WithNamingConvention(PascalCaseNamingConvention.Instance)
-				.Build();
-
-			var yamlText = Resources.Load<TextAsset>(MainScript.PassagesPath).text;
-			Dictionary<string, string> types = deserializer.Deserialize<Dictionary<string, string>>(yamlText);
+			Dictionary<string, string> types = null;
+			YamlHelper.LoadFromResources(MainScript.PassagesPath, out types);
 			if (types.Any(p => string.IsNullOrWhiteSpace(p.Key) || string.IsNullOrWhiteSpace(p.Value)))
 				throw new ArgumentException("Invalid record.");
 

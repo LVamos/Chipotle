@@ -88,22 +88,6 @@ namespace Game.Terrain
 		public List<Passage> GetExitsTo(Zone target) => Exits.Where(p => p.LeadsTo(target)).ToList();
 
 		/// <summary>
-		/// Indicates if a zone is inside a building or outside.
-		/// </summary>
-		public enum ZoneType
-		{
-			/// <summary>
-			/// A room or corridor in a building
-			/// </summary>
-			Indoor,
-
-			/// <summary>
-			/// An openair place like yard or meadow
-			/// </summary>
-			Outdoor
-		}
-
-		/// <summary>
 		/// Enumerates all accessible zones.
 		/// </summary>
 		/// <returns>All accessible zones</returns>
@@ -353,7 +337,7 @@ namespace Game.Terrain
 		/// <param name="area">Coordinates of the area occupied by the zone</param>
 		/// <param name="defaultTerrain">Lowest layer of the terrain in the zone</param>
 		/// <param name="backgroundInfo">A background sound played in loop</param>
-		public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, string ambientSound, float volume, ZoneMaterialsDefinitionModel materials = null)
+		public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, ZoneLoopInfo loop, ZoneMaterials materials = null)
 		{
 			base.Initialize(name, area);
 			_characters = new();
@@ -375,7 +359,7 @@ namespace Game.Terrain
 			gameObject.transform.localScale = new Vector3(area.Width, ceiling, area.Height);
 
 			CreateComponents();
-			_audiocontroller.Initialize(this, ambientSound, volume, materials);
+			_audiocontroller.Initialize(this, loop, materials);
 		}
 
 		[ProtoIgnore]

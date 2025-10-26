@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Game.Serialization;
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -60,15 +62,11 @@ namespace Game
 		/// <param name="configurationName">Name of a YAML file without extension</param>
 		public static void LoadSettings()
 		{
-			IDeserializer deserializer = new DeserializerBuilder()
-				.WithNamingConvention(PascalCaseNamingConvention.Instance)
-				.Build();
-
 			string path = Path.Combine(MainScript.ConfigPath, "config.dat");
 			string configName = File.ReadAllText(path);
 			path = Path.Combine(MainScript.ConfigPath, configName) + ".yaml";
-			string yamlContent = File.ReadAllText(path);
-			Dictionary<string, object> settingsDictionary = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
+			Dictionary<string, object> settingsDictionary = null;
+			YamlHelper.LoadFromFile(path, out settingsDictionary);
 
 			// Using reflection to set static properties
 			FieldInfo[] fields = typeof(Settings).GetFields();

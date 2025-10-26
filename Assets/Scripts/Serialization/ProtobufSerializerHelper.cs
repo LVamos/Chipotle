@@ -1,16 +1,18 @@
 ﻿using System.Collections.Generic;
+
 using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Terrain;
+
 using ProtoBuf;
 
-namespace Game
+namespace Game.Serialization
 {
 	/// <summary>
 	/// A helper class that stores game map, NPCs and objects.
 	/// </summary>
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class SerializerHelper
+	public class ProtobufSerializerHelper
 	{
 		/// <summary>
 		/// Stores all NPCs.
@@ -39,7 +41,7 @@ namespace Game
 		/// <param name="entities">All entities to be serialized</param>
 		/// <param name="objects">All objects to be serialized</param>
 		/// <param name="passages">All passages to be serialized</param>
-		public SerializerHelper(Dictionary<string, Character> entities, Dictionary<string, Item> objects, Dictionary<string, Passage> passages, Dictionary<string, Zone> zones)
+		public ProtobufSerializerHelper(Dictionary<string, Character> entities, Dictionary<string, Item> objects, Dictionary<string, Passage> passages, Dictionary<string, Zone> zones)
 		{
 			Entities = entities;
 			Objects = objects;

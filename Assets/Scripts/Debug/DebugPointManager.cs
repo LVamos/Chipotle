@@ -1,5 +1,6 @@
 using DavyKager;
 
+using Game.Serialization;
 using Game.UI;
 
 using System;
@@ -127,11 +128,8 @@ namespace Game.Debug
 				if (string.IsNullOrWhiteSpace(yaml))
 					return new List<DebugPoint>();
 
-				IDeserializer deserializer = new DeserializerBuilder()
-					.WithNamingConvention(PascalCaseNamingConvention.Instance)
-					.Build();
-
-				List<DebugPoint> existing = deserializer.Deserialize<List<DebugPoint>>(yaml);
+				List<DebugPoint> existing = null;
+				YamlHelper.LoadFromFile(path, out existing);
 				return existing ?? new List<DebugPoint>();
 			}
 			catch (Exception)

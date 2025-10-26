@@ -2,6 +2,7 @@
 // No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
 using Game.Entities.Items;
 using Game.Models;
+using Game.Serialization;
 
 using System;
 using System.Collections.Generic;
@@ -43,13 +44,8 @@ namespace Assets.Scripts.Entities.Items
 		/// </summary>
 		public static void LoadItems()
 		{
-			IDeserializer deserializer = new DeserializerBuilder()
-				.WithNamingConvention(PascalCaseNamingConvention.Instance)
-				.Build();
-
-			string yamlText = Resources.Load<TextAsset>(MainScript.ItemsPath).text;
-			YamlItemsModel items = deserializer.Deserialize<YamlItemsModel>(yamlText);
-
+			YamlItemsModel items = null;
+			YamlHelper.LoadFromResources(MainScript.ItemsPath, out items);
 			foreach (YamlItemModel item in items.Items)
 			{
 				if (string.IsNullOrWhiteSpace(item.Type))

@@ -10,6 +10,7 @@ using Game.Debug.integration;
 using Game.Entities.Characters;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Movement;
+using Game.Serialization;
 using Game.Terrain;
 using Game.UI;
 
@@ -45,7 +46,7 @@ namespace Game.Debug
 
 		private void Update()
 		{
-			if (!Settings.TestCommandsEnabled)
+			if (!Settings.TestCommandsEnabled || Player == null || Player.Area == null)
 				return;
 
 			if (_lastPlayerPosition != Player.Center)
@@ -375,22 +376,10 @@ namespace Game.Debug
 		private void LoadCommands()
 		{
 			string path = Path.Combine(MainScript.DebugPath, _commandMapPath);
-			if (!File.Exists(path))
-			{
-				Logger.LogError($"Definice testovacích příkazů nenalezena: {path}");
-				return;
-			}
-
 			try
 			{
-				string yamlText = File.ReadAllText(path);
-
-				IDeserializer deserializer = new DeserializerBuilder()
-					.WithNamingConvention(PascalCaseNamingConvention.Instance)
-					.Build();
-
-				// Deserialize YAML into a dictionary: DebugCommand name → Keyboard & DualSense bindings
-				Dictionary<string, DebugCommandBindings> rawMap = deserializer.Deserialize<Dictionary<string, DebugCommandBindings>>(yamlText);
+				Dictionary<string, DebugCommandBindings> rawMap = null;
+				YamlHelper.LoadFromFile(path, out rawMap);
 
 				// Get all DebugManager methods with DebugCommand attribute
 				MethodInfo[] methods = typeof(DebugManager).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
@@ -440,13 +429,9 @@ namespace Game.Debug
 
 		private void LoadWalkablePoints()
 		{
-			IDeserializer deserializer = new DeserializerBuilder()
-				.WithNamingConvention(PascalCaseNamingConvention.Instance)
-				.Build();
-
 			string path = Path.Combine(MainScript.DebugPath, _walkablePointsPath);
-			string yaml = File.ReadAllText(path);
-			Dictionary<string, List<float[]>> raw = deserializer.Deserialize<Dictionary<string, List<float[]>>>(yaml);
+			Dictionary<string, List<float[]>> raw = null;
+			YamlHelper.LoadFromFile(path, out raw);
 			_walkablePoints = raw.ToDictionary(k => k.Key, v => v.Value.Select(p => new Vector2(p[0], p[1])).ToList());
 		}
 

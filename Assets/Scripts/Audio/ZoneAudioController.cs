@@ -79,16 +79,19 @@ namespace Game.Audio
 		}
 
 
-		public void Initialize(Zone owner, string ambientSound, float volume, ZoneMaterialsDefinitionModel materials = null)
+		public void Initialize(Zone owner, ZoneLoopInfo loop, ZoneMaterials materials = null)
 		{
 			_owner = owner ?? throw new ArgumentNullException(nameof(owner));
 			_ambientSource = null;
 			_portals = new();
 			_soundMode = default;
-			AmbientSound = null;
-			AmbientSound = ambientSound;
-			_defaultVolume = volume;
 			_materials = materials;
+
+			if (loop != null)
+			{
+				AmbientSound = loop.Sound;
+				_defaultVolume = loop.Volume;
+			}
 		}
 
 		protected ReadyPortalModel GetPortalByPassage(List<ReadyPortalModel> portals, Passage passage)
@@ -131,7 +134,7 @@ namespace Game.Audio
 		/// <summary>
 		/// Surfacematerials for walls, floor and ceiling
 		/// </summary>
-		private ZoneMaterialsDefinitionModel _materials;
+		private ZoneMaterials _materials;
 
 		[ProtoIgnore]
 		private AudioSource _ambientSource;

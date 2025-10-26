@@ -1,6 +1,7 @@
 using DavyKager;
 
 using Game.Audio;
+using Game.Serialization;
 using Game.UI;
 
 using Microsoft.VisualBasic;
@@ -34,6 +35,15 @@ namespace Game
 		/// Path to a YAML file with item definitions.
 		/// </summary>
 		public static string ItemsPath => Path.Combine(DataPath, "Items/items").Replace("\\", "/");
+		public static string ZoneLoopsPath
+		{
+			get
+			{
+				string path = Path.Combine(DataPath, "Zones/ZoneLoops");
+				path = path.Replace("\\", "/");
+				return path;
+			}
+		}
 
 		/// <summary>
 		/// Path to a YAML file with passage definitions.
@@ -398,6 +408,7 @@ Application.Quit();
 			try
 			{
 				Logger.Initialize(MainScript.LogPath);
+				YamlHelper.Initialize();
 				WindowHandler.Initialize();
 				Tolk.Load();
 				Tolk.TrySAPI(false);

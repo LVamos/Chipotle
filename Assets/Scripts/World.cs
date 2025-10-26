@@ -1,16 +1,23 @@
 ﻿using Assets.Scripts;
 using Assets.Scripts.Entities.Items;
 using Assets.Scripts.Models;
+using Assets.Scripts.Terrain;
 
 using DavyKager;
 
+using game.debug;
+
 using Game.Audio;
+using Game.Controls.DualSense;
+using Game.Controls.Keyboard;
+using Game.Debug;
 using Game.Entities;
 using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Sound;
 using Game.Models;
+using Game.Serialization;
 using Game.Terrain;
 using Game.UI;
 
@@ -21,6 +28,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 
 using UnityEditor;
@@ -29,6 +37,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.BufferedDeserialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 using Message = Game.Messaging.Message;
@@ -41,6 +50,13 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
+		private static void LoadZoneLoops()
+		{
+			Dictionary<string, ZoneLoopInfo> loops = null;
+			YamlHelper.LoadFromResources(MainScript.ZoneLoopsPath, out loops);
+			_zoneLoops = new Dictionary<string, ZoneLoopInfo>(loops, StringComparer.OrdinalIgnoreCase);
+		}
+
 		public static bool ZoneHasPath(Zone start, Zone goal)
 		{
 			if (start == goal)
@@ -448,27 +464,7 @@ namespace Game
 		/// <summary>
 		/// Map of zones and corresponding background sounds
 		/// </summary>
-		private static readonly Dictionary<string, (string sound, float volume)> _zoneLoops = new(StringComparer.OrdinalIgnoreCase)
-		{
-			["chodba h1"] = ("ElectricalBoxLoop", .5f),
-			["balkon p1"] = ("BelvedereStreetLoop", 1),
-			["terasa w1"] = ("PoolLoop", .4f),
-			["výčep h1"] = ("CzechPubLoop", .7f),
-			["ulice h1"] = ("BonitaStreetLoop", .5f),
-			["příjezdová cesta w1"] = ("Poolloop", 1),
-			["bazén w1"] = ("PoolLoop", 1),
-			["zahrada c1"] = ("CarsonsGardenLoop", .1f),
-			["asfaltka c1"] = ("AsphaltRoadLoop", .5f),
-			["cesta c1"] = ("AsphaltRoadLoop", .5f),
-			["ulice p1"] = ("BelvedereStreetLoop", 1.5f),
-			["ulice v1"] = ("GordonStreetLoop", 1),
-			["garáž v1"] = ("GarageLoop", 1),
-			["garáž s1"] = ("GarageLoop", 1),
-			["garáž w1"] = ("GarageLoop", 1),
-			["garáž p1"] = ("GarageLoop", 1),
-			["ulice s1"] = ("BonitaStreetLoop", .7f),
-			["dvorek s1"] = ("DriveWayLoop", 1),
-		};
+		private static Dictionary<string, ZoneLoopInfo> _zoneLoops;
 
 		/// <summary>
 		/// List of all NPCs
@@ -989,7 +985,7 @@ namespace Game
 			GameInProgress = false;
 
 			// Deserialize data from file
-			SerializerHelper helper = null;
+			ProtobufSerializerHelper helper = null;
 
 			try
 			{
@@ -1002,7 +998,7 @@ namespace Game
 
 				using (stream = File.OpenRead(path))
 				{
-					helper = ProtoBuf.Serializer.Deserialize<SerializerHelper>(stream);
+					helper = ProtoBuf.Serializer.Deserialize<ProtobufSerializerHelper>(stream);
 				}
 				stream?.Close();
 			}
@@ -1127,21 +1123,18 @@ namespace Game
 			}
 		}
 
-		private static Dictionary<string, ZoneMaterialsDefinitionModel> LoadZoneMaterials()
+		private static Dictionary<string, ZoneMaterials> LoadZoneMaterials()
 		{
-			IDeserializer deserializer = new DeserializerBuilder()
-				.WithNamingConvention(PascalCaseNamingConvention.Instance)
-				.Build();
-
-			string yaml = Resources.Load<TextAsset>(MainScript.MaterialsPath).text;
-			Dictionary<string, ZoneMaterialsDefinitionModel> materials = deserializer.Deserialize<Dictionary<string, ZoneMaterialsDefinitionModel>>(yaml);
-			return new Dictionary<string, ZoneMaterialsDefinitionModel>(materials, StringComparer.OrdinalIgnoreCase);
+			Dictionary<string, ZoneMaterials> materials = null;
+			YamlHelper.LoadFromResources(MainScript.MaterialsPath, out materials);
+			return new Dictionary<string, ZoneMaterials>(materials, StringComparer.OrdinalIgnoreCase);
 		}
 
 		private static void LoadZonesAndItems(XElement root, Dictionary<string, GameObject> zoneObjects, Dictionary<string, GameObject> itemObjects)
 		{
+			LoadZoneLoops();
 			ItemFactory.LoadItems();
-			Dictionary<string, ZoneMaterialsDefinitionModel> materials = LoadZoneMaterials();
+			Dictionary<string, ZoneMaterials> materials = LoadZoneMaterials();
 			foreach (XElement zoneNode in _zoneNodes)
 			{
 				Zone zone = LoadZone(zoneNode, zoneObjects, materials);
@@ -1149,19 +1142,19 @@ namespace Game
 			}
 		}
 
-		private static Zone LoadZone(XElement zoneNode, Dictionary<string, GameObject> localitiObjects, Dictionary<string, ZoneMaterialsDefinitionModel> materials)
+		private static Zone LoadZone(XElement zoneNode, Dictionary<string, GameObject> localitiObjects, Dictionary<string, ZoneMaterials> materials)
 		{
-			(string sound, float volume) lBackgroundInfo;
-			_zoneLoops.TryGetValue(GetAttribute(zoneNode, "indexedname"), out lBackgroundInfo);
+			ZoneLoopInfo loopInfo;
+			_zoneLoops.TryGetValue(GetAttribute(zoneNode, "indexedname"), out loopInfo);
 			Name name = new(GetAttribute(zoneNode, "indexedname"), GetAttribute(zoneNode, "friendlyname"));
 			string description = GetAttribute(zoneNode, "description");
 			string to = GetAttribute(zoneNode, "to");
-			Zone.ZoneType type = GetAttribute(zoneNode, "type").ToZoneType();
+			ZoneType type = GetAttribute(zoneNode, "type").ToZoneType();
 			float height = int.Parse(GetAttribute(zoneNode, "height"));
 			Rectangle area = new(GetAttribute(zoneNode, "coordinates"));
 			TerrainType defaultTerrain = GetAttribute(zoneNode, "defaultTerrain", false).ToTerrainType();
 
-			if (type == Zone.ZoneType.Outdoor)
+			if (type == ZoneType.Outdoor)
 				height = 6;
 
 			GameObject obj = null;
@@ -1178,8 +1171,7 @@ namespace Game
 				height,
 				area,
 				defaultTerrain,
-				lBackgroundInfo.sound,
-				lBackgroundInfo.volume,
+				loopInfo,
 				materials[name.Indexed]
 			);
 			Add(zone);
@@ -1315,7 +1307,7 @@ namespace Game
 		public static void SaveGame(string path)
 		{
 			return; // todo nefunguje
-			SerializerHelper helper = new(_characters, _items, _passages, _zones);
+			ProtobufSerializerHelper helper = new(_characters, _items, _passages, _zones);
 			FileStream stream = null;
 			using (stream = File.Create(path))
 			{

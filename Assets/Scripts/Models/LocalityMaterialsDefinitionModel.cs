@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.Models
 {
-    public class ZoneMaterialsDefinitionModel
+    public class ZoneMaterials
     {
         public Material LeftWall;
         public Material FrontWall;
@@ -11,9 +11,9 @@ namespace Assets.Scripts.Models
         public Material Floor;
         public Material Ceiling;
 
-        public ZoneMaterialsDefinitionModel() { }
+        public ZoneMaterials() { }
 
-        public ZoneMaterialsDefinitionModel(Material leftwall, Material frontwall, Material rightwall, Material backwall, Material floor, Material ceiling)
+        public ZoneMaterials(Material leftwall, Material frontwall, Material rightwall, Material backwall, Material floor, Material ceiling)
         {
             LeftWall = leftwall;
             FrontWall = frontwall;
