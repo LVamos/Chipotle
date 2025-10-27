@@ -48,16 +48,16 @@ namespace Game.Entities.Items
 
 			foreach (Passage exit in _portals.Keys)
 			{
-				PortalModel portal = _portals[exit];
+				AudioSource portal = _portals[exit];
 				UpdatePortalOcclusion(portal, exit, _enteringZoneOcclusionDuration);
 				UpdatePortalPosition(portal, exit);
 			}
 		}
 
-		private void UpdatePortalPosition(PortalModel portal, Passage exit)
+		private void UpdatePortalPosition(AudioSource portal, Passage exit)
 		{
 			Vector3 position = GetPointForPortal(exit);
-			portal.AudioSource.transform.position = position;
+			portal.transform.position = position;
 		}
 
 		protected string GetPortalDescription(Passage passage)
@@ -71,13 +71,10 @@ namespace Game.Entities.Items
 		private void MoveAmbientToPortal(ReadyPortalModel portal, float volume)
 		{
 			_ambientSource.transform.position = portal.Position;
-			PortalModel newPortal = new()
-			{
-				AudioSource = _ambientSource
-			};
+			AudioSource newPortal = _ambientSource;
 			_ambientSource = null;
 			SetPortalAttenuation(newPortal);
-			newPortal.AudioSource.name = GetPortalDescription(portal.Passage);
+			newPortal.name = GetPortalDescription(portal.Passage);
 			_portals[portal.Passage] = newPortal;
 		}
 
@@ -101,23 +98,23 @@ namespace Game.Entities.Items
 
 		protected bool ReplaceAmbientLoopWithNearestPortal()
 		{
-			PortalModel portal = TryRemovePortalNearPlayer();
+			AudioSource portal = TryRemovePortalNearPlayer();
 			if (portal == null)
 				return false;
 
-			DisableOcclusion(portal.AudioSource, _enteringZoneOcclusionDuration);
-			_ambientSource = portal.AudioSource;
+			DisableOcclusion(portal, _enteringZoneOcclusionDuration);
+			_ambientSource = portal;
 			_ambientSource.transform.position = GetAmbientPosition();
 			return true;
 		}
 
-		protected PortalModel TryRemovePortalNearPlayer()
+		protected AudioSource TryRemovePortalNearPlayer()
 		{
 			if (_portals == null)
 				return null;
 
 			Passage closestPassage = World.GetClosestElement(_portals.Keys, World.Player) as Passage;
-			PortalModel closestPortal = _portals[closestPassage];
+			AudioSource closestPortal = _portals[closestPassage];
 			_portals.Remove(closestPassage);
 			return closestPortal;
 		}
@@ -149,14 +146,14 @@ namespace Game.Entities.Items
 
 		private const int _passageDistanceAttenuationThreshold = 5;
 
-		private void UpdatePortalOcclusion(PortalModel portal, Passage exit, float? duration = null)
+		private void UpdatePortalOcclusion(AudioSource portal, Passage exit, float? duration = null)
 		{
 			float finalDuration = duration != null ? duration.Value : GetPortalOcclusionDuration(exit);
 			PassageState state = exit.State;
 			bool farFromPlayer = exit.GetDistanceToPlayer() > _passageDistanceAttenuationThreshold;
 			float lowPass = GetPortalOcclusionLowPass(exit, farFromPlayer);
 
-			Sounds.SlideLowPass(portal.AudioSource, finalDuration, lowPass);
+			Sounds.SlideLowPass(portal, finalDuration, lowPass);
 			bool playerBehindWall = !GetZoneNearPlayer().IsAccessible(World.Player.Zone);
 			UpdatePortalVolume(portal, exit, finalDuration, playerBehindWall);
 		}
@@ -175,7 +172,7 @@ namespace Game.Entities.Items
 			return _doorOpeningOcclusionDuration;
 		}
 
-		protected void UpdatePortalVolume(PortalModel portal, Passage exit, float duration, bool playerBehindWall = false)
+		protected void UpdatePortalVolume(AudioSource portal, Passage exit, float duration, bool playerBehindWall = false)
 		{
 			float volume = Sounds.GetLinearRolloffAttenuation(
 				transform.position,
@@ -186,7 +183,7 @@ namespace Game.Entities.Items
 			float finalVolume = volume * GetPortalVolumeCoefficient(exit);
 			if (playerBehindWall)
 				finalVolume *= _behindWallVolumeCoefficient;
-			Sounds.SlideVolume(portal.AudioSource, duration, finalVolume, false);
+			Sounds.SlideVolume(portal, duration, finalVolume, false);
 		}
 
 		protected float GetPortalVolumeCoefficient(Passage exit)
@@ -214,10 +211,7 @@ namespace Game.Entities.Items
 		{
 			string description = GetPortalDescription(readyPortal.Passage);
 			string name = _sounds["loop"];
-			PortalModel newPortal = new()
-			{
-				AudioSource = Sounds.Play(name, readyPortal.Position, 0, true, false, description: description)
-			};
+			AudioSource newPortal = Sounds.Play(name, readyPortal.Position, 0, true, false, description: description);
 			SetPortalAttenuation(newPortal);
 
 			_portals[readyPortal.Passage] = newPortal;
@@ -255,7 +249,7 @@ namespace Game.Entities.Items
 			return volume;
 		}
 
-		private PortalModel TakeClosestPassageLoop()
+		private AudioSource TakeClosestPassageLoop()
 		{
 			Passage closest = _portals.Keys
 				.OrderBy(p => p.Area.Value.GetDistanceFrom(World.Player.Area.Value))
@@ -263,7 +257,7 @@ namespace Game.Entities.Items
 			if (closest == null)
 				return null;
 
-			PortalModel loop = _portals[closest];
+			AudioSource loop = _portals[closest];
 			_portals.Remove(closest);
 			return loop;
 		}
@@ -273,8 +267,8 @@ namespace Game.Entities.Items
 			if (_portals == null)
 				return;
 
-			foreach (PortalModel loop in _portals.Values)
-				Sounds.SlideVolume(loop.AudioSource, .5f, 0);
+			foreach (AudioSource loop in _portals.Values)
+				Sounds.SlideVolume(loop, .5f, 0);
 
 			_portals = null;
 		}
@@ -282,8 +276,11 @@ namespace Game.Entities.Items
 		private void StopLoops()
 		{
 			Stop(ref _ambientSource);
-			foreach (PortalModel loop in _portals.Values)
-				Stop(ref loop.AudioSource);
+			foreach (AudioSource loop in _portals.Values)
+			{
+				AudioSource tmp = loop;
+				Stop(ref tmp);
+			}
 			_portals = new();
 
 			void Stop(ref AudioSource source)
@@ -308,7 +305,7 @@ namespace Game.Entities.Items
 		}
 
 		[ProtoIgnore]
-		private Dictionary<Passage, PortalModel> _portals;
+		private Dictionary<Passage, AudioSource> _portals;
 
 		protected Vector3? _loopPositionBackup;
 		protected const float _portalVolumeCoefficient = 0.8f;
@@ -888,9 +885,9 @@ namespace Game.Entities.Items
 			return _area.Value.Center.ToVector3(GetSoundHeight());
 		}
 
-		private void SetPortalAttenuation(PortalModel portal)
+		private void SetPortalAttenuation(AudioSource portal)
 		{
-			AudioSource source = portal.AudioSource;
+			AudioSource source = portal;
 			source.maxDistance = GetMaxDistance();
 			float distance = Vector3.Distance(source.transform.position, transform.position);
 			source.maxDistance -= distance;
