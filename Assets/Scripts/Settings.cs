@@ -15,14 +15,9 @@ namespace Game
 {
 	public static class Settings
 	{
-		public static float PortalAmbientMaxDistance = 19;
-
-		/// <summary>
-		/// The maximum distance the player is from the zone at which it makes sense to play the location audio.
-		/// </summary>
-		public static float ZoneSoundRadius = 100;
-		public static int PortalAmbientOpenDoorMaxDistance = 13;
-		public static float PortalAmbientClosedDoorMaxDistance = 4.5f;
+		public static float PortalMaxDistance = 19;
+		public static int OpenDoorMaxDistance = 13;
+		public static float ClosedDoorMaxDistance = 4.5f;
 		public static float DoorOpeningOcclusionDuration = 3;
 		public static float DoorClosingOcclusionDuration = .5f;
 		public static int Ambient2dFadeDuration = 2;

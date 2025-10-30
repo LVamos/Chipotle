@@ -68,7 +68,7 @@ namespace Game.Entities.Items
 		}
 
 
-		private void MoveAmbientToPortal(ReadyPortalModel portal, float volume)
+		private void MoveAmbientToPortal(PortalAnchor portal, float volume)
 		{
 			_ambientSource.transform.position = portal.Position;
 			AudioSource newPortal = _ambientSource;
@@ -78,18 +78,18 @@ namespace Game.Entities.Items
 			_portals[portal.Passage] = newPortal;
 		}
 
-		protected ReadyPortalModel GetReadyPortalByPassage(List<ReadyPortalModel> portals, Passage passage)
+		protected PortalAnchor GetReadyPortalByPassage(List<PortalAnchor> portals, Passage passage)
 		{
-			ReadyPortalModel result = portals
+			PortalAnchor result = portals
 				.First(loop => loop.Passage == passage);
 			return result;
 		}
 
-		protected ReadyPortalModel RemoveReadyPortalNearPlayer(List<ReadyPortalModel> portals)
+		protected PortalAnchor RemoveReadyPortalNearPlayer(List<PortalAnchor> portals)
 		{
 			List<Passage> passages = ReadyPortalsToPassages(portals);
 			Passage closestPassage = World.GetClosestElement(passages, World.Player) as Passage;
-			ReadyPortalModel closestPortal = GetReadyPortalByPassage(portals, closestPassage);
+			PortalAnchor closestPortal = GetReadyPortalByPassage(portals, closestPassage);
 			portals.Remove(closestPortal);
 			return closestPortal;
 		}
@@ -127,7 +127,7 @@ namespace Game.Entities.Items
 
 			_portals = new();
 			Zone playersZone = World.Player.Zone;
-			List<ReadyPortalModel> readyPortals = PreparePortals();
+			List<PortalAnchor> readyPortals = PreparePortals();
 
 			/* 
 			 * Enuse original ambient sound if already playing.
@@ -135,12 +135,12 @@ namespace Game.Entities.Items
 			if (_ambientSource != null && _ambientSource.isPlaying)
 			{
 				// place it into  the nearest exit.
-				ReadyPortalModel closestPortal = RemoveReadyPortalNearPlayer(readyPortals);
+				PortalAnchor closestPortal = RemoveReadyPortalNearPlayer(readyPortals);
 				MoveAmbientToPortal(closestPortal, GetPortalVolume(closestPortal.Passage));
 			}
 
 			// Start playback in The remaining exits.
-			foreach (ReadyPortalModel portal in readyPortals)
+			foreach (PortalAnchor portal in readyPortals)
 				PlayPortal(portal);
 		}
 
@@ -199,7 +199,7 @@ namespace Game.Entities.Items
 			};
 		}
 
-		private List<Passage> ReadyPortalsToPassages(List<ReadyPortalModel> portals)
+		private List<Passage> ReadyPortalsToPassages(List<PortalAnchor> portals)
 		{
 			List<Passage> result = portals
 				.Select(loop => loop.Passage)
@@ -207,7 +207,7 @@ namespace Game.Entities.Items
 			return result;
 		}
 
-		private void PlayPortal(ReadyPortalModel readyPortal)
+		private void PlayPortal(PortalAnchor readyPortal)
 		{
 			string description = GetPortalDescription(readyPortal.Passage);
 			string name = _sounds["loop"];
@@ -226,10 +226,10 @@ namespace Game.Entities.Items
 			return exits;
 		}
 
-		private List<ReadyPortalModel> PreparePortals()
+		private List<PortalAnchor> PreparePortals()
 		{
 			Zone playersZone = World.Player.Zone;
-			List<ReadyPortalModel> portals = new();
+			List<PortalAnchor> portals = new();
 			List<Passage> exits = GetExitsFromZones();
 
 			foreach (Passage exit in exits)

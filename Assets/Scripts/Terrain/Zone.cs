@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Models;
+﻿using Assets.Scripts.Audio;
+using Assets.Scripts.Models;
 
 using DavyKager;
 
@@ -28,7 +29,9 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Zone : MapElement
 	{
-		public bool SameAmbients(string soundName) => _audiocontroller.SameAmbients(soundName);
+		public bool SameAmbients(string soundName)
+			 => _ambientController != null && _ambientController.SameAmbients(soundName);
+
 		/// <summary>
 		/// Returns all open passages between this zone and the specified one..
 		/// </summary>
@@ -318,25 +321,15 @@ namespace Game.Terrain
 
 		private void CreateComponents()
 		{
-			_audiocontroller = gameObject.AddComponent<ZoneAudioController>();
+			_ambientController = gameObject.AddComponent<ZoneAmbientController>();
+			_portalController = gameObject.AddComponent<ZonePortalController>();
 			_components = new MessagingObject[]
 			{
-				_audiocontroller
+				_ambientController,
+				_portalController
 			};
 		}
 
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="name">Inner and public name of the zone</param>
-		/// <param name="to">
-		/// Name of the zone in a shape that expresses a direction to the zone
-		/// </param>
-		/// <param name="type">Specifies if the zone is outside or inside a building.</param>
-		/// <param name="ceiling">Ceiling height of the zone (should be 0 for outdoor zones)</param>
-		/// <param name="area">Coordinates of the area occupied by the zone</param>
-		/// <param name="defaultTerrain">Lowest layer of the terrain in the zone</param>
-		/// <param name="backgroundInfo">A background sound played in loop</param>
 		public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, ZoneLoopInfo loop, ZoneMaterials materials = null)
 		{
 			base.Initialize(name, area);
@@ -358,8 +351,12 @@ namespace Game.Terrain
 			gameObject.transform.position = new Vector3(area.Center.x, ceiling / 2, area.Center.y);
 			gameObject.transform.localScale = new Vector3(area.Width, ceiling, area.Height);
 
-			CreateComponents();
-			_audiocontroller.Initialize(this, loop, materials);
+			if (loop != null)
+			{
+				CreateComponents();
+				_ambientController.Initialize(this, loop, materials);
+				_portalController.Initialize(this, loop);
+			}
 		}
 
 		[ProtoIgnore]
@@ -495,8 +492,17 @@ namespace Game.Terrain
 		public override void Activate()
 		{
 			base.Activate();
-			_audiocontroller.Activate();
+			ActivateComponents();
 			FindNeighbours();
+		}
+
+		private void ActivateComponents()
+		{
+			if (_components == null)
+				return;
+
+			foreach (MessagingObject component in _components)
+				component?.Activate();
 		}
 
 		/// <summary>
@@ -553,28 +559,6 @@ namespace Game.Terrain
 				throw new InvalidOperationException("Unregistered passage");
 
 			_exits.Remove(p.Name.Indexed);
-		}
-
-		/// <summary>
-		/// Erases the zone from game world.
-		/// </summary>
-		protected void Disappear()
-		{
-			// Delete objects.
-			foreach (Item o in Items)
-				World.Remove(o);
-
-			// Delete passages.
-			foreach (Passage p in Exits)
-				World.Remove(p);
-
-			// Delete character.
-			foreach (Character e in Characters)
-				World.Remove(e);
-
-			// Delete zone from the map.
-			foreach (Vector2 p in _area.Value.GetPoints())
-				World.Map[p] = null;
 		}
 
 		/// <summary>
@@ -638,7 +622,8 @@ namespace Game.Terrain
 		}
 
 		private bool _reloaded;
-		private ZoneAudioController _audiocontroller;
+		private ZoneAmbientController _ambientController;
+		private ZonePortalController _portalController;
 
 		/// <summary>
 		/// Returns all passages leading to the specified zone.
@@ -647,6 +632,7 @@ namespace Game.Terrain
 		/// <returns> all passages leading to the specified zone</returns>
 		private IEnumerable<Passage> GetPassagesTo(Zone zone) => Exits.Where(p => p.Zones.Contains(zone));
 
-		public AudioSource ReleaseAmbientSource() => _audiocontroller.ReleaseAmbientSource();
+		public AudioSource ReleaseAmbientSource() => _ambientController.ReleaseAmbientSource();
 	}
+
 }
