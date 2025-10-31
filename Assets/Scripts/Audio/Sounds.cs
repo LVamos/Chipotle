@@ -161,7 +161,7 @@ namespace Game.Audio
 
 		public static void Unmute(float duration = .5f) => _soundManager.Unmute();
 
-		public static void ConvertTo2d(AudioSource audioSource, bool muffled) => _soundManager.ConvertTo2d(audioSource, muffled);
+		public static void ConvertTo2d(AudioSource audioSource, bool disableLowPass = true) => _soundManager.ConvertTo2d(audioSource, disableLowPass);
 
 		/// <summary>
 		/// All sounds used in the game

@@ -120,9 +120,6 @@ namespace Game.Audio
 
 		private void PlayAmbient()
 		{
-			//test
-			if (_owner.Name.Indexed == "výčep h1" && Owner.PlayerInHere())
-				Console.WriteLine("");
 			string description = $"2d ambient; {_owner.Name.Indexed}";
 
 			// Get portals and select the one closest to the player.
@@ -133,7 +130,7 @@ namespace Game.Audio
 			else
 			{
 				AudioSource portal = GetClosestPortal(portals);
-				Sounds.ConvertTo2d(portal, false);
+				Sounds.ConvertTo2d(portal, true);
 				_ambientSource = portal;
 				_ambientSource.name = description;
 			}

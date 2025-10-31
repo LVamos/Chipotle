@@ -32,8 +32,14 @@ namespace Game.Audio
 			return _portals.TryGetValue(soundName, out portals) ? portals : null;
 		}
 
-		public static void UnregisterPortal(string soundName)
+		public static void UnregisterPortals(string soundName)
 			=> _portals.Remove(soundName);
+		public static void UnregisterPortal(string soundName, AudioSource portal)
+		{
+			HashSet<AudioSource> portals = TryGetPortals(soundName);
+			if (portals != null && portals.Contains(portal))
+				portals.Remove(portal);
+		}
 
 		public static IEnumerable<string> Active2D => _zone2D.Keys;
 		public static IEnumerable<string> ActivePortals => _portals.Keys;

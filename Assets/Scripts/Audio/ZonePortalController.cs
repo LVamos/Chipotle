@@ -108,12 +108,14 @@ namespace Assets.Scripts.Audio
 		private void StopUnusedPortals()
 		{
 			AudioSource ambient2d = AmbientRegistry.TryGet2D(AmbientSound);
-			foreach (var portal in _portals.Values)
+			foreach (AudioSource portal in _portals.Values)
 			{
 				if (portal != ambient2d)
+				{
+					AmbientRegistry.UnregisterPortal(AmbientSound, portal);
 					Sounds.SlideVolume(portal, Settings.Ambient3dFadeDuration, 0);
+				}
 			}
-			AmbientRegistry.UnregisterPortal(AmbientSound);
 			_portals = new();
 		}
 
@@ -221,7 +223,7 @@ namespace Assets.Scripts.Audio
 
 		private void PlayPortals(Zone previousZone = null)
 		{
-			// Portal ambients already playing
+			// Portals already playing
 			if (previousZone != null && PortalsPlaying())
 				return;
 
@@ -396,6 +398,7 @@ namespace Assets.Scripts.Audio
 		private void SetVolume(Passage passage, AudioSource portal)
 		{
 			float targetVolume = GetVolume(passage, portal);
+			float targetVolume = _defaultVolume;
 			float duration = Settings.Ambient2dFadeDuration;
 			if (passage is Door)
 			{
@@ -420,7 +423,7 @@ namespace Assets.Scripts.Audio
 		/// </summary>
 		private void UpdatePortals()
 		{
-			if (_portals.IsNullOrEmpty())
+			if (_portals.IsNullOrEmpty() && !Owner.PlayerInHere())
 			{
 				PlayPortals();
 				return;
