@@ -1463,7 +1463,10 @@ namespace Game.Entities.Characters.Chipotle
 				coefficient = _backwardSpeed;
 			else
 				coefficient = _forwardWalkSpeed;
-			return (int)(GetTerrainSpeed() * coefficient);
+			int result = (int)(GetTerrainSpeed() * coefficient);
+
+			result /= Settings.PlayerAcceleration;
+			return result;
 		}
 
 		/// <summary>
