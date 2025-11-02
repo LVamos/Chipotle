@@ -15,6 +15,7 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float PortalMinDistance = .5f;
 		public static float PortalMaxDistance = 19;
 		public static int OpenDoorMaxDistance = 13;
 		public static float ClosedDoorMaxDistance = 4.5f;

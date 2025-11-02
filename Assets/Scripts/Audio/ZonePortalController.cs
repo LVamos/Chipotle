@@ -29,6 +29,25 @@ namespace Assets.Scripts.Audio
 {
 	public class ZonePortalController : GameComponent<Zone>
 	{
+		private List<Zone> _multipleExitZOnes;
+
+		private void CollectMultipleExitZones()
+		{
+			_multipleExitZOnes = new();
+			Dictionary<Zone, int> _zoneConnections = new();
+			foreach (Passage exit in _owner.Exits)
+			{
+				_zoneConnections[exit.Zones.First()]++;
+				_zoneConnections[exit.Zones.Last()]++;
+			}
+
+			foreach (KeyValuePair<Zone, int> record in _zoneConnections)
+			{
+				if (record.Value > 0)
+					_multipleExitZOnes.Add(record.Key);
+			}
+		}
+
 		private Zone PlayersZone => World.Player.Zone;
 
 		private Zone _owner;
@@ -55,6 +74,7 @@ namespace Assets.Scripts.Audio
 
 			if (loop != null)
 				ApplyLoopSettings(loop);
+			CollectMultipleExitZones();
 		}
 
 		private void ApplyLoopSettings(ZoneLoopInfo loop)
@@ -103,7 +123,8 @@ namespace Assets.Scripts.Audio
 
 			if (_owner.PlayerInHere())
 				StopUnusedPortals();
-			else UpdatePortals(true, message.PreviousZone);
+			else
+				UpdatePortals(true, message.PreviousZone);
 		}
 
 		private void StopUnusedPortals()
@@ -180,7 +201,7 @@ namespace Assets.Scripts.Audio
 		private void SetPortalParameters(PortalAnchor anchor, AudioSource portal, bool attenuation = true, bool volume = true, bool occlusion = true, bool spatialBlend = true, bool playerChangedZone = false)
 		{
 			if (attenuation)
-				SetAttenuation(anchor, portal);
+				SetAttenuation(anchor, portal, playerChangedZone);
 			if (volume)
 				SetVolume(anchor.Passage, portal, playerChangedZone);
 			if (occlusion)
@@ -255,14 +276,37 @@ namespace Assets.Scripts.Audio
 			return closestAnchor;
 		}
 
-		private void SetAttenuation(PortalAnchor anchor, AudioSource portal)
+		private void SetAttenuation(PortalAnchor anchor, AudioSource portal, bool playerChangedZone = false)
 		{
 			portal.rolloffMode = AudioRolloffMode.Linear;
-			if (anchor.Passage is Door door)
-				portal.maxDistance = door.Open ? _loop.OpenDoorMaxDistance.Value : _loop.ClosedDoorMaxDistance.Value;
-			else portal.maxDistance = _loop.PortalMaxDistance.Value;
+			portal.minDistance = Settings.PortalMinDistance;
 
-			portal.minDistance = .5f; // 3D sound
+			List<Zone> zones = anchor.Passage.Zones.ToList();
+			if (zones.Any(z => _multipleExitZOnes.Contains(z)))
+			{
+				UseIndividualParameters();
+				return;
+			}
+
+			// Set individual parameters for the exit nearest to the player. Use default parameters for the others.
+			Passage exitNearPlayer = _owner.GetNearestExits(World.Player.Center).First();
+			if (anchor.Passage == exitNearPlayer)
+				UseIndividualParameters();
+			else UseDefaultParameters();
+
+			void UseDefaultParameters()
+			{
+				if (anchor.Passage is Door door)
+					portal.maxDistance = door.Open ? Settings.OpenDoorMaxDistance : Settings.ClosedDoorMaxDistance;
+				else portal.maxDistance = Settings.PortalMaxDistance;
+			}
+
+			void UseIndividualParameters()
+			{
+				if (anchor.Passage is Door door)
+					portal.maxDistance = door.Open ? _loop.OpenDoorMaxDistance.Value : _loop.ClosedDoorMaxDistance.Value;
+				else portal.maxDistance = _loop.PortalMaxDistance.Value;
+			}
 		}
 
 		private void SetOcclusion(PortalAnchor anchor, AudioSource portal, bool fadingTo3d = false)
@@ -314,19 +358,13 @@ namespace Assets.Scripts.Audio
 			int distance = (int)passage.Area.Value.GetDistanceFrom(World.Player.Area.Value);
 			float finalBlend = distance > 10 ? 1 : distance * .2f;
 			Sounds.SlideSpatialBlend(portal, Settings.PortalBlendSlidingDuration, finalBlend);
-
-			// Turn off spatialization if spatial blend was set to 1.
-			if (oldSpatialBlend >= 1)
-			{
-				portal.spatialize = false;
-			}
 		}
 
 		private void SetVolume(Passage passage, AudioSource portal, bool playerChangedZone = false)
 		{
 			if (playerChangedZone && !AudibleInPlayersZone())
 			{
-				StopPortal(portal);
+				MutePortal(portal);
 				return;
 			}
 
@@ -378,7 +416,7 @@ namespace Assets.Scripts.Audio
 				else
 				{
 					MovePortalInFrontOfPlayer(anchor, portal);
-					SetPortalParameters(anchor, portal, false, true, true, true, playerChangedZone);
+					SetPortalParameters(anchor, portal, true, true, true, true, playerChangedZone);
 				}
 			}
 		}
@@ -387,11 +425,10 @@ namespace Assets.Scripts.Audio
 
 		private bool AudibleInPlayersZone()
 		{
-			return PlayersZone.IsAccessible(_owner)
-									&& _loop.PortalAudibleZones.Contains(PlayersZone.Name.Indexed);
+			return _loop.PortalAudibleZones.Contains(PlayersZone.Name.Indexed);
 		}
 
-		private void StopPortal(AudioSource portal)
+		private void MutePortal(AudioSource portal)
 		{
 			Sounds.SlideVolume(portal, Settings.Ambient3dFadeDuration, 0, false);
 		}
