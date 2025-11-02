@@ -227,7 +227,8 @@ namespace Game.Entities.Characters
 			SetPosition(targetPosition, message.TargetZone);
 			RecordZone(message.SourceZone, message.TargetZone);
 			AnnounceZoneChange(message.SourceZone, message.TargetZone);
-			AnnouncePosition(message.SourcePosition, targetPosition, message.SourceZone, message.TargetZone);
+			bool zoneChanged = message.SourceZone != null && message.SourceZone != message.TargetZone;
+			AnnouncePosition(message.SourcePosition, targetPosition, message.SourceZone, message.TargetZone, !zoneChanged);
 		}
 
 		private void AnnounceZoneChange(Zone sourceZone, Zone targetZone)
@@ -242,12 +243,13 @@ namespace Game.Entities.Characters
 				World.MessageZones(came);
 		}
 
-		private void AnnouncePosition(Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone)
+		private void AnnouncePosition(Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone, bool messageZones = true)
 		{
 			// todo Implement listener pattern
 			CharacterMoved moved = new(this, sourcePosition, targetPosition, sourceZone, targetZone);
 			World.MessageCharacters(moved);
-			World.MessageZones(moved);
+			if (messageZones)
+				World.MessageZones(moved);
 		}
 
 		private void SetPosition(Rectangle position, Zone zone)

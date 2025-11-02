@@ -68,22 +68,9 @@ namespace Game.Audio
 		public void UpdateAmbient(Zone previousZone = null)
 		{
 			if (!_owner.PlayerInHere())
-			{
-				if (_ambientSource != null)
-				{
-					//test
-					//if (PlayersZone.IsNeighbour(Owner) && PlayersZone.IsAccessible(Owner))
-					return;
-
-					AmbientRegistry.Unregister2D(AmbientSound);
-					Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, 0);
-				}
 				return;
-			}
-
 			if (previousZone != null && TryStealAmbient(previousZone))
 				return;
-
 			PlayAmbient();
 		}
 

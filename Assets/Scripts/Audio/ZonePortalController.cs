@@ -156,7 +156,7 @@ namespace Assets.Scripts.Audio
 			portal.maxDistance = _loop.PortalMaxDistance.Value;
 			portal.name = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Indexed);
 			_portals[anchor.Passage] = portal;
-			SetPortalParameters(anchor, portal, false, true, true, true);
+			SetPortalParameters(anchor, portal, false, true, true, true, true);
 			portal.rolloffMode = AudioRolloffMode.Linear;
 		}
 
@@ -221,8 +221,9 @@ namespace Assets.Scripts.Audio
 
 		private IEnumerator FadeAmbientTo3dDelayed(PortalAnchor anchor)
 		{
-			yield return new WaitForSeconds(Settings.Ambient3dFadeDuration);
 			AudioSource portal = AmbientRegistry.TryGet2D(_loop.Sound);
+			MutePortal(portal);
+			yield return new WaitForSeconds(Settings.Ambient3dFadeDuration);
 			if (portal != null)
 				FadeAmbientTo3d(anchor);
 		}
@@ -233,7 +234,6 @@ namespace Assets.Scripts.Audio
 			if (previousZone != null && PortalsPlaying())
 				return;
 
-			Zone playersZone = World.Player.Zone;
 			List<PortalAnchor> anchors = ZonePortalHelper.GetAnchors(_owner, _loop);
 
 			/* 
@@ -244,9 +244,9 @@ namespace Assets.Scripts.Audio
 				// Change 2D ambient sound to 3D and place it in the nearest passage between this and new zone. Start playing 3D ambient sounds from other passages between this and the new zone.
 				PortalAnchor closestPortal = RemoveAnchorNearPlayer(anchors);
 
-				if (!playersZone.SameAmbients(_loop.Sound))
+				if (!PlayersZone.SameAmbients(_loop.Sound))
 				{
-					if (!playersZone.IsAccessible(_owner))
+					if (!PlayersZone.IsAccessible(_owner))
 						StartCoroutine(FadeAmbientTo3dDelayed(closestPortal));
 					else FadeAmbientTo3d(closestPortal);
 				}
@@ -345,19 +345,23 @@ namespace Assets.Scripts.Audio
 			portal.spatialize = false;
 		}
 
-		private void SetSpatialBlend(Passage passage, AudioSource portal)
+		private void SetSpatialBlend(Passage exit, AudioSource portal)
 		{
-			float oldSpatialBlend = portal.spatialBlend;
-			if (passage is Door)
+			float oldBlend = portal.spatialBlend;
+			if (exit is Door)
 			{
 				Sounds.SlideSpatialBlend(portal, Settings.PortalBlendSlidingDuration, 1);
-				portal.spatialize = true;
+				if (!exit.Open)
+					portal.spatialize = true;
 				return;
 			}
 
-			int distance = (int)passage.Area.Value.GetDistanceFrom(World.Player.Area.Value);
+			int distance = (int)exit.Area.Value.GetDistanceFrom(World.Player.Area.Value);
 			float finalBlend = distance > 10 ? 1 : distance * .2f;
 			Sounds.SlideSpatialBlend(portal, Settings.PortalBlendSlidingDuration, finalBlend);
+
+			if (oldBlend >= 1 && finalBlend < 1)
+				portal.spatialize = false;
 		}
 
 		private void SetVolume(Passage passage, AudioSource portal, bool playerChangedZone = false)
@@ -403,11 +407,11 @@ namespace Assets.Scripts.Audio
 		/// </summary>
 		private void UpdatePortals(bool playerChangedZone = false, Zone previousZone = null)
 		{
-			if (PlayPortalsIfNeeded(previousZone))
-				return;
+			PlayPortalsIfNeeded(previousZone);
 
-			IEnumerable<PortalAnchor> anchors = ZonePortalHelper.GetAnchors(_owner, _loop)
-				.Where(p => _portals.ContainsKey(p.Passage));
+			List<PortalAnchor> anchors = ZonePortalHelper.GetAnchors(_owner, _loop)
+				.Where(p => _portals.ContainsKey(p.Passage))
+				.ToList();
 			foreach (PortalAnchor anchor in anchors)
 			{
 				AudioSource portal = _portals[(Passage)anchor.Passage];
@@ -430,7 +434,7 @@ namespace Assets.Scripts.Audio
 
 		private void MutePortal(AudioSource portal)
 		{
-			Sounds.SlideVolume(portal, Settings.Ambient3dFadeDuration, 0, false);
+			Sounds.SlideVolume(portal, Settings.Ambient2dFadeDuration, 0, false);
 		}
 
 		private void MovePortalInFrontOfPlayer(PortalAnchor anchor, AudioSource portal)

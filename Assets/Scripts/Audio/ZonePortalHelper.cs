@@ -56,9 +56,8 @@ namespace Game.Audio
 
 		public static List<PortalAnchor> GetAnchors(Zone zone, ZoneLoopInfo loop)
 		{
-			Zone playersZone = World.Player.Zone;
 			Dictionary<Passage, Vector3> positions = GetPortalPositions(zone);
-			List<PortalAnchor> anchors = new List<PortalAnchor>();
+			List<PortalAnchor> anchors = new();
 
 			foreach (Passage exit in zone.Exits)
 			{
