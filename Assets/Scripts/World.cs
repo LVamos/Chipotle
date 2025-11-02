@@ -645,6 +645,7 @@ namespace Game
 		/// <returns>The found zone or null if nothing was found</returns>
 		public static Zone GetZone(string name)
 		{
+
 			_zones.TryGetValue(name.PrepareForIndexing(), out Zone zone);
 			return zone;
 		}
@@ -905,6 +906,7 @@ namespace Game
 		/// <returns>True on success</returns>
 		public static bool CreatePredefinedSave()
 		{
+
 			throw new NotImplementedException();
 			string name = null;
 			//Interaction.InputBox(String.Empty, "Zadej název sejvu");

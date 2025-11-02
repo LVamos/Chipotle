@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.LowLevel;
 
 namespace Game.Audio
 {
@@ -62,18 +63,20 @@ namespace Game.Audio
 		protected bool IsSameAmbientNearBy() =>
 			_owner.Neighbours.Any(n => n.SameAmbients(AmbientSound));
 
+		private Zone PlayersZone => World.Player.Zone;
+
 		public void UpdateAmbient(Zone previousZone = null)
 		{
-			//test
-			if (_owner.Name.Indexed == "výčep h1" && Owner.PlayerInHere())
-				Console.WriteLine("");
-
 			if (!_owner.PlayerInHere())
 			{
 				if (_ambientSource != null)
 				{
+					//test
+					//if (PlayersZone.IsNeighbour(Owner) && PlayersZone.IsAccessible(Owner))
+					return;
+
 					AmbientRegistry.Unregister2D(AmbientSound);
-					Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, 0, false);
+					Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, 0);
 				}
 				return;
 			}
@@ -128,19 +131,19 @@ namespace Game.Audio
 			if (portals.IsNullOrEmpty())
 				_ambientSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description);
 			else
-			{
-				AudioSource portal = GetClosestPortal(portals);
-				Sounds.ConvertTo2d(portal, true);
-				_ambientSource = portal;
-				_ambientSource.name = description;
-			}
+				FadePortalTo2d(description, portals);
 
 			AmbientRegistry.Register2D(AmbientSound, _ambientSource);
-			//test
-			if (_owner.Name.Indexed == "výčep h1")
-				Console.WriteLine("");
-
 			Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, _defaultVolume);
+		}
+
+		private void FadePortalTo2d(string description, HashSet<AudioSource> portals)
+		{
+			AudioSource portal = GetClosestPortal(portals);
+			AmbientRegistry.UnregisterPortal(AmbientSound, portal);
+			Sounds.ConvertTo2d(portal, true);
+			_ambientSource = portal;
+			_ambientSource.name = description;
 		}
 
 		private void StopAmbient()
@@ -165,9 +168,7 @@ namespace Game.Audio
 		{
 			if (message.Character != World.Player)
 				return;
-			//test
-			if (_owner.Name.Indexed == "výčep h1")
-				Console.WriteLine("");
+
 			Sounds.SetRoomParameters(_owner, _materials);
 			UpdateAmbient(message.PreviousZone);
 		}

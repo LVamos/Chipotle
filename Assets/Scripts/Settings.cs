@@ -18,7 +18,7 @@ namespace Game
 		public static float PortalMaxDistance = 19;
 		public static int OpenDoorMaxDistance = 13;
 		public static float ClosedDoorMaxDistance = 4.5f;
-		public static float DoorOpeningOcclusionDuration = 3;
+		public static float DoorOpeningOcclusionDuration = 2;
 		public static float DoorClosingOcclusionDuration = .5f;
 		public static int Ambient2dFadeDuration = 2;
 		public static float Ambient3dFadeDuration = .5f;
@@ -104,6 +104,9 @@ namespace Game
 		/// Name of currently loaded configuration file.
 		/// </summary>
 		public static string Configuration { get; private set; }
+
+		public static float PortalBlendSlidingDuration = 4;
+		public static float Portal2dFadingDuration = .5f;
 
 		/// <summary>
 		/// Enables or disables logging of currently played sounds into console.

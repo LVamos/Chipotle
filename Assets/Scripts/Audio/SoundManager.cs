@@ -112,10 +112,11 @@ namespace Game.Audio
 		public AudioSource ConvertTo2d(AudioSource source, bool disableLowPass = false)
 		{
 			if (disableLowPass)
-				_soundPool.DisableLowPass(source);
+				SlideLowPass(source, Settings.Portal2dFadingDuration, 22000, true);
+
 			source.spatialize = false;
 			source.outputAudioMixerGroup = null;
-			source.spatialBlend = 0;
+			SlideSpatialBlend(source, Settings.PortalBlendSlidingDuration, 0);
 			return source;
 		}
 
@@ -128,6 +129,14 @@ namespace Game.Audio
 			}
 
 			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone));
+		}
+
+		public void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null)
+		{
+			if (targetBlend == source.spatialBlend)
+				return;
+
+			StartCoroutine(SlideSpatialBlendStep(source, duration, targetBlend, finalAction));
 		}
 
 		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
@@ -151,6 +160,20 @@ namespace Game.Audio
 			}
 		}
 
+		private IEnumerator SlideSpatialBlendStep(AudioSource source, float duration, float targetBlend, Action finalAction)
+		{
+			float startBlend = source.spatialBlend;
+
+			for (float t = 0; t < duration; t += Time.deltaTime)
+			{
+				source.spatialBlend = Mathf.Lerp(startBlend, targetBlend, t / duration);
+				yield return null;
+			}
+
+			source.spatialBlend = targetBlend;
+			finalAction?.Invoke();
+		}
+
 		private void Update()
 		{
 			return;
@@ -159,6 +182,7 @@ namespace Game.Audio
 		public AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
+			_soundPool.DisableLowPass(source);
 			source.name = description ?? "sound";
 			source.clip = Sounds.GetClip(soundName);
 			source.spatialize = false;
