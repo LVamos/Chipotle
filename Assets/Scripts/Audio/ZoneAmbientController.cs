@@ -53,7 +53,7 @@ namespace Game.Audio
 
 		public AudioSource ReleaseAmbientSource()
 		{
-			AmbientRegistry.Unregister2D(AmbientSound);
+			AmbientRegistry.Unregister2D(_owner.Name.Indexed);
 			return (_ambientSource, _ambientSource = null).Item1;
 		}
 
@@ -82,7 +82,7 @@ namespace Game.Audio
 			if (_owner.PlayerInHere())
 			{
 				_ambientSource = previousZone.ReleaseAmbientSource();
-				AmbientRegistry.Register2D(AmbientSound, _ambientSource);
+				AmbientRegistry.Register2D(_owner.Name.Indexed, _ambientSource);
 				return true;
 			}
 			return false;
@@ -113,21 +113,21 @@ namespace Game.Audio
 			string description = $"2d ambient; {_owner.Name.Indexed}";
 
 			// Get portals and select the one closest to the player.
-			HashSet<AudioSource> portals = AmbientRegistry.TryGetPortals(AmbientSound);
+			HashSet<AudioSource> portals = AmbientRegistry.TryGetPortals(_owner.Name.Indexed);
 			// Find the closest one to the player
 			if (portals.IsNullOrEmpty())
 				_ambientSource = Sounds.Play2d(AmbientSound, 0, true, false, description: description);
 			else
 				FadePortalTo2d(description, portals);
 
-			AmbientRegistry.Register2D(AmbientSound, _ambientSource);
+			AmbientRegistry.Register2D(_owner.Name.Indexed, _ambientSource);
 			Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, _defaultVolume);
 		}
 
 		private void FadePortalTo2d(string description, HashSet<AudioSource> portals)
 		{
 			AudioSource portal = GetClosestPortal(portals);
-			AmbientRegistry.UnregisterPortal(AmbientSound, portal);
+			AmbientRegistry.UnregisterPortal(_owner.Name.Indexed, portal);
 			Sounds.ConvertTo2d(portal, true);
 			_ambientSource = portal;
 			_ambientSource.name = description;
@@ -137,7 +137,7 @@ namespace Game.Audio
 		{
 			if (_ambientSource?.isPlaying == true)
 			{
-				AmbientRegistry.Unregister2D(AmbientSound);
+				AmbientRegistry.Unregister2D(_owner.Name.Indexed);
 				Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, 0);
 			}
 			_ambientSource = null;

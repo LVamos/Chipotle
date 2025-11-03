@@ -129,12 +129,12 @@ namespace Assets.Scripts.Audio
 
 		private void StopUnusedPortals()
 		{
-			AudioSource ambient2d = AmbientRegistry.TryGet2D(_loop.Sound);
+			AudioSource ambient2d = AmbientRegistry.TryGet2D(_owner.Name.Indexed);
 			foreach (AudioSource portal in _portals.Values)
 			{
 				if (portal != ambient2d)
 				{
-					AmbientRegistry.UnregisterPortal(_loop.Sound, portal);
+					AmbientRegistry.UnregisterPortal(_owner.Name.Indexed, portal);
 					Sounds.SlideVolume(portal, Settings.Ambient3dFadeDuration, 0);
 				}
 			}
@@ -149,9 +149,9 @@ namespace Assets.Scripts.Audio
 
 		private void FadeAmbientTo3d(PortalAnchor anchor)
 		{
-			AudioSource portal = AmbientRegistry.TryGet2D(_loop.Sound);
-			AmbientRegistry.Unregister2D(_loop.Sound);
-			AmbientRegistry.RegisterPortal(_loop.Sound, portal);
+			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Indexed);
+			AmbientRegistry.Unregister2D(_owner.Name.Indexed);
+			AmbientRegistry.RegisterPortal(_owner.Name.Indexed, portal);
 			portal.transform.position = anchor.Position;
 			portal.maxDistance = _loop.PortalMaxDistance.Value;
 			portal.name = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Indexed);
@@ -213,15 +213,15 @@ namespace Assets.Scripts.Audio
 		private void PlayPortal(PortalAnchor anchor)
 		{
 			string description = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Indexed);
-			AudioSource newPortal = Sounds.Play(_loop.Sound, anchor.Position, 0, true, description: description);
-			AmbientRegistry.RegisterPortal(_loop.Sound, newPortal);
-			SetPortalParameters(anchor, newPortal);
-			_portals[anchor.Passage] = newPortal;
+			AudioSource portal = Sounds.Play(_loop.Sound, anchor.Position, 0, true, description: description);
+			AmbientRegistry.RegisterPortal(_owner.Name.Indexed, portal);
+			SetPortalParameters(anchor, portal);
+			_portals[anchor.Passage] = portal;
 		}
 
 		private IEnumerator FadeAmbientTo3dDelayed(PortalAnchor anchor)
 		{
-			AudioSource portal = AmbientRegistry.TryGet2D(_loop.Sound);
+			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Indexed);
 			MutePortal(portal);
 			yield return new WaitForSeconds(Settings.Ambient3dFadeDuration);
 			if (portal != null)
