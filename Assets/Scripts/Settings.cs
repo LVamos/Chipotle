@@ -107,7 +107,7 @@ namespace Game
 		/// </summary>
 		public static string Configuration { get; private set; }
 
-		public static float PortalBlendSlidingDuration = 4;
+		public static float PortalBlendSlidingDuration = 2;
 		public static float Portal2dFadingDuration = .5f;
 
 		/// <summary>

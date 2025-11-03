@@ -227,8 +227,7 @@ namespace Game.Entities.Characters
 			SetPosition(targetPosition, message.TargetZone);
 			RecordZone(message.SourceZone, message.TargetZone);
 			AnnounceZoneChange(message.SourceZone, message.TargetZone);
-			bool zoneChanged = message.SourceZone != null && message.SourceZone != message.TargetZone;
-			AnnouncePosition(message.SourcePosition, targetPosition, message.SourceZone, message.TargetZone, !zoneChanged);
+			AnnouncePosition(message.SourcePosition, targetPosition, message.SourceZone, message.TargetZone);
 		}
 
 		private void AnnounceZoneChange(Zone sourceZone, Zone targetZone)

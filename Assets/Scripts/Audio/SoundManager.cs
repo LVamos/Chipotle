@@ -5,6 +5,8 @@ using DavyKager;
 
 using Game.Terrain;
 
+using NUnit.Framework.Constraints;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -115,6 +117,7 @@ namespace Game.Audio
 				SlideLowPass(source, Settings.Portal2dFadingDuration, 22000, true);
 
 			source.spatialize = false;
+			source.spatializePostEffects = false;
 			source.outputAudioMixerGroup = null;
 			SlideSpatialBlend(source, Settings.PortalBlendSlidingDuration, 0);
 			return source;

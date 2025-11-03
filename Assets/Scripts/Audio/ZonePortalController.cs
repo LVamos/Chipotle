@@ -124,7 +124,7 @@ namespace Assets.Scripts.Audio
 			if (_owner.PlayerInHere())
 				StopUnusedPortals();
 			else
-				UpdatePortals(true, message.PreviousZone);
+				UpdatePortals(message.PreviousZone);
 		}
 
 		private void StopUnusedPortals()
@@ -156,7 +156,7 @@ namespace Assets.Scripts.Audio
 			portal.maxDistance = _loop.PortalMaxDistance.Value;
 			portal.name = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Indexed);
 			_portals[anchor.Passage] = portal;
-			SetPortalParameters(anchor, portal, false, true, true, true, true);
+			SetPortalParameters(anchor, portal, false, true, true, true);
 			portal.rolloffMode = AudioRolloffMode.Linear;
 		}
 
@@ -198,12 +198,12 @@ namespace Assets.Scripts.Audio
 		}
 
 
-		private void SetPortalParameters(PortalAnchor anchor, AudioSource portal, bool attenuation = true, bool volume = true, bool occlusion = true, bool spatialBlend = true, bool playerChangedZone = false)
+		private void SetPortalParameters(PortalAnchor anchor, AudioSource portal, bool attenuation = true, bool volume = true, bool occlusion = true, bool spatialBlend = true)
 		{
 			if (attenuation)
-				SetAttenuation(anchor, portal, playerChangedZone);
+				SetAttenuation(anchor, portal);
 			if (volume)
-				SetVolume(anchor.Passage, portal, playerChangedZone);
+				SetVolume(anchor.Passage, portal);
 			if (occlusion)
 				SetOcclusion(anchor, portal);
 			if (spatialBlend)
@@ -276,7 +276,7 @@ namespace Assets.Scripts.Audio
 			return closestAnchor;
 		}
 
-		private void SetAttenuation(PortalAnchor anchor, AudioSource portal, bool playerChangedZone = false)
+		private void SetAttenuation(PortalAnchor anchor, AudioSource portal)
 		{
 			portal.rolloffMode = AudioRolloffMode.Linear;
 			portal.minDistance = Settings.PortalMinDistance;
@@ -364,9 +364,9 @@ namespace Assets.Scripts.Audio
 				portal.spatialize = false;
 		}
 
-		private void SetVolume(Passage passage, AudioSource portal, bool playerChangedZone = false)
+		private void SetVolume(Passage passage, AudioSource portal)
 		{
-			if (playerChangedZone && !AudibleInPlayersZone())
+			if (!AudibleInPlayersZone())
 			{
 				MutePortal(portal);
 				return;
@@ -405,7 +405,7 @@ namespace Assets.Scripts.Audio
 		/// <summary>
 		/// Updates position of passage sound loops.
 		/// </summary>
-		private void UpdatePortals(bool playerChangedZone = false, Zone previousZone = null)
+		private void UpdatePortals(Zone previousZone = null)
 		{
 			PlayPortalsIfNeeded(previousZone);
 
@@ -420,7 +420,7 @@ namespace Assets.Scripts.Audio
 				else
 				{
 					MovePortalInFrontOfPlayer(anchor, portal);
-					SetPortalParameters(anchor, portal, true, true, true, true, playerChangedZone);
+					SetPortalParameters(anchor, portal, true, true, true, true);
 				}
 			}
 		}
