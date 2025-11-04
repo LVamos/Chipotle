@@ -127,7 +127,7 @@ namespace Game.Terrain
 		/// Returns the public name of the element.
 		/// </summary>
 		/// <returns>Public name of the element</returns>
-		public override string ToString() => Name.Friendly;
+		public override string ToString() => Name.Indexed;
 
 		/// <summary>
 		/// Destroys the element.
