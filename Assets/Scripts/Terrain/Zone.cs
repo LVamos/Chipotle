@@ -17,6 +17,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using UnityEditor.Callbacks;
+
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
@@ -94,7 +96,10 @@ namespace Game.Terrain
 		/// Enumerates all accessible zones.
 		/// </summary>
 		/// <returns>All accessible zones</returns>
-		public IEnumerable<Zone> GetAccessibleZones() => Exits.Select(p => p.AnotherZone(this)).Distinct();
+		public IEnumerable<Zone> GetAccessibleZones()
+		{
+			return Exits.Select(p => p.AnotherZone(this)).Distinct();
+		}
 
 		/// <summary>
 		/// Checks if the specified point lays in front or behind a passage.
@@ -143,7 +148,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="zone">The target zone</param>
 		/// <returns>True if there's a way between this loclaity and the specified zone</returns>
-		public bool IsAccessible(Zone zone) => GetAccessibleZones().Any(l => l == zone);
+		public bool IsAccessible(Zone zone) => GetAccessibleZones().Contains(zone);
 
 		/// <summary>
 		/// Checks if the specified zone is next to this zone.
@@ -182,33 +187,36 @@ namespace Game.Terrain
 		/// <summary>
 		/// Enumerates passages ordered by distance from the specified point.
 		/// </summary>
-		/// <param name="point">The default point</param>
-		/// <param name="radius">distance in which exits from current zone are searched</param>
-		/// <returns>Enumeration of passages</returns>
-		public List<Passage> GetNearestExits(Vector2 point, int? radius = null)
+		/// <param name="point">The reference point</param>
+		/// <param name="radius">Optional search radius</param>
+		/// <returns>List of passages</returns>
+		public List<Passage> GetNearestExits(Vector2 point, float? radius = null, bool includePlayersPosition = false)
 		{
-			IEnumerable<Passage> exits = null;
+			List<Passage> result = new();
 
-			if (radius != null)
+			foreach (var e in Exits)
 			{
-				exits =
-					from e in Exits
-					let intersects = e.Area.Value.Contains(point)
-					let distance = e.Area.Value.GetDistanceFrom(point)
-					where !intersects && distance <= radius
-					orderby distance
-					select e;
+				bool intersects = e.Area.Value.Contains(point);
+				float distance = e.Area.Value.GetDistanceFrom(point);
+				bool inRadius = radius == null || distance <= radius;
+				bool matches = (includePlayersPosition && inRadius)
+				  || (!includePlayersPosition && !intersects && inRadius);
+				if (matches)
+					result.Add(e);
 			}
-			else
-			{
-				exits =
-	from e in Exits
-	let intersects = e.Area.Value.Contains(point)
-	let distance = e.Area.Value.GetDistanceFrom(point)
-	where !intersects
-	orderby distance
-	select e;
-			}
+
+
+
+			List<Passage> exits =
+				(from e in Exits
+				 let intersects = e.Area.Value.Contains(point)
+				 let distance = e.Area.Value.GetDistanceFrom(point)
+				 let inRadius = radius == null || distance <= radius
+				 where (includePlayersPosition && inRadius)
+					   || (!includePlayersPosition && !intersects && inRadius)
+				 orderby distance
+				 select e)
+				.ToList();
 
 			return exits.ToList();
 		}

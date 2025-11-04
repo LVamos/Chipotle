@@ -128,7 +128,7 @@ namespace Game.Audio
 		{
 			AudioSource portal = GetClosestPortal(portals);
 			AmbientRegistry.UnregisterPortal(_owner.Name.Indexed, portal);
-			Sounds.ConvertTo2d(portal, true);
+			Sounds.SwitchTo2d(portal, true);
 			_ambientSource = portal;
 			_ambientSource.name = description;
 		}

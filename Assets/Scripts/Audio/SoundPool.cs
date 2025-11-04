@@ -37,8 +37,6 @@ namespace Assets.Scripts.Audio
 				return;
 
 			(AudioSource[] sounds, string[] names) sounds = GetPlayingSounds();
-			//test
-			List<AudioSource> asphalt = sounds.sounds.Where(s => s.clip.name.ToLower().Contains("asphalt")).ToList();
 			string[] soundDescriptions = sounds.sounds.Select(s => s.name).ToArray();
 			StringBuilder builder = new("Playing sounds");
 			builder.AppendLine();

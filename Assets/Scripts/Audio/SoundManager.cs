@@ -123,6 +123,18 @@ namespace Game.Audio
 			return source;
 		}
 
+		public void DisableSpatializer(AudioSource source)
+		{
+			source.spatialize = false;
+			source.outputAudioMixerGroup = null;
+		}
+
+		public void EnableSpatializer(AudioSource source)
+		{
+			source.spatialize = true;
+			source.outputAudioMixerGroup = ResonanceGroup;
+		}
+
 		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
 		{
 			if (targetVolume == sound.volume)

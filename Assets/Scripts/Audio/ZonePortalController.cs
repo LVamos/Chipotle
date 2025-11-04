@@ -123,8 +123,7 @@ namespace Assets.Scripts.Audio
 
 			if (_owner.PlayerInHere())
 				StopUnusedPortals();
-			else
-				UpdatePortals(message.PreviousZone);
+			else UpdatePortals(message.PreviousZone);
 		}
 
 		private void StopUnusedPortals()
@@ -236,9 +235,7 @@ namespace Assets.Scripts.Audio
 
 			List<PortalAnchor> anchors = ZonePortalHelper.GetAnchors(_owner, _loop);
 
-			/* 
-			 * Player leaved this zone.
-			 */
+			// Player leaved this zone.
 			if (previousZone == Owner)
 			{
 				// Change 2D ambient sound to 3D and place it in the nearest passage between this and new zone. Start playing 3D ambient sounds from other passages between this and the new zone.
@@ -289,7 +286,7 @@ namespace Assets.Scripts.Audio
 			}
 
 			// Set individual parameters for the exit nearest to the player. Use default parameters for the others.
-			Passage exitNearPlayer = _owner.GetNearestExits(World.Player.Center).First();
+			Passage exitNearPlayer = _owner.GetNearestExits(World.Player.Center, null, true).First();
 			if (anchor.Passage == exitNearPlayer)
 				UseIndividualParameters();
 			else UseDefaultParameters();
@@ -350,9 +347,12 @@ namespace Assets.Scripts.Audio
 			float oldBlend = portal.spatialBlend;
 			if (exit is Door)
 			{
-				Sounds.SlideSpatialBlend(portal, Settings.PortalBlendSlidingDuration, 1);
-				if (!exit.Open)
-					portal.spatialize = true;
+				Action action = () =>
+				{
+					if (!exit.Open)
+						Sounds.EnableSpatializer(portal);
+				};
+				Sounds.SlideSpatialBlend(portal, Settings.PortalBlendSlidingDuration, 1, action);
 				return;
 			}
 
@@ -360,13 +360,13 @@ namespace Assets.Scripts.Audio
 			float finalBlend = distance > 10 ? 1 : distance * .2f;
 			Sounds.SlideSpatialBlend(portal, Settings.PortalBlendSlidingDuration, finalBlend);
 
-			if (oldBlend >= 1 && finalBlend < 1)
-				portal.spatialize = false;
+			if (exit.Open)
+				Sounds.DisableSpatializer(portal);
 		}
 
 		private void SetVolume(Passage passage, AudioSource portal)
 		{
-			if (!AudibleInPlayersZone())
+			if (!PlayersZone.IsAccessible(_owner) && !AudibleInPlayersZone())
 			{
 				MutePortal(portal);
 				return;

@@ -163,7 +163,11 @@ namespace Game.Audio
 
 		public static void Unmute(float duration = .5f) => _soundManager.Unmute();
 
-		public static void ConvertTo2d(AudioSource audioSource, bool disableLowPass = true) => _soundManager.ConvertTo2d(audioSource, disableLowPass);
+		public static void SwitchTo2d(AudioSource audioSource, bool disableLowPass = true) => _soundManager.ConvertTo2d(audioSource, disableLowPass);
+
+		public static void DisableSpatializer(AudioSource source) => _soundManager.DisableSpatializer(source);
+
+		public static void EnableSpatializer(AudioSource source) => _soundManager.EnableSpatializer(source);
 
 		/// <summary>
 		/// All sounds used in the game
