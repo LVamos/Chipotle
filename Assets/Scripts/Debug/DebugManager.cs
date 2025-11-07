@@ -12,6 +12,7 @@ using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Movement;
 using Game.Serialization;
 using Game.Terrain;
+using Game.Testing.Characters.Chipotle;
 using Game.UI;
 
 using Microsoft.VisualBasic;
@@ -83,6 +84,23 @@ namespace Game.Debug
 			WindowHandler.Menu(parameters);
 		}
 
+		[DebugCommand(DebugCommand.TestTuttleCollisions)]
+		private void TestTuttleCollisions()
+		{
+			GameObject player = World.Player.gameObject;
+			var tester = player.GetComponent<ChipotleTuttleCollisionTester>();
+			if (tester != null)
+			{
+				Tolk.Speak("Vypnuto");
+				Destroy(tester);
+				return;
+			}
+
+			Tolk.Speak("Strkám do Tuttla");
+			tester = player.AddComponent<ChipotleTuttleCollisionTester>();
+			tester.Initialize();
+			tester.Activate();
+		}
 
 		[DebugCommand(DebugCommand.OpenTuttleInEditor)]
 		private void OpenTuttleInEditor()

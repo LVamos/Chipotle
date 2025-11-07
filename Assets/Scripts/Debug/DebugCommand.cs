@@ -2,6 +2,7 @@
 {
 	public enum DebugCommand
 	{
+		TestTuttleCollisions,
 		OpenEditorOnPoint,
 		StopMacroRecording,
 		StartMacroRecording,
