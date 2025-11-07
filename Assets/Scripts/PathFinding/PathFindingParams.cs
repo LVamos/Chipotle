@@ -38,19 +38,13 @@ public class PathfindingParams
 	/// </summary>
 	public Character IgnoredCharacter { get; set; }
 
-	/// <summary>
-	/// Area to avoid during pathfinding.
-	/// </summary>
-	public Rectangle? AvoidedArea { get; set; }
-
 	public PathfindingParams(
 		Vector2 start,
 		Vector2 goal,
 		bool sameZone,
 		bool throughStart,
 		bool throughGoal,
-		Character ignoredCharacter,
-		Rectangle? avoidedArea = null
+		Character ignoredCharacter
 		)
 	{
 		Start = start;
@@ -59,6 +53,5 @@ public class PathfindingParams
 		ThroughStart = throughStart;
 		ThroughGoal = throughGoal;
 		IgnoredCharacter = ignoredCharacter;
-		AvoidedArea = avoidedArea;
 	}
 }

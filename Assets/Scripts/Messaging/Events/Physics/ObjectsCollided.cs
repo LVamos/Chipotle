@@ -15,11 +15,6 @@ namespace Game.Messaging.Events.Physics
 	public class ObjectsCollided : Message
 	{
 		/// <summary>
-		/// The intended position of the colliding object.
-		/// </summary>
-		public readonly Rectangle IntendedPosition;
-
-		/// <summary>
 		/// The colliding object
 		/// </summary>
 		public readonly Entity Object;
@@ -35,12 +30,11 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="collidingObject">The colliding object</param>
 		/// <param name="contactPoint">POint of the collision</param>
 		/// <param name="tile">The tile under the object the NPC bumped to</param>
-		public ObjectsCollided(object sender, Entity collidingObject, Vector2 contactPoint, Rectangle intendedPosition)
+		public ObjectsCollided(object sender, Entity collidingObject, Vector2 contactPoint)
 			: base(sender)
 		{
 			Object = collidingObject;
 			ContactPoint = contactPoint;
-			IntendedPosition = intendedPosition;
 		}
 	}
 }

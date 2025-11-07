@@ -118,7 +118,7 @@ namespace Game.Entities.Characters.Tuttle
 				return;
 
 			// Walk to the side a bit.
-			GoNear(_player.Area.Value, _minPlayerDistanceWhenMovingAside, _maxPlayerDistanceWhenMovingAside, true, message.IntendedPosition);
+			GoNear(_player.Area.Value, _minPlayerDistanceWhenMovingAside, _maxPlayerDistanceWhenMovingAside, true);
 			InnerMessage(new ReactToCollision(this, _player));
 			_collisionTimer = 0;
 		}

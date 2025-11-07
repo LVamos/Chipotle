@@ -1012,9 +1012,7 @@ namespace Game.Entities.Characters.Chipotle
 					.First();
 
 				Vector2 contactPoint = GetContactPoint(closest);
-				Rectangle intendedPosition = _area.Value;
-				intendedPosition.Move(GetStepDirection(), _stepLength);
-				ObjectsCollided collisionMessage = new(Owner, closest, contactPoint, intendedPosition);
+				ObjectsCollided collisionMessage = new(Owner, closest, contactPoint);
 				closest.TakeMessage(collisionMessage);
 				InnerMessage(collisionMessage);
 			}

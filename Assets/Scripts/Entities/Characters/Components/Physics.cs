@@ -810,7 +810,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="goal">The target position</param>
 		/// <returns>Queue with nodes leading to the target</returns>
-		protected Queue<Vector2> FindPath(Vector2 goal, bool withStart = false, bool withGoal = true, Rectangle? avoidedArea = null)
+		protected Queue<Vector2> FindPath(Vector2 goal, bool withStart = false, bool withGoal = true)
 		{
 			if (_area == null)
 				return null;
@@ -851,8 +851,7 @@ namespace Game.Entities.Characters.Components
 				sameZone,
 				withStart,
 				withGoal,
-				Owner,
-				avoidedArea
+				Owner
 				);
 			Queue<Vector2> path1 = PathFinder.FindPath(parameters);
 			if (path1 == null)
@@ -867,8 +866,7 @@ namespace Game.Entities.Characters.Components
 					true,
 					false,
 					withGoal,
-					Owner,
-					avoidedArea
+					Owner
 					);
 				Queue<Vector2> path2 = PathFinder.FindPath(parameters);
 				if (path2 == null)
@@ -1066,7 +1064,7 @@ namespace Game.Entities.Characters.Components
 
 			foreach (Vector2 point in message.Points)
 			{
-				Queue<Vector2> path = FindPath(point, false, true, message.AvoidedArea);
+				Queue<Vector2> path = FindPath(point, false, true);
 				if (path == null)
 					continue;
 
