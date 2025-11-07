@@ -149,8 +149,6 @@ namespace Game.PathFinding
 				.All(t => t != null && t.Tile.Walkable);
 			Tile tile = World.Map[node.Coords];
 			bool noCharacters = !zone.Characters.Any(c => c != parameters.IgnoredCharacter && c.Area.Value.Contains(node.Coords));
-			//test
-			noCharacters = true;
 			bool walkable = walkableTerrain && noStaticObjects && noCharacters;
 			if (!walkable)
 				return false;
