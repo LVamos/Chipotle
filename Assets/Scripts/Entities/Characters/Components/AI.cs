@@ -83,13 +83,11 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Tuttle makes few random steps in the current zone.
 		/// </summary>
-		protected void GoNear(Rectangle target, float minDistance, float maxDistance, bool watchPlayer = false)
+		protected void GoNear(Rectangle target, float minDistance, float maxDistance, bool watchPlayer, Rectangle? avoidedArea = null)
 		{
-			List<Vector2> Targets = GetPointsAround(target, minDistance, maxDistance).Take(10).ToList();
-
-			// Tuttle tries each point from the array.
+			List<Vector2> Targets = GetPointsAround(target, minDistance, maxDistance).ToList();
 			if (Targets.Count > 0)
-				TryGoTo(Targets, watchPlayer);
+				TryGoTo(Targets, watchPlayer, avoidedArea);
 		}
 
 		private List<Vector2> GetPointsAround(Rectangle target, float minDistance, float maxDistance)
@@ -149,9 +147,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected void StartFollowingPlayer() => InnerMessage(new StartFollowingPlayer(this));
 
-		protected void TryGoTo(List<Vector2> points, bool watchPlayer = false)
+		protected void TryGoTo(List<Vector2> points, bool watchPlayer = false, Rectangle? avoidedArea = null)
 		{
-			TryGoTo message = new(this, points, watchPlayer);
+			TryGoTo message = new(this, points, watchPlayer, avoidedArea);
 			InnerMessage(message);
 		}
 

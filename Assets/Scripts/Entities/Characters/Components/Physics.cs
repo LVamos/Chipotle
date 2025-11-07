@@ -7,6 +7,7 @@ using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Models;
+using Game.PathFinding;
 using Game.Terrain;
 
 using ProtoBuf;
@@ -809,7 +810,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="goal">The target position</param>
 		/// <returns>Queue with nodes leading to the target</returns>
-		protected Queue<Vector2> FindPath(Vector2 goal, bool withStart = false, bool withGoal = true)
+		protected Queue<Vector2> FindPath(Vector2 goal, bool withStart = false, bool withGoal = true, Rectangle? avoidedArea = null)
 		{
 			if (_area == null)
 				return null;
@@ -844,14 +845,32 @@ namespace Game.Entities.Characters.Components
 			if (IsZoneTight(targetZone))
 				return null;
 
-			Queue<Vector2> path1 = World.FindPath(start, goal1.Value, sameZone, withStart, withGoal, Height, Width, Owner);
+			PathfindingParams parameters = new(
+				start,
+				goal1.Value,
+				sameZone,
+				withStart,
+				withGoal,
+				Owner,
+				avoidedArea
+				);
+			Queue<Vector2> path1 = PathFinder.FindPath(parameters);
 			if (path1 == null)
 				return null;
 
 			if (!sameZone)
 			{
 				// Construct the rest of the path from the entrance to the goal.
-				Queue<Vector2> path2 = World.FindPath(goal1.Value, goal2.Value, true, false, withGoal, Height, Width, Owner);
+				parameters = new(
+					goal1.Value,
+					goal2.Value,
+					true,
+					false,
+					withGoal,
+					Owner,
+					avoidedArea
+					);
+				Queue<Vector2> path2 = PathFinder.FindPath(parameters);
 				if (path2 == null)
 					return null;
 
@@ -905,7 +924,7 @@ namespace Game.Entities.Characters.Components
 		private void OnCharacterMoved(CharacterMoved message)
 		{
 			// Test if the component has been initialized.
-			if (_area == null || _state != CharacterState.WatchingPlayer || message.Sender != _player)
+			if (Owner.Area == null || _state != CharacterState.WatchingPlayer || message.Sender != _player)
 				return;
 
 			// Avoid too long paths.
@@ -1047,7 +1066,7 @@ namespace Game.Entities.Characters.Components
 
 			foreach (Vector2 point in message.Points)
 			{
-				Queue<Vector2> path = FindPath(point);
+				Queue<Vector2> path = FindPath(point, false, true, message.AvoidedArea);
 				if (path == null)
 					continue;
 
@@ -1119,7 +1138,7 @@ namespace Game.Entities.Characters.Components
 		/// <param name="area">The target coordinates</param>
 		protected virtual bool DetectCollisions(Rectangle area)
 		{
-			CollisionsModel collisions = World.DetectCollisions(new() { Owner }, area, true);
+			CollisionsModel collisions = World.DetectCollisions(new() { Owner, _player }, area, true);
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 

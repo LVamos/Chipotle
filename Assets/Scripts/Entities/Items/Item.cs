@@ -687,10 +687,10 @@ namespace Game.Entities.Items
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnObjectsCollided(ObjectsCollided message)
 		{
-			Vector3 position = message.Position.ToVector3(GetSoundHeight());
+			Vector3 position = message.ContactPoint.ToVector3(GetSoundHeight());
 			string soundName = _sounds["collision"];
 			Sounds.Play(soundName, position, _defaultVolume);
-			LogCollision(message.Sender as Character, message.Position);
+			LogCollision(message.Sender as Character, message.ContactPoint);
 		}
 
 		private float GetSoundHeight()

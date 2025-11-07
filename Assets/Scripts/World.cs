@@ -17,6 +17,7 @@ using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Sound;
 using Game.Models;
+using Game.PathFinding;
 using Game.Serialization;
 using Game.Terrain;
 using Game.UI;
@@ -343,30 +344,6 @@ namespace Game
 				let position = name.Length - 2
 				where name.Substring(position, 1).ToLower() == "h"
 				select l;
-		}
-
-		private static PathFinder _pathFinder = new();
-
-		/// <summary>
-		/// Constructs the shortest possible path between two points.
-		/// </summary>
-		/// <param name="start">The initial point fo path finding.</param>
-		/// <param name="goal">The goal of the path finding</param>
-		/// <param name="throughObjects">Specifies if tiles with objects should be included.</param>
-		/// <param name="throughClosedDoors"Specifies if tiles on closed doors should be included.></param>
-		/// <param name="throughImpermeableTerrain">Specifies if tiles with impermeable terrain should be included.</param>
-		/// <param name="sameZone">Specifies if different zones than zone of the initial point should be included</param>
-		/// <param name="withStart">Specifies if the start point should be considered walkable.</param>
-		/// <param name="withGoal">Specifies if the goal should be considered walkable</param>
-		/// <param name="maxDistance">Maximum allowed distance from the initial point</param>
-		/// <returns>
-		/// A list of points leading from start to the end or null if no possible path exists
-		/// </returns>
-		public static Queue<Vector2> FindPath(Vector2 start, Vector2 goal, bool sameZone, bool withStart, bool withGoal, float characterHeight, float characterWidth, Character character)
-		{
-			Queue<Vector2> path = _pathFinder.FindPath(start, goal, sameZone, withStart, withGoal, characterHeight, characterWidth, character);
-
-			return path;
 		}
 
 		private static readonly float _cutsceneVolume = 1;

@@ -972,7 +972,7 @@ namespace Game.Entities.Characters.Chipotle
 			HandleDoorCollision(elements);
 
 			// Handle collisions with items and characters
-			if (HandleItemsAndCharactersCollisions(elements))
+			if (HandleEntityCollisions(elements))
 				return;
 
 			// Handle collisions with inaccessible terrain
@@ -994,7 +994,7 @@ namespace Game.Entities.Characters.Chipotle
 			return false;
 		}
 
-		private bool HandleItemsAndCharactersCollisions(List<object> elements)
+		private bool HandleEntityCollisions(List<object> elements)
 		{
 			bool doorColided = elements.Any(e => e is Door);
 			IEnumerable<Entity> entities = elements.OfType<Entity>();
@@ -1012,7 +1012,9 @@ namespace Game.Entities.Characters.Chipotle
 					.First();
 
 				Vector2 contactPoint = GetContactPoint(closest);
-				ObjectsCollided collisionMessage = new(Owner, closest, contactPoint);
+				Rectangle intendedPosition = _area.Value;
+				intendedPosition.Move(GetStepDirection(), _stepLength);
+				ObjectsCollided collisionMessage = new(Owner, closest, contactPoint, intendedPosition);
 				closest.TakeMessage(collisionMessage);
 				InnerMessage(collisionMessage);
 			}

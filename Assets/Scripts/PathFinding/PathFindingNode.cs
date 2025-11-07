@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Game.Terrain;
 
-namespace Game.Terrain
+using UnityEngine;
+
+namespace Game.PathFinding
 {
 	/// <summary>
 	/// Reprezents one node in a graph corresponding to a tile on a tile map.
