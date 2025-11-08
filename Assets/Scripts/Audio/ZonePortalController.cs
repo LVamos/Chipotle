@@ -366,7 +366,10 @@ namespace Assets.Scripts.Audio
 
 		private void SetVolume(Passage passage, AudioSource portal)
 		{
-			if (!PlayersZone.IsAccessible(_owner) && !AudibleInPlayersZone())
+			if (
+PlayersZone.SameAmbients(_loop.Sound)
+|| (!PlayersZone.IsAccessible(_owner) && !AudibleInPlayersZone())
+				)
 			{
 				MutePortal(portal);
 				return;
