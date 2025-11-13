@@ -1,4 +1,5 @@
-﻿using Game.Entities.Characters.Chipotle;
+﻿using Game.Debug;
+using Game.Entities.Characters.Chipotle;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
@@ -365,8 +366,8 @@ namespace Game.Entities.Characters.Components
 			[TerrainType.Cobblestones] = 510,
 			[TerrainType.Tiles] = 400,
 			[TerrainType.Wood] = 570,
-			[TerrainType.Mud] = 940,
-			[TerrainType.Puddle] = 650,
+			[TerrainType.Mud] = 740,
+			[TerrainType.Puddle] = 450,
 			[TerrainType.Concrete] = 468,
 			[TerrainType.Clay] = 460,
 			[TerrainType.Bush] = 970
@@ -773,7 +774,7 @@ namespace Game.Entities.Characters.Components
 			if (_area == null || Owner.Zone == null || World.Player == null)
 				return;
 
-			Vector2 goal = _player.Area.Value.Center;
+			Vector2 goal = _player.Center;
 			_path = FindPath(goal);
 			if (_path == null)
 				return;
@@ -832,14 +833,12 @@ namespace Game.Entities.Characters.Components
 				.OrderBy(p => p.Area.Value.GetDistanceFrom(_area.Value))
 				.FirstOrDefault();
 
-				Vector2 center = closestExit.Area.Value.Center;
-				HashSet<Vector2> points = closestExit.Area.Value.GetPoints(TileMap.TileSize);
-				goal1 = points
-					.Where(p => targetZone.Area.Value.Contains(p))
-					.OrderBy(p => World.GetDistance(center, p))
-					.FirstOrDefault();
-				if (goal1 == null)
+				Vector2 center = closestExit.Center;
+				IEnumerable<Vector2> points = closestExit.GetPointsOfZone(targetZone)
+					.OrderBy(p => World.GetDistance(center, p));
+				if (points.IsNullOrEmpty())
 					return null;
+				goal1 = points.First();
 			}
 
 			if (IsZoneTight(targetZone))
@@ -896,7 +895,7 @@ namespace Game.Entities.Characters.Components
 				return null;
 
 			Rectangle targetArea = targetZone.Area.Value;
-			List<Vector2> exitPoints = closestExit.GetPointsOfZone(Zone);
+			HashSet<Vector2> exitPoints = closestExit.GetPointsOfZone(Zone);
 			if (exitPoints.IsNullOrEmpty())
 				return null;
 

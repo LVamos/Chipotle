@@ -23,14 +23,13 @@ namespace Game.Terrain
 	{
 		public bool Open { get => State == PassageState.Open; }
 
-		public List<Vector2> GetPointsOfZone(Zone zone)
+		public HashSet<Vector2> GetPointsOfZone(Zone zone)
 		{
-			HashSet<Vector2> points = _area.Value.GetPoints();
+			HashSet<Vector2> points = _area.Value.GetPoints(.1f, false);
 
-			List<Vector2> pointsOfZone = points
+			HashSet<Vector2> pointsOfZone = points
 				.Where(p => zone.Area.Value.Contains(p))
-				.ToList();
-			List<Zone> test = points.Select(p => World.Map[p]?.Zone).Distinct().ToList();
+				.ToHashSet();
 			return pointsOfZone;
 		}
 

@@ -487,6 +487,8 @@ namespace Game.Debug
 			Player.TakeMessage(message1);
 
 			// Move Tuttle
+			if (!Settings.LetTuttleFollowChipotle)
+				return;
 			Vector2 pointForTuttle = _walkablePoints[zone][1];
 			SetPosition message2 = new(null, pointForTuttle);
 			Tuttle.TakeMessage(message2);

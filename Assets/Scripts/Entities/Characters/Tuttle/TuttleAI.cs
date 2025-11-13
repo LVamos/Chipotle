@@ -198,7 +198,7 @@ namespace Game.Entities.Characters.Tuttle
 			StartFollowingPlayer();
 		}
 
-		private Vector2 _pointNearChristinesBell = new(1789.1f, 1110);
+		private Vector2 _pointNearChristinesBell = new(1787.1f, 1118.1f);
 
 		/// <summary>
 		/// The detective Chipotle and Tuttle NPCs relocate from the Belvedere street (ulice p1)

@@ -54,7 +54,7 @@ namespace Game.Terrain
 
 		public bool KeepRounded { get; private set; }
 
-		public static List<Vector2> GetPointsAround(Rectangle areaToAvoid, float minDistance, float maxDistance, float resolution, bool sameZone = true)
+		public static List<Vector2> GetPointsAround(Rectangle areaToAvoid, float minDistance, float maxDistance, float resolution)
 		{
 			Rectangle maxArea = areaToAvoid;
 			maxArea.Extend(maxDistance);
@@ -65,10 +65,10 @@ namespace Game.Terrain
 			IEnumerable<Vector2> filteredPoints =
 				from point in candidatePoints
 				let allowed = !areaToAvoid.Contains(point)
-				let inSameZone = World.GetZone(point) == zone
 				let distance = areaToAvoid.GetDistanceFrom(point)
 				let allowedDistance = distance >= minDistance && distance <= maxDistance
-				where allowed && inSameZone && allowedDistance
+				let notEmpty = World.Map[point] != null
+				where allowed && allowedDistance && notEmpty
 				orderby distance
 				select point
 				;
@@ -750,10 +750,10 @@ namespace Game.Terrain
 		/// Enumerates all points of the plane.
 		/// </summary>
 		/// <returns>all points of the plane</returns>
-		public HashSet<Vector2> GetPoints(float resolution = 0.1f)
+		public HashSet<Vector2> GetPoints(float resolution = 0.1f, bool snapToGrid = true)
 		{
-			Vector2 upperLeft = World.Map.SnapToGrid(UpperLeftCorner);
-			Vector2 lowerRight = World.Map.SnapToGrid(LowerRightCorner);
+			Vector2 upperLeft = snapToGrid ? World.Map.SnapToGrid(UpperLeftCorner) : UpperLeftCorner;
+			Vector2 lowerRight = snapToGrid ? World.Map.SnapToGrid(LowerRightCorner) : LowerRightCorner;
 
 			float startX = upperLeft.x;
 			float endX = lowerRight.x;
