@@ -148,7 +148,6 @@ namespace Game.Audio
 		private void OnChipotlesCarMoved(ChipotlesCarMoved _)
 		{
 			StopAmbient();
-			throw new NotImplementedException();
 		}
 
 		private void OnCharacterCameToZone(CharacterCameToZone message)

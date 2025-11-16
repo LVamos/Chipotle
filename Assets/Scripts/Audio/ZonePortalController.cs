@@ -162,7 +162,6 @@ namespace Assets.Scripts.Audio
 		private void OnChipotlesCarMoved(ChipotlesCarMoved message)
 		{
 			StopPortals();
-			throw new NotImplementedException();
 		}
 
 		/// <summary>
@@ -221,7 +220,8 @@ namespace Assets.Scripts.Audio
 		private IEnumerator FadeAmbientTo3dDelayed(PortalAnchor anchor)
 		{
 			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Indexed);
-			MutePortal(portal);
+			if (portal != null)
+				MutePortal(portal);
 			yield return new WaitForSeconds(Settings.Ambient3dFadeDuration);
 			if (portal != null)
 				FadeAmbientTo3d(anchor);

@@ -146,6 +146,8 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			bool knock =
 				onDriveWay && !Moved && !walschAreaDone
 				|| onAsphaltRoad && !CarsonsBenchesUsed();
+			//test
+			knock = false;
 			if (
 				knock)
 			{
@@ -155,7 +157,8 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			}
 
 			// If player didn't leave Walsh area but used required objects and went through all area
-			if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
+			//test
+			//if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
 			{
 				AllowDestination(World.GetZone("ulice p1"));
 				DestinationMenu("cs20");
