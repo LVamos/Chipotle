@@ -798,7 +798,7 @@ namespace Game.Entities.Characters.Chipotle
 			switch (message.CutsceneName)
 			{
 				case "cs24": case "cs25": _sittingAtPubTable = true; break;
-				case "snd12": _sittingOnChair = true; break;
+				case "snd13": _sittingOnChair = true; break;
 			}
 		}
 

@@ -3,6 +3,7 @@ using Assets.Scripts;
 using Assets.Scripts.Entities.Items;
 
 using Game;
+using Game.Serialization;
 using Game.Terrain;
 
 using System;
@@ -94,6 +95,7 @@ public static class sceneSetup
 
 	public static void LoadMap()
 	{
+		YamlHelper.Initialize();
 		XDocument document = null;
 		try
 		{
