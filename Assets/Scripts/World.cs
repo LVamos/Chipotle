@@ -1141,6 +1141,8 @@ namespace Game
 				throw new InvalidOperationException($"No geometry found for the zone {name.Indexed}");
 
 			Zone zone = obj.GetComponent<Zone>();
+			ZoneMaterials zoneMaterials = null;
+			materials.TryGetValue(name.Indexed, out zoneMaterials);
 
 			zone.Initialize(
 				name,
@@ -1151,7 +1153,7 @@ namespace Game
 				area,
 				defaultTerrain,
 				loopInfo,
-				materials[name.Indexed]
+				zoneMaterials
 			);
 			Add(zone);
 			return zone;

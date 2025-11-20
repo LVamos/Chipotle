@@ -153,8 +153,10 @@ public static class sceneSetup
 		List<XElement> zones = root.Element("localities").Elements("locality").ToList();
 		foreach (XElement zoneNode in zones)
 		{
-			GameObject zone = CreateObject(Attribute(zoneNode, "indexedname"), "Locality");
+			string zoneName = Attribute(zoneNode, "indexedname");
+			GameObject zone = CreateObject(zoneName, "Locality");
 			zone.AddComponent<Zone>();
+			UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 			LoadItems(zoneNode);
 		}
 	}
@@ -163,7 +165,7 @@ public static class sceneSetup
 	{
 		ItemFactory.LoadItems();
 
-		System.Collections.Generic.List<XElement> items = zoneNode.Elements("object").ToList();
+		List<XElement> items = zoneNode.Elements("object").ToList();
 		foreach (XElement item in items)
 		{
 			string type = Attribute(item, "type");

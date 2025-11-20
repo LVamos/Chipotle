@@ -79,6 +79,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 
 			_allowedDestinations = new();
 		}
+
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC
 		/// </summary>
@@ -146,11 +147,9 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			bool knock =
 				onDriveWay && !Moved && !walschAreaDone
 				|| onAsphaltRoad && !CarsonsBenchesUsed();
-			if (
-				knock)
+			if (knock)
 			{
-				string soundName = "snd14";
-				PlayActionSound(message.ManipulationPoint, soundName);
+				World.PlayCutscene(this,"snd14");
 				return;
 			}
 
