@@ -70,11 +70,7 @@ namespace Assets.Scripts
 			if (!Settings.PlayCutscenes)
 				return;
 
-			_audio.clip = Sounds.GetClip(cutSceneName);
-			_audio.spatialize = false;
-			_audio.spatialBlend = 0;
-			_audio.volume = 1;
-			_audio.Play();
+			_audio = Sounds.Play2d(cutSceneName);
 			Paused = false;
 		}
 
