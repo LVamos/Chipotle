@@ -352,7 +352,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (NavigationInProgress)
 				return;
 
-			NavigableCharactersModel characters = GetNavigableCharacters();
+			NavigableCharactersModel characters = GetCharacters();
 
 			if (characters.Characters.IsNullOrEmpty())
 			{
@@ -376,7 +376,7 @@ namespace Game.Entities.Characters.Chipotle
 			_navigatedItem.TakeMessage(new StartNavigation(Owner));
 		}
 
-		private NavigableCharactersModel GetNavigableCharacters()
+		private NavigableCharactersModel GetCharacters()
 		{
 			IEnumerable<Character> characters = Zone.GetNearByCharacters(
 				_area.Value.Center,
@@ -523,7 +523,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			NavigableExitsModel result = GetNavigableExits();
+			NavigableExitsModel result = GetExits();
 
 			if (result.Descriptions.IsNullOrEmpty()) // No objects near by
 			{
@@ -599,7 +599,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (NavigationInProgress)
 				return;
 
-			NavigableItemsModel objects = GetNavigableItems();
+			NavigableItemsModel objects = GetItems();
 
 			if (objects.Items.IsNullOrEmpty())
 			{
@@ -729,7 +729,7 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new SayExitsResult(this, occupiedPassage));
 			else
 			{
-				NavigableExitsModel navigableExits = GetNavigableExits();
+				NavigableExitsModel navigableExits = GetExits();
 				InnerMessage(new SayExitsResult(this, navigableExits.Descriptions, navigableExits.TargetZones));
 			}
 		}
@@ -776,7 +776,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Returns text descriptions of the specified exits including distance and position.
 		/// </summary>
 		/// <returns>A string array</returns>
-		private NavigableExitsModel GetNavigableExits()
+		private NavigableExitsModel GetExits()
 		{
 			List<Passage> exits =
 				Zone.GetNearestExits(_area.Value.Center);
@@ -1111,7 +1111,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Returns information about all navigable objects from current zone in the specified radius around the NPC.
 		/// </summary>
 		/// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
-		protected NavigableItemsModel GetNavigableItems()
+		protected NavigableItemsModel GetItems()
 		{
 			List<string> descriptions = new();
 			IEnumerable<Item> items = Zone.GetNearByObjects(_area.Value.Center, _navigableObjectsRadius);
@@ -1156,7 +1156,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			NavigableCharactersModel characters = GetNavigableCharacters();
+			NavigableCharactersModel characters = GetCharacters();
 			InnerMessage(new SayCharactersResult(this, characters.Descriptions));
 		}
 
@@ -1168,7 +1168,7 @@ namespace Game.Entities.Characters.Chipotle
 			// If there's any navigation in progress, it'll be stopped and this command will be cancelled.
 			StopNavigation();
 			if (!NavigationInProgress)
-				InnerMessage(new SayObjectsResult(this, GetNavigableItems().Descriptions));
+				InnerMessage(new SayObjectsResult(this, GetItems().Descriptions));
 		}
 
 		/// <summary>
