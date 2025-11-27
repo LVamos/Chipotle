@@ -55,7 +55,7 @@ namespace Assets.Scripts.Audio
 		/// <returns>(AudioSource[] sounds, string[] names)</returns>
 		public (AudioSource[] sounds, string[] names) GetPlayingSounds()
 		{
-			AudioSource[] playingSounds = _playingSources.ToArray();
+						AudioSource[] playingSounds = _playingSources.ToArray();
 			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
 			return (playingSounds, playingSoundNames);
 		}
@@ -98,7 +98,6 @@ namespace Assets.Scripts.Audio
 
 		private void Update()
 		{
-			LogPlayingSounds();
 			HashSet<AudioSource> sourcesToRemove = new();
 			foreach (AudioSource source in _playingSources)
 			{
@@ -113,11 +112,13 @@ namespace Assets.Scripts.Audio
 
 			foreach (AudioSource source in sourcesToRemove)
 				_playingSources.Remove(source);
+
+			LogPlayingSounds();
 		}
 
 		private void StopForbiddenSound(AudioSource source)
 		{
-			if (!source.isPlaying)
+			if (source.clip == null)
 				return;
 
 			if (!string.IsNullOrEmpty(Settings.AllowedSound) && source.clip.name != Settings.AllowedSound)
