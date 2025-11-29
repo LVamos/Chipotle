@@ -27,15 +27,6 @@ namespace Game.Terrain
 	public class Door : Passage
 	{
 		/// <summary>
-		/// Describes type of a door.
-		/// </summary>
-		public enum DoorType
-		{
-			Door,
-			Gate
-		}
-
-		/// <summary>
 		/// Describes type of the door.
 		/// </summary>
 		public DoorType Type { get; protected set; }

@@ -1091,7 +1091,7 @@ namespace Game
 				{ GetAttribute(passageNode, "from"),
 					GetAttribute(passageNode, "to")
 				};
-				Door.DoorType dType = GetAttribute(passageNode, "type") == "door" ? Door.DoorType.Door : Door.DoorType.Gate;
+				DoorType dType = GetAttribute(passageNode, "type") == "door" ? DoorType.Door : DoorType.Gate;
 
 				GameObject obj = null;
 				if (!passageObjects.TryGetValue(name.Indexed, out obj))

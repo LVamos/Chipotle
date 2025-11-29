@@ -1002,7 +1002,7 @@ namespace Game.Entities.Characters.Chipotle
 				entities = entities.Where(e => e is Item i && i.Type != "zeď");
 			if (entities.IsNullOrEmpty())
 				return false;
-			var entityList = entities.ToList();
+			List<Entity> entityList = entities.ToList();
 			IEnumerable<IGrouping<string, Entity>> groupedElements = entityList
 				.GroupBy(o => o.Name.Friendly);
 

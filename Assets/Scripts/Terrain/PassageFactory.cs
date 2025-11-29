@@ -50,7 +50,7 @@ namespace Game.Terrain
 		/// <param name="state">State of a door</param>
 		/// <param name="doorType">Type of a door</param>
 		/// <returns>A new instance of the passage</returns>
-		public static Passage CreatePassage(GameObject obj, Name name, Rectangle area, IEnumerable<string> zones, bool isDoor, PassageState state, Door.DoorType doorType)
+		public static Passage CreatePassage(GameObject obj, Name name, Rectangle area, IEnumerable<string> zones, bool isDoor, PassageState state, DoorType doorType)
 		{
 			if (name == null || string.IsNullOrWhiteSpace(name.Indexed))
 				throw new ArgumentNullException(nameof(name));
