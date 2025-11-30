@@ -1025,7 +1025,7 @@ namespace Game
 
 		private static CutScenePlayer _cutScenePlayer;
 
-		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
 
 		private static List<XElement> _zoneNodes;
 
@@ -1074,7 +1074,10 @@ namespace Game
 			List<XElement> xPassages = root.Element("passages").Elements("passage").ToList();
 			foreach (XElement passageNode in xPassages)
 			{
-				Name name = new(GetAttribute(passageNode, "indexedname"));
+				Name name = new(
+					GetAttribute(passageNode, "indexedname"),
+					GetAttribute(passageNode, "friendlyname",false)
+					);
 				bool isDoor = GetAttribute(passageNode, "door").ToBool();
 				bool closed = GetAttribute(passageNode, "closed").ToBool();
 				bool openable = GetAttribute(passageNode, "openable").ToBool();

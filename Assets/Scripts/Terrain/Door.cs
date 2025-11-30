@@ -27,6 +27,11 @@ namespace Game.Terrain
 	public class Door : Passage
 	{
 		/// <summary>
+		/// Indicates if the door has been opened previously.
+		/// </summary>
+		public bool OpenedPreviously { get; private set; }
+
+		/// <summary>
 		/// Describes type of the door.
 		/// </summary>
 		public DoorType Type { get; protected set; }
@@ -94,7 +99,7 @@ namespace Game.Terrain
 			_manipulationTimer = 0;
 			_openingSound = "snd23";
 			_pinchTimer = 0;
-
+			OpenedPreviously = false;
 
 			State = state;
 			Type = type;
@@ -344,6 +349,7 @@ namespace Game.Terrain
 		/// </param>
 		protected virtual void Open(object sender, Vector2 point)
 		{
+			OpenedPreviously = true;
 			State = PassageState.Open;
 
 			AnnounceManipulation();
