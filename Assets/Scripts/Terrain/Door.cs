@@ -116,7 +116,7 @@ namespace Game.Terrain
 		{
 			switch (message)
 			{
-				case DoorHit dh: OnDoorHit(dh); break;
+				case DoorHitByCharacter dh: OnDoorHitByCharacter(dh); break;
 				case UseDoor m: OnUseDoor(m); break;
 				default: base.HandleMessage(message); break;
 			}
@@ -126,7 +126,7 @@ namespace Game.Terrain
 		///  Handles the DoorHit message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		protected virtual void OnDoorHit(DoorHit message)
+		protected virtual void OnDoorHitByCharacter(DoorHitByCharacter message)
 		{
 			Character character = message.Sender as Character;
 			float characterHeight = character.transform.localScale.y;

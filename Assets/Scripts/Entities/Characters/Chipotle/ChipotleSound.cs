@@ -5,6 +5,7 @@ using DavyKager;
 using Game.Audio;
 using Game.Entities.Characters.Components;
 using Game.Entities.Items;
+using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Events;
 using Game.Messaging.Events.Characters;
@@ -12,6 +13,7 @@ using Game.Messaging.Events.GameInfo;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Messaging.Events.Sound;
+using Game.Narration.WorldDescribers;
 using Game.Terrain;
 
 using ProtoBuf;
@@ -36,6 +38,7 @@ namespace Game.Entities.Characters.Chipotle
 		public override void Initialize()
 		{
 			base.Initialize();
+			_exitDescriber = new();
 			_announceWalls = true;
 		}
 
@@ -118,7 +121,7 @@ namespace Game.Entities.Characters.Chipotle
 				case SayExitsResult ser: OnSayExitsResult(ser); break;
 				case SayObjectsResult sor: OnSayObjectsResult(sor); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
-				case DoorHit dh: OnDoorHit(dh); break;
+				case CharacterHitDoor m: OnCharacterHitDoor(m); break;
 				case OrientationChanged ocd: OnOrientationChanged(ocd); break;
 				case PositionChanged pcd: OnPositionChanged(pcd); break;
 				case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
@@ -339,16 +342,17 @@ message.ExitDescriptions.Select(e => GetExit(e)).ToList();
 		/// </summary>
 		protected void SayOrientation() => Tolk.Output(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
 
+		ExitDescriber _exitDescriber;
+
 		/// <summary>
 		/// Processes the EntityHitDoor message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnDoorHit(DoorHit message)
+		private void OnCharacterHitDoor(CharacterHitDoor message)
 		{
-			Door door = message.Door;
-			string text = $"{door.TypeDescription} {message.Destination}";
+			string text = _exitDescriber.GetExitDescription(message.Exit);
 			if (Settings.SayInnerPassageNames)
-				text += " " + door.Name.Indexed;
+				text+= " " + message.Exit.Exit.Name.Indexed;
 			Tolk.Speak(text);
 		}
 

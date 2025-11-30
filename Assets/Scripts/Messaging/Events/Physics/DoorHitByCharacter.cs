@@ -14,7 +14,7 @@ namespace Game.Messaging.Events.Physics
 	/// from a descendant of the <see cref="Entities.Characters.Components.CharacterComponent"/> class.
 	/// </remarks>
 	[Serializable]
-	public class DoorHit : Message
+	public class DoorHitByCharacter : Message
 	{
 		public readonly string Destination;
 
@@ -34,7 +34,7 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="sender"></param>
 		/// <param name="door"></param>
 		/// <param name="point"></param>
-		public DoorHit(object sender, Door door, Vector2 point, string destination) : base(sender)
+		public DoorHitByCharacter(object sender, Door door, Vector2 point, string destination) : base(sender)
 		{
 			Door = door;
 			Point = point;
