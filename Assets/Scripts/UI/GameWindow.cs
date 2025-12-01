@@ -21,6 +21,9 @@ using UnityEngine;
 using Message = Game.Messaging.Message;
 using Game.Controls;
 using Game.Controls.Keyboard;
+using Game.Narration.WorldDescribers;
+using Game.Models;
+using Assets.Scripts.Messaging.Commands.Characters;
 
 namespace Game.UI
 {
@@ -108,6 +111,7 @@ namespace Game.UI
 
 			switch (message)
 			{
+				case SelectNavigableExit m: OnSelectNavigableExit(m); break;
 				case OpenGameMenu m: OnOpenGameMenu(m); break;
 				case SelectObjectToApply m: OnSelectObjectToApply(m); break;
 				case selectInventoryAction m: OnselectInventoryAction(m); break;
@@ -158,6 +162,14 @@ namespace Game.UI
 			sender.TakeMessage(message);
 		}
 
+		private void HandleExitMenu(MessagingObject sender, List<ExitInfo> exits, int option)
+		{
+			if (option == -1 || sender == null)
+				return;
+
+			NavigateToExit message = new(this, exits[option].Exit);
+			sender.TakeMessage(message);
+		}
 
 		private void HandleInteractionMenu(MessagingObject sender, List<Entity> objects, int option)
 		{
@@ -278,6 +290,34 @@ namespace Game.UI
 			WindowHandler.Menu(parameters);
 		}
 
+		private ExitDescriber _exitDescriber;
+
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="message">The message to be handled</param>
+		private void OnSelectNavigableExit(SelectNavigableExit message)
+		{
+			const string prompt = "Východy";
+			List<List<string>> descriptions=new();
+			foreach (ExitInfo exit in message.Exits)
+			{
+				string description = _exitDescriber.GetExitDescription(exit);
+				if (Settings.SayInnerZoneNames)
+					description += " " + exit.TargetZone.Name.Indexed;
+				descriptions.Add(new List<string>(){ description});
+			}
+			MenuParameters parameters = new(
+							descriptions,
+							prompt,
+divider: " ",
+	searchIndex: 2,
+								wrappingAllowed: false,
+							menuClosed: (option) => HandleExitMenu(message.Sender as MessagingObject, message.Exits, option));
+			WindowHandler.Menu(parameters);
+		}
+
+
 		private List<List<string>> GetFriendlyNames(List<Entity> objects)
 		{
 
@@ -293,6 +333,8 @@ namespace Game.UI
 		public void Initialize()
 		{
 			_messagingEnabled = true;
+			_exitDescriber = new();
+
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),
 				(new(KeyboardModifiers.Control, KeyCode.Y), MainScript.SendFeedback)

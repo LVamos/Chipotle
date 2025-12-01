@@ -194,7 +194,7 @@ namespace Game.Terrain
 		{
 			List<Passage> result = new();
 
-			foreach (var e in Exits)
+			foreach (Passage e in Exits)
 			{
 				bool intersects = e.Area.Value.Contains(point);
 				float distance = e.Area.Value.GetDistanceFrom(point);

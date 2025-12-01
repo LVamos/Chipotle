@@ -265,18 +265,16 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			if (message.ExitDescriptions.IsNullOrEmpty())
+			if (message.Exits.IsNullOrEmpty())
 			{
 				Tolk.Speak("žádné východy nevidíš", true);
 				return;
 			}
 
-			int count = message.ExitDescriptions.Count;
+			int count = message.Exits.Count;
 			if (count == 1)
 			{
-				string exit = GetExit(message.ExitDescriptions[0]);
-				if (Settings.SayInnerZoneNames)
-					exit += " " + message.TargetZones[0].Name.Indexed;
+				string exit = _exitDescriber.GetExitDescription(message.Exits[0]);
 				Tolk.Speak(exit, true);
 				return;
 			}
@@ -286,21 +284,11 @@ namespace Game.Entities.Characters.Chipotle
 				number = (count == 2 ? "dva" : count.ToString()) + " východy: ";
 			else number = count.ToString() + " východů: ";
 
-			List<string> exits = new();
-			if (Settings.SayInnerZoneNames)
-			{
-				for (int i = 0; i < message.ExitDescriptions.Count; i++)
-				{
-					string text = GetExit(message.ExitDescriptions[i]) + " " + message.TargetZones[i].Name.Indexed;
-					exits.Add(text);
-				}
-			}
-			else exits =
-message.ExitDescriptions.Select(e => GetExit(e)).ToList();
+			List<string> exits = message.Exits
+				.Select(e=>_exitDescriber.GetExitDescription(e))
+				.ToList();
 			string formatedList = FormatStringList(exits.ToArray(), true);
 			Tolk.Speak($"{number}{formatedList}.", true);
-
-			string GetExit(List<string> exit) => string.Join(" ", exit);
 		}
 
 		/// <summary>

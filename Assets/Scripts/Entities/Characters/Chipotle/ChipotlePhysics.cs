@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Messaging.Events.Characters;
+﻿using Assets.Scripts.Messaging.Commands.Characters;
+using Assets.Scripts.Messaging.Events.Characters;
 
 using DavyKager;
 
@@ -260,6 +261,7 @@ namespace Game.Entities.Characters.Chipotle
 			switch (message)
 			{
 				case CharacterMoved m: return;
+				case NavigateToExit m: OnNavigateToExit(m);break;
 				case PlaceItem m: OnPlaceItem(m); break;
 				case ApplyItemToTarget m:
 					OnApplyItemToTarget(m); break;
@@ -289,6 +291,13 @@ namespace Game.Entities.Characters.Chipotle
 				case Interact m: OnInteract(m); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		private void OnNavigateToExit(NavigateToExit message)
+		{
+			StartNavigation newMessage = new(Owner);
+			message.Exit.TakeMessage(newMessage);
+			_navigatedExit = message.Exit;
 		}
 
 		private void OnPlaceItem(PlaceItem message)
@@ -512,53 +521,28 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnListExits(ListExits message)
 		{
+			// Change command to SayExits if character's walking.
 			if (_walking)
 			{
 				SayExits();
 				return;
 			}
 
+			// Stop navigation.
 			if (NavigationInProgress)
 			{
-				StopNavigation(); // If there's any navigation in progress,  it'll be stopped and this command will be cancelled.
+				StopNavigation();
 				return;
 			}
 
-			NavigableExitsModel result = GetExits();
-
-			if (result.Descriptions.IsNullOrEmpty()) // No objects near by
+			// Gather info and run menu.
+			List<ExitInfo> exits = GetExits();
+			if (exits.IsNullOrEmpty()) // No objects near by
 			{
 				InnerMessage(new SayExitsResult(this));
 				return;
 			}
-
-			// Run the menu
-			List<List<string>> descriptions = new();
-			if (Settings.SayInnerZoneNames)
-			{
-				for (int i = 0; i < result.Descriptions.Count; i++)
-				{
-					descriptions.Add(result.Descriptions[i]);
-					descriptions[i].Add(result.TargetZones[i].Name.Indexed);
-				}
-			}
-			else descriptions = result.Descriptions;
-			MenuParameters parameters = new(
-	items: result.Descriptions,
-	introText: "Východy",
-	divider: " ",
-	searchIndex: 2,
-	wrappingAllowed: false,
-	menuClosed: (option) =>
-	{
-		if (option == -1)
-			return;
-
-		_navigatedExit = result.Exits[option];
-		_navigatedExit.TakeMessage(new StartNavigation(Owner));
-	}
-);
-			WindowHandler.Menu(parameters);
+			WindowHandler.ActiveWindow.TakeMessage(new SelectNavigableExit(Owner, exits));
 		}
 
 		/// <summary>
@@ -730,8 +714,8 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new SayExitsResult(this, occupiedPassage));
 			else
 			{
-				NavigableExitsModel navigableExits = GetExits();
-				InnerMessage(new SayExitsResult(this, navigableExits.Descriptions, navigableExits.TargetZones));
+				List<ExitInfo> exits = GetExits();
+				InnerMessage(new SayExitsResult(this, exits));
 			}
 		}
 
@@ -760,7 +744,8 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			float distance = World.GetDistance(Owner, exit);
 			float angle = GetAngle(exit.Area.Value);
-			ExitInfo info = new(distance, exit, angle, _stepLength, Owner);
+			Zone targetZone = exit.AnotherZone(Zone);
+			ExitInfo info = new(distance, exit, angle, _stepLength, targetZone,Owner);
 			return info;
 		}
 
@@ -770,17 +755,15 @@ namespace Game.Entities.Characters.Chipotle
 		/// Returns text descriptions of the specified exits including distance and position.
 		/// </summary>
 		/// <returns>A string array</returns>
-		private NavigableExitsModel GetExits()
+		private List<ExitInfo> GetExits()
 		{
 			List<Passage> exits =
-				Zone.GetNearestExits(_area.Value.Center);
-			List<List<string>> descriptions =
-			exits.Select(GetExitDesc).ToList();
-			List<Zone> targetZones = exits
-				.Select(e => e.AnotherZone(Zone))
+				Zone.GetNearestExits(Center);
+			List<ExitInfo> info = exits
+				.Select(e => GetExitInfo(e))
 				.ToList();
 
-			return new(descriptions, exits, targetZones);
+			return info;
 		}
 
 		/// <summary>

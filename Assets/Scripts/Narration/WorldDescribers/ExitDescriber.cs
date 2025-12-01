@@ -13,11 +13,6 @@ namespace Game.Narration.WorldDescribers
 {
 	public class ExitDescriber
 	{
-		private string GetExitDestination(ExitInfo info)
-		{
-			Zone targetZone = info.Exit.AnotherZone(info.Observer.Zone);
-			return $"{targetZone.To} ";
-		}
 
 		/// <summary>
 		/// Generates a text representation of the specified distance in Czech.
@@ -53,7 +48,7 @@ namespace Game.Narration.WorldDescribers
 			}
 			else
 			{
-				to = GetExitDestination(info);
+				to = info.TargetZone.To;
 				int index = to.IndexOf(' ');
 				to1 = to.Substring(0, index);
 				to2 = to.Substring(index + 1);
@@ -68,6 +63,8 @@ namespace Game.Narration.WorldDescribers
 				.Append(to2)
 				.Append(distanceDescription)
 				.Append(angleDescription);
+			if (Settings.SayInnerZoneNames)
+				builder.Append($" {info.TargetZone.Name.Indexed}");
 			return builder.ToString();
 		}
 }

@@ -1,4 +1,5 @@
-﻿using Game.Terrain;
+﻿using Game.Models;
+using Game.Terrain;
 
 using System.Collections.Generic;
 
@@ -6,12 +7,7 @@ namespace Game.Messaging.Events.GameInfo
 {
 	public class SayExitsResult : Message
 	{
-		public readonly List<Zone> TargetZones;
-
-		/// <summary>
-		/// Information about the exits including description of their location.
-		/// </summary>
-		public readonly List<List<string>> ExitDescriptions;
+		public readonly List<ExitInfo> Exits;
 
 		/// <summary>
 		/// An exit the NPC stands in.
@@ -22,11 +18,9 @@ namespace Game.Messaging.Events.GameInfo
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		/// <param name="exitInfo">Information about the exits</param>
-		public SayExitsResult(object sender, List<List<string>> exitDescriptions, List<Zone> targetZones) : base(sender)
+		public SayExitsResult(object sender, List<ExitInfo> exits) : base(sender)
 		{
-			ExitDescriptions = exitDescriptions;
-			TargetZones = targetZones;
+			Exits = exits;
 		}
 
 		/// <summary>
@@ -37,7 +31,7 @@ namespace Game.Messaging.Events.GameInfo
 		public SayExitsResult(object sender, Passage occupiedPassage) : base(sender)
 		{
 			OccupiedPassage = occupiedPassage;
-			ExitDescriptions = null;
+			Exits= null;
 		}
 
 		/// <summary>

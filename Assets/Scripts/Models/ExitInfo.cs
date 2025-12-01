@@ -19,13 +19,15 @@ namespace Game.Models
 		public float Distance;
 		public float Angle;
 		public float StepLength;
+		public Zone TargetZone;
 
-		public ExitInfo(float distance, Passage exit, float angle,float stepLength, Character observer)
+		public ExitInfo(float distance, Passage exit, float angle,float stepLength, Zone targetZone, Character observer)
 		{
 			Exit = exit;
 			Distance = distance;
 			Angle = angle;
 			StepLength= stepLength; 
+			TargetZone = targetZone;
 			Observer = observer;
 		}
 	}
