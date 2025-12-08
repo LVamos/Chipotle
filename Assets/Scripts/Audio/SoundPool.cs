@@ -1,6 +1,5 @@
 ﻿
 using Game;
-using Game.Audio;
 
 using System;
 using System.Collections.Generic;
@@ -55,7 +54,7 @@ namespace Assets.Scripts.Audio
 		/// <returns>(AudioSource[] sounds, string[] names)</returns>
 		public (AudioSource[] sounds, string[] names) GetPlayingSounds()
 		{
-						AudioSource[] playingSounds = _playingSources.ToArray();
+			AudioSource[] playingSounds = _playingSources.ToArray();
 			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
 			return (playingSounds, playingSoundNames);
 		}

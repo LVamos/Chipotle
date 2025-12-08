@@ -38,7 +38,7 @@ namespace Game.Messaging.Events.Movement
 		/// <param name="sender">Source of the message</param>
 		/// <param name="source">Original orientation of the NPC</param>
 		/// <param name="target">New orientation of the NPC</param>
-		public OrientationChanged(object sender, Orientation2D source, Orientation2D target, TurnType direction, bool announce = true, bool immediately = false) 
+		public OrientationChanged(object sender, Orientation2D source, Orientation2D target, TurnType direction, bool announce = true, bool immediately = false)
 			: base(sender, direction)
 		{
 			Source = source;

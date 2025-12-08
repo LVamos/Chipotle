@@ -1,6 +1,5 @@
 using DavyKager;
 
-using Game;
 using Game.Controls.Keyboard;
 
 using Microsoft.VisualBasic;
@@ -8,7 +7,6 @@ using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 
 using UnityEngine;

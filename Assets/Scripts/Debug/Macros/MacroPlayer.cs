@@ -1,10 +1,7 @@
 using DavyKager;
 
-using Game;
-using Game.Controls;
 using Game.Controls.Keyboard;
 using Game.Messaging;
-using Game.Messaging.Events.Input;
 using Game.UI;
 
 using System;

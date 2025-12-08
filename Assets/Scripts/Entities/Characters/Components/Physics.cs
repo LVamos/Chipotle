@@ -1,5 +1,4 @@
-﻿using Game.Debug;
-using Game.Entities.Characters.Chipotle;
+﻿using Game.Entities.Characters.Chipotle;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;

@@ -9,9 +9,6 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-
 using Rectangle = Game.Terrain.Rectangle;
 
 namespace Assets.Scripts.Entities.Items

@@ -31,7 +31,7 @@ namespace Game.Messaging.Events.GameInfo
 		public SayExitsResult(object sender, Passage occupiedPassage) : base(sender)
 		{
 			OccupiedPassage = occupiedPassage;
-			Exits= null;
+			Exits = null;
 		}
 
 		/// <summary>

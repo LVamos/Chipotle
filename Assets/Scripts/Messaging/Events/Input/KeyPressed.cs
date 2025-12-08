@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Game.Controls.Keyboard;
 
-using Game.Controls.Keyboard;
-using Game.UI;
+using System;
 
 namespace Game.Messaging.Events.Input
 {

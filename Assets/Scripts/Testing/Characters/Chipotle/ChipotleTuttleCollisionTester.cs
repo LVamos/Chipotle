@@ -1,14 +1,12 @@
-﻿using Game.Terrain;
-using Game.Entities;
-using Game.Entities.Characters;
+﻿using Game.Entities.Characters;
 using Game.Entities.Characters.Components;
 using Game.Messaging.Events.Physics;
-using UnityEngine;
-using System;
+using Game.Terrain;
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using UnityEngine;
 
 namespace Game.Testing.Characters.Chipotle
 {

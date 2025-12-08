@@ -1,5 +1,4 @@
-﻿using Game.Entities.Characters;
-using Game.Models;
+﻿using Game.Models;
 using Game.Terrain;
 
 using System;
@@ -7,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Game.PathFinding
 {

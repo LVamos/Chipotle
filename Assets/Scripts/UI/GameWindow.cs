@@ -1,6 +1,8 @@
-﻿using Game.Debug;
+﻿using Assets.Scripts.Messaging.Commands.Characters;
 using Assets.Scripts.Models;
 
+using Game.Controls;
+using Game.Controls.Keyboard;
 using Game.Entities;
 using Game.Entities.Items;
 using Game.Messaging;
@@ -8,22 +10,17 @@ using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Input;
+using Game.Models;
+using Game.Narration.WorldDescribers;
 using Game.Terrain;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using UnityEditorInternal;
-
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
-using Game.Controls;
-using Game.Controls.Keyboard;
-using Game.Narration.WorldDescribers;
-using Game.Models;
-using Assets.Scripts.Messaging.Commands.Characters;
 
 namespace Game.UI
 {
@@ -299,13 +296,13 @@ namespace Game.UI
 		private void OnSelectNavigableExit(SelectNavigableExit message)
 		{
 			const string prompt = "Východy";
-			List<List<string>> descriptions=new();
+			List<List<string>> descriptions = new();
 			foreach (ExitInfo exit in message.Exits)
 			{
 				string description = _exitDescriber.GetExitDescription(exit);
 				if (Settings.SayInnerZoneNames)
 					description += " " + exit.TargetZone.Name.Indexed;
-				descriptions.Add(new List<string>(){ description});
+				descriptions.Add(new List<string>() { description });
 			}
 			MenuParameters parameters = new(
 							descriptions,

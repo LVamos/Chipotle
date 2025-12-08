@@ -1,28 +1,28 @@
 ﻿namespace Game.UI
 {
+	/// <summary>
+	/// Defines possible actions
+	/// </summary>
+	public enum InventoryAction
+	{
 		/// <summary>
-		/// Defines possible actions
+		/// No action selected
 		/// </summary>
-		public enum InventoryAction
-		{
-			/// <summary>
-			/// No action selected
-			/// </summary>
-			None = 0,
+		None = 0,
 
-			/// <summary>
-			/// Puts an object on the ground.
-			/// </summary>
-			Place,
+		/// <summary>
+		/// Puts an object on the ground.
+		/// </summary>
+		Place,
 
-			/// <summary>
-			/// Uses the selected item.
-			/// </summary>
-			Use,
+		/// <summary>
+		/// Uses the selected item.
+		/// </summary>
+		Use,
 
-			/// <summary>
-			/// Applies the selected item to another item.
-			/// </summary>
-			ApplyToTarget
-		}
+		/// <summary>
+		/// Applies the selected item to another item.
+		/// </summary>
+		ApplyToTarget
 	}
+}

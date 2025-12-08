@@ -1,13 +1,10 @@
 ﻿using Assets.Scripts.Audio;
 using Assets.Scripts.Models;
 
-using DavyKager;
-
 using Game.Audio;
 using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging;
-using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 
@@ -17,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using UnityEditor.Callbacks;
 
 using UnityEngine;
 

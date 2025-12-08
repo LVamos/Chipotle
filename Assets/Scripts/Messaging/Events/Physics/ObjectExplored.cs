@@ -1,5 +1,6 @@
-﻿using System;
-using Game.Entities.Characters;
+﻿using Game.Entities.Characters;
+
+using System;
 
 namespace Game.Messaging.Events.Physics
 {

@@ -19,14 +19,17 @@ using UnityEngine;
 /// etc.), then calls a delegate to refresh the material mapper.
 [AddComponentMenu("")]
 [ExecuteInEditMode]
-public class ResonanceAudioMaterialMapperUpdater : MonoBehaviour {
-  /// The delegate to call to refresh the material mapper.
-  public delegate void RefreshMaterialMapperDelegate();
-  public RefreshMaterialMapperDelegate RefreshMaterialMapper = null;
+public class ResonanceAudioMaterialMapperUpdater : MonoBehaviour
+{
+	/// The delegate to call to refresh the material mapper.
+	public delegate void RefreshMaterialMapperDelegate();
+	public RefreshMaterialMapperDelegate RefreshMaterialMapper = null;
 
-  void Update() {
-    if (Application.isEditor && !Application.isPlaying && RefreshMaterialMapper != null) {
-      RefreshMaterialMapper();
-    }
-  }
+	void Update()
+	{
+		if (Application.isEditor && !Application.isPlaying && RefreshMaterialMapper != null)
+		{
+			RefreshMaterialMapper();
+		}
+	}
 }

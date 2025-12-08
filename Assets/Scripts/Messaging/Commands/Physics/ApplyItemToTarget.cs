@@ -1,6 +1,7 @@
-﻿using System;
-using Game.Entities;
+﻿using Game.Entities;
 using Game.Entities.Items;
+
+using System;
 
 
 namespace Game.Messaging.Commands.Physics

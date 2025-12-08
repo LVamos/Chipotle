@@ -261,7 +261,7 @@ namespace Game.Entities.Characters.Chipotle
 			switch (message)
 			{
 				case CharacterMoved m: return;
-				case NavigateToExit m: OnNavigateToExit(m);break;
+				case NavigateToExit m: OnNavigateToExit(m); break;
 				case PlaceItem m: OnPlaceItem(m); break;
 				case ApplyItemToTarget m:
 					OnApplyItemToTarget(m); break;
@@ -745,7 +745,7 @@ namespace Game.Entities.Characters.Chipotle
 			float distance = World.GetDistance(Owner, exit);
 			float angle = GetAngle(exit.Area.Value);
 			Zone targetZone = exit.AnotherZone(Zone);
-			ExitInfo info = new(distance, exit, angle, _stepLength, targetZone,Owner);
+			ExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner);
 			return info;
 		}
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Game.Terrain
+﻿namespace Game.Terrain
 {
 	/// <summary>
 	/// Indicates if a zone is inside a building or outside.

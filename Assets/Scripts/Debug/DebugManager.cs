@@ -2,8 +2,6 @@
 
 using game.debug;
 
-using Game;
-using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Debug.integration;
@@ -15,23 +13,13 @@ using Game.Terrain;
 using Game.Testing.Characters.Chipotle;
 using Game.UI;
 
-using Microsoft.VisualBasic;
-
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using UnityEngine;
-
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-
-using Settings = Game.Settings;
 
 namespace Game.Debug
 {

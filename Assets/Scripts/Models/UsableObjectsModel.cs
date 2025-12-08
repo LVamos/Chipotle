@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using Game.Entities;
+﻿using Game.Entities;
+
+using System.Collections.Generic;
 
 namespace Game.Models
 {

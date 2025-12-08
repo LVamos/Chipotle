@@ -1,10 +1,7 @@
 using DavyKager;
 
-using Game.Controls;
 using Game.Controls.Keyboard;
 using Game.UI;
-
-using Microsoft.VisualBasic;
 
 using System;
 using System.Collections.Generic;

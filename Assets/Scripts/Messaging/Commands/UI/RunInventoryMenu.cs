@@ -1,5 +1,6 @@
-﻿using System;
-using Game.Entities.Characters.Components;
+﻿using Game.Entities.Characters.Components;
+
+using System;
 
 namespace Game.Messaging.Commands.UI
 {

@@ -2,7 +2,6 @@
 using Game.Entities.Characters.Chipotle;
 using Game.Messaging.Events.Input;
 using Game.Messaging.Events.Sound;
-using Game.UI;
 
 using ProtoBuf;
 

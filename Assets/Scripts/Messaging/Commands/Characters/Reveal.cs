@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Rectangle = Game.Terrain.Rectangle;
 
 namespace Game.Messaging.Commands.Characters

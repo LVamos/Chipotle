@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Game.Entities;
+
+using System;
 using System.Collections.Generic;
-using Game.Entities;
 
 namespace Game.Messaging.Commands.UI
 {

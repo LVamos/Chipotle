@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-
-using Game.Entities.Characters;
+﻿using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Terrain;
 
 using ProtoBuf;
+
+using System.Collections.Generic;
 
 namespace Game.Serialization
 {

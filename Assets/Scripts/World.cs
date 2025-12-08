@@ -1,23 +1,16 @@
 ﻿using Assets.Scripts;
 using Assets.Scripts.Entities.Items;
 using Assets.Scripts.Models;
-using Assets.Scripts.Terrain;
 
 using DavyKager;
 
-using game.debug;
-
 using Game.Audio;
-using Game.Controls.DualSense;
-using Game.Controls.Keyboard;
-using Game.Debug;
 using Game.Entities;
 using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Sound;
 using Game.Models;
-using Game.PathFinding;
 using Game.Serialization;
 using Game.Terrain;
 using Game.UI;
@@ -29,17 +22,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Xml.Linq;
 
 using UnityEditor;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.BufferedDeserialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 using Message = Game.Messaging.Message;
 using Rectangle = Game.Terrain.Rectangle;
@@ -1076,7 +1064,7 @@ namespace Game
 			{
 				Name name = new(
 					GetAttribute(passageNode, "indexedname"),
-					GetAttribute(passageNode, "friendlyname",false)
+					GetAttribute(passageNode, "friendlyname", false)
 					);
 				bool isDoor = GetAttribute(passageNode, "door").ToBool();
 				bool closed = GetAttribute(passageNode, "closed").ToBool();

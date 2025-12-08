@@ -2,7 +2,6 @@
 using Game.Entities.Items;
 using Game.Messaging;
 using Game.Messaging.Commands.Physics;
-using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Terrain;

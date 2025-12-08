@@ -21,7 +21,6 @@ using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using UnityEngine;
 
@@ -285,7 +284,7 @@ namespace Game.Entities.Characters.Chipotle
 			else number = count.ToString() + " východů: ";
 
 			List<string> exits = message.Exits
-				.Select(e=>_exitDescriber.GetExitDescription(e))
+				.Select(e => _exitDescriber.GetExitDescription(e))
 				.ToList();
 			string formatedList = FormatStringList(exits.ToArray(), true);
 			Tolk.Speak($"{number}{formatedList}.", true);
@@ -340,7 +339,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			string text = _exitDescriber.GetExitDescription(message.Exit);
 			if (Settings.SayInnerPassageNames)
-				text+= " " + message.Exit.Exit.Name.Indexed;
+				text += " " + message.Exit.Exit.Name.Indexed;
 			Tolk.Speak(text);
 		}
 

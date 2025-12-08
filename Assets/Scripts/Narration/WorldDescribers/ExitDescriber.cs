@@ -2,12 +2,8 @@
 using Game.Terrain;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-using UnityEditor.ShaderKeywordFilter;
 
 namespace Game.Narration.WorldDescribers
 {
@@ -67,5 +63,5 @@ namespace Game.Narration.WorldDescribers
 				builder.Append($" {info.TargetZone.Name.Indexed}");
 			return builder.ToString();
 		}
-}
+	}
 }
