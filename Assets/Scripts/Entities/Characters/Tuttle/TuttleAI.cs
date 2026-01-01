@@ -161,7 +161,7 @@ namespace Game.Entities.Characters.Tuttle
 
 			switch (message.CutsceneName)
 			{
-				case "cs6": GoToPool(); break;
+				case "cs6": _goToPoolWhenPositionSet=true; break;
 				case "cs14": JumpToBelvedereStreet(); break;
 				case "cs21": JumpToChristinesHall(); break;
 				case "cs23": JumpToSweeneysRoom(); break;
@@ -169,15 +169,21 @@ namespace Game.Entities.Characters.Tuttle
 			}
 		}
 
+		private bool _goToPoolWhenPositionSet;
+
 		/// <summary>
 		/// Instructs the NPC to walk towards the corpse (tělo w1) object and wait there for the
 		/// Detective Chipotle NPC.
 		/// </summary>
-		private void GoToPool()
+		private void TryGoToPool()
 		{
-			if (!Settings.SendTuttleToPool)
+			if (!_goToPoolWhenPositionSet || !Settings.SendTuttleToPool)
 				return;
 
+			if (_goToPoolWhenPositionSet && Owner.Area == null)
+				return;
+
+			_goToPoolWhenPositionSet = false;
 			Vector2 goal = new(1005, 1051);
 			GoToPoint(goal);
 		}
@@ -291,6 +297,7 @@ namespace Game.Entities.Characters.Tuttle
 		public override void GameUpdate()
 		{
 			base.GameUpdate();
+			TryGoToPool();
 			WaitForPlayer();
 			WatchTimers();
 		}

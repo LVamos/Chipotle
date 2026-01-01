@@ -1,5 +1,7 @@
 ﻿
 using Game;
+using Game.Entities.Characters;
+using Game.Messaging;
 
 using System;
 using System.Collections.Generic;
@@ -110,7 +112,9 @@ namespace Assets.Scripts.Audio
 			}
 
 			foreach (AudioSource source in sourcesToRemove)
+			{
 				_playingSources.Remove(source);
+			}
 
 			LogPlayingSounds();
 		}

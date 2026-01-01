@@ -139,8 +139,8 @@ namespace Game.PathFinding
 		/// </summary>
 		private static bool IsWalkable(PathFindingNode node, PathfindingParams parameters)
 		{
-			Rectangle tempAre = parameters.IgnoredCharacter.Area.Value;
-			Rectangle area = Rectangle.FromCenter(node.Coords, tempAre.Height, tempAre.Width);
+			Rectangle tempArea = parameters.IgnoredCharacter.Area.Value;
+			Rectangle area = Rectangle.FromCenter(node.Coords, tempArea.Height, tempArea.Width);
 			Zone zone = World.Map[area.Center].Zone;
 			bool noStaticObjects = zone.IsWalkable(area);
 			bool walkableTerrain = area.GetTiles(TileMap.TileSize)

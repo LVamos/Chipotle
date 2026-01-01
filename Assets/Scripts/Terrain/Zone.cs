@@ -323,15 +323,18 @@ namespace Game.Terrain
 		/// </summary>
 		private HashSet<string> _exits;
 
-		private void CreateComponents()
+		private void CreateComponents(bool loopExists)
 		{
+			List<MessagingObject> components = new();
 			_ambientController = gameObject.AddComponent<ZoneAmbientController>();
-			_portalController = gameObject.AddComponent<ZonePortalController>();
-			_components = new MessagingObject[]
+			components.Add(_ambientController);
+
+			if (loopExists)
 			{
-				_ambientController,
-				_portalController
-			};
+			_portalController = gameObject.AddComponent<ZonePortalController>();
+				components.Add(_portalController);
+			}
+			_components = components.ToArray();
 		}
 
 		public void Initialize(Name name, string description, string to, ZoneType type, float ceiling, Rectangle area, TerrainType defaultTerrain, ZoneLoopInfo loop, ZoneMaterials materials = null)
@@ -355,12 +358,9 @@ namespace Game.Terrain
 			gameObject.transform.position = new Vector3(area.Center.x, ceiling / 2, area.Center.y);
 			gameObject.transform.localScale = new Vector3(area.Width, ceiling, area.Height);
 
-			if (loop != null)
-			{
-				CreateComponents();
+			CreateComponents(loop!=null);
 				_ambientController.Initialize(this, loop, materials);
-				_portalController.Initialize(this, loop);
-			}
+				_portalController?.Initialize(this, loop);
 		}
 
 		[ProtoIgnore]

@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.Models;
 
+using Game.Entities.Characters;
+using Game.Entities.Characters.Components;
 using Game.Terrain;
 
 using System;

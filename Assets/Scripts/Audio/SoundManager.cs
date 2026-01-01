@@ -3,6 +3,7 @@ using Assets.Scripts.Models;
 
 using DavyKager;
 
+using Game.Entities.Characters;
 using Game.Terrain;
 
 using System;
@@ -425,4 +426,3 @@ namespace Game.Audio
 		}
 	}
 }
-

@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 using Message = Game.Messaging.Message;
 
@@ -34,28 +35,42 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleSound : Sound
 	{
+		protected AudioSource _footStep;
+
+		private void InitFootStepSource()
+		{
+			GameObject go = new GameObject("FootstepSource");
+			go.transform.SetParent(Camera.main.gameObject.transform, false);
+			go.transform.localPosition = Vector3.zero;
+
+			_footStep = go.AddComponent<AudioSource>();
+			_footStep.spatialBlend = 1f;   // 3D
+			_footStep.dopplerLevel = 0f;
+			_footStep.playOnAwake = false;
+			_footStep.spatialize = true;
+			_footStep.spatializePostEffects = false;
+			_footStep.outputAudioMixerGroup = Sounds.ResonanceGroup;
+
+			ResonanceAudioSource resonance = go.AddComponent<ResonanceAudioSource>();
+			resonance.nearFieldEffectEnabled = true;
+			resonance.occlusionEnabled = true;
+		}
+
 		public override void Initialize()
 		{
 			base.Initialize();
+			InitFootStepSource();
 			_exitDescriber = new();
 			_announceWalls = true;
 		}
 
-		protected override AudioSource PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None)
+		protected new void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None)
 		{
-			AudioSource source = base.PlayStep(position, obstacle);
+			string sound = GetStepSoundName(position);
+			AudioClip clip = Sounds.GetClip(sound);
+			_footStep.PlayOneShot(clip, _walkVolume);
 
-			Transform cam = Camera.main.transform;
-
-			// Vektor dopředu od kamery
-			Vector3 forward = cam.forward;
-
-			// Výsledná pozice: 0.5 metru před kamerou a 0.2 metru níž
-			Vector3 soundPosition = cam.position + forward * 0.5f - Vector3.up * 0.2f;
-
-			source.transform.position = soundPosition;
-			source.transform.SetParent(Owner.transform, true);
-			return source;
+			AnnounceWall(position);
 		}
 
 		public void OnSaySize(SaySize message)

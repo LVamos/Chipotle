@@ -354,7 +354,7 @@ namespace Game.Terrain
 		{
 			foreach (MessagingObject c in _components)
 			{
-				if (c != message.Sender || message is Reloaded)
+				 if (c != message.Sender || message is Reloaded)
 					c.TakeMessage(message);
 			}
 		}
