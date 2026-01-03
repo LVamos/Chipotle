@@ -162,6 +162,13 @@ namespace Game.Terrain
 		{
 			bool keepNavigating = ShouldNavigationContinue();
 			ReportPosition(keepNavigating);
+
+			if (!keepNavigating)
+			{
+				StopNavigation();
+				return;
+			}
+
 			_navigating = keepNavigating;
 			UpdateNavigatingSoundPosition();
 		}
@@ -195,7 +202,10 @@ namespace Game.Terrain
 		/// Processes the StartNavigation message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnStartNavigation(StartNavigation message) => StartNavigation();
+		protected void OnStartNavigation(StartNavigation message)
+		{
+			StartNavigation();
+		}
 
 		protected bool ShouldNavigationContinue()
 		{
