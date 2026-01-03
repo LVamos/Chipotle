@@ -288,7 +288,7 @@ namespace Game.Entities.Characters.Chipotle
 			int count = message.Exits.Count;
 			if (count == 1)
 			{
-				string exit = _exitDescriber.GetExitDescription(message.Exits[0]);
+				string exit = _exitDescriber.GetDescription(message.Exits[0]);
 				Tolk.Speak(exit, true);
 				return;
 			}
@@ -299,7 +299,7 @@ namespace Game.Entities.Characters.Chipotle
 			else number = count.ToString() + " východů: ";
 
 			List<string> exits = message.Exits
-				.Select(e => _exitDescriber.GetExitDescription(e))
+				.Select(e => _exitDescriber.GetDescription(e))
 				.ToList();
 			string formatedList = FormatStringList(exits.ToArray(), true);
 			Tolk.Speak($"{number}{formatedList}.", true);
@@ -352,7 +352,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnCharacterHitDoor(CharacterHitDoor message)
 		{
-			string text = _exitDescriber.GetExitDescription(message.Exit);
+			string text = _exitDescriber.GetDescription(message.Exit);
 			if (Settings.SayInnerPassageNames)
 				text += " " + message.Exit.Exit.Name.Indexed;
 			Tolk.Speak(text);

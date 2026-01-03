@@ -17,30 +17,32 @@ namespace Game.UI
 		/// <summary>
 		/// Searches for the first item that starts with the given prefix, starting at 'start' and wrapping once.
 		/// </summary>
-		private int FindMatch(int start, string prefix)
+		private int? FindMatch(int start, string prefix)
 		{
 			if (string.IsNullOrEmpty(prefix))
 				return -1;
 
 			int count = _items.Count;
-
-			// First pass: from start to end
-			for (int i = start; i < count; i++)
+			int? foundItem = FindItem(start, count);
+			foundItem ??= FindItem(0, start);
+			return foundItem;
+			int? FindItem(int startIndex, int endIndex)
 			{
-				string item = _items[i][_searchIndex]?.PrepareForIndexing();
-				if (!string.IsNullOrEmpty(item) && item.StartsWith(prefix))
-					return i;
+				for (int i = startIndex; i < endIndex; i++)
+				{
+					if (ItemMatches(i))
+						return i;
+				}
+				return null;
 			}
 
-			// Second pass: from 0 to start-1
-			for (int i = 0; i < start; i++)
+			bool ItemMatches(int itemIndex)
 			{
-				string item = _items[i][_searchIndex]?.PrepareForIndexing();
-				if (!string.IsNullOrEmpty(item) && item.StartsWith(prefix))
-					return i;
+			List<string> record = _items[itemIndex];
+				int searchIndex = record.Count == 1 ? 0 : _searchIndex;
+				string item = record[searchIndex]?.PrepareForIndexing();
+				return !string.IsNullOrEmpty(item) && item.StartsWith(prefix);
 			}
-
-			return -1;
 		}
 
 		private string _typeSearchBuffer = string.Empty;
@@ -397,11 +399,11 @@ namespace Game.UI
 
 			// Start from the next item after current selection
 			int start = IndexOffEdge() ? 0 : Index + 1;
-			int result = FindMatch(start, search);
+			int? result = FindMatch(start, search);
 
-			if (result != -1)
+			if (result != null)
 			{
-				Index = result;
+				Index = result.Value;
 				SayItem();
 			}
 		}

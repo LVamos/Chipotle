@@ -296,14 +296,7 @@ namespace Game.UI
 		private void OnSelectNavigableExit(SelectNavigableExit message)
 		{
 			const string prompt = "Východy";
-			List<List<string>> descriptions = new();
-			foreach (ExitInfo exit in message.Exits)
-			{
-				string description = _exitDescriber.GetExitDescription(exit);
-				if (Settings.SayInnerZoneNames)
-					description += " " + exit.TargetZone.Name.Indexed;
-				descriptions.Add(new List<string>() { description });
-			}
+			List<List<string>> descriptions = _exitDescriber.GetStructuredDescriptions(message.Exits);
 			MenuParameters parameters = new(
 							descriptions,
 							prompt,
