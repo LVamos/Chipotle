@@ -277,7 +277,7 @@ namespace Game.Entities.Characters.Chipotle
 				case ListExits lex: OnListExits(lex); break;
 				case NavigationStopped m: OnObjectNavigationStopped(m); break;
 				case StopNavigation m: OnStopNavigation(m); break;
-				case ListObjects lob: OnListObjects(lob); break;
+				case ListItems lob: OnListItems(lob); break;
 				case SayExits sex: OnSayExits(sex); break;
 				case StopWalk sw: OnStopWalk(sw); break;
 				case SayTerrain ste: OnSayTerrain(ste); break;
@@ -572,7 +572,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the ListNavigableObjects message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnListObjects(ListObjects message)
+		private void OnListItems(ListItems message)
 		{
 			if (_walking)
 			{

@@ -176,7 +176,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Lists navigable objects.
 		/// </summary>
-		protected void ListItems() => InnerMessage(new ListObjects(this));
+		protected void ListItems() => InnerMessage(new ListItems(this));
 
 		/// <summary>
 		/// Runs the game menu
