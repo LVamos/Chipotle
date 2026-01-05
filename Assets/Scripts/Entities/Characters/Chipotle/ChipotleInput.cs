@@ -333,7 +333,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.
 		/// </summary>
-		private void SayItems() => InnerMessage(new SayObjects(this));
+		private void SayItems() => InnerMessage(new SayItems(this));
 
 		/// <summary>
 		/// Stops the currently playing cutscene.

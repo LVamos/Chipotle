@@ -7,7 +7,7 @@ namespace Game.Messaging.Events.GameInfo
 {
 	public class SayExitsResult : Message
 	{
-		public readonly List<ExitInfo> Exits;
+		public readonly List<NavigableExitInfo> Exits;
 
 		/// <summary>
 		/// An exit the NPC stands in.
@@ -18,7 +18,7 @@ namespace Game.Messaging.Events.GameInfo
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		public SayExitsResult(object sender, List<ExitInfo> exits) : base(sender)
+		public SayExitsResult(object sender, List<NavigableExitInfo> exits) : base(sender)
 		{
 			Exits = exits;
 		}

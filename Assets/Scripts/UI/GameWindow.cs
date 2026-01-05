@@ -1,11 +1,13 @@
 ﻿using Assets.Scripts.Messaging.Commands.Characters;
 using Assets.Scripts.Models;
+using Assets.Scripts.Narration.WorldDescribers;
 
 using Game.Controls;
 using Game.Controls.Keyboard;
 using Game.Entities;
 using Game.Entities.Items;
 using Game.Messaging;
+using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
 using Game.Messaging.Events.GameManagement;
@@ -109,6 +111,7 @@ namespace Game.UI
 			switch (message)
 			{
 				case SelectNavigableExit m: OnSelectNavigableExit(m); break;
+				case SelectNavigableItem m: OnSelectNavigableItem(m); break;
 				case OpenGameMenu m: OnOpenGameMenu(m); break;
 				case SelectObjectToApply m: OnSelectObjectToApply(m); break;
 				case selectInventoryAction m: OnselectInventoryAction(m); break;
@@ -159,7 +162,7 @@ namespace Game.UI
 			sender.TakeMessage(message);
 		}
 
-		private void HandleExitMenu(MessagingObject sender, List<ExitInfo> exits, int option)
+		private void HandleNavigableExitMenu(MessagingObject sender, List<NavigableExitInfo> exits, int option)
 		{
 			if (option == -1 || sender == null)
 				return;
@@ -287,7 +290,8 @@ namespace Game.UI
 			WindowHandler.Menu(parameters);
 		}
 
-		private ExitDescriber _exitDescriber;
+		private NavigableExitDescriber _exitDescriber;
+		private NavigableItemDescriber _itemDescriber;
 
 		/// <summary>
 		/// Handles a message.
@@ -296,17 +300,45 @@ namespace Game.UI
 		private void OnSelectNavigableExit(SelectNavigableExit message)
 		{
 			const string prompt = "Východy";
-			List<List<string>> descriptions = _exitDescriber.GetStructuredDescriptions(message.Exits);
+			List<NavigableObjectInfo> objectInfo = message.Exits.Cast<NavigableObjectInfo>().ToList();
+			List<List<string>> descriptions = _exitDescriber.GetStructuredDescriptions(objectInfo);
 			MenuParameters parameters = new(
 							descriptions,
 							prompt,
-divider: " ",
 	searchIndex: 2,
 								wrappingAllowed: false,
-							menuClosed: (option) => HandleExitMenu(message.Sender as MessagingObject, message.Exits, option));
+							menuClosed: (option) => HandleNavigableExitMenu(message.Sender as MessagingObject, message.Exits, option));
 			WindowHandler.Menu(parameters);
 		}
 
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="message">The message to be handled</param>
+		private void OnSelectNavigableItem(SelectNavigableItem message)
+		{
+			const string prompt = "Okolní předměty";
+			List<NavigableObjectInfo> objectInfo = 
+				message.Items
+				.Cast<NavigableObjectInfo>()
+				.ToList();
+			List<List<string>> descriptions = _itemDescriber.GetStructuredDescriptions(objectInfo);
+			MenuParameters parameters = new(
+							descriptions,
+							prompt,
+								wrappingAllowed: false,
+							menuClosed: (option) => HandleNavigableItemMenu(message.Sender as MessagingObject, message.Items, option));
+			WindowHandler.Menu(parameters);
+		}
+
+		private void HandleNavigableItemMenu(MessagingObject sender, List<NavigableItemInfo> items, int option)
+		{
+			if (option == -1 || sender == null)
+				return;
+
+			NavigateToItem message = new(this, items[option].Item);
+			sender.TakeMessage(message);
+		}
 
 		private List<List<string>> GetFriendlyNames(List<Entity> objects)
 		{
@@ -324,6 +356,7 @@ divider: " ",
 		{
 			_messagingEnabled = true;
 			_exitDescriber = new();
+			_itemDescriber = new();
 
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),

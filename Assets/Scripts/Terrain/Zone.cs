@@ -244,7 +244,7 @@ namespace Game.Terrain
 		/// <param name="radius">Max distance from the specified <paramref name="point"/></param>
 		/// <param name="includeDecoration">Specifies if the method lists decorative objects such as fences or rails.</param>
 		/// <returns>Enumeration of items</returns>
-		public IEnumerable<Item> GetNearByObjects(Vector2 point, int radius, bool includeDecoration = false)
+		public IEnumerable<Item> GetNearByItems(Vector2 point, int radius, bool includeDecoration = false)
 		{
 			IEnumerable<Item> items = Items.Where(o => o.Area != null);
 

@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Messaging.Events.Characters;
+using Assets.Scripts.Narration.WorldDescribers;
 
 using DavyKager;
 
@@ -13,6 +14,7 @@ using Game.Messaging.Events.GameInfo;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Messaging.Events.Sound;
+using Game.Models;
 using Game.Narration.WorldDescribers;
 using Game.Terrain;
 
@@ -61,6 +63,7 @@ namespace Game.Entities.Characters.Chipotle
 			base.Initialize();
 			InitFootStepSource();
 			_exitDescriber = new();
+			_itemDescriber = new();
 			_announceWalls = true;
 		}
 
@@ -133,7 +136,7 @@ namespace Game.Entities.Characters.Chipotle
 				case SayVisitedZoneResult svl: OnSayVisitedZone(svl); break;
 				case SayOrientation m: OnSayOrientation(m); break;
 				case SayExitsResult ser: OnSayExitsResult(ser); break;
-				case SayObjectsResult sor: OnSayObjectsResult(sor); break;
+				case SayItemsResult sor: OnSayItemsResult(sor); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
 				case CharacterHitDoor m: OnCharacterHitDoor(m); break;
 				case OrientationChanged ocd: OnOrientationChanged(ocd); break;
@@ -324,12 +327,18 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles the SayNearestObjects message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnSayObjectsResult(SayObjectsResult message)
+		protected void OnSayItemsResult(SayItemsResult message)
 		{
-			if (message.Objects.IsNullOrEmpty())
+			if (message.Items.IsNullOrEmpty())
+			{
 				Tolk.Speak("Nic tu není", true);
-			else
-				Tolk.Speak(FormatStringList(message.Objects), true);
+				return;
+			}
+
+			var objectInfo = message.Items.Cast<NavigableObjectInfo>().ToList();
+			List<string> describtions = _itemDescriber.GetDescriptions(objectInfo);
+			string output = FormatStringList(describtions.ToArray());
+			Tolk.Speak(output, true);
 		}
 
 		/// <summary>
@@ -344,7 +353,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		protected void SayOrientation() => Tolk.Output(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
 
-		ExitDescriber _exitDescriber;
+		NavigableExitDescriber _exitDescriber;
+		private NavigableItemDescriber _itemDescriber;
 
 		/// <summary>
 		/// Processes the EntityHitDoor message.

@@ -6,9 +6,9 @@ namespace Game.Messaging.Commands.UI
 {
 	public class SelectNavigableExit : Message
 	{
-		public readonly List<ExitInfo> Exits;
+		public readonly List<NavigableExitInfo> Exits;
 
-		public SelectNavigableExit(object sender, List<ExitInfo> exits) : base(sender)
+		public SelectNavigableExit(object sender, List<NavigableExitInfo> exits) : base(sender)
 		{
 			Exits = exits;
 		}

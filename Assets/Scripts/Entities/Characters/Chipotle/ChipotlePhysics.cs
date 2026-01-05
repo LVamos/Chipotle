@@ -28,6 +28,8 @@ using System.Linq;
 
 using UnityEngine;
 
+using static UnityEngine.GraphicsBuffer;
+
 using Message = Game.Messaging.Message;
 using Physics = Game.Entities.Characters.Components.Physics;
 using Random = System.Random;
@@ -262,6 +264,7 @@ namespace Game.Entities.Characters.Chipotle
 			{
 				case CharacterMoved m: return;
 				case NavigateToExit m: OnNavigateToExit(m); break;
+				case NavigateToItem m: OnNavigateToItem(m); break;
 				case PlaceItem m: OnPlaceItem(m); break;
 				case ApplyItemToTarget m:
 					OnApplyItemToTarget(m); break;
@@ -285,13 +288,21 @@ namespace Game.Entities.Characters.Chipotle
 				case ChipotlesCarMoved ccm: OnChipotlesCarMoved(ccm); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
-				case SayObjects sob: OnSayObjects(sob); break;
+				case SayItems sob: OnSayObjects(sob); break;
 				case StartWalk staw: OnStartWalk(staw); break;
 				case ChangeOrientation cor: OnChangeOrientation(cor); break;
 				case Interact m: OnInteract(m); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
+
+		private void OnNavigateToItem(NavigateToItem message)
+		{
+			_navigatedItem = message.Item;
+			StartNavigation newMessage = new(Owner);
+			_navigatedItem.TakeMessage(newMessage);
+		}
+
 
 		private void OnNavigateToExit(NavigateToExit message)
 		{
@@ -385,6 +396,23 @@ namespace Game.Entities.Characters.Chipotle
 			_navigatedItem = target;
 			_navigatedItem.TakeMessage(new StartNavigation(Owner));
 		}
+
+		protected string GetDistanceDescription(float distance)
+		{
+			if (distance <= _stepLength)
+				return string.Empty;
+
+			// Round the distance so that its value corresponds to a multiple of 0.5.
+			int steps = (int)Math.Round(distance / _stepLength);
+
+			// Compose output
+			if (steps == 1)
+				return "jeden krok";
+			if (steps is > 1 and < 5)
+				return $"{steps} kroky";
+			return $"{steps} kroků";
+		}
+
 
 		private NavigableCharactersModel GetCharacters()
 		{
@@ -536,7 +564,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			// Gather info and run menu.
-			List<ExitInfo> exits = GetExits();
+			List<NavigableExitInfo> exits = GetNavigableExits();
 			if (exits.IsNullOrEmpty()) // No objects near by
 			{
 				InnerMessage(new SayExitsResult(this));
@@ -576,7 +604,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			if (_walking)
 			{
-				SayObjects();
+				SayItems();
 				return;
 			}
 
@@ -584,33 +612,16 @@ namespace Game.Entities.Characters.Chipotle
 			if (NavigationInProgress)
 				return;
 
-			NavigableItemsModel objects = GetItems();
+			List<NavigableItemInfo> items = GetNavigableItems();
 
-			if (objects.Items.IsNullOrEmpty())
+			if (items.IsNullOrEmpty())
 			{
-				InnerMessage(new SayObjectsResult(this, null));
+				InnerMessage(new SayItemsResult(this, null));
 				return;
 			}
 
-			List<List<string>> descriptions =
-				objects.Descriptions
-					.Select(d => new List<string> { d }).ToList();
-
-			MenuParameters parameters = new(
-				items: descriptions,
-				introText: "Okolní předměty",
-				wrappingAllowed: false,
-				menuClosed: (index) =>
-				{
-					if (index == -1)
-						return;
-
-					Item target = objects.Items[index];
-
-					_navigatedItem = target;
-					_navigatedItem.TakeMessage(new StartNavigation(Owner));
-				});
-			int option = WindowHandler.Menu(parameters);
+			SelectNavigableItem newMessage = new(Owner, items);
+			WindowHandler.ActiveWindow.TakeMessage(newMessage);
 		}
 
 		/// <summary>
@@ -714,38 +725,17 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new SayExitsResult(this, occupiedPassage));
 			else
 			{
-				List<ExitInfo> exits = GetExits();
+				List<NavigableExitInfo> exits = GetNavigableExits();
 				InnerMessage(new SayExitsResult(this, exits));
 			}
 		}
 
-		/// <summary>
-		/// Generates a text representation of the specified distance in Czech.
-		/// </summary>
-		/// <param name="distance">The distance in meters to be described</param>
-		/// <returns>The text representation of the specified distance</returns>
-		private string GetDistanceDescription(float distance)
-		{
-			if (distance <= _stepLength)
-				return string.Empty;
-
-			// Round the distance so that its value corresponds to a multiple of 0.5.
-			int steps = (int)Math.Round(distance / _stepLength);
-
-			// Compose output
-			if (steps == 1)
-				return "jeden krok";
-			if (steps is > 1 and < 5)
-				return $"{steps} kroky";
-			return $"{steps} kroků";
-		}
-
-		protected ExitInfo GetExitInfo(Passage exit)
+		protected NavigableExitInfo GetNavigableExitInfo(Passage exit)
 		{
 			float distance = World.GetDistance(Owner, exit);
 			float angle = GetAngle(exit.Area.Value);
 			Zone targetZone = exit.AnotherZone(Zone);
-			ExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner);
+			NavigableExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner);
 			return info;
 		}
 
@@ -755,12 +745,12 @@ namespace Game.Entities.Characters.Chipotle
 		/// Returns text descriptions of the specified exits including distance and position.
 		/// </summary>
 		/// <returns>A string array</returns>
-		private List<ExitInfo> GetExits()
+		private List<NavigableExitInfo> GetNavigableExits()
 		{
 			List<Passage> exits =
 				Zone.GetNearestExits(Center);
-			List<ExitInfo> info = exits
-				.Select(e => GetExitInfo(e))
+			List<NavigableExitInfo> info = exits
+				.Select(e => GetNavigableExitInfo(e))
 				.ToList();
 
 			return info;
@@ -965,7 +955,7 @@ namespace Game.Entities.Characters.Chipotle
 				DoorHitByCharacter doorHitMessage = new(Owner, door, contactPoint, GetExitDestination(door));
 				door.TakeMessage(doorHitMessage);
 
-				ExitInfo info = GetExitInfo(door);
+				NavigableExitInfo info = GetNavigableExitInfo(door);
 				CharacterHitDoor innerMessage = new(Owner, info);
 				InnerMessage(innerMessage);
 				LogDoorCollision(door);
@@ -1043,7 +1033,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected void ReportObjects()
 		{
 			HashSet<string> nearObjects =
-				(from o in Zone.GetNearByObjects(_area.Value.Center, _nearObjectRadius, false)
+				(from o in Zone.GetNearByItems(_area.Value.Center, _nearObjectRadius, false)
 				 select o.Name.Indexed)
 				.ToHashSet();
 
@@ -1091,25 +1081,24 @@ namespace Game.Entities.Characters.Chipotle
 		/// Returns information about all navigable objects from current zone in the specified radius around the NPC.
 		/// </summary>
 		/// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
-		protected NavigableItemsModel GetItems()
+		protected List<NavigableItemInfo> GetNavigableItems()
 		{
-			List<string> descriptions = new();
-			IEnumerable<Item> items = Zone.GetNearByObjects(_area.Value.Center, _navigableObjectsRadius);
+			List<Item> items = Zone.GetNearByItems(Center, _navigableObjectsRadius).ToList();
+			return 
+				items
+				.Select(GetNavigableItemInfo)
+				.ToList();
+		}
 
-			foreach (Item item in items)
-			{
-				string name = item.Name.Friendly;
-				if (Settings.SayInnerItemNames)
-					name += " " + item.Name.Indexed;
-				float distance = World.GetDistance(Owner, item);
-				string distanceDescription = GetDistanceDescription(distance);
-				float compassDegrees = GetAngle(item.Area.Value);
-				string angleDescription = Angle.GetClockDirection(compassDegrees);
-				descriptions.Add($"{name} {distanceDescription} {angleDescription}");
-			}
-
-			NavigableItemsModel result = new(descriptions.ToArray(), items.ToArray());
-			return result;
+		private NavigableItemInfo GetNavigableItemInfo(Item item)
+		{
+			string name = item.Name.Friendly;
+			if (Settings.SayInnerItemNames)
+				name += " " + item.Name.Indexed;
+			float distance = World.GetDistance(Owner, item);
+			float angle = GetAngle(item.Area.Value);
+			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner);
+			return info;
 		}
 
 		/// <summary>
@@ -1122,7 +1111,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayNearestObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnSayObjects(SayObjects message) => SayObjects();
+		private void OnSayObjects(SayItems message) => SayItems();
 
 		/// <summary>
 		/// Announces the nearest characters around the Chipotle 
@@ -1143,12 +1132,15 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Announces the nearest objects around the Chipotle 
 		/// </summary>
-		private void SayObjects()
+		private void SayItems()
 		{
 			// If there's any navigation in progress, it'll be stopped and this command will be cancelled.
 			StopNavigation();
 			if (!NavigationInProgress)
-				InnerMessage(new SayObjectsResult(this, GetItems().Descriptions));
+			{
+				SayItemsResult message = new(this, GetNavigableItems());
+				InnerMessage(message);
+			}
 		}
 
 		/// <summary>
