@@ -64,6 +64,7 @@ namespace Game.Entities.Characters.Chipotle
 			InitFootStepSource();
 			_exitDescriber = new();
 			_itemDescriber = new();
+			_characterDescriber= new();
 			_announceWalls = true;
 		}
 
@@ -315,12 +316,15 @@ namespace Game.Entities.Characters.Chipotle
 		protected void OnSayCharactersResult(SayCharactersResult message)
 		{
 			if (message.Characters.IsNullOrEmpty())
-				Tolk.Speak("Nikdo tu není", true);
-			else
 			{
-				string text = FormatStringList(message.Characters);
-				Tolk.Speak(text, true);
+				Tolk.Speak("Nikdo tu není", true);
+				return;
 			}
+
+			List<NavigableObjectInfo> info = message.Characters.Cast<NavigableObjectInfo>().ToList();
+			List<string> descriptions = _characterDescriber.GetDescriptions(info);
+				string text = FormatStringList(descriptions.ToArray());
+				Tolk.Speak(text, true);
 		}
 
 		/// <summary>
@@ -355,6 +359,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		NavigableExitDescriber _exitDescriber;
 		private NavigableItemDescriber _itemDescriber;
+		private NavigableCharacterDescriber _characterDescriber;
 
 		/// <summary>
 		/// Processes the EntityHitDoor message.

@@ -265,6 +265,7 @@ namespace Game.Entities.Characters.Chipotle
 				case CharacterMoved m: return;
 				case NavigateToExit m: OnNavigateToExit(m); break;
 				case NavigateToItem m: OnNavigateToItem(m); break;
+				case NavigateToCharacter m: OnNavigateToCharacter(m); break;
 				case PlaceItem m: OnPlaceItem(m); break;
 				case ApplyItemToTarget m:
 					OnApplyItemToTarget(m); break;
@@ -309,6 +310,13 @@ namespace Game.Entities.Characters.Chipotle
 			StartNavigation newMessage = new(Owner);
 			message.Exit.TakeMessage(newMessage);
 			_navigatedExit = message.Exit;
+		}
+
+		private void OnNavigateToCharacter(NavigateToCharacter message)
+		{
+			StartNavigation newMessage = new(Owner);
+			message.Character.TakeMessage(newMessage);
+			_navigatedCharacter = message.Character;
 		}
 
 		private void OnPlaceItem(PlaceItem message)
@@ -371,30 +379,21 @@ namespace Game.Entities.Characters.Chipotle
 
 			StopNavigation(); // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
 			if (NavigationInProgress)
+			{
+				StopNavigation();
 				return;
+			}
 
-			NavigableCharactersModel characters = GetCharacters();
+			List<NavigableCharacterInfo> characters = GetNavigableCharacters();
 
-			if (characters.Characters.IsNullOrEmpty())
+			if (characters.IsNullOrEmpty())
 			{
 				InnerMessage(new SayCharactersResult(this, null));
 				return;
 			}
 
-			List<List<string>> descriptions =
-				characters.Descriptions
-					.Select(d => new List<string> { d }).ToList();
-
-			MenuParameters parameters = new(descriptions, "Okolní postavy", " ", 0, false);
-			int option = WindowHandler.Menu(parameters);
-
-			if (option == -1)
-				return;
-
-			Character target = characters.Characters[option];
-
-			_navigatedItem = target;
-			_navigatedItem.TakeMessage(new StartNavigation(Owner));
+			SelectNavigableCharacter newMessage = new(Owner, characters);
+			WindowHandler.ActiveWindow.TakeMessage(newMessage);
 		}
 
 		protected string GetDistanceDescription(float distance)
@@ -414,28 +413,14 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 
-		private NavigableCharactersModel GetCharacters()
+		private List<NavigableCharacterInfo> GetNavigableCharacters()
 		{
-			IEnumerable<Character> characters = Zone.GetNearByCharacters(
-				_area.Value.Center,
-				_navigableObjectsRadius,
-				Owner
-			);
-			List<string> descriptions = new();
+			List<Character> characters =Zone.Characters;
+			List<NavigableCharacterInfo> info = characters
+				.Select(GetNavigableCharacterInfo)
+				.ToList();
 
-			foreach (Character character in characters)
-			{
-				string name = character.Name.Friendly;
-				float distance = World.GetDistance(Owner, character);
-				string distanceDescription = GetDistanceDescription(distance);
-				float compassDegrees = GetAngle(character.Area.Value);
-				string angleDescription = Angle.GetRelativeDirection(compassDegrees, distance);
-
-				descriptions.Add($"{name} {distanceDescription} {angleDescription} ");
-			}
-
-			NavigableCharactersModel result = new(descriptions.ToArray(), characters.ToArray());
-			return result;
+			return info;
 		}
 
 		/// <summary>
@@ -588,6 +573,8 @@ namespace Game.Entities.Characters.Chipotle
 				_navigatedItem = null;
 			else if (message.Sender == _navigatedExit)
 				_navigatedExit = null;
+			else if(message.Sender == _navigatedCharacter)
+				_navigatedCharacter = null;
 		}
 
 		/// <summary>
@@ -631,13 +618,14 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			_navigatedItem?.TakeMessage(new StopNavigation(Owner));
 			_navigatedExit?.TakeMessage(new StopNavigation(Owner));
+			_navigatedCharacter?.TakeMessage(new StopNavigation(Owner));
 		}
 
 		/// <summary>
 		/// Checks if there's any navigation in progress.
 		/// </summary>
 		protected bool NavigationInProgress
-			=> _navigatedExit != null || _navigatedItem != null;
+			=> _navigatedExit != null || _navigatedItem != null||_navigatedCharacter!=null;
 
 		/// <summary>
 		/// Objectt to which tthe NPC is currently navigated.
@@ -736,6 +724,14 @@ namespace Game.Entities.Characters.Chipotle
 			float angle = GetAngle(exit.Area.Value);
 			Zone targetZone = exit.AnotherZone(Zone);
 			NavigableExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner);
+			return info;
+		}
+
+		protected NavigableCharacterInfo GetNavigableCharacterInfo(Character character)
+		{
+			float distance = World.GetDistance(Owner, character);
+			float angle = GetAngle(character.Area.Value);
+			NavigableCharacterInfo info = new(distance, character, angle, _stepLength, Owner);
 			return info;
 		}
 
@@ -1064,6 +1060,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Lists near objects that have been already announced.
 		/// </summary>
 		protected HashSet<string> _nearObjects = new();
+		private Character _navigatedCharacter;
 		private const float _maxDistanceToCar = 2;
 		private const float _minDistanceToCar = 1;
 
@@ -1125,8 +1122,8 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			NavigableCharactersModel characters = GetCharacters();
-			InnerMessage(new SayCharactersResult(this, characters.Descriptions));
+			List<NavigableCharacterInfo> characters = GetNavigableCharacters();
+			InnerMessage(new SayCharactersResult(this, characters));
 		}
 
 		/// <summary>

@@ -251,8 +251,11 @@ namespace Game.Terrain
 		/// </summary>
 		protected void StopNavigation()
 		{
+			Sounds.Play("SonarTurnedOff", _navigationAudio.transform.position, _navigationAudio.volume);
 			_navigationAudio.loop = false;
+			Sounds.SlideVolume(_navigationAudio, .2f, 0);
 			_navigationAudio = null;
+
 			_navigating = false;
 			World.Player.TakeMessage(new NavigationStopped(this));
 		}

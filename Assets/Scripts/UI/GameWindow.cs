@@ -111,6 +111,7 @@ namespace Game.UI
 			switch (message)
 			{
 				case SelectNavigableExit m: OnSelectNavigableExit(m); break;
+				case SelectNavigableCharacter m: OnSelectNavigableCharacter(m); break;
 				case SelectNavigableItem m: OnSelectNavigableItem(m); break;
 				case OpenGameMenu m: OnOpenGameMenu(m); break;
 				case SelectObjectToApply m: OnSelectObjectToApply(m); break;
@@ -292,6 +293,7 @@ namespace Game.UI
 
 		private NavigableExitDescriber _exitDescriber;
 		private NavigableItemDescriber _itemDescriber;
+		private NavigableCharacterDescriber _characterDescriber;
 
 		/// <summary>
 		/// Handles a message.
@@ -331,12 +333,41 @@ namespace Game.UI
 			WindowHandler.Menu(parameters);
 		}
 
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="message">The message to be handled</param>
+		private void OnSelectNavigableCharacter(SelectNavigableCharacter message)
+		{
+			const string prompt = "Okolní postavy";
+			List<NavigableObjectInfo> objectInfo =
+				message.Characters
+				.Cast<NavigableObjectInfo>()
+				.ToList();
+			List<List<string>> descriptions = _characterDescriber.GetStructuredDescriptions(objectInfo);
+			MenuParameters parameters = new(
+							descriptions,
+							prompt,
+								wrappingAllowed: false,
+							menuClosed: (option) => HandleNavigableCharacterMenu(message.Sender as MessagingObject, message.Characters, option));
+			WindowHandler.Menu(parameters);
+		}
+
 		private void HandleNavigableItemMenu(MessagingObject sender, List<NavigableItemInfo> items, int option)
 		{
 			if (option == -1 || sender == null)
 				return;
 
 			NavigateToItem message = new(this, items[option].Item);
+			sender.TakeMessage(message);
+		}
+
+		private void HandleNavigableCharacterMenu(MessagingObject sender, List<NavigableCharacterInfo> characters, int option)
+		{
+			if (option == -1 || sender == null)
+				return;
+
+			NavigateToCharacter message = new(this, characters[option].Character);
 			sender.TakeMessage(message);
 		}
 
@@ -357,6 +388,7 @@ namespace Game.UI
 			_messagingEnabled = true;
 			_exitDescriber = new();
 			_itemDescriber = new();
+			_characterDescriber= new();
 
 			RegisterShortcuts(
 				(new(KeyCode.Escape), QuitGame),
