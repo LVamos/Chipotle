@@ -179,9 +179,9 @@ namespace Game.Terrain
 		/// <param name="loop">Specifies if the navigating soudn should be played in loop</param>
 		protected virtual void ReportPosition(bool loop)
 		{
-			Vector2 position2d = GetClosestPointToPlayer();
-			Vector3 position3d = new(position2d.x, 0, position2d.y);
-			_navigationAudio = Sounds.Play(_sounds["navigation"], position3d, _navigationVolume, loop);
+			Vector3 position = GetBeaconPosition();
+			string sound = _sounds["navigation"];
+			_navigationAudio = Sounds.Play(sound, position, _navigationVolume, loop);
 			_navigationAudio.maxDistance = _beaconMaxDistance;
 			_navigationAudio.minDistance = _beaconMinDistance;
 			_navigationAudio.rolloffMode = _beaconRolloffMode;
@@ -274,6 +274,12 @@ namespace Game.Terrain
 			return result;
 		}
 
+		private Vector3 GetBeaconPosition()
+		{
+			Vector2 position2d = GetClosestPointToPlayer();
+			return position2d.ToVector3(2);
+		}
+
 		/// <summary>
 		/// Updates position and attenuation of navigating sound if the navigation is in progress.
 		/// </summary>
@@ -285,9 +291,8 @@ namespace Game.Terrain
 			/* 
              * To give the player the impression that the navigation sound is heard over the entire object its position is set to the coordinates of the object point closest to the player. 
              */
-			Vector2 position2d = GetClosestPointToPlayer();
-			Vector3 position3d = new(position2d.x, 2, position2d.y);
-			_navigationAudio.transform.position = position3d;
+			Vector3 position = GetBeaconPosition();
+			_navigationAudio.transform.position = position;
 
 			// Find opposite point
 			Vector2 player = World.Player.Area.Value.Center;

@@ -40,7 +40,7 @@ namespace Game
 			return result;
 		}
 
-		public static Vector3 ToVector3(this Vector2 value, float y) => new(value.x, y, value.y);
+		public static Vector3 ToVector3(this Vector2 value, float y=0) => new(value.x, y, value.y);
 
 		public static string GetString(this Vector2 vector)
 		{

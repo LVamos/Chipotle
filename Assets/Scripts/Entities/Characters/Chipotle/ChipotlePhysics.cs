@@ -384,14 +384,15 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
+			// Gather characters
 			List<NavigableCharacterInfo> characters = GetNavigableCharacters();
-
 			if (characters.IsNullOrEmpty())
 			{
 				InnerMessage(new SayCharactersResult(this, null));
 				return;
 			}
 
+			// run menu
 			SelectNavigableCharacter newMessage = new(Owner, characters);
 			WindowHandler.ActiveWindow.TakeMessage(newMessage);
 		}
@@ -415,7 +416,9 @@ namespace Game.Entities.Characters.Chipotle
 
 		private List<NavigableCharacterInfo> GetNavigableCharacters()
 		{
-			List<Character> characters =Zone.Characters;
+			List<Character> characters =Zone.Characters
+				.Where(c=>c!=Owner)
+				.ToList();
 			List<NavigableCharacterInfo> info = characters
 				.Select(GetNavigableCharacterInfo)
 				.ToList();
@@ -548,14 +551,15 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			// Gather info and run menu.
+			// Gather info
 			List<NavigableExitInfo> exits = GetNavigableExits();
 			if (exits.IsNullOrEmpty()) // No objects near by
 			{
 				InnerMessage(new SayExitsResult(this));
 				return;
 			}
-			WindowHandler.ActiveWindow.TakeMessage(new SelectNavigableExit(Owner, exits));
+			
+			WindowHandler.ActiveWindow.TakeMessage(new SelectNavigableExit(Owner, exits)); // Run selection menu
 		}
 
 		/// <summary>
