@@ -145,7 +145,6 @@ namespace Game.Terrain
 		/// <param name="message">The message to be handled</param>
 		protected override void HandleMessage(Message message)
 		{
-			base.HandleMessage(message);
 			switch (message)
 			{
 				case StartNavigation m: OnStartNavigation(m); break;
@@ -196,7 +195,10 @@ namespace Game.Terrain
 		/// Processes the StopExitNavigation message.
 		/// </summary>
 		/// <param name="message">Source of the message</param>
-		protected void OnStopNavigation(StopNavigation message) => StopNavigation();
+		protected void OnStopNavigation(StopNavigation message)
+		{
+			StopNavigation();
+		}
 
 		/// <summary>
 		/// Processes the StartNavigation message.
@@ -251,7 +253,13 @@ namespace Game.Terrain
 		/// </summary>
 		protected void StopNavigation()
 		{
-			Sounds.Play("SonarTurnedOff", _navigationAudio.transform.position, _navigationAudio.volume);
+				string sound = "SonarTurnedOff";
+				Vector3 position = GetBeaconPosition();
+				Sounds.Play(sound, position, _navigationVolume);
+
+			if (_navigationAudio == null)
+				return;
+
 			_navigationAudio.loop = false;
 			Sounds.SlideVolume(_navigationAudio, .2f, 0);
 			_navigationAudio = null;

@@ -377,7 +377,6 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			StopNavigation(); // If there's any navigation in progress, it'll be stopped and this command will be cancelled.
 			if (NavigationInProgress)
 			{
 				StopNavigation();
@@ -416,9 +415,8 @@ namespace Game.Entities.Characters.Chipotle
 
 		private List<NavigableCharacterInfo> GetNavigableCharacters()
 		{
-			List<Character> characters =Zone.Characters
-				.Where(c=>c!=Owner)
-				.ToList();
+			IEnumerable<Character> characters = Zone.Characters
+				.Where(c => c != Owner);
 			List<NavigableCharacterInfo> info = characters
 				.Select(GetNavigableCharacterInfo)
 				.ToList();

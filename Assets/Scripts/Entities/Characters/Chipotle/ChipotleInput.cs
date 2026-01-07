@@ -91,7 +91,11 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Sends the ListCharacter message.
 		/// </summary>
-		private void ListCharacters() => InnerMessage(new ListCharacters(this));
+		private void ListCharacters()
+		{
+			ListCharacters message = new(this);
+			InnerMessage(message);
+		}
 
 		/// <summary>
 		/// Determines how quickly the game reacts to movement commands. The speed is in milliseconds.
