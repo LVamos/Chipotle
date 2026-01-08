@@ -622,7 +622,7 @@ namespace Game.Entities.Items
 			if (message.Sender != World.Player)
 				return;
 
-			UpdateNavigatingSoundPosition();
+			UpdateBeaconPosition();
 			UpdateAmbientSounds();
 			StopActionWhenPlayerMoves();
 		}

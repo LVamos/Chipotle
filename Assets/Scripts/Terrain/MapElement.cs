@@ -169,7 +169,7 @@ namespace Game.Terrain
 			}
 
 			_navigating = keepNavigating;
-			UpdateNavigatingSoundPosition();
+			UpdateBeaconPosition();
 		}
 
 		/// <summary>
@@ -291,7 +291,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Updates position and attenuation of navigating sound if the navigation is in progress.
 		/// </summary>
-		protected virtual void UpdateNavigatingSoundPosition()
+		protected virtual void UpdateBeaconPosition()
 		{
 			if (!_navigating)
 				return;
