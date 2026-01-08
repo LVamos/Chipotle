@@ -1014,7 +1014,17 @@ namespace Game.Entities.Characters.Chipotle
 				entities = entities.Where(e => e is Item i && i.Type != "zeď");
 			if (entities.IsNullOrEmpty())
 				return false;
+
+			// If there's a wall and other items in the same time, exclude the wall from announcements.
 			List<Entity> entityList = entities.ToList();
+			IEnumerable<string> types = entityList
+				.Select(e => e.Type)
+				.Distinct();
+			if (types.Contains("zeď") && types.Count() > 1)
+				entityList = 
+					entityList.Where(i => i.Type != "zeď")
+					.ToList();
+
 			IEnumerable<IGrouping<string, Entity>> groupedElements = entityList
 				.GroupBy(o => o.Name.Friendly);
 
