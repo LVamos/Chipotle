@@ -1,4 +1,4 @@
-﻿namespace Game.Messaging.Commands
+﻿namespace Game.Messaging.Commands.GameInfo
 {
 	public class ListExits : Message
 	{

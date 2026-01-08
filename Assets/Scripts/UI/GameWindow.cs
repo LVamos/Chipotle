@@ -48,6 +48,7 @@ namespace Game.UI
 	{ "Otoč se ostře doleva: kontrol levá šipka", "TurnSharplyLeft" },
 	{ "Otoč se ostře doprava: kontrol pravá šipka", "TurnSharplyRight" },
 	{ "Otoč se čelem vzad: kontrol dolní šipka", "TurnAround" },
+	{ "Kde je hledaný předmět, východ nebo postava: shift K", "SayNavigatedObjectLocation" },
 	{ "okolní předměty: O", "SayItems" },
 	{ "Naveď mě k předmětu: šift O", "ListItems" },
 	{ "východy: Vé", "SayExits" },
@@ -67,8 +68,9 @@ namespace Game.UI
 		/// </summary>
 		private void OnOpenGameMenu(OpenGameMenu message)
 		{
-			// Run the menu
-			List<List<string>> items = _gameMenuOptions.Select(c => new List<string>() { c.Key }).ToList();
+			List<List<string>> items = 
+				_gameMenuOptions
+				.Select(c => new List<string>() { c.Key }).ToList();
 			Action<int> menuHandler = (option) =>
 			{
 				HandleGameMenu(items, option, message.Sender as MessagingObject);

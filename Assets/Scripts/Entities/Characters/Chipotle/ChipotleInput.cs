@@ -30,6 +30,11 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleInput : Input
 	{
+		private void SayNavigatedObjectLocation()
+		{
+			InnerMessage(new SayNavigatedObjectLocation(this));
+		}
+
 		public override void Initialize()
 		{
 			base.Initialize();
@@ -50,6 +55,7 @@ namespace Game.Entities.Characters.Chipotle
 				{ "TurnSharplyLeft", TurnSharplyLeft },
 				{ "TurnSharplyRight", TurnSharplyRight },
 				{ "TurnAround", TurnAround },
+				{ "SayNavigatedObjectLocation", SayNavigatedObjectLocation},
 				{ "SayItems", SayItems },
 				{ "ListItems", ListItems },
 				{ "SayExits", SayExits },
@@ -117,6 +123,7 @@ namespace Game.Entities.Characters.Chipotle
 					[new(KeyCode.F5)] = CreatePredefinedSave,
 					[new(KeyCode.Q)] = SayCharacters,
 					[new(KeyboardModifiers.Shift, KeyCode.Q)] = ListCharacters,
+					[new(KeyboardModifiers.Shift, KeyCode.K)] = SayNavigatedObjectLocation,
 					[new(KeyCode.P)] = ExploreItem,
 					[new(KeyCode.R)] = SayZoneDescription,
 					[new(KeyCode.I)] = RunInventoryMenu,

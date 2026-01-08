@@ -262,6 +262,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
+				case SayNavigatedObjectLocation m: OnSayNavigatedObjectLocation(m); break;
 				case CharacterMoved m: return;
 				case NavigateToExit m: OnNavigateToExit(m); break;
 				case NavigateToItem m: OnNavigateToItem(m); break;
@@ -633,7 +634,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Objectt to which tthe NPC is currently navigated.
 		/// </summary>
 		[ProtoIgnore]
-		protected Entity _navigatedItem;
+		protected Item _navigatedItem;
 
 		/// <summary>
 		/// Processes incoming messages.
@@ -698,6 +699,49 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="message">The message</param>
 		protected void OnSayExits(SayExits message) => SayExits();
+
+		/// <summary>
+		/// Processes the SayNavigatedObjectLocation message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		protected void OnSayNavigatedObjectLocation(SayNavigatedObjectLocation message)
+		{
+			SayNavigatedObjectLocation();
+		}
+
+		private void SayNavigatedObjectLocation()
+		{
+			if (!NavigationInProgress)
+			{
+				SayNavigatedObjectLocationResult message = new(this);
+				InnerMessage(message);
+				return;
+			}
+
+			if (_navigatedCharacter != null)
+			{
+				NavigableCharacterInfo characterInfo = GetNavigableCharacterInfo(_navigatedCharacter);
+				List<NavigableCharacterInfo> characters = new() { characterInfo};
+				InnerMessage(new SayCharactersResult(this, characters));
+				return;
+			}
+
+			if (_navigatedItem!= null)
+			{
+				NavigableItemInfo itemInfo = GetNavigableItemInfo(_navigatedItem);
+				List<NavigableItemInfo> items = new() { itemInfo };
+				InnerMessage(new SayItemsResult(this, items));
+				return;
+			}
+
+			if(_navigatedExit!=null)
+			{ 
+			NavigableExitInfo exitInfo = GetNavigableExitInfo(_navigatedExit);
+			List<NavigableExitInfo> exits = new() { exitInfo };
+			InnerMessage(new SayExitsResult(this, exits));
+			return;
+		}
+		}
 
 		/// <summary>
 		/// Announces the nearest exits from the zone in which the Chipotle NPC is located.

@@ -37,6 +37,12 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleSound : Sound
 	{
+		private void OnSayNavigatedObjectLocationResult(SayNavigatedObjectLocationResult message)
+		{
+			if (message.NoNavigatedObjects)
+				Sounds.Play2d("error");
+		}
+
 		protected AudioSource _footStep;
 
 		private void InitFootStepSource()
@@ -117,6 +123,8 @@ namespace Game.Entities.Characters.Chipotle
 
 			switch (message)
 			{
+				case SayNavigatedObjectLocationResult m:
+					OnSayNavigatedObjectLocationResult(m);break;
 				case LeftBycar m: OnLeftBycar(m); break;
 				case NoWallsNearby m:
 					OnNoWallsNearby(m); break;
