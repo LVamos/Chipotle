@@ -623,7 +623,7 @@ namespace Game.Entities.Items
 				return;
 
 			UpdateBeaconPosition();
-			UpdateAmbientSounds();
+			UpdateAmbientSounds(message.SourcePosition, message.SourceZone);
 			StopActionWhenPlayerMoves();
 		}
 
@@ -752,7 +752,7 @@ namespace Game.Entities.Items
 		/// Plays the sound loop of this object if there's any.
 		/// </summary>
 		/// <param name="attenuated">Determines if the sound of the object should be played over a wall or other obstacles.</param>
-		protected void UpdateAmbientSounds()
+		protected void UpdateAmbientSounds(Rectangle? previousPosition = null, Zone playersPreviousZone = null)
 		{
 			if (string.IsNullOrEmpty(_sounds["loop"]))
 				return;
@@ -760,7 +760,12 @@ namespace Game.Entities.Items
 				return;
 
 			ObstacleType obstacle = DetectOcclusion();
-			UpdateOcclusion(obstacle);
+
+			bool nowInSameZone = Zones.Contains(World.Player.Zone);
+			bool previouslyInSameZone = Zones.Contains(playersPreviousZone);
+			if (!previouslyInSameZone && !nowInSameZone)
+				UpdateOcclusion(obstacle, 0);
+			else UpdateOcclusion(obstacle);
 		}
 
 		protected bool IsInAudibleDistance()
