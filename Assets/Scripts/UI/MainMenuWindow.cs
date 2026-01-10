@@ -37,12 +37,16 @@ namespace Game.UI
 		/// </summary>
 		private const float _loopVolume = .5f;
 
+		private bool _menuInactive;		
+
 		/// <summary>
 		/// Actions performed when the window is activated.
 		/// </summary>
 		public override void OnActivate()
 		{
 			base.OnActivate();
+			if (_menuInactive)
+				return;
 
 			//if (_voicingEnabled)
 			//	Tolk.Speak("Hlavní menu", true);
@@ -127,11 +131,11 @@ namespace Game.UI
 			_lastChoice = choice;
 			switch (_usedItems[choice][0])
 			{
-				case "Nová hra": StartCoroutine(StartGame()); break;
-				case "Pokračovat ve hře": LoadGame(); break;
+				case "Nová hra":_menuInactive=true; StartCoroutine(StartGame()); break;
+				case "Pokračovat ve hře":_menuInactive=true; LoadGame(); break;
 				case "Test sluchátek": SpeakerTest(); break;
 				case "Návod": Help(); RunMainMenu(); break;
-				default: StartCoroutine(nameof(ExitGame)); break;
+				default: _menuInactive = true; StartCoroutine(nameof(ExitGame)); break;
 			}
 		}
 
@@ -250,6 +254,9 @@ namespace Game.UI
 		/// <param name="shortcut">The message</param>
 		public override void OnKeyDown(KeyboardInput shortcut)
 		{
+			if (_menuInactive)
+				return;
+
 			if (_speakerTestAudio.isPlaying)
 				_speakerTestAudio.Stop();
 
