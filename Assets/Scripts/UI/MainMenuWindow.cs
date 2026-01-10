@@ -35,7 +35,7 @@ namespace Game.UI
 		/// <summary>
 		/// Default volume for the menu loop
 		/// </summary>
-		private const float _loopVolume = .5f;
+		private const float _loopVolume = .4f;
 
 		private bool _menuInactive;		
 
@@ -181,7 +181,7 @@ namespace Game.UI
 				yield break;
 
 			Sounds.SlideVolume(_menuLoopAudio, .2f, 0, true);
-			_endJingleSource = Play(_endSound);
+			_endJingleSource = Play(_endSound,_loopVolume);
 			yield return WaitForSound(_endJingleSource, endTrim);
 		}
 
@@ -194,7 +194,7 @@ namespace Game.UI
 				return;
 
 			if (!_menuLoopAudio.IsPlaying())
-				_menuLoopAudio = Sounds.Play2d("MainMenuLoop", 1, true);
+				_menuLoopAudio = Sounds.Play2d("MainMenuLoop", _loopVolume, true);
 		}
 
 		/// <summary>

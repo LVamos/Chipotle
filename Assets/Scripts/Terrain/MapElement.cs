@@ -38,7 +38,7 @@ namespace Game.Terrain
 		protected MessagingObject[] _components;
 
 		public Vector2 Center { get => _area.Value.Center; }
-		private const float _navigationVolume = .5f;
+		private const float _navigationVolume = 1;
 		private const float _beaconMinDistance = .6f;
 		private const float _beaconMaxDistance = 50;
 		[ProtoIgnore]
