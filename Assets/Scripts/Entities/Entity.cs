@@ -32,7 +32,7 @@ namespace Game.Entities
 		/// <param name="name">Inner and public name of the object</param>
 		/// <param name="type">Type of the object</param>
 		/// <param name="area">Coordinates of the area that the object occupies</param>
-		public void Initialize(Name name, string type, Rectangle? area)
+		public vo	id Initialize(Name name, string type, Rectangle? area)
 		{
 			base.Initialize(name, area);
 			_sounds["navigation"] = "SonarLoop";

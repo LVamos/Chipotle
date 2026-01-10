@@ -128,7 +128,7 @@ namespace Game
 		/// <summary>
 		/// Current version of the game
 		/// </summary>
-		public static string Version = "v0.21 alfa";
+		public static string Version = "v0.22 alfa";
 
 		/// <summary>
 		/// Sends an e-mail message to my Gmail account.
