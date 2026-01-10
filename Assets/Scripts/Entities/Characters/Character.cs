@@ -255,7 +255,6 @@ namespace Game.Entities.Characters
 			Area = position;
 			transform.position = Center.ToVector3(1.8f);
 			_zone = zone.Name.Indexed;
-
 		}
 
 		/// <summary>

@@ -37,6 +37,12 @@ namespace Game.Entities.Characters.Chipotle
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleSound : Sound
 	{
+		private void Update()
+		{
+			if (_footStep != null && _footStep.isPlaying)
+				SnapFootstepToListener();
+		}
+
 		private void OnSayNavigatedObjectLocationResult(SayNavigatedObjectLocationResult message)
 		{
 			if (message.NoNavigatedObjects)
@@ -47,11 +53,8 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void InitFootStepSource()
 		{
-			GameObject go = new GameObject("FootstepSource");
-			go.transform.SetParent(Camera.main.gameObject.transform, false);
-			go.transform.localPosition = Vector3.zero;
-
-			_footStep = go.AddComponent<AudioSource>();
+			GameObject obj = new GameObject("FootstepSource");
+			_footStep = obj.AddComponent<AudioSource>();
 			_footStep.spatialBlend = 1f;   // 3D
 			_footStep.dopplerLevel = 0f;
 			_footStep.playOnAwake = false;
@@ -59,7 +62,7 @@ namespace Game.Entities.Characters.Chipotle
 			_footStep.spatializePostEffects = false;
 			_footStep.outputAudioMixerGroup = Sounds.ResonanceGroup;
 
-			ResonanceAudioSource resonance = go.AddComponent<ResonanceAudioSource>();
+			ResonanceAudioSource resonance = obj.AddComponent<ResonanceAudioSource>();
 			resonance.nearFieldEffectEnabled = true;
 			resonance.occlusionEnabled = true;
 		}
@@ -78,9 +81,16 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			string sound = GetStepSoundName(position);
 			AudioClip clip = Sounds.GetClip(sound);
+			SnapFootstepToListener();
 			_footStep.PlayOneShot(clip, _walkVolume);
 
 			AnnounceWall(position);
+		}
+
+		private void SnapFootstepToListener()
+		{
+			Vector3 position3d = Camera.main.transform.position;
+			_footStep.transform.position = new Vector3(position3d.x, 1, position3d.z);
 		}
 
 		public void OnSaySize(SaySize message)
