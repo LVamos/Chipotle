@@ -357,13 +357,20 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the CutsceneBegan message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnSayOrientation(SayOrientation message) => SayOrientation();
+		protected void OnSayOrientation(SayOrientation message)
+		{
+			SayOrientation(Owner.Orientation);
+		}
 
 		/// <summary>
 		/// Reports the current orientation of the Detective Chipotle NPC using a screen reader or
 		/// voice synthesizer..
 		/// </summary>
-		protected void SayOrientation() => Tolk.Output(Owner.Orientation.Angle.GetCardinalDirection().GetDescription(), true);
+		protected void SayOrientation(Orientation2D orientation)
+		{
+			string description = orientation.Angle.GetCardinalDirection().GetDescription();
+			Tolk.Output(description, true);
+		}
 
 		NavigableExitDescriber _exitDescriber;
 		private NavigableItemDescriber _itemDescriber;
@@ -424,7 +431,7 @@ namespace Game.Entities.Characters.Chipotle
 			Camera.main.transform.Rotate(0, (float)(source - target), 0);
 
 			if (message.Announce)
-				SayOrientation();
+				SayOrientation(message.Target);
 		}
 
 		private Vector2 _playerPosition => Owner.Area.Value.Center;
