@@ -28,6 +28,24 @@ namespace Game.Entities.Characters
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Character : Entity
 	{
+		protected override bool ShouldNavigationContinue()
+		{
+			float distance = GetDistanceToPlayer();
+			bool playerInAccessibleZone = World.Player.IsInAccessibleZone(Zone);
+			return distance > 1 && playerInAccessibleZone;
+
+		}
+
+
+		public bool IsInAccessibleZone(Zone zone)
+		{
+			Zone charactersZone = Zone;
+
+			return charactersZone.IsAccessible(zone)
+				&& charactersZone.HasPath(zone);
+		}
+
+
 		private void OnPlaceItemResult(PlaceItemResult message)
 		{
 			if (message.Success)

@@ -144,7 +144,12 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="zone">The target zone</param>
 		/// <returns>True if there's a way between this loclaity and the specified zone</returns>
-		public bool IsAccessible(Zone zone) => GetAccessibleZones().Contains(zone);
+		public bool IsAccessible(Zone zone)
+		{
+			if (zone == this)
+				return true;
+			return GetAccessibleZones().Contains(zone);
+		}
 
 		/// <summary>
 		/// Checks if the specified zone is next to this zone.

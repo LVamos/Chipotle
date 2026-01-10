@@ -209,7 +209,7 @@ namespace Game.Terrain
 			StartNavigation();
 		}
 
-		protected bool ShouldNavigationContinue()
+		protected virtual bool ShouldNavigationContinue()
 		{
 			float distance = GetDistanceToPlayer();
 			bool playerInHere = SameZone(World.Player);

@@ -747,6 +747,23 @@ namespace Game
 		/// <param name="point">The point whose surrounding is to be searched</param>
 		/// <param name="maxDistance">Max allowed distance from the specified point</param>
 		/// <returns>Enumeration of doors</returns>
+		public static IEnumerable<Character> GetNearestCharacters(Vector2 point, float maxDistance)
+		{
+			IEnumerable<Character> result =
+							from character in _characters.Values
+							let distance = character.Area.Value.GetDistanceFrom(point)
+							where distance <= maxDistance
+							orderby distance
+							select character;
+			return result;
+		}
+
+		/// <summary>
+		/// Enumerates nearest doors around the specified point sorted by distance.
+		/// </summary>
+		/// <param name="point">The point whose surrounding is to be searched</param>
+		/// <param name="maxDistance">Max allowed distance from the specified point</param>
+		/// <returns>Enumeration of doors</returns>
 		public static IEnumerable<Door> GetNearestDoors(Vector2 point, float maxDistance)
 		{
 			IEnumerable<Door> doors = GetNearestPassages(point).OfType<Door>();
@@ -757,6 +774,7 @@ namespace Game
 							select door;
 			return result;
 		}
+
 		/// <summary>
 		/// searches for a simple game object by name.
 		/// </summary>

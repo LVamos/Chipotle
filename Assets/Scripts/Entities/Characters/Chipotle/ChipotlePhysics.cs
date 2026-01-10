@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 using static UnityEngine.GraphicsBuffer;
 
@@ -416,12 +417,13 @@ namespace Game.Entities.Characters.Chipotle
 
 		private List<NavigableCharacterInfo> GetNavigableCharacters()
 		{
-			IEnumerable<Character> characters = Zone.Characters
-				.Where(c => c != Owner);
+			Zone playersZone = Zone;
+			List<Character> characters = World.GetNearestCharacters(Center, _navigableObjectsRadius)
+				.Where(c => c != Owner && c.IsInAccessibleZone(playersZone))
+				.ToList();
 			List<NavigableCharacterInfo> info = characters
 				.Select(GetNavigableCharacterInfo)
 				.ToList();
-
 			return info;
 		}
 
