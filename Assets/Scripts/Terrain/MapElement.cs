@@ -38,7 +38,6 @@ namespace Game.Terrain
 		protected MessagingObject[] _components;
 
 		public Vector2 Center { get => _area.Value.Center; }
-		private const float _navigationVolume = 1;
 		private const float _beaconMinDistance = .6f;
 		private const float _beaconMaxDistance = 50;
 		[ProtoIgnore]
@@ -180,7 +179,7 @@ namespace Game.Terrain
 		{
 			Vector3 position = GetBeaconPosition();
 			string sound = _sounds["navigation"];
-			_navigationAudio = Sounds.Play(sound, position, _navigationVolume, loop);
+			_navigationAudio = Sounds.Play(sound, position, Settings.BeaconVolume, loop);
 			_navigationAudio.maxDistance = _beaconMaxDistance;
 			_navigationAudio.minDistance = _beaconMinDistance;
 			_navigationAudio.rolloffMode = _beaconRolloffMode;
@@ -255,7 +254,7 @@ namespace Game.Terrain
 		{
 				string sound = "SonarTurnedOff";
 				Vector3 position = GetBeaconPosition();
-				Sounds.Play(sound, position, _navigationVolume);
+				Sounds.Play(sound, position, Settings.BeaconVolume);
 
 			if (_navigationAudio == null)
 				return;

@@ -8,6 +8,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
+using UnityEditor;
+
 using UnityEngine;
 
 namespace Game.UI
@@ -31,11 +33,6 @@ namespace Game.UI
 			SetUpAudioSource(_menuLoopAudio, _menuLoopSound, true);
 			SetUpAudioSource(_speakerTestAudio, _speakerTestSound);
 		}
-
-		/// <summary>
-		/// Default volume for the menu loop
-		/// </summary>
-		private const float _loopVolume = .4f;
 
 		private bool _menuInactive;		
 
@@ -181,7 +178,7 @@ namespace Game.UI
 				yield break;
 
 			Sounds.SlideVolume(_menuLoopAudio, .2f, 0, true);
-			_endJingleSource = Play(_endSound,_loopVolume);
+			_endJingleSource = Play(_endSound,Settings.MenuMusicVolume);
 			yield return WaitForSound(_endJingleSource, endTrim);
 		}
 
@@ -194,7 +191,7 @@ namespace Game.UI
 				return;
 
 			if (!_menuLoopAudio.IsPlaying())
-				_menuLoopAudio = Sounds.Play2d("MainMenuLoop", _loopVolume, true);
+				_menuLoopAudio = Sounds.Play2d("MainMenuLoop", Settings.MenuMusicVolume, true);
 		}
 
 		/// <summary>

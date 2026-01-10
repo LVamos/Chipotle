@@ -15,6 +15,8 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float BeaconVolume = 1;
+		public static float MenuMusicVolume = .4f;
 		public static int PlayerAcceleration = 1;
 		public static float PortalMinDistance = .5f;
 		public static float PortalMaxDistance = 19;
