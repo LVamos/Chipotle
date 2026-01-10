@@ -193,7 +193,7 @@ namespace Game
 		/// Path to data folder
 		/// </summary>
 		public static readonly string DataPath = "Data";
-		public static readonly string LogPath = @"Assets\Resources\Data\Logs\log.html";
+		public static readonly string LogPath = Path.Combine(Application.persistentDataPath, "log.html");
 
 		/// <summary>
 		/// Path to file used for serialization.

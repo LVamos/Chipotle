@@ -435,11 +435,15 @@ namespace Game.Debug
 
 		private void LoadWalkablePoints()
 		{
-			string path = Path.Combine(MainScript.DebugPath, _walkablePointsPath);
-			Dictionary<string, List<float[]>> raw = null;
-			YamlHelper.LoadFromFile(path, out raw);
-			_walkablePoints = raw.ToDictionary(k => k.Key, v => v.Value.Select(p => new Vector2(p[0], p[1])).ToList());
-		}
+			try
+			{
+				string path = Path.Combine(MainScript.DebugPath, _walkablePointsPath);
+				Dictionary<string, List<float[]>> raw = null;
+				YamlHelper.LoadFromFile(path, out raw);
+				_walkablePoints = raw.ToDictionary(k => k.Key, v => v.Value.Select(p => new Vector2(p[0], p[1])).ToList());
+			}
+			catch (Exception){}
+					}
 
 		/// <summary>
 		/// Opens a menu with all zones and jumps to the nearest walkable position in the selected zone.

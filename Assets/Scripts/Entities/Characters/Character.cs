@@ -253,7 +253,7 @@ namespace Game.Entities.Characters
 		private void SetPosition(Rectangle position, Zone zone)
 		{
 			Area = position;
-			transform.position = Center.ToVector3(2);
+			transform.position = Center.ToVector3(1.8f);
 			_zone = zone.Name.Indexed;
 
 		}
