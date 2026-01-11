@@ -370,7 +370,7 @@ namespace Game
 		/// <returns>The corresponding obstacle type</returns>
 		public static ObstacleType DetectOcclusion(MapElement emmittingObject, bool ignoreSubtleObjects = true, bool ignoreItems = true)
 		{
-			Vector2 playerCenter = Player.Area.Value.Center;
+			Vector2 playerCenter = Player.Center;
 			Vector2 closestPoint = emmittingObject.Area.Value.GetClosestPoint(playerCenter);
 
 			Rectangle ray = Rectangle.FromCenter(closestPoint, .1f, .1f, false);

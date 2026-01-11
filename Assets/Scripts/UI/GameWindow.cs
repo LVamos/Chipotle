@@ -2,6 +2,8 @@
 using Assets.Scripts.Models;
 using Assets.Scripts.Narration.WorldDescribers;
 
+using DavyKager;
+
 using Game.Controls;
 using Game.Controls.Keyboard;
 using Game.Entities;
@@ -87,6 +89,11 @@ namespace Game.UI
 
 		private void HandleGameMenu(List<List<string>> items, int option, MessagingObject initiator)
 		{
+			if(option==-1)
+			{
+				Tolk.Speak("hra");
+				return;
+			}
 			string optionDescription = items[option][0];
 			string optionId = _gameMenuOptions[optionDescription];
 			GameMenuOptionselected message = new(this, optionId);
