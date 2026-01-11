@@ -2,6 +2,7 @@
 
 using Game.Audio;
 using Game.Entities;
+using Game.Entities.Characters;
 using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Commands.GameInfo;
@@ -210,11 +211,16 @@ namespace Game.Terrain
 			StartNavigation();
 		}
 
-		protected virtual bool ShouldNavigationContinue()
+		protected bool PlayerNearBy()
 		{
 			float distance = GetDistanceToPlayer();
-			bool playerInHere = SameZone(World.Player);
-			return distance > 1 && playerInHere;
+			return distance <= Settings.NearPlayerThreshold;
+		}
+
+		protected virtual bool ShouldNavigationContinue()
+		{
+			Character player = World.Player;
+			return !PlayerNearBy() && IsInAccessibleZone(player);
 		}
 
 		/// <summary>
@@ -226,7 +232,10 @@ namespace Game.Terrain
 				return;
 
 			if (!ShouldNavigationContinue())
-				StopNavigation(true);
+			{
+				bool reachedByPlayer = PlayerNearBy();
+				StopNavigation(reachedByPlayer);
+			}
 		}
 
 		/// <summary>
@@ -262,7 +271,6 @@ namespace Game.Terrain
 			}
 
 			_navigationAudio.loop = false;
-			Sounds.SlideVolume(_navigationAudio, .2f, 0);
 			_navigationAudio = null;
 			_navigating = false;
 
@@ -386,6 +394,23 @@ namespace Game.Terrain
 				 if (c != message.Sender || message is Reloaded)
 					c.TakeMessage(message);
 			}
+		}
+
+
+		public bool IsInAccessibleZone(MapElement element)
+		{
+			List<Zone> zones = element.Area.Value.GetZones().ToList();
+			List<Zone> myZones = Area.Value.GetZones().ToList();
+
+			foreach (Zone myZone in myZones)
+			{
+				foreach (Zone zone in zones)
+				{
+					if (!myZone.IsAccessible(zone) || !myZone.HasPath(zone))
+						return false;
+				}
+			}
+			return true;
 		}
 	}
 }

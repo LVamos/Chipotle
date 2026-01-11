@@ -15,6 +15,7 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float NearPlayerThreshold = 1;
 		public static float BeaconVolume = 1;
 		public static float MenuMusicVolume = .4f;
 		public static int PlayerAcceleration = 1;

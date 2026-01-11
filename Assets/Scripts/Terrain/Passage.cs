@@ -1,4 +1,5 @@
 ﻿using Game.Entities;
+using Game.Entities.Characters;
 using Game.Messaging.Events.Movement;
 using Game.Models;
 
@@ -21,6 +22,13 @@ namespace Game.Terrain
 	[ProtoInclude(100, typeof(Door))]
 	public class Passage : MapElement
 	{
+		protected override bool ShouldNavigationContinue()
+		{
+			Character player = World.Player;
+			bool playerInHere = SameZone(player);
+			return !PlayerNearBy() && playerInHere;
+		}
+
 		public bool Open { get => State == PassageState.Open; }
 
 		public HashSet<Vector2> GetPointsOfZone(Zone zone)
