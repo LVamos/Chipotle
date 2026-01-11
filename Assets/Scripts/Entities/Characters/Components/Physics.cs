@@ -1313,5 +1313,74 @@ Rectangle.FromCenter(Center, width, height)
 			float width = _area.Value.Width;
 			return Mathf.Max(height, width) * .5f;
 		}
+
+		/// <summary>
+		/// Returns text descriptions of the specified exits including distance and position.
+		/// </summary>
+		/// <returns>A string array</returns>
+		protected List<NavigableExitInfo> GetNavigableExits()
+		{
+			List<Passage> exits =
+				Zone.GetNearestExits(Center);
+			List<NavigableExitInfo> info = exits
+				.Select(e => GetNavigableExitInfo(e))
+				.ToList();
+
+			return info;
+		}
+
+		protected NavigableExitInfo GetNavigableExitInfo(Passage exit)
+		{
+			float distance = World.GetDistance(Owner, exit);
+			float angle = GetAngle(exit.Area.Value);
+			Zone targetZone = exit.AnotherZone(Zone);
+			NavigableExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner);
+			return info;
+		}
+
+		protected NavigableCharacterInfo GetNavigableCharacterInfo(Character character)
+		{
+			float distance = World.GetDistance(Owner, character);
+			float angle = GetAngle(character.Area.Value);
+			NavigableCharacterInfo info = new(distance, character, angle, _stepLength, Owner);
+			return info;
+		}
+
+
+		protected List<NavigableCharacterInfo> GetNavigableCharacters()
+		{
+			Zone playersZone = Zone;
+			List<Character> characters = World.GetNearestCharacters(Center, _navigableObjectsRadius)
+				.Where(c => c != Owner && c.IsInAccessibleZone(playersZone))
+				.ToList();
+			List<NavigableCharacterInfo> info = characters
+				.Select(GetNavigableCharacterInfo)
+				.ToList();
+			return info;
+		}
+
+		protected NavigableItemInfo GetNavigableItemInfo(Item item)
+		{
+			string name = item.Name.Friendly;
+			if (Settings.SayInnerItemNames)
+				name += " " + item.Name.Indexed;
+			float distance = World.GetDistance(Owner, item);
+			float angle = GetAngle(item.Area.Value);
+			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner);
+			return info;
+		}
+
+		/// <summary>
+		/// Returns information about all navigable objects from current zone in the specified radius around the NPC.
+		/// </summary>
+		/// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
+		protected List<NavigableItemInfo> GetNavigableItems()
+		{
+			List<Item> items = Zone.GetNearByItems(Center, _navigableObjectsRadius).ToList();
+			return 
+				items
+				.Select(GetNavigableItemInfo)
+				.ToList();
+		}
 	}
 }

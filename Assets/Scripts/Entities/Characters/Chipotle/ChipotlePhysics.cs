@@ -414,19 +414,6 @@ namespace Game.Entities.Characters.Chipotle
 			return $"{steps} kroků";
 		}
 
-
-		private List<NavigableCharacterInfo> GetNavigableCharacters()
-		{
-			Zone playersZone = Zone;
-			List<Character> characters = World.GetNearestCharacters(Center, _navigableObjectsRadius)
-				.Where(c => c != Owner && c.IsInAccessibleZone(playersZone))
-				.ToList();
-			List<NavigableCharacterInfo> info = characters
-				.Select(GetNavigableCharacterInfo)
-				.ToList();
-			return info;
-		}
-
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
@@ -700,7 +687,10 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the SayExits message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnSayExits(SayExits message) => SayExits();
+		protected void OnSayExits(SayExits message)
+		{
+			SayExits();
+		}
 
 		/// <summary>
 		/// Processes the SayNavigatedObjectLocation message.
@@ -766,39 +756,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 		}
 
-		protected NavigableExitInfo GetNavigableExitInfo(Passage exit)
-		{
-			float distance = World.GetDistance(Owner, exit);
-			float angle = GetAngle(exit.Area.Value);
-			Zone targetZone = exit.AnotherZone(Zone);
-			NavigableExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner);
-			return info;
-		}
-
-		protected NavigableCharacterInfo GetNavigableCharacterInfo(Character character)
-		{
-			float distance = World.GetDistance(Owner, character);
-			float angle = GetAngle(character.Area.Value);
-			NavigableCharacterInfo info = new(distance, character, angle, _stepLength, Owner);
-			return info;
-		}
-
 		private string GetExitDestination(Passage exit) => $"{exit.AnotherZone(Zone).To} ";
-
-		/// <summary>
-		/// Returns text descriptions of the specified exits including distance and position.
-		/// </summary>
-		/// <returns>A string array</returns>
-		private List<NavigableExitInfo> GetNavigableExits()
-		{
-			List<Passage> exits =
-				Zone.GetNearestExits(Center);
-			List<NavigableExitInfo> info = exits
-				.Select(e => GetNavigableExitInfo(e))
-				.ToList();
-
-			return info;
-		}
 
 		/// <summary>
 		/// Checks if the NPC sits and sets appropriate fields.
@@ -1130,30 +1088,6 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			_carMovement = message;
 			Zone.TakeMessage(message, true);
-		}
-
-		/// <summary>
-		/// Returns information about all navigable objects from current zone in the specified radius around the NPC.
-		/// </summary>
-		/// <returns>Tuple with an object list and text descriptions including distance and position of each object</returns>
-		protected List<NavigableItemInfo> GetNavigableItems()
-		{
-			List<Item> items = Zone.GetNearByItems(Center, _navigableObjectsRadius).ToList();
-			return 
-				items
-				.Select(GetNavigableItemInfo)
-				.ToList();
-		}
-
-		private NavigableItemInfo GetNavigableItemInfo(Item item)
-		{
-			string name = item.Name.Friendly;
-			if (Settings.SayInnerItemNames)
-				name += " " + item.Name.Indexed;
-			float distance = World.GetDistance(Owner, item);
-			float angle = GetAngle(item.Area.Value);
-			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner);
-			return info;
 		}
 
 		/// <summary>
