@@ -133,6 +133,8 @@ namespace Game.Entities.Characters.Chipotle
 
 			switch (message)
 			{
+				case NavigationStopped m:
+					OnNavigationStopped(m);break;
 				case SayNavigatedObjectLocationResult m:
 					OnSayNavigatedObjectLocationResult(m);break;
 				case LeftBycar m: OnLeftBycar(m); break;
@@ -164,6 +166,12 @@ namespace Game.Entities.Characters.Chipotle
 				case TerrainCollided tcl: OnTerrainCollided(tcl); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		private void OnNavigationStopped(NavigationStopped message)
+		{
+			if (message.TargetReached)
+				Tolk.Output("Jsi u cíle.");
 		}
 
 		private void OnLeftBycar(LeftBycar m)

@@ -1,4 +1,6 @@
-﻿using Game.Audio;
+﻿using DavyKager;
+
+using Game.Audio;
 using Game.Entities;
 using Game.Messaging;
 using Game.Messaging.Commands;
@@ -163,7 +165,7 @@ namespace Game.Terrain
 
 			if (!keepNavigating)
 			{
-				StopNavigation();
+				StopNavigation(true);
 				return;
 			}
 
@@ -224,7 +226,7 @@ namespace Game.Terrain
 				return;
 
 			if (!ShouldNavigationContinue())
-				StopNavigation();
+				StopNavigation(true);
 		}
 
 		/// <summary>
@@ -250,21 +252,23 @@ namespace Game.Terrain
 		/// <summary>
 		/// Stops the sound navigation.
 		/// </summary>
-		protected void StopNavigation()
+		protected void StopNavigation(bool hasBeenReached=false)
 		{
+			if(!hasBeenReached)
+			{
 				string sound = "SonarTurnedOff";
 				Vector3 position = GetBeaconPosition();
 				Sounds.Play(sound, position, Settings.BeaconVolume);
-
-			if (_navigationAudio == null)
-				return;
+			}
 
 			_navigationAudio.loop = false;
 			Sounds.SlideVolume(_navigationAudio, .2f, 0);
 			_navigationAudio = null;
-
 			_navigating = false;
-			World.Player.TakeMessage(new NavigationStopped(this));
+
+			// Inform player
+			NavigationStopped message = new(this,hasBeenReached);
+			World.Player.TakeMessage(message);
 		}
 
 		/// <summary>

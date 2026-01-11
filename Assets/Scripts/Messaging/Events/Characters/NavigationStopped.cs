@@ -8,10 +8,15 @@ namespace Game.Messaging.Events.Characters
 	[Serializable]
 	public class NavigationStopped : Message
 	{
+		public bool TargetReached;
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
-		public NavigationStopped(object sender) : base(sender) { }
+		public NavigationStopped(object sender, bool targetReached) : base(sender) 
+		{
+			TargetReached = targetReached;
+		}
 	}
 }
