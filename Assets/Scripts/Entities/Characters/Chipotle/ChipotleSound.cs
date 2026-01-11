@@ -46,7 +46,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnSayNavigatedObjectLocationResult(SayNavigatedObjectLocationResult message)
 		{
 			if (message.NoNavigatedObjects)
-				Sounds.Play2d("error");
+				Tolk.Speak("Nevybral jsi cíl.");
 		}
 
 		protected AudioSource _footStep;
