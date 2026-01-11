@@ -142,12 +142,23 @@ namespace Game.Entities.Characters.Components
 		protected virtual IEnumerable<Entity> GetItemsAndCharactersBefore(float radius)
 		{
 			Vector2 direction = GetStepDirection();
-			CollisionsModel collisions = World.DetectCollisionsOnTrack(new() { Owner }, _area.Value, direction, radius);
-			return collisions == null || collisions.Obstacles == null
-				? null
-				: collisions.Obstacles
+			List<MapElement> ignoredElements = new() { Owner };
+			Rectangle area = _area.Value;
+			area = area.Extend(.5f);
+			CollisionsModel collisions = World.DetectCollisionsOnTrack(ignoredElements, area, direction, radius);
+
+			if (collisions == null || collisions.Obstacles==null)
+				return null;
+
+			IEnumerable<Entity> obstacles = collisions.Obstacles
 				.OfType<Entity>()
-				.Select(o => o as Entity);
+				.Cast<Entity>()
+				.ToList();
+
+			obstacles = obstacles
+				.Where(o => GetAngle(o.Area.Value.GetClosestPoint(Center)) <= 45)
+				.ToList();
+			return obstacles.ToList();
 		}
 
 		/// <summary>
@@ -694,9 +705,8 @@ namespace Game.Entities.Characters.Components
 				: _doorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
 
 			Vector2 finalDirection = direction ?? GetStepDirection();
-			const float epsilon = 0.1f; // epsilon for float angle comparison
 			List<Door> doors = World.GetNearestDoors(Center, radius)
-				.Where(d => AngleAllowed(d, finalDirection, epsilon))
+				.Where(d => AngleAllowed(d, finalDirection))
 				.ToList();
 
 			if (leadingTo != null)
@@ -705,7 +715,12 @@ namespace Game.Entities.Characters.Components
 
 			return doors.FirstOrDefault();
 
-			bool AngleAllowed(Door door, Vector2 direction, float epsilon) => Math.Abs(GetAngle(door.Area.Value, direction)) < epsilon;
+			bool AngleAllowed(Door door, Vector2 direction)
+			{
+				const float epsilon = 45; // epsilon for float angle comparison
+				float angle = Math.Abs(GetAngle(door.Area.Value, direction));
+				return angle < epsilon || angle >=360-epsilon;
+			}
 		}
 
 		/// <summary>

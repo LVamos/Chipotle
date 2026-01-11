@@ -556,7 +556,7 @@ namespace Game.Terrain
 		/// Extends the plane to all directions by the specified amount of units in all directions.
 		/// </summary>
 		/// <param name="units">Amount of the units by which the rectangle is extended</param>
-		public void Extend(float distance = 1)
+		public Rectangle Extend(float distance = 1)
 		{
 			UpperLeftCorner = new Vector2(
 				UpperLeftCorner.x - distance,
@@ -567,6 +567,8 @@ namespace Game.Terrain
 				LowerRightCorner.x + distance,
 				LowerRightCorner.y - distance
 			);
+
+			return new Rectangle(UpperLeftCorner, LowerRightCorner);
 		}
 
 		/// <summary>
