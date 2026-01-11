@@ -587,6 +587,18 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="point">The point from which the distance is to be calculated</param>
 		/// <returns>The distance between the default point and the plane</returns>
+		public float GetSquareDistanceFrom(Vector2 point)
+		{
+			Vector2 closestPoint = GetClosestPoint(point);
+			return World.GetSquareDistance(closestPoint, point);
+		}
+
+
+		/// <summary>
+		/// Returns distance between the plane and the default point.
+		/// </summary>
+		/// <param name="point">The point from which the distance is to be calculated</param>
+		/// <returns>The distance between the default point and the plane</returns>
 		public float GetDistanceFrom(Vector2 point)
 		{
 			Vector2 closestPoint = GetClosestPoint(point);

@@ -687,22 +687,25 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Returns the nearest door in front of the NPC.
 		/// </summary>
-		/// <returns>A door</returns>
 		protected Door GetDoorBefore(Vector2? direction = null, bool inOneStep = false, Zone leadingTo = null)
 		{
-			float radius = inOneStep ? _stepLength : _doorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
-			Vector2 finalDirection = direction != null ? direction.Value : GetStepDirection();
+			float radius = inOneStep
+				? _stepLength
+				: _doorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
 
+			Vector2 finalDirection = direction ?? GetStepDirection();
+			const float epsilon = 0.1f; // epsilon for float angle comparison
 			List<Door> doors = World.GetNearestDoors(Center, radius)
-					.Where(d => GetAngle(d.Area.Value, finalDirection) == 0)
-					.ToList();
+				.Where(d => AngleAllowed(d, finalDirection, epsilon))
+				.ToList();
 
 			if (leadingTo != null)
 				doors = doors.Where(d => d.LeadsTo(leadingTo))
-					.ToList();
+							 .ToList();
 
-			Door door = doors.FirstOrDefault();
-			return door;
+			return doors.FirstOrDefault();
+
+			bool AngleAllowed(Door door, Vector2 direction, float epsilon) => Math.Abs(GetAngle(door.Area.Value, direction)) < epsilon;
 		}
 
 		/// <summary>

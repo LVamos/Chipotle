@@ -560,6 +560,22 @@ namespace Game
 		public static float GetDistance(Vector2 a, Vector2 b) => Vector2.Distance(a, b);
 
 		/// <summary>
+		/// Checks if the squared distance between two points is less than or equal to a given distance.
+		/// </summary>
+		public static bool IsWithinDistance(Vector2 a, Vector2 b, float distance)
+		{
+			float squaredDistance = GetSquareDistance(a, b);
+			return squaredDistance <= distance * distance;
+		}
+
+		public static float GetSquareDistance(Vector2 a, Vector2 b)
+		{
+			Vector2 delta = a - b;
+			return delta.sqrMagnitude;  // dx*dx + dy*dy
+
+		}
+
+		/// <summary>
 		/// Computes cartesian distance between two 3d points.
 		/// </summary>
 		/// <param name="a">First point</param>
@@ -764,15 +780,17 @@ namespace Game
 		/// <param name="point">The point whose surrounding is to be searched</param>
 		/// <param name="maxDistance">Max allowed distance from the specified point</param>
 		/// <returns>Enumeration of doors</returns>
-		public static IEnumerable<Door> GetNearestDoors(Vector2 point, float maxDistance)
+		public static List<Door> GetNearestDoors(Vector2 point, float maxDistance)
 		{
-			IEnumerable<Door> doors = GetNearestPassages(point).OfType<Door>();
+			List<Door> doors = GetNearestPassages(point)
+				.OfType<Door>()
+				.ToList();
 			IEnumerable<Door> result =
 							from door in doors
 							let distance = door.Area.Value.GetDistanceFrom(point)
 							where distance <= maxDistance
 							select door;
-			return result;
+			return result.ToList();
 		}
 
 		/// <summary>
