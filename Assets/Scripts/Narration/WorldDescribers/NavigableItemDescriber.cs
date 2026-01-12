@@ -40,7 +40,11 @@ List<NavigableItemInfo> info = 				records
 		{
 			NavigableItemInfo info = record as NavigableItemInfo;
 			string distanceDescription = GetDistanceDescription(info);
-			string angleDescription = Angle.GetClockDirection(info.Angle);
+			string angleDescription;
+			if (info.IntersectsWithCharacter)
+				angleDescription = "tady";
+			else angleDescription = Angle.GetClockDirection(info.Angle);
+
 			string name = info.Item.Name.Friendly;
 			if (Settings.SayInnerItemNames)
 				name += " " + info.Item.Name.Indexed;
