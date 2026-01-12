@@ -41,6 +41,8 @@ namespace Game.Entities.Items
 	[ProtoInclude(111, typeof(VanillaCrunchCar))]
 	public class Item : Entity
 	{
+		public bool Passable { get; protected set; }
+
 		private void UpdatePortals()
 		{
 			if (_portals == null)
@@ -499,7 +501,7 @@ namespace Game.Entities.Items
 		/// <remarks>
 		/// The type parameter allows assigning objects with some special behavior to proper classes.
 		/// </remarks>
-		public virtual void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
+		public virtual void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable,  bool passable = false, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
 		{
 			base.Initialize(name, type, area);
 			HeldBy = null;
@@ -520,6 +522,7 @@ namespace Game.Entities.Items
 			Decorative = decorative;
 			Usable = usable;
 			_pickable = pickable;
+			Passable = passable;
 			_usableOnce = usableOnce;
 			_cutscene = cutscene;
 			_audibleOverWalls = audibleOverWalls;

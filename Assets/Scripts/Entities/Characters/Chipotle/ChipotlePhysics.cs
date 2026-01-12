@@ -1441,18 +1441,26 @@ namespace Game.Entities.Characters.Chipotle
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
+			// Filter out passable items
+			List<object> obstacles = collisions.Obstacles
+				.Where(o => o is not Item
+				|| (o is Item i && !i.Passable))
+				.ToList();
+			if(obstacles.IsNullOrEmpty())
+				return false;
+
 			_walking = false;
 			_startWalkMessage = null;
 
 			if (collisions.OutOfMap)
 				LogOutOfMapAttempt(_area.Value.Center);
-			if (collisions.Obstacles != null)
+			if (obstacles != null)
 			{
 				Door doorInWay = GetDoorBefore(direction, false);
 				if (doorInWay is { Open: true } && SlipThroughDoor(doorInWay))
 					return false;
 
-				HandleCollisions(collisions.Obstacles);
+				HandleCollisions(obstacles);
 			}
 			return true;
 		}

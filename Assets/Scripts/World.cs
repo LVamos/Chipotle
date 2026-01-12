@@ -1049,7 +1049,7 @@ namespace Game
 
 		private static CutScenePlayer _cutScenePlayer;
 
-		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
 
 		private static List<XElement> _zoneNodes;
 
@@ -1196,12 +1196,13 @@ namespace Game
 				string type = GetAttribute(itemNode, "type");
 				bool decorative = GetAttribute(itemNode, "decorative").ToBool();
 				bool pickable = GetAttribute(itemNode, "pickable").ToBool();
+				bool passable = GetAttribute(itemNode, "passable")!=null;
 				bool usable = GetAttribute(itemNode, "usable").ToBool();
 
 				GameObject obj = null;
 				if (!itemObjects.TryGetValue(name.Indexed, out obj))
 					throw new InvalidOperationException($"No geometry found for the item {name.Indexed}");
-				Item item = ItemFactory.CreateItem(obj, name, area, type, decorative, pickable, usable);
+				Item item = ItemFactory.CreateItem(obj, name, area, type, decorative, pickable, usable,passable);
 				Add(item);
 			}
 		}

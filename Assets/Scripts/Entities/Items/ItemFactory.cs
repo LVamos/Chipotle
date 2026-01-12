@@ -80,7 +80,7 @@ namespace Assets.Scripts.Entities.Items
 		/// <param name="decorative">Specifies if the item is decorative.</param>
 		/// <param name="pickable">Specifies if the item is pickable.</param>
 		/// <param name="usable">Specifies if the item is usable.</param>
-		public static Item CreateItem(GameObject obj, Name name, Rectangle area, string type, bool decorative = false, bool pickable = false, bool usable = false)
+		public static Item CreateItem(GameObject obj, Name name, Rectangle area, string type, bool decorative = false, bool pickable = false, bool usable = false, bool passable = false)
 		{
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
@@ -92,7 +92,7 @@ namespace Assets.Scripts.Entities.Items
 			if (_types.TryGetValue(type, out Type itemType))
 			{
 				item = obj.GetComponent(itemType) as Item;
-				item.Initialize(name, area, type, decorative, pickable, usable);
+				item.Initialize(name, area, type, decorative, pickable, usable:usable, passable: passable);
 				return item;
 			}
 
@@ -107,6 +107,7 @@ namespace Assets.Scripts.Entities.Items
 					decorative,
 					pickable,
 					usable,
+					passable,
 					parameters.CollisionSound,
 					parameters.ActionSound,
 					parameters.LoopSound,
@@ -123,7 +124,7 @@ namespace Assets.Scripts.Entities.Items
 			}
 
 			item = obj.GetComponent<Item>() as Item;
-			item.Initialize(name, area, type, decorative, pickable, usable);
+			item.Initialize(name, area, type, decorative, pickable, usable,passable);
 			return item;
 		}
 	}
