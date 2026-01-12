@@ -263,6 +263,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
+				case TakeItem m: OnTakeItem(m); break;
 				case SayNavigatedObjectLocation m: OnSayNavigatedObjectLocation(m); break;
 				case CharacterMoved m: return;
 				case NavigateToExit m: OnNavigateToExit(m); break;
@@ -297,6 +298,13 @@ namespace Game.Entities.Characters.Chipotle
 				case Interact m: OnInteract(m); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		private void OnTakeItem(TakeItem message)
+		{
+			_inventory.Add(message.Item.Name.Indexed);
+			PickUpObjectResult newMessage = new(this,message.Item, PickUpObjectResult.ResultType.Success);
+			InnerMessage(newMessage);
 		}
 
 		private void OnNavigateToItem(NavigateToItem message)
@@ -431,7 +439,6 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			// Run the menu
-
 			List<Item> items =
 				(from itemName in _inventory
 				 let item = World.GetItem(itemName)
@@ -549,7 +556,7 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new SayExitsResult(this));
 				return;
 			}
-			
+
 			WindowHandler.ActiveWindow.TakeMessage(new SelectNavigableExit(Owner, exits)); // Run selection menu
 		}
 
@@ -568,7 +575,7 @@ namespace Game.Entities.Characters.Chipotle
 				_navigatedItem = null;
 			else if (message.Sender == _navigatedExit)
 				_navigatedExit = null;
-			else if(message.Sender == _navigatedCharacter)
+			else if (message.Sender == _navigatedCharacter)
 				_navigatedCharacter = null;
 		}
 
@@ -620,7 +627,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Checks if there's any navigation in progress.
 		/// </summary>
 		protected bool NavigationInProgress
-			=> _navigatedExit != null || _navigatedItem != null||_navigatedCharacter!=null;
+			=> _navigatedExit != null || _navigatedItem != null || _navigatedCharacter != null;
 
 		/// <summary>
 		/// Objectt to which tthe NPC is currently navigated.
@@ -716,12 +723,12 @@ namespace Game.Entities.Characters.Chipotle
 			if (_navigatedCharacter != null)
 			{
 				NavigableCharacterInfo characterInfo = GetNavigableCharacterInfo(_navigatedCharacter);
-				List<NavigableCharacterInfo> characters = new() { characterInfo};
+				List<NavigableCharacterInfo> characters = new() { characterInfo };
 				InnerMessage(new SayCharactersResult(this, characters));
 				return;
 			}
 
-			if (_navigatedItem!= null)
+			if (_navigatedItem != null)
 			{
 				NavigableItemInfo itemInfo = GetNavigableItemInfo(_navigatedItem);
 				List<NavigableItemInfo> items = new() { itemInfo };
@@ -729,13 +736,13 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			if(_navigatedExit!=null)
-			{ 
-			NavigableExitInfo exitInfo = GetNavigableExitInfo(_navigatedExit);
-			List<NavigableExitInfo> exits = new() { exitInfo };
-			InnerMessage(new SayExitsResult(this, exits));
-			return;
-		}
+			if (_navigatedExit != null)
+			{
+				NavigableExitInfo exitInfo = GetNavigableExitInfo(_navigatedExit);
+				List<NavigableExitInfo> exits = new() { exitInfo };
+				InnerMessage(new SayExitsResult(this, exits));
+				return;
+			}
 		}
 
 		/// <summary>
@@ -984,7 +991,7 @@ namespace Game.Entities.Characters.Chipotle
 				.Select(e => e.Type)
 				.Distinct();
 			if (types.Contains("zeď") && types.Count() > 1)
-				entityList = 
+				entityList =
 					entityList.Where(i => i.Type != "zeď")
 					.ToList();
 
@@ -1449,7 +1456,7 @@ namespace Game.Entities.Characters.Chipotle
 				.Where(o => o is not Item
 				|| (o is Item i && !i.Passable))
 				.ToList();
-			if(obstacles.IsNullOrEmpty())
+			if (obstacles.IsNullOrEmpty())
 				return false;
 
 			_walking = false;
