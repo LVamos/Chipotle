@@ -109,6 +109,10 @@ namespace Game.Terrain
 			get => _area == null ? (Rectangle?)null : new Rectangle(_area.Value);
 			protected set => SetArea(value);
 		}
+		/// <summary>
+		/// Indicates if the element can be used by an NPC.
+		/// </summary>
+		public bool Usable { get; protected set; }
 
 		/// <summary>
 		/// Sets value of the Area property.

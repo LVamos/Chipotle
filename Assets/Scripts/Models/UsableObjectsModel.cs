@@ -1,11 +1,12 @@
 ﻿using Game.Entities;
+using Game.Terrain;
 
 using System.Collections.Generic;
 
 namespace Game.Models
 {
 	/// <summary>
-	/// A model for PhysicsComponent.GetUsableItemsBefore.
+	/// A model for PhysicsComponent.GetUsableObjectsBefore.
 	/// </summary>
 	public class UsableObjectsModel
 	{
@@ -15,19 +16,19 @@ namespace Game.Models
 		public enum ResultType
 		{
 			/// <summary>
-			/// No item or characters before the NPC and in range
+			/// No objects before the NPC and in range
 			/// </summary>
 			NothingFound,
 			/// <summary>
-			/// Only unusable items or characters before the NPC
+			/// Only unusable objects before the NPC
 			/// </summary>
 			Unusable,
 			/// <summary>
-			/// Usable items or characters before the NPC
+			/// Usable objects before the NPC
 			/// </summary>
 			Success,
 			/// <summary>
-			/// Unreachable items or characters before the NPC
+			/// Unreachable objects before the NPC
 			/// </summary>
 			Far
 		};
@@ -35,7 +36,7 @@ namespace Game.Models
 		/// <summary>
 		/// Usable items before the NPC.
 		/// </summary>
-		public readonly List<Entity> Objects;
+		public readonly List<MapElement> Objects;
 
 		/// <summary>
 		/// Result of the search
@@ -47,7 +48,7 @@ namespace Game.Models
 		/// </summary>
 		/// <param name="objects">The list of items and characters.</param>
 		/// <param name="result">Result of the action</param>
-		public UsableObjectsModel(List<Entity> objects = null, ResultType result = ResultType.NothingFound)
+		public UsableObjectsModel(List<MapElement> objects = null, ResultType result = ResultType.NothingFound)
 		{
 			Objects = objects;
 			Result = result;

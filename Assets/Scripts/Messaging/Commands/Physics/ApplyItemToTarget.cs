@@ -1,5 +1,6 @@
 ﻿using Game.Entities;
 using Game.Entities.Items;
+using Game.Terrain;
 
 using System;
 
@@ -20,7 +21,7 @@ namespace Game.Messaging.Commands.Physics
 		/// <summary>
 		/// The target item or character.
 		/// </summary>
-		public readonly Entity Target;
+		public readonly MapElement Target;
 
 		/// <summary>
 		/// Constructor
@@ -28,7 +29,7 @@ namespace Game.Messaging.Commands.Physics
 		/// <param name="sender">Sende of the message</param>
 		/// <param name="itemToUse">The item to be used</param>
 		/// <param name="target">The target item or character</param>
-		public ApplyItemToTarget(object sender, Item itemToUse, Entity target = null) : base(sender)
+		public ApplyItemToTarget(object sender, Item itemToUse, MapElement target = null) : base(sender)
 		{
 			ItemToUse = itemToUse ?? throw new ArgumentNullException(nameof(itemToUse));
 			Target = target;

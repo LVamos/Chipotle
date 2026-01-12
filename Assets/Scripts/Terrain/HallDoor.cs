@@ -32,6 +32,6 @@ namespace Game.Terrain
 		/// <param name="area">Coordinates of the area the door occupies</param>
 		/// <param name="zones">The zones connected by the door</param>
 		public override void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
-			=> base.Initialize(name, PassageState.Locked, area, zones);
+			=> base.Initialize(name, PassageState.Locked, area, zones, usable: true);
 	}
 }

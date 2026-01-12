@@ -183,22 +183,26 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
-		protected virtual UsableObjectsModel GetUsableItemsAndCharactersBefore(float radius)
+		protected virtual UsableObjectsModel GetUsableObjectsBefore(float radius)
 		{
-			List<Entity> objectsBefore = GetItemsAndCharactersBefore(_objectManipulationHelpRadius)
+			List<MapElement> objects = GetItemsAndCharactersBefore(_objectManipulationHelpRadius)
+				.Cast<MapElement>()
 				?.ToList();
+			Door door = GetDoorBefore(GetStepDirection(), true);
+			if(door!=null)
+				objects.Add(door);
 
 			// No objects in range
-			if (objectsBefore.IsNullOrEmpty())
+			if (objects.IsNullOrEmpty())
 				return new();
 
 			// Help variable
-			List<Entity> reachable = objectsBefore
+			List<MapElement> reachable = objects
 				.Where(o => World.IsInRange(o, Owner, _objectManipulationRadius))
 				.ToList();
 
 			// Return usable reachable objects.
-			IEnumerable<Entity> usableReachable = reachable
+			IEnumerable<MapElement> usableReachable = reachable
 				.Where(o => o.Usable);
 			if (usableReachable.Any())
 				return new(usableReachable.ToList(), UsableObjectsModel.ResultType.Success);
@@ -212,7 +216,7 @@ namespace Game.Entities.Characters.Components
 				return new(null, UsableObjectsModel.ResultType.Unusable);
 
 			// Usable but too far away
-			IEnumerable<Entity> usableButFar = objectsBefore
+			IEnumerable<MapElement> usableButFar = objects
 				.Where(o => !reachable.Contains(o))
 				.Where(o => o.Usable);
 
@@ -1222,7 +1226,7 @@ namespace Game.Entities.Characters.Components
 			Logger.LogInfo(title, character, itemName, pointMessage);
 		}
 
-		protected void LogItemUsedToTarget(Items.Item itemToUse, Entity target, Vector2 point)
+		protected void LogItemUsedToTarget(Items.Item itemToUse, MapElement target, Vector2 point)
 		{
 			string title = "Postava použila objekt na objekt";
 			string character = Owner.Name.Indexed;

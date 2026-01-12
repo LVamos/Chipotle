@@ -1,5 +1,6 @@
 ﻿using Game.Entities;
 using Game.Entities.Items;
+using Game.Terrain;
 
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Game.Messaging.Commands.UI
 		/// <summary>
 		/// The characters or items to be used
 		/// </summary>
-		public readonly List<Entity> Objects;
+		public readonly List<MapElement> Objects;
 
 		/// <summary>
 		/// Constructor
@@ -27,7 +28,7 @@ namespace Game.Messaging.Commands.UI
 		/// <param name="sender">Sender of the message</param>
 		/// <param name="itemToApply">An item to be applied to another item or character</param>
 		/// <param name="objects">The items or characters to be applied</param>
-		public SelectObjectToApply(object sender, Item itemToApply, List<Entity> objects) : base(sender)
+		public SelectObjectToApply(object sender, Item itemToApply, List<MapElement> objects) : base(sender)
 		{
 			ItemToApply = itemToApply;
 			Objects = objects;

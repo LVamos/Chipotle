@@ -1,6 +1,7 @@
 ﻿using Game.Entities;
 using Game.Entities.Characters;
 using Game.Entities.Items;
+using Game.Terrain;
 
 using System;
 
@@ -36,7 +37,7 @@ namespace Game.Messaging.Events.Physics
 		/// <summary>
 		/// The other item used by a character through another object
 		/// </summary>
-		public readonly Entity Target;
+		public readonly MapElement Target;
 
 		/// <summary>
 		/// Constructor
@@ -45,7 +46,7 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="manipulationPoint">A point of the object at which it's used</param>
 		/// <param name="usedObject">The item directly used by the character</param>
 		/// <param name="target">The other item or character used by a character through another object</param>
-		public ObjectsUsed(Character sender, Vector2 manipulationPoint, Item usedObject, Entity target = null) : base(sender)
+		public ObjectsUsed(Character sender, Vector2 manipulationPoint, Item usedObject, MapElement target = null) : base(sender)
 		{
 			Sender = sender;
 			ManipulationPoint = manipulationPoint;

@@ -43,10 +43,6 @@ namespace Game.Entities
 		/// Returns current description of the object.
 		/// </summary>
 		public string Description { get => World.GetObjectDescription(this, _descriptionID); }
-		/// <summary>
-		/// Indicates if the item can be used by an NPC.
-		/// </summary>
-		public bool Usable { get; protected set; }
 
 		/// <summary>
 		/// Returns the hash code for this object.

@@ -138,7 +138,8 @@ namespace Game.UI
 		private void OnSelectObjectToApply(SelectObjectToApply message)
 		{
 			const string prompt = "Na co to chceš použít?";
-			List<List<string>> names = GetFriendlyNames(message.Objects);
+			List<Entity> objects = message.Objects.Cast<Entity>().ToList();
+			List<List<string>> names = GetFriendlyNames(objects);
 			Action<int> action =
 				(option) => HandleApplyItemMenu(message.Sender as MessagingObject, message.Objects, option, message.ItemToApply);
 			MenuParameters parameters = new(
@@ -181,7 +182,7 @@ namespace Game.UI
 			sender.TakeMessage(message);
 		}
 
-		private void HandleInteractionMenu(MessagingObject sender, List<Entity> objects, int option)
+		private void HandleInteractionMenu(MessagingObject sender, List<MapElement> objects, int option)
 		{
 			if (option == -1 || sender == null)
 				return;
@@ -227,7 +228,7 @@ namespace Game.UI
 			WindowHandler.Menu(parameters);
 		}
 
-		private void HandleApplyItemMenu(MessagingObject sender, List<Entity> objects, int option, Item itemToApply)
+		private void HandleApplyItemMenu(MessagingObject sender, List<MapElement> objects, int option, Item itemToApply)
 		{
 			if (option == -1 || sender == null)
 				return;
@@ -274,7 +275,8 @@ namespace Game.UI
 			const string prompt = "Co chceš použít?";
 
 			// Copy friendly names from the given objects into an array.
-			List<List<string>> names = GetFriendlyNames(message.Objects);
+			List<Entity> objects = message.Objects.Cast<Entity>().ToList();
+			List<List<string>> names = GetFriendlyNames(objects);
 
 			MenuParameters parameters = new(
 				names,

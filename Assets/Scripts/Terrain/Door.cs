@@ -90,7 +90,7 @@ namespace Game.Terrain
 		/// <param name="closed">Specifies whether the door should be implicitly closed or open</param>
 		/// <param name="area">Location of the door</param>
 		/// <param name="zones">Two zones connected by the door</param>
-		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door)
+		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door, bool usable=false)
 		{
 			base.Initialize(name, area, zones);
 			TypeDescription = Type == DoorType.Door ? "dveře" : "vrata";
@@ -106,6 +106,7 @@ namespace Game.Terrain
 			_sounds["hit"] = "KitchenDoorCrash";
 			_sounds["rattle"] = "DoorKnobRattle";
 			_defaultVolume = .2f;
+			Usable = usable;
 		}
 
 		/// <summary>

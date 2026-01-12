@@ -74,7 +74,7 @@ namespace Game.Entities.Characters.Chipotle
 				return; // This should be handled by the sound component.
 			}
 
-			// Check if any items or characters are standing before the player.
+			// Check if any objects are standing before the player.
 			IEnumerable<Entity> objects = GetItemsAndCharactersBefore(_objectManipulationRadius);
 			if (objects.IsNullOrEmpty())
 			{
@@ -338,7 +338,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			UsableObjectsModel objects = GetUsableItemsAndCharactersBefore(_objectManipulationRadius);
+			UsableObjectsModel objects = GetUsableObjectsBefore(_objectManipulationRadius);
 			if (objects.Result == UsableObjectsModel.ResultType.NothingFound)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
 			else if (objects.Result == UsableObjectsModel.ResultType.Unusable)
@@ -350,7 +350,10 @@ namespace Game.Entities.Characters.Chipotle
 				if (objects.Objects.Count() == 1)
 					ApplyItemToTarget(message.ItemToUse, objects.Objects[0]);
 				else if (objects.Objects.Any())
-					WindowHandler.ActiveWindow.TakeMessage(new SelectObjectToApply(Owner, message.ItemToUse, objects.Objects));
+				{
+					SelectObjectToApply newMessage = new(Owner, message.ItemToUse, objects.Objects);
+					WindowHandler.ActiveWindow.TakeMessage(newMessage);
+				}
 			}
 		}
 
@@ -359,7 +362,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		/// <param name="itemToUse">The item to be applied to the target</param>
 		/// <param name="target">The target item or character</param>
-		private void ApplyItemToTarget(Item itemToUse, Entity target)
+		private void ApplyItemToTarget(Item itemToUse, MapElement target)
 		{
 			Vector2 manipulationPoint = FindManipulationPoint(target);
 			ObjectsUsed message = new(Owner, manipulationPoint, itemToUse, target);
@@ -1201,7 +1204,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			Door door = GetDoorBefore(null, false, Zone);
-			UsableObjectsModel objects = GetUsableItemsAndCharactersBefore(_objectManipulationRadius);
+			UsableObjectsModel objects = GetUsableObjectsBefore(_objectManipulationRadius);
 
 			if (door != null)
 			{

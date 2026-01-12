@@ -372,7 +372,7 @@ namespace Game.Entities.Items
 			Logger.LogInfo(title, characterName, pointOfCollision);
 		}
 
-		protected void LogUssage(Character character, Item usedItem, Entity target, Vector2 point)
+		protected void LogUssage(Character character, MapElement usedItem, MapElement target, Vector2 point)
 		{
 			string title = "Objekt zaznamenal použití";
 			string characterName = character.Name.Indexed;

@@ -1,4 +1,5 @@
 ﻿using Game.Entities;
+using Game.Terrain;
 
 using System;
 
@@ -13,14 +14,14 @@ namespace Game.Messaging.Commands.Physics
 		/// <summary>
 		/// An item or character to be used.
 		/// </summary>
-		public readonly Entity Object;
+		public readonly MapElement Object;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source fo the message</param>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="sender"/> is null</exception>
-		public Interact(object sender, Entity obj = null) : base(sender)
+		public Interact(object sender, MapElement obj = null) : base(sender)
 		{
 			Object = obj;
 		}
