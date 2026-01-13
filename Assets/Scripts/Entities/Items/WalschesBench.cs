@@ -42,7 +42,7 @@ namespace Game.Entities.Items
 		{
 			Name name = new("klíče w1", "Walshovy klíče");
 			GameObject obj = new(name.Indexed);
-			obj.AddComponent<Item>();
+			obj.AddComponent<WalshesKeys>();
 			_keys = ItemFactory.CreateItem(obj, name, default, "walshovy klíče", pickable: true, usable: false, passable: true);
 			World.Add(_keys);
 		}

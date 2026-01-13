@@ -77,6 +77,8 @@ namespace Game.Terrain
 			{
 "klíče w1"
 			};
+			_openingSound = "HallDoorOpening";
+			_closingSound = "HallDoorClosing";
 		}
 	}
 }

@@ -106,7 +106,7 @@ namespace Game.Terrain
 			Type = type;
 			_sounds["hit"] = "KitchenDoorCrash";
 			_sounds["rattle"] = "DoorKnobRattle";
-			_defaultVolume = .2f;
+			_defaultVolume = Settings.DoorVolume;
 			Usable = usable;
 		}
 
@@ -157,10 +157,10 @@ namespace Game.Terrain
 		{
 			State = PassageState.Closed;
 
-			AnnounceManipulation();
 			if (_openingSource != null && _openingSource.isPlaying)
 				Sounds.SlideVolume(_openingSource, .5f, 0, true);
 			_closingSource = Play(_closingSound, sender as Character, point);
+			AnnounceManipulation();
 			LogClosing();
 		}
 
@@ -372,11 +372,11 @@ namespace Game.Terrain
 			OpenedPreviously = true;
 			State = PassageState.Open;
 
-			AnnounceManipulation();
 			if (_closingSource != null && _closingSource.isPlaying)
 				Sounds.SlideVolume(_closingSource, .5f, 0, true);
 
 			_openingSource = Play(_openingSound, sender as Character, point);
+			AnnounceManipulation();
 			LogOpening();
 		}
 

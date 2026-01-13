@@ -88,7 +88,8 @@ namespace Game.UI
 
 		private void ApplyItemToTarget()
 		{
-			if (!SelectedItem.Usable)
+			bool usable = SelectedItem.Usable || SelectedItem.UsableWith!=null;
+			if (!usable)
 			{
 				Tolk.Speak("Tohle se použít nedá");
 				Close();
