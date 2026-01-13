@@ -531,7 +531,9 @@ namespace Game.Entities.Items
 			_quickActionsAllowed = quickActionsAllowed;
 
 			// Set up sound names
-			_sounds["collision"] = collisionSound ?? "MovCrashDefault";
+			if (passable)
+				_sounds["collision"] = collisionSound ?? null;
+			else _sounds["collision"] = collisionSound ?? Settings.DefaultCollisionSound;
 			_sounds["action"] = actionSound;
 			_sounds["picking"] = pickingSound;
 			_sounds["placing"] = placingSound;
@@ -690,10 +692,14 @@ namespace Game.Entities.Items
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnObjectsCollided(ObjectsCollided message)
 		{
+			LogCollision(message.Sender as Character, message.ContactPoint);
+
+			if (string.IsNullOrEmpty(_sounds["collision"]))
+				return;
+
 			Vector3 position = message.ContactPoint.ToVector3(GetSoundHeight());
 			string soundName = _sounds["collision"];
 			Sounds.Play(soundName, position, _defaultVolume);
-			LogCollision(message.Sender as Character, message.ContactPoint);
 		}
 
 		private float GetSoundHeight()

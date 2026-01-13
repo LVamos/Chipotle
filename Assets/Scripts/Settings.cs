@@ -15,6 +15,7 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static string DefaultCollisionSound = "MovCrashDefault";
 		public static float DoorVolume = .5f;
 		public static float NearPlayerThreshold = 1;
 		public static float BeaconVolume = 1;

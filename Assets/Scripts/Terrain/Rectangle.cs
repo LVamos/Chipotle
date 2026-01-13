@@ -22,6 +22,15 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Rectangle
 	{
+		public bool IntersectsStrict(Rectangle plane)
+		{
+			return !(plane.MinX >= this.MaxX ||  // dotyk hran = kolize
+					 plane.MaxX <= this.MinX ||
+					 plane.MaxY <= this.MinY ||
+					 plane.MinY >= this.MaxY);
+		}
+
+
 		/// <summary>
 		/// Returns a new Rectangle with its center partially updated to match the given position.
 		/// Only the coordinates that differ from the current center will be updated.

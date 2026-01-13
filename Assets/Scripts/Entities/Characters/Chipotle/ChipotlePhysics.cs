@@ -305,7 +305,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnTakeItem(TakeItem message)
 		{
 			_inventory.Add(message.Item.Name.Indexed);
-			PickUpObjectResult newMessage = new(this,message.Item, PickUpObjectResult.ResultType.Success,true);
+			PickUpObjectResult newMessage = new(this, message.Item, PickUpObjectResult.ResultType.Success, true);
 			InnerMessage(newMessage);
 		}
 
@@ -374,7 +374,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="target">The target item or character</param>
 		private void ApplyItemToTarget(Item source, MapElement target)
 		{
-			bool usable =target.UsableWith!=null&& target.UsableWith.Contains(source.Name.Indexed);
+			bool usable = target.UsableWith != null && target.UsableWith.Contains(source.Name.Indexed);
 			if (!usable)
 			{
 				InteractResult message = new(this, InteractResult.ResultType.NoUsableObjects);
@@ -964,7 +964,6 @@ namespace Game.Entities.Characters.Chipotle
 			if (HandleEntityCollisions(elements))
 				return;
 
-			// Handle collisions with inaccessible terrain
 			HandleTerrainCollisions(elements);
 		}
 
@@ -1221,7 +1220,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			Door door = GetDoorBefore(null, false, Zone);
-			 UsableObjectsModel objects = GetUsableObjectsBefore(_objectManipulationRadius);
+			UsableObjectsModel objects = GetUsableObjectsBefore(_objectManipulationRadius);
 
 			if (door != null)
 			{
@@ -1461,28 +1460,30 @@ namespace Game.Entities.Characters.Chipotle
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
-			// Filter out passable items
-			List<object> obstacles = collisions.Obstacles
-				.Where(o => o is not Item
-				|| (o is Item i && !i.Passable))
-				.ToList();
-			if (obstacles.IsNullOrEmpty())
+			bool obstaclesFound = collisions.Obstacles!=null&&
+				collisions.Obstacles
+				.Any(o => o is Item i && !i.Passable);
+
+			if (collisions.Obstacles.IsNullOrEmpty())
 				return false;
 
-			_walking = false;
-			_startWalkMessage = null;
+			if (obstaclesFound || collisions.OutOfMap)
+			{
+				_walking = false;
+				_startWalkMessage = null;
+			}
 
 			if (collisions.OutOfMap)
 				LogOutOfMapAttempt(_area.Value.Center);
-			if (obstacles != null)
+			if (collisions.Obstacles.Count > 0)
 			{
 				Door doorInWay = GetDoorBefore(direction, false);
 				if (doorInWay is { Open: true } && SlipThroughDoor(doorInWay))
 					return false;
 
-				HandleCollisions(obstacles);
+				HandleCollisions(collisions.Obstacles);
 			}
-			return true;
+			return obstaclesFound;
 		}
 
 		protected bool SlipThroughDoor(Door door)

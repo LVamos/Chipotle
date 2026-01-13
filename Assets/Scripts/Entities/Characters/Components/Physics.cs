@@ -144,10 +144,10 @@ namespace Game.Entities.Characters.Components
 			Vector2 direction = GetStepDirection();
 			List<MapElement> ignoredElements = new() { Owner };
 			Rectangle area = _area.Value;
-			area = area.Extend(.5f);
+			area.Extend(.5f);
 			CollisionsModel collisions = World.DetectCollisionsOnTrack(ignoredElements, area, direction, radius);
 
-			if (collisions == null || collisions.Obstacles==null)
+			if (collisions == null || collisions.Obstacles == null)
 				return null;
 
 			IEnumerable<Entity> obstacles = collisions.Obstacles
@@ -189,7 +189,7 @@ namespace Game.Entities.Characters.Components
 				.Cast<MapElement>()
 				?.ToList();
 			Door door = GetDoorBefore(GetStepDirection(), true);
-			if(door!=null)
+			if (door != null)
 				objects.Add(door);
 
 			// No objects in range
@@ -723,7 +723,7 @@ namespace Game.Entities.Characters.Components
 			{
 				const float epsilon = 45; // epsilon for float angle comparison
 				float angle = Math.Abs(GetAngle(door.Area.Value, direction));
-				return angle < epsilon || angle >=360-epsilon;
+				return angle < epsilon || angle >= 360 - epsilon;
 			}
 		}
 
@@ -1390,7 +1390,7 @@ Rectangle.FromCenter(Center, width, height)
 			float angle = GetAngle(item.Area.Value);
 			bool intersects = item.Area.Value.Intersects(Owner.Area.Value);
 
-			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner,intersects);
+			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner, intersects);
 			return info;
 		}
 
@@ -1401,7 +1401,7 @@ Rectangle.FromCenter(Center, width, height)
 		protected List<NavigableItemInfo> GetNavigableItems()
 		{
 			List<Item> items = Zone.GetNearByItems(Center, _navigableObjectsRadius).ToList();
-			return 
+			return
 				items
 				.Select(GetNavigableItemInfo)
 				.ToList();

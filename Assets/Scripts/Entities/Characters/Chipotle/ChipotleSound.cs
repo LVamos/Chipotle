@@ -435,6 +435,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnObjectsCollided(ObjectsCollided message)
 		{
+			if (message.Object is Item i && i.Passable)
+				return;
+
 			string text = message.Object.Name.Friendly;
 			if (Settings.SayInnerItemNames && message.Object is Item)
 				text += " " + message.Object.Name.Indexed;

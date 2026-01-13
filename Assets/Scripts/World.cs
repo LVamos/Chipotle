@@ -195,21 +195,31 @@ namespace Game
 		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting zones for collision. The search ends at the position where collisions were detected.</remarks>
 		public static CollisionsModel DetectCollisionsOnTrack(List<MapElement> ignoredElements, Rectangle initialPosition, Vector2 direction, float length, bool justFirstObstacle = false, bool checkTerrain = true, bool ignoreSubtleObjects = false, bool ignoreItems = false)
 		{
-			int steps = Mathf.FloorToInt(length / CollisionDetectionResolution);
+			int steps = Mathf.CeilToInt((length) / CollisionDetectionResolution);
 			steps++; // include the initial position
-			Rectangle segment;
+
+			CollisionsModel result= DetectCollisions(ignoredElements, initialPosition, justFirstObstacle, checkTerrain, ignoreSubtleObjects, ignoreItems);
+			if (result.OutOfMap)
+				return result;
+			if (!result.Obstacles.IsNullOrEmpty())
+				return result;
+
+			Rectangle capsule;
 			for (int i = 0; i < steps; i++)
 			{
 				Vector2 offset = direction * CollisionDetectionResolution * i;
 				Vector2 newCenter = new Vector2(initialPosition.Center.x + offset.x, initialPosition.Center.y + offset.y);
-				segment = Rectangle.FromCenter(newCenter, initialPosition.Height, initialPosition.Width, false);
-				CollisionsModel result = DetectCollisions(ignoredElements, segment, justFirstObstacle, checkTerrain, ignoreSubtleObjects, ignoreItems);
+				capsule = Rectangle.FromCenter(newCenter, initialPosition.Height, initialPosition.Width, false);
+
+				result = DetectCollisions(ignoredElements, capsule, justFirstObstacle, checkTerrain, ignoreSubtleObjects, ignoreItems);
 				if (result.OutOfMap)
 					return result;
-
 				if (!result.Obstacles.IsNullOrEmpty())
 					return result;
+
+
 			}
+
 			return new(null, false);
 		}
 
@@ -280,7 +290,7 @@ namespace Game
 				List<MapElement> newObstacles = elements
 					.Where(element => element.Area != null
 					&& !IsIgnoredElement(element))
-					.Where(e => e.Area.Value.Intersects(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value))
+					.Where(e => e.Area.Value.IntersectsStrict(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value))
 .ToList();
 				if (ignoreSubtleObjects)
 					newObstacles = newObstacles
@@ -1196,13 +1206,13 @@ namespace Game
 				string type = GetAttribute(itemNode, "type");
 				bool decorative = GetAttribute(itemNode, "decorative").ToBool();
 				bool pickable = GetAttribute(itemNode, "pickable").ToBool();
-				bool passable = GetAttribute(itemNode, "passable")!=null;
+				bool passable = GetAttribute(itemNode, "passable") != null;
 				bool usable = GetAttribute(itemNode, "usable").ToBool();
 
 				GameObject obj = null;
 				if (!itemObjects.TryGetValue(name.Indexed, out obj))
 					throw new InvalidOperationException($"No geometry found for the item {name.Indexed}");
-				Item item = ItemFactory.CreateItem(obj, name, area, type, decorative, pickable, usable,passable);
+				Item item = ItemFactory.CreateItem(obj, name, area, type, decorative, pickable, usable, passable);
 				Add(item);
 			}
 		}
