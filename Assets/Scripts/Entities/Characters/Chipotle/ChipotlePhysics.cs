@@ -1462,7 +1462,8 @@ namespace Game.Entities.Characters.Chipotle
 
 			bool obstaclesFound = collisions.Obstacles!=null&&
 				collisions.Obstacles
-				.Any(o => o is Item i && !i.Passable);
+				.Any(o => (o is Item i && !i.Passable) 
+				|| (o is Door d && !d.Open));
 
 			if (collisions.Obstacles.IsNullOrEmpty())
 				return false;
