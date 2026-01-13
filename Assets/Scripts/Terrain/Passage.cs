@@ -31,6 +31,8 @@ namespace Game.Terrain
 
 		public bool Open { get => State == PassageState.Open; }
 
+		public bool Locked { get => State == PassageState.Locked; }
+
 		public HashSet<Vector2> GetPointsOfZone(Zone zone)
 		{
 			HashSet<Vector2> points = _area.Value.GetPoints(.1f, false);

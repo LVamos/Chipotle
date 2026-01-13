@@ -7,6 +7,7 @@ using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -152,7 +153,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Closes the door if possible
 		/// </summary>
-		protected void Close(object sender, Vector2 point)
+		protected virtual void Close(object sender, Vector2 point)
 		{
 			State = PassageState.Closed;
 
@@ -166,6 +167,24 @@ namespace Game.Terrain
 		private void LogClosing()
 		{
 			string title = "Dveře zavřeny";
+			string name = $"Název: {Name.Indexed}";
+			string type = $"typ dveří: {TypeDescription}";
+
+			Logger.LogInfo(title, name, type);
+		}
+
+		private void LogLocking()
+		{
+			string title = "Dveře zamčeny";
+			string name = $"Název: {Name.Indexed}";
+			string type = $"typ dveří: {TypeDescription}";
+
+			Logger.LogInfo(title, name, type);
+		}
+
+		private void LogUnlocking()
+		{
+			string title = "Dveře odemčeny";
 			string name = $"Název: {Name.Indexed}";
 			string type = $"typ dveří: {TypeDescription}";
 
@@ -368,6 +387,25 @@ namespace Game.Terrain
 			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
+		}
+
+		protected void Lock()
+		{
+			if (Locked)
+				throw new InvalidOperationException($"Attempt to lock locked door {Name.Indexed}");
+
+			State = PassageState.Locked;
+			AnnounceManipulation();
+			LogLocking();
+		}
+
+		protected void Unlock()
+		{
+			if (!Locked)
+				throw new InvalidOperationException($"Attempt to unlock unlocked door {Name.Indexed}");
+			State = PassageState.Closed;
+			AnnounceManipulation();
+			LogLocking();
 		}
 	}
 }

@@ -1,9 +1,18 @@
-﻿using Game.Entities.Items;
+﻿using DavyKager;
+
+using Game.Audio;
+using Game.Entities.Items;
+using Game.Messaging;
 using Game.Messaging.Commands.Physics;
+using Game.Messaging.Commands.UI;
+using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
+using System;
 using System.Collections.Generic;
+
+using UnityEngine;
 
 namespace Game.Terrain
 {
@@ -13,16 +22,45 @@ namespace Game.Terrain
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class HallDoor : Door
 	{
-		protected override void OnUseDoor(UseDoor message)
+		protected override void Open(object sender, Vector2 point)
 		{
-			if (State == PassageState.Locked)
-			{
-				Item bench = World.GetItem("lavička w1");
-				if (bench.Used)
-					State = PassageState.Closed;
-			}
+			base.Open(sender, point);
+			Usable = false;
+		}
 
-			base.OnUseDoor(message);
+		protected override void Close(object sender, Vector2 point)
+		{
+			base.Close(sender,point);
+			Usable = true;
+		}
+
+		private const string _walshesKeysId = "klíče w1";
+
+		protected override void HandleMessage(Message message)
+		{
+			switch (message)
+			{
+				case ObjectsUsed objectsUsed:
+					OnObjectsUsed(objectsUsed);
+					break;
+				default: base.HandleMessage(message); break;
+			}
+		}
+
+		private void OnObjectsUsed(ObjectsUsed message)
+		{
+			if (message.UsedObject.Name.Indexed != _walshesKeysId)
+				return;
+
+			LockOrUnlock(message.ManipulationPoint);
+			World.PlayCutscene(this,"HalldoorUnlock");
+		}
+
+		private void LockOrUnlock(Vector2 manipulationPoint)
+		{
+			if (Locked)
+				Unlock();
+			else Lock();
 		}
 
 		/// <summary>
