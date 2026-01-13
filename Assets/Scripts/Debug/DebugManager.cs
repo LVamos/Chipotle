@@ -402,10 +402,10 @@ namespace Game.Debug
 				_keyboardCommands.Clear();
 				_gamepadCommands.Clear();
 
-				foreach (KeyValuePair<string, DebugCommandBindings> kvp in rawMap)
+				foreach (KeyValuePair<string, DebugCommandBindings> pair in rawMap)
 				{
 					// Convert string key to DebugCommand enum
-					if (!Enum.TryParse<DebugCommand>(kvp.Key, out DebugCommand command))
+					if (!Enum.TryParse<DebugCommand>(pair.Key, out DebugCommand command))
 						continue;
 
 					// Skip if there is no method for this DebugCommand
@@ -413,16 +413,16 @@ namespace Game.Debug
 						continue;
 
 					// Add keyboard input to dictionary if present
-					if (!string.IsNullOrEmpty(kvp.Value.Keyboard))
+					if (!string.IsNullOrEmpty(pair.Value.Keyboard))
 					{
-						KeyboardInput keyboardInput = new KeyboardInput(kvp.Value.Keyboard);
+						KeyboardInput keyboardInput = new KeyboardInput(pair.Value.Keyboard);
 						_keyboardCommands[keyboardInput] = action;
 					}
 
 					// Add DualSense input to dictionary if present
-					if (!string.IsNullOrEmpty(kvp.Value.DualSense))
+					if (!string.IsNullOrEmpty(pair.Value.DualSense))
 					{
-						DualSenseInput gamepadInput = new DualSenseInput(kvp.Value.DualSense);
+						DualSenseInput gamepadInput = new DualSenseInput(pair.Value.DualSense);
 						_gamepadCommands[gamepadInput] = action;
 					}
 				}

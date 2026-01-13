@@ -1,6 +1,7 @@
 ﻿using DavyKager;
 
 using Game.Audio;
+using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Debug;
 
@@ -168,6 +169,16 @@ namespace Game.UI
 			PreviousWindow = ActiveWindow; // Backing up for future use
 			ActiveWindow = window;
 			ActiveWindow.OnActivate(); // Let new window react on activation
+		}
+
+		public static void OnKeyDown(DualSenseInput dualSenseInput)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal static void OnKeyUp(DualSenseInput dualSenseInput)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
