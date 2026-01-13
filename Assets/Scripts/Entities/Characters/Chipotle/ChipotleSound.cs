@@ -234,9 +234,12 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Handles the PickUpObjectResult message.
 		/// </summary>
-		/// <param name="m">The message to be processed</param>
-		protected void OnPickUpObjectResult(PickUpObjectResult m)
+		/// <param name="message">The message to be processed</param>
+		protected void OnPickUpObjectResult(PickUpObjectResult message)
 		{
+			if (message.Silently)
+				return;
+
 			Dictionary<PickUpObjectResult.ResultType, string> resultMessages = new()
 			{
 				{ PickUpObjectResult.ResultType.Success, "sebráno" },
@@ -246,7 +249,7 @@ namespace Game.Entities.Characters.Chipotle
 				{ PickUpObjectResult.ResultType.Unpickable, "tohle nejde odnést" }
 			};
 
-			Tolk.Speak(resultMessages[m.Result]);
+			Tolk.Speak(resultMessages[message.Result]);
 		}
 
 		/// <summary>

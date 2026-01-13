@@ -114,6 +114,8 @@ namespace Game.Terrain
 		/// </summary>
 		public bool Usable { get; protected set; }
 
+		public List<string> UsableWith { get; protected set; }
+
 		/// <summary>
 		/// Sets value of the Area property.
 		/// </summary>

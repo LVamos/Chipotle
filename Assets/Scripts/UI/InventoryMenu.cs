@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using UnityEditor;
+
 using UnityEngine;
 
 namespace Game.UI
@@ -89,6 +91,7 @@ namespace Game.UI
 			if (!SelectedItem.Usable)
 			{
 				Tolk.Speak("Tohle se použít nedá");
+				Close();
 				return;
 			}
 
@@ -110,9 +113,11 @@ namespace Game.UI
 		/// </summary>
 		private void UseObject()
 		{
-			if (!SelectedItem.Usable)
+			bool usable = SelectedItem.Usable || SelectedItem.UsableWith != null;
+			if (!usable)
 			{
 				Tolk.Speak("Tohle se použít nedá");
+				Close();
 				return;
 			}
 

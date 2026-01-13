@@ -26,6 +26,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using UnityEditor;
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -303,7 +305,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnTakeItem(TakeItem message)
 		{
 			_inventory.Add(message.Item.Name.Indexed);
-			PickUpObjectResult newMessage = new(this,message.Item, PickUpObjectResult.ResultType.Success);
+			PickUpObjectResult newMessage = new(this,message.Item, PickUpObjectResult.ResultType.Success,true);
 			InnerMessage(newMessage);
 		}
 
@@ -368,14 +370,22 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Applies the given item to the target item or character.
 		/// </summary>
-		/// <param name="itemToUse">The item to be applied to the target</param>
+		/// <param name="source">The item to be applied to the target</param>
 		/// <param name="target">The target item or character</param>
-		private void ApplyItemToTarget(Item itemToUse, MapElement target)
+		private void ApplyItemToTarget(Item source, MapElement target)
 		{
+			bool usable =target.UsableWith!=null&& target.UsableWith.Contains(source.Name.Indexed);
+			if (!usable)
+			{
+				InteractResult message = new(this, InteractResult.ResultType.NoUsableObjects);
+				InnerMessage(message);
+				return;
+			}
+
 			Vector2 manipulationPoint = FindManipulationPoint(target);
-			ObjectsUsed message = new(Owner, manipulationPoint, itemToUse, target);
-			target.TakeMessage(message);
-			LogItemUsedToTarget(itemToUse, target, manipulationPoint);
+			ObjectsUsed message2 = new(Owner, manipulationPoint, source, target);
+			target.TakeMessage(message2);
+			LogItemUsedToTarget(source, target, manipulationPoint);
 		}
 
 		/// <summary>

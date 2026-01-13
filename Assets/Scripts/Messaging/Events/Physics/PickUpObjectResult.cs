@@ -43,6 +43,8 @@ namespace Game.Messaging.Events.Physics
 		/// </summary>
 		public readonly ResultType Result;
 
+		public readonly bool Silently;
+
 		/// <summary>
 		/// Sourceof the message
 		/// </summary>
@@ -59,11 +61,12 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="sender">Source of the message</param>
 		/// <param name="object">The manipulated object</param>
 		/// <param name="success">Specifies if the object was picked up off the ground or not.</param>
-		public PickUpObjectResult(MessagingObject sender, Item @object = null, ResultType result = ResultType.NothingFound) : base(sender)
+		public PickUpObjectResult(MessagingObject sender, Item @object = null, ResultType result = ResultType.NothingFound, bool silently=false) : base(sender)
 		{
 			Sender = sender;
 			Object = @object;
 			Result = result;
+			Silently = silently;
 		}
 	}
 }
