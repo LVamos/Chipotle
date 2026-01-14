@@ -1,4 +1,5 @@
 ﻿using Game.Audio;
+using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Messaging;
 
@@ -46,6 +47,8 @@ namespace Game.UI
 		/// Key commands and their handlers
 		/// </summary>
 		protected Dictionary<KeyboardInput, Action> _keyboardShortcuts = new();
+
+		protected Dictionary<DualSenseInput, Action> _dualsenseShortcuts = new();
 
 		/// <summary>
 		/// Indicates if the window is closed
@@ -103,12 +106,26 @@ namespace Game.UI
 		public virtual void OnKeyUp(KeyboardInput shortcut)
 		{ }
 
+		public virtual void OnKeyUp(DualSenseInput input)
+		{ }
+
+		/// <summary>
+		/// Registers Dual Sense shortcuts and corresponding actions.
+		/// </summary>
+		/// <remarks>If a shortcut is already registered it'll be overriden.</remarks>
+		/// <param name="shortcuts">Set of shortcuts to be registered</param>
+		protected void RegisterDualSenseShortcuts(params (DualSenseInput shortcut, Action action)[] shortcuts)
+		{
+			foreach ((DualSenseInput shortcut, Action action) shortcut in shortcuts)
+				_dualsenseShortcuts[shortcut.shortcut] = shortcut.action;
+		}
+
 		/// <summary>
 		/// Registers shotcuts and corresponding actions.
 		/// </summary>
 		/// <remarks>If a shortcut is already registered it'll be overriden.</remarks>
 		/// <param name="shortcuts">Set of shortcuts to be registered</param>
-		protected void RegisterShortcuts(params (KeyboardInput shortcut, Action action)[] shortcuts)
+		protected void RegisterKeyboardShortcuts(params (KeyboardInput shortcut, Action action)[] shortcuts)
 		{
 			foreach ((KeyboardInput shortcut, Action action) shortcut in shortcuts)
 				_keyboardShortcuts[shortcut.shortcut] = shortcut.action;
@@ -123,6 +140,13 @@ namespace Game.UI
 
 			float finalVolume = volume != null ? volume.Value : _defaultVolume;
 			return Sounds.Play2d(soundName, finalVolume);
+		}
+
+		public virtual void OnKeyDown(DualSenseInput input)
+		{
+			Action action = null;
+			if (_dualsenseShortcuts!= null && _dualsenseShortcuts.TryGetValue(input, out action))
+				action();
 		}
 	}
 }

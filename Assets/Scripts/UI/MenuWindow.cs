@@ -166,7 +166,7 @@ namespace Game.UI
 			_menuClosed = parameters.MenuClosed;
 			_index = parameters.DefaultIndex;
 
-			RegisterShortcuts(
+			RegisterKeyboardShortcuts(
 				(new KeyboardInput(KeyCode.End), LastItem),
 				(new KeyboardInput(KeyCode.Home), FirstItem),
 				(new KeyboardInput(KeyCode.UpArrow), PreviousItem),

@@ -173,11 +173,12 @@ namespace Game.UI
 
 		public static void OnKeyDown(DualSenseInput input)
 		{
-			Tolk.Speak(input.ToString());
+			ActiveWindow?.OnKeyDown(input);
 		}
 
 		public static void OnKeyUp(DualSenseInput input)
 		{
+			ActiveWindow?.OnKeyUp(input);
 		}
 	}
 }

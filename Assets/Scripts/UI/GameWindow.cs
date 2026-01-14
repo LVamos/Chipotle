@@ -458,7 +458,7 @@ namespace Game.UI
 			_itemDescriber = new();
 			_characterDescriber = new();
 
-			RegisterShortcuts(
+			RegisterKeyboardShortcuts(
 				(new(KeyCode.Escape), QuitGameMenu),
 				(new(KeyboardModifiers.Control, KeyCode.Y), MainScript.SendFeedback)
 			);

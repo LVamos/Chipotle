@@ -52,7 +52,7 @@ namespace Game.UI
 			base.Initialize(parameters);
 
 			// Register Space for toggling boolean values
-			RegisterShortcuts(
+			RegisterKeyboardShortcuts(
 				(new KeyboardInput(KeyCode.Space), ToggleBoolean)
 			);
 		}

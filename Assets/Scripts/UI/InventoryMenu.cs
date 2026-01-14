@@ -94,7 +94,7 @@ namespace Game.UI
 					.ToList();
 
 			// Add new key shortcuts
-			RegisterShortcuts(
+			RegisterKeyboardShortcuts(
 				(new(KeyCode.Return), UseObject),
 				(new(KeyboardModifiers.Control, KeyCode.Return), PlaceItem),
 				(new(KeyboardModifiers.ControlShift, KeyCode.Return), ApplyItemToTarget)
