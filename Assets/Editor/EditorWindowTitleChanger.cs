@@ -1,6 +1,8 @@
 using System;
+using System.Text;
 
 using UnityEditor;
+
 
 [InitializeOnLoad]
 public class EditorWindowTitleChanger
@@ -10,6 +12,8 @@ public class EditorWindowTitleChanger
 
 	static EditorWindowTitleChanger()
 	{
+		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
 		EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 		EditorApplication.quitting += ResetTitle;
 		AppDomain.CurrentDomain.UnhandledException += (sender, args) => ResetTitle();

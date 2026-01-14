@@ -18,6 +18,7 @@ namespace Game.Controls.DualSense
 			StickDirection = null;
 			Trigger = null;
 			DPad = null;
+
 			TriggerThreshold = null;
 
 			if (Enum.TryParse(identifier, true, out DualSenseButton button))
@@ -112,4 +113,4 @@ namespace Game.Controls.DualSense
 		public static bool operator ==(DualSenseInput left, DualSenseInput right) => left.Equals(right);
 		public static bool operator !=(DualSenseInput left, DualSenseInput right) => !left.Equals(right);
 	}
-	}
+}
