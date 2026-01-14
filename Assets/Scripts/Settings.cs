@@ -15,6 +15,8 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float ObjectManipulationRadius = .5f;
+		public static float DoorManipulationRadius = .7f;
 		public static string DefaultCollisionSound = "MovCrashDefault";
 		public static float DoorVolume = .5f;
 		public static float NearPlayerThreshold = 1;

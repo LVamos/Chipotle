@@ -108,16 +108,6 @@ namespace Game.Entities.Characters.Components
 		protected virtual Vector2 GetStepDirection() => _orientation.UnitVector;
 
 		/// <summary>
-		/// Represents the maximum distance in meters from which the NPC can manipulate items or characters.
-		/// </summary>
-		protected float _objectManipulationRadius = .5f;
-
-		/// <summary>
-		/// Represents the maximum distance in meters from which the NPC can manipulate the door.
-		/// </summary>
-		protected float _doorManipulationRadius = 1;
-
-		/// <summary>
 		/// Checks if there's an character or item standing before the character and returns it.
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
@@ -198,7 +188,7 @@ namespace Game.Entities.Characters.Components
 
 			// Help variable
 			List<MapElement> reachable = objects
-				.Where(o => World.IsInRange(o, Owner, _objectManipulationRadius))
+				.Where(o => World.IsInRange(o, Owner, Settings.ObjectManipulationRadius))
 				.ToList();
 
 			// Return usable reachable objects.
@@ -247,7 +237,7 @@ namespace Game.Entities.Characters.Components
 			}
 
 			// Check if there are any items that are reachable from distance of _objectManipulationRadius.
-			return !pickableItems.Any(i => World.IsInRange(i, Owner, _objectManipulationRadius))
+			return !pickableItems.Any(i => World.IsInRange(i, Owner, Settings.ObjectManipulationRadius))
 				? new(null, PickableItemsModel.ResultType.Unreachable)
 				: new(pickableItems, PickableItemsModel.ResultType.Success);
 		}
@@ -630,7 +620,7 @@ namespace Game.Entities.Characters.Components
 			string objectsBefore = null;
 			if (Owner.Area != null)
 			{
-				IEnumerable<Entity> query = GetItemsAndCharactersBefore(_objectManipulationRadius);
+				IEnumerable<Entity> query = GetItemsAndCharactersBefore(Settings.ObjectManipulationRadius);
 				if (!query.IsNullOrEmpty())
 				{
 					string[] objects = query
@@ -706,7 +696,7 @@ namespace Game.Entities.Characters.Components
 		{
 			float radius = inOneStep
 				? _stepLength
-				: _doorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
+				: Settings.DoorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
 
 			Vector2 finalDirection = direction ?? GetStepDirection();
 			List<Door> doors = World.GetNearestDoors(Center, radius)

@@ -77,7 +77,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			// Check if any objects are standing before the player.
-			IEnumerable<Entity> objects = GetItemsAndCharactersBefore(_objectManipulationRadius);
+			IEnumerable<Entity> objects = GetItemsAndCharactersBefore(Settings.ObjectManipulationRadius);
 			if (objects.IsNullOrEmpty())
 			{
 				NothingFound();
@@ -348,7 +348,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			UsableObjectsModel objects = GetUsableObjectsBefore(_objectManipulationRadius);
+			UsableObjectsModel objects = GetUsableObjectsBefore(Settings.ObjectManipulationRadius);
 			if (objects.Result == UsableObjectsModel.ResultType.NothingFound)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
 			else if (objects.Result == UsableObjectsModel.ResultType.Unusable)
@@ -471,7 +471,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			PickableItemsModel items = GetPickableItemsBefore(_objectManipulationRadius);
+			PickableItemsModel items = GetPickableItemsBefore(Settings.ObjectManipulationRadius);
 			if (items.Result == PickableItemsModel.ResultType.NothingFound)
 			{
 				PickUpObjectResult.ResultType result = PickUpObjectResult.ResultType.NothingFound;
@@ -1220,7 +1220,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			Door door = GetDoorBefore(null, false, Zone);
-			UsableObjectsModel objects = GetUsableObjectsBefore(_objectManipulationRadius);
+			UsableObjectsModel objects = GetUsableObjectsBefore(Settings.ObjectManipulationRadius);
 
 			if (door != null)
 			{
