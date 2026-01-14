@@ -450,6 +450,13 @@ namespace Game.UI
 							prompt,
 	searchIndex: 0,
 								wrappingAllowed: false,
+								introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 							menuClosed: (option) => HandleQuitGameMenu(option == 0));
 			WindowHandler.Menu(parameters);
 		}
