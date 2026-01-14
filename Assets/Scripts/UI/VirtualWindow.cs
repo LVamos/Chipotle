@@ -45,7 +45,7 @@ namespace Game.UI
 		/// <summary>
 		/// Key commands and their handlers
 		/// </summary>
-		protected Dictionary<KeyboardInput, Action> _shortcuts = new();
+		protected Dictionary<KeyboardInput, Action> _keyboardShortcuts = new();
 
 		/// <summary>
 		/// Indicates if the window is closed
@@ -85,7 +85,7 @@ namespace Game.UI
 				Sounds.MuteSpeech();
 
 			Action action = null;
-			if (_shortcuts != null && _shortcuts.TryGetValue(shortcut, out action))
+			if (_keyboardShortcuts != null && _keyboardShortcuts.TryGetValue(shortcut, out action))
 				action();
 		}
 
@@ -111,7 +111,7 @@ namespace Game.UI
 		protected void RegisterShortcuts(params (KeyboardInput shortcut, Action action)[] shortcuts)
 		{
 			foreach ((KeyboardInput shortcut, Action action) shortcut in shortcuts)
-				_shortcuts[shortcut.shortcut] = shortcut.action;
+				_keyboardShortcuts[shortcut.shortcut] = shortcut.action;
 		}
 
 		protected const float _defaultVolume = 1;
