@@ -40,10 +40,10 @@ public class DualSenseHandler : MonoBehaviour
 	// ===== DPad =====
 	private void HandleDPad()
 	{
-		CheckDPad(DualSenseDPad.Up, gamepad.dpad.up);
-		CheckDPad(DualSenseDPad.Down, gamepad.dpad.down);
-		CheckDPad(DualSenseDPad.Left, gamepad.dpad.left);
-		CheckDPad(DualSenseDPad.Right, gamepad.dpad.right);
+		CheckDPad(DualSenseDPad.DPadUp, gamepad.dpad.up);
+		CheckDPad(DualSenseDPad.DPadDown, gamepad.dpad.down);
+		CheckDPad(DualSenseDPad.DPadLeft, gamepad.dpad.left);
+		CheckDPad(DualSenseDPad.DPadRight, gamepad.dpad.right);
 	}
 
 	private static void CheckDPad(DualSenseDPad dpad, ButtonControl control)

@@ -5,9 +5,9 @@
 	/// </summary>
 	public enum DualSenseDPad
 	{
-		Up,
-		Down,
-		Left,
-		Right
+		DPadUp,
+		DPadDown,
+		DPadLeft,
+		DPadRight
 	}
 }

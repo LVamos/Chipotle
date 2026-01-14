@@ -1,11 +1,13 @@
 ﻿using DavyKager;
 
+using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 
 using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.InputSystem.DualShock.LowLevel;
 
 namespace Game.UI
 {
@@ -175,6 +177,17 @@ namespace Game.UI
 				(new KeyboardInput(KeyCode.RightArrow), NextItem),
 				(new KeyboardInput(KeyCode.Return), ActivateItem),
 				(new KeyboardInput(KeyCode.Escape), Quit)
+			);
+
+			RegisterDualSenseShortcuts(
+				(new ("R1"), LastItem),
+				(new ("L1"), FirstItem),
+				(new ("DPadUp"), PreviousItem),
+				(new ("DPadLeft"), PreviousItem),
+				(new ("DPadDown"), NextItem),
+				(new ("DPadRight"), NextItem),
+				(new ("Cross"), ActivateItem),
+				(new ("Circle"), Quit)
 			);
 		}
 

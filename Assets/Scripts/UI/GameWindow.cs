@@ -462,6 +462,10 @@ namespace Game.UI
 				(new(KeyCode.Escape), QuitGameMenu),
 				(new(KeyboardModifiers.Control, KeyCode.Y), MainScript.SendFeedback)
 			);
+
+			RegisterDualSenseShortcuts(
+			(new("Circle"), QuitGameMenu)
+		);
 		}
 
 		/// <summary>
