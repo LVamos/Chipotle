@@ -1,4 +1,5 @@
-﻿using Game.Controls.Keyboard;
+﻿using Game.Controls.DualSense;
+using Game.Controls.Keyboard;
 using Game.Entities.Characters.Chipotle;
 using Game.Messaging.Events.Input;
 using Game.Messaging.Events.Sound;
@@ -23,13 +24,17 @@ namespace Game.Entities.Characters.Components
 		public override void Initialize()
 		{
 			base.Initialize();
-			RegisterShortcuts();
+			RegisterKeyboardShortcuts();
+			RegisterDualSenseShortcuts();
 		}
+
 		/// <summary>
 		/// Registered keyboard shortcuts and corresponding actions
 		/// </summary>
 		[ProtoIgnore]
-		protected Dictionary<KeyboardInput, Action> _shortcuts;
+		protected Dictionary<KeyboardInput, Action> _keyboardShortcuts;
+
+		protected Dictionary<DualSenseInput, Action> _dualsenseShortcuts;
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -39,7 +44,8 @@ namespace Game.Entities.Characters.Components
 		{
 			switch (message)
 			{
-				case KeyPressed kp: OnKeyDown(kp); break;
+				case DualSenseKeyPressed m: OnDualsenseKeyPressed(m); break;
+				case KeyPressed kp: OnKeyPressed(kp); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
 				default: base.HandleMessage(message); break;
@@ -50,24 +56,45 @@ namespace Game.Entities.Characters.Components
 		/// Processes the KeyDown message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnKeyDown(KeyPressed message)
+		protected virtual void OnKeyPressed(KeyPressed message)
 		{
-			if (_shortcuts == null)
-				RegisterShortcuts();
+			if (_keyboardShortcuts == null)
+				RegisterKeyboardShortcuts();
 
-			if (_shortcuts != null && _shortcuts.TryGetValue(message.Shortcut, out Action action))
+			if (_keyboardShortcuts != null && _keyboardShortcuts.TryGetValue(message.Shortcut, out Action action))
 				action();
 		}
+
+		protected virtual void OnDualsenseKeyPressed(DualSenseKeyPressed message)
+		{
+			if (_dualsenseShortcuts== null)
+				RegisterDualSenseShortcuts();
+
+			if (_dualsenseShortcuts!= null && _dualsenseShortcuts.TryGetValue(message.Shortcut, out Action action))
+				action();
+		}
+
 
 		/// <summary>
 		/// registers keyboard shotctus for the component.
 		/// </summary>
-		protected virtual void RegisterShortcuts() => _shortcuts ??= new();
+		protected virtual void RegisterKeyboardShortcuts() => _keyboardShortcuts ??= new();
+
+		protected virtual void RegisterDualSenseShortcuts() => _dualsenseShortcuts??= new();
+
+		protected void AddDualSenseShortcuts(Dictionary<DualSenseInput, Action> shortcuts)
+		{
+			_dualsenseShortcuts = _dualsenseShortcuts.Concat(shortcuts)
+				.GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+		}
 
 		/// <summary>
 		/// Registers keyboard shortcuts and corresponding actions.
 		/// </summary>
 		/// <param name="shortcuts">Set of shortcuts to be registered</param>
-		protected void AddShortcuts(Dictionary<KeyboardInput, Action> shortcuts) => _shortcuts = _shortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+		protected void AddKeyboardShortcuts(Dictionary<KeyboardInput, Action> shortcuts)
+		{
+			_keyboardShortcuts = _keyboardShortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+		}
 	}
 }

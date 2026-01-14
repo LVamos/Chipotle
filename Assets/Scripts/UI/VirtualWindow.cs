@@ -144,6 +144,8 @@ namespace Game.UI
 
 		public virtual void OnKeyDown(DualSenseInput input)
 		{
+			Sounds.MuteSpeech();
+
 			Action action = null;
 			if (_dualsenseShortcuts!= null && _dualsenseShortcuts.TryGetValue(input, out action))
 				action();

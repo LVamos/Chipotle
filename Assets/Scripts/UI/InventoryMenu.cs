@@ -86,6 +86,7 @@ namespace Game.UI
 			base.Initialize(remainingParams);
 
 			_menuClosed = parameters.MenuClosed;
+
 			// Prepare the menu items and sort them by picking time.
 			_inventory = parameters.Inventory;
 			_items =
@@ -99,6 +100,12 @@ namespace Game.UI
 				(new(KeyboardModifiers.Control, KeyCode.Return), PlaceItem),
 				(new(KeyboardModifiers.ControlShift, KeyCode.Return), ApplyItemToTarget)
 			);
+
+			RegisterDualSenseShortcuts(
+			(new("Cross"), UseObject),
+			(new("R1"), PlaceItem),
+			(new("L1"), ApplyItemToTarget)
+		);
 		}
 
 		private void ApplyItemToTarget()

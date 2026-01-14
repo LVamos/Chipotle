@@ -1,4 +1,6 @@
-﻿using Game.Entities.Characters.Components;
+﻿using Game.Entities.Characters.Chipotle;
+using Game.Entities.Characters.Components;
+using Game.Messaging.Events.Input;
 using Game.Messaging.Events.Sound;
 using Game.Terrain;
 
@@ -43,6 +45,7 @@ namespace Game.Messaging
 		/// <param name="message">The message to be received</param>
 		public virtual void TakeMessage(Message message)
 		{
+			//test
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 

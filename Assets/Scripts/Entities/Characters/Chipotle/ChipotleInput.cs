@@ -1,4 +1,7 @@
-﻿using Game.Controls;
+﻿using Assets.Scripts.Messaging.Events.Input;
+
+using Game.Controls;
+using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Messaging.Commands;
 using Game.Messaging.Commands.GameInfo;
@@ -88,8 +91,10 @@ namespace Game.Entities.Characters.Chipotle
 			switch (message)
 			{
 				case GameMenuOptionselected m: OnGameMenuOptionselected(m); break;
-				case KeyReleased kr: OnKeyUp(kr); break;
-				case KeyPressed m: OnKeyDown(m); break;
+				case KeyReleased kr: OnKeyReleased(kr); break;
+				case KeyPressed m: OnKeyPressed(m); break;
+				case DualSenseKeyPressed m: OnDualsenseKeyPressed(m); break;
+				case DualSenseKeyReleased m: OnDualsenseKeyReleased(m); break;
 				default: base.HandleMessage(message); break;
 			}
 		}
@@ -111,11 +116,11 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		protected override void RegisterShortcuts()
+		protected override void RegisterKeyboardShortcuts()
 		{
-			base.RegisterShortcuts();
+			base.RegisterKeyboardShortcuts();
 
-			AddShortcuts(
+			AddKeyboardShortcuts(
 				new()
 				{
 					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
@@ -153,6 +158,56 @@ namespace Game.Entities.Characters.Chipotle
 			);
 
 		}
+
+		protected override void RegisterDualSenseShortcuts()
+		{
+			base.RegisterDualSenseShortcuts();
+
+			AddDualSenseShortcuts(
+				new()
+				{
+					//test
+					//[new("TouchpadButton")] = SayAbsoluteCoordinates,
+					//[new(KeyboardModifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
+					//[new(KeyCode.F5)] = CreatePredefinedSave,
+					//test
+					//[new("RightStickUp")] = SayCharacters,
+					//[new("Create")] = ListCharacters,
+					[new("TouchpadButton")] = SayNavigatedObjectLocation,
+					[new("L1")] = ExploreItem,
+					[new("L2")] = SayZoneDescription,
+					[new("R1")] = RunInventoryMenu,
+					[new("R2")] = PickUpItem,
+					[new("Options")] = GameMenu,
+					//test
+					//[new(KeyCode.L)] = SayZoneSize,
+					[new("LeftStickUp")] = ListExits,
+					[new("LeftStickDown")] = ListItems,
+					//test
+					//[new(KeyCode.S)] = SayOrientation,
+					[new("Square")] = SayExits,
+					[new("TouchpadButton")] = StopCutscene,
+					//test
+					//[new(KeyCode.T)] = TerrainInfo,
+					//[new(KeyCode.B)] = SayVisitedRegion,
+					[new("DPadLeft")] = GoLeft,
+					[new("DPadRight")] = GoRight,
+					[new("Triangle")] = SayItems,
+					//test
+					//[new(KeyCode.K)] = SayZoneName,
+					[new("DPadUp")] = GoForward,
+					[new("DPadDown")] = GoBack,
+					[new("RightStickLeft")] = TurnLeft,
+					[new("RightStickRight")] = TurnRight,
+					[new("LeftStickLeft")] = TurnSharplyLeft,
+					[new("LeftStickRight")] = TurnSharplyRight,
+					[new("RightStickDown")] = TurnAround,
+					[new("Cross")] = Interact,
+				}
+			);
+
+		}
+
 
 		/// <summary>
 		/// Instruucts the sound component to read description of the current zone.
@@ -274,7 +329,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// Processes the KeyUp message.
 		/// </summary>
 		/// <param name="message">The message</param>
-		protected void OnKeyUp(KeyReleased message)
+		protected void OnKeyReleased(KeyReleased message)
 		{
 			if (_cutsceneInProgress)
 				return;
@@ -289,6 +344,25 @@ namespace Game.Entities.Characters.Chipotle
 				new (KeyCode.DownArrow),
 				new (false, true, false, KeyCode.LeftArrow),
 				new (false, true, false, KeyCode.RightArrow)
+			};
+
+			if (walkCommands.Contains(message.Shortcut))
+				StopWalk();
+		}
+
+		protected void OnDualsenseKeyReleased(DualSenseKeyReleased message)
+		{
+			if (_cutsceneInProgress)
+				return;
+
+			HashSet<DualSenseInput> walkCommands = new()
+			{
+				new ("DPadLeft"),
+				new ("DPadRight"),
+				new ("RightStickLeft"),
+				new ("RightStickRight"),
+				new ("DPadUp"),
+				new ("DPadDown")
 			};
 
 			if (walkCommands.Contains(message.Shortcut))
@@ -398,17 +472,27 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void SayVisitedRegion() => InnerMessage(new SayVisitedRegion(this));
 
+		protected override void OnDualsenseKeyPressed(DualSenseKeyPressed message)
+		{
+			if (_cutsceneInProgress
+				&& message.Shortcut != new DualSenseInput("TouchpadButton"))
+				return;
+
+			base.OnDualsenseKeyPressed(message);
+		}
+
+
 		/// <summary>
 		/// Processes the KeyDown message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnKeyDown(KeyPressed message)
+		protected override void OnKeyPressed(KeyPressed message)
 		{
 			if (_cutsceneInProgress
 				&& message.Shortcut != new KeyboardInput(KeyCode.Space))
 				return;
 
-			base.OnKeyDown(message);
+			base.OnKeyPressed(message);
 		}
 	}
 }

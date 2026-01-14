@@ -1,10 +1,12 @@
 ﻿using Assets.Scripts.Messaging.Commands.Characters;
+using Assets.Scripts.Messaging.Events.Input;
 using Assets.Scripts.Models;
 using Assets.Scripts.Narration.WorldDescribers;
 
 using DavyKager;
 
 using Game.Controls;
+using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Entities;
 using Game.Entities.Items;
@@ -468,6 +470,14 @@ namespace Game.UI
 		);
 		}
 
+		public override void OnKeyDown(DualSenseInput shortcut)
+		{
+			base.OnKeyDown(shortcut);
+
+			if (World.GameInProgress)
+				World.Player.TakeMessage(new DualSenseKeyPressed(this, shortcut));
+		}
+
 		/// <summary>
 		/// Processes the KeyDown message.
 		/// </summary>
@@ -487,8 +497,21 @@ namespace Game.UI
 		public override void OnKeyUp(KeyboardInput shortcut)
 		{
 			if (World.GameInProgress && World.Player != null)
-				World.Player.TakeMessage(new KeyReleased(this, shortcut));
+			{
+				KeyReleased message = new(this, shortcut);
+				World.Player.TakeMessage(message);
+			}
 		}
+
+		public override void OnKeyUp(DualSenseInput shortcut)
+		{
+			if (World.GameInProgress && World.Player != null)
+			{
+				DualSenseKeyReleased message = new(this, shortcut);
+				World.Player.TakeMessage(message);
+			}
+		}
+
 
 		/// <summary>
 		/// Quits the game.
