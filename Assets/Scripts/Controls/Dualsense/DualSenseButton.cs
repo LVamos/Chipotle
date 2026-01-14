@@ -5,6 +5,7 @@
 	/// </summary>
 	public enum DualSenseButton
 	{
+		TouchpadButton,
 		Cross,      // X
 		Circle,
 		Square,
@@ -20,7 +21,6 @@
 		Options,
 		Create,
 		PS,
-		TouchpadButton,
 		Mute
 	}
 }

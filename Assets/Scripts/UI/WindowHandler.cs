@@ -171,14 +171,13 @@ namespace Game.UI
 			ActiveWindow.OnActivate(); // Let new window react on activation
 		}
 
-		public static void OnKeyDown(DualSenseInput dualSenseInput)
+		public static void OnKeyDown(DualSenseInput input)
 		{
-			throw new NotImplementedException();
+			Tolk.Speak(input.ToString());
 		}
 
-		internal static void OnKeyUp(DualSenseInput dualSenseInput)
+		public static void OnKeyUp(DualSenseInput input)
 		{
-			throw new NotImplementedException();
 		}
 	}
 }
