@@ -70,7 +70,7 @@ namespace Game.UI
 		/// </summary>
 		private void OnOpenGameMenu(OpenGameMenu message)
 		{
-			List<List<string>> items = 
+			List<List<string>> items =
 				_gameMenuOptions
 				.Select(c => new List<string>() { c.Key }).ToList();
 			Action<int> menuHandler = (option) =>
@@ -89,7 +89,7 @@ namespace Game.UI
 
 		private void HandleGameMenu(List<List<string>> items, int option, MessagingObject initiator)
 		{
-			if(option==-1)
+			if (option == -1)
 			{
 				Tolk.Speak("hra");
 				return;
@@ -331,7 +331,7 @@ namespace Game.UI
 		private void OnSelectNavigableItem(SelectNavigableItem message)
 		{
 			const string prompt = "Okolní předměty";
-			List<NavigableObjectInfo> objectInfo = 
+			List<NavigableObjectInfo> objectInfo =
 				message.Items
 				.Cast<NavigableObjectInfo>()
 				.ToList();
@@ -399,10 +399,10 @@ namespace Game.UI
 			_messagingEnabled = true;
 			_exitDescriber = new();
 			_itemDescriber = new();
-			_characterDescriber= new();
+			_characterDescriber = new();
 
 			RegisterShortcuts(
-				(new(KeyCode.Escape), QuitGame),
+				(new(KeyCode.Escape), QuitGameMenu),
 				(new(KeyboardModifiers.Control, KeyCode.Y), MainScript.SendFeedback)
 			);
 		}
@@ -432,6 +432,36 @@ namespace Game.UI
 		/// <summary>
 		/// Quits the game.
 		/// </summary>
-		private void QuitGame() => World.QuitGame();
+		private void QuitGame()
+		{
+			World.QuitGame();
+		}
+
+		private void QuitGameMenu()
+		{
+			const string prompt = "Chceš ukončit hru?";
+			List<List<string>> items = new()
+			{
+			new List<string>(){ "Ano"},
+			new List<string>(){ "Ne"}
+			};
+			MenuParameters parameters = new(
+							items,
+							prompt,
+	searchIndex: 0,
+								wrappingAllowed: false,
+							menuClosed: (option) => HandleQuitGameMenu(option == 0));
+			WindowHandler.Menu(parameters);
+		}
+
+		private void HandleQuitGameMenu(bool quit)
+		{
+			if (quit)
+			{
+				Tolk.Speak("Tak si naser");
+				QuitGame();
+			}
+			else Tolk.Speak("Tak si hraj, tu máš kohouta.");
+		}
 	}
 }
