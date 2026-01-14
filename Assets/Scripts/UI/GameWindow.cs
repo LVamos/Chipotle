@@ -83,6 +83,13 @@ namespace Game.UI
 				" ",
 				0,
 				false,
+												introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 				menuClosed: menuHandler);
 			WindowHandler.Menu(parameters);
 		}
@@ -146,6 +153,13 @@ namespace Game.UI
 							names,
 							prompt,
 							wrappingAllowed: false,
+								introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 							menuClosed: action);
 			WindowHandler.Menu(parameters);
 		}
@@ -224,6 +238,13 @@ namespace Game.UI
 							names,
 							prompt,
 							wrappingAllowed: false,
+															introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 							menuClosed: action);
 			WindowHandler.Menu(parameters);
 		}
@@ -282,6 +303,13 @@ namespace Game.UI
 				names,
 				prompt,
 				wrappingAllowed: false,
+								introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 				menuClosed: (option) => HandleInteractionMenu(message.Sender as MessagingObject, message.Objects, option));
 			WindowHandler.Menu(parameters);
 		}
@@ -298,6 +326,13 @@ namespace Game.UI
 							names,
 							prompt,
 							wrappingAllowed: false,
+								introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 							menuClosed: (option) => HandleExploringMenu(message.Sender as MessagingObject, message.Objects, option));
 			WindowHandler.Menu(parameters);
 		}
@@ -320,6 +355,13 @@ namespace Game.UI
 							prompt,
 	searchIndex: 2,
 								wrappingAllowed: false,
+								introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 							menuClosed: (option) => HandleNavigableExitMenu(message.Sender as MessagingObject, message.Exits, option));
 			WindowHandler.Menu(parameters);
 		}
@@ -340,6 +382,14 @@ namespace Game.UI
 							descriptions,
 							prompt,
 								wrappingAllowed: false,
+																introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
+
 							menuClosed: (option) => HandleNavigableItemMenu(message.Sender as MessagingObject, message.Items, option));
 			WindowHandler.Menu(parameters);
 		}
@@ -360,6 +410,13 @@ namespace Game.UI
 							descriptions,
 							prompt,
 								wrappingAllowed: false,
+								introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
 							menuClosed: (option) => HandleNavigableCharacterMenu(message.Sender as MessagingObject, message.Characters, option));
 			WindowHandler.Menu(parameters);
 		}

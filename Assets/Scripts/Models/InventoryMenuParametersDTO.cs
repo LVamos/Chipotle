@@ -13,7 +13,8 @@ namespace Assets.Scripts.Models
 
 		public InventoryMenuParametersDTO(
 			List<Item> items,
-			Action<int, InventoryAction> menuClosed)
+			Action<int, InventoryAction> menuClosed
+			)
 		{
 			Inventory = items ?? throw new ArgumentNullException(nameof(items));
 			MenuClosed = menuClosed ?? throw new ArgumentNullException(nameof(menuClosed));

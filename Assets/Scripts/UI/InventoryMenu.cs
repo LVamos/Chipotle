@@ -68,9 +68,24 @@ namespace Game.UI
 		/// </summary>
 		public void Initialize(InventoryMenuParametersDTO parameters)
 		{
-			base.Initialize(new(null, "inventář", " ", 0, false));
-			_menuClosed = parameters.MenuClosed;
+			MenuParameters remainingParams =
+				new(
+					null,
+					"inventář",
+					" ",
+					0,
+					false,
+													introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge"
+					);
+			base.Initialize(remainingParams);
 
+			_menuClosed = parameters.MenuClosed;
 			// Prepare the menu items and sort them by picking time.
 			_inventory = parameters.Inventory;
 			_items =
@@ -88,7 +103,7 @@ namespace Game.UI
 
 		private void ApplyItemToTarget()
 		{
-			bool usable = SelectedItem.Usable || SelectedItem.UsableWith!=null;
+			bool usable = SelectedItem.Usable || SelectedItem.UsableWith != null;
 			if (!usable)
 			{
 				Tolk.Speak("Tohle se použít nedá");
