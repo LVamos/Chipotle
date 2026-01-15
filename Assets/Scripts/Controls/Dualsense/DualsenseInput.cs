@@ -1,60 +1,67 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Game.Controls.DualSense
 {
 	public struct DualSenseInput : IEquatable<DualSenseInput>
 	{
-		public DualSenseButton? Button { get; }
-		public DualSenseStick? Stick { get; }
-		public DualSenseStickDirection? StickDirection { get; }
-		public DualSenseTrigger? Trigger { get; }
-		public DualSenseDPad? DPad { get; }
+		public HashSet<string> Keys { get; }
 		public float? TriggerThreshold { get; }
 
 		public DualSenseInput(string identifier)
 		{
-			Button = null;
-			Stick = null;
-			StickDirection = null;
-			Trigger = null;
-			DPad = null;
+			if (string.IsNullOrWhiteSpace(identifier))
+				throw new ArgumentException("DualSense input identifier cannot be null or empty.", nameof(identifier));
 
-			TriggerThreshold = null;
+			HashSet<string> keys = new(StringComparer.OrdinalIgnoreCase);
+			bool triggerDetected = false;
+			float? triggerThreshold = null;
 
-			if (Enum.TryParse(identifier, true, out DualSenseButton button))
+			string[] tokens = identifier.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+			foreach (string rawToken in tokens)
 			{
-				Button = button;
-				return;
+				string token = rawToken.Trim();
+				if (token.Length == 0)
+					continue;
+
+				DualSenseStick parsedStick;
+				DualSenseStickDirection parsedDirection;
+				if (TryParseStickToken(token, out parsedStick, out parsedDirection))
+				{
+					keys.Add($"{parsedStick}Stick{parsedDirection}");
+					continue;
+				}
+
+				if (Enum.TryParse(token, true, out DualSenseTrigger parsedTrigger))
+				{
+					triggerDetected = true;
+					if (triggerThreshold == null)
+						triggerThreshold = 1.0f;
+					keys.Add(parsedTrigger.ToString());
+					continue;
+				}
+
+				if (Enum.TryParse(token, true, out DualSenseDPad parsedDPad))
+				{
+					keys.Add(parsedDPad.ToString());
+					continue;
+				}
+
+				if (Enum.TryParse(token, true, out DualSenseButton parsedButton))
+				{
+					keys.Add(parsedButton.ToString());
+					continue;
+				}
+
+				throw new ArgumentException($"Unknown DualSense input identifier: {token}", nameof(identifier));
 			}
 
-			if (Enum.TryParse(identifier, true, out DualSenseTrigger trigger))
-			{
-				Trigger = trigger;
+			Keys = keys;
+			TriggerThreshold = triggerThreshold;
+
+			if (triggerDetected && TriggerThreshold == null)
 				TriggerThreshold = 1.0f;
-				return;
-			}
-
-			if (Enum.TryParse(identifier, true, out DualSenseDPad dpad))
-			{
-				DPad = dpad;
-				return;
-			}
-
-			if (identifier.StartsWith("LeftStick", StringComparison.OrdinalIgnoreCase))
-			{
-				Stick = DualSenseStick.Left;
-				StickDirection = ParseStickDirection(identifier.Substring("LeftStick".Length));
-				return;
-			}
-
-			if (identifier.StartsWith("RightStick", StringComparison.OrdinalIgnoreCase))
-			{
-				Stick = DualSenseStick.Right;
-				StickDirection = ParseStickDirection(identifier.Substring("RightStick".Length));
-				return;
-			}
-
-			throw new ArgumentException($"Unknown DualSense input identifier: {identifier}");
 		}
 
 		private static DualSenseStickDirection ParseStickDirection(string suffix)
@@ -64,15 +71,32 @@ namespace Game.Controls.DualSense
 			throw new ArgumentException($"Invalid stick direction: {suffix}");
 		}
 
+		private static bool TryParseStickToken(string token, out DualSenseStick stick, out DualSenseStickDirection direction)
+		{
+			if (token.StartsWith("LeftStick", StringComparison.OrdinalIgnoreCase))
+			{
+				stick = DualSenseStick.Left;
+				direction = ParseStickDirection(token.Substring("LeftStick".Length));
+				return true;
+			}
+
+			if (token.StartsWith("RightStick", StringComparison.OrdinalIgnoreCase))
+			{
+				stick = DualSenseStick.Right;
+				direction = ParseStickDirection(token.Substring("RightStick".Length));
+				return true;
+			}
+
+			stick = default;
+			direction = default;
+			return false;
+		}
+
 		// ======= Equals =======
 		public bool Equals(DualSenseInput other)
 		{
-			return Button == other.Button &&
-				   Stick == other.Stick &&
-				   StickDirection == other.StickDirection &&
-				   Trigger == other.Trigger &&
-				   DPad == other.DPad &&
-				   TriggerThreshold == other.TriggerThreshold;
+			bool keysEqual = Keys != null && other.Keys != null && Keys.SetEquals(other.Keys);
+			return keysEqual && TriggerThreshold == other.TriggerThreshold;
 		}
 
 		public override bool Equals(object obj)
@@ -85,12 +109,15 @@ namespace Game.Controls.DualSense
 		{
 			unchecked
 			{
+				int keysHash = 0;
+				if (Keys != null)
+				{
+					foreach (string key in Keys)
+						keysHash ^= key.ToLowerInvariant().GetHashCode();
+				}
+
 				int hash = 17;
-				hash = hash * 31 + Button.GetHashCode();
-				hash = hash * 31 + Stick.GetHashCode();
-				hash = hash * 31 + StickDirection.GetHashCode();
-				hash = hash * 31 + Trigger.GetHashCode();
-				hash = hash * 31 + DPad.GetHashCode();
+				hash = hash * 31 + keysHash;
 				hash = hash * 31 + TriggerThreshold.GetHashCode();
 				return hash;
 			}
@@ -99,15 +126,9 @@ namespace Game.Controls.DualSense
 		// ======= ToString =======
 		public override string ToString()
 		{
-			if (Button.HasValue)
-				return Button.Value.ToString();
-			if (Trigger.HasValue)
-				return Trigger.Value.ToString();
-			if (DPad.HasValue)
-				return $"DPad{DPad.Value}";
-			if (Stick.HasValue && StickDirection.HasValue)
-				return $"{Stick}Stick{StickDirection}";
-			return "Unknown";
+			List<string> parts = Keys != null ? new(Keys) : new List<string>();
+			parts.Sort(StringComparer.OrdinalIgnoreCase);
+			return parts.Count > 0 ? string.Join(", ", parts) : "Unknown";
 		}
 
 		public static bool operator ==(DualSenseInput left, DualSenseInput right) => left.Equals(right);
