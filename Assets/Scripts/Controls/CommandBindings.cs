@@ -1,11 +1,23 @@
-﻿namespace Game.Controls
+﻿using Game.Controls.DualSense;
+using Game.Controls.Keyboard;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Game.Controls
 {
-	/// <summary>
-	/// Contains keyboard and Dual Sense bindings
-	/// </summary>
 	public class CommandBindings
 	{
-		public string Keyboard { get; set; }
-		public string DualSense { get; set; }
+		public KeyboardInput? Keyboard;
+		public DualSenseInput? DualSense;
+
+		public CommandBindings(KeyboardInput? keyboard, DualSenseInput? dualSense)
+		{
+			Keyboard = keyboard;
+			DualSense = dualSense;
+		}
 	}
 }

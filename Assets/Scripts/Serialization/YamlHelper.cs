@@ -11,6 +11,29 @@ namespace Game.Serialization
 {
 	public static class YamlHelper
 	{
+		private static ISerializer _serializer;
+
+		/// <summary>
+		/// Serializes data to a YAML file at the given path.
+		/// </summary>
+		public static void SaveToFile<T>(string path, T data)
+		{
+			try
+			{
+				string directoryPath = Path.GetDirectoryName(path);
+				if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
+					Directory.CreateDirectory(directoryPath);
+
+				string yamlText = _serializer.Serialize(data);
+				File.WriteAllText(path, yamlText);
+			}
+			catch (Exception e)
+			{
+				Logger.LogError("Chyba při serializaci do YAML", e.ToString());
+				throw;
+			}
+		}
+
 		public static void Initialize()
 		{
 			_deserializer = new DeserializerBuilder()

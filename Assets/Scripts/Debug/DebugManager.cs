@@ -385,7 +385,7 @@ namespace Game.Debug
 			string path = Path.Combine(MainScript.DebugPath, _commandMapPath);
 			try
 			{
-				Dictionary<string, CommandBindings> rawMap = null;
+				Dictionary<string, YamlCommandBindings> rawMap = null;
 				YamlHelper.LoadFromFile(path, out rawMap);
 
 				// Get all DebugManager methods with DebugCommand attribute
@@ -403,7 +403,7 @@ namespace Game.Debug
 				_keyboardCommands.Clear();
 				_gamepadCommands.Clear();
 
-				foreach (KeyValuePair<string, CommandBindings> pair in rawMap)
+				foreach (KeyValuePair<string, YamlCommandBindings> pair in rawMap)
 				{
 					// Convert string key to DebugCommand enum
 					if (!Enum.TryParse<DebugCommand>(pair.Key, out DebugCommand command))

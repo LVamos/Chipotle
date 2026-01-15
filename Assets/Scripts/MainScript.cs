@@ -35,6 +35,11 @@ namespace Game
 		/// Path to a YAML file with item definitions.
 		/// </summary>
 		public static string ItemsPath => Path.Combine(DataPath, "Items/items").Replace("\\", "/");
+
+		public static string DefaultInputMappingPath => Path.Combine(DataPath, "INput/Mapping").Replace("\\", "/");
+
+		public static string UserInputPath => Path.Combine(Application.persistentDataPath, "InputBindings.yaml");
+
 		public static string ZoneLoopsPath
 		{
 			get
