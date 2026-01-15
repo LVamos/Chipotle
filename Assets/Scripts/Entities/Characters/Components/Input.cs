@@ -24,8 +24,7 @@ namespace Game.Entities.Characters.Components
 		public override void Initialize()
 		{
 			base.Initialize();
-			RegisterKeyboardShortcuts();
-			RegisterDualSenseShortcuts();
+			AddCommands();
 		}
 
 		/// <summary>
@@ -59,7 +58,7 @@ namespace Game.Entities.Characters.Components
 		protected virtual void OnKeyPressed(KeyPressed message)
 		{
 			if (_keyboardShortcuts == null)
-				RegisterKeyboardShortcuts();
+				AddCommands();
 
 			if (_keyboardShortcuts != null && _keyboardShortcuts.TryGetValue(message.Shortcut, out Action action))
 				action();
@@ -68,7 +67,7 @@ namespace Game.Entities.Characters.Components
 		protected virtual void OnDualsenseKeyPressed(DualSenseKeyPressed message)
 		{
 			if (_dualsenseShortcuts== null)
-				RegisterDualSenseShortcuts();
+				AddCommands();
 
 			if (_dualsenseShortcuts!= null && _dualsenseShortcuts.TryGetValue(message.Shortcut, out Action action))
 				action();
@@ -78,9 +77,11 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// registers keyboard shotctus for the component.
 		/// </summary>
-		protected virtual void RegisterKeyboardShortcuts() => _keyboardShortcuts ??= new();
-
-		protected virtual void RegisterDualSenseShortcuts() => _dualsenseShortcuts??= new();
+		protected virtual void AddCommands()
+		{
+			_keyboardShortcuts ??= new();
+			_dualsenseShortcuts = new();
+		}
 
 		protected void AddDualSenseShortcuts(Dictionary<DualSenseInput, Action> shortcuts)
 		{

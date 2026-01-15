@@ -5,8 +5,13 @@ using System;
 namespace Game.Messaging.Events.Input
 {
 	[Serializable]
-	public class KeyReleased : KeyPressed
+	public class KeyReleased : Message
 	{
-		public KeyReleased(object sender, KeyboardInput shortcut) : base(sender, shortcut) { }
+		public readonly KeyboardInput Shortcut;
+
+		public KeyReleased(object sender, KeyboardInput shortcut) : base(sender) 
+		{
+			Shortcut = shortcut;
+		}
 	}
 }

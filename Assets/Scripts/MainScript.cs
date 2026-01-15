@@ -1,6 +1,7 @@
 using DavyKager;
 
 using Game.Audio;
+using Game.Controls;
 using Game.Serialization;
 using Game.UI;
 
@@ -36,7 +37,7 @@ namespace Game
 		/// </summary>
 		public static string ItemsPath => Path.Combine(DataPath, "Items/items").Replace("\\", "/");
 
-		public static string DefaultInputMappingPath => Path.Combine(DataPath, "INput/Mapping").Replace("\\", "/");
+		public static string DefaultInputMappingPath => Path.Combine(DataPath, "INput/DefaultLayout").Replace("\\", "/");
 
 		public static string UserInputPath => Path.Combine(Application.persistentDataPath, "InputBindings.yaml");
 
@@ -421,6 +422,7 @@ Application.Quit();
 				ResendErrorReport();
 				Settings.LoadSettings();
 				Sounds.LoadClips();
+				InputConfig.LoadBindings();
 			}
 			catch (Exception ex)
 			{

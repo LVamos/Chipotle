@@ -45,7 +45,7 @@ namespace Game.Controls.Keyboard
 
 			foreach (var part in parts)
 			{
-				var token = part.Trim();
+				string token = part.Trim();
 
 				if (token.Equals("Ctrl", StringComparison.OrdinalIgnoreCase) ||
 					token.Equals("Control", StringComparison.OrdinalIgnoreCase))

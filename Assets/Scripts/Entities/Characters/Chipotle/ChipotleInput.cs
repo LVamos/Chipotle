@@ -20,6 +20,8 @@ using ProtoBuf;
 using System;
 using System.Collections.Generic;
 
+using UnityEditor.ShortcutManagement;
+
 using UnityEngine;
 
 using Input = Game.Entities.Characters.Components.Input;
@@ -46,7 +48,7 @@ namespace Game.Entities.Characters.Chipotle
 			{
 				{ "ResearchItem", ExploreItem },
 				{ "SayZoneDescription", SayZoneDescription },
-				{ "RunInventoryMenu", RunInventoryMenu },
+				{ "RunInventoryMenu", InventoryMenu },
 				{ "Interact", Interact },
 				{ "PickUpItem", PickUpItem },
 				{ "StepForward", StepForward },
@@ -113,101 +115,57 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private const int _keyboardSpeed = 10;
 
+		private void AddShortcut(Command command1, Action command)
+		{
+			CommandBindings shortcut = InputConfig.GetBindings(command1);
+			if (shortcut == null)
+				return;
+
+			if (shortcut.Keyboard != null)
+				_keyboardShortcuts[shortcut.Keyboard.Value] = command;
+			if (shortcut.DualSense != null)
+				_dualsenseShortcuts[shortcut.DualSense.Value] = command;
+		}
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		protected override void RegisterKeyboardShortcuts()
+		protected override void AddCommands()
 		{
-			base.RegisterKeyboardShortcuts();
+			base.AddCommands();
 
-			AddKeyboardShortcuts(
-				new()
-				{
-					[new(false, true, false, KeyCode.C)] = SayAbsoluteCoordinates,
-					[new(KeyboardModifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
-					[new(KeyCode.F5)] = CreatePredefinedSave,
-					[new(KeyCode.Q)] = SayCharacters,
-					[new(KeyboardModifiers.Shift, KeyCode.Q)] = ListCharacters,
-					[new(KeyboardModifiers.Shift, KeyCode.K)] = SayNavigatedObjectLocation,
-					[new(KeyCode.P)] = ExploreItem,
-					[new(KeyCode.R)] = SayZoneDescription,
-					[new(KeyCode.I)] = RunInventoryMenu,
-					[new(KeyboardModifiers.Shift, KeyCode.Return)] = PickUpItem,
-					[new(KeyCode.Tab)] = GameMenu,
-					[new(KeyCode.L)] = SayZoneSize,
-					[new(false, true, false, KeyCode.V)] = ListExits,
-					[new(false, true, false, KeyCode.O)] = ListItems,
-					[new(KeyCode.S)] = SayOrientation,
-					[new(KeyCode.V)] = SayExits,
-					[new(KeyCode.Space)] = StopCutscene,
-					[new(KeyCode.T)] = TerrainInfo,
-					[new(KeyCode.B)] = SayVisitedRegion,
-					[new(KeyboardModifiers.Shift, KeyCode.LeftArrow)] = GoLeft,
-					[new(KeyboardModifiers.Shift, KeyCode.RightArrow)] = GoRight,
-					[new(KeyCode.O)] = SayItems,
-					[new(KeyCode.K)] = SayZoneName,
-					[new(KeyCode.UpArrow)] = GoForward,
-					[new(KeyCode.DownArrow)] = GoBack,
-					[new(KeyCode.LeftArrow)] = TurnLeft,
-					[new(KeyCode.RightArrow)] = TurnRight,
-					[new(KeyboardModifiers.Control, KeyCode.LeftArrow)] = TurnSharplyLeft,
-					[new(KeyboardModifiers.Control, KeyCode.RightArrow)] = TurnSharplyRight,
-					[new(KeyboardModifiers.Control, KeyCode.DownArrow)] = TurnAround,
-					[new(KeyCode.Return)] = Interact,
-				}
-			);
-
+			AddShortcut(Command.GameSayAbsoluteCoordinates, SayAbsoluteCoordinates);
+			AddShortcut(Command.GameLoadPredefinedSave, LoadPredefinedSave);
+			AddShortcut(Command.GameCreatePredefinedSave, CreatePredefinedSave);
+			AddShortcut(Command.GameSayCharacters, SayCharacters);
+			AddShortcut(Command.GameListCharacters, ListCharacters);
+			AddShortcut(Command.GameSayNavigatedObjectLocation, SayNavigatedObjectLocation);
+			AddShortcut(Command.GameExploreItem, ExploreItem);
+			AddShortcut(Command.GameSayZoneDescription, SayZoneDescription);
+			AddShortcut(Command.GameInventoryMenu, InventoryMenu);
+			AddShortcut(Command.GamePickUpItem, PickUpItem);
+			AddShortcut(Command.GameMenu, GameMenu);
+			AddShortcut(Command.GameSayZoneSize, SayZoneSize);
+			AddShortcut(Command.GameListExits, ListExits);
+			AddShortcut(Command.GameListItems, ListItems);
+			AddShortcut(Command.GameSayOrientation, SayOrientation);
+			AddShortcut(Command.GameSayExits, SayExits);
+			AddShortcut(Command.GameStopCutscene, StopCutscene);
+			AddShortcut(Command.GameTerrainInfo, TerrainInfo);
+			AddShortcut(Command.GameSayVisitedRegion, SayVisitedRegion);
+			AddShortcut(Command.GameGoLeft, GoLeft);
+			AddShortcut(Command.GameGoRight, GoRight);
+			AddShortcut(Command.GameSayItems, SayItems);
+			AddShortcut(Command.GameSayZoneName, SayZoneName);
+			AddShortcut(Command.GameGoForward, GoForward);
+			AddShortcut(Command.GameGoBack, GoBack);
+			AddShortcut(Command.GameTurnLeft, TurnLeft);
+			AddShortcut(Command.GameTurnRight, TurnRight);
+			AddShortcut(Command.GameTurnSharplyLeft, TurnSharplyLeft);
+			AddShortcut(Command.GameTurnSharplyRight, TurnSharplyRight);
+			AddShortcut(Command.GameTurnAround, TurnAround);
+			AddShortcut(Command.GameInteract, Interact);
 		}
-
-		protected override void RegisterDualSenseShortcuts()
-		{
-			base.RegisterDualSenseShortcuts();
-
-			AddDualSenseShortcuts(
-				new()
-				{
-					//test
-					//[new("TouchpadButton")] = SayAbsoluteCoordinates,
-					//[new(KeyboardModifiers.Shift, KeyCode.F5)] = LoadPredefinedSave,
-					//[new(KeyCode.F5)] = CreatePredefinedSave,
-					//test
-					//[new("RightStickUp")] = SayCharacters,
-					//[new("Create")] = ListCharacters,
-					[new("TouchpadButton")] = SayNavigatedObjectLocation,
-					[new("L1")] = ExploreItem,
-					[new("L2")] = SayZoneDescription,
-					[new("R1")] = RunInventoryMenu,
-					[new("R2")] = PickUpItem,
-					[new("Options")] = GameMenu,
-					//test
-					//[new(KeyCode.L)] = SayZoneSize,
-					[new("LeftStickUp")] = ListExits,
-					[new("LeftStickDown")] = ListItems,
-					//test
-					//[new(KeyCode.S)] = SayOrientation,
-					[new("Square")] = SayExits,
-					[new("TouchpadButton")] = StopCutscene,
-					//test
-					//[new(KeyCode.T)] = TerrainInfo,
-					//[new(KeyCode.B)] = SayVisitedRegion,
-					[new("DPadLeft")] = GoLeft,
-					[new("DPadRight")] = GoRight,
-					[new("Triangle")] = SayItems,
-					//test
-					//[new(KeyCode.K)] = SayZoneName,
-					[new("DPadUp")] = GoForward,
-					[new("DPadDown")] = GoBack,
-					[new("RightStickLeft")] = TurnLeft,
-					[new("RightStickRight")] = TurnRight,
-					[new("LeftStickLeft")] = TurnSharplyLeft,
-					[new("LeftStickRight")] = TurnSharplyRight,
-					[new("RightStickDown")] = TurnAround,
-					[new("Cross")] = Interact,
-				}
-			);
-
-		}
-
 
 		/// <summary>
 		/// Instruucts the sound component to read description of the current zone.
@@ -257,7 +215,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Runs the inventory menu.
 		/// </summary>
-		protected void RunInventoryMenu() => InnerMessage(new RunInventoryMenu(this));
+		protected void InventoryMenu() => InnerMessage(new RunInventoryMenu(this));
 
 		/// <summary>
 		/// Moves the NPC one step to the right.

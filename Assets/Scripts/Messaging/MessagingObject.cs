@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 namespace Game.Messaging
 {
@@ -45,7 +46,6 @@ namespace Game.Messaging
 		/// <param name="message">The message to be received</param>
 		public virtual void TakeMessage(Message message)
 		{
-			//test
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 
