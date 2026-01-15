@@ -15,6 +15,7 @@ using UnityEngine.InputSystem.Controls;
 public class DualSenseHandler : MonoBehaviour
 {
 	private readonly HashSet<string> _activeKeys = new(StringComparer.OrdinalIgnoreCase);
+	private readonly List<string> _pressedOrder = new();
 	private Gamepad _gamepad;
 
 	// Touchpad swipe tracking
@@ -35,17 +36,24 @@ public class DualSenseHandler : MonoBehaviour
 	private void ProcessInputs()
 	{
 		HashSet<string> pressedKeys = GetPressedKeys();
-		if (!AreSetsEqual(_activeKeys, pressedKeys))
+		List<string> newOrder = BuildNewOrder(pressedKeys);
+		bool setChanged = !AreSetsEqual(_activeKeys, pressedKeys);
+		bool orderChanged = !_pressedOrder.SequenceEqual(newOrder, StringComparer.OrdinalIgnoreCase);
+
+		if (setChanged || orderChanged)
 		{
 			if (_activeKeys.Count > 0)
-				WindowHandler.OnKeyUp(new DualSenseInput(BuildIdentifier(_activeKeys)));
+				WindowHandler.OnKeyUp(new DualSenseInput(BuildIdentifier(_pressedOrder)));
 
 			_activeKeys.Clear();
 			foreach (string key in pressedKeys)
 				_activeKeys.Add(key);
 
+			_pressedOrder.Clear();
+			_pressedOrder.AddRange(newOrder);
+
 			if (_activeKeys.Count > 0)
-				WindowHandler.OnKeyDown(new DualSenseInput(BuildIdentifier(_activeKeys)));
+				WindowHandler.OnKeyDown(new DualSenseInput(BuildIdentifier(_pressedOrder)));
 		}
 	}
 
@@ -151,6 +159,20 @@ public class DualSenseHandler : MonoBehaviour
 			pressed.Add($"Touchpad{_currentSwipe}");
 	}
 
+	private List<string> BuildNewOrder(HashSet<string> pressedKeys)
+	{
+		List<string> newOrder = new();
+		foreach (string key in _pressedOrder)
+			if (pressedKeys.Contains(key))
+				newOrder.Add(key);
+
+		foreach (string key in pressedKeys)
+			if (!ContainsIgnoreCase(newOrder, key))
+				newOrder.Add(key);
+
+		return newOrder;
+	}
+
 	private static bool AreSetsEqual(HashSet<string> first, HashSet<string> second)
 	{
 		if (first == null && second == null)
@@ -160,10 +182,16 @@ public class DualSenseHandler : MonoBehaviour
 		return first.SetEquals(second);
 	}
 
-	private static string BuildIdentifier(HashSet<string> keys)
+	private static bool ContainsIgnoreCase(List<string> list, string value)
 	{
-		List<string> orderedKeys = new(keys);
-		orderedKeys.Sort(StringComparer.OrdinalIgnoreCase);
-		return string.Join(", ", orderedKeys);
+		foreach (string item in list)
+			if (item.Equals(value, StringComparison.OrdinalIgnoreCase))
+				return true;
+		return false;
+	}
+
+	private static string BuildIdentifier(IList<string> keys)
+	{
+		return string.Join(", ", keys);
 	}
 }

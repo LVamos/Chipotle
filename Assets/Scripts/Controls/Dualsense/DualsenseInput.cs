@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Controls.DualSense
 {
 	public struct DualSenseInput : IEquatable<DualSenseInput>
 	{
-		public List<string> Keys { get; }
+		public HashSet<string> Keys { get; }
+		public IReadOnlyList<string> OrderedKeys { get; }
 		public float? TriggerThreshold { get; }
 
 		public DualSenseInput(string identifier)
@@ -14,7 +14,8 @@ namespace Game.Controls.DualSense
 			if (string.IsNullOrWhiteSpace(identifier))
 				throw new ArgumentException("DualSense input identifier cannot be null or empty.", nameof(identifier));
 
-			List<string> keys = new ();
+			HashSet<string> keys = new(StringComparer.OrdinalIgnoreCase);
+			List<string> orderedKeys = new();
 			bool triggerDetected = false;
 			float? triggerThreshold = null;
 
@@ -28,30 +29,35 @@ namespace Game.Controls.DualSense
 
 				DualSenseStick parsedStick;
 				DualSenseStickDirection parsedDirection;
+				string normalizedToken;
 				if (TryParseStickToken(token, out parsedStick, out parsedDirection))
 				{
-					keys.Add($"{parsedStick}Stick{parsedDirection}");
+					normalizedToken = $"{parsedStick}Stick{parsedDirection}";
+					AddUniqueKey(keys, orderedKeys, normalizedToken);
 					continue;
 				}
 
 				if (Enum.TryParse(token, true, out DualSenseTrigger parsedTrigger))
 				{
+					normalizedToken = parsedTrigger.ToString();
 					triggerDetected = true;
 					if (triggerThreshold == null)
 						triggerThreshold = 1.0f;
-					keys.Add(parsedTrigger.ToString());
+					AddUniqueKey(keys, orderedKeys, normalizedToken);
 					continue;
 				}
 
 				if (Enum.TryParse(token, true, out DualSenseDPad parsedDPad))
 				{
-					keys.Add(parsedDPad.ToString());
+					normalizedToken = parsedDPad.ToString();
+					AddUniqueKey(keys, orderedKeys, normalizedToken);
 					continue;
 				}
 
 				if (Enum.TryParse(token, true, out DualSenseButton parsedButton))
 				{
-					keys.Add(parsedButton.ToString());
+					normalizedToken = parsedButton.ToString();
+					AddUniqueKey(keys, orderedKeys, normalizedToken);
 					continue;
 				}
 
@@ -59,6 +65,7 @@ namespace Game.Controls.DualSense
 			}
 
 			Keys = keys;
+			OrderedKeys = orderedKeys;
 			TriggerThreshold = triggerThreshold;
 
 			if (triggerDetected && TriggerThreshold == null)
@@ -96,7 +103,7 @@ namespace Game.Controls.DualSense
 		// ======= Equals =======
 		public bool Equals(DualSenseInput other)
 		{
-			bool keysEqual = Keys != null && other.Keys != null && Keys.SequenceEqual(other.Keys);
+			bool keysEqual = OrderedKeys != null && other.OrderedKeys != null && ListsEqual(OrderedKeys, other.OrderedKeys);
 			return keysEqual && TriggerThreshold == other.TriggerThreshold;
 		}
 
@@ -111,10 +118,10 @@ namespace Game.Controls.DualSense
 			unchecked
 			{
 				int keysHash = 0;
-				if (Keys != null)
+				if (OrderedKeys != null)
 				{
-					foreach (string key in Keys)
-						keysHash ^= key.ToLowerInvariant().GetHashCode();
+					foreach (string key in OrderedKeys)
+						keysHash = (keysHash * 31) ^ key.ToLowerInvariant().GetHashCode();
 				}
 
 				int hash = 17;
@@ -127,12 +134,31 @@ namespace Game.Controls.DualSense
 		// ======= ToString =======
 		public override string ToString()
 		{
-			List<string> parts = Keys != null ? new(Keys) : new List<string>();
-			parts.Sort(StringComparer.OrdinalIgnoreCase);
+			List<string> parts = OrderedKeys != null ? new List<string>(OrderedKeys) : new List<string>();
 			return parts.Count > 0 ? string.Join(", ", parts) : "Unknown";
 		}
 
 		public static bool operator ==(DualSenseInput left, DualSenseInput right) => left.Equals(right);
 		public static bool operator !=(DualSenseInput left, DualSenseInput right) => !left.Equals(right);
+
+		private static void AddUniqueKey(HashSet<string> keys, List<string> orderedKeys, string key)
+		{
+			if (keys.Add(key))
+				orderedKeys.Add(key);
+		}
+
+		private static bool ListsEqual(IReadOnlyList<string> first, IReadOnlyList<string> second)
+		{
+			if (ReferenceEquals(first, second))
+				return true;
+			if (first == null || second == null)
+				return false;
+			if (first.Count != second.Count)
+				return false;
+			for (int i = 0; i < first.Count; i++)
+				if (!first[i].Equals(second[i], StringComparison.OrdinalIgnoreCase))
+					return false;
+			return true;
+		}
 	}
 }
