@@ -1,9 +1,9 @@
-﻿namespace Game.Debug
+﻿namespace Game.Controls
 {
 	/// <summary>
-	/// Helper class for YAML deserialization
+	/// Contains keyboard and Dual Sense bindings
 	/// </summary>
-	public class DebugCommandBindings
+	public class CommandBindings
 	{
 		public string Keyboard { get; set; }
 		public string DualSense { get; set; }

@@ -2,6 +2,7 @@
 
 using game.debug;
 
+using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Debug.integration;
@@ -384,7 +385,7 @@ namespace Game.Debug
 			string path = Path.Combine(MainScript.DebugPath, _commandMapPath);
 			try
 			{
-				Dictionary<string, DebugCommandBindings> rawMap = null;
+				Dictionary<string, CommandBindings> rawMap = null;
 				YamlHelper.LoadFromFile(path, out rawMap);
 
 				// Get all DebugManager methods with DebugCommand attribute
@@ -402,7 +403,7 @@ namespace Game.Debug
 				_keyboardCommands.Clear();
 				_gamepadCommands.Clear();
 
-				foreach (KeyValuePair<string, DebugCommandBindings> pair in rawMap)
+				foreach (KeyValuePair<string, CommandBindings> pair in rawMap)
 				{
 					// Convert string key to DebugCommand enum
 					if (!Enum.TryParse<DebugCommand>(pair.Key, out DebugCommand command))
