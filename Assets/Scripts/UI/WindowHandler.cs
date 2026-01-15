@@ -173,6 +173,12 @@ namespace Game.UI
 
 		public static void OnKeyDown(DualSenseInput input)
 		{
+			//test
+			string v = input.ToString().ToLowerInvariant();
+			if(v.Contains(","))
+			if (v=="DPadUp, Cross")
+			Tolk.Speak("aaaach");
+			return;
 			ActiveWindow?.OnKeyDown(input);
 		}
 

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Controls.DualSense
 {
 	public struct DualSenseInput : IEquatable<DualSenseInput>
 	{
-		public HashSet<string> Keys { get; }
+		public List<string> Keys { get; }
 		public float? TriggerThreshold { get; }
 
 		public DualSenseInput(string identifier)
@@ -13,7 +14,7 @@ namespace Game.Controls.DualSense
 			if (string.IsNullOrWhiteSpace(identifier))
 				throw new ArgumentException("DualSense input identifier cannot be null or empty.", nameof(identifier));
 
-			HashSet<string> keys = new(StringComparer.OrdinalIgnoreCase);
+			List<string> keys = new ();
 			bool triggerDetected = false;
 			float? triggerThreshold = null;
 
@@ -95,7 +96,7 @@ namespace Game.Controls.DualSense
 		// ======= Equals =======
 		public bool Equals(DualSenseInput other)
 		{
-			bool keysEqual = Keys != null && other.Keys != null && Keys.SetEquals(other.Keys);
+			bool keysEqual = Keys != null && other.Keys != null && Keys.SequenceEqual(other.Keys);
 			return keysEqual && TriggerThreshold == other.TriggerThreshold;
 		}
 
