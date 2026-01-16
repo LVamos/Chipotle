@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Game.Narration.WorldDescribers
 {
-	public class NavigableExitDescriber:NavigableObjectDescriber
+	public class NavigableExitDescriber : NavigableObjectDescriber
 	{
 		public override List<string> GetDescriptions(List<NavigableObjectInfo> records)
 		{
@@ -34,7 +34,7 @@ namespace Game.Narration.WorldDescribers
 				.Select(GetStructuredDescription)
 				.ToList();
 			return descriptions;
-					}
+		}
 
 		public override List<string> GetStructuredDescription(NavigableObjectInfo record)
 		{
@@ -44,9 +44,14 @@ namespace Game.Narration.WorldDescribers
 			string distanceDescription = GetDistanceDescription(info);
 
 			string to = "", to1 = "", to2 = "";
-			if (info.Exit is Door door && !door.OpenedPreviously)
+
+			// Solve destination announcement
+			Passage exit = info.Exit;
+			Zone targetZone = info.TargetZone;
+			bool visited = info.Observer.VisitedZones.Contains(targetZone);
+			if (exit is Door && !visited)
 			{
-				to1 = door.Name.Friendly;
+				to1 = info.Exit.Name.Friendly;
 				type = "";
 			}
 			else
@@ -73,7 +78,7 @@ namespace Game.Narration.WorldDescribers
 
 			// If it's a door and hasn't been opened return one line record for simple searching.
 			if (info.Exit is Door tempDoor && !tempDoor.OpenedPreviously)
-				return new() { string.Join(' ',result) };
+				return new() { string.Join(' ', result) };
 			return result;
 		}
 	}
