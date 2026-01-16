@@ -1210,7 +1210,7 @@ namespace Game.Entities.Characters.Components
 		{
 			string title = "Postava použila objekt";
 			string character = Owner.Name.Indexed;
-			string itemName = $"Objekt: {item.Name.Indexed}";
+			string itemName = $"Objekt: {item?.Name.Indexed}";
 			string pointMessage = $"Bod: {point.GetString()}";
 
 			Logger.LogInfo(title, character, itemName, pointMessage);
