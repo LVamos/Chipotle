@@ -78,7 +78,7 @@ namespace Game.Entities.Characters.Chipotle
 
 			// Check if any objects except walls are standing before the player.
 			List<Entity> objects = 
-				GetItemsAndCharactersBefore(Settings.ObjectManipulationRadius)
+				GetEntitiesBefore(Settings.ObjectManipulationRadius)
 				.ToList();
 			objects = objects
 				.Where(o => !string.Equals(o.Type, "zeď", StringComparison.OrdinalIgnoreCase))

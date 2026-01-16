@@ -114,7 +114,7 @@ namespace Game.Entities.Characters.Components
 		/// <returns>The character or item standing before the this character or null</returns>
 		protected Entity SomethingBefore(float radius)
 		{
-			Entity i = GetItemsAndCharactersBefore(radius).First();
+			Entity i = GetEntitiesBefore(radius).First();
 			return i ?? CharacterBefore();
 		}
 
@@ -129,7 +129,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
-		protected virtual IEnumerable<Entity> GetItemsAndCharactersBefore(float radius)
+		protected virtual IEnumerable<Entity> GetEntitiesBeforePhysics(float radius)
 		{
 			Vector2 direction = GetStepDirection();
 			List<MapElement> ignoredElements = new() { Owner };
@@ -159,7 +159,7 @@ namespace Game.Entities.Characters.Components
 		protected virtual IEnumerable<Character> GetCharactersBefore(float radius)
 		{
 			return
-				GetItemsAndCharactersBefore(radius)
+				GetEntitiesBefore(radius)
 					?.OfType<Character>();
 		}
 
@@ -175,7 +175,7 @@ namespace Game.Entities.Characters.Components
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
 		protected virtual UsableObjectsModel GetUsableObjectsBefore(float radius)
 		{
-			List<MapElement> objects = GetItemsAndCharactersBefore(_objectManipulationHelpRadius)
+			List<MapElement> objects = GetEntitiesBefore(_objectManipulationHelpRadius)
 				.Cast<MapElement>()
 				?.ToList();
 			Door door = GetDoorBefore(GetStepDirection(), true);
@@ -250,7 +250,7 @@ namespace Game.Entities.Characters.Components
 		protected virtual IEnumerable<Items.Item> GetItemsBefore(float radius)
 		{
 			return
-				GetItemsAndCharactersBefore(radius)
+				GetEntitiesBefore(radius)
 					?.OfType<Item>();
 		}
 
@@ -620,7 +620,7 @@ namespace Game.Entities.Characters.Components
 			string objectsBefore = null;
 			if (Owner.Area != null)
 			{
-				IEnumerable<Entity> query = GetItemsAndCharactersBefore(Settings.ObjectManipulationRadius);
+				IEnumerable<Entity> query = GetEntitiesBefore(Settings.ObjectManipulationRadius);
 				if (!query.IsNullOrEmpty())
 				{
 					string[] objects = query
