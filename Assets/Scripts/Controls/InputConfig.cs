@@ -1,21 +1,10 @@
-﻿using game.debug;
-
-using Game.Controls.DualSense;
+﻿using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
-using Game.Debug;
 using Game.Serialization;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-using UnityEditor.Build;
-
-using UnityEngine.UIElements;
 
 namespace Game.Controls
 {

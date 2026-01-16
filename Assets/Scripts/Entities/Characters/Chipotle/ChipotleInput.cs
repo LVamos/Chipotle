@@ -20,8 +20,6 @@ using ProtoBuf;
 using System;
 using System.Collections.Generic;
 
-using UnityEditor.ShortcutManagement;
-
 using UnityEngine;
 
 using Input = Game.Entities.Characters.Components.Input;
