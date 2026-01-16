@@ -1,6 +1,7 @@
 using DavyKager;
 
 using Game.Controls.Keyboard;
+using Game.UI;
 
 using Microsoft.VisualBasic;
 
@@ -11,7 +12,7 @@ using System.Reflection;
 
 using UnityEngine;
 
-namespace Game.UI
+namespace Game.Debug.UI
 {
 	/// <summary>
 	/// Debug window for quick toggling and editing of Settings values.
@@ -52,9 +53,7 @@ namespace Game.UI
 			base.Initialize(parameters);
 
 			// Register Space for toggling boolean values
-			RegisterKeyboardShortcuts(
-				(new KeyboardInput(KeyCode.Space), ToggleBoolean)
-			);
+			_keyboardShortcuts[new KeyboardInput(KeyCode.Space)] = ToggleBoolean;
 		}
 
 		public override void OnActivate()

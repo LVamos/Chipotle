@@ -8,6 +8,18 @@ namespace Game.Controls
 {
 	public enum Command
 	{
+		// Menu commands
+		MenuPreviousItem,
+		MenuNextItem,
+		MenuActivateItem,
+		MenuFirstItem,
+		MenuLastItem,
+		MenuQuit,
+
+		// Game commands
+		GamePlaceItem,
+		GameApplyItemToItem,
+		GameSendFeedback,
 		GameSayAbsoluteCoordinates,
 		GameLoadPredefinedSave,
 		GameCreatePredefinedSave,

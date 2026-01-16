@@ -455,19 +455,20 @@ namespace Game.UI
 		/// </summary>
 		public void Initialize()
 		{
+			base.Initialize();
+
 			_messagingEnabled = true;
 			_exitDescriber = new();
 			_itemDescriber = new();
 			_characterDescriber = new();
+		}
 
-			RegisterKeyboardShortcuts(
-				(new(KeyCode.Escape), QuitGameMenu),
-				(new(KeyboardModifiers.Control, KeyCode.Y), MainScript.SendFeedback)
-			);
+		protected override void AddShortcuts()
+		{
+			base.AddShortcuts();
 
-			RegisterDualSenseShortcuts(
-			(new("Circle"), QuitGameMenu)
-		);
+			AddShortcut(Command.GameQuit, QuitGameMenu);
+			AddShortcut(Command.GameSendFeedback, MainScript.SendFeedback);
 		}
 
 		public override void OnKeyDown(DualSenseInput shortcut)

@@ -4,6 +4,7 @@ using Game.Audio;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Debug;
+using Game.Debug.UI;
 
 using Microsoft.VisualBasic;
 

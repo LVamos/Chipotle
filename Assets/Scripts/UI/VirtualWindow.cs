@@ -1,4 +1,5 @@
 ﻿using Game.Audio;
+using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Messaging;
@@ -17,11 +18,24 @@ namespace Game.UI
 	[Serializable]
 	public abstract class VirtualWindow : MessagingObject
 	{
+		protected virtual void AddShortcuts() { }
+
+		protected virtual void AddShortcut(Command command1, Action command)
+		{
+			CommandBindings shortcut = InputConfig.GetBindings(command1);
+			if (shortcut == null)
+				return;
+
+			if (shortcut.Keyboard != null)
+				_keyboardShortcuts[shortcut.Keyboard.Value] = command;
+			if (shortcut.DualSense != null)
+				_dualsenseShortcuts[shortcut.DualSense.Value] = command;
+		}
 
 		public virtual void Initialize()
 		{
+			AddShortcuts();
 		}
-
 
 		protected virtual void Avake()
 			=> SetUpAudio();
@@ -109,28 +123,6 @@ namespace Game.UI
 		public virtual void OnKeyUp(DualSenseInput input)
 		{ }
 
-		/// <summary>
-		/// Registers Dual Sense shortcuts and corresponding actions.
-		/// </summary>
-		/// <remarks>If a shortcut is already registered it'll be overriden.</remarks>
-		/// <param name="shortcuts">Set of shortcuts to be registered</param>
-		protected void RegisterDualSenseShortcuts(params (DualSenseInput shortcut, Action action)[] shortcuts)
-		{
-			foreach ((DualSenseInput shortcut, Action action) shortcut in shortcuts)
-				_dualsenseShortcuts[shortcut.shortcut] = shortcut.action;
-		}
-
-		/// <summary>
-		/// Registers shotcuts and corresponding actions.
-		/// </summary>
-		/// <remarks>If a shortcut is already registered it'll be overriden.</remarks>
-		/// <param name="shortcuts">Set of shortcuts to be registered</param>
-		protected void RegisterKeyboardShortcuts(params (KeyboardInput shortcut, Action action)[] shortcuts)
-		{
-			foreach ((KeyboardInput shortcut, Action action) shortcut in shortcuts)
-				_keyboardShortcuts[shortcut.shortcut] = shortcut.action;
-		}
-
 		protected const float _defaultVolume = 1;
 
 		protected AudioSource Play(string soundName, float? volume = null)
@@ -145,7 +137,7 @@ namespace Game.UI
 		public virtual void OnKeyDown(DualSenseInput input)
 		{
 			Action action = null;
-			if (_dualsenseShortcuts!= null && _dualsenseShortcuts.TryGetValue(input, out action))
+			if (_dualsenseShortcuts != null && _dualsenseShortcuts.TryGetValue(input, out action))
 				action();
 		}
 	}

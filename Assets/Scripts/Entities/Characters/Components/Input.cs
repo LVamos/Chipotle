@@ -1,4 +1,5 @@
-﻿using Game.Controls.DualSense;
+﻿using Game.Controls;
+using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Entities.Characters.Chipotle;
 using Game.Messaging.Events.Input;
@@ -96,6 +97,18 @@ namespace Game.Entities.Characters.Components
 		protected void AddKeyboardShortcuts(Dictionary<KeyboardInput, Action> shortcuts)
 		{
 			_keyboardShortcuts = _keyboardShortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+		}
+
+		protected void AddShortcut(Command command1, Action command)
+		{
+			CommandBindings shortcut = InputConfig.GetBindings(command1);
+			if (shortcut == null)
+				return;
+
+			if (shortcut.Keyboard != null)
+				_keyboardShortcuts[shortcut.Keyboard.Value] = command;
+			if (shortcut.DualSense != null)
+				_dualsenseShortcuts[shortcut.DualSense.Value] = command;
 		}
 	}
 }

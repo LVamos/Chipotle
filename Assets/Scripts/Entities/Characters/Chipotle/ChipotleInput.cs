@@ -115,18 +115,6 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private const int _keyboardSpeed = 10;
 
-		private void AddShortcut(Command command1, Action command)
-		{
-			CommandBindings shortcut = InputConfig.GetBindings(command1);
-			if (shortcut == null)
-				return;
-
-			if (shortcut.Keyboard != null)
-				_keyboardShortcuts[shortcut.Keyboard.Value] = command;
-			if (shortcut.DualSense != null)
-				_dualsenseShortcuts[shortcut.DualSense.Value] = command;
-		}
-
 		/// <summary>
 		/// Constructor
 		/// </summary>

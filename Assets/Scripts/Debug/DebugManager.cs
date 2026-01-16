@@ -443,8 +443,8 @@ namespace Game.Debug
 				YamlHelper.LoadFromFile(path, out raw);
 				_walkablePoints = raw.ToDictionary(k => k.Key, v => v.Value.Select(p => new Vector2(p[0], p[1])).ToList());
 			}
-			catch (Exception){}
-					}
+			catch (Exception) { }
+		}
 
 		/// <summary>
 		/// Opens a menu with all zones and jumps to the nearest walkable position in the selected zone.

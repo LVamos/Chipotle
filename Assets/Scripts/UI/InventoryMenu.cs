@@ -93,19 +93,15 @@ namespace Game.UI
 				_inventory.Select(o => new List<string> { o.Name.Indexed })
 					.Reverse()
 					.ToList();
+		}
 
-			// Add new key shortcuts
-			RegisterKeyboardShortcuts(
-				(new(KeyCode.Return), UseObject),
-				(new(KeyboardModifiers.Control, KeyCode.Return), PlaceItem),
-				(new(KeyboardModifiers.ControlShift, KeyCode.Return), ApplyItemToTarget)
-			);
+		protected override void AddShortcuts()
+		{
+			base.AddShortcuts();
 
-			RegisterDualSenseShortcuts(
-			(new("Cross"), UseObject),
-			(new("R1"), PlaceItem),
-			(new("L1"), ApplyItemToTarget)
-		);
+			AddShortcut(Command.GameInteract, UseObject);
+			AddShortcut(Command.GamePlaceItem, PlaceItem);
+			AddShortcut(Command.GameApplyItemToItem, ApplyItemToTarget);
 		}
 
 		private void ApplyItemToTarget()

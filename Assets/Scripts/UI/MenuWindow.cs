@@ -1,5 +1,6 @@
 ﻿using DavyKager;
 
+using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 
@@ -40,7 +41,7 @@ namespace Game.UI
 
 			bool ItemMatches(int itemIndex)
 			{
-			List<string> record = _items[itemIndex];
+				List<string> record = _items[itemIndex];
 				int searchIndex = record.Count == 1 ? 0 : _searchIndex;
 				string item = record[searchIndex]?.PrepareForIndexing();
 				return !string.IsNullOrEmpty(item) && item.StartsWith(prefix);
@@ -48,7 +49,6 @@ namespace Game.UI
 		}
 
 		private string _typeSearchBuffer = string.Empty;
-
 
 		private const float _typeTimeout = 1f; // seconds
 
@@ -153,6 +153,8 @@ namespace Game.UI
 		/// </param>
 		public void Initialize(MenuParameters parameters)
 		{
+			base.Initialize();
+
 			_items = parameters.Items;
 			_introText = parameters.IntroText;
 			_divider = parameters.Divider;
@@ -167,28 +169,18 @@ namespace Game.UI
 			_lowerEdgeSound = parameters.LowerEdgeSound;
 			_menuClosed = parameters.MenuClosed;
 			_index = parameters.DefaultIndex;
+		}
 
-			RegisterKeyboardShortcuts(
-				(new KeyboardInput(KeyCode.End), LastItem),
-				(new KeyboardInput(KeyCode.Home), FirstItem),
-				(new KeyboardInput(KeyCode.UpArrow), PreviousItem),
-				(new KeyboardInput(KeyCode.LeftArrow), PreviousItem),
-				(new KeyboardInput(KeyCode.DownArrow), NextItem),
-				(new KeyboardInput(KeyCode.RightArrow), NextItem),
-				(new KeyboardInput(KeyCode.Return), ActivateItem),
-				(new KeyboardInput(KeyCode.Escape), Quit)
-			);
+		protected override void AddShortcuts()
+		{
+			base.AddShortcuts();
 
-			RegisterDualSenseShortcuts(
-				(new ("R1"), LastItem),
-				(new ("L1"), FirstItem),
-				(new ("DPadUp"), PreviousItem),
-				(new ("DPadLeft"), PreviousItem),
-				(new ("DPadDown"), NextItem),
-				(new ("DPadRight"), NextItem),
-				(new ("Cross"), ActivateItem),
-				(new ("Circle"), Quit)
-			);
+			AddShortcut(Command.MenuLastItem, LastItem);
+			AddShortcut(Command.MenuFirstItem, FirstItem);
+			AddShortcut(Command.MenuPreviousItem, PreviousItem);
+			AddShortcut(Command.MenuNextItem, NextItem);
+			AddShortcut(Command.MenuActivateItem, ActivateItem);
+			AddShortcut(Command.MenuQuit, Quit);
 		}
 
 		private Action<int> _menuClosed;

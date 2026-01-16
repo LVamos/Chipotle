@@ -46,7 +46,7 @@ namespace Game.Controls
 
 		public static CommandBindings GetBindings(Command command)
 		{
-			CommandBindings bindings=null;
+			CommandBindings bindings = null;
 			_commands.TryGetValue(command, out bindings);
 			return bindings;
 		}
