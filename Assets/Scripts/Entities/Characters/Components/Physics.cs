@@ -129,7 +129,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
-		protected virtual IEnumerable<Entity> GetEntitiesBeforePhysics(float radius)
+		protected virtual IEnumerable<Entity> GetEntitiesBefore(float radius)
 		{
 			Vector2 direction = GetStepDirection();
 			List<MapElement> ignoredElements = new() { Owner };
