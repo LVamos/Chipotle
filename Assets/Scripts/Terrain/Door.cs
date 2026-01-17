@@ -211,7 +211,7 @@ namespace Game.Terrain
 			// Set attenuation parameters
 			ObstacleType obstacle;
 			if (character != World.Player)
-				obstacle = World.CollisionDetector.DetectOcclusion(character);
+				obstacle = World.Collisions.DetectOcclusion(character);
 			else
 				obstacle = ObstacleType.None;
 

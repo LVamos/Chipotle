@@ -1,4 +1,6 @@
-﻿using Game.Entities.Characters.Bartender;
+﻿using Assets.Scripts.Spatial;
+
+using Game.Entities.Characters.Bartender;
 using Game.Entities.Characters.Carson;
 using Game.Entities.Characters.Christine;
 using Game.Entities.Characters.Mariotti;
@@ -67,7 +69,7 @@ namespace Game.Entities.Characters.Components
 			float height = transform.localScale.z;
 			float width = transform.localScale.x;
 
-			Vector2[] points = World.GetFreePlacementsNear(new() { Owner }, area, height, width, minDistance, maxDistance, sameZone)
+			Vector2[] points = World.Placements.GetFreePlacementsNear(new() { Owner }, area, height, width, minDistance, maxDistance, sameZone)
 				.ToArray();
 
 			return points;
@@ -91,7 +93,7 @@ namespace Game.Entities.Characters.Components
 
 		private List<Vector2> GetPointsAround(Rectangle target, float minDistance, float maxDistance)
 		{
-			return Rectangle.GetPointsAround(target, minDistance, maxDistance, World.ValidplacementsResolution)
+			return Rectangle.GetPointsAround(target, minDistance, maxDistance, PlacementFinder.ValidplacementsResolution)
 .Where(p => !_area.Contains(p))
 .ToList();
 		}

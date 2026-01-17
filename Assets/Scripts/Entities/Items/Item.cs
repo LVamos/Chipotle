@@ -340,7 +340,7 @@ namespace Game.Entities.Items
 
 			// If the item is in the same zone as the player, use raycasting.
 			if (playersZone == myZone)
-				return World.CollisionDetector.DetectOcclusion(this);
+				return World.Collisions.DetectOcclusion(this);
 
 			// Player in a different zone. Simplify occlusion detection.
 			bool neighbourZone = playersZone.IsNeighbour(myZone);

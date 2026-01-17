@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts;
 using Assets.Scripts.Entities.Items;
 using Assets.Scripts.Models;
+using Assets.Scripts.Spatial;
 
 using DavyKager;
 
@@ -105,45 +106,6 @@ namespace Game
 			if (steps is > 1 and < 5)
 				return $"{steps} kroky";
 			return $"{steps} kroků";
-		}
-
-
-		public static IEnumerable<Vector2> GetFreePlacementsNear(List<MapElement> ignoredElements, Rectangle areaToAvoid, float height, float width, float minDistance, float maxDistance, bool sameZone = true)
-		{
-			Rectangle maxArea = areaToAvoid;
-			maxArea.Extend(maxDistance);
-
-			IEnumerable<Vector2> candidatePoints = GetFreePlacements(ignoredElements, maxArea, height, width);
-
-			Zone zone = GetZone(areaToAvoid.Center);
-			IEnumerable<Vector2> filteredPoints =
-				from point in candidatePoints
-				let inSameZone = GetZone(point) == zone
-				let tempArea = Rectangle.FromCenter(point, height, width)
-				let distance = areaToAvoid.GetDistanceFrom(tempArea)
-				let allowedDistance = distance >= minDistance && distance <= maxDistance
-				where inSameZone && allowedDistance
-				orderby distance
-				select point
-				;
-			return filteredPoints;
-		}
-
-		public const float ValidplacementsResolution = 1;
-
-		public static IEnumerable<Vector2> GetFreePlacements(List<MapElement> ignoredElements, Rectangle areaToAvoid, float height, float width)
-		{
-			List<Vector2> placements = new();
-
-			HashSet<Vector2> points = areaToAvoid.GetPoints(ValidplacementsResolution);
-			foreach (Vector2 point in points)
-			{
-				Rectangle rectangle = Rectangle.FromCenter(point, height, width);
-				CollisionsModel collisions = CollisionDetector.DetectCollisions(ignoredElements, rectangle);
-				if (collisions is { Obstacles: null, OutOfMap: false })
-					placements.Add(point);
-			}
-			return placements;
 		}
 
 		/// <summary>
@@ -736,7 +698,9 @@ namespace Game
 			_cutScenePlayer = obj.AddComponent<CutScenePlayer>();
 		}
 
-		public static CollisionDetector CollisionDetector { get; private set; } = new();
+		public static CollisionDetector Collisions { get; private set; } = new();
+
+		public static PlacementFinder Placements { get; private set; } = new();
 
 		/// <summary>
 		/// Indicates if a tile on the specified position is occupied by an NPC or game object.

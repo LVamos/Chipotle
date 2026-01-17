@@ -282,7 +282,7 @@ namespace Game.Entities.Characters.Tuttle
 			float height = transform.localScale.y;
 			float width = transform.localScale.x;
 			List<MapElement> ignored = new() { Owner };
-			Vector2? target = World.GetFreePlacementsNear(ignored, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
+			Vector2? target = World.Placements.GetFreePlacementsNear(ignored, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
 				.FirstOrDefault();
 			if (target == null)
 				throw new ArgumentNullException("No walkable tile found.");
