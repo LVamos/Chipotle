@@ -14,7 +14,7 @@ namespace Game.Controls
 		public KeyboardInput? Keyboard;
 		public DualSenseInput? DualSense;
 
-		public CommandBindings(KeyboardInput? keyboard, DualSenseInput? dualSense)
+		public CommandBindings(KeyboardInput? keyboard=null, DualSenseInput? dualSense=null)
 		{
 			Keyboard = keyboard;
 			DualSense = dualSense;

@@ -19,6 +19,7 @@ using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -41,7 +42,12 @@ namespace Game.Entities.Characters.Chipotle
 		public override void Initialize()
 		{
 			base.Initialize();
+			CollectMenuItems();
+			CollectWalkCommands();
+		}
 
+		private void CollectMenuItems()
+		{
 			_gameMenuCommands = new Dictionary<string, Action>
 			{
 				{ "ResearchItem", ExploreItem },
@@ -278,20 +284,29 @@ namespace Game.Entities.Characters.Chipotle
 			if (_cutsceneInProgress)
 				return;
 
-			HashSet<KeyboardInput> walkCommands = new()
+			if (_walkCommands.Any(c => c.Keyboard == message.Shortcut))
+				StopWalk();
+		}
+
+		private HashSet<CommandBindings> _walkCommands;
+
+		private void CollectWalkCommands()
+		{
+			_walkCommands = new()
 			{
-				new (KeyCode.LeftShift),
-				new (KeyCode.RightShift),
-				new (KeyCode.LeftArrow),
-				new (KeyCode.RightArrow),
-				new (KeyCode.UpArrow),
-				new (KeyCode.DownArrow),
-				new (false, true, false, KeyCode.LeftArrow),
-				new (false, true, false, KeyCode.RightArrow)
+				new(new KeyboardInput(KeyCode.LeftShift)),
+				new(new KeyboardInput(KeyCode.RightShift)),
+				Get(Command.GameTurnLeft),
+				Get(Command.GameTurnRight),
+				Get(Command.GameGoForward),
+				Get(Command.GameGoBack),
+				Get(Command.GameGoLeft),
+				Get(Command.GameGoRight),
+				Get(Command.GameTurnSharplyLeft),
+				Get(Command.GameTurnSharplyRight)
 			};
 
-			if (walkCommands.Contains(message.Shortcut))
-				StopWalk();
+			CommandBindings Get(Command command) => InputConfig.GetBindings(command);
 		}
 
 		protected void OnDualsenseKeyReleased(DualSenseKeyReleased message)
@@ -299,17 +314,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (_cutsceneInProgress)
 				return;
 
-			HashSet<DualSenseInput> walkCommands = new()
-			{
-				new ("DPadLeft"),
-				new ("DPadRight"),
-				new ("RightStickLeft"),
-				new ("RightStickRight"),
-				new ("DPadUp"),
-				new ("DPadDown")
-			};
-
-			if (walkCommands.Contains(message.Shortcut))
+			if (_walkCommands.Any(c => c.DualSense == message.Shortcut))
 				StopWalk();
 		}
 
