@@ -1462,7 +1462,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <returns>True if collisions were detected</returns>
 		protected bool DetectCollisions(Vector2 direction)
 		{
-			CollisionsModel collisions = World.DetectCollisionsOnTrack(new() { Owner }, _area.Value, direction, _stepLength);
+			CollisionsModel collisions = World.CollisionDetector.DetectCollisionsOnTrack(new() { Owner }, _area.Value, direction, _stepLength);
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
@@ -1522,7 +1522,7 @@ namespace Game.Entities.Characters.Chipotle
 			bool IsWalkable(Rectangle newPosition)
 			{
 				List<MapElement> me = new() { Owner };
-				List<object> obstacles = World.DetectCollisions(me, newPosition).Obstacles;
+				List<object> obstacles = World.CollisionDetector.DetectCollisions(me, newPosition).Obstacles;
 				if (!obstacles.IsNullOrEmpty())
 					return false;
 				return true;

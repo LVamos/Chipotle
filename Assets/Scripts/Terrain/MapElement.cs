@@ -326,7 +326,7 @@ namespace Game.Terrain
 				return; // Sound blocked, play it normally.
 
 			// Detect potentional acoustic obstacles and set up attenuate parameters
-			ObstacleType obstacle = World.DetectOcclusion(this);
+			ObstacleType obstacle = World.CollisionDetector.DetectOcclusion(this);
 			bool muffled = obstacle is ObstacleType.Wall or ObstacleType.ItemOrCharacter;
 
 			if (obstacle == ObstacleType.Wall)
