@@ -514,8 +514,7 @@ namespace Game.Entities.Items
 			_placingAudio = null;
 			_portals = null;
 			_zones = new();
-
-
+			_audibleOverWalls = false;
 
 			Area = area;
 
