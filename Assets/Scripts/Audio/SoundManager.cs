@@ -276,25 +276,6 @@ namespace Game.Audio
 			lowPass.cutoffFrequency = cutOffFrequency;
 		}
 
-		public AudioSource PlayMuffled(string soundName, Vector3 position, float volume = 1, bool loop = false, int cutOffFrequency = 22000, string description = null)
-		{
-			AudioSource source = _soundPool.GetSource();
-			source.name = description ?? "sound";
-			AudioLowPassFilter lowPass = source.gameObject.GetComponent<AudioLowPassFilter>();
-			lowPass.cutoffFrequency = cutOffFrequency;
-			source.transform.position = position;
-			source.clip = Sounds.GetClip(soundName);
-			source.volume = volume;
-			source.spatialBlend = 1; // Full surround sound
-			source.spatialize = true;
-			source.loop = loop;
-			source.dopplerLevel = 0;
-			source.Play();
-			_soundPool.SoundStartedPlaying(source);
-
-			return source;
-		}
-
 		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
