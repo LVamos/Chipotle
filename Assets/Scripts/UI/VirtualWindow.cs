@@ -20,7 +20,7 @@ namespace Game.UI
 	{
 		protected virtual void AddShortcuts() { }
 
-		protected virtual void AddShortcut(Command command, Action action)
+		protected virtual void AddShortcut(CommandId command, Action action)
 		{
 			CommandBindings shortcut = InputConfig.GetBindings(command);
 			if (shortcut == null)

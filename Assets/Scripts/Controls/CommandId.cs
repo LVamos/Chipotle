@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Game.Controls
 {
-	public enum Command
+	public enum CommandId
 	{
 		// Menu commands
 		MenuPreviousItem,

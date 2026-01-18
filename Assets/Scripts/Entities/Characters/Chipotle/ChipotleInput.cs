@@ -107,7 +107,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		protected override void OnDualSenseKeyPressed(DualSenseKeyPressed message)
 		{
-			DualSenseInput? command = InputConfig.GetBindings(Command.GameStopCutscene)?.DualSense;
+			DualSenseInput? command = InputConfig.GetBindings(CommandId.GameStopCutscene)?.DualSense;
 			if (_cutsceneInProgress && command != null && message.Shortcut!= command)
 				return;
 
@@ -135,37 +135,37 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			base.AddCommands();
 
-			AddShortcut(Command.GameSayAbsoluteCoordinates, SayAbsoluteCoordinates);
-			AddShortcut(Command.GameLoadPredefinedSave, LoadPredefinedSave);
-			AddShortcut(Command.GameCreatePredefinedSave, CreatePredefinedSave);
-			AddShortcut(Command.GameSayCharacters, SayCharacters);
-			AddShortcut(Command.GameListCharacters, ListCharacters);
-			AddShortcut(Command.GameSayNavigatedObjectLocation, SayNavigatedObjectLocation);
-			AddShortcut(Command.GameExploreItem, ExploreItem);
-			AddShortcut(Command.GameSayZoneDescription, SayZoneDescription);
-			AddShortcut(Command.GameInventoryMenu, InventoryMenu);
-			AddShortcut(Command.GamePickUpItem, PickUpItem);
-			AddShortcut(Command.GameMenu, GameMenu);
-			AddShortcut(Command.GameSayZoneSize, SayZoneSize);
-			AddShortcut(Command.GameListExits, ListExits);
-			AddShortcut(Command.GameListItems, ListItems);
-			AddShortcut(Command.GameSayOrientation, SayOrientation);
-			AddShortcut(Command.GameSayExits, SayExits);
-			AddShortcut(Command.GameStopCutscene, StopCutscene);
-			AddShortcut(Command.GameTerrainInfo, TerrainInfo);
-			AddShortcut(Command.GameSayVisitedRegion, SayVisitedRegion);
-			AddShortcut(Command.GameGoLeft, GoLeft);
-			AddShortcut(Command.GameGoRight, GoRight);
-			AddShortcut(Command.GameSayItems, SayItems);
-			AddShortcut(Command.GameSayZoneName, SayZoneName);
-			AddShortcut(Command.GameGoForward, GoForward);
-			AddShortcut(Command.GameGoBack, GoBack);
-			AddShortcut(Command.GameTurnLeft, TurnLeft);
-			AddShortcut(Command.GameTurnRight, TurnRight);
-			AddShortcut(Command.GameTurnSharplyLeft, TurnSharplyLeft);
-			AddShortcut(Command.GameTurnSharplyRight, TurnSharplyRight);
-			AddShortcut(Command.GameTurnAround, TurnAround);
-			AddShortcut(Command.GameInteract, Interact);
+			AddShortcut(CommandId.GameSayAbsoluteCoordinates, SayAbsoluteCoordinates);
+			AddShortcut(CommandId.GameLoadPredefinedSave, LoadPredefinedSave);
+			AddShortcut(CommandId.GameCreatePredefinedSave, CreatePredefinedSave);
+			AddShortcut(CommandId.GameSayCharacters, SayCharacters);
+			AddShortcut(CommandId.GameListCharacters, ListCharacters);
+			AddShortcut(CommandId.GameSayNavigatedObjectLocation, SayNavigatedObjectLocation);
+			AddShortcut(CommandId.GameExploreItem, ExploreItem);
+			AddShortcut(CommandId.GameSayZoneDescription, SayZoneDescription);
+			AddShortcut(CommandId.GameInventoryMenu, InventoryMenu);
+			AddShortcut(CommandId.GamePickUpItem, PickUpItem);
+			AddShortcut(CommandId.GameMenu, GameMenu);
+			AddShortcut(CommandId.GameSayZoneSize, SayZoneSize);
+			AddShortcut(CommandId.GameListExits, ListExits);
+			AddShortcut(CommandId.GameListItems, ListItems);
+			AddShortcut(CommandId.GameSayOrientation, SayOrientation);
+			AddShortcut(CommandId.GameSayExits, SayExits);
+			AddShortcut(CommandId.GameStopCutscene, StopCutscene);
+			AddShortcut(CommandId.GameTerrainInfo, TerrainInfo);
+			AddShortcut(CommandId.GameSayVisitedRegion, SayVisitedRegion);
+			AddShortcut(CommandId.GameGoLeft, GoLeft);
+			AddShortcut(CommandId.GameGoRight, GoRight);
+			AddShortcut(CommandId.GameSayItems, SayItems);
+			AddShortcut(CommandId.GameSayZoneName, SayZoneName);
+			AddShortcut(CommandId.GameGoForward, GoForward);
+			AddShortcut(CommandId.GameGoBack, GoBack);
+			AddShortcut(CommandId.GameTurnLeft, TurnLeft);
+			AddShortcut(CommandId.GameTurnRight, TurnRight);
+			AddShortcut(CommandId.GameTurnSharplyLeft, TurnSharplyLeft);
+			AddShortcut(CommandId.GameTurnSharplyRight, TurnSharplyRight);
+			AddShortcut(CommandId.GameTurnAround, TurnAround);
+			AddShortcut(CommandId.GameInteract, Interact);
 		}
 
 		/// <summary>
@@ -305,17 +305,17 @@ namespace Game.Entities.Characters.Chipotle
 			{
 				new(new KeyboardInput(KeyCode.LeftShift)),
 				new(new KeyboardInput(KeyCode.RightShift)),
-				Get(Command.GameTurnLeft),
-				Get(Command.GameTurnRight),
-				Get(Command.GameGoForward),
-				Get(Command.GameGoBack),
-				Get(Command.GameGoLeft),
-				Get(Command.GameGoRight),
-				Get(Command.GameTurnSharplyLeft),
-				Get(Command.GameTurnSharplyRight)
+				Get(CommandId.GameTurnLeft),
+				Get(CommandId.GameTurnRight),
+				Get(CommandId.GameGoForward),
+				Get(CommandId.GameGoBack),
+				Get(CommandId.GameGoLeft),
+				Get(CommandId.GameGoRight),
+				Get(CommandId.GameTurnSharplyLeft),
+				Get(CommandId.GameTurnSharplyRight)
 			};
 
-			CommandBindings Get(Command command) => InputConfig.GetBindings(command);
+			CommandBindings Get(CommandId command) => InputConfig.GetBindings(command);
 		}
 
 		protected void OnDualsenseKeyReleased(DualSenseKeyReleased message)
@@ -436,7 +436,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		protected override void OnKeyPressed(KeyPressed message)
 		{
-			KeyboardInput? command = InputConfig.GetBindings(Command.GameStopCutscene)?.Keyboard;
+			KeyboardInput? command = InputConfig.GetBindings(CommandId.GameStopCutscene)?.Keyboard;
 			if (_cutsceneInProgress && command != null && message.Shortcut != command)
 				return;
 

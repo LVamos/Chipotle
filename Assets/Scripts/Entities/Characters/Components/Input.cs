@@ -99,7 +99,7 @@ namespace Game.Entities.Characters.Components
 			_keyboardShortcuts = _keyboardShortcuts.Concat(shortcuts).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
 		}
 
-		protected void AddShortcut(Command command1, Action command)
+		protected void AddShortcut(CommandId command1, Action command)
 		{
 			CommandBindings shortcut = InputConfig.GetBindings(command1);
 			if (shortcut == null)

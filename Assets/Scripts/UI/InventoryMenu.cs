@@ -99,9 +99,9 @@ namespace Game.UI
 		{
 			base.AddShortcuts();
 
-			AddShortcut(Command.GameInteract, UseObject);
-			AddShortcut(Command.GamePlaceItem, PlaceItem);
-			AddShortcut(Command.GameApplyItemToItem, ApplyItemToTarget);
+			AddShortcut(CommandId.GameInteract, UseObject);
+			AddShortcut(CommandId.GamePlaceItem, PlaceItem);
+			AddShortcut(CommandId.GameApplyItemToItem, ApplyItemToTarget);
 		}
 
 		private void ApplyItemToTarget()

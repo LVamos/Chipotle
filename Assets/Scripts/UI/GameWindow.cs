@@ -467,8 +467,8 @@ namespace Game.UI
 		{
 			base.AddShortcuts();
 
-			AddShortcut(Command.GameQuit, QuitGameMenu);
-			AddShortcut(Command.GameSendFeedback, MainScript.SendFeedback);
+			AddShortcut(CommandId.GameQuit, QuitGameMenu);
+			AddShortcut(CommandId.GameSendFeedback, MainScript.SendFeedback);
 		}
 
 		public override void OnKeyDown(DualSenseInput shortcut)

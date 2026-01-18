@@ -10,7 +10,7 @@ namespace Game.Controls
 {
 	public static class InputConfig
 	{
-		public static bool TrySetBinding(Command command, CommandBindings bindings)
+		public static bool TrySetBinding(CommandId command, CommandBindings bindings)
 		{
 			if (_commands.Values.Contains(bindings))
 				return false;
@@ -33,7 +33,7 @@ namespace Game.Controls
 			}
 		}
 
-		public static CommandBindings GetBindings(Command command)
+		public static CommandBindings GetBindings(CommandId command)
 		{
 			CommandBindings bindings = null;
 			_commands.TryGetValue(command, out bindings);
@@ -84,8 +84,8 @@ namespace Game.Controls
 		{
 			foreach (KeyValuePair<string, YamlCommandBindings> pair in map)
 			{
-				Command command;
-				if (!Enum.TryParse<Command>(pair.Key, out command))
+				CommandId command;
+				if (!Enum.TryParse<CommandId>(pair.Key, out command))
 					continue;
 
 				// Add keyboard input to dictionary if present
@@ -105,6 +105,6 @@ namespace Game.Controls
 
 		}
 
-		private static Dictionary<Command, CommandBindings> _commands;
+		private static Dictionary<CommandId, CommandBindings> _commands;
 	}
 }

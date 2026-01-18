@@ -175,12 +175,12 @@ namespace Game.UI
 		{
 			base.AddShortcuts();
 
-			AddShortcut(Command.MenuLastItem, LastItem);
-			AddShortcut(Command.MenuFirstItem, FirstItem);
-			AddShortcut(Command.MenuPreviousItem, PreviousItem);
-			AddShortcut(Command.MenuNextItem, NextItem);
-			AddShortcut(Command.MenuActivateItem, ActivateItem);
-			AddShortcut(Command.MenuQuit, Quit);
+			AddShortcut(CommandId.MenuLastItem, LastItem);
+			AddShortcut(CommandId.MenuFirstItem, FirstItem);
+			AddShortcut(CommandId.MenuPreviousItem, PreviousItem);
+			AddShortcut(CommandId.MenuNextItem, NextItem);
+			AddShortcut(CommandId.MenuActivateItem, ActivateItem);
+			AddShortcut(CommandId.MenuQuit, Quit);
 		}
 
 		private Action<int> _menuClosed;
