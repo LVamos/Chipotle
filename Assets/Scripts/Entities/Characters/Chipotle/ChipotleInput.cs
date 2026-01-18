@@ -48,42 +48,42 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void CollectMenuItems()
 		{
-			_gameMenuCommands = new Dictionary<string, Action>
+			_menuCommands = new()
 			{
-				{ "ResearchItem", ExploreItem },
-				{ "SayZoneDescription", SayZoneDescription },
-				{ "RunInventoryMenu", InventoryMenu },
-				{ "Interact", Interact },
-				{ "PickUpItem", PickUpItem },
-				{ "StepForward", StepForward },
-				{ "StepBack", StepBack },
-				{ "StepLeft", StepLeft },
-				{ "StepRight", StepRight },
-				{ "TurnLeft", TurnLeft },
-				{ "TurnRight", TurnRight },
-				{ "TurnSharplyLeft", TurnSharplyLeft },
-				{ "TurnSharplyRight", TurnSharplyRight },
-				{ "TurnAround", TurnAround },
-				{ "SayNavigatedObjectLocation", SayNavigatedObjectLocation},
-				{ "SayItems", SayItems },
-				{ "ListItems", ListItems },
-				{ "SayExits", SayExits },
-				{ "ListExits", ListExits },
-				{ "SayZoneName", SayZoneName },
-				{ "SayVisitedRegion", SayVisitedRegion },
-				{ "SayZoneSize", SayZoneSize },
-				{ "SayOrientation", SayOrientation },
-				{ "SayAbsoluteCoordinates", SayAbsoluteCoordinates },
-				{ "SendFeedback", MainScript.SendFeedback },
-				{ "QuitGame", World.QuitGame },
+				{ CommandId.GameExploreItem, ExploreItem },
+				{ CommandId.GameSayZoneDescription, SayZoneDescription },
+				{ CommandId.GameInventoryMenu, InventoryMenu },
+				{ CommandId.GameInteract, Interact },
+				{ CommandId.GamePickUpItem, PickUpItem },
+				{ CommandId.GameGoForward, StepForward },
+				{ CommandId.GameGoBack, StepBack },
+				{ CommandId.GameGoLeft, StepLeft },
+				{ CommandId.GameGoRight, StepRight },
+				{ CommandId.GameTurnLeft, TurnLeft },
+				{ CommandId.GameTurnRight, TurnRight },
+				{ CommandId.GameTurnSharplyLeft, TurnSharplyLeft },
+				{ CommandId.GameTurnSharplyRight, TurnSharplyRight },
+				{ CommandId.GameTurnAround, TurnAround },
+				{ CommandId.GameSayNavigatedObjectLocation, SayNavigatedObjectLocation},
+				{ CommandId.GameSayItems, SayItems },
+				{ CommandId.GameListItems, ListItems },
+				{ CommandId.GameSayExits, SayExits },
+				{ CommandId.GameListExits, ListExits },
+				{ CommandId.GameSayZoneName, SayZoneName },
+				{ CommandId.GameSayVisitedRegion, SayVisitedRegion },
+				{ CommandId.GameSayZoneSize, SayZoneSize },
+				{ CommandId.GameSayOrientation, SayOrientation },
+				{ CommandId.GameSayAbsoluteCoordinates, SayAbsoluteCoordinates },
+				{ CommandId.GameSendFeedback, MainScript.SendFeedback },
+				{ CommandId.GameQuit, World.QuitGame },
 			};
 		}
 
-		private Dictionary<string, Action> _gameMenuCommands;
+		private Dictionary<CommandId, Action> _menuCommands;
 
 		private void OnGameMenuOptionselected(GameMenuOptionselected message)
 		{
-			Action action = _gameMenuCommands[message.OptionId];
+			Action action = _menuCommands[message.Command];
 			action();
 			World.GameInProgress = true;
 		}
@@ -108,7 +108,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected override void OnDualSenseKeyPressed(DualSenseKeyPressed message)
 		{
 			DualSenseInput? command = InputConfig.GetBindings(CommandId.GameStopCutscene)?.DualSense;
-			if (_cutsceneInProgress && command != null && message.Shortcut!= command)
+			if (_cutsceneInProgress && command != null && message.Shortcut != command)
 				return;
 
 			base.OnDualSenseKeyPressed(message);
@@ -208,8 +208,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void GameMenu()
 		{
-			InnerMessage(new StopWalk(this)); // Stop Chipotle if he's going somewhere.
-			OpenGameMenu message = new(Owner);
+			StopWalk();
+			List<CommandId> commands = _menuCommands.Keys.ToList();
+			OpenGameMenu message = new(Owner, commands);
 			WindowHandler.ActiveWindow.TakeMessage(message);
 		}
 

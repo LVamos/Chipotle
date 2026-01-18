@@ -39,6 +39,8 @@ namespace Game
 
 		public static string DefaultInputMappingPath => Path.Combine(DataPath, "INput/DefaultLayout").Replace("\\", "/");
 
+		public static string CommandNamesPath => Path.Combine(DataPath, "INput/CommandNames").Replace("\\", "/");
+
 		public static string UserInputPath => Path.Combine(Application.persistentDataPath, "InputBindings.yaml");
 
 		public static string ZoneLoopsPath

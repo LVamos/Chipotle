@@ -5,11 +5,17 @@ using Game.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Game.Controls
 {
 	public static class InputConfig
 	{
+		public static string GetCommandName(CommandId command)
+		{
+			return _commandNames[command];
+		}
+
 		public static bool TrySetBinding(CommandId command, CommandBindings bindings)
 		{
 			if (_commands.Values.Contains(bindings))
@@ -58,10 +64,38 @@ namespace Game.Controls
 			}
 		}
 
+		private static void LoadCommandNames()
+		{
+			_commandNames = new();
+			string path = MainScript.CommandNamesPath;
+
+			try
+			{
+				Dictionary<string, string> map = null;
+				YamlHelper.LoadFromResources(path, out map);
+
+				foreach (KeyValuePair<string, string> record in map)
+				{
+					CommandId command;
+					string key = record.Value;
+					if (!Enum.TryParse<CommandId>(record.Key, out command))
+						throw new InvalidOperationException($"Unable to parse CommandId from YAML: {key}");
+					_commandNames[command] = key
+						?? throw new ArgumentNullException($"Missing display name for {key} command.");
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.LogError("Chyba při načítání mapování vstupů", e.ToString());
+				throw;
+			}
+		}
+
 		public static void LoadBindings()
 		{
 			LoadDefaultBindings();
 			LoadUserBindings();
+			LoadCommandNames();
 		}
 
 		private static void LoadUserBindings()
@@ -106,5 +140,7 @@ namespace Game.Controls
 		}
 
 		private static Dictionary<CommandId, CommandBindings> _commands;
+
+		private static Dictionary<CommandId, string> _commandNames;
 	}
 }

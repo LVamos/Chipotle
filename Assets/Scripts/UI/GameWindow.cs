@@ -36,45 +36,17 @@ namespace Game.UI
 	[Serializable]
 	public class GameWindow : VirtualWindow
 	{
-		private Dictionary<string, string> _gameMenuOptions = new()
-{
-	{ "Prozkoumej předmět: pé", "ResearchItem" },
-	{ "Rozhlédni se: r", "SayZoneDescription" },
-	{ "inventář: I", "RunInventoryMenu" },
-	{ "použij předmět nebo dveře: entr", "Interact" },
-	{ "Vezmi předmět: šift entr", "PickUpItem" },
-	{ "Jdi dopředu: horní šipka", "StepForward" },
-	{ "Jdi dozadu: dolní šipka", "StepBack" },
-	{ "Jdi doleva: šift levá šipka", "StepLeft" },
-	{ "Jdi doprava: šift pravá šipka", "StepRight" },
-	{ "Otoč se trochu doleva: levá šipka", "TurnLeft" },
-	{ "Otoč se trochu doprava: pravá šipka", "TurnRight" },
-	{ "Otoč se ostře doleva: kontrol levá šipka", "TurnSharplyLeft" },
-	{ "Otoč se ostře doprava: kontrol pravá šipka", "TurnSharplyRight" },
-	{ "Otoč se čelem vzad: kontrol dolní šipka", "TurnAround" },
-	{ "Kde je hledaný předmět, východ nebo postava: shift K", "SayNavigatedObjectLocation" },
-	{ "okolní předměty: O", "SayItems" },
-	{ "Naveď mě k předmětu: šift O", "ListItems" },
-	{ "východy: Vé", "SayExits" },
-	{ "Naveď mě k východu: šift vé", "ListExits" },
-	{ "kde jsem: ká", "SayZoneName" },
-	{ "Byl jsem tu: bé", "SayVisitedRegion" },
-	{ "Rozměry lokace: el", "SayZoneSize" },
-	{ "kompas: Es", "SayOrientation" },
-	{ "souřadnice: Cé", "SayAbsoluteCoordinates" },
-	{ "Poslat zprávu autorovi: Kontrol zet", "SendFeedback" },
-	{ "hlavní menu: Iskejp", "QuitGame" },
-};
-
+		private List<CommandId> _gameMenuCommands = new();
 
 		/// <summary>
 		/// Runs the game menu
 		/// </summary>
 		private void OnOpenGameMenu(OpenGameMenu message)
 		{
+			_gameMenuCommands = message.Commands;
 			List<List<string>> items =
-				_gameMenuOptions
-				.Select(c => new List<string>() { c.Key }).ToList();
+				_gameMenuCommands
+				.Select(c => new List<string>() { InputConfig.GetCommandName(c) }).ToList();
 			Action<int> menuHandler = (option) =>
 			{
 				HandleGameMenu(items, option, message.Sender as MessagingObject);
@@ -96,17 +68,14 @@ namespace Game.UI
 			WindowHandler.Menu(parameters);
 		}
 
-		private void HandleGameMenu(List<List<string>> items, int option, MessagingObject initiator)
+		private void HandleGameMenu(List<List<string>> items, int option, MessagingObject sender)
 		{
 			if (option == -1)
-			{
-				Tolk.Speak("hra");
 				return;
-			}
-			string optionDescription = items[option][0];
-			string optionId = _gameMenuOptions[optionDescription];
-			GameMenuOptionselected message = new(this, optionId);
-			initiator.TakeMessage(message);
+
+			CommandId command = _gameMenuCommands[option];
+			GameMenuOptionselected message = new(this, command);
+			sender.TakeMessage(message);
 		}
 
 		public static GameWindow CreateInstance()
