@@ -43,8 +43,7 @@ namespace Game.Audio
 			Coroutine coroutine;
 			if (_lowPassCoroutines.TryGetValue(source, out coroutine))
 			{
-				if (coroutine != null)
-					StopCoroutine(_lowPassCoroutines[source]);
+				StopCoroutine(_lowPassCoroutines[source]);
 				_lowPassCoroutines.Remove(source);
 			}
 
@@ -60,6 +59,9 @@ namespace Game.Audio
 
 		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
 		{
+			if (!source.isActiveAndEnabled && !source.isPlaying)
+				DestroyCoroutine();
+
 			float startFrequency = GetLowPass(source);
 
 			for (float t = 0; t < duration; t += Time.deltaTime)
@@ -73,9 +75,17 @@ namespace Game.Audio
 			if (disableLowPassAfterwards)
 				_soundPool.DisableLowPass(source);
 
-			// Remove the coroutine
-			if (_lowPassCoroutines.ContainsKey(source))
-				_lowPassCoroutines.Remove(source);
+			DestroyCoroutine();
+
+			void DestroyCoroutine()
+			{
+				Coroutine coroutine;
+				if (_lowPassCoroutines.TryGetValue(source, out coroutine))
+				{
+					_lowPassCoroutines.Remove(source);
+					StopCoroutine(coroutine);
+				}
+			}
 		}
 
 		public void Mute(float duration = _fadingDuration)
