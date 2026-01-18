@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 using Message = Game.Messaging.Message;
 
@@ -46,7 +47,14 @@ namespace Game.UI
 			_gameMenuCommands = message.Commands;
 			List<List<string>> items =
 				_gameMenuCommands
-				.Select(c => new List<string>() { InputConfig.GetCommandName(c) }).ToList();
+				.Select(command =>
+				{
+					string name = InputConfig.GetCommandName(command);
+					CommandBindings input = InputConfig.GetBindings(command);
+					string keyboard = input.Keyboard != null ? $", {input.Keyboard}" : string.Empty;
+					string dualsense = input.DualSense != null ? $", {input.DualSense}" : string.Empty;
+					return new List<string>() { name, keyboard, dualsense };
+				}).ToList();
 			Action<int> menuHandler = (option) =>
 			{
 				HandleGameMenu(items, option, message.Sender as MessagingObject);
