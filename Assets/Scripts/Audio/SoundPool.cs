@@ -28,7 +28,10 @@ namespace Assets.Scripts.Audio
 			_playingSources.Add(source);
 		}
 
-		public AudioLowPassFilter GetLowPass(AudioSource source) => _lowPasses[source];
+		public AudioLowPassFilter GetLowPass(AudioSource source)
+		{
+			return _lowPasses[source];
+		}
 
 		private Dictionary<AudioSource, AudioLowPassFilter> _lowPasses = new();
 

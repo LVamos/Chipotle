@@ -44,7 +44,7 @@ namespace Game.Entities.Characters.Components
 		{
 			switch (message)
 			{
-				case DualSenseKeyPressed m: OnDualsenseKeyPressed(m); break;
+				case DualSenseKeyPressed m: OnDualSenseKeyPressed(m); break;
 				case KeyPressed kp: OnKeyPressed(kp); break;
 				case CutsceneEnded ce: OnCutsceneEnded(ce); break;
 				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
@@ -65,7 +65,7 @@ namespace Game.Entities.Characters.Components
 				action();
 		}
 
-		protected virtual void OnDualsenseKeyPressed(DualSenseKeyPressed message)
+		protected virtual void OnDualSenseKeyPressed(DualSenseKeyPressed message)
 		{
 			if (_dualsenseShortcuts== null)
 				AddCommands();

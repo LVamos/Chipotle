@@ -20,16 +20,16 @@ namespace Game.UI
 	{
 		protected virtual void AddShortcuts() { }
 
-		protected virtual void AddShortcut(Command command1, Action command)
+		protected virtual void AddShortcut(Command command, Action action)
 		{
-			CommandBindings shortcut = InputConfig.GetBindings(command1);
+			CommandBindings shortcut = InputConfig.GetBindings(command);
 			if (shortcut == null)
 				return;
 
 			if (shortcut.Keyboard != null)
-				_keyboardShortcuts[shortcut.Keyboard.Value] = command;
+				_keyboardShortcuts[shortcut.Keyboard.Value] = action;
 			if (shortcut.DualSense != null)
-				_dualsenseShortcuts[shortcut.DualSense.Value] = command;
+				_dualsenseShortcuts[shortcut.DualSense.Value] = action;
 		}
 
 		public virtual void Initialize()

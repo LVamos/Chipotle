@@ -99,10 +99,19 @@ namespace Game.Entities.Characters.Chipotle
 				case GameMenuOptionselected m: OnGameMenuOptionselected(m); break;
 				case KeyReleased kr: OnKeyReleased(kr); break;
 				case KeyPressed m: OnKeyPressed(m); break;
-				case DualSenseKeyPressed m: OnDualsenseKeyPressed(m); break;
+				case DualSenseKeyPressed m: OnDualSenseKeyPressed(m); break;
 				case DualSenseKeyReleased m: OnDualsenseKeyReleased(m); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		protected override void OnDualSenseKeyPressed(DualSenseKeyPressed message)
+		{
+			DualSenseInput? command = InputConfig.GetBindings(Command.GameStopCutscene)?.DualSense;
+			if (_cutsceneInProgress && command != null && message.Shortcut!= command)
+				return;
+
+			base.OnDualSenseKeyPressed(message);
 		}
 
 		/// <summary>
@@ -421,24 +430,14 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void SayVisitedRegion() => InnerMessage(new SayVisitedRegion(this));
 
-		protected override void OnDualsenseKeyPressed(DualSenseKeyPressed message)
-		{
-			if (_cutsceneInProgress
-				&& message.Shortcut != new DualSenseInput("TouchpadButton"))
-				return;
-
-			base.OnDualsenseKeyPressed(message);
-		}
-
-
 		/// <summary>
 		/// Processes the KeyDown message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
 		protected override void OnKeyPressed(KeyPressed message)
 		{
-			if (_cutsceneInProgress
-				&& message.Shortcut != new KeyboardInput(KeyCode.Space))
+			KeyboardInput? command = InputConfig.GetBindings(Command.GameStopCutscene)?.Keyboard;
+			if (_cutsceneInProgress && command != null && message.Shortcut != command)
 				return;
 
 			base.OnKeyPressed(message);
