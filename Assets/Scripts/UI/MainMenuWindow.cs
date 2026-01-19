@@ -8,8 +8,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-using UnityEditor;
-
 using UnityEngine;
 
 namespace Game.UI
@@ -34,7 +32,7 @@ namespace Game.UI
 			SetUpAudioSource(_speakerTestAudio, _speakerTestSound);
 		}
 
-		private bool _menuInactive;		
+		private bool _menuInactive;
 
 		/// <summary>
 		/// Actions performed when the window is activated.
@@ -69,6 +67,7 @@ namespace Game.UI
 			new() { "Nová hra" },
 			new() { "Test sluchátek" },
 			new() { "Návod" },
+			new() { "Ovládání" },
 			new() { "Konec" }
 		};
 
@@ -90,6 +89,7 @@ namespace Game.UI
 			new() {"Pokračovat ve hře" },
 			new() {"Test sluchátek" },
 			new() {"Návod" },
+			new() {"Ovládání" },
 			new() {"Konec" }
 		};
 
@@ -118,22 +118,29 @@ namespace Game.UI
 			PlayLoop();
 
 			_usedItems = GameStateSaved() ? _itemsWithLoadGame : _items;
-			MenuParameters parameters = new(_usedItems, intro, menuClosed: MenuClosed, defaultIndex: _lastChoice);
-			int choice = WindowHandler.Menu(parameters);
+			MenuParameters parameters = new(_usedItems, intro, menuClosed: HandleMenu, defaultIndex: _lastChoice);
+			WindowHandler.Menu(parameters, false);
 		}
 
-		private void MenuClosed(int choice)
+		private void HandleMenu(int choice)
 		{
 			choice = choice == -1 ? _usedItems.Count - 1 : choice;
 			_lastChoice = choice;
 			switch (_usedItems[choice][0])
 			{
-				case "Nová hra":_menuInactive=true; StartCoroutine(StartGame()); break;
-				case "Pokračovat ve hře":_menuInactive=true; LoadGame(); break;
+				case "Nová hra": _menuInactive = true; StartCoroutine(StartGame()); break;
+				case "Pokračovat ve hře": _menuInactive = true; LoadGame(); break;
 				case "Test sluchátek": SpeakerTest(); break;
 				case "Návod": Help(); RunMainMenu(); break;
+				case "Ovládání": ControllSettings(); break;
 				default: _menuInactive = true; StartCoroutine(nameof(ExitGame)); break;
 			}
+		}
+
+		private void ControllSettings()
+		{
+			ControllSettingsWindow window = ControllSettingsWindow.CreateInstance(this);
+			WindowHandler.Switch(window, false);
 		}
 
 		/// <summary>
@@ -178,7 +185,7 @@ namespace Game.UI
 				yield break;
 
 			Sounds.SlideVolume(_menuLoopAudio, .2f, 0, true);
-			_endJingleSource = Play(_endSound,Settings.MenuMusicVolume);
+			_endJingleSource = Play(_endSound, Settings.MenuMusicVolume);
 			yield return WaitForSound(_endJingleSource, endTrim);
 		}
 

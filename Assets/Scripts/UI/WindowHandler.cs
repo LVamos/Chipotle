@@ -109,11 +109,13 @@ namespace Game.UI
 		/// <param name="upperEdgeSound">Name of a sound to be played when cursor gets to upper edge of the menu</param>
 		/// <param name="lowerEdgeSound">Name of a sound to be played when cursor gets to lower edge of the menu</param>
 		/// <returns>Tuple with index of selected item and value of selected item</returns>
-		public static int Menu(MenuParameters parameters)
+		public static int Menu(MenuParameters parameters, bool openAsModal = true)
 		{
 			MenuWindow menu = MenuWindow.CreateInstance(parameters);
 
-			OpenModalWindow(menu);
+			if (openAsModal)
+				OpenModalWindow(menu);
+			else Switch(menu, false);
 			return 0;
 		}
 
@@ -164,10 +166,11 @@ namespace Game.UI
 		/// Closes currently active window and activates another one.
 		/// </summary>
 		/// <param name="window">New window</param>
-		public static void Switch(VirtualWindow window)
+		public static void Switch(VirtualWindow window, bool keepPreviousWindow = true)
 		{
 			ActiveWindow?.OnDeactivate(); // Let active window react on deactivating
-			PreviousWindow = ActiveWindow; // Backing up for future use
+
+			PreviousWindow = keepPreviousWindow ? ActiveWindow : null; // Backing up for future use
 			ActiveWindow = window;
 			ActiveWindow.OnActivate(); // Let new window react on activation
 		}
