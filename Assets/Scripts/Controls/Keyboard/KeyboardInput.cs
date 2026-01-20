@@ -15,11 +15,11 @@ namespace Game.Controls.Keyboard
 		{
 			StringBuilder builder = new();
 			if (Control)
-				builder.Append("ctrl ");
+				builder.Append("Control+");
 			if (Alt)
-				builder.Append("alt ");
+				builder.Append("Alt+");
 			if (Shift)
-				builder.Append("shift ");
+				builder.Append("Shift+");
 			if (Key != KeyCode.None)
 				builder.Append(Key.ToString());
 			return builder.ToString();

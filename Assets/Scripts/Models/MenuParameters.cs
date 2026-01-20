@@ -20,7 +20,7 @@ public class MenuParameters
 
 	public MenuParameters(
 		List<List<string>> items,
-		string introText,
+		string introText = null,
 		string divider = " ",
 		int searchIndex = 0,
 		bool wrappingAllowed = true,

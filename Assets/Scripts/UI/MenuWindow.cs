@@ -1,14 +1,11 @@
 ﻿using DavyKager;
 
 using Game.Controls;
-using Game.Controls.DualSense;
-using Game.Controls.Keyboard;
 
 using System;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.InputSystem.DualShock.LowLevel;
 
 namespace Game.UI
 {
@@ -236,7 +233,7 @@ namespace Game.UI
 			base.OnActivate();
 			Play(_introSound);
 
-			if (!string.IsNullOrEmpty(_introText))
+			if (!string.IsNullOrWhiteSpace(_introText))
 				Tolk.Speak(_introText, true);
 		}
 

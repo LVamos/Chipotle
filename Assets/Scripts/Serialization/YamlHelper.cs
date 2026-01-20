@@ -36,6 +36,10 @@ namespace Game.Serialization
 
 		public static void Initialize()
 		{
+			_serializer = new SerializerBuilder()
+					   .WithNamingConvention(PascalCaseNamingConvention.Instance)
+					   .Build();
+
 			_deserializer = new DeserializerBuilder()
 						   .WithNamingConvention(PascalCaseNamingConvention.Instance)
 						   .Build();

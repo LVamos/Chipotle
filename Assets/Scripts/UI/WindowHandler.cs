@@ -1,6 +1,7 @@
 ﻿using DavyKager;
 
 using Game.Audio;
+using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 using Game.Debug;
@@ -125,6 +126,12 @@ namespace Game.UI
 		/// <param name="shortcut">Event parameters</param>
 		public static void OnKeyDown(KeyboardInput shortcut)
 		{
+			if (InputConfig.KeyboardRebinding)
+			{
+				InputConfig.FinishKeyboardBinding(shortcut);
+				return;
+			}
+
 			DebugManager.OnKeyDown(shortcut);
 			ActiveWindow?.OnKeyDown(shortcut);
 		}
@@ -183,6 +190,16 @@ namespace Game.UI
 		public static void OnKeyUp(DualSenseInput input)
 		{
 			ActiveWindow?.OnKeyUp(input);
+		}
+
+		public static KeyboardInput? CatchKeyboardShortcut()
+		{
+			throw new NotImplementedException();
+		}
+
+		internal static DualSenseInput? CatchDualSenseShortcut()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

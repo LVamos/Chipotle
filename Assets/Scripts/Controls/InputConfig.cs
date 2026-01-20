@@ -4,8 +4,10 @@ using Game.Serialization;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
+
+using UnityEngine;
 
 namespace Game.Controls
 {
@@ -16,12 +18,34 @@ namespace Game.Controls
 			return _commandNames[command];
 		}
 
-		public static bool TrySetBinding(CommandId command, CommandBindings bindings)
+		public static bool SetKeyboardBinding(CommandId command, KeyboardInput shortcut)
 		{
-			if (_commands.Values.Contains(bindings))
+			if (_commands.Values.Any(b => b.Keyboard == shortcut))
 				return false;
 
-			_commands[command] = bindings;
+			_commands[command].Keyboard = shortcut;
+			SaveBindings();
+			return true;
+		}
+
+		public static void RemoveKeyboardBinding(CommandId command)
+		{
+			_commands[command].Keyboard = null;
+			SaveBindings();
+		}
+
+		public static void RemoveDualsenseBinding(CommandId command)
+		{
+			_commands[command].DualSense = null;
+			SaveBindings();
+		}
+
+		public static bool SetDualSenseBinding(CommandId command, DualSenseInput shortcut)
+		{
+			if (_commands.Values.Any(b => b.DualSense == shortcut))
+				return false;
+
+			_commands[command].DualSense = shortcut;
 			SaveBindings();
 			return true;
 		}
@@ -31,7 +55,18 @@ namespace Game.Controls
 			try
 			{
 				string path = MainScript.UserInputPath;
-				YamlHelper.SaveToFile(path, _commands);
+
+				Dictionary<string, YamlCommandBindings> data = _commands
+					.ToDictionary(
+						kv => kv.Key.ToString(),
+						kv => new YamlCommandBindings
+						{
+							Keyboard = kv.Value.Keyboard?.ToString(),
+							DualSense = kv.Value.DualSense?.ToString()
+						}
+					);
+
+				YamlHelper.SaveToFile(path, data);
 			}
 			catch (Exception e)
 			{
@@ -101,6 +136,8 @@ namespace Game.Controls
 		private static void LoadUserBindings()
 		{
 			string path = MainScript.UserInputPath;
+			if (!File.Exists(path))
+				return;
 
 			try
 			{
@@ -139,8 +176,52 @@ namespace Game.Controls
 
 		}
 
+		internal static CommandId GetCommandByShortcut(KeyboardInput? shortcut)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal static CommandId GetCommandByShortcut(DualSenseInput shortcut)
+		{
+			throw new NotImplementedException();
+		}
+
+		public static void StartKeyboardBinding(CommandId command, Action<KeyboardBindingResult> callback)
+		{
+			_rebindedCommand = command;
+			_keyboardBindingFinished = callback;
+			KeyboardRebinding = true;
+		}
+
+		public static void FinishKeyboardBinding(KeyboardInput shortcut)
+		{
+			Action<KeyboardBindingResult> callback = _keyboardBindingFinished;
+			_keyboardBindingFinished = null;
+			CommandId command = _rebindedCommand.Value;
+			_rebindedCommand = null;
+			KeyboardRebinding = false;
+
+			KeyboardBindingResult result = null;
+			if (shortcut == new KeyboardInput(KeyCode.Escape))
+			{
+				result = new(command);
+				callback(result);
+				return;
+			}
+
+			bool success = SetKeyboardBinding(command, shortcut);
+			result = new(command, shortcut, !success);
+			callback(result);
+		}
+
+		private static CommandId? _rebindedCommand;
+
+		private static Action<KeyboardBindingResult> _keyboardBindingFinished;
+
 		private static Dictionary<CommandId, CommandBindings> _commands;
 
 		private static Dictionary<CommandId, string> _commandNames;
+
+		public static bool KeyboardRebinding { get; private set; }
 	}
 }

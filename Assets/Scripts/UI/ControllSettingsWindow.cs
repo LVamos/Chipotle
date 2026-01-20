@@ -1,6 +1,8 @@
 ﻿using DavyKager;
 
 using Game.Controls;
+using Game.Controls.DualSense;
+using Game.Controls.Keyboard;
 
 using System;
 using System.Collections.Generic;
@@ -96,7 +98,7 @@ namespace Game.UI
 				return;
 			}
 
-			SetBindingsMenu(commandName);
+			BindingMenu(commandName);
 		}
 
 		private enum BindingAction
@@ -108,9 +110,8 @@ namespace Game.UI
 			Cancel = -1
 		}
 
-		private void SetBindingsMenu(string commandName)
+		private void BindingMenu(string commandName)
 		{
-			string prompt = $"Nastavení zkratek pro příkaz {commandName}";
 			List<List<string>> items = new()
 			{
 			new List<string>() { "Nastavit klávesovou zkratku" },
@@ -126,10 +127,7 @@ namespace Game.UI
 
 			MenuParameters parameters = new(
 				items,
-				prompt,
-				" ",
-				0,
-				false,
+				wrappingAllowed: false,
 												introSound: "MenuItemActivated",
 								outroSound: "MenuOpened",
 		selectionSound: "MenuItemSelected",
@@ -156,22 +154,61 @@ namespace Game.UI
 
 		private void RemoveDualSenseBinding(CommandId command)
 		{
-			Tolk.Speak("Vymaž zkratku pro Dual sense");
+			InputConfig.RemoveDualsenseBinding(command);
+			Tolk.Speak("Zrušeno");
 		}
 
 		private void SetDualSenseBinding(CommandId command)
 		{
-			Tolk.Speak("Nastav zkratku pro Dual sense");
+			DualSenseInput? shortcut = WindowHandler.CatchDualSenseShortcut();
+			if (shortcut == null)
+			{
+				BindingMenu(InputConfig.GetCommandName(command));
+				return;
+			}
+
+			bool result = InputConfig.SetDualSenseBinding(command, shortcut.Value);
+			if (!result)
+				AnnounceBlockedShortcut(shortcut.Value);
+			else Tolk.Speak("Nastaveno.");
 		}
 
 		private void RemoveKeyboardBinding(CommandId command)
 		{
-			Tolk.Speak("Vymaž klávesovou zkratku");
+			InputConfig.RemoveKeyboardBinding(command);
+			Tolk.Speak("Zrušeno");
+		}
+
+		private void KeyboardBindingFinished(KeyboardBindingResult result)
+		{
+			if (result.ShortcutAlreadyUsed)
+				AnnounceBlockedShortcut(result.Shortcut.Value);
+			else Tolk.Speak("Nastaveno");
+
+			string commandName = InputConfig.GetCommandName(result.Command);
+			BindingMenu(commandName);
 		}
 
 		private void SetKeyboardBinding(CommandId command)
 		{
-			Tolk.Speak("Nastav klávesovou zkratku");
+			Tolk.Speak("Zadej klávesovou zkratku");
+			InputConfig.StartKeyboardBinding(command, KeyboardBindingFinished);
+		}
+
+		private static void AnnounceBlockedShortcut(DualSenseInput shortcut)
+		{
+			CommandId blockingCommand = InputConfig.GetCommandByShortcut(shortcut);
+			string blockingCommandName = InputConfig.GetCommandName(blockingCommand);
+			string message = $"Tuhle zkratku už máš nastavenou pro příkaz {blockingCommandName}.";
+			Tolk.Speak(message);
+		}
+
+		private static void AnnounceBlockedShortcut(KeyboardInput shortcut)
+		{
+			CommandId blockingCommand = InputConfig.GetCommandByShortcut(shortcut);
+			string blockingCommandName = InputConfig.GetCommandName(blockingCommand);
+			string message = $"Tuhle zkratku už máš nastavenou pro příkaz {blockingCommandName}.";
+			Tolk.Speak(message);
 		}
 	}
 }
