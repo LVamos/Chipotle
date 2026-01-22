@@ -114,9 +114,9 @@ namespace Game.UI
 		private List<List<string>> _bindingMenuItems = new()
 			{
 			new List<string>() { "Nastavit klávesovou zkratku" },
-			new List<string>() { "Zrušit klávesovou zkratku" },
-			new List<string>() { "Nastavit zkratku pro Dual sense tlačítko" },
-			new List<string>() { "Zrušit zkratku pro Dual sense tlačítko" }
+			new List<string>() { "Vrátit výchozí klávesovou zkratku" },
+			new List<string>() { "Nastavit zkratku pro Dual sense" },
+			new List<string>() { "Vrátit výchozí zkratku pro Dual sense" }
 			};
 
 		private void BindingMenu(CommandId command)
@@ -140,18 +140,19 @@ namespace Game.UI
 			switch (action)
 			{
 				case BindingAction.SetKeyboardBinding: SetKeyboardBinding(command); break;
-				case BindingAction.RemoveKeyboardBinding: RemoveKeyboardBinding(command); break;
+				case BindingAction.RemoveKeyboardBinding: RestoreKeyboardBinding(command); break;
 				case BindingAction.SetDualSenseBinding: SetDualSenseBinding(command); break;
 				case BindingAction.RemoveDualSenseBinding:
-					RemoveDualSenseBinding(command); break;
+					RestoreDualSenseBinding(command); break;
 				case BindingAction.Cancel: SelectCommandMenu(command); break;
 			}
 		}
 
-		private void RemoveDualSenseBinding(CommandId command)
+		private void RestoreDualSenseBinding(CommandId command)
 		{
-			InputConfig.RemoveDualsenseBinding(command);
+			InputConfig.RestoreDualsenseBinding(command);
 			Tolk.Speak("Zrušeno");
+			BindingMenu(command);
 		}
 
 		private void SetDualSenseBinding(CommandId command)
@@ -169,10 +170,11 @@ namespace Game.UI
 			else Tolk.Speak("Nastaveno.");
 		}
 
-		private void RemoveKeyboardBinding(CommandId command)
+		private void RestoreKeyboardBinding(CommandId command)
 		{
-			InputConfig.RemoveKeyboardBinding(command);
-			Tolk.Speak("Zrušeno");
+			InputConfig.RestoreKeyboardBinding(command);
+			Tolk.Speak("Obnoveno");
+			BindingMenu(command);
 		}
 
 		private void KeyboardBindingFinished(KeyboardBindingResult result)

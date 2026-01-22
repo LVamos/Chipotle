@@ -35,15 +35,19 @@ namespace Game.Controls
 			return null;
 		}
 
-		public static void RemoveKeyboardBinding(CommandId command)
+		public static void RestoreKeyboardBinding(CommandId command)
 		{
-			_commands[command].Keyboard = null;
+			CommandBindings binding = _commands[command];
+			CommandBindings defaultBinding = _defaultBindings[command];
+			binding.Keyboard = defaultBinding.Keyboard;
 			SaveBindings();
 		}
 
-		public static void RemoveDualsenseBinding(CommandId command)
+		public static void RestoreDualsenseBinding(CommandId command)
 		{
-			_commands[command].DualSense = null;
+			CommandBindings binding = _commands[command];
+			CommandBindings defaultBinding = _defaultBindings[command];
+			binding.DualSense = defaultBinding.DualSense;
 			SaveBindings();
 		}
 
@@ -95,6 +99,8 @@ namespace Game.Controls
 			return bindings;
 		}
 
+
+
 		private static void LoadDefaultBindings()
 		{
 			_commands = new();
@@ -105,6 +111,16 @@ namespace Game.Controls
 				Dictionary<string, YamlCommandBindings> map = null;
 				YamlHelper.LoadFromResources(path, out map);
 				AddBindings(map);
+
+				// Duplicate bindings
+				_defaultBindings =
+					_commands.ToDictionary(
+						kv => kv.Key,
+						kv => new CommandBindings(
+							kv.Value.Keyboard,
+							kv.Value.DualSense
+						)
+					);
 			}
 			catch (Exception e)
 			{
@@ -261,6 +277,7 @@ namespace Game.Controls
 		private static Action<KeyboardBindingResult> _keyboardBindingFinished;
 
 		private static Dictionary<CommandId, CommandBindings> _commands;
+		private static Dictionary<CommandId, CommandBindings> _defaultBindings;
 		private static HashSet<CommandId> _bindableCommands = new()
 		{
 					CommandId.GamePlaceItem,
