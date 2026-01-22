@@ -36,20 +36,10 @@ namespace Game.UI
 
 		private void CollectCommands()
 		{
-			_commands = new();
-			Type enumType = typeof(CommandId);
-			List<CommandId> ids = Enum.GetValues(enumType)
-				.Cast<CommandId>()
-				.ToList();
-
-			foreach (CommandId id in ids)
-			{
-				string name = InputConfig.GetCommandName(id);
-				_commands[name] = id;
-			}
+			_commands = InputConfig.GetBindableCommands();
 		}
 
-		private Dictionary<string, CommandId> _commands;
+		private Dictionary<CommandId, CommandBindings> _commands;
 
 		public override void OnActivate()
 		{
@@ -62,16 +52,10 @@ namespace Game.UI
 		{
 			const string prompt = "Příkazy";
 			List<List<string>> items =
-				_commands.Keys
-				.Select(command => new List<string>() { command })
+				_commands
+				.Select(command => CreateItem(command))
 				.ToList();
 
-			Action<int> menuHandler = (option) =>
-			{
-				if (option == -1)
-					HandleSelectCommandMenu();
-				else HandleSelectCommandMenu(items[option][0]);
-			};
 			MenuParameters parameters = new(
 				items,
 				prompt,
@@ -85,20 +69,30 @@ namespace Game.UI
 		wrapUpSound: "MenuWrapped",
 		upperEdgeSound: "MenuEdge",
 		lowerEdgeSound: "MenuEdge",
-				menuClosed: menuHandler);
-
+				menuClosed: SelectCommandMenuHandler);
 			WindowHandler.Menu(parameters, false);
+
+			List<string> CreateItem(KeyValuePair<CommandId, CommandBindings> command)
+			{
+				string name = InputConfig.GetCommandName(command.Key);
+				string keyboard = command.Value.Keyboard.ToString();
+				string dualSense = command.Value.DualSense.ToString();
+
+				return new() { name, keyboard, dualSense };
+			}
 		}
 
-		private void HandleSelectCommandMenu(string commandName = null)
-		{
-			if (string.IsNullOrEmpty(commandName))
-			{
-				WindowHandler.Switch(_mainMenu);
-				return;
-			}
 
-			BindingMenu(commandName);
+		private void SelectCommandMenuHandler(int option)
+		{
+			if (option == -1)
+				WindowHandler.Switch(_mainMenu);
+			else BindingMenu(GetCommandByIndex(option));
+		}
+
+		private CommandId GetCommandByIndex(int option)
+		{
+			return _commands.Keys.ToArray()[option];
 		}
 
 		private enum BindingAction
@@ -110,9 +104,7 @@ namespace Game.UI
 			Cancel = -1
 		}
 
-		private void BindingMenu(string commandName)
-		{
-			List<List<string>> items = new()
+		private List<List<string>> _bindingMenuItems = new()
 			{
 			new List<string>() { "Nastavit klávesovou zkratku" },
 			new List<string>() { "Zrušit klávesovou zkratku" },
@@ -120,13 +112,10 @@ namespace Game.UI
 			new List<string>() { "Zrušit zkratku pro Dual sense tlačítko" }
 			};
 
-			Action<int> menuHandler = (option) =>
-			{
-				HandleSetBindingsMenu((BindingAction)option, _commands[commandName]);
-			};
-
+		private void BindingMenu(CommandId command)
+		{
 			MenuParameters parameters = new(
-				items,
+				_bindingMenuItems,
 				wrappingAllowed: false,
 												introSound: "MenuItemActivated",
 								outroSound: "MenuOpened",
@@ -135,11 +124,19 @@ namespace Game.UI
 		wrapUpSound: "MenuWrapped",
 		upperEdgeSound: "MenuEdge",
 		lowerEdgeSound: "MenuEdge",
-				menuClosed: menuHandler);
+				menuClosed: BindingMenuHandler(command));
 			WindowHandler.Menu(parameters, false);
 		}
 
-		private void HandleSetBindingsMenu(BindingAction action, CommandId command)
+		private Action<int> BindingMenuHandler(CommandId command)
+		{
+			return (option) =>
+			{
+				SetBindingsMenuHandler((BindingAction)option, command);
+			};
+		}
+
+		private void SetBindingsMenuHandler(BindingAction action, CommandId command)
 		{
 			switch (action)
 			{
@@ -163,7 +160,7 @@ namespace Game.UI
 			DualSenseInput? shortcut = WindowHandler.CatchDualSenseShortcut();
 			if (shortcut == null)
 			{
-				BindingMenu(InputConfig.GetCommandName(command));
+				BindingMenu(command);
 				return;
 			}
 
@@ -184,9 +181,7 @@ namespace Game.UI
 			if (result.ShortcutAlreadyUsed)
 				AnnounceBlockedShortcut(result.Shortcut.Value);
 			else Tolk.Speak("Nastaveno");
-
-			string commandName = InputConfig.GetCommandName(result.Command);
-			BindingMenu(commandName);
+			BindingMenu(result.Command);
 		}
 
 		private void SetKeyboardBinding(CommandId command)
@@ -197,7 +192,7 @@ namespace Game.UI
 
 		private static void AnnounceBlockedShortcut(DualSenseInput shortcut)
 		{
-			CommandId blockingCommand = InputConfig.GetCommandByShortcut(shortcut);
+			CommandId blockingCommand = InputConfig.GetBindableCommand(shortcut);
 			string blockingCommandName = InputConfig.GetCommandName(blockingCommand);
 			string message = $"Tuhle zkratku už máš nastavenou pro příkaz {blockingCommandName}.";
 			Tolk.Speak(message);
@@ -205,7 +200,7 @@ namespace Game.UI
 
 		private static void AnnounceBlockedShortcut(KeyboardInput shortcut)
 		{
-			CommandId blockingCommand = InputConfig.GetCommandByShortcut(shortcut);
+			CommandId blockingCommand = InputConfig.GetBindableCommand(shortcut);
 			string blockingCommandName = InputConfig.GetCommandName(blockingCommand);
 			string message = $"Tuhle zkratku už máš nastavenou pro příkaz {blockingCommandName}.";
 			Tolk.Speak(message);

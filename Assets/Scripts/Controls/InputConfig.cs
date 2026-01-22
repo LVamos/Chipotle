@@ -20,7 +20,11 @@ namespace Game.Controls
 
 		public static bool SetKeyboardBinding(CommandId command, KeyboardInput shortcut)
 		{
-			if (_commands.Values.Any(b => b.Keyboard == shortcut))
+			if (!IsBindable(command))
+				throw new InvalidOperationException($"Command {command} is not configurable.");
+
+			Dictionary<CommandId, CommandBindings> bindables = GetBindableCommands();
+			if (bindables.Values.Any(b => b.Keyboard == shortcut))
 				return false;
 
 			_commands[command].Keyboard = shortcut;
@@ -50,13 +54,20 @@ namespace Game.Controls
 			return true;
 		}
 
+		public static Dictionary<CommandId, CommandBindings> GetBindableCommands()
+		{
+			return _commands
+				.Where(record => _bindableCommands.Contains(record.Key))
+				.ToDictionary(record => record.Key, record => record.Value);
+		}
+
 		private static void SaveBindings()
 		{
 			try
 			{
 				string path = MainScript.UserInputPath;
 
-				Dictionary<string, YamlCommandBindings> data = _commands
+				Dictionary<string, YamlCommandBindings> data = GetBindableCommands()
 					.ToDictionary(
 						kv => kv.Key.ToString(),
 						kv => new YamlCommandBindings
@@ -176,14 +187,15 @@ namespace Game.Controls
 
 		}
 
-		public static CommandId GetCommandByShortcut(KeyboardInput shortcut)
+		public static CommandId GetBindableCommand(KeyboardInput shortcut)
 		{
 			var value = (KeyboardInput?)shortcut;
-			KeyValuePair<CommandId, CommandBindings> record = _commands.First(record => record.Value.Keyboard == value);
-			return record.Key;
+			Dictionary<CommandId, CommandBindings> bindables = GetBindableCommands();
+			return bindables
+				.First(record => record.Value.Keyboard == value).Key;
 		}
 
-		public static CommandId GetCommandByShortcut(DualSenseInput shortcut)
+		public static CommandId GetBindableCommand(DualSenseInput shortcut)
 		{
 			var value = (DualSenseInput?)shortcut;
 			return _commands.First(record => record.Value.DualSense == value).Key;
@@ -191,9 +203,17 @@ namespace Game.Controls
 
 		public static void StartKeyboardBinding(CommandId command, Action<KeyboardBindingResult> callback)
 		{
+			if (!IsBindable(command))
+				throw new InvalidOperationException($"Command {command} is not configurable.");
+
 			_rebindedCommand = command;
 			_keyboardBindingFinished = callback;
 			KeyboardRebinding = true;
+		}
+
+		private static bool IsBindable(CommandId command)
+		{
+			return _bindableCommands.Contains(command);
 		}
 
 		public static void FinishKeyboardBinding(KeyboardInput shortcut)
@@ -222,6 +242,44 @@ namespace Game.Controls
 		private static Action<KeyboardBindingResult> _keyboardBindingFinished;
 
 		private static Dictionary<CommandId, CommandBindings> _commands;
+		private static HashSet<CommandId> _bindableCommands = new()
+		{
+					CommandId.GamePlaceItem,
+		CommandId.GameApplyItemToItem,
+		CommandId.GameSendFeedback,
+		CommandId.GameSayAbsoluteCoordinates,
+CommandId.      GameLoadPredefinedSave,
+		CommandId.GameCreatePredefinedSave,
+		CommandId.GameSayCharacters,
+		CommandId.GameListCharacters,
+		CommandId.GameSayNavigatedObjectLocation,
+		CommandId.GameExploreItem,
+		CommandId.GameSayZoneDescription,
+		CommandId.GameInventoryMenu,
+		CommandId.GamePickUpItem,
+		CommandId.GameMenu,
+		CommandId.GameSayZoneSize,
+		CommandId.GameListExits,
+		CommandId.GameListItems,
+		CommandId.GameSayOrientation,
+		CommandId.GameSayExits,
+		CommandId.GameStopCutscene,
+		CommandId.GameTerrainInfo,
+		CommandId.GameSayVisitedRegion,
+		CommandId.GameGoLeft,
+		CommandId.GameGoRight,
+		CommandId.GameSayItems,
+		CommandId.GameSayZoneName,
+		CommandId.GameGoForward,
+		CommandId.GameGoBack,
+		CommandId.GameTurnLeft,
+		CommandId.GameTurnRight,
+		CommandId.GameTurnSharplyLeft,
+		CommandId.GameTurnSharplyRight,
+		CommandId.GameTurnAround,
+		CommandId.GameInteract,
+		CommandId.GameQuit
+		};
 
 		private static Dictionary<CommandId, string> _commandNames;
 
