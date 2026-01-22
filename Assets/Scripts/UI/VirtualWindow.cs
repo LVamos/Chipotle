@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.UI
 {
@@ -98,7 +99,7 @@ namespace Game.UI
 		/// <param name="e">Event parameters</param>
 		public virtual void OnKeyDown(KeyboardInput shortcut)
 		{
-			if (shortcut.Control || shortcut.Key is KeyCode.LeftControl or KeyCode.RightControl)
+			if (shortcut.Control || shortcut.Key is Key.LeftCtrl or Key.RightCtrl)
 				Sounds.MuteSpeech();
 
 			Action action = null;

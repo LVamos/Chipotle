@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
 
-using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.Controls.Keyboard
 {
@@ -13,16 +13,16 @@ namespace Game.Controls.Keyboard
 	{
 		public override string ToString()
 		{
-			StringBuilder builder = new();
+			List<string> segments = new();
 			if (Control)
-				builder.Append("Control+");
-			if (Alt)
-				builder.Append("Alt+");
+				segments.Add("Control");
 			if (Shift)
-				builder.Append("Shift+");
-			if (Key != KeyCode.None)
-				builder.Append(Key.ToString());
-			return builder.ToString();
+				segments.Add("Shift");
+			if (Alt)
+				segments.Add("Alt");
+			if (Key != Key.None)
+				segments.Add(Key.ToString());
+			return string.Join("+", segments);
 		}
 
 		/// <summary>
@@ -38,34 +38,33 @@ namespace Game.Controls.Keyboard
 			Control = false;
 			Shift = false;
 			Alt = false;
-			Key = KeyCode.None;
+			Key = Key.None;
+			bool keyFound = false;
 
 			// Split by '+' and trim whitespace
-			var parts = input.Split('+', StringSplitOptions.RemoveEmptyEntries);
+			string[] parts = input.Split('+', StringSplitOptions.RemoveEmptyEntries);
 
-			foreach (var part in parts)
+			foreach (string part in parts)
 			{
 				string token = part.Trim();
 
 				if (token.Equals("Ctrl", StringComparison.OrdinalIgnoreCase) ||
 					token.Equals("Control", StringComparison.OrdinalIgnoreCase))
-				{
 					Control = true;
-				}
 				else if (token.Equals("Shift", StringComparison.OrdinalIgnoreCase))
-				{
 					Shift = true;
-				}
 				else if (token.Equals("Alt", StringComparison.OrdinalIgnoreCase))
-				{
 					Alt = true;
-				}
 				else
 				{
-					// Try to parse as KeyCode (UnityEngine)
-					if (Enum.TryParse<KeyCode>(token, true, out var parsedKey))
+					// Try to parse as Key (UnityEngine)
+					if (Enum.TryParse<Key>(token, true, out Key parsedKey))
 					{
+						if (keyFound)
+							throw new ArgumentException($"Multiple keys specified in '{input}'");
+
 						Key = parsedKey;
+						keyFound = true;
 					}
 					else
 					{
@@ -88,7 +87,7 @@ namespace Game.Controls.Keyboard
 		/// <summary>
 		/// Value of pressed keys.
 		/// </summary>
-		public readonly KeyCode Key;
+		public readonly Key Key;
 
 		/// <summary>
 		/// Indicates whether shift key was pressed.
@@ -100,7 +99,7 @@ namespace Game.Controls.Keyboard
 		/// </summary>
 		/// <param name="modifiers">Key modifiers</param>
 		/// <param name="key">The pressed key</param>
-		public KeyboardInput(KeyboardModifiers modifiers, KeyCode key)
+		public KeyboardInput(KeyboardModifiers modifiers, Key key)
 		{
 			Control = modifiers.HasFlag(KeyboardModifiers.Control);
 			Alt = modifiers.HasFlag(KeyboardModifiers.Alt);
@@ -115,7 +114,7 @@ namespace Game.Controls.Keyboard
 		/// <param name="shift">Specifies if the shift key was pressed</param>
 		/// <param name="alt">Specifies if the alt key was pressed</param>
 		/// <param name="key">Value of pressed keys</param>
-		public KeyboardInput(bool control, bool shift, bool alt, KeyCode key)
+		public KeyboardInput(bool control, bool shift, bool alt, Key key)
 		{
 			Control = control;
 			Shift = shift;
@@ -127,7 +126,7 @@ namespace Game.Controls.Keyboard
 		/// Constructor
 		/// </summary>
 		/// <param name="key">Value of pressed key</param>
-		public KeyboardInput(KeyCode key) : this(false, false, false, key)
+		public KeyboardInput(Key key) : this(false, false, false, key)
 		{
 		}
 

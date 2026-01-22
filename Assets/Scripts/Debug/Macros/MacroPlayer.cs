@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.Debug
 {
@@ -105,7 +106,7 @@ namespace Game.Debug
 						bool control = bool.Parse(parts[3 + offset]);
 						bool alt = bool.Parse(parts[4 + offset]);
 
-						KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyString, true);
+						Key key = (Key)Enum.Parse(typeof(KeyCode), keyString, true);
 						KeyboardInput shortcut = new KeyboardInput(control, shift, alt, key);
 
 						MacroEvent @event = new MacroEvent
@@ -141,11 +142,11 @@ namespace Game.Debug
 						if (eventType == MacroEventType.KeyPress)
 						{
 							@event.Character = keyOrChar.Length > 0 ? keyOrChar[0] : '\0';
-							@event.Shortcut = new KeyboardInput(KeyCode.None);
+							@event.Shortcut = new KeyboardInput(Key.None);
 						}
 						else
 						{
-							KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyOrChar, true);
+							Key key = (Key)Enum.Parse(typeof(Key), keyOrChar, true);
 							@event.Shortcut = new KeyboardInput(control, shift, alt, key);
 						}
 

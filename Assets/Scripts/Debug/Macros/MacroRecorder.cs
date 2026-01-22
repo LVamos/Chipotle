@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.Debug
 {
@@ -146,7 +147,7 @@ namespace Game.Debug
 				DelayMilliseconds = delay,
 				EventType = MacroEventType.KeyPress,
 				Character = character,
-				Shortcut = new KeyboardInput(KeyCode.None)
+				Shortcut = new KeyboardInput(Key.None)
 			};
 			_buffer.Add(macroEvent);
 		}

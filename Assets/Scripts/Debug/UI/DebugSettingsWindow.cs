@@ -11,6 +11,7 @@ using System.Globalization;
 using System.Reflection;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.Debug.UI
 {
@@ -53,7 +54,7 @@ namespace Game.Debug.UI
 			base.Initialize(parameters);
 
 			// Register Space for toggling boolean values
-			_keyboardShortcuts[new KeyboardInput(KeyCode.Space)] = ToggleBoolean;
+			_keyboardShortcuts[new KeyboardInput(Key.Space)] = ToggleBoolean;
 		}
 
 		public override void OnActivate()

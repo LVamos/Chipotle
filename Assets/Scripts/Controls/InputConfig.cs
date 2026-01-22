@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.Controls
 {
@@ -176,14 +176,17 @@ namespace Game.Controls
 
 		}
 
-		internal static CommandId GetCommandByShortcut(KeyboardInput? shortcut)
+		public static CommandId GetCommandByShortcut(KeyboardInput shortcut)
 		{
-			throw new NotImplementedException();
+			var value = (KeyboardInput?)shortcut;
+			KeyValuePair<CommandId, CommandBindings> record = _commands.First(record => record.Value.Keyboard == value);
+			return record.Key;
 		}
 
-		internal static CommandId GetCommandByShortcut(DualSenseInput shortcut)
+		public static CommandId GetCommandByShortcut(DualSenseInput shortcut)
 		{
-			throw new NotImplementedException();
+			var value = (DualSenseInput?)shortcut;
+			return _commands.First(record => record.Value.DualSense == value).Key;
 		}
 
 		public static void StartKeyboardBinding(CommandId command, Action<KeyboardBindingResult> callback)
@@ -202,7 +205,7 @@ namespace Game.Controls
 			KeyboardRebinding = false;
 
 			KeyboardBindingResult result = null;
-			if (shortcut == new KeyboardInput(KeyCode.Escape))
+			if (shortcut == new KeyboardInput(Key.Escape))
 			{
 				result = new(command);
 				callback(result);

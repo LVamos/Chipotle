@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 using Input = Game.Entities.Characters.Components.Input;
 using Message = Game.Messaging.Message;
@@ -304,8 +305,8 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			_walkCommands = new()
 			{
-				new(new KeyboardInput(KeyCode.LeftShift)),
-				new(new KeyboardInput(KeyCode.RightShift)),
+				new(new KeyboardInput(Key.LeftShift)),
+				new(new KeyboardInput(Key.RightShift)),
 				Get(CommandId.GameTurnLeft),
 				Get(CommandId.GameTurnRight),
 				Get(CommandId.GameGoForward),
