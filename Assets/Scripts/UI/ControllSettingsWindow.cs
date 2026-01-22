@@ -3,7 +3,6 @@
 using Game.Controls;
 using Game.Controls.DualSense;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -47,8 +46,10 @@ namespace Game.UI
 			SelectCommandMenu();
 		}
 
-		private void SelectCommandMenu()
+		private void SelectCommandMenu(CommandId? command = null)
 		{
+			int index = command != null ? GetCommandIndex(command.Value) : 0;
+
 			const string prompt = "Příkazy";
 			List<List<string>> items =
 				_commands
@@ -61,6 +62,7 @@ namespace Game.UI
 				" ",
 				0,
 				false,
+				defaultIndex: index,
 												introSound: "MenuItemActivated",
 								outroSound: "MenuOpened",
 		selectionSound: "MenuItemSelected",
@@ -81,6 +83,12 @@ namespace Game.UI
 			}
 		}
 
+		private int GetCommandIndex(CommandId command)
+		{
+			return _commands.Keys
+								.ToList()
+								.IndexOf(command);
+		}
 
 		private void SelectCommandMenuHandler(int option)
 		{
@@ -123,19 +131,11 @@ namespace Game.UI
 		wrapUpSound: "MenuWrapped",
 		upperEdgeSound: "MenuEdge",
 		lowerEdgeSound: "MenuEdge",
-				menuClosed: BindingMenuHandler(command));
+				menuClosed: (option) => BindingMenuHandler((BindingAction)option, command));
 			WindowHandler.Menu(parameters, false);
 		}
 
-		private Action<int> BindingMenuHandler(CommandId command)
-		{
-			return (option) =>
-			{
-				SetBindingsMenuHandler((BindingAction)option, command);
-			};
-		}
-
-		private void SetBindingsMenuHandler(BindingAction action, CommandId command)
+		private void BindingMenuHandler(BindingAction action, CommandId command)
 		{
 			switch (action)
 			{
@@ -144,7 +144,7 @@ namespace Game.UI
 				case BindingAction.SetDualSenseBinding: SetDualSenseBinding(command); break;
 				case BindingAction.RemoveDualSenseBinding:
 					RemoveDualSenseBinding(command); break;
-				case BindingAction.Cancel: SelectCommandMenu(); break;
+				case BindingAction.Cancel: SelectCommandMenu(command); break;
 			}
 		}
 

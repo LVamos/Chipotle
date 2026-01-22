@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class MenuParameters
 {
+	public bool SayItemAtStartup { get; }
 	public List<List<string>> Items { get; }
 	public string IntroText { get; }
 	public string Divider { get; }
@@ -32,7 +33,9 @@ public class MenuParameters
 		string upperEdgeSound = null,
 		string lowerEdgeSound = null,
 		Action<int> menuClosed = null,
-		int defaultIndex = -1)
+		int defaultIndex = 0,
+		bool sayItemAtStartup = true
+		)
 	{
 		Items = items;
 		IntroText = introText;
@@ -48,5 +51,6 @@ public class MenuParameters
 		LowerEdgeSound = lowerEdgeSound;
 		MenuClosed = menuClosed;
 		DefaultIndex = defaultIndex;
+		SayItemAtStartup = sayItemAtStartup;
 	}
 }

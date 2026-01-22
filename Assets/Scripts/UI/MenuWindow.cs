@@ -166,7 +166,10 @@ namespace Game.UI
 			_lowerEdgeSound = parameters.LowerEdgeSound;
 			_menuClosed = parameters.MenuClosed;
 			_index = parameters.DefaultIndex;
+			_sayItemAtStartup = parameters.SayItemAtStartup;
 		}
+
+		private bool _sayItemAtStartup;
 
 		protected override void AddShortcuts()
 		{
@@ -235,6 +238,8 @@ namespace Game.UI
 
 			if (!string.IsNullOrWhiteSpace(_introText))
 				Tolk.Speak(_introText, true);
+			if (_sayItemAtStartup)
+				SayItem(false, false);
 		}
 
 		/// <summary>
@@ -340,11 +345,13 @@ namespace Game.UI
 		/// <summary>
 		/// Announces selected item using a screen reader or voice synthesizer
 		/// </summary>
-		protected virtual void SayItem()
+		protected virtual void SayItem(bool playSound = true, bool interruptSpeech = true)
 		{
-			Play(_selectionSound);
+			if (playSound)
+				Play(_selectionSound);
+
 			string text = string.Join(_divider, _items[Index]);
-			Tolk.Speak(text, true);
+			Tolk.Speak(text, interruptSpeech);
 		}
 
 		/// <summary>

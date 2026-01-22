@@ -187,7 +187,7 @@ namespace Game.UI
 		/// <summary>
 		/// Announces selected item using a screen reader or voice synthesizer
 		/// </summary>
-		protected override void SayItem()
+		protected override void SayItem(bool playSound = true, bool interruptSpeech = true)
 		{
 			Play(_selectionSound);
 			Tolk.Speak(SelectedItem.Name.Friendly);
