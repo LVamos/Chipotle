@@ -18,18 +18,21 @@ namespace Game.Controls
 			return _commandNames[command];
 		}
 
-		public static bool SetKeyboardBinding(CommandId command, KeyboardInput shortcut)
+		public static CommandId? SetKeyboardBinding(CommandId command, KeyboardInput shortcut)
 		{
 			if (!IsBindable(command))
 				throw new InvalidOperationException($"Command {command} is not configurable.");
 
 			Dictionary<CommandId, CommandBindings> bindables = GetBindableCommands();
-			if (bindables.Values.Any(b => b.Keyboard == shortcut))
-				return false;
+			List<CommandId> blockingCommands = GetBindableCommands(shortcut)
+				.Where(c => c != command)
+				.ToList();
+			if (blockingCommands != null && blockingCommands.Count > 0)
+				return blockingCommands.First();
 
 			_commands[command].Keyboard = shortcut;
 			SaveBindings();
-			return true;
+			return null;
 		}
 
 		public static void RemoveKeyboardBinding(CommandId command)
@@ -187,12 +190,14 @@ namespace Game.Controls
 
 		}
 
-		public static CommandId GetBindableCommand(KeyboardInput shortcut)
+		public static List<CommandId> GetBindableCommands(KeyboardInput shortcut)
 		{
 			var value = (KeyboardInput?)shortcut;
 			Dictionary<CommandId, CommandBindings> bindables = GetBindableCommands();
 			return bindables
-				.First(record => record.Value.Keyboard == value).Key;
+				.Where(record => record.Value.Keyboard == value)
+				.Select(record => record.Key)
+				.ToList();
 		}
 
 		public static CommandId GetBindableCommand(DualSenseInput shortcut)
@@ -216,7 +221,7 @@ namespace Game.Controls
 			return _bindableCommands.Contains(command);
 		}
 
-		public static void FinishKeyboardBinding(KeyboardInput shortcut)
+		public static void FinishKeyboardBinding()
 		{
 			Action<KeyboardBindingResult> callback = _keyboardBindingFinished;
 			_keyboardBindingFinished = null;
@@ -225,16 +230,30 @@ namespace Game.Controls
 			KeyboardRebinding = false;
 
 			KeyboardBindingResult result = null;
-			if (shortcut == new KeyboardInput(Key.Escape))
+			if (_bindingKeyboardShortcut == null)
 			{
 				result = new(command);
 				callback(result);
 				return;
 			}
 
-			bool success = SetKeyboardBinding(command, shortcut);
-			result = new(command, shortcut, !success);
+			CommandId? blockingCommand = SetKeyboardBinding(command, _bindingKeyboardShortcut.Value);
+			result = new(command, _bindingKeyboardShortcut, blockingCommand);
 			callback(result);
+		}
+
+		private static KeyboardInput? _bindingKeyboardShortcut;
+
+		public static void CatchKeyForBinding(KeyboardInput shortcut)
+		{
+			if (shortcut == new KeyboardInput(Key.Escape))
+			{
+				_bindingKeyboardShortcut = null;
+				FinishKeyboardBinding();
+				return;
+			}
+
+			_bindingKeyboardShortcut = shortcut;
 		}
 
 		private static CommandId? _rebindedCommand;

@@ -433,20 +433,6 @@ Application.Quit();
 			EnableJAWSKeyHook();
 
 			AddStartup();
-			AddKeyboardHandler();
-			AddDualSenseHandler();
-		}
-
-		private static void AddKeyboardHandler()
-		{
-			GameObject obj = new(nameof(KeyboardHandler));
-			obj.AddComponent<KeyboardHandler>();
-		}
-
-		private static void AddDualSenseHandler()
-		{
-			GameObject obj = new(nameof(DualSenseHandler));
-			obj.AddComponent<DualSenseHandler>();
 		}
 
 		private static void AddStartup()

@@ -13,6 +13,8 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using UnityEngine;
+
 namespace Game.UI
 {
 	/// <summary>
@@ -20,10 +22,28 @@ namespace Game.UI
 	/// </summary>
 	public static class WindowHandler
 	{
+		private static void AddKeyboardHandler()
+		{
+			GameObject obj = new(nameof(KeyboardHandler));
+			_keyboardHandler = obj.AddComponent<KeyboardHandler>();
+		}
+
+		private static KeyboardHandler _keyboardHandler;
+
 		public static void Initialize()
 		{
 			CreateDebugManager();
+			AddKeyboardHandler();
+			AddDualSenseHandler();
 		}
+
+		private static void AddDualSenseHandler()
+		{
+			GameObject obj = new(nameof(DualSenseHandler));
+			_dualSenseHandler = obj.AddComponent<DualSenseHandler>();
+		}
+
+		private static DualSenseHandler _dualSenseHandler;
 
 		private static void CreateDebugManager() => DebugManager = DebugManager.CreateInstance();
 
@@ -128,7 +148,8 @@ namespace Game.UI
 		{
 			if (InputConfig.KeyboardRebinding)
 			{
-				InputConfig.FinishKeyboardBinding(shortcut);
+				InputConfig.CatchKeyForBinding(shortcut);
+				_catchKeysForBinding = true;
 				return;
 			}
 
@@ -139,14 +160,24 @@ namespace Game.UI
 		/// <summary>
 		/// Sends the KeyUp event to the current active window.
 		/// </summary>
-		/// <param name="e">Event parameters</param>
 		public static void OnKeyUp(KeyboardInput shortcut)
 		{
+			if (InputConfig.KeyboardRebinding)
+			{
+				if (_catchKeysForBinding && !_keyboardHandler.AnyKeyPressed)
+				{
+					InputConfig.FinishKeyboardBinding();
+					_catchKeysForBinding = false;
+					return;
+				}
+			}
+
 			DebugManager.OnKeyUp(shortcut);
 			ActiveWindow?.OnKeyUp(shortcut);
 		}
 
 		public static DebugManager DebugManager;
+		private static bool _catchKeysForBinding;
 
 		/// <summary>
 		/// Opens virtual modal window

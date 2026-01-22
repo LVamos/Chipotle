@@ -5,14 +5,14 @@ namespace Game.Controls
 	public class KeyboardBindingResult
 	{
 		public readonly KeyboardInput? Shortcut;
-		public readonly bool ShortcutAlreadyUsed;
+		public readonly CommandId? CommandWithSameShortcut;
 		public readonly CommandId Command;
 
-		public KeyboardBindingResult(CommandId command, KeyboardInput? shortcut = null, bool shortcutAlreadyUsed = false)
+		public KeyboardBindingResult(CommandId command, KeyboardInput? shortcut = null, CommandId? commandWithSameShortcut = null)
 		{
 			Command = command;
 			Shortcut = shortcut;
-			ShortcutAlreadyUsed = shortcutAlreadyUsed;
+			CommandWithSameShortcut = commandWithSameShortcut;
 		}
 	}
 }

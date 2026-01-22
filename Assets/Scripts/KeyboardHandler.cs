@@ -1,23 +1,72 @@
 ﻿using Game.Controls.Keyboard;
 using Game.UI;
 
-using System;
-using System.Linq;
+using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 
 /// <summary>
-/// A class that takes care of the detection and processing of keyboard inputs.
+/// Handles keyboard input using Unity New Input System.
+/// Tracks held keys reliably and reports correct modifier states.
 /// </summary>
 public class KeyboardHandler : MonoBehaviour
 {
-	private void Start()
+	private readonly HashSet<Key> heldKeys = new();
+
+	/// <summary>
+	/// Indicates whether any non-modifier key is currently held.
+	/// </summary>
+	public bool AnyKeyPressed => heldKeys.Count > 0;
+
+	private void Update()
 	{
-		_keyCodes = Enum.GetValues(typeof(KeyCode))
-				.Cast<KeyCode>()
-				.ToArray();
+		Keyboard keyboard = Keyboard.current;
+		if (keyboard == null)
+			return;
+
+		HandleKeys(keyboard);
+		HandleCharacterInput();
+	}
+
+	private void HandleKeys(Keyboard keyboard)
+	{
+		// Read modifier state directly in this frame
+		bool shift = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
+		bool ctrl = keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed;
+		bool alt = keyboard.leftAltKey.isPressed || keyboard.rightAltKey.isPressed;
+
+		foreach (KeyControl keyControl in keyboard.allKeys)
+		{
+			if (keyControl == null)
+				continue;
+
+			Key key = keyControl.keyCode;
+
+			if (IsModifier(key))
+				continue;
+
+			// Key down
+			if (keyControl.wasPressedThisFrame)
+			{
+				if (heldKeys.Add(key))
+				{
+					KeyboardInput shortcut = new(ctrl, shift, alt, key);
+					WindowHandler.OnKeyDown(shortcut);
+				}
+			}
+
+			// Key up
+			if (keyControl.wasReleasedThisFrame)
+			{
+				if (heldKeys.Remove(key))
+				{
+					KeyboardInput shortcut = new(shift, alt, ctrl, key);
+					WindowHandler.OnKeyUp(shortcut);
+				}
+			}
+		}
 	}
 
 	private void HandleCharacterInput()
@@ -25,7 +74,7 @@ public class KeyboardHandler : MonoBehaviour
 		if (string.IsNullOrEmpty(Input.inputString))
 			return;
 
-		// Input.inputString can contain multiple characters in a single frame.
+		// Input.inputString may contain multiple characters in one frame
 		foreach (char c in Input.inputString)
 		{
 			if (char.IsLetterOrDigit(c))
@@ -33,106 +82,19 @@ public class KeyboardHandler : MonoBehaviour
 		}
 	}
 
-	private void Update()
+	private bool IsModifier(Key key)
 	{
-		HandleKeyDown();
-		HandleKeyUp();
-		HandleCharacterInput();
+		switch (key)
+		{
+			case Key.LeftShift:
+			case Key.RightShift:
+			case Key.LeftCtrl:
+			case Key.RightCtrl:
+			case Key.LeftAlt:
+			case Key.RightAlt:
+				return true;
+			default:
+				return false;
+		}
 	}
-
-	private KeyCode[] _keyCodes;
-
-	private bool IsModifier(KeyControl key, Keyboard keyboard)
-	{
-		return
-			key == keyboard.leftCtrlKey
-			|| key == keyboard.rightCtrlKey
-			|| key == keyboard.leftAltKey
-			|| key == keyboard.rightAltKey
-			|| key == keyboard.leftShiftKey
-			|| key == keyboard.rightShiftKey;
-	}
-
-	private void HandleKeyDown()
-	{
-		Keyboard keyboard = Keyboard.current;
-		if (keyboard == null)
-			return;
-
-		if (!keyboard.anyKey.wasPressedThisFrame)
-			return;
-
-		bool ctrl =
-			keyboard.leftCtrlKey.isPressed ||
-			keyboard.rightCtrlKey.isPressed;
-
-		bool alt =
-			keyboard.leftAltKey.isPressed ||
-			keyboard.rightAltKey.isPressed;
-
-		bool shift =
-			keyboard.leftShiftKey.isPressed ||
-			keyboard.rightShiftKey.isPressed;
-
-		KeyControl pressedKey = keyboard.allKeys.FirstOrDefault((KeyControl key) =>
-			key != null && key.wasPressedThisFrame &&
-			!IsModifier(key, keyboard)
-		);
-
-		if (pressedKey == null)
-			return;
-
-		KeyboardInput shortcut = new(
-			shift: shift,
-			alt: alt,
-			control: ctrl,
-			key: pressedKey.keyCode
-		);
-
-		WindowHandler.OnKeyDown(shortcut);
-	}
-
-	private void HandleKeyUp()
-	{
-		Keyboard keyboard = Keyboard.current;
-		if (keyboard == null)
-			return;
-
-		if (!keyboard.anyKey.wasReleasedThisFrame)
-			return;
-
-		KeyControl[] releasedKeys = keyboard.allKeys
-			.Where((KeyControl key) => key != null && key.wasReleasedThisFrame)
-			.ToArray();
-
-		if (releasedKeys.Length == 0)
-			return;
-
-		bool ctrl =
-			keyboard.leftCtrlKey.isPressed ||
-			keyboard.rightCtrlKey.isPressed;
-		bool alt =
-			keyboard.leftAltKey.isPressed ||
-			keyboard.rightAltKey.isPressed;
-		bool shift =
-			keyboard.leftShiftKey.isPressed ||
-			keyboard.rightShiftKey.isPressed;
-
-		KeyControl releasedKey = releasedKeys.FirstOrDefault((KeyControl key) =>
-			!IsModifier(key, keyboard)
-		);
-
-		if (releasedKey == null)
-			return;
-
-		KeyboardInput shortcut = new(
-			shift: shift,
-			alt: alt,
-			control: ctrl,
-			key: releasedKey.keyCode
-		);
-
-		WindowHandler.OnKeyUp(shortcut);
-	}
-
 }

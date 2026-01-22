@@ -2,7 +2,6 @@
 
 using Game.Controls;
 using Game.Controls.DualSense;
-using Game.Controls.Keyboard;
 
 using System;
 using System.Collections.Generic;
@@ -166,7 +165,7 @@ namespace Game.UI
 
 			bool result = InputConfig.SetDualSenseBinding(command, shortcut.Value);
 			if (!result)
-				AnnounceBlockedShortcut(shortcut.Value);
+				AnnounceBlockedShortcut(default);
 			else Tolk.Speak("Nastaveno.");
 		}
 
@@ -178,8 +177,8 @@ namespace Game.UI
 
 		private void KeyboardBindingFinished(KeyboardBindingResult result)
 		{
-			if (result.ShortcutAlreadyUsed)
-				AnnounceBlockedShortcut(result.Shortcut.Value);
+			if (result.CommandWithSameShortcut != null)
+				AnnounceBlockedShortcut(result.CommandWithSameShortcut.Value);
 			else Tolk.Speak("Nastaveno");
 			BindingMenu(result.Command);
 		}
@@ -190,17 +189,8 @@ namespace Game.UI
 			InputConfig.StartKeyboardBinding(command, KeyboardBindingFinished);
 		}
 
-		private static void AnnounceBlockedShortcut(DualSenseInput shortcut)
+		private static void AnnounceBlockedShortcut(CommandId blockingCommand)
 		{
-			CommandId blockingCommand = InputConfig.GetBindableCommand(shortcut);
-			string blockingCommandName = InputConfig.GetCommandName(blockingCommand);
-			string message = $"Tuhle zkratku už máš nastavenou pro příkaz {blockingCommandName}.";
-			Tolk.Speak(message);
-		}
-
-		private static void AnnounceBlockedShortcut(KeyboardInput shortcut)
-		{
-			CommandId blockingCommand = InputConfig.GetBindableCommand(shortcut);
 			string blockingCommandName = InputConfig.GetCommandName(blockingCommand);
 			string message = $"Tuhle zkratku už máš nastavenou pro příkaz {blockingCommandName}.";
 			Tolk.Speak(message);
