@@ -237,7 +237,7 @@ namespace Game.UI
 			Play(_introSound);
 
 			if (!string.IsNullOrWhiteSpace(_introText))
-				Tolk.Speak(_introText, true);
+				Tolk.Speak(_introText, false);
 			if (_sayItemAtStartup)
 				SayItem(false, false);
 		}
