@@ -29,9 +29,6 @@ using System.Linq;
 using UnityEditor;
 
 using UnityEngine;
-using UnityEngine.InputSystem;
-
-using static UnityEngine.GraphicsBuffer;
 
 using Message = Game.Messaging.Message;
 using Physics = Game.Entities.Characters.Components.Physics;
@@ -77,11 +74,11 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			// Check if any objects except walls are standing before the player.
-			List<Entity> objects = 
-				GetEntitiesBefore(Settings.ObjectManipulationRadius)
+			List<Entity> objects =
+				GetEntitiesBefore(Settings.ObjectManipulationRadius)?
 				.ToList();
-			objects = objects
-				.Where(o => !string.Equals(o.Type, "zeď", StringComparison.OrdinalIgnoreCase))
+			objects = objects?
+				.Where(o => !string.Equals(o.Type, "zeď", StringComparison.OrdinalIgnoreCase))?
 				.ToList();
 
 			if (objects.IsNullOrEmpty())
@@ -1466,9 +1463,9 @@ namespace Game.Entities.Characters.Chipotle
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
-			bool obstaclesFound = collisions.Obstacles!=null&&
+			bool obstaclesFound = collisions.Obstacles != null &&
 				collisions.Obstacles
-				.Any(o => (o is Item i && !i.Passable) 
+				.Any(o => (o is Item i && !i.Passable)
 				|| (o is Door d && !d.Open)
 				|| collisions.Obstacles.Any(o => o is TileInfo)
 				);

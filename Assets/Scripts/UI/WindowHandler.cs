@@ -143,41 +143,42 @@ namespace Game.UI
 		/// <summary>
 		/// Delegates event to event handler of active window
 		/// </summary>
-		/// <param name="shortcut">Event parameters</param>
-		public static void OnKeyDown(KeyboardInput shortcut)
+		/// <param name="inpuut">Event parameters</param>
+		public static void OnKeyDown(KeyboardInput inpuut)
 		{
 			if (InputConfig.KeyboardRebinding)
 			{
-				InputConfig.CatchKeyForBinding(shortcut);
-				_catchKeysForBinding = true;
+				InputConfig.CatchKeysForBinding(inpuut);
+				_catchKeyboardKeysForBinding = true;
 				return;
 			}
 
-			DebugManager.OnKeyDown(shortcut);
-			ActiveWindow?.OnKeyDown(shortcut);
+			DebugManager.OnKeyDown(inpuut);
+			ActiveWindow?.OnKeyDown(inpuut);
 		}
 
 		/// <summary>
 		/// Sends the KeyUp event to the current active window.
 		/// </summary>
-		public static void OnKeyUp(KeyboardInput shortcut)
+		public static void OnKeyUp(KeyboardInput input)
 		{
 			if (InputConfig.KeyboardRebinding)
 			{
-				if (_catchKeysForBinding && !_keyboardHandler.AnyKeyPressed)
+				if (_catchKeyboardKeysForBinding && !_dualSenseHandler.AnyKeyPressed())
 				{
 					InputConfig.FinishKeyboardBinding();
-					_catchKeysForBinding = false;
+					_catchKeyboardKeysForBinding = false;
 					return;
 				}
 			}
 
-			DebugManager.OnKeyUp(shortcut);
-			ActiveWindow?.OnKeyUp(shortcut);
+			DebugManager.OnKeyUp(input);
+			ActiveWindow?.OnKeyUp(input);
 		}
 
 		public static DebugManager DebugManager;
-		private static bool _catchKeysForBinding;
+		private static bool _catchKeyboardKeysForBinding;
+		private static bool _catchDualSenseButtonsForBinding;
 
 		/// <summary>
 		/// Opens virtual modal window
@@ -215,11 +216,29 @@ namespace Game.UI
 
 		public static void OnKeyDown(DualSenseInput input)
 		{
+			if (InputConfig.DualSenseRebinding)
+			{
+				InputConfig.CatchKeysForBinding(input);
+				_catchDualSenseButtonsForBinding = true;
+				return;
+			}
+
 			ActiveWindow?.OnKeyDown(input);
 		}
 
+
 		public static void OnKeyUp(DualSenseInput input)
 		{
+			if (InputConfig.DualSenseRebinding)
+			{
+				if (_catchDualSenseButtonsForBinding && !_dualSenseHandler.AnyKeyPressed())
+				{
+					InputConfig.FinishDualSenseBinding();
+					_catchDualSenseButtonsForBinding = false;
+					return;
+				}
+			}
+
 			ActiveWindow?.OnKeyUp(input);
 		}
 

@@ -18,7 +18,10 @@ public class KeyboardHandler : MonoBehaviour
 	/// <summary>
 	/// Indicates whether any non-modifier key is currently held.
 	/// </summary>
-	public bool AnyKeyPressed => heldKeys.Count > 0;
+	public bool GetAnyKeyPressed()
+	{
+		return heldKeys.Count > 0;
+	}
 
 	private void Update()
 	{

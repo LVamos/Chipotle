@@ -1,7 +1,6 @@
 ﻿using DavyKager;
 
 using Game.Controls;
-using Game.Controls.DualSense;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -157,17 +156,8 @@ namespace Game.UI
 
 		private void SetDualSenseBinding(CommandId command)
 		{
-			DualSenseInput? shortcut = WindowHandler.CatchDualSenseShortcut();
-			if (shortcut == null)
-			{
-				BindingMenu(command);
-				return;
-			}
-
-			bool result = InputConfig.SetDualSenseBinding(command, shortcut.Value);
-			if (!result)
-				AnnounceBlockedShortcut(default);
-			else Tolk.Speak("Nastaveno.");
+			Tolk.Speak("Zadej kombinaci tlačítek");
+			InputConfig.StartDualSenseBinding(command, DualSenseBindingFinished);
 		}
 
 		private void RestoreKeyboardBinding(CommandId command)
@@ -177,13 +167,22 @@ namespace Game.UI
 			BindingMenu(command);
 		}
 
-		private void KeyboardBindingFinished(KeyboardBindingResult result)
+		private void KeyboardBindingFinished(BindingResult result)
 		{
 			if (result.CommandWithSameShortcut != null)
 				AnnounceBlockedShortcut(result.CommandWithSameShortcut.Value);
 			else Tolk.Speak("Nastaveno");
 			BindingMenu(result.Command);
 		}
+
+		private void DualSenseBindingFinished(BindingResult result)
+		{
+			if (result.CommandWithSameShortcut != null)
+				AnnounceBlockedShortcut(result.CommandWithSameShortcut.Value);
+			else Tolk.Speak("Nastaveno");
+			BindingMenu(result.Command);
+		}
+
 
 		private void SetKeyboardBinding(CommandId command)
 		{

@@ -51,14 +51,21 @@ namespace Game.Controls
 			SaveBindings();
 		}
 
-		public static bool SetDualSenseBinding(CommandId command, DualSenseInput shortcut)
+		public static CommandId? SetDualSenseBinding(CommandId command, DualSenseInput shortcut)
 		{
-			if (_commands.Values.Any(b => b.DualSense == shortcut))
-				return false;
+			if (!IsBindable(command))
+				throw new InvalidOperationException($"Command {command} is not configurable.");
+
+			Dictionary<CommandId, CommandBindings> bindables = GetBindableCommands();
+			List<CommandId> blockingCommands = GetBindableCommands(shortcut)
+				.Where(c => c != command)
+				.ToList();
+			if (blockingCommands != null && blockingCommands.Count > 0)
+				return blockingCommands.First();
 
 			_commands[command].DualSense = shortcut;
 			SaveBindings();
-			return true;
+			return null;
 		}
 
 		public static Dictionary<CommandId, CommandBindings> GetBindableCommands()
@@ -216,13 +223,17 @@ namespace Game.Controls
 				.ToList();
 		}
 
-		public static CommandId GetBindableCommand(DualSenseInput shortcut)
+		public static List<CommandId> GetBindableCommands(DualSenseInput shortcut)
 		{
 			var value = (DualSenseInput?)shortcut;
-			return _commands.First(record => record.Value.DualSense == value).Key;
+			Dictionary<CommandId, CommandBindings> bindables = GetBindableCommands();
+			return bindables
+				.Where(record => record.Value.DualSense == value)
+				.Select(record => record.Key)
+				.ToList();
 		}
 
-		public static void StartKeyboardBinding(CommandId command, Action<KeyboardBindingResult> callback)
+		public static void StartKeyboardBinding(CommandId command, Action<BindingResult> callback)
 		{
 			if (!IsBindable(command))
 				throw new InvalidOperationException($"Command {command} is not configurable.");
@@ -232,6 +243,16 @@ namespace Game.Controls
 			KeyboardRebinding = true;
 		}
 
+		public static void StartDualSenseBinding(CommandId command, Action<BindingResult> callback)
+		{
+			if (!IsBindable(command))
+				throw new InvalidOperationException($"Command {command} is not configurable.");
+
+			_rebindedCommand = command;
+			_dualSenseBindingFinished = callback;
+			DualSenseRebinding = true;
+		}
+
 		private static bool IsBindable(CommandId command)
 		{
 			return _bindableCommands.Contains(command);
@@ -239,13 +260,13 @@ namespace Game.Controls
 
 		public static void FinishKeyboardBinding()
 		{
-			Action<KeyboardBindingResult> callback = _keyboardBindingFinished;
+			Action<BindingResult> callback = _keyboardBindingFinished;
 			_keyboardBindingFinished = null;
 			CommandId command = _rebindedCommand.Value;
 			_rebindedCommand = null;
 			KeyboardRebinding = false;
 
-			KeyboardBindingResult result = null;
+			BindingResult result = null;
 			if (_bindingKeyboardShortcut == null)
 			{
 				result = new(command);
@@ -254,13 +275,34 @@ namespace Game.Controls
 			}
 
 			CommandId? blockingCommand = SetKeyboardBinding(command, _bindingKeyboardShortcut.Value);
-			result = new(command, _bindingKeyboardShortcut, blockingCommand);
+			result = new(command, blockingCommand);
+			callback(result);
+		}
+
+		public static void FinishDualSenseBinding()
+		{
+			Action<BindingResult> callback = _dualSenseBindingFinished;
+			_dualSenseBindingFinished = null;
+			CommandId command = _rebindedCommand.Value;
+			_rebindedCommand = null;
+			DualSenseRebinding = false;
+
+			BindingResult result = null;
+			if (_bindingDualSenseShortcut == null)
+			{
+				result = new(command);
+				callback(result);
+				return;
+			}
+
+			CommandId? blockingCommand = SetDualSenseBinding(command, _bindingDualSenseShortcut.Value);
+			result = new(command, blockingCommand);
 			callback(result);
 		}
 
 		private static KeyboardInput? _bindingKeyboardShortcut;
 
-		public static void CatchKeyForBinding(KeyboardInput shortcut)
+		public static void CatchKeysForBinding(KeyboardInput shortcut)
 		{
 			if (shortcut == new KeyboardInput(Key.Escape))
 			{
@@ -272,9 +314,24 @@ namespace Game.Controls
 			_bindingKeyboardShortcut = shortcut;
 		}
 
-		private static CommandId? _rebindedCommand;
+		public static void CatchKeysForBinding(DualSenseInput shortcut)
+		{
+			if (shortcut == new DualSenseInput("Circle"))
+			{
+				_bindingDualSenseShortcut = null;
+				FinishDualSenseBinding();
+				return;
+			}
 
-		private static Action<KeyboardBindingResult> _keyboardBindingFinished;
+			_bindingDualSenseShortcut = shortcut;
+		}
+
+		private static CommandId? _rebindedCommand;
+		private static Action<BindingResult> _dualSenseBindingFinished;
+
+		public static bool DualSenseRebinding { get; private set; }
+
+		private static Action<BindingResult> _keyboardBindingFinished;
 
 		private static Dictionary<CommandId, CommandBindings> _commands;
 		private static Dictionary<CommandId, CommandBindings> _defaultBindings;
@@ -318,6 +375,7 @@ CommandId.      GameLoadPredefinedSave,
 		};
 
 		private static Dictionary<CommandId, string> _commandNames;
+		private static DualSenseInput? _bindingDualSenseShortcut;
 
 		public static bool KeyboardRebinding { get; private set; }
 	}

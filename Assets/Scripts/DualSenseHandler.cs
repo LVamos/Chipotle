@@ -1,4 +1,5 @@
-﻿using Game.Controls.DualSense;
+﻿using Game;
+using Game.Controls.DualSense;
 using Game.UI;
 
 using System;
@@ -17,6 +18,10 @@ public class DualSenseHandler : MonoBehaviour
 	private readonly HashSet<string> _activeKeys = new(StringComparer.OrdinalIgnoreCase);
 	private readonly List<string> _pressedOrder = new();
 	private Gamepad _gamepad;
+	private bool _previousLeftTriggerPressed;
+	private bool _previousRightTriggerPressed;
+	private string _previousLeftStickDirection;
+	private string _previousRightStickDirection;
 
 	// Touchpad swipe tracking
 	private Vector2? _previousTouchPosition = null;
@@ -35,85 +40,102 @@ public class DualSenseHandler : MonoBehaviour
 
 	private void ProcessInputs()
 	{
-		HashSet<string> pressedKeys = GetPressedKeys();
-		List<string> newOrder = BuildNewOrder(pressedKeys);
-		bool setChanged = !AreSetsEqual(_activeKeys, pressedKeys);
-		bool orderChanged = !_pressedOrder.SequenceEqual(newOrder, StringComparer.OrdinalIgnoreCase);
+		UpdateButton(DualSenseButton.Cross, _gamepad.buttonSouth);
+		UpdateButton(DualSenseButton.Circle, _gamepad.buttonEast);
+		UpdateButton(DualSenseButton.Square, _gamepad.buttonWest);
+		UpdateButton(DualSenseButton.Triangle, _gamepad.buttonNorth);
+		UpdateButton(DualSenseButton.L1, _gamepad.leftShoulder);
+		UpdateButton(DualSenseButton.R1, _gamepad.rightShoulder);
+		UpdateButton(DualSenseButton.Options, _gamepad.startButton);
+		UpdateButton(DualSenseButton.Create, _gamepad.selectButton);
+		UpdateButton(DualSenseButton.L3, _gamepad.leftStickButton);
+		UpdateButton(DualSenseButton.R3, _gamepad.rightStickButton);
 
-		if (setChanged || orderChanged)
-		{
-			if (_activeKeys.Count > 0)
-				WindowHandler.OnKeyUp(new DualSenseInput(BuildIdentifier(_pressedOrder)));
-
-			_activeKeys.Clear();
-			foreach (string key in pressedKeys)
-				_activeKeys.Add(key);
-
-			_pressedOrder.Clear();
-			_pressedOrder.AddRange(newOrder);
-
-			if (_activeKeys.Count > 0)
-				WindowHandler.OnKeyDown(new DualSenseInput(BuildIdentifier(_pressedOrder)));
-		}
-	}
-
-	private HashSet<string> GetPressedKeys()
-	{
-		HashSet<string> pressed = new(StringComparer.OrdinalIgnoreCase);
-
-		AddButton(pressed, DualSenseButton.Cross, _gamepad.buttonSouth);
-		AddButton(pressed, DualSenseButton.Circle, _gamepad.buttonEast);
-		AddButton(pressed, DualSenseButton.Square, _gamepad.buttonWest);
-		AddButton(pressed, DualSenseButton.Triangle, _gamepad.buttonNorth);
-		AddButton(pressed, DualSenseButton.L1, _gamepad.leftShoulder);
-		AddButton(pressed, DualSenseButton.R1, _gamepad.rightShoulder);
-		AddButton(pressed, DualSenseButton.Options, _gamepad.startButton);
-		AddButton(pressed, DualSenseButton.Create, _gamepad.selectButton);
-		AddButton(pressed, DualSenseButton.L3, _gamepad.leftStickButton);
-		AddButton(pressed, DualSenseButton.R3, _gamepad.rightStickButton);
+		ButtonControl dpadUp = _gamepad.dpad.up;
+		ButtonControl dpadDown = _gamepad.dpad.down;
+		ButtonControl dpadLeft = _gamepad.dpad.left;
+		ButtonControl dpadRight = _gamepad.dpad.right;
+		UpdateDPad(DualSenseDPad.DPadUp, dpadUp);
+		UpdateDPad(DualSenseDPad.DPadDown, dpadDown);
+		UpdateDPad(DualSenseDPad.DPadLeft, dpadLeft);
+		UpdateDPad(DualSenseDPad.DPadRight, dpadRight);
 
 		StickControl touchpadStick = _gamepad.allControls.FirstOrDefault(c => c.name.Equals("touchpad", StringComparison.OrdinalIgnoreCase)) as StickControl;
 		ButtonControl touchpadButton = _gamepad.allControls.FirstOrDefault(c => c.name.Equals("touchpadButton", StringComparison.OrdinalIgnoreCase)) as ButtonControl;
-		AddButton(pressed, DualSenseButton.TouchpadButton, touchpadButton);
+		UpdateButton(DualSenseButton.TouchpadButton, touchpadButton);
 
-		AddDPad(pressed, DualSenseDPad.DPadUp, _gamepad.dpad.up);
-		AddDPad(pressed, DualSenseDPad.DPadDown, _gamepad.dpad.down);
-		AddDPad(pressed, DualSenseDPad.DPadLeft, _gamepad.dpad.left);
-		AddDPad(pressed, DualSenseDPad.DPadRight, _gamepad.dpad.right);
+		UpdateTrigger(DualSenseTrigger.L2, _gamepad.leftTrigger.ReadValue(), ref _previousLeftTriggerPressed);
+		UpdateTrigger(DualSenseTrigger.R2, _gamepad.rightTrigger.ReadValue(), ref _previousRightTriggerPressed);
 
-		AddTrigger(pressed, DualSenseTrigger.L2, _gamepad.leftTrigger.ReadValue());
-		AddTrigger(pressed, DualSenseTrigger.R2, _gamepad.rightTrigger.ReadValue());
+		UpdateStick(DualSenseStick.Left, _gamepad.leftStick.ReadValue(), ref _previousLeftStickDirection);
+		UpdateStick(DualSenseStick.Right, _gamepad.rightStick.ReadValue(), ref _previousRightStickDirection);
 
-		AddStick(pressed, DualSenseStick.Left, _gamepad.leftStick.ReadValue());
-		AddStick(pressed, DualSenseStick.Right, _gamepad.rightStick.ReadValue());
-
-		AddTouchpadSwipe(pressed, touchpadStick, touchpadButton);
-
-		return pressed;
+		UpdateTouchpadSwipe(touchpadStick, touchpadButton);
 	}
 
-	private static void AddButton(HashSet<string> pressed, DualSenseButton button, ButtonControl control)
+	public bool AnyKeyPressed()
 	{
-		if (control != null && control.isPressed)
-			pressed.Add(button.ToString());
+		Gamepad gamepad = Gamepad.current;
+		if (gamepad == null)
+			return false;
+
+		return _activeKeys.Count > 0;
 	}
 
-	private static void AddDPad(HashSet<string> pressed, DualSenseDPad dpad, ButtonControl control)
+	private void UpdateButton(DualSenseButton button, ButtonControl control)
 	{
-		if (control != null && control.isPressed)
-			pressed.Add(dpad.ToString());
+		if (control == null)
+			return;
+
+		string identifier = button.ToString();
+		if (control.wasPressedThisFrame)
+			AddActive(identifier);
+
+		if (control.wasReleasedThisFrame)
+			RemoveActive(identifier);
 	}
 
-	private void AddTrigger(HashSet<string> pressed, DualSenseTrigger trigger, float value)
+	private void UpdateDPad(DualSenseDPad dpad, ButtonControl control)
 	{
-		if (value > _triggerPressThreshold)
-			pressed.Add(trigger.ToString());
+		if (control == null)
+			return;
+
+		string identifier = dpad.ToString();
+		if (control.wasPressedThisFrame)
+			AddActive(identifier);
+
+		if (control.wasReleasedThisFrame)
+			RemoveActive(identifier);
 	}
 
-	private static void AddStick(HashSet<string> pressed, DualSenseStick stick, Vector2 input)
+	private void UpdateTrigger(DualSenseTrigger trigger, float value, ref bool previousPressed)
+	{
+		bool pressed = value > _triggerPressThreshold;
+		if (pressed && !previousPressed)
+			AddActive(trigger.ToString());
+		else if (!pressed && previousPressed)
+			RemoveActive(trigger.ToString());
+
+		previousPressed = pressed;
+	}
+
+	private void UpdateStick(DualSenseStick stick, Vector2 input, ref string previousDirection)
+	{
+		string direction = GetStickDirectionIdentifier(stick, input);
+		if (!string.Equals(previousDirection, direction, StringComparison.OrdinalIgnoreCase))
+		{
+			if (!string.IsNullOrEmpty(previousDirection))
+				RemoveActive(previousDirection);
+			if (!string.IsNullOrEmpty(direction))
+				AddActive(direction);
+			previousDirection = direction;
+		}
+	}
+
+	private static string GetStickDirectionIdentifier(DualSenseStick stick, Vector2 input)
 	{
 		if (input.magnitude < 0.1f)
-			return;
+			return null;
 
 		DualSenseStickDirection direction;
 		if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
@@ -121,22 +143,20 @@ public class DualSenseHandler : MonoBehaviour
 		else
 			direction = input.y > 0 ? DualSenseStickDirection.Up : DualSenseStickDirection.Down;
 
-		pressed.Add($"{stick}Stick{direction}");
+		return $"{stick}Stick{direction}";
 	}
 
-	private void AddTouchpadSwipe(HashSet<string> pressed, StickControl touchpadStick, ButtonControl touchpadButton)
+	private void UpdateTouchpadSwipe(StickControl touchpadStick, ButtonControl touchpadButton)
 	{
 		if (touchpadStick == null || touchpadButton == null)
 		{
-			_currentSwipe = null;
-			_previousTouchPosition = null;
+			ClearTouchpadSwipe();
 			return;
 		}
 
 		if (!touchpadButton.isPressed)
 		{
-			_currentSwipe = null;
-			_previousTouchPosition = null;
+			ClearTouchpadSwipe();
 			return;
 		}
 
@@ -154,40 +174,40 @@ public class DualSenseHandler : MonoBehaviour
 		}
 
 		_previousTouchPosition = position;
-
 		if (_currentSwipe.HasValue)
-			pressed.Add($"Touchpad{_currentSwipe}");
+			AddActive($"Touchpad{_currentSwipe}");
 	}
 
-	private List<string> BuildNewOrder(HashSet<string> pressedKeys)
+	private void ClearTouchpadSwipe()
 	{
-		List<string> newOrder = new();
-		foreach (string key in _pressedOrder)
-			if (pressedKeys.Contains(key))
-				newOrder.Add(key);
-
-		foreach (string key in pressedKeys)
-			if (!ContainsIgnoreCase(newOrder, key))
-				newOrder.Add(key);
-
-		return newOrder;
+		if (_currentSwipe.HasValue)
+			RemoveActive($"Touchpad{_currentSwipe}");
+		_currentSwipe = null;
+		_previousTouchPosition = null;
 	}
 
-	private static bool AreSetsEqual(HashSet<string> first, HashSet<string> second)
+	private void AddActive(string identifier)
 	{
-		if (first == null && second == null)
-			return true;
-		if (first == null || second == null)
-			return false;
-		return first.SetEquals(second);
+		if (string.IsNullOrEmpty(identifier))
+			return;
+
+		if (_activeKeys.Add(identifier))
+		{
+			_pressedOrder.Add(identifier);
+			WindowHandler.OnKeyDown(new DualSenseInput(BuildIdentifier(_pressedOrder)));
+		}
 	}
 
-	private static bool ContainsIgnoreCase(List<string> list, string value)
+	private void RemoveActive(string identifier)
 	{
-		foreach (string item in list)
-			if (item.Equals(value, StringComparison.OrdinalIgnoreCase))
-				return true;
-		return false;
+		if (string.IsNullOrEmpty(identifier))
+			return;
+
+		if (_activeKeys.Remove(identifier))
+		{
+			_pressedOrder.RemoveAll(item => item.Equals(identifier, StringComparison.OrdinalIgnoreCase));
+			WindowHandler.OnKeyUp(new DualSenseInput(identifier));
+		}
 	}
 
 	private static string BuildIdentifier(IList<string> keys)
