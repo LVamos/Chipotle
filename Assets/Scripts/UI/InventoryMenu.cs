@@ -18,6 +18,12 @@ namespace Game.UI
 {
 	public class InventoryMenu : MenuWindow
 	{
+		public override void OnActivate()
+		{
+			base.OnActivate();
+			AssignSelectedObject();
+		}
+
 		protected override void FinalizeMenu()
 		{
 			_menuClosed?.Invoke(Index, Action);
@@ -132,8 +138,7 @@ namespace Game.UI
 		/// </summary>
 		private void UseObject()
 		{
-			bool usable = SelectedItem.Usable || SelectedItem.UsableWith != null;
-			if (!usable)
+			if (!SelectedItem.Usable)
 			{
 				Tolk.Speak("Tohle se použít nedá");
 				Close();
@@ -182,15 +187,6 @@ namespace Game.UI
 		protected void AssignSelectedObject()
 		{
 			SelectedItem = _inventory.First(o => o.Name.Indexed == _items[_index][0]);
-		}
-
-		/// <summary>
-		/// Announces selected item using a screen reader or voice synthesizer
-		/// </summary>
-		protected override void SayItem(bool playSound = true, bool interruptSpeech = true)
-		{
-			Play(_selectionSound);
-			Tolk.Speak(SelectedItem.Name.Friendly);
 		}
 	}
 }
