@@ -269,13 +269,13 @@ namespace Game.Controls
 			BindingResult result = null;
 			if (_bindingKeyboardShortcut == null)
 			{
-				result = new(command);
+				result = new(command, false);
 				callback(result);
 				return;
 			}
 
 			CommandId? blockingCommand = SetKeyboardBinding(command, _bindingKeyboardShortcut.Value);
-			result = new(command, blockingCommand);
+			result = new(command, false, blockingCommand);
 			callback(result);
 		}
 
@@ -290,13 +290,13 @@ namespace Game.Controls
 			BindingResult result = null;
 			if (_bindingDualSenseShortcut == null)
 			{
-				result = new(command);
+				result = new(command, false);
 				callback(result);
 				return;
 			}
 
 			CommandId? blockingCommand = SetDualSenseBinding(command, _bindingDualSenseShortcut.Value);
-			result = new(command, blockingCommand);
+			result = new(command, false, blockingCommand);
 			callback(result);
 		}
 

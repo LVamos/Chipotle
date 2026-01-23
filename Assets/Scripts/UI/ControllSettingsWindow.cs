@@ -112,13 +112,13 @@ namespace Game.UI
 
 		private List<List<string>> _bindingMenuItems = new()
 			{
-			new List<string>() { "Nastavit klávesovou zkratku" },
-			new List<string>() { "Vrátit výchozí klávesovou zkratku" },
-			new List<string>() { "Nastavit zkratku pro Dual sense" },
-			new List<string>() { "Vrátit výchozí zkratku pro Dual sense" }
+			new () { "Nastavit klávesovou zkratku" },
+			new () { "Vrátit výchozí klávesovou zkratku" },
+			new () { "Nastavit kombinaci tlačítek pro Dual sense" },
+			new () { "Vrátit výchozí kombinaci tlačítek pro Dual sense" }
 			};
 
-		private void BindingMenu(CommandId command)
+		private void BindingMenu(CommandId command, int index = 0)
 		{
 			MenuParameters parameters = new(
 				_bindingMenuItems,
@@ -130,6 +130,7 @@ namespace Game.UI
 		wrapUpSound: "MenuWrapped",
 		upperEdgeSound: "MenuEdge",
 		lowerEdgeSound: "MenuEdge",
+		defaultIndex: index,
 				menuClosed: (option) => BindingMenuHandler((BindingAction)option, command));
 			WindowHandler.Menu(parameters, false);
 		}
@@ -150,8 +151,8 @@ namespace Game.UI
 		private void RestoreDualSenseBinding(CommandId command)
 		{
 			InputConfig.RestoreDualsenseBinding(command);
-			Tolk.Speak("Zrušeno");
-			BindingMenu(command);
+			Tolk.Speak("Obnoveno");
+			BindingMenu(command, 3);
 		}
 
 		private void SetDualSenseBinding(CommandId command)
@@ -164,14 +165,15 @@ namespace Game.UI
 		{
 			InputConfig.RestoreKeyboardBinding(command);
 			Tolk.Speak("Obnoveno");
-			BindingMenu(command);
+			BindingMenu(command, 1);
 		}
 
 		private void KeyboardBindingFinished(BindingResult result)
 		{
 			if (result.CommandWithSameShortcut != null)
 				AnnounceBlockedShortcut(result.CommandWithSameShortcut.Value);
-			else Tolk.Speak("Nastaveno");
+			else if (result.Success)
+				Tolk.Speak("Nastaveno");
 			BindingMenu(result.Command);
 		}
 
@@ -179,10 +181,10 @@ namespace Game.UI
 		{
 			if (result.CommandWithSameShortcut != null)
 				AnnounceBlockedShortcut(result.CommandWithSameShortcut.Value);
-			else Tolk.Speak("Nastaveno");
-			BindingMenu(result.Command);
+			else if (result.Success)
+				Tolk.Speak("Nastaveno");
+			BindingMenu(result.Command, 2);
 		}
-
 
 		private void SetKeyboardBinding(CommandId command)
 		{
