@@ -275,7 +275,7 @@ namespace Game.Controls
 			}
 
 			CommandId? blockingCommand = SetKeyboardBinding(command, _bindingKeyboardShortcut.Value);
-			result = new(command, false, blockingCommand);
+			result = new(command, blockingCommand == null, blockingCommand);
 			callback(result);
 		}
 
@@ -296,7 +296,7 @@ namespace Game.Controls
 			}
 
 			CommandId? blockingCommand = SetDualSenseBinding(command, _bindingDualSenseShortcut.Value);
-			result = new(command, false, blockingCommand);
+			result = new(command, blockingCommand == null, blockingCommand);
 			callback(result);
 		}
 
@@ -324,6 +324,28 @@ namespace Game.Controls
 			}
 
 			_bindingDualSenseShortcut = shortcut;
+		}
+
+		public static void RestoreCommands()
+		{
+			// Delte the YAML file
+			try
+			{
+				string path = MainScript.UserInputPath;
+				if (File.Exists(path))
+					File.Delete(path);
+			}
+			catch (Exception) { }
+
+			// Restore defaults
+			_commands = _defaultBindings
+				.ToDictionary(
+					kv => kv.Key,
+					kv => new CommandBindings(
+						kv.Value.Keyboard,
+						kv.Value.DualSense
+					)
+				);
 		}
 
 		private static CommandId? _rebindedCommand;

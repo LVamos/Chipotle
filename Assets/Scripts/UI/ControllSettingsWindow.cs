@@ -25,7 +25,6 @@ namespace Game.UI
 		public void Initialize(MainMenuWindow mainMenu)
 		{
 			base.Initialize();
-			CollectCommands();
 			_mainMenu = mainMenu;
 		}
 
@@ -41,12 +40,65 @@ namespace Game.UI
 		public override void OnActivate()
 		{
 			base.OnActivate();
-
-			SelectCommandMenu();
+			TopLevelMenu();
 		}
 
-		private void SelectCommandMenu(CommandId? command = null)
+		private List<List<string>> _topLevelMenuItems = new()
+			{
+			new () { "Změnit mapování příkazů", "", "" },
+			new () { "Obnovit mapování příkazů do původního stavu", "", "" },
+			};
+
+
+		private void TopLevelMenu(int index = 0)
 		{
+			const string prompt = "Ovládání";
+
+			MenuParameters parameters = new(
+				_topLevelMenuItems,
+				prompt,
+				" ",
+				0,
+				false,
+				defaultIndex: index,
+												introSound: "MenuItemActivated",
+								outroSound: "MenuOpened",
+		selectionSound: "MenuItemSelected",
+		wrapDownSound: "MenuWrapped",
+		wrapUpSound: "MenuWrapped",
+		upperEdgeSound: "MenuEdge",
+		lowerEdgeSound: "MenuEdge",
+				menuClosed: (option) => TopLevelMenuHandler((TopLevelMenuAction)option));
+			WindowHandler.Menu(parameters, false);
+		}
+
+		private enum TopLevelMenuAction
+		{
+			RebindCommands = 0,
+			RestoreCommands = 1,
+			Quit = -1
+		}
+
+		private void TopLevelMenuHandler(TopLevelMenuAction action)
+		{
+			switch (action)
+			{
+				case TopLevelMenuAction.RebindCommands: RebindCommandsMenu(); break;
+				case TopLevelMenuAction.RestoreCommands: RestoreCommands(); break;
+				case TopLevelMenuAction.Quit: WindowHandler.Switch(_mainMenu); break;
+			}
+		}
+
+		private void RestoreCommands()
+		{
+			InputConfig.RestoreCommands();
+			Tolk.Speak("Obnoveno");
+			TopLevelMenu();
+		}
+
+		private void RebindCommandsMenu(CommandId? command = null)
+		{
+			CollectCommands();
 			int index = command != null ? GetCommandIndex(command.Value) : 0;
 
 			const string prompt = "Příkazy";
@@ -69,7 +121,7 @@ namespace Game.UI
 		wrapUpSound: "MenuWrapped",
 		upperEdgeSound: "MenuEdge",
 		lowerEdgeSound: "MenuEdge",
-				menuClosed: SelectCommandMenuHandler);
+				menuClosed: RebindCommandsMenuHandler);
 			WindowHandler.Menu(parameters, false);
 
 			List<string> CreateItem(KeyValuePair<CommandId, CommandBindings> command)
@@ -89,10 +141,10 @@ namespace Game.UI
 								.IndexOf(command);
 		}
 
-		private void SelectCommandMenuHandler(int option)
+		private void RebindCommandsMenuHandler(int option)
 		{
 			if (option == -1)
-				WindowHandler.Switch(_mainMenu);
+				TopLevelMenu(1);
 			else BindingMenu(GetCommandByIndex(option));
 		}
 
@@ -144,7 +196,7 @@ namespace Game.UI
 				case BindingAction.SetDualSenseBinding: SetDualSenseBinding(command); break;
 				case BindingAction.RemoveDualSenseBinding:
 					RestoreDualSenseBinding(command); break;
-				case BindingAction.Cancel: SelectCommandMenu(command); break;
+				case BindingAction.Cancel: RebindCommandsMenu(command); break;
 			}
 		}
 
