@@ -43,7 +43,7 @@ namespace Game.Debug.UI
 			DebugSettingsWindow instance = obj.AddComponent<DebugSettingsWindow>();
 
 			List<List<string>> items = new List<List<string>>();
-			MenuParameters parameters = new(items, "Nastavení pro ladìní", " ");
+			MenuParameters parameters = new(items, "Nastavení pro ladìní", " ", defaultIndex: -1, sayItemAtStartup: false);
 			instance.Initialize(parameters);
 			return instance;
 		}

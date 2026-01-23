@@ -22,6 +22,21 @@ namespace Game.UI
 	/// </summary>
 	public static class WindowHandler
 	{
+		private static void ShowVersion()
+		{
+			IntPtr window = FindWindowByName(null, Application.productName); // najde okno podle původního titulku
+			if (window != IntPtr.Zero)
+			{
+				SetWindowText(window, $"Chipotle {MainScript.Version}");
+			}
+		}
+		[DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
+		static extern IntPtr FindWindowByName(string lpClassName, string lpWindowName);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern bool SetWindowText(IntPtr hWnd, string lpString);
+
+
 		private static void AddKeyboardHandler()
 		{
 			GameObject obj = new(nameof(KeyboardHandler));
@@ -35,6 +50,7 @@ namespace Game.UI
 			CreateDebugManager();
 			AddKeyboardHandler();
 			AddDualSenseHandler();
+			ShowVersion();
 		}
 
 		private static void AddDualSenseHandler()

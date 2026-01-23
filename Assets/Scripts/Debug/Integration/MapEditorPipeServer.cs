@@ -14,6 +14,7 @@ namespace Game.Debug.integration
 {
 	public class MapEditorPipeServer : MonoBehaviour, IDisposable
 	{
+
 		private const string FromEditorPipeName = "EditorToChipotle";
 		private const string ToEditorPipeName = "ChipotleToEditor";
 
