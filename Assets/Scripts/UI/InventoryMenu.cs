@@ -4,6 +4,7 @@ using DavyKager;
 
 using Game.Controls;
 using Game.Entities.Items;
+using Game.Messaging.Commands.Physics;
 using Game.Models;
 
 using System;
@@ -105,9 +106,16 @@ namespace Game.UI
 		{
 			base.AddShortcuts();
 
-			AddShortcut(CommandId.GameInteract, UseObject);
+			AddShortcut(CommandId.GameInteract, UseItem);
+			AddShortcut(CommandId.GameExploreItem, ExploreItem);
 			AddShortcut(CommandId.GamePlaceItem, PlaceItem);
 			AddShortcut(CommandId.GameApplyItemToItem, ApplyItemToTarget);
+		}
+
+		private void ExploreItem()
+		{
+			ExploreItem message = new(this, SelectedItem);
+			World.Player.TakeMessage(message);
 		}
 
 		private void ApplyItemToTarget()
@@ -136,7 +144,7 @@ namespace Game.UI
 		/// <summary>
 		/// Selects the current item as an object that should be used and quits the menu.
 		/// </summary>
-		private void UseObject()
+		private void UseItem()
 		{
 			if (!SelectedItem.Usable)
 			{
