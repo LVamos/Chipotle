@@ -126,9 +126,9 @@ namespace Game.UI
 
 			List<string> CreateItem(KeyValuePair<CommandId, CommandBindings> command)
 			{
-				string name = InputConfig.GetCommandName(command.Key);
-				string keyboard = command.Value.Keyboard.ToString();
-				string dualSense = command.Value.DualSense.ToString();
+				string name = $"{InputConfig.GetCommandName(command.Key)}. ";
+				string keyboard = $"Klávesnice: {command.Value.Keyboard}. ";
+				string dualSense = $"Dual Sense: {command.Value.DualSense}.";
 
 				return new() { name, keyboard, dualSense };
 			}
