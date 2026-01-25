@@ -11,7 +11,6 @@ using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Sound;
-using Game.Models;
 using Game.Serialization;
 using Game.Terrain;
 using Game.UI;
@@ -974,7 +973,7 @@ namespace Game
 			ZoneLoopInfo loopInfo;
 			_zoneLoops.TryGetValue(GetAttribute(zoneNode, "indexedname"), out loopInfo);
 			Name name = new(GetAttribute(zoneNode, "indexedname"), GetAttribute(zoneNode, "friendlyname"));
-			string description = GetAttribute(zoneNode, "description");
+			string description = GetAttribute(zoneNode, "description", false);
 			string to = GetAttribute(zoneNode, "to");
 			ZoneType type = GetAttribute(zoneNode, "type").ToZoneType();
 			float height = int.Parse(GetAttribute(zoneNode, "height"));
@@ -1033,7 +1032,7 @@ namespace Game
 			IEnumerable<XElement> descriptionsNode = root.Element("objectdescriptions").Elements("object");
 			foreach (XElement element in descriptionsNode)
 			{
-				string descriptions = GetAttribute(element, "descriptions");
+				string descriptions = GetAttribute(element, "descriptions", false);
 				_objectDescriptions[GetAttribute(element, "type")] = descriptions.Split(new char[] { '|' });
 			}
 		}
