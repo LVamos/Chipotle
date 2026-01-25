@@ -19,6 +19,21 @@ namespace Game.UI
 {
 	public class InventoryMenu : MenuWindow
 	{
+		protected override void SayItem(bool playSound = true, bool interruptSpeech = true)
+		{
+			if (SelectedItem == null)
+				AssignSelectedObject();
+
+			if (playSound)
+				Play(_selectionSound);
+
+			string text = SelectedItem.Name.Friendly;
+			if (Settings.SayInnerItemNames)
+				text += ", " + SelectedItem.Name.Indexed;
+
+			Tolk.Speak(text, interruptSpeech);
+		}
+
 		public override void OnActivate()
 		{
 			base.OnActivate();
