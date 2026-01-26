@@ -84,16 +84,6 @@ namespace Game.Terrain
 			return filteredPoints.ToList();
 		}
 
-		public static Rectangle FromCenter(string value, float height, float width, bool keepRounded = true)
-		{
-			if (string.IsNullOrEmpty(value))
-				throw new ArgumentNullException($"{nameof(value)} cann't be null.");
-
-			List<float> coords = ParseCoords(value);
-			Vector2 center = new(coords[0].Round(), coords[1].Round());
-			return FromCenter(center, height, width, keepRounded);
-		}
-
 		private float Left => UpperLeftCorner.x;
 		private float Right => LowerRightCorner.x;
 		private float Top => UpperLeftCorner.y;
@@ -416,6 +406,15 @@ namespace Game.Terrain
 			Vector2 upperLeftCorner = new(center.x - halfWidth, center.y + halfHeight);
 			Vector2 lowerRightCorner = new(center.x + halfWidth, center.y - halfHeight);
 			return new(upperLeftCorner, lowerRightCorner, keepRounded);
+		}
+
+		public void Resize(Vector2 center, float height, float width)
+		{
+			float halfWidth = width / 2;
+			float halfHeight = height / 2;
+
+			UpperLeftCorner = new(center.x - halfWidth, center.y + halfHeight);
+			LowerRightCorner = new(center.x + halfWidth, center.y - halfHeight);
 		}
 
 		/// <summary>

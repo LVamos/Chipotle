@@ -16,17 +16,18 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="area">The map element to be checked</param>
 		/// <returns>The corresponding obstacle type</returns>
-		public ObstacleType DetectOcclusion(MapElement emmittingObject, bool ignoreSubtleObjects = true, bool ignoreItems = true)
+		public ObstacleType DetectOcclusion(MapElement emittingObject, bool ignoreSubtleObjects = true, bool ignoreItems = true)
 		{
 			Vector2 playerCenter = World.Player.Center;
-			Vector2 closestPoint = emmittingObject.Area.Value.GetClosestPoint(playerCenter);
+			Vector2 closestPoint = emittingObject.Area.Value.GetClosestPoint(playerCenter);
 
-			Rectangle ray = Rectangle.FromCenter(closestPoint, .1f, .1f, false);
+			Rectangle ray = Rectangle.FromCenter(closestPoint, 0.1f, 0.1f, false);
 			float distance = World.GetDistance(ray.Center, playerCenter);
 			Vector2 direction = (playerCenter - ray.Center).normalized;
-			List<MapElement> ignored = new() { emmittingObject, World.Player };
-			TrackCollisionParams parameters = new
-				(
+
+			List<MapElement> ignored = new() { emittingObject, World.Player };
+
+			TrackCollisionParams parameters = new(
 				direction,
 				distance,
 				ignored,
@@ -35,22 +36,29 @@ namespace Game.Terrain
 				false,
 				false,
 				ignoreItems
-				);
+			);
+
 			CollisionsModel result = DetectOnTrack(parameters);
-			if (result.Obstacles == null)
-				return ObstacleType.None;
+			if (result.Obstacles == null) return ObstacleType.None;
 
-			if (result.Obstacles.Any(o => o is Item i && i.Type == "zeď"))
-				return ObstacleType.Wall;
+			return ClassifyObstacle(result.Obstacles);
+		}
 
-			if (result.Obstacles.Any(o => o is Door d && d.State is PassageState.Closed or PassageState.Locked))
-				return ObstacleType.ClosedDoor;
-
-			if (result.Obstacles.Any(o => o is Character))
-				return ObstacleType.ItemOrCharacter;
+		private ObstacleType ClassifyObstacle(IEnumerable<object> obstacles)
+		{
+			if (obstacles.Any(o => o is Item i && i.Type == "zeď")) return ObstacleType.Wall;
+			if (obstacles.Any(o => o is Door d && d.State is PassageState.Closed or PassageState.Locked)) return ObstacleType.ClosedDoor;
+			if (obstacles.Any(o => o is Character)) return ObstacleType.ItemOrCharacter;
 			return ObstacleType.None;
 		}
 
+
+		private Rectangle GetCapsuleAtStep(int step, TrackCollisionParams parameters)
+		{
+			Vector2 offset = parameters.Direction * CollisionDetectionResolution * step;
+			Vector2 newCenter = new Vector2(parameters.Area.Center.x + offset.x, parameters.Area.Center.y + offset.y);
+			return Rectangle.FromCenter(newCenter, parameters.Area.Height, parameters.Area.Width, false);
+		}
 
 		/// <summary>
 		/// Detects collisions on the given track area in the specified direction for the given length.
@@ -62,23 +70,19 @@ namespace Game.Terrain
 		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting zones for collision. The search ends at the position where collisions were detected.</remarks>
 		public CollisionsModel DetectOnTrack(TrackCollisionParams parameters)
 		{
-			int steps = Mathf.CeilToInt((parameters.Length) / CollisionDetectionResolution);
-			steps++; // include the initial position
-			CollisionsModel result = Detect(parameters);
-			if (result.OutOfMap)
-				return result;
-			if (!result.Obstacles.IsNullOrEmpty())
-				return result;
+			int steps = Mathf.CeilToInt(parameters.Length / CollisionDetectionResolution) + 1;
+			Rectangle capsule = parameters.Area;
 
 			for (int i = 0; i < steps; i++)
 			{
-				Vector2 offset = parameters.Direction * CollisionDetectionResolution * i;
-				Vector2 newCenter = new Vector2(parameters.Area.Center.x + offset.x, parameters.Area.Center.y + offset.y);
-				Rectangle capsule = Rectangle.FromCenter(newCenter, parameters.Area.Height, parameters.Area.Width, false);
-				result = Detect(parameters.WithArea(capsule));
-				if (result.OutOfMap)
-					return result;
-				if (!result.Obstacles.IsNullOrEmpty())
+				if (i > 0)
+				{
+					Vector2 offset = parameters.Direction * CollisionDetectionResolution * i;
+					capsule.Resize(parameters.Area.Center + offset, parameters.Area.Width, parameters.Area.Height);
+				}
+
+				CollisionsModel result = Detect(parameters.WithArea(capsule));
+				if (result.OutOfMap || !result.Obstacles.IsNullOrEmpty())
 					return result;
 			}
 
@@ -100,15 +104,11 @@ namespace Game.Terrain
 			List<object> obstacles = new();
 			List<Zone> zones = parameters.Area.GetZones().ToList();
 
-			// Detect inaccesible terrain.
+			// Detect inaccesible terrain
 			if (parameters.Terrain)
 			{
-				List<TileInfo> allTiles = parameters.Area.GetTiles(TileMap.TileSize);
-				List<TileInfo> inaccessibleTiles = allTiles
-					.Where(t => !t.Tile.Walkable)
-					.Distinct().ToList();
-
-				if (inaccessibleTiles.Any())
+				var inaccessibleTiles = CheckTerrain(parameters);
+				if (inaccessibleTiles.Count > 0)
 				{
 					obstacles.AddRange(inaccessibleTiles.Cast<object>());
 					if (parameters.FirstHit)
@@ -116,61 +116,77 @@ namespace Game.Terrain
 				}
 			}
 
-			// Check all objects, passages and characters in zones the given element intersects. Skip the given element.
+			// Check all objects, passages, and characters in zones
 			foreach (Zone z in zones)
 			{
-				bool probablyWalkable = z.IsWalkable(parameters.Area);
-				if (!probablyWalkable)
+				if (!z.IsWalkable(parameters.Area))
 				{
-					// make sure there is an item. If not, allow further collision detection.
-					Detect(z.Items, parameters.IgnoreSmall, parameters.IgnoreItems);
-					if (Enough())
-						return new(obstacles, false);
+					ProcessZoneCollection(z.Items, parameters, obstacles, parameters.IgnoreSmall, parameters.IgnoreItems);
+					if (Enough()) return new(obstacles, false);
 				}
 
-				Detect(z.Characters);
-				if (Enough())
-					return new(obstacles, false);
+				// Always check these regardless of walkability
+				var zoneCollections = new List<IEnumerable<MapElement>>()
+		{
+			z.Characters,
+			z.MovableItems,
+			z.GetClosedDoors()
+		};
 
-				Detect(z.MovableItems);
-				if (Enough())
-					return new(obstacles, false);
-
-				Detect(z.GetClosedDoors());
-				if (Enough())
-					return new(obstacles, false);
+				foreach (var collection in zoneCollections)
+				{
+					ProcessZoneCollection(collection, parameters, obstacles);
+					if (Enough()) return new(obstacles, false);
+				}
 			}
 
 			bool outOfMap = parameters.Area.IsOutOfMap();
-			if (!obstacles.Any())
-				obstacles = null;
-			else obstacles = obstacles.Distinct().ToList();
-			return new(obstacles, outOfMap);
+			var finalObstacles = obstacles.Count > 0 ? obstacles.Distinct().ToList() : null;
+			return new(finalObstacles, outOfMap);
 
-			void Detect(IEnumerable<MapElement> elements, bool ignoreSubtleObjects = false, bool ignoreItems = false)
-			{
-				bool IsIgnoredElement(MapElement element) => parameters.Ignored != null && parameters.Ignored.Contains(element);
-
-				List<MapElement> newObstacles = elements
-					.Where(element => element.Area != null
-					&& !IsIgnoredElement(element))
-					.Where(e => e.Area.Value.IntersectsStrict(parameters.Area) || e.Area.Value.Contains(parameters.Area) || parameters.Area.Contains(e.Area.Value))
-.ToList();
-				if (ignoreSubtleObjects)
-					newObstacles = newObstacles
-					.Where(o => o.Area.Value.Size > _subtleObjectSizeThreshold)
-					.ToList();
-
-				if (ignoreItems)
-					newObstacles = newObstacles
-					.Where(o => o is Item i && i.Type == "zeď")
-					.ToList();
-
-				if (newObstacles.Any())
-					obstacles.AddRange(newObstacles);
-			}
-
+			// Local function to keep FirstHit logic
 			bool Enough() => parameters.FirstHit && obstacles.Count > 0;
+		}
+
+		private void ProcessZoneCollection(
+			IEnumerable<MapElement> elements,
+			CollisionParams parameters,
+			List<object> obstacles,
+			bool ignoreSmall = false,
+			bool ignoreItems = false)
+		{
+			CheckElements(elements, parameters, obstacles, ignoreSmall, ignoreItems);
+		}
+
+		private static List<TileInfo> CheckTerrain(CollisionParams parameters)
+		{
+			List<TileInfo> allTiles = parameters.Area.GetTiles(TileMap.TileSize);
+			List<TileInfo> inaccessibleTiles = allTiles
+				.Where(t => !t.Tile.Walkable)
+				.Distinct().ToList();
+			return inaccessibleTiles;
+		}
+
+		private void CheckElements(
+	IEnumerable<MapElement> elements,
+	CollisionParams parameters,
+	List<object> obstacles,
+	bool ignoreSmall = false,
+	bool ignoreItems = false)
+		{
+			bool IsIgnored(MapElement e) => parameters.Ignored?.Contains(e) ?? false;
+
+			var newObstacles = elements
+				.Where(e => e.Area != null && !IsIgnored(e))
+				.Where(e => e.Area.Value.IntersectsStrict(parameters.Area)
+						 || e.Area.Value.Contains(parameters.Area)
+						 || parameters.Area.Contains(e.Area.Value))
+				.Where(e => !ignoreSmall || e.Area.Value.Size > _subtleObjectSizeThreshold)
+				.Where(e => !ignoreItems || (e is Item i && i.Type == "zeď"))
+				.ToList();
+
+			if (newObstacles.Count > 0)
+				obstacles.AddRange(newObstacles);
 		}
 
 	}

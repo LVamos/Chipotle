@@ -27,14 +27,14 @@ namespace Game.Terrain
 		public TrackCollisionParams(
 			Vector2 direction,
 			float length,
-			List<MapElement> ignoredElements,
+			List<MapElement> ignored,
 			Rectangle area,
-			bool justFirstObstacle = false,
-			bool checkTerrain = true,
-			bool ignoreSubtleObjects = false,
+			bool firstHit = false,
+			bool terrain = true,
+			bool ignoreSmall = false,
 			bool ignoreItems = false
 			)
-			: base(ignoredElements, area, justFirstObstacle, checkTerrain, ignoreSubtleObjects, ignoreItems)
+			: base(ignored, area, firstHit, terrain, ignoreSmall, ignoreItems)
 		{
 			Length = length;
 			Direction = direction;

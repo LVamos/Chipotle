@@ -7,16 +7,16 @@ namespace Game.Terrain
 		public CollisionParams(
 			List<MapElement> ignored,
 			Rectangle area,
-			bool justFirstObstacle = false,
-			bool checkTerrain = true,
-			bool ignoreSubtleObjects = false,
+			bool firstHit = false,
+			bool terrain = true,
+			bool ignoreSmall = false,
 			bool ignoreItems = false)
 		{
 			Ignored = ignored;
 			Area = area;
-			FirstHit = justFirstObstacle;
-			Terrain = checkTerrain;
-			IgnoreSmall = ignoreSubtleObjects;
+			FirstHit = firstHit;
+			Terrain = terrain;
+			IgnoreSmall = ignoreSmall;
 			IgnoreItems = ignoreItems;
 		}
 
