@@ -131,11 +131,14 @@ namespace Game.Entities.Characters.Components
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
 		protected virtual IEnumerable<Entity> GetEntitiesBefore(float radius)
 		{
-			Vector2 direction = GetStepDirection();
-			List<MapElement> ignoredElements = new() { Owner };
 			Rectangle area = _area.Value;
 			area.Extend(.5f);
-			CollisionsModel collisions = World.Collisions.DetectCollisionsOnTrack(ignoredElements, area, direction, radius);
+			TrackCollisionParams parameters = new(
+				GetStepDirection(),
+				radius,
+				new() { Owner },
+				area);
+			CollisionsModel collisions = World.Collisions.DetectOnTrack(parameters);
 
 			if (collisions == null || collisions.Obstacles == null)
 				return null;
@@ -1146,7 +1149,11 @@ namespace Game.Entities.Characters.Components
 		/// <param name="area">The target coordinates</param>
 		protected virtual bool DetectCollisions(Rectangle area)
 		{
-			CollisionsModel collisions = World.Collisions.DetectCollisions(new() { Owner, _player }, area, true);
+			CollisionParams parameters = new(
+				new() { Owner, _player },
+				area,
+				true);
+			CollisionsModel collisions = World.Collisions.Detect(parameters);
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
@@ -1298,7 +1305,11 @@ Rectangle.FromCenter(Center, width, height)
 
 				bool ValidatePosition(Rectangle rectangle)
 				{
-					CollisionsModel result = World.Collisions.DetectCollisions(null, rectangle, justFirstObstacle: true);
+					CollisionParams parameters = new(
+						null,
+						rectangle,
+						true);
+					CollisionsModel result = World.Collisions.Detect(parameters);
 
 					float compassAngle = GetAngle(rectangle);
 					return compassAngle == 0 && !result.OutOfMap && result.Obstacles == null;
@@ -1311,7 +1322,11 @@ Rectangle.FromCenter(Center, width, height)
 				for (int i = 0; i < steps; i++)
 				{
 					tempRectangle = tempRectangle.Move(direction, step);
-					CollisionsModel result = World.Collisions.DetectCollisions(null, tempRectangle, justFirstObstacle: true);
+					CollisionParams parameters = new(
+						null,
+						tempRectangle,
+						true);
+					CollisionsModel result = World.Collisions.Detect(parameters);
 					if (!result.OutOfMap && result.Obstacles == null)
 						return rectangle;
 				}

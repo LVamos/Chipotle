@@ -2,11 +2,8 @@
 using Game.Models;
 using Game.Terrain;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -23,8 +20,10 @@ namespace Assets.Scripts.Spatial
 			HashSet<Vector2> points = areaToAvoid.GetPoints(ValidplacementsResolution);
 			foreach (Vector2 point in points)
 			{
-				Rectangle rectangle = Rectangle.FromCenter(point, height, width);
-				CollisionsModel collisions = World.Collisions.DetectCollisions(ignoredElements, rectangle);
+				CollisionParams parameters = new(
+					ignoredElements,
+					Rectangle.FromCenter(point, height, width));
+				CollisionsModel collisions = World.Collisions.Detect(parameters);
 				if (collisions is { Obstacles: null, OutOfMap: false })
 					placements.Add(point);
 			}

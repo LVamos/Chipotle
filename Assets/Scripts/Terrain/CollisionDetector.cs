@@ -2,11 +2,8 @@
 using Game.Entities.Items;
 using Game.Models;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -28,7 +25,18 @@ namespace Game.Terrain
 			float distance = World.GetDistance(ray.Center, playerCenter);
 			Vector2 direction = (playerCenter - ray.Center).normalized;
 			List<MapElement> ignored = new() { emmittingObject, World.Player };
-			CollisionsModel result = DetectCollisionsOnTrack(ignored, ray, direction, distance, false, false, false, ignoreItems);
+			TrackCollisionParams parameters = new
+				(
+				direction,
+				distance,
+				ignored,
+				ray,
+				false,
+				false,
+				false,
+				ignoreItems
+				);
+			CollisionsModel result = DetectOnTrack(parameters);
 			if (result.Obstacles == null)
 				return ObstacleType.None;
 
@@ -52,31 +60,26 @@ namespace Game.Terrain
 		/// <param name="length">The length for which to detect collisions in meters</param>
 		/// <returns>A list of MapElements representing the obstacles detected on the track or null</returns>
 		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting zones for collision. The search ends at the position where collisions were detected.</remarks>
-		public CollisionsModel DetectCollisionsOnTrack(List<MapElement> ignoredElements, Rectangle initialPosition, Vector2 direction, float length, bool justFirstObstacle = false, bool checkTerrain = true, bool ignoreSubtleObjects = false, bool ignoreItems = false)
+		public CollisionsModel DetectOnTrack(TrackCollisionParams parameters)
 		{
-			int steps = Mathf.CeilToInt((length) / CollisionDetectionResolution);
+			int steps = Mathf.CeilToInt((parameters.Length) / CollisionDetectionResolution);
 			steps++; // include the initial position
-
-			CollisionsModel result = DetectCollisions(ignoredElements, initialPosition, justFirstObstacle, checkTerrain, ignoreSubtleObjects, ignoreItems);
+			CollisionsModel result = Detect(parameters);
 			if (result.OutOfMap)
 				return result;
 			if (!result.Obstacles.IsNullOrEmpty())
 				return result;
 
-			Rectangle capsule;
 			for (int i = 0; i < steps; i++)
 			{
-				Vector2 offset = direction * CollisionDetectionResolution * i;
-				Vector2 newCenter = new Vector2(initialPosition.Center.x + offset.x, initialPosition.Center.y + offset.y);
-				capsule = Rectangle.FromCenter(newCenter, initialPosition.Height, initialPosition.Width, false);
-
-				result = DetectCollisions(ignoredElements, capsule, justFirstObstacle, checkTerrain, ignoreSubtleObjects, ignoreItems);
+				Vector2 offset = parameters.Direction * CollisionDetectionResolution * i;
+				Vector2 newCenter = new Vector2(parameters.Area.Center.x + offset.x, parameters.Area.Center.y + offset.y);
+				Rectangle capsule = Rectangle.FromCenter(newCenter, parameters.Area.Height, parameters.Area.Width, false);
+				result = Detect(parameters.WithArea(capsule));
 				if (result.OutOfMap)
 					return result;
 				if (!result.Obstacles.IsNullOrEmpty())
 					return result;
-
-
 			}
 
 			return new(null, false);
@@ -92,15 +95,15 @@ namespace Game.Terrain
 		/// <param name="ignoredElements">The element to be moved.</param>
 		/// <param name="area">The map element to detect collisions for.</param>
 		/// <returns>List of MapElements or null</returns>
-		public CollisionsModel DetectCollisions(List<MapElement> ignoredElements, Rectangle area, bool justFirstObstacle = false, bool checkTerrain = true, bool ignoreSubtleObjects = false, bool ignoreItems = false)
+		public CollisionsModel Detect(CollisionParams parameters)
 		{
 			List<object> obstacles = new();
-			List<Zone> zones = area.GetZones().ToList();
+			List<Zone> zones = parameters.Area.GetZones().ToList();
 
 			// Detect inaccesible terrain.
-			if (checkTerrain)
+			if (parameters.Terrain)
 			{
-				List<TileInfo> allTiles = area.GetTiles(TileMap.TileSize);
+				List<TileInfo> allTiles = parameters.Area.GetTiles(TileMap.TileSize);
 				List<TileInfo> inaccessibleTiles = allTiles
 					.Where(t => !t.Tile.Walkable)
 					.Distinct().ToList();
@@ -108,7 +111,7 @@ namespace Game.Terrain
 				if (inaccessibleTiles.Any())
 				{
 					obstacles.AddRange(inaccessibleTiles.Cast<object>());
-					if (justFirstObstacle)
+					if (parameters.FirstHit)
 						return new(obstacles, false);
 				}
 			}
@@ -116,11 +119,11 @@ namespace Game.Terrain
 			// Check all objects, passages and characters in zones the given element intersects. Skip the given element.
 			foreach (Zone z in zones)
 			{
-				bool probablyWalkable = z.IsWalkable(area);
+				bool probablyWalkable = z.IsWalkable(parameters.Area);
 				if (!probablyWalkable)
 				{
 					// make sure there is an item. If not, allow further collision detection.
-					Detect(z.Items, ignoreSubtleObjects, ignoreItems);
+					Detect(z.Items, parameters.IgnoreSmall, parameters.IgnoreItems);
 					if (Enough())
 						return new(obstacles, false);
 				}
@@ -138,7 +141,7 @@ namespace Game.Terrain
 					return new(obstacles, false);
 			}
 
-			bool outOfMap = area.IsOutOfMap();
+			bool outOfMap = parameters.Area.IsOutOfMap();
 			if (!obstacles.Any())
 				obstacles = null;
 			else obstacles = obstacles.Distinct().ToList();
@@ -146,12 +149,12 @@ namespace Game.Terrain
 
 			void Detect(IEnumerable<MapElement> elements, bool ignoreSubtleObjects = false, bool ignoreItems = false)
 			{
-				bool IsIgnoredElement(MapElement element) => ignoredElements != null && ignoredElements.Contains(element);
+				bool IsIgnoredElement(MapElement element) => parameters.Ignored != null && parameters.Ignored.Contains(element);
 
 				List<MapElement> newObstacles = elements
 					.Where(element => element.Area != null
 					&& !IsIgnoredElement(element))
-					.Where(e => e.Area.Value.IntersectsStrict(area) || e.Area.Value.Contains(area) || area.Contains(e.Area.Value))
+					.Where(e => e.Area.Value.IntersectsStrict(parameters.Area) || e.Area.Value.Contains(parameters.Area) || parameters.Area.Contains(e.Area.Value))
 .ToList();
 				if (ignoreSubtleObjects)
 					newObstacles = newObstacles
@@ -167,7 +170,7 @@ namespace Game.Terrain
 					obstacles.AddRange(newObstacles);
 			}
 
-			bool Enough() => justFirstObstacle && obstacles.Count > 0;
+			bool Enough() => parameters.FirstHit && obstacles.Count > 0;
 		}
 
 	}
