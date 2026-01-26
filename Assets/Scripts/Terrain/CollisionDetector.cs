@@ -52,14 +52,6 @@ namespace Game.Terrain
 			return ObstacleType.None;
 		}
 
-
-		private Rectangle GetCapsuleAtStep(int step, TrackCollisionParams parameters)
-		{
-			Vector2 offset = parameters.Direction * CollisionDetectionResolution * step;
-			Vector2 newCenter = new Vector2(parameters.Area.Center.x + offset.x, parameters.Area.Center.y + offset.y);
-			return Rectangle.FromCenter(newCenter, parameters.Area.Height, parameters.Area.Width, false);
-		}
-
 		/// <summary>
 		/// Detects collisions on the given track area in the specified direction for the given length.
 		/// </summary>
@@ -82,11 +74,19 @@ namespace Game.Terrain
 				}
 
 				CollisionsModel result = Detect(parameters.WithArea(capsule));
-				if (result.OutOfMap || !result.Obstacles.IsNullOrEmpty())
+				if (result.OutOfMap
+					|| HasBlockingObstacle(result.Obstacles))
 					return result;
 			}
 
 			return new(null, false);
+		}
+
+		private static bool HasBlockingObstacle(IEnumerable<object> obstacles)
+		{
+			return obstacles != null && obstacles.Any(o =>
+		(o is Item i && !i.Passable) ||
+		(o is Door d && !d.Open));
 		}
 
 		private const float _subtleObjectSizeThreshold = 0.04f;
