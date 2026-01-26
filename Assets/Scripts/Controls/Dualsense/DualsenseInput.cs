@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Controls.DualSense
 {
@@ -131,11 +132,62 @@ namespace Game.Controls.DualSense
 			}
 		}
 
-		// ======= ToString =======
+		public string GetCzechLocalization()
+		{
+			List<string> parts;
+			if (OrderedKeys != null)
+				parts = new(OrderedKeys);
+			else parts = new();
+
+			if (parts.Count <= 0)
+				return "Neznámý";
+
+			List<string> translatedParts = parts
+				.Select(GetTranslation)
+				.ToList();
+
+			return string.Join(", ", translatedParts);
+
+			string GetTranslation(string input)
+			{
+				Dictionary<string, string> localizationStrings = new(StringComparer.OrdinalIgnoreCase)
+				{
+					{"TouchpadButton","Tlačítko touchpadu" },
+					{"Cross","Křížek" },
+					{"Square", "Čtvereček" },
+					{"Circle", "Kolečko" },
+					{"Triangle", "Trojúhelník" },
+					{"DPadUp", "D-Pad Nahoru" },
+					{"DPadDown", "D-Pad Dolů" },
+					{"DPadLeft", "D-Pad Doleva" },
+					{"DPadRight", "D-Pad Doprava" },
+					{"LeftStickUp", "Levá páčka nahoru" },
+					{"LeftStickDown", "Levá páčka dolů" },
+					{"LeftStickLeft", "Levá páčka doleva" },
+					{"LeftStickRight", "Levá páčka doprava" },
+					{"RightStickUp", "Pravá páčka nahoru" },
+					{"RightStickDown", "Pravá páčka dolů" },
+					{"RightStickLeft", "Pravá páčka doleva" },
+					{"RightStickRight", "Pravá páčka doprava" }
+				};
+
+				string translation = null;
+				if (localizationStrings.TryGetValue(input, out translation))
+					return translation;
+				return input;
+			}
+		}
+
 		public override string ToString()
 		{
-			List<string> parts = OrderedKeys != null ? new List<string>(OrderedKeys) : new List<string>();
-			return parts.Count > 0 ? string.Join(", ", parts) : "Unknown";
+			List<string> parts;
+			if (OrderedKeys != null)
+				parts = new(OrderedKeys);
+			else parts = new();
+
+			if (parts.Count > 0)
+				return string.Join(", ", parts);
+			else return "Unknown";
 		}
 
 		public static bool operator ==(DualSenseInput left, DualSenseInput right) => left.Equals(right);

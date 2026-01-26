@@ -1,6 +1,8 @@
 ﻿using DavyKager;
 
 using Game.Controls;
+using Game.Controls.DualSense;
+using Game.Controls.Keyboard;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -127,10 +129,15 @@ namespace Game.UI
 			List<string> CreateItem(KeyValuePair<CommandId, CommandBindings> command)
 			{
 				string name = $"{InputConfig.GetCommandName(command.Key)}. ";
-				string keyboard = $"Klávesnice: {command.Value.Keyboard}. ";
-				string dualSense = $"Dual Sense: {command.Value.DualSense}.";
-
-				return new() { name, keyboard, dualSense };
+				KeyboardInput? keyboard = command.Value.Keyboard;
+				DualSenseInput? dualSense = command.Value.DualSense;
+				string keyboardDescription = $"";
+				if (keyboard != null)
+					keyboardDescription += $"Klávesnice: {keyboard.Value.ToString()}. ";
+				string dualSenseDescription = "";
+				if (dualSense != null)
+					dualSenseDescription += $"Dual Sense: {dualSense.Value.GetCzechLocalization()}.";
+				return new() { name, keyboardDescription, dualSenseDescription };
 			}
 		}
 
