@@ -1103,6 +1103,12 @@ namespace Game
 		{
 			foreach (Character c in _characters.Values)
 				c.TakeMessage(message);
+			foreach (Passage p in _passages.Values)
+			{
+				if (p is Door)
+					p.TakeMessage(message);
+			}
+
 		}
 
 		/// <summary>
