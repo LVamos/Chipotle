@@ -38,7 +38,7 @@ namespace Game.Entities.Characters
 		/// <summary>
 		/// Destroys the NPC.
 		/// </summary>
-		protected override void DestroyObject()
+		public override void Destroy()
 		{
 			World.Remove(this);
 			Zone.TakeMessage(new CharacterLeftZone(this, this, Zone, null));
@@ -271,6 +271,6 @@ namespace Game.Entities.Characters
 		/// Processes the Destroy message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private new void OnDestroyObject(DestroyObject message) => DestroyObject();
+		private new void OnDestroyObject(DestroyObject message) => Destroy();
 	}
 }

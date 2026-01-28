@@ -673,12 +673,10 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Destroys the object.
 		/// </summary>
-		protected override void DestroyObject()
+		public override void Destroy()
 		{
-			base.DestroyObject();
-
+			base.Destroy();
 			StopAmbientSounds();
-			_messagingEnabled = false;
 
 			// Inform zones that the object disappeared.
 			foreach (Zone l in Zones)

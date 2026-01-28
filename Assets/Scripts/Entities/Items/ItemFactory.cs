@@ -15,6 +15,16 @@ namespace Assets.Scripts.Entities.Items
 {
 	public class ItemFactory
 	{
+		public static Item CreateAndActivate<T>(Name name, string type, bool pickable, bool usable, bool passable)
+		{
+			GameObject obj = new(name.Indexed);
+			obj.AddComponent(typeof(T));
+			Item item = ItemFactory.CreateItem(obj, name, default, type, pickable: pickable, usable: usable, passable: passable) as WalshesKeys;
+			World.Add(item);
+			item.Activate();
+			return item;
+		}
+
 		public static Item AddComponent(GameObject obj, string type)
 		{
 			Item item = null;
@@ -92,7 +102,7 @@ namespace Assets.Scripts.Entities.Items
 			if (_types.TryGetValue(type, out Type itemType))
 			{
 				item = obj.GetComponent(itemType) as Item;
-				item.Initialize(name, area, type, decorative, pickable, usable:usable, passable: passable);
+				item.Initialize(name, area, type, decorative, pickable, usable: usable, passable: passable);
 				return item;
 			}
 
@@ -124,7 +134,7 @@ namespace Assets.Scripts.Entities.Items
 			}
 
 			item = obj.GetComponent<Item>() as Item;
-			item.Initialize(name, area, type, decorative, pickable, usable,passable);
+			item.Initialize(name, area, type, decorative, pickable, usable, passable);
 			return item;
 		}
 	}

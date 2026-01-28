@@ -36,7 +36,7 @@ namespace Game.Entities.Items
 			base.GameUpdate();
 
 			if (Car.Moved)
-				DestroyObject();
+				Destroy();
 		}
 	}
 }

@@ -326,13 +326,13 @@ namespace Game.Entities.Characters.Chipotle
 			if (_walshesBenchUsed)
 				return;
 			_walshesBenchUsed = true;
-
-			Name name = new("klíče w1", "Walshovy klíče");
-			GameObject obj = new(name.Indexed);
-			obj.AddComponent<WalshesKeys>();
-			_walshesKeys = ItemFactory.CreateItem(obj, name, default, "walshovy klíče", pickable: true, usable: false, passable: true) as WalshesKeys;
-			World.Add(_walshesKeys);
-			_walshesKeys.Activate();
+			_walshesKeys = ItemFactory.CreateAndActivate<WalshesKeys>(
+				new("klíče w1", "Walshovy klíče"),
+				"walshovy klíče",
+				true,
+				false,
+				true
+				) as WalshesKeys;
 			PickUpItem message = new(Owner, _walshesKeys, true);
 			_walshesKeys.TakeMessage(message);
 		}

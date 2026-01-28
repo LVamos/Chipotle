@@ -59,7 +59,12 @@ namespace Game.Entities
 		/// <summary>
 		/// Destroys the object or NPC.
 		/// </summary>
-		protected override void DestroyObject() => World.Remove(this);
+		public override void Destroy()
+		{
+			World.Remove(this);
+			_messagingEnabled = false;
+			Destroy(gameObject);
+		}
 
 		/// <summary>
 		/// Moves the object to the specified coordinates.

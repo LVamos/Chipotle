@@ -1,6 +1,4 @@
-﻿using DavyKager;
-
-using Game.Audio;
+﻿using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
 using Game.Messaging;
@@ -139,13 +137,13 @@ namespace Game.Terrain
 		/// <summary>
 		/// Destroys the element.
 		/// </summary>
-		protected virtual void DestroyObject() => _messagingEnabled = false;
+		public virtual void Destroy() => _messagingEnabled = false;
 
 		/// <summary>
 		/// Processes the Destroy message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnDestroyObject(DestroyObject message) => DestroyObject();
+		protected virtual void OnDestroyObject(DestroyObject message) => Destroy();
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -267,9 +265,9 @@ namespace Game.Terrain
 		/// <summary>
 		/// Stops the sound navigation.
 		/// </summary>
-		protected void StopNavigation(bool hasBeenReached=false)
+		protected void StopNavigation(bool hasBeenReached = false)
 		{
-			if(!hasBeenReached)
+			if (!hasBeenReached)
 			{
 				string sound = "SonarTurnedOff";
 				Vector3 position = GetBeaconPosition();
@@ -281,7 +279,7 @@ namespace Game.Terrain
 			_navigating = false;
 
 			// Inform player
-			NavigationStopped message = new(this,hasBeenReached);
+			NavigationStopped message = new(this, hasBeenReached);
 			World.Player.TakeMessage(message);
 		}
 
@@ -397,7 +395,7 @@ namespace Game.Terrain
 		{
 			foreach (MessagingObject c in _components)
 			{
-				 if (c != message.Sender || message is Reloaded)
+				if (c != message.Sender || message is Reloaded)
 					c.TakeMessage(message);
 			}
 		}
