@@ -393,7 +393,7 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			Vector2 manipulationPoint = FindManipulationPoint(target);
-			ObjectsUsed message2 = new(Owner, manipulationPoint, source, target);
+			UseObjects message2 = new(Owner, manipulationPoint, source, target);
 			target.TakeMessage(message2);
 			LogItemUsedToTarget(source, target, manipulationPoint);
 		}
@@ -1297,7 +1297,7 @@ namespace Game.Entities.Characters.Chipotle
 			else
 			{
 				Item item = element as Item;
-				element.TakeMessage(new ObjectsUsed(Owner, point.Value, item));
+				element.TakeMessage(new UseObjects(Owner, point.Value, item));
 				LogItemUsage(item, point.Value);
 			}
 		}

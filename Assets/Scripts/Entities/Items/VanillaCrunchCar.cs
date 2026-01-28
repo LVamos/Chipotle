@@ -1,4 +1,4 @@
-﻿using Game.Messaging.Events.Physics;
+﻿using Game.Messaging.Commands.Physics;
 
 using ProtoBuf;
 
@@ -33,10 +33,10 @@ namespace Game.Entities.Items
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnObjectsUsed(ObjectsUsed message)
+		protected override void OnUseObjects(UseObjects message)
 		{
 			_sounds["action"] = KeyHanger.KeysHanging ? "snd14" : "snd4";
-			base.OnObjectsUsed(message);
+			base.OnUseObjects(message);
 		}
 	}
 }

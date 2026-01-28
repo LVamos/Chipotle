@@ -1,8 +1,7 @@
 ﻿using Assets.Scripts.Entities.Items;
 using Assets.Scripts.Messaging.Commands.Characters;
 
-using Game.Entities.Characters;
-using Game.Messaging.Events.Physics;
+using Game.Messaging.Commands.Physics;
 
 using ProtoBuf;
 
@@ -28,14 +27,14 @@ namespace Game.Entities.Items
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnObjectsUsed(ObjectsUsed message)
+		protected override void OnUseObjects(UseObjects message)
 		{
 			if (Used || message.Sender != World.Player)
 				return;
 
 			TakeItem newMessage = new(this, _keys);
 			World.Player.TakeMessage(newMessage);
-			base.OnObjectsUsed(message);
+			base.OnUseObjects(message);
 		}
 
 		private void CreateKeys()

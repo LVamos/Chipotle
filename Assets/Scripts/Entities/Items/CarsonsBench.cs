@@ -1,6 +1,5 @@
 ﻿// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
 using Game.Messaging.Commands.Physics;
-using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
@@ -34,14 +33,14 @@ namespace Game.Entities.Items
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnObjectsUsed(ObjectsUsed message)
+		protected override void OnUseObjects(UseObjects message)
 		{
 			if (
 				!World.GetItemsByType("lavice u Carsona")
 					.Any(o => o.Used)
 			)
 			{
-				base.OnObjectsUsed(message);
+				base.OnUseObjects(message);
 				Car.TakeMessage(new UnblockZone(this, World.GetZone("ulice v1")));
 			}
 		}

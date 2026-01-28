@@ -1,5 +1,5 @@
 ﻿using Game.Entities.Characters;
-using Game.Messaging.Events.Physics;
+using Game.Messaging.Commands.Physics;
 
 using ProtoBuf;
 
@@ -26,7 +26,7 @@ namespace Game.Entities.Items
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnObjectsUsed(ObjectsUsed message)
+		protected override void OnUseObjects(UseObjects message)
 		{
 			Character tuttle = World.GetCharacter("tuttle");
 
@@ -38,7 +38,7 @@ namespace Game.Entities.Items
 			else
 				_cutscene = "cs25";
 
-			base.OnObjectsUsed(message);
+			base.OnUseObjects(message);
 		}
 	}
 }

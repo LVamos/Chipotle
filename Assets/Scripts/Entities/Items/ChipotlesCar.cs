@@ -1,7 +1,6 @@
 ﻿using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
-using Game.Messaging.Events.Physics;
 using Game.Terrain;
 using Game.UI;
 
@@ -136,9 +135,9 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnObjectsUsed(ObjectsUsed message)
+		protected override void OnUseObjects(UseObjects message)
 		{
-			base.OnObjectsUsed(message);
+			base.OnUseObjects(message);
 
 			// When it's not allowed to use the car, play a knocking sound.
 			bool onDriveWay = _zones.Contains("příjezdová cesta w1");

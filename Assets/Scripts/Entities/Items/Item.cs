@@ -501,7 +501,7 @@ namespace Game.Entities.Items
 		/// <remarks>
 		/// The type parameter allows assigning objects with some special behavior to proper classes.
 		/// </remarks>
-		public virtual void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable,  bool passable = false, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
+		public virtual void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, bool passable = false, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
 		{
 			base.Initialize(name, type, area);
 			HeldBy = null;
@@ -713,7 +713,7 @@ namespace Game.Entities.Items
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected virtual void OnObjectsUsed(ObjectsUsed message)
+		protected virtual void OnUseObjects(UseObjects message)
 		{
 			if (_usableOnce && Used)
 			{
@@ -741,6 +741,7 @@ namespace Game.Entities.Items
 
 			UsedOnce = !Used;
 			Used = true;
+
 			LogUssage(message.Sender, message.UsedObject, message.Target, message.ManipulationPoint);
 		}
 
@@ -938,7 +939,7 @@ namespace Game.Entities.Items
 				case DoorUsed dm: OnDoorUsed(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;
 				case ObjectsCollided oc: OnObjectsCollided(oc); break;
-				case ObjectsUsed uo: OnObjectsUsed(uo); break;
+				case UseObjects uo: OnUseObjects(uo); break;
 				default: base.HandleMessage(message); break;
 			}
 		}

@@ -1,15 +1,8 @@
-﻿using DavyKager;
-
-using Game.Audio;
-using Game.Entities.Items;
-using Game.Messaging;
+﻿using Game.Messaging;
 using Game.Messaging.Commands.Physics;
-using Game.Messaging.Commands.UI;
-using Game.Messaging.Events.Physics;
 
 using ProtoBuf;
 
-using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -30,7 +23,7 @@ namespace Game.Terrain
 
 		protected override void Close(object sender, Vector2 point)
 		{
-			base.Close(sender,point);
+			base.Close(sender, point);
 			Usable = true;
 		}
 
@@ -40,20 +33,20 @@ namespace Game.Terrain
 		{
 			switch (message)
 			{
-				case ObjectsUsed objectsUsed:
-					OnObjectsUsed(objectsUsed);
+				case UseObjects objectsUsed:
+					OnUseObjects(objectsUsed);
 					break;
 				default: base.HandleMessage(message); break;
 			}
 		}
 
-		private void OnObjectsUsed(ObjectsUsed message)
+		private void OnUseObjects(UseObjects message)
 		{
 			if (message.UsedObject.Name.Indexed != _walshesKeysId)
 				return;
 
 			LockOrUnlock(message.ManipulationPoint);
-			World.PlayCutscene(this,"HalldoorUnlock");
+			World.PlayCutscene(this, "HalldoorUnlock");
 		}
 
 		private void LockOrUnlock(Vector2 manipulationPoint)

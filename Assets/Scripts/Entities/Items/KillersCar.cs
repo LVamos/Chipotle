@@ -1,5 +1,4 @@
 ﻿using Game.Messaging.Commands.Physics;
-using Game.Messaging.Events.Physics;
 using Game.Terrain;
 
 using ProtoBuf;
@@ -46,7 +45,7 @@ namespace Game.Entities.Items
 		/// Processes the UseObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected override void OnObjectsUsed(ObjectsUsed message)
+		protected override void OnUseObjects(UseObjects message)
 		{
 			if (KeysOnHanger)
 				_sounds["action"] = "snd14";
@@ -60,7 +59,7 @@ namespace Game.Entities.Items
 				ChipotlesCar.TakeMessage(newMessage);
 			}
 
-			base.OnObjectsUsed(message);
+			base.OnUseObjects(message);
 		}
 	}
 }
