@@ -14,7 +14,7 @@ using Game.Messaging;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
-using Game.Messaging.Events.GameManagement;
+using Game.Messaging.Events.GameActions;
 using Game.Messaging.Events.Input;
 using Game.Models;
 using Game.Narration.WorldDescribers;
@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
-using UnityEngine.UIElements;
 
 using Message = Game.Messaging.Message;
 
@@ -180,7 +179,7 @@ namespace Game.UI
 			if (option == -1 || sender == null)
 				return;
 
-			Interact message = new(this, objects[option]);
+			InteractionSelected message = new(this, objects[option]);
 			sender.TakeMessage(message);
 		}
 
@@ -195,7 +194,7 @@ namespace Game.UI
 			switch (action)
 			{
 				case InventoryAction.Use:
-					sender.TakeMessage(new Interact(this, selectedItem));
+					sender.TakeMessage(new InteractionSelected(this, selectedItem));
 					break;
 				case InventoryAction.ApplyToTarget:
 					sender.TakeMessage(new ApplyItemToTarget(this, selectedItem));

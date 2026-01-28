@@ -12,6 +12,7 @@ using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
 using Game.Messaging.Events.Characters;
+using Game.Messaging.Events.GameActions;
 using Game.Messaging.Events.GameInfo;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
@@ -268,6 +269,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
+				case InteractionSelected m: OnInteractionSelected(m); break;
 				case TakeItem m: OnTakeItem(m); break;
 				case SayNavigatedObjectLocation m: OnSayNavigatedObjectLocation(m); break;
 				case CharacterMoved m: return;
@@ -303,6 +305,11 @@ namespace Game.Entities.Characters.Chipotle
 				case Interact m: OnInteract(m); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		private void OnInteractionSelected(InteractionSelected message)
+		{
+			UseElement(message.Object);
 		}
 
 		private void OnTakeItem(TakeItem message)
@@ -1216,12 +1223,6 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		protected void OnInteract(Interact message)
 		{
-			if (message.Object != null)
-			{
-				UseElement(message.Object);
-				return;
-			}
-
 			Door door = GetDoorBefore(null, false, Zone);
 			UsableObjectsModel objects = GetUsableObjectsBefore(Settings.ObjectManipulationRadius);
 

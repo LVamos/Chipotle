@@ -1,6 +1,6 @@
 ﻿using Game.Controls;
 
-namespace Game.Messaging.Events.GameManagement
+namespace Game.Messaging.Events.GameActions
 {
 	public class GameMenuOptionselected : Message
 	{

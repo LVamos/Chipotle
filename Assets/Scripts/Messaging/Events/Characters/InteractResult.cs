@@ -1,7 +1,7 @@
 ﻿using Game.Entities;
 using Game.Entities.Characters;
 
-namespace Game.Messaging.Events.Physics
+namespace Game.Messaging.Events.Characters
 {
 	/// <summary>
 	/// Represents the result of an interaction.
