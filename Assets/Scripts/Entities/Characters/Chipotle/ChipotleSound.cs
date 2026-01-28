@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
-using UnityEngine.UIElements;
 
 using Message = Game.Messaging.Message;
 
@@ -73,7 +72,7 @@ namespace Game.Entities.Characters.Chipotle
 			InitFootStepSource();
 			_exitDescriber = new();
 			_itemDescriber = new();
-			_characterDescriber= new();
+			_characterDescriber = new();
 			_announceWalls = true;
 		}
 
@@ -134,9 +133,9 @@ namespace Game.Entities.Characters.Chipotle
 			switch (message)
 			{
 				case NavigationStopped m:
-					OnNavigationStopped(m);break;
+					OnNavigationStopped(m); break;
 				case SayNavigatedObjectLocationResult m:
-					OnSayNavigatedObjectLocationResult(m);break;
+					OnSayNavigatedObjectLocationResult(m); break;
 				case LeftBycar m: OnLeftBycar(m); break;
 				case NoWallsNearby m:
 					OnNoWallsNearby(m); break;
@@ -151,7 +150,7 @@ namespace Game.Entities.Characters.Chipotle
 				case SayZoneName m: OnSayZoneName(m); break;
 				case PlaceItemResult m: OnPlaceItemResult(m); break;
 				case EmptyInventory m: OnEmptyInventory(m); break;
-				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
+				case PickUpItemResult m: OnPickUpItemResult(m); break;
 				case SayCoordinates sc: OnSayCoordinates(sc); break;
 				case SayZoneSize sl: OnSayZoneSize(sl); break;
 				case SayVisitedZoneResult svl: OnSayVisitedZone(svl); break;
@@ -167,6 +166,7 @@ namespace Game.Entities.Characters.Chipotle
 				default: base.HandleMessage(message); break;
 			}
 		}
+
 
 		private void OnNavigationStopped(NavigationStopped message)
 		{
@@ -235,18 +235,18 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles the PickUpObjectResult message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		protected void OnPickUpObjectResult(PickUpObjectResult message)
+		protected void OnPickUpItemResult(PickUpItemResult message)
 		{
 			if (message.Silently)
 				return;
 
-			Dictionary<PickUpObjectResult.ResultType, string> resultMessages = new()
+			Dictionary<PickUpItemResult.ResultType, string> resultMessages = new()
 			{
-				{ PickUpObjectResult.ResultType.Success, "sebráno" },
-				{ PickUpObjectResult.ResultType.FullInventory, "Víc toho nepobereš." },
-				{ PickUpObjectResult.ResultType.NothingFound, "Před tebou nic není" },
-				{ PickUpObjectResult.ResultType.Unreachable, "Musíš jít blíž" },
-				{ PickUpObjectResult.ResultType.Unpickable, "tohle nejde odnést" }
+				{ PickUpItemResult.ResultType.Success, "sebráno" },
+				{ PickUpItemResult.ResultType.FullInventory, "Víc toho nepobereš." },
+				{ PickUpItemResult.ResultType.NothingFound, "Před tebou nic není" },
+				{ PickUpItemResult.ResultType.Unreachable, "Musíš jít blíž" },
+				{ PickUpItemResult.ResultType.Unpickable, "tohle nejde odnést" }
 			};
 
 			Tolk.Speak(resultMessages[message.Result]);
@@ -352,8 +352,8 @@ namespace Game.Entities.Characters.Chipotle
 
 			List<NavigableObjectInfo> info = message.Characters.Cast<NavigableObjectInfo>().ToList();
 			List<string> descriptions = _characterDescriber.GetDescriptions(info);
-				string text = FormatStringList(descriptions.ToArray());
-				Tolk.Speak(text, true);
+			string text = FormatStringList(descriptions.ToArray());
+			Tolk.Speak(text, true);
 		}
 
 		/// <summary>

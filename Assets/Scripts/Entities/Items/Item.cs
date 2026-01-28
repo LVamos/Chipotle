@@ -742,6 +742,8 @@ namespace Game.Entities.Items
 			UsedOnce = !Used;
 			Used = true;
 
+			ObjectsUsed newMessage = new(this, message.Sender, message.ManipulationPoint, message.UsedObject, message.Target);
+			message.Sender.TakeMessage(newMessage);
 			LogUssage(message.Sender, message.UsedObject, message.Target, message.ManipulationPoint);
 		}
 
@@ -932,7 +934,7 @@ namespace Game.Entities.Items
 			switch (message)
 			{
 				case PlaceItem m: OnPlaceItem(m); break;
-				case PickUpItem m: OnPickUpObject(m); break;
+				case PickUpItem m: OnPickUpItem(m); break;
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
 				case CharacterMoved em: OnCharacterMoved(em); break;
@@ -984,11 +986,11 @@ namespace Game.Entities.Items
 		/// Handles the PickUpObject message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		protected void OnPickUpObject(PickUpItem message)
+		protected void OnPickUpItem(PickUpItem message)
 		{
-			PickUpObjectResult.ResultType result = CanBePicked() ? PickUpObjectResult.ResultType.Success : PickUpObjectResult.ResultType.Unpickable;
+			PickUpItemResult.ResultType result = CanBePicked() ? PickUpItemResult.ResultType.Success : PickUpItemResult.ResultType.Unpickable;
 
-			if (result == PickUpObjectResult.ResultType.Success)
+			if (result == PickUpItemResult.ResultType.Success)
 			{
 				Picked();
 				HeldBy = (Character)message.Sender;
@@ -996,11 +998,12 @@ namespace Game.Entities.Items
 			}
 
 			// Report the result.
-			message.Sender.TakeMessage(new PickUpObjectResult(this, this, result));
+			PickUpItemResult newMessage = new(this, this, result, message.Silently);
+			message.Sender.TakeMessage(newMessage);
 			LogPickup(message.Sender as Character, result);
 		}
 
-		protected void LogPickup(Character character, PickUpObjectResult.ResultType result)
+		protected void LogPickup(Character character, PickUpItemResult.ResultType result)
 		{
 			string title = "Objekt zaznamenal pokus o sebrání";
 			string itemName = $"Objekt: {Name.Indexed}";

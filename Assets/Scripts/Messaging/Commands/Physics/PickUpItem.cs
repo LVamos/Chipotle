@@ -12,6 +12,8 @@ namespace Game.Messaging.Commands.Physics
 		/// </summary>
 		public new readonly MessagingObject Sender;
 
+		public bool Silently { get; }
+
 		/// <summary>
 		/// The object that should be picked.
 		/// </summary>
@@ -22,10 +24,11 @@ namespace Game.Messaging.Commands.Physics
 		/// </summary>
 		/// <param name="sender">Source of the message (Entity or EntityComponent)</param>
 		/// <param name="item">The object that should be picked</param>
-		public PickUpItem(MessagingObject sender, Item item = null) : base(sender)
+		public PickUpItem(MessagingObject sender, Item item, bool silently = false) : base(sender)
 		{
 			Sender = sender;
 			Item = item;
+			Silently = silently;
 		}
 	}
 }

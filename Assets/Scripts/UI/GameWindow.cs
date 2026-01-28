@@ -161,7 +161,7 @@ namespace Game.UI
 			if (option == -1 || sender == null)
 				return;
 
-			ExploreItem message = new(this, objects[option]);
+			ObjectForExploringSelected message = new(this, objects[option]);
 			sender.TakeMessage(message);
 		}
 
@@ -242,7 +242,7 @@ namespace Game.UI
 			if (option == -1 || sender == null)
 				return;
 
-			PickUpItem message = new(this, objects[option]);
+			ItemForPickingSelected message = new(this, objects[option]);
 			sender.TakeMessage(message);
 		}
 

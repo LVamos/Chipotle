@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Messaging.Commands.Characters;
+﻿using Assets.Scripts.Entities.Items;
+using Assets.Scripts.Messaging.Commands.Characters;
 using Assets.Scripts.Messaging.Events.Characters;
 
 using DavyKager;
@@ -66,14 +67,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
-		protected void OnExploreItem(ExploreItem message)
+		protected void OnTryExploreItem(TryExploreItem message)
 		{
-			if (message.Object != null)
-			{
-				InnerMessage(new SayObjectDescription(this, message.Object));
-				return; // This should be handled by the sound component.
-			}
-
 			// Check if any objects except walls are standing before the player.
 			List<Entity> objects =
 				GetEntitiesBefore(Settings.ObjectManipulationRadius)?
@@ -118,9 +113,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles a message.
 		/// </summary>
 		/// <param name="message">Source of the message</param>
-		protected void OnPickUpObjectResult(PickUpObjectResult message)
+		protected void OnPickUpObjectResult(PickUpItemResult message)
 		{
-			if (message.Result == PickUpObjectResult.ResultType.Success)
+			if (message.Result == PickUpItemResult.ResultType.Success)
 				_inventory.Add(message.Object.Name.Indexed);
 		}
 
@@ -269,6 +264,9 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
+				case ObjectForExploringSelected m: OnObjectForExploringSelected(m); break;
+				case ItemForPickingSelected m: OnItemForPickingSelected(m); break;
+				case ObjectsUsed m: OnObjectsUsed(m); break;
 				case InteractionSelected m: OnInteractionSelected(m); break;
 				case TakeItem m: OnTakeItem(m); break;
 				case SayNavigatedObjectLocation m: OnSayNavigatedObjectLocation(m); break;
@@ -282,10 +280,10 @@ namespace Game.Entities.Characters.Chipotle
 				case SayCharacters m: OnSayCharacters(m); break;
 				case ListCharacters m: OnListCharacters(m); break;
 				case SayItemSize m: OnSayItemSize(m); break;
-				case ExploreItem m: OnExploreItem(m); break;
-				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
+				case TryExploreItem m: OnTryExploreItem(m); break;
+				case PickUpItemResult m: OnPickUpObjectResult(m); break;
 				case RunInventoryMenu m: OnRunInventoryMenu(m); break;
-				case PickUpItem m: OnPickUpObject(m); break;
+				case TryPickUpItem m: OnTryPickUpItem(m); break;
 				case CreatePredefinedSave c: OnCreatePredefinedSave(c); break;
 				case LoadPredefinedSave l: OnLoadPredefinedSave(l); break;
 				case ListExits lex: OnListExits(lex); break;
@@ -307,6 +305,40 @@ namespace Game.Entities.Characters.Chipotle
 			}
 		}
 
+		private void OnObjectForExploringSelected(ObjectForExploringSelected message)
+		{
+			InnerMessage(new SayObjectDescription(this, message.Object));
+		}
+
+		private void OnItemForPickingSelected(ItemForPickingSelected message)
+		{
+			TryPickItem(message.Item);
+		}
+
+		private void OnObjectsUsed(ObjectsUsed message)
+		{
+			if (message.UsedObject.Name.Indexed == "lavička w1")
+				TakeKeysFromWalshesBench();
+		}
+
+		private void TakeKeysFromWalshesBench()
+		{
+			if (_walshesBenchUsed)
+				return;
+			_walshesBenchUsed = true;
+
+			Name name = new("klíče w1", "Walshovy klíče");
+			GameObject obj = new(name.Indexed);
+			obj.AddComponent<WalshesKeys>();
+			_walshesKeys = ItemFactory.CreateItem(obj, name, default, "walshovy klíče", pickable: true, usable: false, passable: true) as WalshesKeys;
+			World.Add(_walshesKeys);
+			_walshesKeys.Activate();
+			PickUpItem message = new(Owner, _walshesKeys, true);
+			_walshesKeys.TakeMessage(message);
+		}
+
+		private WalshesKeys _walshesKeys;
+		private bool _walshesBenchUsed;
 		private void OnInteractionSelected(InteractionSelected message)
 		{
 			UseElement(message.Object);
@@ -315,7 +347,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnTakeItem(TakeItem message)
 		{
 			_inventory.Add(message.Item.Name.Indexed);
-			PickUpObjectResult newMessage = new(this, message.Item, PickUpObjectResult.ResultType.Success, true);
+			PickUpItemResult newMessage = new(this, message.Item, PickUpItemResult.ResultType.Success, true);
 			InnerMessage(newMessage);
 		}
 
@@ -473,31 +505,25 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles the PickUpObject message.
 		/// </summary>
 		/// <param name="message">The message to be processed.
-		protected void OnPickUpObject(PickUpItem message)
+		protected void OnTryPickUpItem(TryPickUpItem message)
 		{
-			if (message.Item != null)
-			{
-				TryPickItem(message.Item);
-				return;
-			}
-
 			PickableItemsModel items = GetPickableItemsBefore(Settings.ObjectManipulationRadius);
 			if (items.Result == PickableItemsModel.ResultType.NothingFound)
 			{
-				PickUpObjectResult.ResultType result = PickUpObjectResult.ResultType.NothingFound;
-				InnerMessage(new PickUpObjectResult(this, null, result));
+				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.NothingFound;
+				InnerMessage(new PickUpItemResult(this, null, result));
 				LogItemPickup(null, result);
 			}
 			else if (items.Result == PickableItemsModel.ResultType.Unpickable)
 			{
-				PickUpObjectResult.ResultType result = PickUpObjectResult.ResultType.Unpickable;
-				InnerMessage(new PickUpObjectResult(this, null, result));
+				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.Unpickable;
+				InnerMessage(new PickUpItemResult(this, null, result));
 				LogItemPickup(null, result);
 			}
 			else if (items.Result == PickableItemsModel.ResultType.Unreachable)
 			{
-				PickUpObjectResult.ResultType result = PickUpObjectResult.ResultType.Unreachable;
-				PickUpObjectResult newMessage = new(this, null, result);
+				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.Unreachable;
+				PickUpItemResult newMessage = new(this, null, result);
 				InnerMessage(newMessage);
 				LogItemPickup(null, result);
 			}
@@ -513,21 +539,22 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void TryPickItem(Item item)
 		{
-			PickUpObjectResult.ResultType result;
+			PickUpItemResult.ResultType result;
 			if (!item.CanBePicked())
 			{
-				result = PickUpObjectResult.ResultType.Unpickable;
-				InnerMessage(new PickUpObjectResult(this, null, result));
+				result = PickUpItemResult.ResultType.Unpickable;
+				InnerMessage(new PickUpItemResult(this, null, result));
 			}
 			else if (_inventory.Count >= _inventoryLimit)
 			{
-				result = PickUpObjectResult.ResultType.FullInventory;
-				InnerMessage(new PickUpObjectResult(this, null, result));
+				result = PickUpItemResult.ResultType.FullInventory;
+				InnerMessage(new PickUpItemResult(this, null, result));
 			}
 			else
 			{
-				result = PickUpObjectResult.ResultType.Success;
-				item.TakeMessage(new PickUpItem(Owner, item));
+				result = PickUpItemResult.ResultType.Success;
+				PickUpItem message = new(Owner, item);
+				item.TakeMessage(message);
 			}
 
 			LogItemPickup(item, result);

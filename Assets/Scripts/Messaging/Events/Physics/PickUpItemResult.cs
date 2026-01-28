@@ -5,7 +5,7 @@ namespace Game.Messaging.Events.Physics
 	/// <summary>
 	/// informs an entity or entity component if the specified object was picked up or not.
 	/// </summary>
-	public class PickUpObjectResult : Message
+	public class PickUpItemResult : Message
 	{
 		/// <summary>
 		/// Defines possible results of picking an object off the ground.
@@ -61,7 +61,7 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="sender">Source of the message</param>
 		/// <param name="object">The manipulated object</param>
 		/// <param name="success">Specifies if the object was picked up off the ground or not.</param>
-		public PickUpObjectResult(MessagingObject sender, Item @object = null, ResultType result = ResultType.NothingFound, bool silently=false) : base(sender)
+		public PickUpItemResult(MessagingObject sender, Item @object = null, ResultType result = ResultType.NothingFound, bool silently=false) : base(sender)
 		{
 			Sender = sender;
 			Object = @object;

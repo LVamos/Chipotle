@@ -128,7 +128,7 @@ namespace Game.Entities.Characters
 			switch (message)
 			{
 				case PlaceItemResult m: OnPlaceItemResult(m); break;
-				case PickUpObjectResult m: OnPickUpObjectResult(m); break;
+				case PickUpItemResult m: OnPickUpObjectResult(m); break;
 				case OrientationChanged och: OnOrientationChanged(och); break;
 				case ZoneChanged lcd: OnZoneChanged(lcd); break;
 				case PositionChanged pcd: OnPositionChanged(pcd); break;
@@ -140,9 +140,9 @@ namespace Game.Entities.Characters
 		/// Handles the PickUpObjectResult message.
 		/// </summary>
 		/// <param name="m">The message to be processed</param>
-		private void OnPickUpObjectResult(PickUpObjectResult m)
+		private void OnPickUpObjectResult(PickUpItemResult m)
 		{
-			if (m.Result == PickUpObjectResult.ResultType.Success)
+			if (m.Result == PickUpItemResult.ResultType.Success)
 				_inventory.Add(m.Object.Name.Indexed);
 		}
 

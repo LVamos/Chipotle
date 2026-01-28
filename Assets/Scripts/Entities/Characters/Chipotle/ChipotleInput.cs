@@ -8,7 +8,6 @@ using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.GameManagement;
 using Game.Messaging.Commands.Movement;
-using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
 using Game.Messaging.Events.GameActions;
 using Game.Messaging.Events.Input;
@@ -173,14 +172,14 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Instruucts the sound component to read description of the current zone.
 		/// </summary>
-		private void ExploreItem() => InnerMessage(new ExploreItem(this));
+		private void ExploreItem() => InnerMessage(new TryExploreItem(this));
 
 		private void SayZoneDescription() => InnerMessage(new SayZoneDescription(this));
 
 		/// <summary>
 		/// Performs the command to pick up an object off the ground.
 		/// </summary>
-		private void PickUpItem() => InnerMessage(new PickUpItem(this));
+		private void PickUpItem() => InnerMessage(new TryPickUpItem(this));
 
 		/// <summary>
 		/// Creates a predefined save.
