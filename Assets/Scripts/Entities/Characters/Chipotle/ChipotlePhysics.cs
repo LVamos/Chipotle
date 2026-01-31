@@ -99,7 +99,7 @@ namespace Game.Entities.Characters.Chipotle
 				}
 
 				obj.TakeMessage(new ObjectExplored(Owner)); // Announce the object or character that it was researched.
-				InnerMessage(new SayObjectDescription(this, obj)); // A command for sound component.be spoken.
+				SayItemDescription(obj);
 				return;
 			}
 
@@ -107,6 +107,11 @@ namespace Game.Entities.Characters.Chipotle
 			WindowHandler.ActiveWindow.TakeMessage(new SelectObjectToExplore(Owner, objects.ToList()));
 
 			void NothingFound() => InnerMessage(new SayObjectDescription(this, null));
+		}
+
+		private void SayItemDescription(Entity obj)
+		{
+			InnerMessage(new SayObjectDescription(this, obj));
 		}
 
 		/// <summary>
@@ -264,7 +269,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			switch (message)
 			{
-				case ObjectForExploringSelected m: OnObjectForExploringSelected(m); break;
+				case ExplorationObjectSelected m: OnObjectForExploringSelected(m); break;
 				case ItemForPickingSelected m: OnItemForPickingSelected(m); break;
 				case ObjectsUsed m: OnObjectsUsed(m); break;
 				case InteractionSelected m: OnInteractionSelected(m); break;
@@ -305,9 +310,9 @@ namespace Game.Entities.Characters.Chipotle
 			}
 		}
 
-		private void OnObjectForExploringSelected(ObjectForExploringSelected message)
+		private void OnObjectForExploringSelected(ExplorationObjectSelected message)
 		{
-			InnerMessage(new SayObjectDescription(this, message.Object));
+			SayItemDescription(message.Object);
 		}
 
 		private void OnItemForPickingSelected(ItemForPickingSelected message)

@@ -4,7 +4,7 @@ using DavyKager;
 
 using Game.Controls;
 using Game.Entities.Items;
-using Game.Messaging.Commands.Physics;
+using Game.Messaging.Events.GameActions;
 using Game.Models;
 
 using System;
@@ -129,7 +129,7 @@ namespace Game.UI
 
 		private void ExploreItem()
 		{
-			ExploreItem message = new(this, SelectedItem);
+			ExplorationObjectSelected message = new(this, SelectedItem);
 			World.Player.TakeMessage(message);
 		}
 

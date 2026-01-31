@@ -161,10 +161,14 @@ namespace Game.UI
 			if (option == -1 || sender == null)
 				return;
 
-			ObjectForExploringSelected message = new(this, objects[option]);
-			sender.TakeMessage(message);
+			SendExplorationObjectSelected(sender, objects[option]);
 		}
 
+		private void SendExplorationObjectSelected(MessagingObject target, Entity entity)
+		{
+			ExplorationObjectSelected message = new(this, entity);
+			target.TakeMessage(message);
+		}
 		private void HandleNavigableExitMenu(MessagingObject sender, List<NavigableExitInfo> exits, int option)
 		{
 			if (option == -1 || sender == null)

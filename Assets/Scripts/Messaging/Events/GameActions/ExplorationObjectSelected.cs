@@ -2,11 +2,11 @@
 
 namespace Game.Messaging.Events.GameActions
 {
-	public class ObjectForExploringSelected : Message
+	public class ExplorationObjectSelected : Message
 	{
 		public Entity Object { get; }
 
-		public ObjectForExploringSelected(object sender, Entity @object) : base(sender)
+		public ExplorationObjectSelected(object sender, Entity @object) : base(sender)
 		{
 			Object = @object;
 		}
