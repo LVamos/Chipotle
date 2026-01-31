@@ -1,4 +1,6 @@
-﻿namespace Game.Models
+﻿using System.Collections.Generic;
+
+namespace Game.Models
 {
 	public class YamlItemModel
 	{
@@ -15,5 +17,6 @@
 		public bool QuickActionsAllowed { get; set; }
 		public string PickingSound { get; set; }
 		public string PlacingSound { get; set; }
+		public List<string> UsableWith { get; set; }
 	}
 }

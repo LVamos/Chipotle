@@ -176,7 +176,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
-		protected virtual UsableObjectsModel GetUsableObjectsBefore(float radius)
+		protected virtual UsableObjectsModel GetUsableObjectsBefore(float radius, List<string> included = null)
 		{
 			List<MapElement> objects = GetEntitiesBefore(_objectManipulationHelpRadius)
 				.Cast<MapElement>()
@@ -196,7 +196,7 @@ namespace Game.Entities.Characters.Components
 
 			// Return usable reachable objects.
 			IEnumerable<MapElement> usableReachable = reachable
-				.Where(o => o.Usable);
+				.Where(o => o.Usable || (included != null && included.Contains(o.Name.Indexed)));
 			if (usableReachable.Any())
 				return new(usableReachable.ToList(), UsableObjectsModel.ResultType.Success);
 

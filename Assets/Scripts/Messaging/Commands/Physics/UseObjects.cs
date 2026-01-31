@@ -50,6 +50,7 @@ namespace Game.Messaging.Commands.Physics
 			Sender = sender;
 			ManipulationPoint = manipulationPoint;
 			UsedObject = usedObject;
+			Target = target;
 		}
 	}
 }

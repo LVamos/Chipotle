@@ -501,7 +501,27 @@ namespace Game.Entities.Items
 		/// <remarks>
 		/// The type parameter allows assigning objects with some special behavior to proper classes.
 		/// </remarks>
-		public virtual void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, bool passable = false, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
+		public virtual void Initialize(
+			Name name,
+			Rectangle area,
+			string type,
+			bool decorative,
+			bool pickable,
+			bool usable,
+			bool passable = false,
+			string collisionSound = null,
+			string actionSound = null,
+			string loopSound = null,
+			string cutscene = null,
+			bool usableOnce = false,
+			bool audibleOverWalls = true,
+			float volume = 1,
+			bool stopWhenPlayerMoves = false,
+			bool quickActionsAllowed = false,
+			string pickingSound = null,
+			string placingSound = null,
+			List<string> usableWith = null
+			)
 		{
 			base.Initialize(name, type, area);
 			HeldBy = null;
@@ -538,6 +558,8 @@ namespace Game.Entities.Items
 			_sounds["placing"] = placingSound;
 			_sounds["loop"] = loopSound;
 			_sounds["passBy"] = "ObjectPassBy";
+
+			UsableWith = usableWith;
 		}
 
 		/// <summary>

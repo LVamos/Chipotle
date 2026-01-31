@@ -3,6 +3,8 @@ using Game.Messaging.Events.Movement;
 
 using ProtoBuf;
 
+using System.Collections.Generic;
+
 using Message = Game.Messaging.Message;
 using Rectangle = Game.Terrain.Rectangle;
 
@@ -19,7 +21,27 @@ namespace Game.Entities.Items
 		/// </summary>
 		/// <param name="name">Inner and public name for the object</param>
 		/// <param name="area">The coordinates of the area that the object occupies</param>
-		public override void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, bool passable = false, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
+		public override void Initialize(
+			Name name,
+			Rectangle area,
+			string type,
+			bool decorative,
+			bool pickable,
+			bool usable,
+			bool passable = false,
+			string collisionSound = null,
+			string actionSound = null,
+			string loopSound = null,
+			string cutscene = null,
+			bool usableOnce = false,
+			bool audibleOverWalls = true,
+			float volume = 1,
+			bool stopWhenPlayerMoves = false,
+			bool quickActionsAllowed = false,
+			string pickingSound = null,
+			string placingSound = null,
+			List<string> usableWith = null
+			)
 					=> base.Initialize(name, area, type, decorative, pickable, usable, passable, null, null, "snd17", volume: .1f);
 
 		/// <summary>

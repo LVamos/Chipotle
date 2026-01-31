@@ -6,6 +6,7 @@ using Game.Serialization;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -15,11 +16,52 @@ namespace Assets.Scripts.Entities.Items
 {
 	public class ItemFactory
 	{
-		public static Item CreateAndActivate<T>(Name name, string type, bool pickable, bool usable, bool passable)
+		private static Type GetItemCLRType(string itemtype)
+		{
+			Type result = null;
+			_types.TryGetValue(itemtype, out result);
+			return result;
+		}
+
+		private static string GetItemType(Type type)
+		{
+			KeyValuePair<string, Type> record = _types
+				.FirstOrDefault(r => r.Value == type);
+			if (record.Equals(default(KeyValuePair<string, Type>)))
+				return null;
+			return record.Key;
+		}
+
+		public static Item CreateAndActivate(
+			Name name,
+			string type,
+			Rectangle area = default,
+			bool decorative = false,
+			bool pickable = false,
+			bool usable = false,
+			bool passable = false
+			)
+		{
+			GameObject obj = new(name.Indexed);
+			obj.AddComponent<Item>();
+			Item item = CreateItem(obj, name, area, type, decorative, pickable, usable, passable);
+			World.Add(item);
+			item.Activate();
+			return item;
+		}
+
+		public static Item CreateAndActivate<T>(
+			Name name,
+			Rectangle area = default,
+			bool decorative = false,
+			bool pickable = false,
+			bool usable = false,
+			bool passable = false)
 		{
 			GameObject obj = new(name.Indexed);
 			obj.AddComponent(typeof(T));
-			Item item = ItemFactory.CreateItem(obj, name, default, type, pickable: pickable, usable: usable, passable: passable) as WalshesKeys;
+			string type = GetItemType(typeof(T));
+			Item item = CreateItem(obj, name, area, type, decorative, pickable, usable, passable);
 			World.Add(item);
 			item.Activate();
 			return item;
@@ -81,6 +123,7 @@ namespace Assets.Scripts.Entities.Items
 			}
 		}
 
+
 		/// <summary>
 		/// Creates a new item.
 		/// </summary>
@@ -99,9 +142,10 @@ namespace Assets.Scripts.Entities.Items
 
 			Item item = null;
 
-			if (_types.TryGetValue(type, out Type itemType))
+			Type clrType = GetItemCLRType(type);
+			if (clrType != null)
 			{
-				item = obj.GetComponent(itemType) as Item;
+				item = obj.GetComponent(clrType) as Item;
 				item.Initialize(name, area, type, decorative, pickable, usable: usable, passable: passable);
 				return item;
 			}

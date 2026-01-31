@@ -2,8 +2,6 @@
 
 using ProtoBuf;
 
-using Rectangle = Game.Terrain.Rectangle;
-
 namespace Game.Entities.Items
 {
 	/// <summary>
@@ -12,14 +10,6 @@ namespace Game.Entities.Items
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class KeyHanger : Item
 	{
-		/// <summary>
-		/// constructor
-		/// </summary>
-		/// <param name="name">Inner and public name of the object</param>
-		/// <param name="area">Coordinates of the area that the object occupies</param>
-
-		public override void Initialize(Name name, Rectangle area, string type, bool decorative, bool pickable, bool usable, bool passable = false, string collisionSound = null, string actionSound = null, string loopSound = null, string cutscene = null, bool usableOnce = false, bool audibleOverWalls = true, float volume = 1, bool stopWhenPlayerMoves = false, bool quickActionsAllowed = false, string pickingSound = null, string placingSound = null)
-					=> base.Initialize(name, area, type, decorative, pickable, usable, passable, volume: .5f);
 
 		/// <summary>
 		/// Indicates if the keys are on the hanger.
@@ -32,8 +22,22 @@ namespace Game.Entities.Items
 		/// <param name="message">The message to be processed</param>
 		protected override void OnUseObjects(UseObjects message)
 		{
-			_sounds["action"] = KeysHanging ? "snd6" : "snd5";
-			KeysHanging = !KeysHanging;
+			string usedObject = message.UsedObject?.Name.Indexed;
+			string target = message.Target?.Name.Indexed;
+
+			if (KeysHanging && usedObject == Name.Indexed && target == null)
+			{
+				_cutscene = "TakeKeysFromHanger";
+				KeysHanging = false;
+				Usable = false;
+			}
+			else if (!KeysHanging && usedObject == "klíče v1" && target == Name.Indexed)
+			{
+				KeysHanging = true;
+				_cutscene = null;
+				Usable = true;
+			}
+
 			base.OnUseObjects(message);
 		}
 	}

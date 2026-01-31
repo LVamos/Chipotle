@@ -1,6 +1,7 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Entities.Items;
 using Game.Messaging;
+using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
@@ -127,6 +128,8 @@ namespace Game.Entities.Characters
 		{
 			switch (message)
 			{
+				case DiscardInventoryItem m:
+					OnDiscardInventoryItem(m); break;
 				case PlaceItemResult m: OnPlaceItemResult(m); break;
 				case PickUpItemResult m: OnPickUpObjectResult(m); break;
 				case OrientationChanged och: OnOrientationChanged(och); break;
@@ -134,6 +137,12 @@ namespace Game.Entities.Characters
 				case PositionChanged pcd: OnPositionChanged(pcd); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		private void OnDiscardInventoryItem(DiscardInventoryItem message)
+		{
+			string name = message.Item.Name.Indexed;
+			_inventory.Remove(name);
 		}
 
 		/// <summary>

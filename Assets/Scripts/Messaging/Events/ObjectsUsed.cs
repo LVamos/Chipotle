@@ -49,6 +49,7 @@ namespace Game.Messaging.Events.Physics
 			Character = character;
 			ManipulationPoint = manipulationPoint;
 			UsedObject = usedObject;
+			Target = target;
 		}
 	}
 }

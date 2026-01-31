@@ -317,27 +317,81 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void OnObjectsUsed(ObjectsUsed message)
 		{
-			if (message.UsedObject.Name.Indexed == "lavička w1")
-				TakeKeysFromWalshesBench();
+			const string hook = "věšák v1";
+			const string vanillaKeys = "klíče v1";
+			const string bench = "lavička w1";
+
+			string tool = message.UsedObject.Name.Indexed;
+			if (message.Target == null)
+			{
+				switch (tool)
+				{
+					case bench: UseWalshesBench(); break;
+					case hook: UseGarageHook(); break;
+				}
+				return;
+			}
+
+			string target = message.Target.Name.Indexed;
+			// Two objects used
+			switch (tool, target)
+			{
+				case (vanillaKeys, hook):
+					HangVanillaKeys();
+					break;
+			}
 		}
 
-		private void TakeKeysFromWalshesBench()
+		private void UseGarageHook()
+		{
+			if (_vanillaKeys != null)
+				return;
+
+			_vanillaKeys = ItemFactory.CreateAndActivate<VanillaKeys>(
+			new("klíče v1", "klíče"),
+			pickable: true,
+			passable: true
+			) as VanillaKeys;
+			PickItemSilently(_vanillaKeys);
+		}
+
+		private void HangVanillaKeys()
+		{
+			RemoveFromInventory(_vanillaKeys);
+			_vanillaKeys = null;
+		}
+
+		private void RemoveFromInventory(Item item)
+		{
+			DiscardInventoryItem message = new(this, item);
+			Owner.TakeMessage(message);
+		}
+
+		private VanillaKeys _vanillaKeys;
+
+		private void UseWalshesBench()
 		{
 			if (_walshesBenchUsed)
 				return;
 			_walshesBenchUsed = true;
-			_walshesKeys = ItemFactory.CreateAndActivate<WalshesKeys>(
+
+			_walshesKeys = ItemFactory.CreateAndActivate(
 				new("klíče w1", "Walshovy klíče"),
 				"walshovy klíče",
-				true,
-				false,
-				true
-				) as WalshesKeys;
-			PickUpItem message = new(Owner, _walshesKeys, true);
-			_walshesKeys.TakeMessage(message);
+				pickable: true,
+				passable: true
+				);
+
+			PickItemSilently(_walshesKeys);
 		}
 
-		private WalshesKeys _walshesKeys;
+		private void PickItemSilently(Item item)
+		{
+			PickUpItem message = new(Owner, item, true);
+			item.TakeMessage(message);
+		}
+
+		private Item _walshesKeys;
 		private bool _walshesBenchUsed;
 		private void OnInteractionSelected(InteractionSelected message)
 		{
@@ -390,7 +444,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			UsableObjectsModel objects = GetUsableObjectsBefore(Settings.ObjectManipulationRadius);
+			UsableObjectsModel objects = GetUsableObjectsBefore(Settings.ObjectManipulationRadius, message.ItemToUse.UsableWith);
 			if (objects.Result == UsableObjectsModel.ResultType.NothingFound)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
 			else if (objects.Result == UsableObjectsModel.ResultType.Unusable)
@@ -416,7 +470,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="target">The target item or character</param>
 		private void ApplyItemToTarget(Item source, MapElement target)
 		{
-			bool usable = target.UsableWith != null && target.UsableWith.Contains(source.Name.Indexed);
+			bool usable = source.UsableWith != null && source.UsableWith.Contains(target.Name.Indexed);
 			if (!usable)
 			{
 				InteractResult message = new(this, InteractResult.ResultType.NoUsableObjects);
@@ -426,7 +480,7 @@ namespace Game.Entities.Characters.Chipotle
 
 			Vector2 manipulationPoint = FindManipulationPoint(target);
 			UseObjects message2 = new(Owner, manipulationPoint, source, target);
-			target.TakeMessage(message2);
+			source.TakeMessage(message2);
 			LogItemUsedToTarget(source, target, manipulationPoint);
 		}
 
