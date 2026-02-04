@@ -1109,6 +1109,8 @@ namespace Game
 					p.TakeMessage(message);
 			}
 
+			foreach (Zone z in _zones.Values)
+				z.TakeMessage(message);
 		}
 
 		/// <summary>

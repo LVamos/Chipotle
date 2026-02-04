@@ -25,6 +25,7 @@ namespace Game.Entities.Items
 			string usedObject = message.UsedObject?.Name.Indexed;
 			string target = message.Target?.Name.Indexed;
 
+			// Taking the keys
 			if (KeysHanging && usedObject == Name.Indexed && target == null)
 			{
 				_cutscene = "TakeKeysFromHanger";

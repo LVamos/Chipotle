@@ -35,10 +35,8 @@ namespace Game.Entities.Items
 	[ProtoInclude(104, typeof(ChristinesBell))]
 	[ProtoInclude(105, typeof(IcecreamMachine))]
 	[ProtoInclude(106, typeof(KeyHanger))]
-	[ProtoInclude(107, typeof(KillersCar))]
 	[ProtoInclude(109, typeof(PubBench))]
 	[ProtoInclude(110, typeof(SweeneysBell))]
-	[ProtoInclude(111, typeof(VanillaCrunchCar))]
 	public class Item : Entity
 	{
 		public bool Passable { get; protected set; }
@@ -761,6 +759,9 @@ namespace Game.Entities.Items
 
 			UsedOnce = !Used;
 			Used = true;
+
+			if (message.UsedObject != this)
+				return;
 
 			ObjectsUsed newMessage = new(this, message.Sender, message.ManipulationPoint, message.UsedObject, message.Target);
 			message.Sender.TakeMessage(newMessage);

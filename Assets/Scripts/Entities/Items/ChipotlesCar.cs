@@ -168,7 +168,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 				|| onAsphaltRoad && !CarsonsBenchesUsed();
 			if (knock)
 			{
-				World.PlayCutscene(this, "snd14");
+				World.PlayCutscene(this, "DrumOnCar");
 				return;
 			}
 

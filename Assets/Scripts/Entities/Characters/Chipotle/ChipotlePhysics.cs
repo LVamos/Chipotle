@@ -363,6 +363,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void HangVanillaKeys()
 		{
 			RemoveFromInventory(_vanillaKeys);
+			_vanillaKeys.Destroy();
 			_vanillaKeys = null;
 		}
 
@@ -400,7 +401,7 @@ namespace Game.Entities.Characters.Chipotle
 		private bool _walshesBenchUsed;
 		private void OnInteractionSelected(InteractionSelected message)
 		{
-			UseElement(message.Object);
+			UseObject(message.Object);
 		}
 
 		private void OnTakeItem(TakeItem message)
@@ -486,6 +487,7 @@ namespace Game.Entities.Characters.Chipotle
 			Vector2 manipulationPoint = FindManipulationPoint(target);
 			UseObjects message2 = new(Owner, manipulationPoint, source, target);
 			source.TakeMessage(message2);
+			target.TakeMessage(message2);
 			LogItemUsedToTarget(source, target, manipulationPoint);
 		}
 
@@ -1327,7 +1329,7 @@ namespace Game.Entities.Characters.Chipotle
 			else // Success
 			{
 				if (objects.Objects.Count() == 1)
-					UseElement(objects.Objects[0]);
+					UseObject(objects.Objects[0]);
 				else if (objects.Objects.Any())
 					WindowHandler.ActiveWindow.TakeMessage(new SelectObjectToUse(Owner, objects.Objects));
 			}
@@ -1339,16 +1341,16 @@ namespace Game.Entities.Characters.Chipotle
 		private void HandleDoorAndObjectsInteractions(Door door, UsableObjectsModel itemsOrCharacters)
 		{
 			if (itemsOrCharacters.Objects.IsNullOrEmpty())
-				UseElement(door);
+				UseObject(door);
 			else if (itemsOrCharacters.Objects.Count() == 1)
 				UseCloserElement(door, itemsOrCharacters.Objects[0]);
 			else
 			{ // More awailable objects 
 				MapElement closest = World.GetClosestElement(itemsOrCharacters.Objects, Owner);
 				if (World.IsCloser(Owner, door, closest))
-					UseElement(door);
+					UseObject(door);
 				else
-					UseElement(closest);
+					UseObject(closest);
 			}
 		}
 		/// <summary>
@@ -1360,18 +1362,18 @@ namespace Game.Entities.Characters.Chipotle
 		private void UseCloserElement(MapElement a, MapElement b)
 		{
 			if (World.IsCloser(Owner, a, b))
-				UseElement(a);
+				UseObject(a);
 			else if (World.IsCloser(Owner, b, a))
-				UseElement(b);
+				UseObject(b);
 			else
-				UseElement(a);
+				UseObject(a);
 		}
 
 		/// <summary>
 		/// Interacts with the specified map element.
 		/// </summary>
 		/// <param name="element">The element to be used</param>
-		private void UseElement(MapElement element)
+		private void UseObject(MapElement element)
 		{
 			Vector2? point = FindManipulationPoint(element);
 

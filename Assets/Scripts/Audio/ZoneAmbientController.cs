@@ -31,11 +31,19 @@ namespace Game.Audio
 		{
 			switch (message)
 			{
+				case GameStatechanged m:
+					OnGameStatechanged(m); break;
 				case ChipotlesCarMoved m: OnChipotlesCarMoved(m); break;
 				case Reloaded: OnGameReloaded(); break;
 				case CharacterCameToZone m: OnCharacterCameToZone(m); break;
 				default: base.HandleMessage(message); break;
 			}
+		}
+
+		private void OnGameStatechanged(GameStatechanged message)
+		{
+			if (message.Current == GameState.Finished)
+				StopAmbient();
 		}
 
 		public void Initialize(Zone owner, ZoneLoopInfo loop, ZoneMaterials materials = null)

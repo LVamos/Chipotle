@@ -8,7 +8,33 @@ namespace Game.Entities.Items
 {
 	public class VanillaKeys : Item
 	{
-		public override void Initialize(
+		/// <summary>
+		/// Indicates if the Detective Chipotle NPC had icecream from the icecream machine (automat
+		/// v1) object.
+		/// </summary>
+		private bool ChipotleHadIcecream
+		{
+			get
+			{
+				var icecreamMachine = World.GetItem("automat v1") as IcecreamMachine;
+				return icecreamMachine.Used;
+			}
+		}
+
+		private List<string> _unlockableCars = new() {
+					"auto v1",
+					"auto v2",
+					"auto v3",
+					"auto v4",
+					"auto v5",
+					"auto v6",
+					"auto v7",
+					"auto v8",
+					"auto v9"
+				};
+
+		public override void Initialize
+			(
 			Name name,
 			Rectangle area,
 			string type,
@@ -27,8 +53,23 @@ namespace Game.Entities.Items
 			bool quickActionsAllowed = false,
 			string pickingSound = null,
 			string placingSound = null,
-			List<string> usableWith = null)
+			List<string> usableWith = null
+			)
 		{
+			List<string> usableList = new() {
+					"věšák v1",
+					"auto v1",
+					"auto v2",
+					"auto v3",
+					"auto v4",
+					"auto v5",
+					"auto v6",
+					"auto v7",
+					"auto v8",
+					"auto v9",
+					"vražedné auto v1"
+				};
+
 			base.Initialize(
 				name,
 				area,
@@ -48,7 +89,7 @@ namespace Game.Entities.Items
 				quickActionsAllowed,
 				pickingSound,
 				placingSound,
-				new() { "věšák v1" }
+				usableList
 				);
 		}
 
@@ -61,13 +102,34 @@ namespace Game.Entities.Items
 			}
 		}
 
+		/// <summary>
+		/// Reference to the Detective's car (detektivovo auto) object.
+		/// </summary>
+		private ChipotlesCar ChipotlesCar
+			=> World.GetItem("detektivovo auto") as ChipotlesCar;
+
 		private void OnUseObjects(UseObjects message)
 		{
-			MapElement target = message.Target;
-			if (target != null && target.Name.Indexed == "věšák v1")
+			string target = message.Target?.Name.Indexed;
+			if (target == null)
+				_cutscene = "DrumOnCar";
+			else if (target == "věšák v1")
 				_cutscene = "HangKeys";
-			else _cutscene = null;
-
+			else if (_unlockableCars.Contains(target))
+				_cutscene = "CarUnlockAttempt";
+			else if (target == "vražedné auto v1")
+			{
+				GameManager.FinishGame();
+				if (ChipotleHadIcecream)
+					_cutscene = "cs7";
+				else
+				{
+					_cutscene = "cs8";
+					Zone destination = World.GetZone("ulice h1");
+					MoveChipotlesCar newMessage = new(this, destination);
+					ChipotlesCar.TakeMessage(newMessage);
+				}
+			}
 			base.OnUseObjects(message);
 		}
 	}
