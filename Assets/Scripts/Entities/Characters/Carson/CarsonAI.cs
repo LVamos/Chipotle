@@ -1,4 +1,5 @@
-﻿using Game.Entities.Characters.Components;
+﻿using Game.Audio;
+using Game.Entities.Characters.Components;
 using Game.Entities.Items;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
@@ -84,7 +85,7 @@ namespace Game.Entities.Characters.Carson
 			if (!_yelledAtChipotle)
 			{
 				_yelledAtChipotle = true;
-				World.PlayCutscene(Owner, "cs34");
+				CutScene.Play(Owner, "cs34");
 			}
 		}
 
@@ -101,7 +102,7 @@ namespace Game.Entities.Characters.Carson
 			if (benchUsed && !_saidGoodbyeToChipotle)
 			{
 				_saidGoodbyeToChipotle = true;
-				World.PlayCutscene(Owner, "cs33");
+				CutScene.Play(Owner, "cs33");
 			}
 		}
 

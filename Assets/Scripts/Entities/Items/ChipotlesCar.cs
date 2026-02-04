@@ -1,4 +1,5 @@
-﻿using Game.Entities.Characters;
+﻿using Game.Audio;
+using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Terrain;
@@ -168,7 +169,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 				|| onAsphaltRoad && !CarsonsBenchesUsed();
 			if (knock)
 			{
-				World.PlayCutscene(this, "DrumOnCar");
+				CutScene.Play(this, "DrumOnCar");
 				return;
 			}
 
@@ -259,7 +260,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <param name="cutscene">Name of the cutscene to be played</param>
 		private void Move(Rectangle target, string cutscene)
 		{
-			World.PlayCutscene(this, cutscene);
+			CutScene.Play(this, cutscene);
 			Move(target);
 			Moved = true;
 		}

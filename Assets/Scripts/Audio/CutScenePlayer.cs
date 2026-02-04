@@ -1,21 +1,39 @@
-﻿using Game;
-using Game.Audio;
+﻿using Game.Messaging.Events.Sound;
 
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Game.Audio
 {
 	public class CutScenePlayer : MonoBehaviour
 	{
+		private object _sender;
+
+		private string _cutsceneName;
+
+		private bool _wasPlaying;
+
 		private void Update()
 		{
-			if (!_audio.isPlaying && _audio.time > 0)
-				_audio.clip = null;
-		}
+			if (_audio.clip == null)
+				return;
 
-		private void Awake()
-		{
-			_audio = gameObject.AddComponent<AudioSource>();
+			if (_audio.isPlaying)
+			{
+				_wasPlaying = true;
+				return;
+			}
+
+			if (_wasPlaying)
+			{
+				_wasPlaying = false;
+
+				World.TakeMessage(
+					new CutsceneEnded(_sender, _cutsceneName)
+				);
+
+				_audio.clip = null;
+				_sender = null;
+			}
 		}
 
 		public float Volume => _audio.volume; public float Position => _audio.time;
@@ -29,8 +47,6 @@ namespace Assets.Scripts
 				if (_audio.time > seconds)
 					_audio.time -= seconds;
 		}
-
-		public bool Finished => _audio != null && _audio.clip != null && !Paused && Mathf.Approximately(_audio.time, _audio.clip.length);
 
 		public bool Paused { get; set; }
 
@@ -65,13 +81,16 @@ namespace Assets.Scripts
 			Paused = true;
 		}
 
-		public void Play(string cutSceneName)
+		public void Play(string cutsceneName, object sender)
 		{
 			if (!Settings.PlayCutscenes)
 				return;
 
-			_audio = Sounds.Play2d(cutSceneName);
+			_sender = sender;
+			_cutsceneName = cutsceneName;
+			_audio = Sounds.Play2d(cutsceneName);
 			Paused = false;
+			_wasPlaying = false;
 		}
 
 		private AudioSource _audio;

@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Messaging.Events.Input;
 
+using Game.Audio;
 using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
@@ -388,7 +389,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (_cutsceneInProgress)
 			{
 				_cutsceneInProgress = false;
-				World.StopCutscene(Owner);
+				CutScene.Stop(Owner);
 			}
 		}
 

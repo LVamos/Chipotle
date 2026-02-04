@@ -1,4 +1,6 @@
-﻿using ProtoBuf;
+﻿using Game.Audio;
+
+using ProtoBuf;
 
 using System.Collections.Generic;
 
@@ -29,6 +31,6 @@ namespace Game.Terrain
 		/// The coordinates of the place on the door that an NPC is pushing on
 		/// </param>
 		protected override void Open(object sender, Vector2 point)
-			=> World.PlayCutscene(this, "cs11");
+			=> CutScene.Play(this, "cs11");
 	}
 }

@@ -1,4 +1,5 @@
-﻿using Game.Messaging;
+﻿using Game.Audio;
+using Game.Messaging;
 using Game.Messaging.Commands.Physics;
 
 using ProtoBuf;
@@ -46,7 +47,7 @@ namespace Game.Terrain
 				return;
 
 			LockOrUnlock(message.ManipulationPoint);
-			World.PlayCutscene(this, "HalldoorUnlock");
+			CutScene.Play(this, "HalldoorUnlock");
 		}
 
 		private void LockOrUnlock(Vector2 manipulationPoint)

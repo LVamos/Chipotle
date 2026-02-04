@@ -1,5 +1,4 @@
-﻿using Assets.Scripts;
-using Assets.Scripts.Entities.Items;
+﻿using Assets.Scripts.Entities.Items;
 using Assets.Scripts.Models;
 using Assets.Scripts.Spatial;
 
@@ -10,7 +9,6 @@ using Game.Entities;
 using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
-using Game.Messaging.Events.Sound;
 using Game.Serialization;
 using Game.Terrain;
 using Game.UI;
@@ -111,7 +109,6 @@ namespace Game
 		/// Indicates if the game is in progress.
 		/// </summary>
 		public static bool GameInProgress;
-		private static CutsceneBegan _cutSceneMessage;
 
 		/// <summary>
 		/// Check if two map elements are within a specified radius of each other.
@@ -187,25 +184,6 @@ namespace Game
 		public static void RepeatCutscene()
 		{
 
-		}
-
-		/// <summary>
-		/// Resumes a paused cutscene.
-		/// </summary>
-		public static void ResumeCutscene()
-		{
-			if (_cutScenePlayer == null || _cutSceneMessage == null)
-				return;
-
-			_cutScenePlayer.Resume();
-		}
-
-		/// <summary>
-		/// Pauses an ongoing cutscene.
-		/// </summary>
-		public static void PauseCutscene()
-		{
-			_cutScenePlayer?.Pause();
 		}
 
 		/// <summary>
@@ -693,8 +671,6 @@ namespace Game
 			_zones = new(StringComparer.OrdinalIgnoreCase);
 			_characters = new(StringComparer.OrdinalIgnoreCase);
 			_passages = new(StringComparer.OrdinalIgnoreCase);
-			GameObject obj = new();
-			_cutScenePlayer = obj.AddComponent<CutScenePlayer>();
 		}
 
 		public static CollisionDetector Collisions { get; private set; } = new();
@@ -866,8 +842,6 @@ namespace Game
 			RuntimeTypeModel.Default.Add(typeof(Vector2), false).Add("x", "y");
 			RuntimeTypeModel.Default.Add(typeof(Vector3), false).Add("x", "y", "z");
 		}
-
-		private static CutScenePlayer _cutScenePlayer;
 
 		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
 
@@ -1061,25 +1035,6 @@ namespace Game
 				Map.DrawZone(zone);
 		}
 
-		/// <summary>
-		/// Plays the specified audio cutscene.
-		/// </summary>
-		/// <param name="sender">An object or NPC which wants to play the cutscene</param>
-		/// <param name="cutscene">Name of the soudn file to be played</param>
-		public static void PlayCutscene(object sender, string cutscene)
-		{
-			if (string.IsNullOrEmpty(cutscene))
-				throw new ArgumentNullException(nameof(cutscene));
-
-			_cutScenePlayer.Play(cutscene);
-			_cutSceneMessage = new(null, cutscene);
-			TakeMessage(_cutSceneMessage);
-
-			// Stop it if cutscenes are forbidden for debugging purposes.
-			if (!Settings.PlayCutscenes)
-				StopCutscene(null);
-		}
-
 		private const float _gameQuittingFadingDuration = 1;
 
 		/// <summary>
@@ -1088,7 +1043,7 @@ namespace Game
 		public static void QuitGame()
 		{
 			GameInProgress = false;
-			_cutSceneMessage = null;
+			CutScene.Init();
 			Action onDone = () => WindowHandler.MainMenu();
 			Sounds.StopAllSounds(_gameQuittingFadingDuration, onDone);
 			//todo fix game saving
@@ -1193,21 +1148,8 @@ namespace Game
 
 			//Play the first cutscene
 			GameInProgress = true;
-			PlayCutscene(null, "cs6");
-		}
-
-		/// <summary>
-		/// Stops an ongoing audio cutscene.
-		/// </summary>
-		/// <param name="sender">The object or NPC which wants to stop the cutscene</param>
-		public static void StopCutscene(object sender)
-		{
-			if (_cutSceneMessage == null)
-				return;
-
-			TakeMessage(new CutsceneEnded(_cutSceneMessage.Sender, _cutSceneMessage.CutsceneName));
-			_cutScenePlayer.Stop();
-			_cutSceneMessage = null;
+			CutScene.Init();
+			CutScene.Play(null, "cs6");
 		}
 
 		/// <summary>
@@ -1231,20 +1173,7 @@ namespace Game
 			foreach (Character character in _characters.Values)
 				character.GameUpdate();
 
-			HandleCutscene();
 			WindowHandler.ActiveWindow.GameUpdate();
-		}
-
-		/// <summary>
-		/// Watches an ongoing audio cutscene and informs the world when it's completed.
-		/// </summary>
-		private static void HandleCutscene()
-		{
-			if (_cutSceneMessage != null && _cutScenePlayer.Finished)
-			{
-				TakeMessage(new CutsceneEnded(_cutSceneMessage.Sender, _cutSceneMessage.CutsceneName));
-				_cutSceneMessage = null;
-			}
 		}
 
 		/// <summary>
