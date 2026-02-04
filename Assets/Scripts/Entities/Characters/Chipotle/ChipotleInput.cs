@@ -389,7 +389,7 @@ namespace Game.Entities.Characters.Chipotle
 			if (_cutsceneInProgress)
 			{
 				_cutsceneInProgress = false;
-				CutScene.Stop(Owner);
+				Cutscene.Stop(Owner);
 			}
 		}
 

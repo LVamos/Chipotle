@@ -743,7 +743,7 @@ namespace Game.Entities.Items
 				return;
 
 			if (!string.IsNullOrEmpty(_cutscene))
-				CutScene.Play(this, _cutscene);
+				Cutscene.Play(this, _cutscene);
 			else if (!_quickActionsAllowed)
 			{
 				if (_actionAudio == null || !_actionAudio.isPlaying)

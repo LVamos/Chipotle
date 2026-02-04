@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Audio
 {
-	public class CutScenePlayer : MonoBehaviour
+	public class CutscenePlayer : MonoBehaviour
 	{
 		private object _sender;
 
@@ -38,7 +38,7 @@ namespace Game.Audio
 
 		public float Volume => _audio.volume; public float Position => _audio.time;
 
-		public void Revind(int seconds)
+		public void Rewind(int seconds)
 		{
 			if (_audio == null)
 				return;
@@ -60,10 +60,17 @@ namespace Game.Audio
 			if (!Paused)
 				Sounds.SlideVolume(_audio, 1, 0, true);
 			Paused = false;
+
+			// Announce end of playback
+			CutsceneEnded message = new(_sender, _cutsceneName);
+			World.TakeMessage(message);
 		}
 
 		public void Resume()
 		{
+			if (!Settings.PlayCutscenes || _audio == null)
+				return;
+
 			if (!_audio.isPlaying)
 				_audio = Sounds.Play2d(_cutsceneName, 0);
 
@@ -92,6 +99,10 @@ namespace Game.Audio
 			_audio = Sounds.Play2d(cutsceneName);
 			Paused = false;
 			_wasPlaying = false;
+
+			// Announce playback
+			CutsceneBegan message = new(this, cutsceneName);
+			World.TakeMessage(message);
 		}
 
 		private AudioSource _audio;

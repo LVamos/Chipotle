@@ -1043,7 +1043,7 @@ namespace Game
 		public static void QuitGame()
 		{
 			GameInProgress = false;
-			CutScene.Init();
+			Cutscene.Init();
 			Action onDone = () => WindowHandler.MainMenu();
 			Sounds.StopAllSounds(_gameQuittingFadingDuration, onDone);
 			//todo fix game saving
@@ -1148,8 +1148,8 @@ namespace Game
 
 			//Play the first cutscene
 			GameInProgress = true;
-			CutScene.Init();
-			CutScene.Play(null, "cs6");
+			Cutscene.Init();
+			Cutscene.Play(null, "cs6");
 		}
 
 		/// <summary>

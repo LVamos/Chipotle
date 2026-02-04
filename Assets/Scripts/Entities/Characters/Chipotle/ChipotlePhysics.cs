@@ -928,7 +928,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void JumpToChristinesHall()
 		{
 			JumpTo(_pointInChristinesHall);
-			CutScene.Play(Owner, "cs38");
+			Cutscene.Play(Owner, "cs38");
 		}
 
 		private Vector2 _pointInChristinesHall = new(1773.9f, 1119.2f);
@@ -950,7 +950,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void JumpToSweeneysHall()
 		{
 			JumpTo(PointInSweeneysHall, true);
-			CutScene.Play(Owner, "cs41");
+			Cutscene.Play(Owner, "cs41");
 		}
 
 		/// <summary>
@@ -1407,7 +1407,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 		private void PlayFinalScene()
 		{
-			CutScene.Play(Owner, "cs35");
+			Cutscene.Play(Owner, "cs35");
 		}
 
 		/// <summary>
@@ -1424,14 +1424,14 @@ namespace Game.Entities.Characters.Chipotle
 			if (_sittingAtPubTable)
 			{
 				_sittingAtPubTable = false;
-				CutScene.Play(Owner, IsTuttleNearBy() ? "cs27" : "cs26");
+				Cutscene.Play(Owner, IsTuttleNearBy() ? "cs27" : "cs26");
 				return true;
 			}
 
 			if (_sittingOnChair)
 			{
 				_sittingOnChair = false;
-				CutScene.Play(Owner, "snd13");
+				Cutscene.Play(Owner, "snd13");
 				return true;
 			}
 
@@ -1468,7 +1468,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void WatchIcecreamMachine()
 		{
 			if (World.GetItem("automat v1").Used)
-				CutScene.Play(this, "cs13");
+				Cutscene.Play(this, "cs13");
 		}
 
 		/// <summary>
@@ -1481,7 +1481,7 @@ namespace Game.Entities.Characters.Chipotle
 			{
 				_phoneCountdown = false;
 				World.GetItem("detektivovo auto").TakeMessage(new UnblockZone(Owner, World.GetZone("ulice s1")));
-				CutScene.Play(Owner, "cs22");
+				Cutscene.Play(Owner, "cs22");
 			}
 		}
 
@@ -1499,7 +1499,7 @@ namespace Game.Entities.Characters.Chipotle
 				&& World.GetItem("bazén w1").Area.Value.GetDistanceFrom(CurrentTile.position) <= _puddleRadius)
 			{
 				_steppedIntoPuddle = true;
-				CutScene.Play(Owner, "cs2");
+				Cutscene.Play(Owner, "cs2");
 			}
 		}
 
@@ -1520,7 +1520,7 @@ namespace Game.Entities.Characters.Chipotle
 			)
 			{
 				Car.TakeMessage(new MoveChipotlesCar(Owner, AsphaltRoad));
-				CutScene.Play(Owner, "cs19");
+				Cutscene.Play(Owner, "cs19");
 			}
 
 			bool Used(string itemName) => World.GetItem(itemName).Used;

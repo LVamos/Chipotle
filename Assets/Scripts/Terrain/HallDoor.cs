@@ -47,7 +47,7 @@ namespace Game.Terrain
 				return;
 
 			LockOrUnlock(message.ManipulationPoint);
-			CutScene.Play(this, "HalldoorUnlock");
+			Cutscene.Play(this, "HalldoorUnlock");
 		}
 
 		private void LockOrUnlock(Vector2 manipulationPoint)

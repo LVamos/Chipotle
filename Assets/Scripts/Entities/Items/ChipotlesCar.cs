@@ -169,7 +169,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 				|| onAsphaltRoad && !CarsonsBenchesUsed();
 			if (knock)
 			{
-				CutScene.Play(this, "DrumOnCar");
+				Cutscene.Play(this, "DrumOnCar");
 				return;
 			}
 
@@ -260,7 +260,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <param name="cutscene">Name of the cutscene to be played</param>
 		private void Move(Rectangle target, string cutscene)
 		{
-			CutScene.Play(this, cutscene);
+			Cutscene.Play(this, cutscene);
 			Move(target);
 			Moved = true;
 		}

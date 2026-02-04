@@ -85,7 +85,7 @@ namespace Game.Entities.Characters.Carson
 			if (!_yelledAtChipotle)
 			{
 				_yelledAtChipotle = true;
-				CutScene.Play(Owner, "cs34");
+				Cutscene.Play(Owner, "cs34");
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace Game.Entities.Characters.Carson
 			if (benchUsed && !_saidGoodbyeToChipotle)
 			{
 				_saidGoodbyeToChipotle = true;
-				CutScene.Play(Owner, "cs33");
+				Cutscene.Play(Owner, "cs33");
 			}
 		}
 

@@ -119,7 +119,7 @@ namespace Game.Entities.Characters.Bartender
 				&& door.Area.Value.GetDistanceFrom(player.Area.Value.Center) == 1
 			)
 			{
-				CutScene.Play(Owner, IsChipotleAlone() ? "cs28" : "cs29");
+				Cutscene.Play(Owner, IsChipotleAlone() ? "cs28" : "cs29");
 				_sayGoodbyeToChipotle = false;
 			}
 		}
@@ -135,7 +135,7 @@ namespace Game.Entities.Characters.Bartender
 
 			if (_velcomeChipotle)
 			{
-				CutScene.Play(Owner, IsChipotleAlone() ? "cs30" : "cs31");
+				Cutscene.Play(Owner, IsChipotleAlone() ? "cs30" : "cs31");
 				_velcomeChipotle = false;
 				_sayGoodbyeToChipotle = true;
 			}

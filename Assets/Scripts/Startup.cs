@@ -92,14 +92,14 @@ public class Startup : MonoBehaviour
 	{
 		MainScript.DisableJAWSKeyHook();
 
-		CutScene.Resume();
+		Cutscene.Resume();
 		Sounds.Unmute();
 	}
 
 	private void OnDeactivated()
 	{
 		MainScript.EnableJAWSKeyHook();
-		CutScene.Pause();
+		Cutscene.Pause();
 		Sounds.Mute();
 	}
 }

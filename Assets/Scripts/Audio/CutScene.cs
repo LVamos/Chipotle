@@ -1,25 +1,22 @@
-﻿using Game.Messaging.Events.Sound;
-
-using System;
+﻿using System;
 
 using UnityEngine;
 
 namespace Game.Audio
 {
-	public static class CutScene
+	public static class Cutscene
 	{
 
 		public static void Init()
 		{
-			_cutSceneMessage = null;
-			if (_cutScenePlayer == null)
+			if (_player == null)
 				CreateCutsceneplayer();
 		}
 
 		private static void CreateCutsceneplayer()
 		{
 			GameObject obj = new("CutScene player");
-			_cutScenePlayer = obj.AddComponent<CutScenePlayer>();
+			_player = obj.AddComponent<CutscenePlayer>();
 		}
 
 		/// <summary>
@@ -27,25 +24,19 @@ namespace Game.Audio
 		/// </summary>
 		public static void Resume()
 		{
-			if (_cutScenePlayer == null || _cutSceneMessage == null)
-				return;
-
-			_cutScenePlayer.Resume();
+			_player.Resume();
 		}
-
 
 		/// <summary>
 		/// Pauses an ongoing cutscene.
 		/// </summary>
 		public static void Pause()
 		{
-			_cutScenePlayer?.Pause();
+			_player?.Pause();
 		}
 
 
-		private static CutsceneBegan _cutSceneMessage;
-
-		private static CutScenePlayer _cutScenePlayer;
+		private static CutscenePlayer _player;
 
 		/// <summary>
 		/// Plays the specified audio cutscene.
@@ -57,13 +48,7 @@ namespace Game.Audio
 			if (string.IsNullOrEmpty(cutsceneName))
 				throw new ArgumentNullException(nameof(cutsceneName));
 
-			_cutScenePlayer.Play(cutsceneName, sender);
-			_cutSceneMessage = new(null, cutsceneName);
-			World.TakeMessage(_cutSceneMessage);
-
-			// Stop it if cutscenes are forbidden for debugging purposes.
-			if (!Settings.PlayCutscenes)
-				Stop(null);
+			_player.Play(cutsceneName, sender);
 		}
 
 		/// <summary>
@@ -72,12 +57,7 @@ namespace Game.Audio
 		/// <param name="sender">The object or NPC which wants to stop the cutscene</param>
 		public static void Stop(object sender)
 		{
-			if (_cutSceneMessage == null)
-				return;
-
-			World.TakeMessage(new CutsceneEnded(_cutSceneMessage.Sender, _cutSceneMessage.CutsceneName));
-			_cutScenePlayer.Stop();
-			_cutSceneMessage = null;
+			_player.Stop();
 		}
 	}
 }
