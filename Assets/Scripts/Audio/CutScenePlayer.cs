@@ -64,7 +64,9 @@ namespace Game.Audio
 
 		public void Resume()
 		{
-			_audio.loop = false;
+			if (!_audio.isPlaying)
+				_audio = Sounds.Play2d(_cutsceneName, 0);
+
 			_audio.time = _pauseTime - 3;
 			Sounds.SlideVolume(_audio, 2, 1);
 			Paused = false;
@@ -76,8 +78,7 @@ namespace Game.Audio
 				return;
 
 			_pauseTime = _audio.time;
-			Sounds.SlideVolume(_audio, 2, 0.00021f);
-			_audio.loop = true;
+			Sounds.SlideVolume(_audio, 2, 0);
 			Paused = true;
 		}
 

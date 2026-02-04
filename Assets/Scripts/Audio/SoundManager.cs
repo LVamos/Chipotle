@@ -3,7 +3,6 @@ using Assets.Scripts.Models;
 
 using DavyKager;
 
-using Game.Entities.Characters;
 using Game.Terrain;
 
 using System;
@@ -146,12 +145,6 @@ namespace Game.Audio
 
 		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
 		{
-			if (targetVolume == sound.volume)
-			{
-				actionWhenDone?.Invoke();
-				return;
-			}
-
 			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone));
 		}
 
