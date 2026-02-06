@@ -14,7 +14,12 @@ namespace Game.Audio
 
 		private void Update()
 		{
-			if (_audio.clip == null)
+			DetectPlaybackEnd();
+		}
+
+		private void DetectPlaybackEnd()
+		{
+			if (_audio == null)
 				return;
 
 			if (_audio.isPlaying)
@@ -24,16 +29,19 @@ namespace Game.Audio
 			}
 
 			if (_wasPlaying)
-			{
-				_wasPlaying = false;
+				RemoveCutscene();
+		}
 
-				World.TakeMessage(
-					new CutsceneEnded(_sender, _cutsceneName)
-				);
+		private void RemoveCutscene()
+		{
+			_wasPlaying = false;
+			Paused = false;
+			World.TakeMessage(
+				new CutsceneEnded(_sender, _cutsceneName)
+			);
 
-				_audio.clip = null;
-				_sender = null;
-			}
+			_audio = null;
+			_sender = null;
 		}
 
 		public float Volume => _audio.volume; public float Position => _audio.time;
@@ -59,11 +67,7 @@ namespace Game.Audio
 
 			if (!Paused)
 				Sounds.SlideVolume(_audio, 1, 0, true);
-			Paused = false;
-
-			// Announce end of playback
-			CutsceneEnded message = new(_sender, _cutsceneName);
-			World.TakeMessage(message);
+			RemoveCutscene();
 		}
 
 		public void Resume()
