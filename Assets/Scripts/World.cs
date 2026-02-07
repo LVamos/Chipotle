@@ -399,7 +399,10 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting entities</returns>
-		public static IEnumerable<Character> GetCharacters(Rectangle area) => _characters.Values.Where(o => o.Area != null && o.Area.Value.Intersects(area));
+		public static List<Character> GetCharacters(Rectangle area)
+			=> _characters.Values
+			.Where(o => o.Area != null && o.Area.Value.Intersects(area))
+			.ToList();
 
 		/// <summary>
 		/// Returns an NPC found by its name.
@@ -619,13 +622,10 @@ namespace Game
 		/// </summary>
 		/// <param name="area">The plane to be checked.</param>
 		/// <returns>Enumeration of intersecting objects</returns>
-		public static IEnumerable<Item> GetItems(Rectangle area)
-		{
-			return
-				from o in _items.Values
-				where o.Area != null && o.Area.Value.Intersects(area)
-				select o;
-		}
+		public static List<Item> GetItems(Rectangle area) =>
+			_items.Values
+				.Where(item => item.Area != null && item.Area.Value.Intersects(area))
+				.ToList();
 
 		/// <summary>
 		/// Enumerates all simple game objects of the specified type

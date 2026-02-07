@@ -91,7 +91,7 @@ namespace Game.Terrain
 		/// <param name="closed">Specifies whether the door should be implicitly closed or open</param>
 		/// <param name="area">Location of the door</param>
 		/// <param name="zones">Two zones connected by the door</param>
-		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door, bool usable=false)
+		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door, bool usable = false)
 		{
 			base.Initialize(name, area, zones);
 			TypeDescription = Type == DoorType.Door ? "dveře" : "vrata";
@@ -239,13 +239,16 @@ namespace Game.Terrain
 		/// Enumerates objects and entities stand ing near the door.
 		/// </summary>
 		/// <returns>Enumeration of objects and entities</returns>
-		protected IEnumerable<Entity> GetObstacles()
+		protected List<Entity> GetObstacles()
 		{
 			Rectangle surroundings = Area.Value; // Just copied
 			surroundings.Extend();
-			IEnumerable<Entity> obstacles = surroundings.GetEntities()
-				.Union(_area.Value.GetObjects());
-			return obstacles;
+
+			return
+				World.GetCharacters(surroundings)
+	.Cast<Entity>()
+	.Union(World.GetItems(_area.Value))
+	.ToList();
 		}
 
 		/// <summary>

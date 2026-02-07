@@ -1,6 +1,4 @@
-﻿using Game.Entities;
-using Game.Entities.Characters;
-using Game.Models;
+﻿using Game.Models;
 
 using ProtoBuf;
 
@@ -620,18 +618,6 @@ namespace Game.Terrain
 		/// </summary>
 		/// <returns>The hash code</returns>
 		public override int GetHashCode() => unchecked(4112 * (8121 + UpperLeftCorner.GetHashCode()) * (6988 + LowerRightCorner.GetHashCode()));
-
-		/// <summary>
-		/// Enumerates entities intersecting with the plane.
-		/// </summary>
-		/// <returns>Enumeration of intersecting entities</returns>
-		public IEnumerable<Character> GetEntities() => World.GetCharacters(this);
-
-		/// <summary>
-		/// Returns all game objects intersecting with the plane.
-		/// </summary>
-		/// <returns>List of intersecting objects</returns>
-		public IEnumerable<Entity> GetObjects() => World.GetItems(this);
 
 		/// <summary>
 		/// Returns all passages intersecting with the plane.

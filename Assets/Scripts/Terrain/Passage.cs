@@ -1,5 +1,5 @@
-﻿using Game.Entities;
-using Game.Entities.Characters;
+﻿using Game.Entities.Characters;
+using Game.Entities.Items;
 using Game.Messaging.Events.Movement;
 using Game.Models;
 
@@ -147,11 +147,9 @@ namespace Game.Terrain
 
 			_sounds["navigation"] = "ExitLoop";
 			_zones = zones.ToArray<string>();
-			Rectangle testArea = new("1054, 1029, 1055, 1028.4");
-			IEnumerable<Entity> testItems = testArea.GetObjects();
 
 			// Validate passage location
-			IEnumerable<Entity> items = area.GetObjects();
+			List<Item> items = World.GetItems(area);
 			IEnumerable<Passage> passages = area.GetPassages();
 			if (items.Any() && passages.Any())
 				throw new ArgumentException("No objects or nested passages allowed");
