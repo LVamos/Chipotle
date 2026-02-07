@@ -453,11 +453,11 @@ namespace Game.Entities.Characters.Chipotle
 			}
 
 			Usables objects = GetUsables(Settings.ObjectManipulationRadius, message.ItemToUse.UsableWith);
-			if (objects.Result == Usables.ResultType.NothingFound)
+			if (objects.Result == UsablesResult.NothingFound)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
-			else if (objects.Result == Usables.ResultType.Unusable)
+			else if (objects.Result == UsablesResult.Unusable)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoUsableObjects));
-			else if (objects.Result == Usables.ResultType.Far)
+			else if (objects.Result == UsablesResult.Far)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.Far));
 			else // Success
 			{
@@ -1314,11 +1314,11 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			if (objects.Result == Usables.ResultType.NothingFound)
+			if (objects.Result == UsablesResult.NothingFound)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
-			else if (objects.Result == Usables.ResultType.Unusable)
+			else if (objects.Result == UsablesResult.Unusable)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoUsableObjects));
-			else if (objects.Result == Usables.ResultType.Far)
+			else if (objects.Result == UsablesResult.Far)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.Far));
 			else // Success
 			{

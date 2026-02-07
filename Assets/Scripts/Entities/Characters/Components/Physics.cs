@@ -199,7 +199,7 @@ namespace Game.Entities.Characters.Components
 			IEnumerable<MapElement> usableReachable = reachable
 				.Where(o => o.Usable || (included != null && included.Contains(o.Name.Indexed)));
 			if (usableReachable.Any())
-				return new(usableReachable.ToList(), Usables.ResultType.Success);
+				return new(usableReachable.ToList(), UsablesResult.Success);
 
 			// Report that there are only unusable items in front of the NPC.
 			bool unusableOnly = reachable.Any() &&
@@ -207,14 +207,14 @@ namespace Game.Entities.Characters.Components
 									.All(o => !o.Usable);
 
 			if (unusableOnly)
-				return new(null, Usables.ResultType.Unusable);
+				return new(null, UsablesResult.Unusable);
 
 			// Usable but too far away
 			IEnumerable<MapElement> usableButFar = objects
 				.Where(o => !reachable.Contains(o))
 				.Where(o => o.Usable);
 
-			return usableButFar.Any() ? new(null, Usables.ResultType.Far) : new();
+			return usableButFar.Any() ? new(null, UsablesResult.Far) : new();
 		}
 
 		/// <summary>
