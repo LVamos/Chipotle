@@ -7,7 +7,7 @@ namespace Game.Models
 	/// <summary>
 	/// A model for PhysicsComponent.GetPickableItemsBefore.
 	/// </summary>
-	public class PickableItemsModel
+	public class PickableItems
 	{
 		/// <summary>
 		/// Result of the search.
@@ -46,7 +46,7 @@ namespace Game.Models
 		/// Constructor
 		/// </summary>
 		/// <param name="items">The list of items.</param>
-		public PickableItemsModel(List<Item> items = null, ResultType result = ResultType.NothingFound)
+		public PickableItems(List<Item> items = null, ResultType result = ResultType.NothingFound)
 		{
 			Items = items;
 			Result = result;

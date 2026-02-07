@@ -221,7 +221,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items standing before the character.</returns>
-		protected virtual PickableItemsModel GetPickableItemsBefore(float radius)
+		protected virtual PickableItems GetPickableItemsBefore(float radius)
 		{
 			List<Items.Item> items = GetItemsBefore(_objectManipulationHelpRadius).ToList();
 			if (items.IsNullOrEmpty())
@@ -235,14 +235,14 @@ namespace Game.Entities.Characters.Components
 			{
 				// If there are only decorative items in front of the character, we return the Unpickable result.
 				if (items.Any(i => i.Decorative))
-					return new(null, PickableItemsModel.ResultType.Unpickable);
-				return new(null, PickableItemsModel.ResultType.Unpickable);
+					return new(null, PickableItems.ResultType.Unpickable);
+				return new(null, PickableItems.ResultType.Unpickable);
 			}
 
 			// Check if there are any items that are reachable from distance of _objectManipulationRadius.
 			return !pickableItems.Any(i => World.IsInRange(i, Owner, Settings.ObjectManipulationRadius))
-				? new(null, PickableItemsModel.ResultType.Unreachable)
-				: new(pickableItems, PickableItemsModel.ResultType.Success);
+				? new(null, PickableItems.ResultType.Unreachable)
+				: new(pickableItems, PickableItems.ResultType.Success);
 		}
 
 		/// <summary>

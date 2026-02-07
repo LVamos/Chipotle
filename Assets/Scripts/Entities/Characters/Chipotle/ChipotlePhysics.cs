@@ -569,20 +569,20 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed.
 		protected void OnTryPickUpItem(TryPickUpItem message)
 		{
-			PickableItemsModel items = GetPickableItemsBefore(Settings.ObjectManipulationRadius);
-			if (items.Result == PickableItemsModel.ResultType.NothingFound)
+			PickableItems items = GetPickableItemsBefore(Settings.ObjectManipulationRadius);
+			if (items.Result == PickableItems.ResultType.NothingFound)
 			{
 				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.NothingFound;
 				InnerMessage(new PickUpItemResult(this, null, result));
 				LogItemPickup(null, result);
 			}
-			else if (items.Result == PickableItemsModel.ResultType.Unpickable)
+			else if (items.Result == PickableItems.ResultType.Unpickable)
 			{
 				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.Unpickable;
 				InnerMessage(new PickUpItemResult(this, null, result));
 				LogItemPickup(null, result);
 			}
-			else if (items.Result == PickableItemsModel.ResultType.Unreachable)
+			else if (items.Result == PickableItems.ResultType.Unreachable)
 			{
 				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.Unreachable;
 				PickUpItemResult newMessage = new(this, null, result);
