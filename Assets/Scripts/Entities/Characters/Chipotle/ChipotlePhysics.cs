@@ -457,8 +457,6 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
 			else if (objects.Result == UsablesResult.Unusable)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoUsableObjects));
-			else if (objects.Result == UsablesResult.Far)
-				InnerMessage(new InteractResult(this, InteractResult.ResultType.Far));
 			else // Success
 			{
 				if (objects.Objects.Count() == 1)
@@ -1318,8 +1316,6 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
 			else if (objects.Result == UsablesResult.Unusable)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoUsableObjects));
-			else if (objects.Result == UsablesResult.Far)
-				InnerMessage(new InteractResult(this, InteractResult.ResultType.Far));
 			else // Success
 			{
 				if (objects.Objects.Count() == 1)

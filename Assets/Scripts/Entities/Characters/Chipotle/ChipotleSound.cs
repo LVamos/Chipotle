@@ -201,7 +201,6 @@ namespace Game.Entities.Characters.Chipotle
 			{
 				{ InteractResult.ResultType.NoObjects, "Není tu nic co by se dalo použít" },
 				{ InteractResult.ResultType.NoUsableObjects, "Tohle se použít nedá" },
-				{ InteractResult.ResultType.Far, "Musíš jít blíž" }
 			};
 			if (answers.TryGetValue(message.Result, out string answer))
 				Tolk.Speak(answer);

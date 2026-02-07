@@ -16,10 +16,6 @@
 		/// <summary>
 		/// Usable objects before the NPC
 		/// </summary>
-		Success,
-		/// <summary>
-		/// Unreachable objects before the NPC
-		/// </summary>
-		Far
-	};
+		Success
+	}
 }

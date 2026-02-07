@@ -209,12 +209,7 @@ namespace Game.Entities.Characters.Components
 			if (unusableOnly)
 				return new(null, UsablesResult.Unusable);
 
-			// Usable but too far away
-			IEnumerable<MapElement> usableButFar = objects
-				.Where(o => !reachable.Contains(o))
-				.Where(o => o.Usable);
-
-			return usableButFar.Any() ? new(null, UsablesResult.Far) : new();
+			return new();
 		}
 
 		/// <summary>
