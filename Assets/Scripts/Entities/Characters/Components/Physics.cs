@@ -241,7 +241,7 @@ namespace Game.Entities.Characters.Components
 
 			// Check if there are any items that are reachable from distance of _objectManipulationRadius.
 			return !pickableItems.Any(i => World.IsInRange(i, Owner, Settings.ObjectManipulationRadius))
-				? new(null, PickableItems.ResultType.Unreachable)
+				? new(null, PickableItems.ResultType.NothingFound)
 				: new(pickableItems, PickableItems.ResultType.Success);
 		}
 

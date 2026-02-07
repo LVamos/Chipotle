@@ -582,14 +582,6 @@ namespace Game.Entities.Characters.Chipotle
 				InnerMessage(new PickUpItemResult(this, null, result));
 				LogItemPickup(null, result);
 			}
-			else if (items.Result == PickableItems.ResultType.Unreachable)
-			{
-				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.Unreachable;
-				PickUpItemResult newMessage = new(this, null, result);
-				InnerMessage(newMessage);
-				LogItemPickup(null, result);
-			}
-
 			else if (items.Items.Count() == 1)
 				TryPickItem(items.Items[0]);
 			else // More items awailable.

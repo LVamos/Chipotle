@@ -25,11 +25,7 @@ namespace Game.Models
 			/// <summary>
 			/// Pickable items before the NPC
 			/// </summary>
-			Success,
-			/// <summary>
-			/// Unreachable items before the NPC
-			/// </summary>
-			Unreachable
+			Success
 		};
 
 		/// <summary>
