@@ -219,7 +219,8 @@ namespace Game.Entities.Characters.Components
 		/// <returns>Enumeration of items standing before the character.</returns>
 		protected virtual Pickables GetPickables(float radius)
 		{
-			List<Items.Item> items = GetItemsBefore(Settings.ObjectManipulationRadius).ToList();
+			List<Items.Item> items = GetItemsBefore(Settings.ObjectManipulationRadius)?.ToList();
+
 			if (items.IsNullOrEmpty())
 				return new();
 
