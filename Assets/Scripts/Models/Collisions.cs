@@ -2,12 +2,12 @@
 
 namespace Game.Models
 {
-	public class CollisionsModel
+	public class Collisions
 	{
 		public List<object> Obstacles;
 		public bool OutOfMap;
 
-		public CollisionsModel(List<object> obstacles, bool outOfMap)
+		public Collisions(List<object> obstacles, bool outOfMap)
 		{
 			Obstacles = obstacles;
 			OutOfMap = outOfMap;

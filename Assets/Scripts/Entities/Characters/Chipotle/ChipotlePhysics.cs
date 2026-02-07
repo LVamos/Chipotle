@@ -1557,7 +1557,7 @@ namespace Game.Entities.Characters.Chipotle
 				_stepLength,
 				new() { Owner },
 				_area.Value);
-			CollisionsModel collisions = World.Collisions.DetectOnTrack(parameters);
+			Collisions collisions = World.Collisions.DetectOnTrack(parameters);
 
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;

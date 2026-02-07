@@ -138,7 +138,7 @@ namespace Game.Entities.Characters.Components
 				radius,
 				new() { Owner },
 				area);
-			CollisionsModel collisions = World.Collisions.DetectOnTrack(parameters);
+			Collisions collisions = World.Collisions.DetectOnTrack(parameters);
 
 			if (collisions == null || collisions.Obstacles == null)
 				return null;
@@ -1153,7 +1153,7 @@ namespace Game.Entities.Characters.Components
 				new() { Owner, _player },
 				area,
 				true);
-			CollisionsModel collisions = World.Collisions.Detect(parameters);
+			Collisions collisions = World.Collisions.Detect(parameters);
 			if (collisions.Obstacles == null && !collisions.OutOfMap)
 				return false;
 
@@ -1309,7 +1309,7 @@ Rectangle.FromCenter(Center, width, height)
 						null,
 						rectangle,
 						true);
-					CollisionsModel result = World.Collisions.Detect(parameters);
+					Collisions result = World.Collisions.Detect(parameters);
 
 					float compassAngle = GetAngle(rectangle);
 					return compassAngle == 0 && !result.OutOfMap && result.Obstacles == null;
@@ -1326,7 +1326,7 @@ Rectangle.FromCenter(Center, width, height)
 						null,
 						tempRectangle,
 						true);
-					CollisionsModel result = World.Collisions.Detect(parameters);
+					Collisions result = World.Collisions.Detect(parameters);
 					if (!result.OutOfMap && result.Obstacles == null)
 						return rectangle;
 				}

@@ -38,7 +38,7 @@ namespace Game.Terrain
 				ignoreItems
 			);
 
-			CollisionsModel result = DetectOnTrack(parameters);
+			Collisions result = DetectOnTrack(parameters);
 			if (result.Obstacles == null) return ObstacleType.None;
 
 			return ClassifyObstacle(result.Obstacles);
@@ -60,7 +60,7 @@ namespace Game.Terrain
 		/// <param name="length">The length for which to detect collisions in meters</param>
 		/// <returns>A list of MapElements representing the obstacles detected on the track or null</returns>
 		/// <remarks>Divides the track to little segments and in every position checks all objects, closed passages and characters in intersecting zones for collision. The search ends at the position where collisions were detected.</remarks>
-		public CollisionsModel DetectOnTrack(TrackCollisionParams parameters)
+		public Collisions DetectOnTrack(TrackCollisionParams parameters)
 		{
 			int steps = Mathf.CeilToInt(parameters.Length / CollisionDetectionResolution) + 1;
 			Rectangle capsule = parameters.Area;
@@ -73,7 +73,7 @@ namespace Game.Terrain
 					capsule.Resize(parameters.Area.Center + offset, parameters.Area.Width, parameters.Area.Height);
 				}
 
-				CollisionsModel result = Detect(parameters.WithArea(capsule));
+				Collisions result = Detect(parameters.WithArea(capsule));
 				if (result.OutOfMap
 					|| HasBlockingObstacle(result.Obstacles))
 					return result;
@@ -99,7 +99,7 @@ namespace Game.Terrain
 		/// <param name="ignoredElements">The element to be moved.</param>
 		/// <param name="area">The map element to detect collisions for.</param>
 		/// <returns>List of MapElements or null</returns>
-		public CollisionsModel Detect(CollisionParams parameters)
+		public Collisions Detect(CollisionParams parameters)
 		{
 			List<object> obstacles = new();
 			List<Zone> zones = parameters.Area.GetZones().ToList();

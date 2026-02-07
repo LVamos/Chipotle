@@ -23,7 +23,7 @@ namespace Assets.Scripts.Spatial
 				CollisionParams parameters = new(
 					ignoredElements,
 					Rectangle.FromCenter(point, height, width));
-				CollisionsModel collisions = World.Collisions.Detect(parameters);
+				Collisions collisions = World.Collisions.Detect(parameters);
 				if (collisions is { Obstacles: null, OutOfMap: false })
 					placements.Add(point);
 			}
