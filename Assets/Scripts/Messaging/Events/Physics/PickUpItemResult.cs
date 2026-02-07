@@ -31,11 +31,6 @@ namespace Game.Messaging.Events.Physics
 			/// No object within reach.
 			/// </summary>
 			NothingFound,
-
-			/// <summary>
-			/// Pickalb eitems too far away.
-			/// </summary>
-			Unreachable
 		}
 
 		/// <summary>
@@ -61,7 +56,7 @@ namespace Game.Messaging.Events.Physics
 		/// <param name="sender">Source of the message</param>
 		/// <param name="object">The manipulated object</param>
 		/// <param name="success">Specifies if the object was picked up off the ground or not.</param>
-		public PickUpItemResult(MessagingObject sender, Item @object = null, ResultType result = ResultType.NothingFound, bool silently=false) : base(sender)
+		public PickUpItemResult(MessagingObject sender, Item @object = null, ResultType result = ResultType.NothingFound, bool silently = false) : base(sender)
 		{
 			Sender = sender;
 			Object = @object;

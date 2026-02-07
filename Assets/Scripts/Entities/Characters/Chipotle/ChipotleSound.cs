@@ -245,7 +245,6 @@ namespace Game.Entities.Characters.Chipotle
 				{ PickUpItemResult.ResultType.Success, "sebráno" },
 				{ PickUpItemResult.ResultType.FullInventory, "Víc toho nepobereš." },
 				{ PickUpItemResult.ResultType.NothingFound, "Před tebou nic není" },
-				{ PickUpItemResult.ResultType.Unreachable, "Musíš jít blíž" },
 				{ PickUpItemResult.ResultType.Unpickable, "tohle nejde odnést" }
 			};
 

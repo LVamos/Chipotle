@@ -5,6 +5,7 @@ using Assets.Scripts.Messaging.Events.Characters;
 using DavyKager;
 
 using Game.Audio;
+using Game.Entities.Characters.Components.PhysicsComponent.Results;
 using Game.Entities.Items;
 using Game.Messaging.Commands;
 using Game.Messaging.Commands.Characters;
@@ -569,14 +570,14 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed.
 		protected void OnTryPickUpItem(TryPickUpItem message)
 		{
-			PickableItems items = GetPickableItemsBefore(Settings.ObjectManipulationRadius);
-			if (items.Result == PickableItems.ResultType.NothingFound)
+			Pickables items = GetPickables(Settings.ObjectManipulationRadius);
+			if (items.Result == PickableItemsResult.NothingFound)
 			{
 				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.NothingFound;
 				InnerMessage(new PickUpItemResult(this, null, result));
 				LogItemPickup(null, result);
 			}
-			else if (items.Result == PickableItems.ResultType.Unpickable)
+			else if (items.Result == PickableItemsResult.Unpickable)
 			{
 				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.Unpickable;
 				InnerMessage(new PickUpItemResult(this, null, result));

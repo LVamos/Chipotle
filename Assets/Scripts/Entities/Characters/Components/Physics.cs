@@ -1,4 +1,5 @@
 ﻿using Game.Entities.Characters.Chipotle;
+using Game.Entities.Characters.Components.PhysicsComponent.Results;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
@@ -178,7 +179,7 @@ namespace Game.Entities.Characters.Components
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
 		protected virtual UsableObjectsModel GetUsableObjectsBefore(float radius, List<string> included = null)
 		{
-			List<MapElement> objects = GetEntitiesBefore(_objectManipulationHelpRadius)
+			List<MapElement> objects = GetEntitiesBefore(Settings.ObjectManipulationRadius)
 				.Cast<MapElement>()
 				?.ToList();
 			Door door = GetDoorBefore(GetStepDirection(), true);
@@ -221,9 +222,9 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items standing before the character.</returns>
-		protected virtual PickableItems GetPickableItemsBefore(float radius)
+		protected virtual Pickables GetPickables(float radius)
 		{
-			List<Items.Item> items = GetItemsBefore(_objectManipulationHelpRadius).ToList();
+			List<Items.Item> items = GetItemsBefore(Settings.ObjectManipulationRadius).ToList();
 			if (items.IsNullOrEmpty())
 				return new();
 
@@ -235,14 +236,14 @@ namespace Game.Entities.Characters.Components
 			{
 				// If there are only decorative items in front of the character, we return the Unpickable result.
 				if (items.Any(i => i.Decorative))
-					return new(null, PickableItems.ResultType.Unpickable);
-				return new(null, PickableItems.ResultType.Unpickable);
+					return new(null, PickableItemsResult.Unpickable);
+				return new(null, PickableItemsResult.Unpickable);
 			}
 
 			// Check if there are any items that are reachable from distance of _objectManipulationRadius.
 			return !pickableItems.Any(i => World.IsInRange(i, Owner, Settings.ObjectManipulationRadius))
-				? new(null, PickableItems.ResultType.NothingFound)
-				: new(pickableItems, PickableItems.ResultType.Success);
+				? new(null, PickableItemsResult.NothingFound)
+				: new(pickableItems, PickableItemsResult.Success);
 		}
 
 		/// <summary>
