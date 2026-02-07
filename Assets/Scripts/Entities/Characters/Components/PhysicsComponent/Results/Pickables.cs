@@ -17,13 +17,13 @@ namespace Game.Entities.Characters.Components.PhysicsComponent.Results
 		/// <summary>
 		/// Result of the search
 		/// </summary>
-		public PickableItemsResult Result;
+		public PickablesResult Result;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="items">The list of items.</param>
-		public Pickables(List<Item> items = null, PickableItemsResult result = PickableItemsResult.NothingFound)
+		public Pickables(List<Item> items = null, PickablesResult result = PickablesResult.NothingFound)
 		{
 			Items = items;
 			Result = result;

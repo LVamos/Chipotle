@@ -236,14 +236,14 @@ namespace Game.Entities.Characters.Components
 			{
 				// If there are only decorative items in front of the character, we return the Unpickable result.
 				if (items.Any(i => i.Decorative))
-					return new(null, PickableItemsResult.Unpickable);
-				return new(null, PickableItemsResult.Unpickable);
+					return new(null, PickablesResult.Unpickable);
+				return new(null, PickablesResult.Unpickable);
 			}
 
 			// Check if there are any items that are reachable from distance of _objectManipulationRadius.
 			return !pickableItems.Any(i => World.IsInRange(i, Owner, Settings.ObjectManipulationRadius))
-				? new(null, PickableItemsResult.NothingFound)
-				: new(pickableItems, PickableItemsResult.Success);
+				? new(null, PickablesResult.NothingFound)
+				: new(pickableItems, PickablesResult.Success);
 		}
 
 		/// <summary>

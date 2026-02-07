@@ -571,13 +571,13 @@ namespace Game.Entities.Characters.Chipotle
 		protected void OnTryPickUpItem(TryPickUpItem message)
 		{
 			Pickables items = GetPickables(Settings.ObjectManipulationRadius);
-			if (items.Result == PickableItemsResult.NothingFound)
+			if (items.Result == PickablesResult.NothingFound)
 			{
 				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.NothingFound;
 				InnerMessage(new PickUpItemResult(this, null, result));
 				LogItemPickup(null, result);
 			}
-			else if (items.Result == PickableItemsResult.Unpickable)
+			else if (items.Result == PickablesResult.Unpickable)
 			{
 				PickUpItemResult.ResultType result = PickUpItemResult.ResultType.Unpickable;
 				InnerMessage(new PickUpItemResult(this, null, result));
