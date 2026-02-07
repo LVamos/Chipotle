@@ -452,12 +452,12 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			UsableObjectsModel objects = GetUsableObjectsBefore(Settings.ObjectManipulationRadius, message.ItemToUse.UsableWith);
-			if (objects.Result == UsableObjectsModel.ResultType.NothingFound)
+			Usables objects = GetUsables(Settings.ObjectManipulationRadius, message.ItemToUse.UsableWith);
+			if (objects.Result == Usables.ResultType.NothingFound)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
-			else if (objects.Result == UsableObjectsModel.ResultType.Unusable)
+			else if (objects.Result == Usables.ResultType.Unusable)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoUsableObjects));
-			else if (objects.Result == UsableObjectsModel.ResultType.Far)
+			else if (objects.Result == Usables.ResultType.Far)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.Far));
 			else // Success
 			{
@@ -1306,7 +1306,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected void OnInteract(Interact message)
 		{
 			Door door = GetDoorBefore(null, false, Zone);
-			UsableObjectsModel objects = GetUsableObjectsBefore(Settings.ObjectManipulationRadius);
+			Usables objects = GetUsables(Settings.ObjectManipulationRadius);
 
 			if (door != null)
 			{
@@ -1314,11 +1314,11 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			if (objects.Result == UsableObjectsModel.ResultType.NothingFound)
+			if (objects.Result == Usables.ResultType.NothingFound)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoObjects));
-			else if (objects.Result == UsableObjectsModel.ResultType.Unusable)
+			else if (objects.Result == Usables.ResultType.Unusable)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.NoUsableObjects));
-			else if (objects.Result == UsableObjectsModel.ResultType.Far)
+			else if (objects.Result == Usables.ResultType.Far)
 				InnerMessage(new InteractResult(this, InteractResult.ResultType.Far));
 			else // Success
 			{
@@ -1332,7 +1332,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Handles simultaneous collisions with a door and items or characters.
 		/// </summary>
-		private void HandleDoorAndObjectsInteractions(Door door, UsableObjectsModel itemsOrCharacters)
+		private void HandleDoorAndObjectsInteractions(Door door, Usables itemsOrCharacters)
 		{
 			if (itemsOrCharacters.Objects.IsNullOrEmpty())
 				UseObject(door);

@@ -177,7 +177,7 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="radius">The radius of the search</param>
 		/// <returns>Enumeration of items and characters standing before the character.</returns>
-		protected virtual UsableObjectsModel GetUsableObjectsBefore(float radius, List<string> included = null)
+		protected virtual Usables GetUsables(float radius, List<string> included = null)
 		{
 			List<MapElement> objects = GetEntitiesBefore(Settings.ObjectManipulationRadius)
 				.Cast<MapElement>()
@@ -199,7 +199,7 @@ namespace Game.Entities.Characters.Components
 			IEnumerable<MapElement> usableReachable = reachable
 				.Where(o => o.Usable || (included != null && included.Contains(o.Name.Indexed)));
 			if (usableReachable.Any())
-				return new(usableReachable.ToList(), UsableObjectsModel.ResultType.Success);
+				return new(usableReachable.ToList(), Usables.ResultType.Success);
 
 			// Report that there are only unusable items in front of the NPC.
 			bool unusableOnly = reachable.Any() &&
@@ -207,14 +207,14 @@ namespace Game.Entities.Characters.Components
 									.All(o => !o.Usable);
 
 			if (unusableOnly)
-				return new(null, UsableObjectsModel.ResultType.Unusable);
+				return new(null, Usables.ResultType.Unusable);
 
 			// Usable but too far away
 			IEnumerable<MapElement> usableButFar = objects
 				.Where(o => !reachable.Contains(o))
 				.Where(o => o.Usable);
 
-			return usableButFar.Any() ? new(null, UsableObjectsModel.ResultType.Far) : new();
+			return usableButFar.Any() ? new(null, Usables.ResultType.Far) : new();
 		}
 
 		/// <summary>

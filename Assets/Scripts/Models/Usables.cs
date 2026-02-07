@@ -8,7 +8,7 @@ namespace Game.Models
 	/// <summary>
 	/// A model for PhysicsComponent.GetUsableObjectsBefore.
 	/// </summary>
-	public class UsableObjectsModel
+	public class Usables
 	{
 		/// <summary>
 		/// Result of the search.
@@ -48,7 +48,7 @@ namespace Game.Models
 		/// </summary>
 		/// <param name="objects">The list of items and characters.</param>
 		/// <param name="result">Result of the action</param>
-		public UsableObjectsModel(List<MapElement> objects = null, ResultType result = ResultType.NothingFound)
+		public Usables(List<MapElement> objects = null, ResultType result = ResultType.NothingFound)
 		{
 			Objects = objects;
 			Result = result;
