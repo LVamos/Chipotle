@@ -1045,7 +1045,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Handles collisions between the NPC and other elements.
 		/// </summary>
-		private void HandleCollisions(List<object> elements)
+		private void HandleCollisions(HashSet<object> elements)
 		{
 			// Check for door collisions first
 			HandleDoorCollision(elements);
@@ -1054,10 +1054,10 @@ namespace Game.Entities.Characters.Chipotle
 			if (HandleEntityCollisions(elements))
 				return;
 
-			HandleTerrainCollisions(elements);
+			HandleTerrainCollisions(elements.ToList());
 		}
 
-		private bool HandleDoorCollision(List<object> elements)
+		private bool HandleDoorCollision(HashSet<object> elements)
 		{
 			Door door = elements.OfType<Door>().FirstOrDefault();
 			if (door != null)
@@ -1075,7 +1075,7 @@ namespace Game.Entities.Characters.Chipotle
 			return false;
 		}
 
-		private bool HandleEntityCollisions(List<object> elements)
+		private bool HandleEntityCollisions(HashSet<object> elements)
 		{
 			bool doorColided = elements.Any(e => e is Door);
 			IEnumerable<Entity> entities = elements.OfType<Entity>();
@@ -1611,7 +1611,7 @@ namespace Game.Entities.Characters.Chipotle
 				CollisionParams parameters = new(
 					new() { Owner },
 					newPosition);
-				List<object> obstacles = World.Collisions.Detect(parameters).Obstacles;
+				HashSet<object> obstacles = World.Collisions.Detect(parameters).Obstacles;
 				if (!obstacles.IsNullOrEmpty())
 					return false;
 				return true;

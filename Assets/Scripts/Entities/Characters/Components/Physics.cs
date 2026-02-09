@@ -134,11 +134,14 @@ namespace Game.Entities.Characters.Components
 		{
 			Rectangle area = _area.Value;
 			area.Extend(.5f);
+
 			TrackCollisionParams parameters = new(
-				GetStepDirection(),
-				radius,
-				new() { Owner },
-				area);
+				direction: GetStepDirection(),
+				length: radius,
+				ignored: new() { Owner },
+				area: area,
+				mode: TrackStopMode.WholeTrack
+				);
 			Collisions collisions = World.Collisions.DetectOnTrack(parameters);
 
 			if (collisions == null || collisions.Obstacles == null)

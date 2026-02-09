@@ -4,10 +4,10 @@ namespace Game.Models
 {
 	public class Collisions
 	{
-		public List<object> Obstacles;
+		public HashSet<object> Obstacles;
 		public bool OutOfMap;
 
-		public Collisions(List<object> obstacles, bool outOfMap)
+		public Collisions(HashSet<object> obstacles = null, bool outOfMap = false)
 		{
 			Obstacles = obstacles;
 			OutOfMap = outOfMap;

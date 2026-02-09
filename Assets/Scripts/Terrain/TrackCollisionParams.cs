@@ -6,6 +6,8 @@ namespace Game.Terrain
 {
 	public class TrackCollisionParams : CollisionParams
 	{
+		public TrackStopMode Mode;
+
 		public TrackCollisionParams WithArea(Rectangle newArea)
 		{
 			return new
@@ -32,12 +34,14 @@ namespace Game.Terrain
 			bool firstHit = false,
 			bool terrain = true,
 			bool ignoreSmall = false,
-			bool ignoreItems = false
+			bool ignoreItems = false,
+			TrackStopMode mode = TrackStopMode.Blocking
 			)
 			: base(ignored, area, firstHit, terrain, ignoreSmall, ignoreItems)
 		{
 			Length = length;
 			Direction = direction;
+			Mode = mode;
 		}
 
 	}

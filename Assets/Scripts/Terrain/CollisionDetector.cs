@@ -64,6 +64,7 @@ namespace Game.Terrain
 		{
 			int steps = Mathf.CeilToInt(parameters.Length / CollisionDetectionResolution) + 1;
 			Rectangle capsule = parameters.Area;
+			Collisions result = new(new());
 
 			for (int i = 0; i < steps; i++)
 			{
@@ -73,13 +74,22 @@ namespace Game.Terrain
 					capsule.Resize(parameters.Area.Center + offset, parameters.Area.Width, parameters.Area.Height);
 				}
 
-				Collisions result = Detect(parameters.WithArea(capsule));
-				if (result.OutOfMap
-					|| HasBlockingObstacle(result.Obstacles))
-					return result;
+				Collisions stepResult = Detect(parameters.WithArea(capsule));
+				if (stepResult.OutOfMap
+					|| HasBlockingObstacle(stepResult.Obstacles))
+				{
+					if (parameters.Mode == TrackStopMode.Blocking)
+						return stepResult;
+				}
+
+				// We're checking the whole track, so we need to accumulate all obstacles
+				if (!stepResult.Obstacles.IsNullOrEmpty())
+					result.Obstacles.UnionWith(stepResult.Obstacles);
+				if (stepResult.OutOfMap)
+					result.OutOfMap = true;
 			}
 
-			return new(null, false);
+			return result;
 		}
 
 		private static bool HasBlockingObstacle(IEnumerable<object> obstacles)
@@ -101,7 +111,7 @@ namespace Game.Terrain
 		/// <returns>List of MapElements or null</returns>
 		public Collisions Detect(CollisionParams parameters)
 		{
-			List<object> obstacles = new();
+			HashSet<object> obstacles = new();
 			List<Zone> zones = parameters.Area.GetZones().ToList();
 
 			// Detect inaccesible terrain
@@ -110,7 +120,7 @@ namespace Game.Terrain
 				var inaccessibleTiles = CheckTerrain(parameters);
 				if (inaccessibleTiles.Count > 0)
 				{
-					obstacles.AddRange(inaccessibleTiles.Cast<object>());
+					obstacles.UnionWith(inaccessibleTiles.Cast<object>());
 					if (parameters.FirstHit)
 						return new(obstacles, false);
 				}
@@ -141,7 +151,10 @@ namespace Game.Terrain
 			}
 
 			bool outOfMap = parameters.Area.IsOutOfMap();
-			var finalObstacles = obstacles.Count > 0 ? obstacles.Distinct().ToList() : null;
+			HashSet<object> finalObstacles = null;
+			if (obstacles.Count > 0)
+				finalObstacles = obstacles.Distinct().ToHashSet();
+
 			return new(finalObstacles, outOfMap);
 
 			// Local function to keep FirstHit logic
@@ -151,7 +164,7 @@ namespace Game.Terrain
 		private void ProcessZoneCollection(
 			IEnumerable<MapElement> elements,
 			CollisionParams parameters,
-			List<object> obstacles,
+			HashSet<object> obstacles,
 			bool ignoreSmall = false,
 			bool ignoreItems = false)
 		{
@@ -170,23 +183,23 @@ namespace Game.Terrain
 		private void CheckElements(
 	IEnumerable<MapElement> elements,
 	CollisionParams parameters,
-	List<object> obstacles,
+	HashSet<object> obstacles,
 	bool ignoreSmall = false,
 	bool ignoreItems = false)
 		{
 			bool IsIgnored(MapElement e) => parameters.Ignored?.Contains(e) ?? false;
 
-			var newObstacles = elements
+			HashSet<MapElement> newObstacles = elements
 				.Where(e => e.Area != null && !IsIgnored(e))
 				.Where(e => e.Area.Value.IntersectsStrict(parameters.Area)
 						 || e.Area.Value.Contains(parameters.Area)
 						 || parameters.Area.Contains(e.Area.Value))
 				.Where(e => !ignoreSmall || e.Area.Value.Size > _subtleObjectSizeThreshold)
 				.Where(e => !ignoreItems || (e is Item i && i.Type == "zeď"))
-				.ToList();
+				.ToHashSet();
 
 			if (newObstacles.Count > 0)
-				obstacles.AddRange(newObstacles);
+				obstacles.UnionWith(newObstacles);
 		}
 
 	}
