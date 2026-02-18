@@ -1,4 +1,4 @@
-﻿using ProtoBuf;
+﻿
 
 using System.Collections.Generic;
 
@@ -7,7 +7,7 @@ namespace Game
 	/// <summary>
 	/// An immutable class to store unique names
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public sealed class Name
 	{
 		/// <summary>

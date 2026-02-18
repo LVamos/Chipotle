@@ -18,7 +18,7 @@ using Game.Models;
 using Game.Narration.WorldDescribers;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace Game.Entities.Characters.Chipotle
 	/// <summary>
 	/// Controls the sound output of the detective Chipotle NPC
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+
 	public class ChipotleSound : Sound
 	{
 		private void Update()
@@ -251,15 +251,6 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		/// <summary>
-		/// Initializes the component and starts its message loop.
-		/// </summary>
-		public override void Activate()
-		{
-			base.Activate();
-			_listenerOrientation.steps = -1;
-		}
-
-		/// <summary>
 		/// Handles the SayCoordinates message.
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
@@ -457,10 +448,5 @@ namespace Game.Entities.Characters.Chipotle
 		}
 
 		private Vector2 _playerPosition => Owner.Area.Value.Center;
-
-		/// <summary>
-		/// Stores information for dynamic listener orientation settings.
-		/// </summary>
-		private (Orientation2D current, Orientation2D final, int step, int steps) _listenerOrientation;
 	}
 }

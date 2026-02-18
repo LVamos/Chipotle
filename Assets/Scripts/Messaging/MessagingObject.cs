@@ -4,7 +4,7 @@ using Game.Messaging.Events.Input;
 using Game.Messaging.Events.Sound;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -17,15 +17,14 @@ namespace Game.Messaging
 	/// <summary>
 	/// Base class for all objects used in the game; receives, sends and processes messages.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(CharacterComponent))]
-	[ProtoInclude(101, typeof(MapElement))]
+
+
 	public abstract class MessagingObject : MonoBehaviour
 	{
 		/// <summary>
 		/// Stores the messages before they are processed.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected Queue<Message> _messages = new();
 
 		/// <summary>

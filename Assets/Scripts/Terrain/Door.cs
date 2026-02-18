@@ -5,7 +5,7 @@ using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.Physics;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -20,11 +20,10 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents a door between two zones.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(HallDoor))]
-	[ProtoInclude(101, typeof(MariottisDoor))]
-	[ProtoInclude(102, typeof(SlidingDoor))]
-	[ProtoInclude(103, typeof(VanillaCrunchGarageDoor))]
+
+
+
+
 	public class Door : Passage
 	{
 		/// <summary>

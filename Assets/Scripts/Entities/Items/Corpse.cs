@@ -1,5 +1,5 @@
 ﻿// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 
@@ -13,7 +13,7 @@ namespace Game.Entities.Items
 	/// <remarks>
 	/// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 zone.
 	/// </remarks>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class Corpse : Item
 	{
 		/// <summary>

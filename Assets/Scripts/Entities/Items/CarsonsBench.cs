@@ -1,7 +1,7 @@
 ﻿// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
 using Game.Messaging.Commands.Physics;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Game.Entities.Items
 	/// <summary>
 	/// Represents a bench object in the zahrada c1 zone.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class CarsonsBench : Item
 	{
 		/// <summary>

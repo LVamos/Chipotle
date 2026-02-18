@@ -24,7 +24,7 @@ using Game.Models;
 using Game.Terrain;
 using Game.UI;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -43,7 +43,6 @@ namespace Game.Entities.Characters.Chipotle
 	/// <summary>
 	/// Controls movement of the Detective Chipotle NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotlePhysics : Physics
 	{
 		public override Vector2 Move(Vector2 direction, bool silently = false)
@@ -158,7 +157,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Specifies if the NPC can walk.
 		/// </summary>
-		[ProtoIgnore]
+
 		protected bool _blockWalk;
 
 		/// <summary>
@@ -215,7 +214,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// stores information about walk.
 		/// </summary>
-		[ProtoIgnore]
+
 		private StartWalk _startWalkMessage;
 
 		/// <summary>
@@ -226,7 +225,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Indicates if the Chipotle NPC is currently walking.
 		/// </summary>
-		[ProtoIgnore]
+
 		private bool _walking;
 
 		/// <summary>
@@ -244,7 +243,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Returns reference to the Tuttle NPC.
 		/// </summary>
-		[ProtoIgnore]
+
 		private Character Tuttle
 			=> World.GetCharacter("tuttle");
 
@@ -663,7 +662,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// An exit to which the NPC is navigated.
 		/// </summary>
-		[ProtoIgnore]
+
 		protected Passage _navigatedExit;
 		/// <summary>
 		/// Processes the ObjectNavigationStopped message.
@@ -732,7 +731,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Objectt to which tthe NPC is currently navigated.
 		/// </summary>
-		[ProtoIgnore]
+
 		protected Item _navigatedItem;
 
 		/// <summary>

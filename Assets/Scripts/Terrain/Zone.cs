@@ -8,7 +8,7 @@ using Game.Messaging;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents one region on the game map (e.g. a room).
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class Zone : MapElement
 	{
 		public bool SameAmbients(string soundName)
@@ -182,7 +182,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// List of adjecting zones
 		/// </summary>
-		[ProtoIgnore]
+		
 		public Zone[] Neighbours => _neighbours.Select(World.GetZone).ToArray();
 
 		/// <summary>
@@ -271,7 +271,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// All exits from the zone
 		/// </summary>
-		[ProtoIgnore]
+		
 		public Passage[] Exits
 		{
 			get
@@ -336,7 +336,7 @@ namespace Game.Terrain
 
 			if (loopExists)
 			{
-			_portalController = gameObject.AddComponent<ZonePortalController>();
+				_portalController = gameObject.AddComponent<ZonePortalController>();
 				components.Add(_portalController);
 			}
 			_components = components.ToArray();
@@ -363,18 +363,18 @@ namespace Game.Terrain
 			gameObject.transform.position = new Vector3(area.Center.x, ceiling / 2, area.Center.y);
 			gameObject.transform.localScale = new Vector3(area.Width, ceiling, area.Height);
 
-			CreateComponents(loop!=null);
-				_ambientController.Initialize(this, loop, materials);
-				_portalController?.Initialize(this, loop);
+			CreateComponents(loop != null);
+			_ambientController.Initialize(this, loop, materials);
+			_portalController?.Initialize(this, loop);
 		}
 
-		[ProtoIgnore]
+		
 		public TerrainType DefaultTerrain { get; private set; }
 
 		/// <summary>
 		/// List of NPCs present in this zone.
 		/// </summary>
-		[ProtoIgnore]
+		
 		public List<Character> Characters
 		{
 			get
@@ -390,13 +390,13 @@ namespace Game.Terrain
 			}
 		}
 
-		[ProtoIgnore]
+		
 		public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
 
 		/// <summary>
 		/// List of objects present in this zone.
 		/// </summary>
-		[ProtoIgnore]
+		
 		public IEnumerable<Item> Items
 		{
 			get
@@ -630,7 +630,6 @@ namespace Game.Terrain
 			Unregister(message.Sender as Character);
 		}
 
-		private bool _reloaded;
 		private ZoneAmbientController _ambientController;
 		private ZonePortalController _portalController;
 

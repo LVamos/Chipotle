@@ -5,7 +5,7 @@ using Game.Messaging.Events.Movement;
 using Game.Terrain;
 using Game.UI;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ namespace Game.Entities.Items
 	/// <summary>
 	/// Represents the car of the Detective Chipotle NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class ChipotlesCar : Item
 	{
 		/// <summary>
@@ -103,7 +103,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC
 		/// </summary>
-		[ProtoIgnore]
+		
 		private Character Player => World.Player;
 
 		/// <summary>
@@ -114,7 +114,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <summary>
 		/// Reference to the Tuttle NPC
 		/// </summary>
-		[ProtoIgnore]
+		
 		private Character _tuttle
 			=> World.GetCharacter("tuttle");
 

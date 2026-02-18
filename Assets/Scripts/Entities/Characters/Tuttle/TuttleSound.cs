@@ -3,7 +3,7 @@ using Game.Entities.Characters.Components;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Events.Movement;
 
-using ProtoBuf;
+
 
 using UnityEngine;
 
@@ -14,7 +14,7 @@ namespace Game.Entities.Characters.Tuttle
 	/// <summary>
 	/// Controls the sound output of the Tuttle NPC
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class TuttleSound : Sound
 	{
 
@@ -26,13 +26,13 @@ namespace Game.Entities.Characters.Tuttle
 		/// <su mmary>
 		/// Handle of sound with Tuttle's speech that can move when Tuttle is walking.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected AudioSource _movingSpeechAudio;
 
 		/// <summary>
 		/// Target position for current Tuttle's voice sliding.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected Vector3 _voiceSlideTarget;
 
 		/// <summary>
@@ -43,7 +43,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Specifies how the current position of Tuttle's voice changes in one step when voice sliding is being performed.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected Vector3 _voiceSlideDelta;
 
 		/// <summary>
@@ -54,7 +54,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// A counter used for voice sliding.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected int _voiceSlideTimer = -1;
 
 		/// <summary>
@@ -65,7 +65,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Specifies how long it takes to slide position of Tuttle's voice from one tile to another one.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected const int _voiceSlideInterval = 500;
 
 		/// <summary>

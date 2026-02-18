@@ -1,7 +1,7 @@
 ﻿using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 
@@ -12,7 +12,7 @@ namespace Game.Entities.Items
 	/// <summary>
 	/// Represents a table in the pub (výčep h1) zone.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+
 	public class PubBench : Item
 	{
 		/// <summary>

@@ -1,6 +1,6 @@
 ﻿using Game.Audio;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 
@@ -12,7 +12,7 @@ namespace Game.Terrain
 	/// Represents the door between the hall of the Vanilla crunch company and (hala v1) zone
 	/// and the office of the Paolo Mariotti office (kancelář v1) zone.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class MariottisDoor : Door
 	{
 		/// <summary>

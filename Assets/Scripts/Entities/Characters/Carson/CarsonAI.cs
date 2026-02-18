@@ -5,7 +5,7 @@ using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System.Linq;
 
@@ -18,7 +18,6 @@ namespace Game.Entities.Characters.Carson
 	/// <summary>
 	/// Controls the behavior of the Carson NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class CarsonAI : AI
 	{
 		/// <summary>

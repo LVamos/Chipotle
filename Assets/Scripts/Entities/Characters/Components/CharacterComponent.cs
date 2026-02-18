@@ -1,7 +1,7 @@
 ﻿using Game.Messaging;
 using Game.Messaging.Events.Sound;
 
-using ProtoBuf;
+
 
 using System;
 
@@ -12,11 +12,7 @@ namespace Game.Entities.Characters.Components
 	/// <summary>
 	/// Base class for all NPC components
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(AI))]
-	[ProtoInclude(101, typeof(Physics))]
-	[ProtoInclude(102, typeof(Sound))]
-	[ProtoInclude(103, typeof(Input))]
+
 	public abstract class CharacterComponent : GameComponent<Character>
 	{
 		public virtual void Initialize()
@@ -35,13 +31,13 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Backing field for the Onwer property.
 		/// </summary>
-		[ProtoIgnore]
+
 		protected Character _owner;
 
 		/// <summary>
 		/// A reference to the parent NPC
 		/// </summary>
-		[ProtoIgnore]
+
 		public override Character Owner
 		{
 			get

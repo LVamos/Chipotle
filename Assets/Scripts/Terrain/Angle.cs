@@ -1,4 +1,4 @@
-﻿using ProtoBuf;
+﻿
 
 using System;
 
@@ -11,7 +11,7 @@ namespace Game.Terrain
 	/// <summary>
 	/// Offers methods for convenient angle handling.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public struct Angle
 	{
 		/// <summary>

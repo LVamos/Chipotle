@@ -7,7 +7,7 @@ using Game.Messaging.Events.Physics;
 using Game.Messaging.Events.Sound;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace Game.Entities.Characters.Tuttle
 	/// <summary>
 	/// Controls behavior of the Tuttle NPC
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class TuttleAI : AI
 	{
 		public override void Initialize() => transform.localScale = new(.4f, 1.7f, .4f);
@@ -56,7 +56,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Specifies if the NPC is just moving to another zone with the Chipotle's car.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected Zone _ridingTo;
 
 		/// <summary>

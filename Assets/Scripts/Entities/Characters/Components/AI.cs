@@ -1,17 +1,11 @@
 ﻿using Assets.Scripts.Spatial;
 
-using Game.Entities.Characters.Bartender;
-using Game.Entities.Characters.Carson;
-using Game.Entities.Characters.Christine;
-using Game.Entities.Characters.Mariotti;
-using Game.Entities.Characters.Sweeney;
-using Game.Entities.Characters.Tuttle;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.Movement;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -27,13 +21,7 @@ namespace Game.Entities.Characters.Components
 	/// <summary>
 	/// Controls the behavior of an NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(BartenderAI))]
-	[ProtoInclude(101, typeof(CarsonAI))]
-	[ProtoInclude(102, typeof(ChristineAI))]
-	[ProtoInclude(103, typeof(MariottiAI))]
-	[ProtoInclude(104, typeof(SweeneyAI))]
-	[ProtoInclude(105, typeof(TuttleAI))]
+
 	public class AI : CharacterComponent
 	{
 		protected virtual void Reveal(Vector2 target)
@@ -61,7 +49,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC
 		/// </summary>
-		[ProtoIgnore]
+
 		protected Character _player => World.Player;
 
 		protected Vector2[] FindFreePlacementsAroundArea(Rectangle area, float minDistance, float maxDistance, bool sameZone = true)

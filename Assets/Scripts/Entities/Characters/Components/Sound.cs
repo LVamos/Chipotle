@@ -1,30 +1,22 @@
 ﻿using DavyKager;
 
 using Game.Audio;
-using Game.Entities.Characters.Chipotle;
-using Game.Entities.Characters.Tuttle;
 using Game.Terrain;
 
-using NUnit.Framework;
 
-using ProtoBuf;
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
-using UnityEngine.UIElements;
 
 namespace Game.Entities.Characters.Components
 {
 	/// <summary>
 	/// Controls the sound output of an NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(ChipotleSound))]
-	[ProtoInclude(101, typeof(TuttleSound))]
+
+
 	public class Sound : CharacterComponent
 	{
 		/// <summary>
@@ -126,7 +118,7 @@ namespace Game.Entities.Characters.Components
 				source = Sounds.Play(sound, position3d, volume);
 			source.minDistance = 5;
 
-			AnnounceWall(position);		
+			AnnounceWall(position);
 		}
 
 		protected void AnnounceWall(Vector2 position)

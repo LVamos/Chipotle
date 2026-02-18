@@ -2,7 +2,7 @@
 using Game.Messaging.Commands.Physics;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace Game.Entities.Items
 	/// Represents the icecream machine object (automat v1) )in the hall of the Vanilla crunch
 	/// company (hala v1) zone.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+
 	public class IcecreamMachine : Item
 	{
 		/// <summary>

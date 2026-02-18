@@ -1,50 +1,48 @@
-﻿using Game.Entities.Characters;
-using Game.Entities.Items;
-using Game.Terrain;
-
-using ProtoBuf;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Game.Serialization
 {
 	/// <summary>
 	/// A helper class that stores game map, NPCs and objects.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+
 	public class ProtobufSerializerHelper
 	{
 		/// <summary>
 		/// Stores all NPCs.
 		/// </summary>
-		public readonly Dictionary<string, Character> Entities;
+		public readonly Dictionary<string, CharacterSnapshot> Entities;
 
 		/// <summary>
 		/// stores all zones.
 		/// </summary>
-		public readonly Dictionary<string, Zone> Zones;
+		public readonly Dictionary<string, ZoneSnapshot> Zones;
 
 		/// <summary>
 		/// stores all game objects.
 		/// </summary>
-		public readonly Dictionary<string, Item> Objects;
+		public readonly Dictionary<string, ItemSnapshot> Items;
 
 		/// <summary>
 		/// stores all passages.
 		/// </summary>
-		public readonly Dictionary<string, Passage> Passages;
+		public readonly Dictionary<string, PassageSnapshot> Passages;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="map">Whole map of the game world to be serialized</param>
 		/// <param name="entities">All entities to be serialized</param>
-		/// <param name="objects">All objects to be serialized</param>
+		/// <param name="items">All objects to be serialized</param>
 		/// <param name="passages">All passages to be serialized</param>
-		public ProtobufSerializerHelper(Dictionary<string, Character> entities, Dictionary<string, Item> objects, Dictionary<string, Passage> passages, Dictionary<string, Zone> zones)
+		public ProtobufSerializerHelper(
+			Dictionary<string, CharacterSnapshot> entities,
+			Dictionary<string, ItemSnapshot> items,
+			Dictionary<string, PassageSnapshot> passages,
+			Dictionary<string, ZoneSnapshot> zones)
 		{
 			Entities = entities;
-			Objects = objects;
+			Items = items;
 			Passages = passages;
 			Zones = zones;
 		}

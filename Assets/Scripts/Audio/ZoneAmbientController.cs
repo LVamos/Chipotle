@@ -5,7 +5,6 @@ using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Terrain;
 
-using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
@@ -24,7 +23,7 @@ namespace Game.Audio
 
 		public string AmbientSound;
 
-		[ProtoIgnore]
+
 		public override Zone Owner => _owner ??= World.GetZone(_ownerName) ?? throw new InvalidOperationException(nameof(_ownerName));
 
 		protected override void HandleMessage(Message message)

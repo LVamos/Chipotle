@@ -1,7 +1,7 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Messaging.Events.Sound;
 
-using ProtoBuf;
+
 
 using UnityEngine;
 
@@ -12,7 +12,7 @@ namespace Game.Entities.Characters.Sweeney
 	/// <summary>
 	/// Controls behavior of the Derreck Sweeney NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class SweeneyAI : AI
 	{
 		/// <summary>

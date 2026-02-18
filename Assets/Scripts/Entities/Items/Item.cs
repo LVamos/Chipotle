@@ -10,7 +10,7 @@ using Game.Messaging.Events.Physics;
 using Game.Models;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -27,16 +27,15 @@ namespace Game.Entities.Items
 	/// <summary>
 	/// Base class for all simple game objects
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(CarsonsBench))]
-	[ProtoInclude(101, typeof(CarsonsGrill))]
-	[ProtoInclude(102, typeof(Corpse))]
-	[ProtoInclude(103, typeof(ChipotlesCar))]
-	[ProtoInclude(104, typeof(ChristinesBell))]
-	[ProtoInclude(105, typeof(IcecreamMachine))]
-	[ProtoInclude(106, typeof(KeyHanger))]
-	[ProtoInclude(109, typeof(PubBench))]
-	[ProtoInclude(110, typeof(SweeneysBell))]
+
+
+
+
+
+
+
+
+
 	public class Item : Entity
 	{
 		public bool Passable { get; protected set; }
@@ -304,7 +303,7 @@ namespace Game.Entities.Items
 			StopPortals();
 		}
 
-		[ProtoIgnore]
+		
 		private Dictionary<Passage, AudioSource> _portals;
 
 		protected Vector3? _loopPositionBackup;
@@ -383,13 +382,13 @@ namespace Game.Entities.Items
 			Logger.LogInfo(title, characterName, itemName, targetName, pointMessage);
 		}
 
-		[ProtoIgnore]
+		
 		protected AudioSource _ambientSource;
 
-		[ProtoIgnore]
+		
 		protected AudioSource _actionAudio;
 
-		[ProtoIgnore]
+		
 		protected AudioSource _placingAudio;
 
 		/// <summary>
@@ -410,7 +409,7 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Zones intersecting with this object.
 		/// </summary>
-		[ProtoIgnore]
+		
 		public List<Zone> Zones
 		{
 			get => _zones.Select(World.GetZone).ToList();
@@ -662,17 +661,17 @@ namespace Game.Entities.Items
 				Sounds.SlideVolume(_actionAudio, _actionFadingDuration, 0);
 		}
 
-		private bool _quickActionsAllowed;
+		protected bool _quickActionsAllowed;
 
 		/// <summary>
 		/// Specifies if the object can be carried.
 		/// </summary>
 		protected bool _pickable;
 
-		[ProtoIgnore]
+		
 		protected float _lastUse;
 
-		[ProtoIgnore]
+		
 		private AudioSource _passByAudio;
 		protected ObstacleType _lastOccludingObstacle;
 		private const float _behindWallVolumeCoefficient = .5f;

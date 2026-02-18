@@ -3,7 +3,7 @@ using Game.Entities.Items;
 using Game.Messaging.Events.Movement;
 using Game.Models;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -18,8 +18,7 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents a passage between two zones.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(Door))]
+
 	public class Passage : MapElement
 	{
 		protected override bool ShouldNavigationContinue()
@@ -105,7 +104,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Zones connected by the passage
 		/// </summary>
-		[ProtoIgnore]
+		
 		public IEnumerable<Zone> Zones
 		{
 			get
@@ -201,7 +200,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// stores a zone in which the player is located after navigation start.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected Zone _playersZone;
 
 		/// <summary>

@@ -16,7 +16,7 @@ using Game.Messaging.Events.Sound;
 using Game.Terrain;
 using Game.UI;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,6 @@ namespace Game.Entities.Characters.Chipotle
 	/// <summary>
 	/// Allows the player to scroll the entity using the keyboard.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class ChipotleInput : Input
 	{
 		private void SayNavigatedObjectLocation()

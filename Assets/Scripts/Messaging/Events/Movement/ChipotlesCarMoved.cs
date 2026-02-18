@@ -1,7 +1,7 @@
 ﻿using Game.Entities.Items;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 namespace Game.Messaging.Events.Movement
 {
@@ -9,7 +9,7 @@ namespace Game.Messaging.Events.Movement
 	/// Indicates that the Detective Chipotle's car object (detektivovo auto) has moved.
 	/// </summary>
 	/// <remarks>Sent from the <see cref="ChipotlesCar"/> class.</remarks>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class ChipotlesCarMoved : Message
 	{
 		/// <summary>

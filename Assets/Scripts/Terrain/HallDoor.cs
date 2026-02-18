@@ -2,7 +2,7 @@
 using Game.Messaging;
 using Game.Messaging.Commands.Physics;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 
@@ -13,7 +13,7 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents a door in the hall of the Vanilla crunch company (hala v1) zone.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class HallDoor : Door
 	{
 		protected override void Open(object sender, Vector2 point)

@@ -7,7 +7,7 @@ using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,6 @@ namespace Game.Entities.Characters
 	/// <summary>
 	/// Represents an NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class Character : Entity
 	{
 
@@ -53,7 +52,7 @@ namespace Game.Entities.Characters
 		/// <summary>
 		/// Zone intersecting with the character.
 		/// </summary>
-		[ProtoIgnore]
+
 		public Zone Zone => _zone == null ? null : World.GetZone(_zone);
 
 		/// <summary>

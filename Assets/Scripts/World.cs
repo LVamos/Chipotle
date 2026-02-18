@@ -811,7 +811,7 @@ namespace Game
 			}
 
 			_characters = helper.Entities;
-			_items = helper.Objects;
+			_items = helper.Items;
 			_passages = helper.Passages;
 			_zones = helper.Zones;
 			WindowHandler.Switch(GameWindow.CreateInstance());

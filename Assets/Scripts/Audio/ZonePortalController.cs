@@ -8,7 +8,7 @@ using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections;
@@ -159,7 +159,7 @@ namespace Assets.Scripts.Audio
 		/// <summary>
 		/// A reference to the parent NPC
 		/// </summary>
-		[ProtoIgnore]
+
 		public override Zone Owner
 		{
 			get
@@ -175,7 +175,7 @@ namespace Assets.Scripts.Audio
 		/// <summary>
 		/// Stores the identifiers of location audio loops played in passages.
 		/// </summary>
-		[ProtoIgnore]
+
 		private Dictionary<Passage, AudioSource> _portals;
 
 		private float GetVolume(Passage passage, AudioSource portal)

@@ -1,6 +1,6 @@
 ﻿using Game.Entities.Characters.Components;
 
-using ProtoBuf;
+
 
 using UnityEngine;
 
@@ -10,7 +10,7 @@ namespace Game.Entities.Characters.Mariotti
 	/// <summary>
 	/// Controls behavior of the Paolo Mariotti NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class MariottiAI : AI
 	{
 		/// <summary>

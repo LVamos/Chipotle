@@ -1,6 +1,6 @@
 ﻿using Game.Messaging.Events.Movement;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 
@@ -11,7 +11,7 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents the garage door in the garage of the Vanilla crunch company (garáž v1) zone.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class VanillaCrunchGarageDoor : Door
 	{
 		/// <summary>

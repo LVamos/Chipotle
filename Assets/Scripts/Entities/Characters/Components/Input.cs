@@ -1,11 +1,10 @@
 ﻿using Game.Controls;
 using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
-using Game.Entities.Characters.Chipotle;
 using Game.Messaging.Events.Input;
 using Game.Messaging.Events.Sound;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -18,8 +17,7 @@ namespace Game.Entities.Characters.Components
 	/// <summary>
 	/// Allows the player to control an NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(ChipotleInput))]
+
 	public abstract class Input : CharacterComponent
 	{
 		public override void Initialize()
@@ -31,7 +29,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Registered keyboard shortcuts and corresponding actions
 		/// </summary>
-		[ProtoIgnore]
+
 		protected Dictionary<KeyboardInput, Action> _keyboardShortcuts;
 
 		protected Dictionary<DualSenseInput, Action> _dualsenseShortcuts;
@@ -67,10 +65,10 @@ namespace Game.Entities.Characters.Components
 
 		protected virtual void OnDualSenseKeyPressed(DualSenseKeyPressed message)
 		{
-			if (_dualsenseShortcuts== null)
+			if (_dualsenseShortcuts == null)
 				AddCommands();
 
-			if (_dualsenseShortcuts!= null && _dualsenseShortcuts.TryGetValue(message.Shortcut, out Action action))
+			if (_dualsenseShortcuts != null && _dualsenseShortcuts.TryGetValue(message.Shortcut, out Action action))
 				action();
 		}
 

@@ -1,8 +1,5 @@
-﻿using Game.Entities.Characters;
-using Game.Entities.Items;
-using Game.Terrain;
+﻿using Game.Terrain;
 
-using ProtoBuf;
 
 using System;
 
@@ -11,9 +8,6 @@ namespace Game.Entities
 	/// <summary>
 	/// A base class for all simple objects and NPCS
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(Item))]
-	[ProtoInclude(101, typeof(Character))]
 	public class Entity : MapElement
 	{
 		/// <summary>

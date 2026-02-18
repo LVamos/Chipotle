@@ -4,7 +4,7 @@ using Game.Entities.Items;
 using Game.Messaging.Events.Movement;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,6 @@ namespace Game.Entities.Characters.Bartender
 	/// <summary>
 	/// Controls the behavior of Bartender NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class BartenderAI : AI
 	{
 		private readonly Zone BonitaStreet = World.GetZone("ulice h1");

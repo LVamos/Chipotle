@@ -1,5 +1,4 @@
-﻿using Game.Entities.Characters.Chipotle;
-using Game.Entities.Characters.Components.PhysicsComponent.Results;
+﻿using Game.Entities.Characters.Components.PhysicsComponent.Results;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
@@ -11,7 +10,7 @@ using Game.Models;
 using Game.PathFinding;
 using Game.Terrain;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -29,8 +28,7 @@ namespace Game.Entities.Characters.Components
 	/// <summary>
 	/// Controls movement of an NPC.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(ChipotlePhysics))]
+
 	public class Physics : CharacterComponent
 	{
 		public Vector2 Center { get => _area.Value.Center; }
@@ -306,7 +304,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Specifies the length of one step in milliseconds.
 		/// </summary>
-		[ProtoIgnore]
+
 		protected int _walkTimer;
 
 		protected void UpdateWalkTimer()
@@ -328,7 +326,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Returns reference to the tile the NPC currently stands on.
 		/// </summary>
-		[ProtoIgnore]
+
 		protected (Vector2 position, Tile tile) CurrentTile
 			=> (_area.Value.Center, World.Map[_area.Value.Center]);
 
@@ -406,7 +404,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Specifies the length of one step.
 		/// </summary>
-		[ProtoIgnore]
+
 		protected int _speed;
 
 		/// <summary>
@@ -534,7 +532,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// An instance of the Random number generator
 		/// </summary>
-		[ProtoIgnore]
+
 		protected Random _random = new();
 
 		/// <summary>

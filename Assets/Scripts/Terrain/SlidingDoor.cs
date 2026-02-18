@@ -1,7 +1,7 @@
 ﻿using Game.Entities.Characters;
 using Game.Messaging.Events.Movement;
 
-using ProtoBuf;
+
 
 using System.Collections.Generic;
 
@@ -14,7 +14,7 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents a sliding door.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
+	
 	public class SlidingDoor : Door
 	{
 

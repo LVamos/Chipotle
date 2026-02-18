@@ -8,7 +8,7 @@ using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.GameManagement;
 
-using ProtoBuf;
+
 
 using System;
 using System.Collections.Generic;
@@ -23,10 +23,9 @@ namespace Game.Terrain
 	/// <summary>
 	/// Base class for all objects that can be displayed on the game map.
 	/// </summary>
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(Entity))]
-	[ProtoInclude(101, typeof(Zone))]
-	[ProtoInclude(102, typeof(Passage))]
+
+
+
 	public abstract class MapElement : MessagingObject
 	{
 		public override void TakeMessage(Message message)
@@ -41,7 +40,7 @@ namespace Game.Terrain
 		public Vector2 Center { get => _area.Value.Center; }
 		private const float _beaconMinDistance = .6f;
 		private const float _beaconMaxDistance = 50;
-		[ProtoIgnore]
+		
 		protected AudioSource _navigationAudio;
 
 		/// <summary>
@@ -74,7 +73,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Indicates if the sound navigation is enabled.
 		/// </summary>
-		[ProtoIgnore]
+		
 		protected bool _navigating;
 
 		/// <summary>
