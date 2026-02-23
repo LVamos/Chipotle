@@ -10,6 +10,7 @@ using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
 using Game.Serialization;
+using Game.Serialization.Protobuf;
 using Game.Terrain;
 using Game.UI;
 

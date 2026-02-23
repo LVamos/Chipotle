@@ -176,11 +176,6 @@ namespace Game.Entities.Characters.Chipotle
 		private const float _sideSpeed = 1.1f;
 
 		/// <summary>
-		/// Stores references to all the zones the NPC has visited.
-		/// </summary>
-		private readonly HashSet<Zone> _visitedZones = new();
-
-		/// <summary>
 		/// A delayed message of ChipotlesCarMoved type
 		/// </summary>
 		private ChipotlesCarMoved _carMovement;
