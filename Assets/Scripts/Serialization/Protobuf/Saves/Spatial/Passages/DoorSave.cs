@@ -5,7 +5,7 @@ using ProtoBuf;
 namespace Game.Serialization.Protobuf.Snapshots.Spatial.Passages
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class DoorSnapshot : PassageSnapshot
+	public class DoorSave : PassageSave
 	{
 		public string ClosingSound { get; set; }
 		public string LockedSound { get; set; }

@@ -1,7 +1,6 @@
 ﻿using Game.Messaging;
 using Game.Messaging.Events.Sound;
-
-
+using Game.Serialization.Protobuf.Snapshots.Characters;
 
 using System;
 
@@ -15,6 +14,12 @@ namespace Game.Entities.Characters.Components
 
 	public abstract class CharacterComponent : GameComponent<Character>
 	{
+		public virtual void Restore(ComponentSave save)
+		{
+			_owner = World.GetCharacter(save.Owner)
+				?? throw new InvalidOperationException("Nonexistant or missing character");
+		}
+
 		public virtual void Initialize()
 		{
 		}

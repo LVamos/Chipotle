@@ -1,11 +1,12 @@
-﻿using ProtoBuf;
+﻿using Game.Serialization.Protobuf.Snapshots.Entities;
+
+using ProtoBuf;
 
 namespace Game.Serialization.Protobuf.Snapshots.Characters
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class SoundSnapshot : CharacterSnapshot
+	public class ComponentSave : EntitySave
 	{
-		public bool AnnounceWalls { get; set; }
-		public float WalkVolume { get; set; }
+		public string Owner { get; set; }
 	}
 }

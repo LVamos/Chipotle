@@ -7,8 +7,7 @@ using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.GameManagement;
-
-
+using Game.Serialization.Protobuf.Snapshots;
 
 using System;
 using System.Collections.Generic;
@@ -28,6 +27,15 @@ namespace Game.Terrain
 
 	public abstract class MapElement : MessagingObject
 	{
+		public void Restore(MapElementSave data)
+		{
+			Initialize(data.Name, data.Area.Value);
+			_sounds = data.Sounds;
+			Usable = data.Usable;
+			UsableWith = data.UsableWith;
+
+		}
+
 		public override void TakeMessage(Message message)
 		{
 			base.TakeMessage(message);
@@ -40,7 +48,7 @@ namespace Game.Terrain
 		public Vector2 Center { get => _area.Value.Center; }
 		private const float _beaconMinDistance = .6f;
 		private const float _beaconMaxDistance = 50;
-		
+
 		protected AudioSource _navigationAudio;
 
 		/// <summary>
@@ -73,7 +81,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Indicates if the sound navigation is enabled.
 		/// </summary>
-		
+
 		protected bool _navigating;
 
 		/// <summary>

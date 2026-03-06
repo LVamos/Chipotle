@@ -7,8 +7,7 @@ using Game.Entities.Items;
 using Game.Messaging;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
-
-
+using Game.Serialization.Protobuf.Snapshots.Spatial;
 
 using System;
 using System.Collections.Generic;
@@ -24,9 +23,23 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents one region on the game map (e.g. a room).
 	/// </summary>
-	
+
 	public class Zone : MapElement
 	{
+		public void Restore(ZoneSave data)
+		{
+			base.Restore(data);
+			_ceiling = data.Ceiling;
+			_exits = data.Exits;
+			_characters = data.Characters;
+			_items = data.Items;
+			_neighbours = data.Neighbours;
+			_nonwalkables = data.Nonwalkables;
+			DefaultTerrain = data.DefaultTerrain;
+			Description = data.Description;
+			To = data.To;
+			Type = data.Type;
+		}
 		public bool SameAmbients(string soundName)
 			 => _ambientController != null && _ambientController.SameAmbients(soundName);
 
@@ -182,7 +195,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// List of adjecting zones
 		/// </summary>
-		
+
 		public Zone[] Neighbours => _neighbours.Select(World.GetZone).ToArray();
 
 		/// <summary>
@@ -271,7 +284,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// All exits from the zone
 		/// </summary>
-		
+
 		public Passage[] Exits
 		{
 			get
@@ -368,13 +381,13 @@ namespace Game.Terrain
 			_portalController?.Initialize(this, loop);
 		}
 
-		
+
 		public TerrainType DefaultTerrain { get; private set; }
 
 		/// <summary>
 		/// List of NPCs present in this zone.
 		/// </summary>
-		
+
 		public List<Character> Characters
 		{
 			get
@@ -390,13 +403,13 @@ namespace Game.Terrain
 			}
 		}
 
-		
+
 		public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
 
 		/// <summary>
 		/// List of objects present in this zone.
 		/// </summary>
-		
+
 		public IEnumerable<Item> Items
 		{
 			get

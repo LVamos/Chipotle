@@ -11,8 +11,8 @@ using UnityEngine;
 namespace Game.Serialization.Protobuf.Snapshots.Characters
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(120, typeof(ChipotlePhysicsSnapshot))]
-	public class PhysicsSnapshot
+	[ProtoInclude(120, typeof(ChipotlePhysicsSave))]
+	public class PhysicsSave : ComponentSave
 	{
 		public CharacterState State { get; set; }
 		public Rectangle? Area { get; set; }

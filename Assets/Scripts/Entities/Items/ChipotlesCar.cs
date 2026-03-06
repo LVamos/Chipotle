@@ -2,6 +2,8 @@
 using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
+using Game.Serialization.Protobuf.Snapshots.Entities.Items;
+using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
 using Game.Terrain;
 using Game.UI;
 
@@ -21,9 +23,41 @@ namespace Game.Entities.Items
 	/// <summary>
 	/// Represents the car of the Detective Chipotle NPC.
 	/// </summary>
-	
+
 	public class ChipotlesCar : Item
 	{
+		public void Restore(ItemSave save)
+		{
+			if (save is not ChipotlesCarSave data)
+				return;
+
+			Initialize
+				(
+				data.Name,
+				data.Area.Value,
+				data.Type,
+				data.Decorative,
+data.Pickable,
+data.Usable,
+data.Passable,
+data.CollisionSound,
+data.ActionSound,
+data.LoopSound,
+data.Cutscene,
+data.UsableOnce,
+data.AudibleOverWalls,
+_defaultVolume,
+data.StopWhenPlayerMoves,
+data.QuickActionsAllowed,
+data.PickingSound,
+data.PlacingSound,
+data.UsableWith
+				);
+			_visitedZones = data.VisitedZones;
+			_allowedDestinations = data.AllowedDestinations;
+			_descriptionID = data.DescriptionID;
+		}
+
 		/// <summary>
 		/// Indicates if the object has moved at least once.
 		/// </summary>
@@ -103,7 +137,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <summary>
 		/// Reference to the Detective Chipotle NPC
 		/// </summary>
-		
+
 		private Character Player => World.Player;
 
 		/// <summary>
@@ -114,7 +148,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <summary>
 		/// Reference to the Tuttle NPC
 		/// </summary>
-		
+
 		private Character _tuttle
 			=> World.GetCharacter("tuttle");
 

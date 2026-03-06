@@ -24,7 +24,7 @@ using Message = Game.Messaging.Message;
 using Random = System.Random;
 using Rectangle = Game.Terrain.Rectangle;
 
-namespace Game.Entities.Characters.Components
+namespace Game.Entities.Characters.Components.PhysicsComponent
 {
 	/// <summary>
 	/// Controls movement of an NPC.
@@ -37,26 +37,26 @@ namespace Game.Entities.Characters.Components
 			if (save is not PhysicsSave data)
 				return;
 
-			base.Restore(save);
-			_state = save.State;
-			_area = save.Area;
-			_goal = save.Goal;
-			_inventory = save.Inventory;
-			_maxObjectDistance = save.MaxObjectDistance;
-			_minObjectDistance = save.MinObjectDistance;
-			_navigableObjectsRadius = save.NavigableObjectsRadius;
-			_nearbyWalls = save.NearbyWalls;
-			_objectManipulationHelpRadius = save.ObjectManipulationHelpRadius;
-			_orientation = save.Orientation;
-			_path = save.Path;
-			_restartApproaching = save.RestartApproaching;
-			_speed = save.Speed;
-			_stepLength = save.StepLength;
-			_targetPlayerDistance = save.TargetPlayerDistance;
-			_wallDistanceThreshold = save.WallDistanceThreshold;
-			Height = save.Height;
-			StartPosition = save.StartPosition;
-			Width = save.Width;
+			base.Restore(data);
+			_state = data.State;
+			_area = data.Area;
+			_goal = data.Goal;
+			_inventory = data.Inventory;
+			_maxObjectDistance = data.MaxObjectDistance;
+			_minObjectDistance = data.MinObjectDistance;
+			_navigableObjectsRadius = data.NavigableObjectsRadius;
+			_nearbyWalls = data.NearbyWalls;
+			_objectManipulationHelpRadius = data.ObjectManipulationHelpRadius;
+			_orientation = data.Orientation;
+			_path = data.Path;
+			_restartApproaching = data.RestartApproaching;
+			_speed = data.Speed;
+			_stepLength = data.StepLength;
+			_targetPlayerDistance = data.TargetPlayerDistance;
+			_wallDistanceThreshold = data.WallDistanceThreshold;
+			Height = data.Height;
+			StartPosition = data.StartPosition;
+			Width = data.Width;
 		}
 
 		public Vector2 Center { get => _area.Value.Center; }

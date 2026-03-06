@@ -6,7 +6,7 @@ using ProtoBuf;
 namespace Game.Serialization.Protobuf.Snapshots.Characters.Tuttle
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class TuttleAISnapshot : AISnapshot
+	public class TuttleAISave : AISave
 	{
 		public ChipotlesCarMoved CarMovement { get; set; }
 		public int CollisionInterval { get; set; }

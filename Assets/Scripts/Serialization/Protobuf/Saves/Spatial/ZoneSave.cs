@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Game.Serialization.Protobuf.Snapshots.Spatial
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class ZoneSnapshot : MapElementSnapshot
+	public class ZoneSave : MapElementSave
 	{
 		public float Ceiling { get; set; }
 		public HashSet<string> Exits { get; set; }
@@ -21,6 +21,5 @@ namespace Game.Serialization.Protobuf.Snapshots.Spatial
 		public string Description { get; set; }
 		public string To { get; set; }
 		public ZoneType Type { get; set; }
-
 	}
 }

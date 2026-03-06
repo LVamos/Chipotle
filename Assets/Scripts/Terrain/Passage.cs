@@ -2,8 +2,7 @@
 using Game.Entities.Items;
 using Game.Messaging.Events.Movement;
 using Game.Models;
-
-
+using Game.Serialization.Protobuf.Snapshots.Spatial.Passages;
 
 using System;
 using System.Collections.Generic;
@@ -21,6 +20,15 @@ namespace Game.Terrain
 
 	public class Passage : MapElement
 	{
+		public void Restore(PassageSave data)
+		{
+			base.Restore(data);
+			_playersZone = data.PlayersZone;
+			_zones = data.Zones;
+			State = data.State;
+			TypeDescription = data.TypeDescription;
+		}
+
 		protected override bool ShouldNavigationContinue()
 		{
 			Character player = World.Player;
@@ -104,7 +112,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Zones connected by the passage
 		/// </summary>
-		
+
 		public IEnumerable<Zone> Zones
 		{
 			get
@@ -200,7 +208,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// stores a zone in which the player is located after navigation start.
 		/// </summary>
-		
+
 		protected Zone _playersZone;
 
 		/// <summary>

@@ -4,8 +4,7 @@ using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.Movement;
-
-
+using Game.Serialization.Protobuf.Snapshots.Characters;
 
 using System;
 using System.Collections.Generic;
@@ -24,6 +23,19 @@ namespace Game.Entities.Characters.Components
 
 	public class AI : CharacterComponent
 	{
+		public void Restore(ComponentSave save)
+		{
+			if (save is not AISave data)
+				return;
+
+			base.Restore(data);
+			_area = data.Area;
+			_hidden = data.Hidden;
+			_maxObjectDistance = data.MaxObjectDistance;
+			_minObjectDistance = data.MinObjectDistance;
+			_state = data.State;
+		}
+
 		protected virtual void Reveal(Vector2 target)
 		{
 			_hidden = false;

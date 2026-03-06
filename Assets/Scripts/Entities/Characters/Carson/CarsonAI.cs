@@ -3,6 +3,8 @@ using Game.Entities.Characters.Components;
 using Game.Entities.Items;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
+using Game.Serialization.Protobuf.Snapshots.Characters;
+using Game.Serialization.Protobuf.Snapshots.Characters.Carson;
 using Game.Terrain;
 
 
@@ -20,6 +22,15 @@ namespace Game.Entities.Characters.Carson
 	/// </summary>
 	public class CarsonAI : AI
 	{
+		public void Restore(ComponentSave save)
+		{
+			if (save is not CarsonAISave data)
+				return;
+
+			_saidGoodbyeToChipotle = data.SaidGoodbyeToChipotle;
+			_yelledAtChipotle = data.YelledAtChipotle;
+		}
+
 		/// <summary>
 		/// Indicates if the Carson NPC said goodbye to the Detective Chipotle NPC when Chipotle
 		/// left the zahrada c1 zone.

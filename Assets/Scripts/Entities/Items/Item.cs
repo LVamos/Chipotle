@@ -8,6 +8,8 @@ using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Models;
+using Game.Serialization.Protobuf.Snapshots.Entities;
+using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
 using Game.Terrain;
 
 
@@ -303,7 +305,7 @@ namespace Game.Entities.Items
 			StopPortals();
 		}
 
-		
+
 		private Dictionary<Passage, AudioSource> _portals;
 
 		protected Vector3? _loopPositionBackup;
@@ -382,13 +384,13 @@ namespace Game.Entities.Items
 			Logger.LogInfo(title, characterName, itemName, targetName, pointMessage);
 		}
 
-		
+
 		protected AudioSource _ambientSource;
 
-		
+
 		protected AudioSource _actionAudio;
 
-		
+
 		protected AudioSource _placingAudio;
 
 		/// <summary>
@@ -409,7 +411,7 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Zones intersecting with this object.
 		/// </summary>
-		
+
 		public List<Zone> Zones
 		{
 			get => _zones.Select(World.GetZone).ToList();
@@ -471,6 +473,32 @@ namespace Game.Entities.Items
 		/// Determines if the object shall be used just once
 		/// </summary>
 		private bool _usableOnce;
+
+		public void Restore(ItemSave save)
+		{
+			base.Restore((EntitySave)save);
+			Initialize(
+				save.Name,
+				save.Area.Value,
+				save.Type,
+				save.Decorative,
+				save.Pickable,
+				save.Usable,
+				save.Passable,
+				save.CollisionSound,
+				save.ActionSound,
+				save.LoopSound,
+				save.Cutscene,
+save.UsableOnce,
+save.AudibleOverWalls,
+_defaultVolume,
+save.StopWhenPlayerMoves,
+save.QuickActionsAllowed,
+save.PickingSound,
+save.PlacingSound,
+save.UsableWith
+				);
+		}
 
 		/// <summary>
 		/// constructor
@@ -668,10 +696,10 @@ namespace Game.Entities.Items
 		/// </summary>
 		protected bool _pickable;
 
-		
+
 		protected float _lastUse;
 
-		
+
 		private AudioSource _passByAudio;
 		protected ObstacleType _lastOccludingObstacle;
 		private const float _behindWallVolumeCoefficient = .5f;

@@ -8,7 +8,7 @@ using Game.Entities.Characters.Tuttle;
 
 using UnityEngine;
 
-using Physics = Game.Entities.Characters.Components.Physics;
+using Physics = Game.Entities.Characters.Components.PhysicsComponent.Physics;
 using Sound = Game.Entities.Characters.Components.Sound;
 
 namespace Game.Entities.Characters

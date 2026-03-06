@@ -2,6 +2,8 @@
 using Game.Entities.Characters.Components;
 using Game.Entities.Items;
 using Game.Messaging.Events.Movement;
+using Game.Serialization.Protobuf.Snapshots.Characters;
+using Game.Serialization.Protobuf.Snapshots.Characters.Bartender;
 using Game.Terrain;
 
 
@@ -20,6 +22,16 @@ namespace Game.Entities.Characters.Bartender
 	/// </summary>
 	public class BartenderAI : AI
 	{
+		public void Restore(ComponentSave save)
+		{
+			if (save is not BartenderAISave data)
+				return;
+
+			_sayGoodbyeToChipotle = data.SayGoodbyeToChipotle;
+			_velcomeChipotle = data.VelcomeChipotle;
+			_wasChipotleHere = data.WasChipotleHere;
+		}
+
 		private readonly Zone BonitaStreet = World.GetZone("ulice h1");
 
 		/// <summary>

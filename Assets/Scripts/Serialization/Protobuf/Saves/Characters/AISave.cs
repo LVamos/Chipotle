@@ -9,10 +9,10 @@ using ProtoBuf;
 namespace Game.Serialization.Protobuf.Snapshots.Characters
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(110, typeof(BartenderAISnapshot))]
-	[ProtoInclude(111, typeof(CarsonAISnapshot))]
-	[ProtoInclude(112, typeof(TuttleAISnapshot))]
-	public class AISnapshot : CharacterComponentSnapshot
+	[ProtoInclude(110, typeof(BartenderAISave))]
+	[ProtoInclude(111, typeof(CarsonAISave))]
+	[ProtoInclude(112, typeof(TuttleAISave))]
+	public class AISave : ComponentSave
 	{
 		public Rectangle Area { get; set; }
 		public bool Hidden { get; set; }

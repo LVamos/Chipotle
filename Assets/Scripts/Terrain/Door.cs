@@ -4,8 +4,7 @@ using Game.Entities.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.Physics;
-
-
+using Game.Serialization.Protobuf.Snapshots.Spatial.Passages;
 
 using System;
 using System.Collections.Generic;
@@ -26,6 +25,18 @@ namespace Game.Terrain
 
 	public class Door : Passage
 	{
+		public void Restore(PassageSave save)
+		{
+			if (save is not DoorSave data)
+				return;
+
+			base.Restore(data);
+			_closingSound = data.ClosingSound;
+			_lockedSound = data.LockedSound;
+			_openingSound = data.OpeningSound;
+			Type = data.Type;
+		}
+
 		/// <summary>
 		/// Indicates if the door has been opened previously.
 		/// </summary>

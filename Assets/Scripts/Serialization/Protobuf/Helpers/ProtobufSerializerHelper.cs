@@ -16,22 +16,22 @@ namespace Game.Serialization.Protobuf
 		/// <summary>
 		/// Stores all NPCs.
 		/// </summary>
-		public readonly Dictionary<string, CharacterSnapshot> Entities;
+		public readonly Dictionary<string, CharacterSave> Entities;
 
 		/// <summary>
 		/// stores all zones.
 		/// </summary>
-		public readonly Dictionary<string, ZoneSnapshot> Zones;
+		public readonly Dictionary<string, ZoneSave> Zones;
 
 		/// <summary>
 		/// stores all game objects.
 		/// </summary>
-		public readonly Dictionary<string, ItemSnapshot> Items;
+		public readonly Dictionary<string, ItemSave> Items;
 
 		/// <summary>
 		/// stores all passages.
 		/// </summary>
-		public readonly Dictionary<string, PassageSnapshot> Passages;
+		public readonly Dictionary<string, PassageSave> Passages;
 
 		/// <summary>
 		/// Constructor
@@ -41,10 +41,10 @@ namespace Game.Serialization.Protobuf
 		/// <param name="items">All objects to be serialized</param>
 		/// <param name="passages">All passages to be serialized</param>
 		public ProtobufSerializerHelper(
-			Dictionary<string, CharacterSnapshot> entities,
-			Dictionary<string, ItemSnapshot> items,
-			Dictionary<string, PassageSnapshot> passages,
-			Dictionary<string, ZoneSnapshot> zones)
+			Dictionary<string, CharacterSave> entities,
+			Dictionary<string, ItemSave> items,
+			Dictionary<string, PassageSave> passages,
+			Dictionary<string, ZoneSave> zones)
 		{
 			Entities = entities;
 			Items = items;

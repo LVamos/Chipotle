@@ -5,6 +5,8 @@ using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Messaging.Events.Sound;
+using Game.Serialization.Protobuf.Snapshots.Characters;
+using Game.Serialization.Protobuf.Snapshots.Characters.Tuttle;
 using Game.Terrain;
 
 
@@ -22,9 +24,22 @@ namespace Game.Entities.Characters.Tuttle
 	/// <summary>
 	/// Controls behavior of the Tuttle NPC
 	/// </summary>
-	
+
 	public class TuttleAI : AI
 	{
+		public void Restore(ComponentSave save)
+		{
+			if (save is not TuttleAISave data)
+				return;
+
+			base.Restore(data);
+			_carMovement = data.CarMovement;
+			_collisionInterval = data.CollisionInterval;
+			_goToPoolWhenPositionSet = data.GoToPoolWhenPositionSet;
+			_playerWasByPool = data.PlayerWasByPool;
+			_ridingTo = data._ridingTo;
+		}
+
 		public override void Initialize() => transform.localScale = new(.4f, 1.7f, .4f);
 
 		/// <summary>
@@ -56,7 +71,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// <summary>
 		/// Specifies if the NPC is just moving to another zone with the Chipotle's car.
 		/// </summary>
-		
+
 		protected Zone _ridingTo;
 
 		/// <summary>
@@ -161,7 +176,7 @@ namespace Game.Entities.Characters.Tuttle
 
 			switch (message.CutsceneName)
 			{
-				case "cs6": _goToPoolWhenPositionSet=true; break;
+				case "cs6": _goToPoolWhenPositionSet = true; break;
 				case "cs14": JumpToBelvedereStreet(); break;
 				case "cs21": JumpToChristinesHall(); break;
 				case "cs23": JumpToSweeneysRoom(); break;

@@ -1,6 +1,6 @@
 ﻿using Game.Models;
 
-
+using ProtoBuf;
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,8 @@ namespace Game.Terrain
 	/// <remarks>
 	/// The region is defined by two points: <see cref="Rectangle.UpperLeftCorner"/> and <see cref="Rectangle.LowerRightCorner"/>.
 	/// </remarks>
-	
+
+	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Rectangle
 	{
 		public bool IntersectsStrict(Rectangle plane)
@@ -293,7 +294,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Checks if the plane is a line.
 		/// </summary>
-		
+
 		public bool IsLine
 			=> Size > 1 && (Width == 1 || Height == 1);
 
@@ -301,7 +302,7 @@ namespace Game.Terrain
 		/// Checks if the plane is a horizohntal rectangle.
 		/// </summary>
 		/// <returns>True if the plane is a horizontal rectangle</returns>
-		
+
 		public bool Horizontal
 			=> Width > Height;
 
@@ -315,7 +316,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Checks if the plane is a square.
 		/// </summary>
-		
+
 		public bool IsSquare
 			=> Height == Width;
 
@@ -418,7 +419,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Returns coordinates of the center of the plane.
 		/// </summary>
-		
+
 		public Vector2 Center
 		{
 			get
@@ -434,13 +435,13 @@ namespace Game.Terrain
 		/// <summary>
 		/// Height of the plane.
 		/// </summary>
-		
+
 		public float Height => (UpperLeftCorner.y - LowerRightCorner.y).Round();
 
 		/// <summary>
 		/// Returns coordinates of the lower left corner of the plane.
 		/// </summary>
-		
+
 		public Vector2 LowerLeftCorner
 			=> new(UpperLeftCorner.x, LowerRightCorner.y);
 
@@ -466,7 +467,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Returns size of the plane.
 		/// </summary>
-		
+
 		public float Size => Height * Width;
 
 		private Vector2 Round(Vector2 coordinates)
@@ -490,7 +491,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Coordinates of the upper right corner of the plane.
 		/// </summary>
-		
+
 		public Vector2 UpperRightCorner => new(LowerRightCorner.x, UpperLeftCorner.y);
 
 		/// <summary>

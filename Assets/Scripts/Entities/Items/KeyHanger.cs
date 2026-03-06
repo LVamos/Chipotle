@@ -1,4 +1,5 @@
 ﻿using Game.Messaging.Commands.Physics;
+using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
 
 
 
@@ -10,6 +11,36 @@ namespace Game.Entities.Items
 
 	public class KeyHanger : Item
 	{
+		public void Restore(ItemSave save)
+		{
+			if (save is not KeyHangerSave data)
+				return;
+
+			Initialize
+	(
+							data.Name,
+							data.Area.Value,
+							data.Type,
+							data.Decorative,
+							data.Pickable,
+							data.Usable,
+							data.Passable,
+							data.CollisionSound,
+							data.ActionSound,
+							data.LoopSound,
+							data.Cutscene,
+			data.UsableOnce,
+			data.AudibleOverWalls,
+			_defaultVolume,
+			data.StopWhenPlayerMoves,
+			data.QuickActionsAllowed,
+			data.PickingSound,
+			data.PlacingSound,
+			data.UsableWith
+							);
+			KeysHanging = data.KeysHanging;
+			_descriptionID = data.DescriptionID;
+		}
 
 		/// <summary>
 		/// Indicates if the keys are on the hanger.

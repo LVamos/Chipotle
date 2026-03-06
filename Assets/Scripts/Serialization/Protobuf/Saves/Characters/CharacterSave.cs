@@ -8,11 +8,12 @@ using System.Collections.Generic;
 namespace Game.Serialization.Protobuf.Snapshots.Characters
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	public class CharacterSnapshot : EntitySnapshot
+	public class CharacterSave : EntitySave
 	{
 		public HashSet<string> Inventory { get; set; }
 		public HashSet<string> VisitedZones { get; set; }
 		public string Zone { get; set; }
 		public Orientation2D Orientation { get; set; }
+		public List<ComponentSave> Components { get; set; }
 	}
 }

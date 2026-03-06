@@ -5,6 +5,8 @@ using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
+using Game.Serialization.Protobuf.Snapshots.Characters;
+using Game.Serialization.Protobuf.Snapshots.Entities;
 using Game.Terrain;
 
 
@@ -19,7 +21,7 @@ using UnityEngine;
 
 using Input = Game.Entities.Characters.Components.Input;
 using Message = Game.Messaging.Message;
-using Physics = Game.Entities.Characters.Components.Physics;
+using Physics = Game.Entities.Characters.Components.PhysicsComponent.Physics;
 
 namespace Game.Entities.Characters
 {
@@ -28,6 +30,20 @@ namespace Game.Entities.Characters
 	/// </summary>
 	public class Character : Entity
 	{
+		public void Restore(CharacterSave save)
+		{
+			base.Restore((EntitySave)save);
+			_inventory = save.Inventory;
+			_visitedZones = save.VisitedZones;
+			_zone = save.Zone;
+			Orientation = save.Orientation;
+
+			foreach (CharacterComponent component in _components)
+			{
+				foreach (ComponentSave componentSave in save.Components)
+					component.Restore(componentSave);
+			}
+		}
 
 		private void OnPlaceItemResult(PlaceItemResult message)
 		{

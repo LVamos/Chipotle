@@ -10,12 +10,17 @@ using UnityEngine;
 namespace Game.Serialization.Protobuf.Snapshots.Entities.Items.Items
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(105, typeof(ChipotlesCarSnapshot))]
-	[ProtoInclude(106, typeof(KeyHangerSnapshot))]
-	public class ItemSnapshot : EntitySnapshot
+	[ProtoInclude(105, typeof(ChipotlesCarSave))]
+	[ProtoInclude(106, typeof(KeyHangerSave))]
+	public class ItemSave : EntitySave
 	{
-		public bool AudibleOverWalls { get; set; }
+		public string CollisionSound { get; set; }
+		public string ActionSound { get; set; }
+		public string LoopSound { get; set; }
 		public string Cutscene { get; set; }
+		public string PickingSound { get; set; }
+		public string PlacingSound { get; set; }
+		public bool AudibleOverWalls { get; set; }
 		public ObstacleType LastOccludingObstacle { get; set; }
 		public Vector3? LoopPositionBackup { get; set; }
 		public bool Pickable { get; set; }

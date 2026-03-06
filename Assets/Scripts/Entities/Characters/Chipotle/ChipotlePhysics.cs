@@ -21,6 +21,8 @@ using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Messaging.Events.Sound;
 using Game.Models;
+using Game.Serialization.Protobuf.Snapshots.Characters;
+using Game.Serialization.Protobuf.Snapshots.Characters.Chipotle;
 using Game.Terrain;
 using Game.UI;
 
@@ -35,7 +37,7 @@ using UnityEditor;
 using UnityEngine;
 
 using Message = Game.Messaging.Message;
-using Physics = Game.Entities.Characters.Components.Physics;
+using Physics = Game.Entities.Characters.Components.PhysicsComponent.Physics;
 using Random = System.Random;
 
 namespace Game.Entities.Characters.Chipotle
@@ -45,6 +47,23 @@ namespace Game.Entities.Characters.Chipotle
 	/// </summary>
 	public class ChipotlePhysics : Physics
 	{
+		public void Restore(ComponentSave save)
+		{
+			if (save is not ChipotlePhysicsSave data)
+				return;
+
+			base.Restore(data);
+			_currentRegion = data.CurrentRegion;
+			_inVisitedRegion = data.InVisitedRegion;
+			_phoneCountdown = data.PhoneCountdown;
+			_phoneDeltaTime = data.PhoneDeltaTime;
+			_phoneInterval = data.PhoneInterval;
+			_sittingAtPubTable = data.SittingAtPubTable;
+			_sittingOnChair = data.SittingOnChair;
+			_steppedIntoPuddle = data.SteppedIntoPuddle;
+			_walshesBenchUsed = data.WalshesBenchUsed;
+		}
+
 		public override Vector2 Move(Vector2 direction, bool silently = false)
 		{
 			Vector2 target = base.Move(direction, silently);

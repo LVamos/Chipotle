@@ -1,7 +1,7 @@
 ﻿namespace Game.Serialization.Protobuf.Snapshots.Characters.Chipotle
 {
 	[ProtoBuf.ProtoContract(SkipConstructor = true, ImplicitFields = ProtoBuf.ImplicitFields.AllFields)]
-	public class ChipotlePhysicsSnapshot : PhysicsSnapshot
+	public class ChipotlePhysicsSave : PhysicsSave
 	{
 		public int CurrentRegion { get; set; }
 		public bool InVisitedRegion { get; set; }

@@ -5,8 +5,8 @@ using ProtoBuf;
 namespace Game.Serialization.Protobuf.Snapshots.Spatial.Passages
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(106, typeof(DoorSnapshot))]
-	public class PassageSnapshot : MapElementSnapshot
+	[ProtoInclude(106, typeof(DoorSave))]
+	public class PassageSave : MapElementSave
 	{
 		public Zone PlayersZone { get; set; }
 		public string[] Zones { get; set; }

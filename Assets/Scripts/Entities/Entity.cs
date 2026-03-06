@@ -1,4 +1,6 @@
-﻿using Game.Terrain;
+﻿using Game.Serialization.Protobuf.Snapshots;
+using Game.Serialization.Protobuf.Snapshots.Entities;
+using Game.Terrain;
 
 
 using System;
@@ -10,6 +12,13 @@ namespace Game.Entities
 	/// </summary>
 	public class Entity : MapElement
 	{
+		public void Restore(EntitySave data)
+		{
+			base.Restore((MapElementSave)data);
+			_descriptionID = data.DescriptionID;
+			Type = data.Type;
+		}
+
 		/// <summary>
 		/// Type of the object; it allows grouping objects with tha same behavior.
 		/// </summary>

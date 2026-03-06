@@ -10,10 +10,10 @@ using System.Collections.Generic;
 namespace Game.Serialization.Protobuf.Snapshots
 {
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
-	[ProtoInclude(100, typeof(EntitySnapshot))]
-	[ProtoInclude(101, typeof(ZoneSnapshot))]
-	[ProtoInclude(102, typeof(PassageSnapshot))]
-	public class MapElementSnapshot
+	[ProtoInclude(100, typeof(EntitySave))]
+	[ProtoInclude(101, typeof(ZoneSave))]
+	[ProtoInclude(102, typeof(PassageSave))]
+	public class MapElementSave
 	{
 		public Rectangle? Area { get; set; }
 		public Dictionary<string, string> Sounds { get; set; }

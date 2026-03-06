@@ -1,6 +1,7 @@
 ﻿using DavyKager;
 
 using Game.Audio;
+using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Terrain;
 
 
@@ -19,6 +20,16 @@ namespace Game.Entities.Characters.Components
 
 	public class Sound : CharacterComponent
 	{
+		public void Restore(ComponentSave save)
+		{
+			if (save is not SoundSave data)
+				return;
+
+			base.Restore(data);
+			_announceWalls = data.AnnounceWalls;
+			_walkVolume = data.WalkVolume;
+		}
+
 		/// <summary>
 		/// Default voluem of sound output.
 		/// </summary>
