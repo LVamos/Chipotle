@@ -33,8 +33,8 @@ namespace Game.Entities.Characters
 		public void Restore(CharacterSave save)
 		{
 			base.Restore((EntitySave)save);
-			_inventory = save.Inventory;
-			_visitedZones = save.VisitedZones;
+			_inventory = new(save.Inventory);
+			_visitedZones = new(save.VisitedZones);
 			_zone = save.Zone;
 			Orientation = save.Orientation;
 
@@ -43,6 +43,21 @@ namespace Game.Entities.Characters
 				foreach (ComponentSave componentSave in save.Components)
 					component.Restore(componentSave);
 			}
+		}
+
+		public CharacterSave Export()
+		{
+			var save = (CharacterSave)base.Export();
+			save.Inventory = new(_inventory);
+			save.VisitedZones = new(_visitedZones);
+			save.Zone = _zone;
+			save.Orientation = Orientation;
+			save.Components = _components
+				.Cast<CharacterComponent>()
+				.Select(c => c.Export())
+				.ToList();
+
+			return save;
 		}
 
 		private void OnPlaceItemResult(PlaceItemResult message)

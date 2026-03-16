@@ -1,4 +1,5 @@
 ﻿using Game.Entities.Characters.Components;
+using Game.Entities.Items;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Characters;
@@ -33,11 +34,22 @@ namespace Game.Entities.Characters.Tuttle
 				return;
 
 			base.Restore(data);
-			_carMovement = data.CarMovement;
+			_carMovement = new(data.CarMovement.Sender as ChipotlesCar, data.CarMovement.Target);
 			_collisionInterval = data.CollisionInterval;
 			_goToPoolWhenPositionSet = data.GoToPoolWhenPositionSet;
 			_playerWasByPool = data.PlayerWasByPool;
 			_ridingTo = data._ridingTo;
+		}
+
+		public TuttleAISave Export()
+		{
+			var save = (TuttleAISave)base.Export();
+			save.CarMovement = new((ChipotlesCar)_carMovement.Sender, _carMovement.Target);
+			save.CollisionInterval = _collisionInterval;
+			save.GoToPoolWhenPositionSet = _goToPoolWhenPositionSet;
+			save.PlayerWasByPool = _playerWasByPool;
+			save._ridingTo = _ridingTo;
+			return save;
 		}
 
 		public override void Initialize() => transform.localScale = new(.4f, 1.7f, .4f);

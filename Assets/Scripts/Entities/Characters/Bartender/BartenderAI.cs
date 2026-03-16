@@ -32,6 +32,15 @@ namespace Game.Entities.Characters.Bartender
 			_wasChipotleHere = data.WasChipotleHere;
 		}
 
+		public BartenderAISave Export()
+		{
+			var save = (BartenderAISave)base.Export();
+			save.SayGoodbyeToChipotle = _sayGoodbyeToChipotle;
+			save.VelcomeChipotle = _velcomeChipotle;
+			save.WasChipotleHere = _wasChipotleHere;
+			return save;
+		}
+
 		private readonly Zone BonitaStreet = World.GetZone("ulice h1");
 
 		/// <summary>

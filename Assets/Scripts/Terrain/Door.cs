@@ -37,6 +37,16 @@ namespace Game.Terrain
 			Type = data.Type;
 		}
 
+		public DoorSave Export()
+		{
+			var save = (DoorSave)base.Export();
+			save.ClosingSound = _closingSound;
+			save.LockedSound = _lockedSound;
+			save.OpeningSound = _openingSound;
+			save.Type = Type;
+			return save;
+		}
+
 		/// <summary>
 		/// Indicates if the door has been opened previously.
 		/// </summary>

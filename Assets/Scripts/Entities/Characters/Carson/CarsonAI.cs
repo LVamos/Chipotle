@@ -31,6 +31,14 @@ namespace Game.Entities.Characters.Carson
 			_yelledAtChipotle = data.YelledAtChipotle;
 		}
 
+		public CarsonAISave Export()
+		{
+			var save = (CarsonAISave)base.Export();
+			save.SaidGoodbyeToChipotle = _saidGoodbyeToChipotle;
+			save.YelledAtChipotle = _yelledAtChipotle;
+			return save;
+		}
+
 		/// <summary>
 		/// Indicates if the Carson NPC said goodbye to the Detective Chipotle NPC when Chipotle
 		/// left the zahrada c1 zone.

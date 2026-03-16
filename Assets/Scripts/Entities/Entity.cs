@@ -19,6 +19,14 @@ namespace Game.Entities
 			Type = data.Type;
 		}
 
+		public EntitySave Export()
+		{
+			var save = (EntitySave)base.Export();
+			save.DescriptionID = _descriptionID;
+			save.Type = Type;
+			return save;
+		}
+
 		/// <summary>
 		/// Type of the object; it allows grouping objects with tha same behavior.
 		/// </summary>

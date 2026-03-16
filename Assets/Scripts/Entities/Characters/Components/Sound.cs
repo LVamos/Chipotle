@@ -30,6 +30,14 @@ namespace Game.Entities.Characters.Components
 			_walkVolume = data.WalkVolume;
 		}
 
+		public SoundSave Export()
+		{
+			var save = (SoundSave)base.Export();
+			save.AnnounceWalls = _announceWalls;
+			save.WalkVolume = _walkVolume;
+			return save;
+		}
+
 		/// <summary>
 		/// Default voluem of sound output.
 		/// </summary>

@@ -41,7 +41,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			_state = data.State;
 			_area = data.Area;
 			_goal = data.Goal;
-			_inventory = data.Inventory;
+			_inventory = new(data.Inventory);
 			_maxObjectDistance = data.MaxObjectDistance;
 			_minObjectDistance = data.MinObjectDistance;
 			_navigableObjectsRadius = data.NavigableObjectsRadius;
@@ -57,6 +57,31 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			Height = data.Height;
 			StartPosition = data.StartPosition;
 			Width = data.Width;
+		}
+
+		public PhysicsSave Export()
+		{
+			var save = (PhysicsSave)base.Export();
+			save.State = _state;
+			save.Area = _area;
+			save.Goal = _goal;
+			save.Inventory = new(_inventory);
+			save.MaxObjectDistance = _maxObjectDistance;
+			save.MinObjectDistance = _minObjectDistance;
+			save.NavigableObjectsRadius = _navigableObjectsRadius;
+			save.NearbyWalls = _nearbyWalls;
+			save.ObjectManipulationHelpRadius = _objectManipulationHelpRadius;
+			save.Orientation = _orientation;
+			save.Path = _path;
+			save.RestartApproaching = _restartApproaching;
+			save.Speed = _speed;
+			save.StepLength = _stepLength;
+			save.TargetPlayerDistance = _targetPlayerDistance;
+			save.WallDistanceThreshold = _wallDistanceThreshold;
+			save.Height = Height;
+			save.StartPosition = StartPosition;
+			save.Width = Width;
+			return save;
 		}
 
 		public Vector2 Center { get => _area.Value.Center; }

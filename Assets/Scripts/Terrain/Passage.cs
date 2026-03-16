@@ -24,9 +24,19 @@ namespace Game.Terrain
 		{
 			base.Restore(data);
 			_playersZone = data.PlayersZone;
-			_zones = data.Zones;
+			_zones = data.Zones.ToArray();
 			State = data.State;
 			TypeDescription = data.TypeDescription;
+		}
+
+		public PassageSave Export()
+		{
+			var save = (PassageSave)base.Export();
+			save.PlayersZone = _playersZone;
+			save.Zones = _zones;
+			save.State = State;
+			save.TypeDescription = TypeDescription;
+			return save;
 		}
 
 		protected override bool ShouldNavigationContinue()

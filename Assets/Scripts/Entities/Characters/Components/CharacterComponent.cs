@@ -20,6 +20,15 @@ namespace Game.Entities.Characters.Components
 				?? throw new InvalidOperationException("Nonexistant or missing character");
 		}
 
+		public ComponentSave Export()
+		{
+			ComponentSave save = new()
+			{
+				Owner = _owner.Name.Indexed
+			};
+			return save;
+		}
+
 		public virtual void Initialize()
 		{
 		}

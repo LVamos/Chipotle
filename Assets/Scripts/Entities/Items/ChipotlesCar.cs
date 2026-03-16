@@ -58,6 +58,14 @@ data.UsableWith
 			_descriptionID = data.DescriptionID;
 		}
 
+		public ChipotlesCarSave Export()
+		{
+			var save = (ChipotlesCarSave)base.Export();
+			save.VisitedZones = new(_visitedZones);
+			save.AllowedDestinations = new(_allowedDestinations);
+			return save;
+		}
+
 		/// <summary>
 		/// Indicates if the object has moved at least once.
 		/// </summary>

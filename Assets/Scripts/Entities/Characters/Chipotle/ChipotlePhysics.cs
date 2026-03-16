@@ -64,6 +64,21 @@ namespace Game.Entities.Characters.Chipotle
 			_walshesBenchUsed = data.WalshesBenchUsed;
 		}
 
+		public ChipotlePhysicsSave Export()
+		{
+			var save = (ChipotlePhysicsSave)base.Export();
+			save.CurrentRegion = _currentRegion;
+			save.InVisitedRegion = _inVisitedRegion;
+			save.PhoneCountdown = _phoneCountdown;
+			save.PhoneDeltaTime = _phoneDeltaTime;
+			save.PhoneInterval = _phoneInterval;
+			save.SittingAtPubTable = _sittingAtPubTable;
+			save.SittingOnChair = _sittingOnChair;
+			save.SteppedIntoPuddle = _steppedIntoPuddle;
+			save.WalshesBenchUsed = _walshesBenchUsed;
+			return save;
+		}
+
 		public override Vector2 Move(Vector2 direction, bool silently = false)
 		{
 			Vector2 target = base.Move(direction, silently);

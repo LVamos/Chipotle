@@ -30,16 +30,33 @@ namespace Game.Terrain
 		{
 			base.Restore(data);
 			_ceiling = data.Ceiling;
-			_exits = data.Exits;
-			_characters = data.Characters;
-			_items = data.Items;
-			_neighbours = data.Neighbours;
-			_nonwalkables = data.Nonwalkables;
+			_exits = new(data.Exits);
+			_characters = new(data.Characters);
+			_items = new(data.Items);
+			_neighbours = new(data.Neighbours);
+			_nonwalkables = new(data.Nonwalkables);
 			DefaultTerrain = data.DefaultTerrain;
 			Description = data.Description;
 			To = data.To;
 			Type = data.Type;
 		}
+
+		public ZoneSave Export()
+		{
+			var save = (ZoneSave)base.Export();
+			save.Ceiling = _ceiling;
+			save.Exits = new(_exits);
+			save.Characters = new(_characters);
+			save.Items = new(_items);
+			save.Neighbours = new(_neighbours);
+			save.Nonwalkables = new(_nonwalkables);
+			save.DefaultTerrain = DefaultTerrain;
+			save.Description = Description;
+			save.To = To;
+			save.Type = Type;
+			return save;
+		}
+
 		public bool SameAmbients(string soundName)
 			 => _ambientController != null && _ambientController.SameAmbients(soundName);
 

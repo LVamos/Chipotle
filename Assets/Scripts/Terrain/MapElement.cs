@@ -30,10 +30,22 @@ namespace Game.Terrain
 		public void Restore(MapElementSave data)
 		{
 			Initialize(data.Name, data.Area.Value);
-			_sounds = data.Sounds;
+			_sounds = new(data.Sounds);
 			Usable = data.Usable;
-			UsableWith = data.UsableWith;
+			UsableWith = new(data.UsableWith);
+		}
 
+		public MapElementSave Export()
+		{
+			MapElementSave save = new()
+			{
+				Name = this.Name,
+				Area = this.Area,
+				Sounds = new(_sounds),
+				Usable = this.Usable,
+				UsableWith = new(UsableWith)
+			};
+			return save;
 		}
 
 		public override void TakeMessage(Message message)

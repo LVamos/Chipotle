@@ -42,6 +42,13 @@ namespace Game.Entities.Items
 			_descriptionID = data.DescriptionID;
 		}
 
+		public KeyHangerSave Export()
+		{
+			var save = (KeyHangerSave)base.Export();
+			save.KeysHanging = KeysHanging;
+			return save;
+		}
+
 		/// <summary>
 		/// Indicates if the keys are on the hanger.
 		/// </summary>

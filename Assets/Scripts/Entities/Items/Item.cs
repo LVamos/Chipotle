@@ -472,7 +472,7 @@ namespace Game.Entities.Items
 		/// <summary>
 		/// Determines if the object shall be used just once
 		/// </summary>
-		private bool _usableOnce;
+		protected bool _usableOnce;
 
 		public void Restore(ItemSave save)
 		{
@@ -498,6 +498,25 @@ save.PickingSound,
 save.PlacingSound,
 save.UsableWith
 				);
+		}
+
+		public ItemSave Export()
+		{
+			var save = (ItemSave)base.Export();
+			save.Decorative = Decorative;
+			save.Pickable = _pickable;
+			save.Passable = Passable;
+			save.CollisionSound = _sounds["collision"];
+			save.ActionSound = _sounds["action"];
+			save.LoopSound = _sounds["loop"];
+			save.Cutscene = _cutscene;
+			save.UsableOnce = _usableOnce;
+			save.AudibleOverWalls = _audibleOverWalls;
+			save.StopWhenPlayerMoves = _stopWhenPlayerMoves;
+			save.QuickActionsAllowed = _quickActionsAllowed;
+			save.PickingSound = _sounds["picking"];
+			save.PlacingSound = _sounds["placing"];
+			return save;
 		}
 
 		/// <summary>

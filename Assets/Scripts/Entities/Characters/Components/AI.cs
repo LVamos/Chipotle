@@ -36,6 +36,17 @@ namespace Game.Entities.Characters.Components
 			_state = data.State;
 		}
 
+		public AISave Export()
+		{
+			var save = (AISave)base.Export();
+			save.Area = _area;
+			save.Hidden = _hidden;
+			save.MaxObjectDistance = _maxObjectDistance;
+			save.MinObjectDistance = _minObjectDistance;
+			save.State = _state;
+			return save;
+		}
+
 		protected virtual void Reveal(Vector2 target)
 		{
 			_hidden = false;
