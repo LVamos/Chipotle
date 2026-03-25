@@ -23,9 +23,13 @@ namespace Game
 		}
 
 		public static void StartGame()
-		{
-			state = GameState.Playing;
-		}
+			=> state = GameState.Playing;
+
+		public static void PauseGame()
+	=> state = GameState.Paused;
+
+		public static void ResumeGame()
+=> state = GameState.Playing;
 
 		private static void AnnounceStatechange(GameState previous, GameState current)
 		{

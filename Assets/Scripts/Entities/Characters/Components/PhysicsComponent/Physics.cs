@@ -88,7 +88,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 		private void FixedUpdate()
 		{
-			if (World.GameInProgress)
+			if (GameManager.state == GameState.Playing)
 				PerformWalk();
 		}
 

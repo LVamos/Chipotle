@@ -1,21 +1,29 @@
-﻿using Game;
-// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
-using Game.Entities.Items;
+﻿// No changes needed as the file already includes `using Assets.Scripts.Entities.Items`.
 using Game.Models;
 using Game.Serialization;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 using UnityEngine;
 
 using Rectangle = Game.Terrain.Rectangle;
 
-namespace Assets.Scripts.Entities.Items
+namespace Game.Entities.Items
 {
 	public class ItemFactory
 	{
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
+
+		private static GameObject GetHostObject(Name name, bool create)
+		{
+			return !create
+				? SceneObjects.GetItem(name.Indexed)
+				: SceneObjects.GetOrCreateItem(name.Indexed);
+		}
+
 		private static Type GetItemCLRType(string itemtype)
 		{
 			Type result = null;
@@ -44,7 +52,7 @@ namespace Assets.Scripts.Entities.Items
 		{
 			GameObject obj = new(name.Indexed);
 			obj.AddComponent<Item>();
-			Item item = CreateItem(obj, name, area, type, decorative, pickable, usable, passable);
+			Item item = Create(obj, name, area, type, decorative, pickable, usable, passable);
 			World.Add(item);
 			item.Activate();
 			return item;
@@ -61,7 +69,7 @@ namespace Assets.Scripts.Entities.Items
 			GameObject obj = new(name.Indexed);
 			obj.AddComponent(typeof(T));
 			string type = GetItemType(typeof(T));
-			Item item = CreateItem(obj, name, area, type, decorative, pickable, usable, passable);
+			Item item = Create(obj, name, area, type, decorative, pickable, usable, passable);
 			World.Add(item);
 			item.Activate();
 			return item;
@@ -91,7 +99,7 @@ namespace Assets.Scripts.Entities.Items
 		/// <summary>
 		/// Loads items from a YAML file.
 		/// </summary>
-		public static void LoadItems()
+		public static void Init()
 		{
 			YamlItemsModel items = null;
 			YamlHelper.LoadFromResources(MainScript.ItemsPath, out items);
@@ -123,6 +131,32 @@ namespace Assets.Scripts.Entities.Items
 			}
 		}
 
+		public static Item Create(XElement itemNode, XElement zoneNode, bool createGameObject = false)
+		{
+			Rectangle zoneArea = new Rectangle(GetAttribute(zoneNode, "coordinates"));
+			Name name = new(
+				Extract("indexedname"),
+				Extract("friendlyname"));
+			Rectangle area = new Rectangle(Extract("coordinates")).ToAbsolute(zoneArea);
+			string type = Extract("type");
+			bool decorative = Extract("decorative").ToBool();
+			bool pickable = Extract("pickable").ToBool();
+			bool passable = Extract("passable") != null;
+			bool usable = Extract("usable").ToBool();
+
+			return Create(
+				createGameObject,
+				name,
+				area,
+				type,
+				decorative,
+				pickable,
+				usable,
+				passable);
+
+			string Extract(string attributeName, bool sanitize = true)
+					=> GetAttribute(itemNode, attributeName, sanitize);
+		}
 
 		/// <summary>
 		/// Creates a new item.
@@ -133,13 +167,25 @@ namespace Assets.Scripts.Entities.Items
 		/// <param name="decorative">Specifies if the item is decorative.</param>
 		/// <param name="pickable">Specifies if the item is pickable.</param>
 		/// <param name="usable">Specifies if the item is usable.</param>
-		public static Item CreateItem(GameObject obj, Name name, Rectangle area, string type, bool decorative = false, bool pickable = false, bool usable = false, bool passable = false)
+		public static Item Create(
+			bool createGameObject = false,
+			Name name = null,
+			Rectangle area = default,
+			string type = null,
+			bool decorative = false,
+			bool pickable = false,
+			bool usable = false,
+			bool passable = false)
 		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-			if (string.IsNullOrWhiteSpace(type))
-				throw new ArgumentNullException(nameof(type));
+			if (createGameObject)
+			{
+				if (name == null)
+					throw new ArgumentNullException(nameof(name));
+				if (string.IsNullOrWhiteSpace(type))
+					throw new ArgumentNullException(nameof(type));
+			}
 
+			GameObject obj = GetHostObject(name.Indexed, createGameObject);
 			Item item = null;
 
 			Type clrType = GetItemCLRType(type);
@@ -155,25 +201,25 @@ namespace Assets.Scripts.Entities.Items
 			{
 				item = obj.GetComponent<Item>() as Item;
 				item.Initialize(
-					name,
-					area,
-					type,
-					decorative,
-					pickable,
-					usable,
-					passable,
-					parameters.CollisionSound,
-					parameters.ActionSound,
-					parameters.LoopSound,
-					parameters.Cutscene,
-					parameters.UsableOnce,
-					parameters.AudibleOverWalls,
-					parameters.Volume,
-					parameters.StopWhenPlayerMoves,
-					parameters.QuickActionsAllowed,
-					parameters.PickingSound,
-					parameters.PlacingSound
-				);
+			name,
+			area,
+			type,
+			decorative,
+			pickable,
+			usable,
+			passable,
+			parameters.CollisionSound,
+			parameters.ActionSound,
+			parameters.LoopSound,
+			parameters.Cutscene,
+			parameters.UsableOnce,
+			parameters.AudibleOverWalls,
+			parameters.Volume,
+			parameters.StopWhenPlayerMoves,
+			parameters.QuickActionsAllowed,
+			parameters.PickingSound,
+			parameters.PlacingSound
+		);
 				return item;
 			}
 

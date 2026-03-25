@@ -139,7 +139,7 @@ namespace Game.Terrain
 				var zoneCollections = new List<IEnumerable<MapElement>>()
 		{
 			z.Characters,
-			z.MovableItems,
+			z.GetMovableItems,
 			z.GetClosedDoors()
 		};
 

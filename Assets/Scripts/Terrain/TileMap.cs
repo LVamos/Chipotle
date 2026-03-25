@@ -15,7 +15,26 @@ namespace Game.Terrain
 	[Serializable]
 	public class TileMap
 	{
-		public Vector2 SnapToGrid(Vector2 point, float? tileSize = null)
+		public static TileMap Create(List<XElement> zones)
+		{
+			// count tiles
+			int tileCount = 0;
+			foreach (XElement zone in zones)
+			{
+				Rectangle area = new(zone.Attribute("coordinates").Value);
+				int size = (int)(area.Height * 10 * area.Width * 10);
+				tileCount += size;
+			}
+
+			TileMap map = new(tileCount);
+			foreach (XElement zone in zones)
+				map.DrawZone(zone);
+
+			return map;
+		}
+
+
+		public static Vector2 SnapToGrid(Vector2 point, float? tileSize = null)
 		{
 			float finalTileSize = tileSize == null ? TileSize : tileSize.Value;
 			float x = finalTileSize * Mathf.Round(point.x / finalTileSize);
@@ -30,20 +49,11 @@ namespace Game.Terrain
 		public static float TileSize { get => Settings.TileSize; }
 
 		/// <summary>
-		/// Name of an opened map file
-		/// </summary>
-		public readonly string FileName;
-
-		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="fileName">Name of the map file to be loaded</param>
-		public TileMap(string fileName, int tileCount)
+		public TileMap(int tileCount)
 		{
-			if (string.IsNullOrEmpty(fileName))
-				throw new ArgumentNullException("missing file name");
-
-			FileName = fileName;
 			_terrain = new Dictionary<Vector2, Tile>(tileCount);
 		}
 

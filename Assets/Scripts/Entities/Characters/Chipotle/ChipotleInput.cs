@@ -86,7 +86,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			Action action = _menuCommands[message.Command];
 			action();
-			World.GameInProgress = true;
+			GameManager.ResumeGame();
 		}
 
 		/// <summary>

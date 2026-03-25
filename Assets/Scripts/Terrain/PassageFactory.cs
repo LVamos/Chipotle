@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 using UnityEngine;
 
@@ -10,6 +11,45 @@ namespace Game.Terrain
 {
 	public static class PassageFactory
 	{
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
+
+		public static Passage Create(XElement passageNode, bool createGameObject = false)
+		{
+			Name name = new(
+				Extract("indexedname"),
+				Extract("friendlyname", false)
+				);
+			bool isDoor = Extract("door").ToBool();
+			bool closed = Extract("closed").ToBool();
+			bool openable = Extract("openable").ToBool();
+
+			PassageState state = PassageState.Open;
+			if (!openable)
+				state = PassageState.Locked;
+			else if (openable && closed)
+				state = PassageState.Closed;
+
+			Rectangle area = new(Extract("coordinates"));
+			List<string> zones = new()
+			{ Extract("from"),
+					Extract("to")
+			};
+			DoorType doorType = Extract("type") == "door" ? DoorType.Door : DoorType.Gate;
+
+			return Create(
+				createGameObject,
+				name,
+				area,
+				zones,
+				isDoor,
+				state,
+				doorType
+				);
+
+			string Extract(string attributeName, bool sanitize = true)
+						=> GetAttribute(passageNode, attributeName, sanitize);
+		}
+
 		public static Passage AddComponent(GameObject obj, string name, bool isDoor)
 		{
 			if (_types.TryGetValue(name, out Type itemType))
@@ -26,7 +66,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// Loads items from a YAML file.
 		/// </summary>
-		public static void LoadPassages()
+		public static void Init()
 		{
 			Dictionary<string, string> types = null;
 			YamlHelper.LoadFromResources(MainScript.PassagesPath, out types);
@@ -34,6 +74,13 @@ namespace Game.Terrain
 				throw new ArgumentException("Invalid record.");
 
 			_types = types.ToDictionary(p => p.Key, p => Type.GetType($"Game.Terrain.{p.Value}"));
+		}
+
+		private static GameObject GetHostObject(Name name, bool create)
+		{
+			return !create
+				? SceneObjects.GetPassage(name.Indexed)
+				: SceneObjects.GetOrCreatePassage(name.Indexed);
 		}
 
 		/// <summary>
@@ -46,13 +93,23 @@ namespace Game.Terrain
 		/// <param name="state">State of a door</param>
 		/// <param name="doorType">Type of a door</param>
 		/// <returns>A new instance of the passage</returns>
-		public static Passage CreatePassage(GameObject obj, Name name, Rectangle area, IEnumerable<string> zones, bool isDoor, PassageState state, DoorType doorType)
+		public static Passage Create(
+			bool createGameObject = false,
+			Name name = null,
+			Rectangle area = default,
+			List<string> zones = null,
+			bool isDoor = false,
+			PassageState state = default,
+			DoorType doorType = default)
 		{
-			if (name == null || string.IsNullOrWhiteSpace(name.Indexed))
-				throw new ArgumentNullException(nameof(name));
-			if (zones.IsNullOrEmpty() || zones.Count() != 2)
-				throw new ArgumentException("Invalid zones.");
-
+			if (!createGameObject)
+			{
+				if (name == null || string.IsNullOrWhiteSpace(name.Indexed))
+					throw new ArgumentNullException(nameof(name));
+				if (zones.IsNullOrEmpty() || zones.Count() != 2)
+					throw new ArgumentException("Invalid zones.");
+			}
+			GameObject obj = GetHostObject(name, createGameObject);
 			Passage passage = null;
 			if (_types.TryGetValue(name.Indexed, out Type passageType))
 			{

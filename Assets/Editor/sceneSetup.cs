@@ -1,8 +1,8 @@
 using Assets.Editor;
 using Assets.Scripts;
-using Assets.Scripts.Entities.Items;
 
 using Game;
+using Game.Entities.Items;
 using Game.Serialization;
 using Game.Terrain;
 
@@ -136,7 +136,7 @@ public static class sceneSetup
 
 	private static void LoadPassages(XElement root)
 	{
-		PassageFactory.LoadPassages();
+		PassageFactory.Init();
 		XElement passagesNode = root.Element("passages");
 		System.Collections.Generic.List<XElement> passages = passagesNode.Elements("passage").ToList();
 		foreach (XElement passage in passages)
@@ -163,7 +163,7 @@ public static class sceneSetup
 
 	private static void LoadItems(XElement zoneNode)
 	{
-		ItemFactory.LoadItems();
+		ItemFactory.Init();
 
 		List<XElement> items = zoneNode.Elements("object").ToList();
 		foreach (XElement item in items)

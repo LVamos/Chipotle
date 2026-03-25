@@ -1,4 +1,6 @@
-﻿using DavyKager;
+﻿using Assets.Scripts;
+
+using DavyKager;
 
 using Game.Audio;
 using Game.Controls.Keyboard;
@@ -157,10 +159,12 @@ namespace Game.UI
 		{
 			Tolk.Speak("To musim dodělat... píči už");
 			//todo dodělat
+
 			return;
+			WindowHandler.Switch(GameWindow.CreateInstance());
 
 			StopLoop();
-			World.LoadGame();
+			GamePersistence.LoadGame();
 		}
 
 		/// <summary>

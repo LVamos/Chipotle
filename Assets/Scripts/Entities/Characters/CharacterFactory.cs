@@ -6,6 +6,9 @@ using Game.Entities.Characters.Mariotti;
 using Game.Entities.Characters.Sweeney;
 using Game.Entities.Characters.Tuttle;
 
+using System;
+using System.Collections.Generic;
+
 using UnityEngine;
 
 using Physics = Game.Entities.Characters.Components.PhysicsComponent.Physics;
@@ -15,6 +18,25 @@ namespace Game.Entities.Characters
 {
 	public static class CharacterFactory
 	{
+		private static readonly Dictionary<string, Func<Character>> _map = new(StringComparer.OrdinalIgnoreCase)
+	{
+		{ "Carson", CreateCarson },
+		{ "Chipotle", CreateChipotle },
+		{ "Christine", CreateChristine },
+		{ "Mariotti", CreateMariotti },
+		{ "Sweeney", CreateSweeney },
+		{ "Tuttle", CreateTuttle },
+		{ "Bartender", CreateBartender }
+	};
+
+		public static Character Create(string type)
+		{
+			if (!_map.TryGetValue(type, out Func<Character> factory))
+				throw new Exception($"Unknown character type: {type}");
+
+			return factory();
+		}
+
 		/// <summary>
 		/// Creates new instance of the Carson NPC.
 		/// </summary>

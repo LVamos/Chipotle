@@ -2,7 +2,9 @@ using DavyKager;
 
 using Game.Audio;
 using Game.Controls;
+using Game.Entities.Items;
 using Game.Serialization;
+using Game.Terrain;
 using Game.UI;
 
 using Microsoft.VisualBasic;
@@ -97,9 +99,9 @@ namespace Game
 
 		public static void SendFeedback()
 		{
-			World.GameInProgress = false;
+			GameManager.PauseGame();
 			string message = Interaction.InputBox("", "Zadej zprávu pro autora", "");
-			World.GameInProgress = true;
+			GameManager.ResumeGame();
 
 			if (string.IsNullOrEmpty(message))
 			{
@@ -418,6 +420,7 @@ Application.Quit();
 				Logger.Initialize(MainScript.LogPath);
 				YamlHelper.Initialize();
 				WindowHandler.Initialize();
+				InitRuntime();
 				Tolk.Load();
 				Tolk.TrySAPI(false);
 				DisableJAWSKeyHook();
@@ -435,6 +438,14 @@ Application.Quit();
 			AddStartup();
 		}
 
+		private static void InitRuntime()
+		{
+			SceneObjects.Init();
+			ItemFactory.Init();
+			PassageFactory.Init();
+			ZoneFactory.Init();
+		}
+
 		private static void AddStartup()
 		{
 			GameObject obj = new(nameof(Startup));
@@ -442,7 +453,5 @@ Application.Quit();
 		}
 
 		public static Scene Scene { get; set; }
-
-		public static GameObject ItemFactory { get; set; }
 	}
 }

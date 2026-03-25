@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Entities.Items;
+﻿using Assets.Scripts;
 using Assets.Scripts.Messaging.Commands.Characters;
 using Assets.Scripts.Messaging.Events.Characters;
 
@@ -645,7 +645,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// Handles the CreatePredefinedSave message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnCreatePredefinedSave(CreatePredefinedSave message) => World.CreatePredefinedSave();
+		private void OnCreatePredefinedSave(CreatePredefinedSave message)
+			=> GamePersistence.CreateNamedSave();
 
 		/// <summary>
 		/// Handles the LoadPredefinedSave message.
@@ -654,7 +655,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void OnLoadPredefinedSave(LoadPredefinedSave message)
 		{
 			StopNavigation();
-			World.LoadPredefinedSave();
+			GamePersistence.LoadNamedSave();
 		}
 
 		/// <summary>
@@ -790,7 +791,7 @@ namespace Game.Entities.Characters.Chipotle
 			_currentRegion = -1;
 			_inVisitedRegion = true;
 
-			World.SaveGame();
+			GamePersistence.SaveGame();
 
 			_currentRegion = temp;
 			_inVisitedRegion = temp2;

@@ -102,7 +102,7 @@ namespace Game.Terrain
 
 			// I "snap" each point to the nearest half and put it in the list of non-passable points
 			foreach (Vector2 point in points)
-				_nonwalkables.Add(World.Map.SnapToGrid(point));
+				_nonwalkables.Add(TileMap.SnapToGrid(point));
 		}
 
 		public bool PlayerInHere()
@@ -421,7 +421,8 @@ namespace Game.Terrain
 		}
 
 
-		public IEnumerable<Item> MovableItems => Items.Where(i => i.CanBePicked());
+		public List<Item> GetMovableItems
+			=> Items.Where(i => i.CanBePicked()).ToList();
 
 		/// <summary>
 		/// List of objects present in this zone.

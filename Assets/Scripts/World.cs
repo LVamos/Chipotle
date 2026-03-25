@@ -1,16 +1,16 @@
-﻿using Assets.Scripts.Entities.Items;
-using Assets.Scripts.Models;
+﻿using Assets.Scripts;
 using Assets.Scripts.Spatial;
-
-using DavyKager;
 
 using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
 using Game.Entities.Items;
 using Game.Messaging.Events.GameManagement;
-using Game.Serialization;
 using Game.Serialization.Protobuf;
+using Game.Serialization.Protobuf.Snapshots.Characters;
+using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
+using Game.Serialization.Protobuf.Snapshots.Spatial;
+using Game.Serialization.Protobuf.Snapshots.Spatial.Passages;
 using Game.Terrain;
 using Game.UI;
 
@@ -19,14 +19,12 @@ using ProtoBuf.Meta;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
 using UnityEditor;
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 using Message = Game.Messaging.Message;
 using Rectangle = Game.Terrain.Rectangle;
@@ -38,11 +36,14 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
-		private static void LoadZoneLoops()
+		public static GameSave CreateSave()
 		{
-			Dictionary<string, ZoneLoopInfo> loops = null;
-			YamlHelper.LoadFromResources(MainScript.ZoneLoopsPath, out loops);
-			_zoneLoops = new Dictionary<string, ZoneLoopInfo>(loops, StringComparer.OrdinalIgnoreCase);
+			return new(
+				_characters.Values.Select(c => c.Export()).ToHashSet(),
+				_items.Values.Select(i => i.Export()).ToHashSet(),
+				_passages.Values.Select(p => p.Export()).ToHashSet(),
+				_zones.Values.Select(z => z.Export()).ToHashSet()
+				);
 		}
 
 		public static bool ZoneHasPath(Zone start, Zone goal)
@@ -105,11 +106,6 @@ namespace Game
 				return $"{steps} kroky";
 			return $"{steps} kroků";
 		}
-
-		/// <summary>
-		/// Indicates if the game is in progress.
-		/// </summary>
-		public static bool GameInProgress;
 
 		/// <summary>
 		/// Check if two map elements are within a specified radius of each other.
@@ -222,11 +218,6 @@ namespace Game
 		private static readonly Queue<Action> _delayedActions = new();
 
 		/// <summary>
-		/// Map of zones and corresponding background sounds
-		/// </summary>
-		private static Dictionary<string, ZoneLoopInfo> _zoneLoops;
-
-		/// <summary>
 		/// List of all NPCs
 		/// </summary>
 		private static Dictionary<string, Character> _characters;
@@ -240,7 +231,6 @@ namespace Game
 		/// List of all simple game objects
 		/// </summary>
 		private static Dictionary<string, Item> _items;
-		private static Dictionary<string, Item> _movableItems;
 
 		/// <summary>
 		/// List of all passages
@@ -286,7 +276,7 @@ namespace Game
 			if (_items.ContainsKey(o.Name.Indexed))
 				throw new ArgumentException("Object already registered");
 
-			_items.Add(o.Name.Indexed, o); // Added to dictionary
+			_items.Add(o.Name.Indexed, o);
 		}
 
 		/// <summary>
@@ -665,13 +655,14 @@ namespace Game
 		/// <summary>
 		/// Prepares the game world.
 		/// </summary>
-		public static void Initialize()
+		public static void Init()
 		{
-			_items = new(StringComparer.OrdinalIgnoreCase);
-			_movableItems = new(StringComparer.OrdinalIgnoreCase);
-			_zones = new(StringComparer.OrdinalIgnoreCase);
-			_characters = new(StringComparer.OrdinalIgnoreCase);
-			_passages = new(StringComparer.OrdinalIgnoreCase);
+			var comparer = StringComparer.OrdinalIgnoreCase;
+			_items = new(comparer);
+			_zones = new(comparer);
+			_characters = new(comparer);
+			_passages = new(comparer);
+			Map = null;
 		}
 
 		public static CollisionDetector Collisions { get; private set; } = new();
@@ -698,141 +689,68 @@ namespace Game
 										&& (p == null || p is { State: PassageState.Open });
 		}
 
-		/// <summary>
-		/// Creates a predefined game state save. Asks for its name.
-		/// </summary>
-		/// <returns>True on success</returns>
-		public static bool CreatePredefinedSave()
+		public static void ApplySave(GameSave gameSave, TileMap map)
 		{
+			if (gameSave == null)
+				throw new ArgumentException(nameof(gameSave));
 
-			throw new NotImplementedException();
-			string name = null;
-			//Interaction.InputBox(String.Empty, "Zadej název sejvu");
-			if (string.IsNullOrEmpty(name))
+			Init();
+
+			// Restore characters
+			if (gameSave.Characters.IsNullOrEmpty())
+				throw new InvalidOperationException("No characters");
+
+			foreach (CharacterSave save in gameSave.Characters)
 			{
-				Tolk.Speak("Tak nic");
-				return false;
+				Character character = CharacterFactory.Create(save.Type);
+				character.Restore(save);
+				Add(character);
 			}
 
-			if (!Directory.Exists(MainScript.PredefinedSavesPath))
-				Directory.CreateDirectory(MainScript.PredefinedSavesPath);
-			string path = Path.Combine(MainScript.PredefinedSavesPath, name);
-			if (!Directory.Exists(path))
-				Directory.CreateDirectory(path);
-
-			path = Path.Combine(path, "game.sav");
-			SaveGame(path);
-			Tolk.Speak("uloženo");
-			return true;
-		}
-
-		/// <summary>
-		/// Starts the menu for selecting a predefined save and loads the selected save into memory.
-		/// </summary>
-		/// <returns>True if a save was selected.</returns>
-		/// <remarks>for testing purposes only.</remarks>
-		public static bool LoadPredefinedSave()
-		{
-			string[] saves = null;
-
-			if (Directory.Exists(MainScript.PredefinedSavesPath))
+			// Restore items
+			foreach (ItemSave save in gameSave.Items)
 			{
-				saves =
-					Directory.GetDirectories(MainScript.PredefinedSavesPath);
+				Item item = ItemFactory.Create(true);
+				item.Restore(save);
+				Add(item);
 			}
 
-			if (saves.IsNullOrEmpty())
+			// Restore passages
+			foreach (PassageSave save in gameSave.Passages)
 			{
-				Tolk.Speak("Žádný sejvy tady nevidim.");
-				return false;
+				Passage passage = PassageFactory.Create(true);
+				passage.Restore(save);
+				Add(passage);
 			}
 
-			List<List<string>> items =
-				saves.Select(s => new List<string> { Path.GetFileName(s) })
-					.ToList();
-
-			int i = WindowHandler.Menu(new(items, "Kterej sejv chceš načíst?"));
-
-			if (i == -1)
+			// Restore zones
+			foreach (ZoneSave save in gameSave.Zones)
 			{
-				Tolk.Speak("Tak nic");
-				return false;
+				Zone zone = ZoneFactory.Create(true);
+				zone.Restore(save);
+				Add(zone);
 			}
 
-			// Stop all sounds
-			Sounds.StopAllSounds();
+			// Restore map
+			Map = map;
 
-			string path = Path.Combine(saves[i], "game.sav");
-			LoadGame(path);
-			Tolk.Speak("Načteno.");
-			return true;
-		}
-
-		/// <summary>
-		/// Loads a saved game state from default path.
-		/// </summary>
-		public static void LoadGame() => LoadGame(MainScript.SerializationPath);
-
-		/// <summary>
-		/// Loads a saved game state from the specified binary file.
-		/// </summary>
-		/// <param name="path">Path to the saved game state</param>
-		/// <remarks>Used just for testing purposes. Allows opening predefined saves.</remarks>
-		public static void LoadGame(string path)
-		{
-			// Pause game if in progress.
-			bool resumeGame = GameInProgress;
-			GameInProgress = false;
-
-			// Deserialize data from file
-			ProtobufSerializerHelper helper = null;
-
-			try
-			{
-				if (!File.Exists(path))
-					MainScript.Terminate($"Nevidím soubor {MainScript.SerializationPath}. Že ty ses v tom hrabal?");
-
-				// Load terrain, objects, NPCs, zones and passages.
-				LoadTerrain(OpenMap().Root);
-				FileStream stream = null;
-
-				using (stream = File.OpenRead(path))
-				{
-					helper = ProtoBuf.Serializer.Deserialize<ProtobufSerializerHelper>(stream);
-				}
-				stream?.Close();
-			}
-			catch (ProtoBuf.ProtoException)
-			{
-				MainScript.Terminate($"Nepodařilo se načíst hru. Soubor {MainScript.SerializationPath} je v nesprávném formátu.");
-			}
-			catch (Exception e)
-			{
-				MainScript.OnError(e);
-			}
-
-			_characters = helper.Entities;
-			_items = helper.Items;
-			_passages = helper.Passages;
-			_zones = helper.Zones;
-			WindowHandler.Switch(GameWindow.CreateInstance());
 			Reloaded message = new();
+			MessageCharacters(message);
+			MessageZones(message);
+			MessageItems(message);
+			MessagePassages(message);
+		}
 
-			foreach (Character c in _characters.Values)
-				c.TakeMessage(message);
-
-			foreach (Zone l in _zones.Values)
-				l.TakeMessage(message);
-
-			foreach (Item i in _items.Values)
-				i.TakeMessage(message);
-
+		private static void MessagePassages(Message message)
+		{
 			foreach (Passage p in _passages.Values)
 				p.TakeMessage(message);
+		}
 
-			// Resume the game
-			if (resumeGame)
-				GameInProgress = true;
+		private static void MessageItems(Message message)
+		{
+			foreach (Item i in _items.Values)
+				i.TakeMessage(message);
 		}
 
 		/// <summary>
@@ -846,158 +764,52 @@ namespace Game
 
 		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
 
-		private static List<XElement> _zoneNodes;
+		private static Dictionary<string, GameObject> _zoneObjects;
+		private static Dictionary<string, GameObject> _itemObjects;
+		private static Dictionary<string, GameObject> _passageObjects;
+
 
 		/// <summary>
 		/// Loads the map from file.
 		/// </summary>
-		public static void LoadMap()
+		public static void CreateGame()
 		{
-			// gather precreated game objects.
-			Dictionary<string, GameObject> zoneObjects = new();
-			Dictionary<string, GameObject> itemObjects = new();
-			Dictionary<string, GameObject> passageObjects = new();
-			Scene scene = SceneManager.GetActiveScene();
-			GameObject[] allObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
-			foreach (GameObject obj in allObjects)
-			{
-				switch (obj.tag)
-				{
-					case "Locality": zoneObjects[obj.name] = obj; break;
-					case "Item": itemObjects[obj.name] = obj; break;
-					case "Passage": passageObjects[obj.name] = obj; break;
-				}
-			}
+			XElement root = GamePersistence.OpenMap().Root;
+			Init();
+			List<XElement> zoneNodes = root.Element("localities").Elements("locality").ToList();
 
-			if (zoneObjects.Count == 0)
-				throw new InvalidOperationException("No geometry for zones found in the scene.");
-			if (itemObjects.Count == 0)
-				throw new InvalidOperationException("No geometry for items found in the scene.");
-			if (passageObjects.Count == 0)
-				throw new InvalidOperationException("No geometry for zones found in the scene.");
-
-			XElement root = OpenMap().Root;
-			Initialize();
-			_zoneNodes = root.Element("localities").Elements("locality").ToList();
-			LoadTerrain(root);
+			Map = TileMap.Create(zoneNodes);
 			LoadItemDescriptions(root);
-			LoadZonesAndItems(root, zoneObjects, itemObjects);
-
-			LoadPassages(root, passageObjects);
+			LoadZonesAndItems(zoneNodes);
+			LoadPassages(root);
 		}
 
-		private static void LoadPassages(XElement root, Dictionary<string, GameObject> passageObjects)
+		private static void LoadPassages(XElement root)
 		{
-			PassageFactory.LoadPassages();
-
 			List<XElement> xPassages = root.Element("passages").Elements("passage").ToList();
 			foreach (XElement passageNode in xPassages)
 			{
-				Name name = new(
-					GetAttribute(passageNode, "indexedname"),
-					GetAttribute(passageNode, "friendlyname", false)
-					);
-				bool isDoor = GetAttribute(passageNode, "door").ToBool();
-				bool closed = GetAttribute(passageNode, "closed").ToBool();
-				bool openable = GetAttribute(passageNode, "openable").ToBool();
-
-				// Determine the state of the passage.
-				PassageState state = PassageState.Open;
-				if (!openable)
-					state = PassageState.Locked;
-				else if (openable && closed)
-					state = PassageState.Closed;
-
-				Rectangle area = new(GetAttribute(passageNode, "coordinates"));
-				string[] zones = new string[]
-				{ GetAttribute(passageNode, "from"),
-					GetAttribute(passageNode, "to")
-				};
-				DoorType dType = GetAttribute(passageNode, "type") == "door" ? DoorType.Door : DoorType.Gate;
-
-				GameObject obj = null;
-				if (!passageObjects.TryGetValue(name.Indexed, out obj))
-					throw new InvalidOperationException("No geometry found for the passage {name.Indexed}.");
-
-				Passage passage = PassageFactory.CreatePassage(obj, name, area, zones, isDoor, state, dType);
+				Passage passage = PassageFactory.Create(passageNode);
 				Add(passage);
 			}
 		}
 
-		private static Dictionary<string, ZoneMaterials> LoadZoneMaterials()
+		private static void LoadZonesAndItems(List<XElement> zoneNodes)
 		{
-			Dictionary<string, ZoneMaterials> materials = null;
-			YamlHelper.LoadFromResources(MainScript.MaterialsPath, out materials);
-			return new Dictionary<string, ZoneMaterials>(materials, StringComparer.OrdinalIgnoreCase);
-		}
-
-		private static void LoadZonesAndItems(XElement root, Dictionary<string, GameObject> zoneObjects, Dictionary<string, GameObject> itemObjects)
-		{
-			LoadZoneLoops();
-			ItemFactory.LoadItems();
-			Dictionary<string, ZoneMaterials> materials = LoadZoneMaterials();
-			foreach (XElement zoneNode in _zoneNodes)
+			foreach (XElement zoneNode in zoneNodes)
 			{
-				Zone zone = LoadZone(zoneNode, zoneObjects, materials);
-				LoadItems(zoneNode, zone.Area.Value, itemObjects);
+				Zone zone = ZoneFactory.Create(zoneNode);
+				Add(zone);
+				LoadItems(zoneNode);
 			}
 		}
 
-		private static Zone LoadZone(XElement zoneNode, Dictionary<string, GameObject> localitiObjects, Dictionary<string, ZoneMaterials> materials)
-		{
-			ZoneLoopInfo loopInfo;
-			_zoneLoops.TryGetValue(GetAttribute(zoneNode, "indexedname"), out loopInfo);
-			Name name = new(GetAttribute(zoneNode, "indexedname"), GetAttribute(zoneNode, "friendlyname"));
-			string description = GetAttribute(zoneNode, "description", false);
-			string to = GetAttribute(zoneNode, "to");
-			ZoneType type = GetAttribute(zoneNode, "type").ToZoneType();
-			float height = int.Parse(GetAttribute(zoneNode, "height"));
-			Rectangle area = new(GetAttribute(zoneNode, "coordinates"));
-			TerrainType defaultTerrain = GetAttribute(zoneNode, "defaultTerrain", false).ToTerrainType();
-
-			if (type == ZoneType.Outdoor)
-				height = 6;
-
-			GameObject obj = null;
-			if (!localitiObjects.TryGetValue(name.Indexed, out obj))
-				throw new InvalidOperationException($"No geometry found for the zone {name.Indexed}");
-
-			Zone zone = obj.GetComponent<Zone>();
-			ZoneMaterials zoneMaterials = null;
-			materials.TryGetValue(name.Indexed, out zoneMaterials);
-
-			zone.Initialize(
-				name,
-				description,
-				to,
-				type,
-				height,
-				area,
-				defaultTerrain,
-				loopInfo,
-				zoneMaterials
-			);
-			Add(zone);
-			return zone;
-		}
-
-		private static void LoadItems(XElement zoneNode, Rectangle zoneArea, Dictionary<string, GameObject> itemObjects)
+		private static void LoadItems(XElement zoneNode)
 		{
 			List<XElement> items = zoneNode.Elements("object").ToList();
 			foreach (XElement itemNode in items)
 			{
-				Name name = new(GetAttribute(itemNode, "indexedname"), GetAttribute(itemNode, "friendlyname"));
-				Rectangle area = new Rectangle(GetAttribute(itemNode, "coordinates")).ToAbsolute(zoneArea);
-				string type = GetAttribute(itemNode, "type");
-				bool decorative = GetAttribute(itemNode, "decorative").ToBool();
-				bool pickable = GetAttribute(itemNode, "pickable").ToBool();
-				bool passable = GetAttribute(itemNode, "passable") != null;
-				bool usable = GetAttribute(itemNode, "usable").ToBool();
-
-				GameObject obj = null;
-				if (!itemObjects.TryGetValue(name.Indexed, out obj))
-					throw new InvalidOperationException($"No geometry found for the item {name.Indexed}");
-				Item item = ItemFactory.CreateItem(obj, name, area, type, decorative, pickable, usable, passable);
+				Item item = ItemFactory.Create(itemNode, zoneNode);
 				Add(item);
 			}
 		}
@@ -1012,30 +824,6 @@ namespace Game
 			}
 		}
 
-		private static XDocument OpenMap()
-		{
-			string mapPath = Path.Combine(MainScript.MapPath, Settings.MapName).Replace("\\", "/");
-			TextAsset mapAsset = Resources.Load<TextAsset>(mapPath);
-			return XDocument.Parse(mapAsset.text);
-		}
-
-		public static void LoadTerrain(XElement root)
-		{
-			// count tiles
-			int tileCount = 0;
-			foreach (XElement zone in _zoneNodes)
-			{
-				Rectangle area = new(zone.Attribute("coordinates").Value);
-				int size = (int)(area.Height * 10 * area.Width * 10);
-				tileCount += size;
-			}
-
-			Map = new(MainScript.MapPath, tileCount);
-
-			foreach (XElement zone in _zoneNodes)
-				Map.DrawZone(zone);
-		}
-
 		private const float _gameQuittingFadingDuration = 1;
 
 		/// <summary>
@@ -1043,7 +831,7 @@ namespace Game
 		/// </summary>
 		public static void QuitGame()
 		{
-			GameInProgress = false;
+			GameManager.PauseGame();
 			Cutscene.Init();
 			Action onDone = () => WindowHandler.MainMenu();
 			Sounds.StopAllSounds(_gameQuittingFadingDuration, onDone);
@@ -1088,35 +876,13 @@ namespace Game
 		public static void Remove(Entity o) => _delayedActions.Enqueue(() => _items.Remove(o.Name.Indexed));
 
 		/// <summary>
-		/// Saves the game state to the default file.
-		/// </summary>
-		public static void SaveGame() => SaveGame(MainScript.SerializationPath);
-
-		/// <summary>
-		/// Saves sttate of the game into a specified binary file.
-		/// </summary>
-		/// <param name="path">Location of the save</param>
-		/// <remarks>Used for testing purposes only. Allows creation of predefined saves.</remarks>
-		public static void SaveGame(string path)
-		{
-			return; // todo nefunguje
-			ProtobufSerializerHelper helper = new(_characters, _items, _passages, _zones);
-			FileStream stream = null;
-			using (stream = File.Create(path))
-			{
-				ProtoBuf.Serializer.Serialize(stream, helper);
-			}
-			stream?.Close();
-		}
-
-		/// <summary>
 		/// Starts game from the begining.
 		/// </summary>
 		public static void StartGame()
 		{
 			try
 			{
-				LoadMap();
+				CreateGame();
 			}
 			catch (Exception)
 			{
@@ -1124,9 +890,6 @@ namespace Game
 			}
 			MainScript.GameLoaded = true;
 			Camera.main.transform.rotation = Quaternion.identity;
-			Player = CharacterFactory.CreateChipotle();
-			Add(Player);
-			Player.Activate();
 
 			foreach (Zone z in _zones.Values)
 				z.Activate();
@@ -1134,23 +897,36 @@ namespace Game
 			foreach (Passage p in _passages.Values)
 				p.Activate();
 
-			foreach (Item i in _items.Values)
-				i.Activate();
-			Add(CharacterFactory.CreateTuttle());
-			Add(CharacterFactory.CreateCarson());
-			Add(CharacterFactory.CreateBartender());
-			Add(CharacterFactory.CreateChristine());
-			Add(CharacterFactory.CreateSweeney());
-			Add(CharacterFactory.CreateMariotti());
-
-			// start the remaining characters
-			foreach (Character c in _characters.Values.Where(c => c != Player))
+			CreateCharacters();
+			foreach (Character c in _characters.Values)
 				c.Activate();
 
+			foreach (Item i in _items.Values)
+				i.Activate();
+
 			//Play the first cutscene
-			GameInProgress = true;
+			GameManager.StartGame();
 			Cutscene.Init();
 			Cutscene.Play(null, "cs6");
+		}
+
+		private static void CreateCharacters()
+		{
+			string[] characters = new string[]
+			{
+ "Carson",
+		 "Chipotle",
+		 "Christine",
+		 "Mariotti",
+		 "Sweeney",
+		 "Tuttle",
+		 "Bartender"
+	};
+
+			foreach (string type in characters)
+				Add(CharacterFactory.Create(type));
+
+			Player = GetCharacter("Chipotle");
 		}
 
 		/// <summary>
@@ -1158,7 +934,7 @@ namespace Game
 		/// </summary>
 		public static void UpdateGame()
 		{
-			if (!GameInProgress)
+			if (GameManager.state != GameState.Playing)
 				return;
 
 			PerformDelayedActions();

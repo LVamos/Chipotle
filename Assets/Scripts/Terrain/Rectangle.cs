@@ -761,8 +761,8 @@ namespace Game.Terrain
 		/// <returns>all points of the plane</returns>
 		public HashSet<Vector2> GetPoints(float resolution = 0.1f, bool snapToGrid = true)
 		{
-			Vector2 upperLeft = snapToGrid ? World.Map.SnapToGrid(UpperLeftCorner) : UpperLeftCorner;
-			Vector2 lowerRight = snapToGrid ? World.Map.SnapToGrid(LowerRightCorner) : LowerRightCorner;
+			Vector2 upperLeft = snapToGrid ? TileMap.SnapToGrid(UpperLeftCorner) : UpperLeftCorner;
+			Vector2 lowerRight = snapToGrid ? TileMap.SnapToGrid(LowerRightCorner) : LowerRightCorner;
 
 			float startX = upperLeft.x;
 			float endX = lowerRight.x;
@@ -786,7 +786,7 @@ namespace Game.Terrain
 						y = endY;
 
 					Vector2 point = new(x, y);
-					point = World.Map.SnapToGrid(point, resolution);
+					point = TileMap.SnapToGrid(point, resolution);
 					result.Add(point);
 				}
 			}

@@ -24,7 +24,7 @@ namespace Game.Audio
 		/// </summary>
 		public static void Resume()
 		{
-			_player.Resume();
+			_player?.Resume();
 		}
 
 		/// <summary>
