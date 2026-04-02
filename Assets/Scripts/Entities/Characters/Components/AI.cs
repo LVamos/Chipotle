@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Spatial;
 
+using Game.Mapping.Saves;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Characters;
@@ -29,7 +30,7 @@ namespace Game.Entities.Characters.Components
 				return;
 
 			base.Restore(data);
-			_area = data.Area;
+			_area = data.Area.ToRectangle();
 			_hidden = data.Hidden;
 			_maxObjectDistance = data.MaxObjectDistance;
 			_minObjectDistance = data.MinObjectDistance;
@@ -38,12 +39,14 @@ namespace Game.Entities.Characters.Components
 
 		public AISave Export()
 		{
-			var save = (AISave)base.Export();
-			save.Area = _area;
+			var save = base.Export().ToAISave();
+
+			save.Area = _area.ToRectangleSave();
 			save.Hidden = _hidden;
 			save.MaxObjectDistance = _maxObjectDistance;
 			save.MinObjectDistance = _minObjectDistance;
 			save.State = _state;
+
 			return save;
 		}
 

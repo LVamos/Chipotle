@@ -12,7 +12,6 @@ namespace Game.Entities.Characters.Christine
 	/// <summary>
 	/// Controls behavior of the Christine Pierce NPC
 	/// </summary>
-	
 	public class ChristineAI : AI
 	{
 		/// <summary>

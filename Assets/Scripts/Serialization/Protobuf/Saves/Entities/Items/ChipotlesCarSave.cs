@@ -1,5 +1,4 @@
 ﻿using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
-using Game.Terrain;
 
 using ProtoBuf;
 
@@ -11,6 +10,6 @@ namespace Game.Serialization.Protobuf.Snapshots.Entities.Items
 	public class ChipotlesCarSave : ItemSave
 	{
 		public HashSet<string> AllowedDestinations { get; set; }
-		public HashSet<Zone> VisitedZones { get; set; }
+		public HashSet<string> VisitedZones { get; set; }
 	}
 }

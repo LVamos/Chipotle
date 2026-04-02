@@ -1,5 +1,7 @@
 ﻿
 
+using ProtoBuf;
+
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +14,8 @@ namespace Game.Terrain
 	/// <summary>
 	/// Represents orientation of an NPC.
 	/// </summary>
-	
+
+	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Orientation2D
 	{
 		/// <summary>

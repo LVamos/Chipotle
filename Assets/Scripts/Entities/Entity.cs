@@ -1,4 +1,5 @@
-﻿using Game.Serialization.Protobuf.Snapshots;
+﻿using Game.Mapping.Saves;
+using Game.Serialization.Protobuf.Snapshots;
 using Game.Serialization.Protobuf.Snapshots.Entities;
 using Game.Terrain;
 
@@ -21,9 +22,11 @@ namespace Game.Entities
 
 		public EntitySave Export()
 		{
-			var save = (EntitySave)base.Export();
+			var save = base.Export().ToEntitySave();
+
 			save.DescriptionID = _descriptionID;
 			save.Type = Type;
+
 			return save;
 		}
 

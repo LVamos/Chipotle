@@ -1,5 +1,6 @@
 ﻿using Game.Entities.Characters;
 using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging.Events.Movement;
 using Game.Models;
 using Game.Serialization.Protobuf.Snapshots.Spatial.Passages;
@@ -23,7 +24,7 @@ namespace Game.Terrain
 		public void Restore(PassageSave data)
 		{
 			base.Restore(data);
-			_playersZone = data.PlayersZone;
+			_playersZone = data.PlayersZone != null ? World.GetZone(data.PlayersZone) : null;
 			_zones = data.Zones.ToArray();
 			State = data.State;
 			TypeDescription = data.TypeDescription;
@@ -31,8 +32,8 @@ namespace Game.Terrain
 
 		public PassageSave Export()
 		{
-			var save = (PassageSave)base.Export();
-			save.PlayersZone = _playersZone;
+			var save = base.Export().ToPassageSave();
+			save.PlayersZone = _playersZone?.Name?.Indexed;
 			save.Zones = _zones;
 			save.State = State;
 			save.TypeDescription = TypeDescription;
@@ -151,7 +152,6 @@ namespace Game.Terrain
 			TypeDescription = "průchod";
 			_playersZone = null;
 			_zones = null;
-
 
 			// Validate parameters
 			if (

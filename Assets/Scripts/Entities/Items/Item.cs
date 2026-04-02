@@ -2,6 +2,7 @@
 
 using Game.Audio;
 using Game.Entities.Characters;
+using Game.Mapping.Saves;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.GameManagement;
@@ -478,8 +479,8 @@ namespace Game.Entities.Items
 		{
 			base.Restore((EntitySave)save);
 			Initialize(
-				save.Name,
-				save.Area.Value,
+				save.Name.ToName(),
+				save.Area.ToRectangle(),
 				save.Type,
 				save.Decorative,
 				save.Pickable,
@@ -498,11 +499,15 @@ save.PickingSound,
 save.PlacingSound,
 save.UsableWith
 				);
+
+			HeldBy = save.HeldBy != null ? World.GetCharacter(save.HeldBy) : null;
 		}
 
 		public ItemSave Export()
 		{
-			var save = (ItemSave)base.Export();
+			var save = base.Export().ToItemsave();
+
+			save.HeldBy = HeldBy?.Name?.Indexed;
 			save.Decorative = Decorative;
 			save.Pickable = _pickable;
 			save.Passable = Passable;
@@ -516,6 +521,7 @@ save.UsableWith
 			save.QuickActionsAllowed = _quickActionsAllowed;
 			save.PickingSound = _sounds["picking"];
 			save.PlacingSound = _sounds["placing"];
+
 			return save;
 		}
 

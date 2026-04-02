@@ -1,5 +1,5 @@
 ﻿using Game.Entities.Characters.Components;
-using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Characters;
@@ -9,8 +9,6 @@ using Game.Messaging.Events.Sound;
 using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Serialization.Protobuf.Snapshots.Characters.Tuttle;
 using Game.Terrain;
-
-
 
 using System;
 using System.Collections.Generic;
@@ -34,21 +32,21 @@ namespace Game.Entities.Characters.Tuttle
 				return;
 
 			base.Restore(data);
-			_carMovement = new(data.CarMovement.Sender as ChipotlesCar, data.CarMovement.Target);
 			_collisionInterval = data.CollisionInterval;
 			_goToPoolWhenPositionSet = data.GoToPoolWhenPositionSet;
 			_playerWasByPool = data.PlayerWasByPool;
-			_ridingTo = data._ridingTo;
+			_carTargetZone = World.GetZone(data.CarTargetZone);
 		}
 
 		public TuttleAISave Export()
 		{
-			var save = (TuttleAISave)base.Export();
-			save.CarMovement = new((ChipotlesCar)_carMovement.Sender, _carMovement.Target);
+			var save = base.Export().ToTuttleAISave();
+
 			save.CollisionInterval = _collisionInterval;
 			save.GoToPoolWhenPositionSet = _goToPoolWhenPositionSet;
 			save.PlayerWasByPool = _playerWasByPool;
-			save._ridingTo = _ridingTo;
+			save.CarTargetZone = _carTargetZone?.Name?.Indexed;
+
 			return save;
 		}
 
@@ -84,7 +82,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// Specifies if the NPC is just moving to another zone with the Chipotle's car.
 		/// </summary>
 
-		protected Zone _ridingTo;
+		protected Zone _carTargetZone;
 
 		/// <summary>
 		/// A delayed message of ChipotlesCarMoved type
@@ -265,7 +263,7 @@ namespace Game.Entities.Characters.Tuttle
 			if (zone.Name.Indexed != "asfaltka c1")
 				_carMovement = m;
 
-			_ridingTo = _carMovement.Target.GetZones().First();
+			_carTargetZone = _carMovement.Target.GetZones().First();
 			InnerMessage(new StopFollowingPlayer(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new zone.
 		}
 
@@ -343,9 +341,9 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void WaitForPlayer()
 		{
-			if (_ridingTo != null && Owner.Zone == _ridingTo && World.Player.Zone == _ridingTo)
+			if (_carTargetZone != null && Owner.Zone == _carTargetZone && World.Player.Zone == _carTargetZone)
 			{
-				_ridingTo = null;
+				_carTargetZone = null;
 				InnerMessage(new StartFollowingPlayer(this));
 			}
 		}

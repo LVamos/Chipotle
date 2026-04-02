@@ -8,7 +8,7 @@ namespace Game.Serialization.Protobuf.Snapshots.Spatial.Passages
 	[ProtoInclude(106, typeof(DoorSave))]
 	public class PassageSave : MapElementSave
 	{
-		public Zone PlayersZone { get; set; }
+		public string PlayersZone { get; set; }
 		public string[] Zones { get; set; }
 		public PassageState State { get; set; } = PassageState.Open;
 		public string TypeDescription { get; set; }

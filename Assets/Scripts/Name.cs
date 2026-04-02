@@ -7,7 +7,6 @@ namespace Game
 	/// <summary>
 	/// An immutable class to store unique names
 	/// </summary>
-	
 	public sealed class Name
 	{
 		/// <summary>

@@ -1,7 +1,5 @@
 ﻿using Game.Models;
 
-using ProtoBuf;
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,7 +16,6 @@ namespace Game.Terrain
 	/// The region is defined by two points: <see cref="Rectangle.UpperLeftCorner"/> and <see cref="Rectangle.LowerRightCorner"/>.
 	/// </remarks>
 
-	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public struct Rectangle
 	{
 		public bool IntersectsStrict(Rectangle plane)

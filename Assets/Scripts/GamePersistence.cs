@@ -69,7 +69,8 @@ namespace Assets.Scripts
 		/// <summary>
 		/// Saves the game state to the default file.
 		/// </summary>
-		public static void SaveGame() => SaveGame(MainScript.SerializationPath);
+		public static void SaveGame()
+			=> SaveGame(MainScript.SerializationPath);
 
 		/// <summary>
 		/// Saves sttate of the game into a specified binary file.
@@ -122,6 +123,7 @@ namespace Assets.Scripts
 		/// <remarks>Used just for testing purposes. Allows opening predefined saves.</remarks>
 		public static void LoadGame(string path)
 		{
+			GameManager.LoadGame();
 			GameSave save = null;
 			TileMap map = null;
 

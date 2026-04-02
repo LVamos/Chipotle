@@ -208,7 +208,7 @@ namespace Game
 		/// <summary>
 		/// Path to file used for serialization.
 		/// </summary>
-		public static string SerializationPath => Path.Combine(DataPath, "game.sav");
+		public static string SerializationPath = Path.Combine(Application.persistentDataPath, "game.sav");
 
 		/// <summary>
 		/// Path to the folder with predefined saves.

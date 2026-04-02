@@ -1,5 +1,6 @@
 ﻿using Game.Entities.Characters.Components;
 using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Physics;
@@ -8,8 +9,6 @@ using Game.Messaging.Events.Physics;
 using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Serialization.Protobuf.Snapshots.Entities;
 using Game.Terrain;
-
-
 
 using System;
 using System.Collections.Generic;
@@ -33,10 +32,10 @@ namespace Game.Entities.Characters
 		public void Restore(CharacterSave save)
 		{
 			base.Restore((EntitySave)save);
-			_inventory = new(save.Inventory);
-			_visitedZones = new(save.VisitedZones);
+			_inventory = save.Inventory != null ? new(save.Inventory) : null;
+			_visitedZones = save.VisitedZones != null ? new(save.VisitedZones) : null;
 			_zone = save.Zone;
-			Orientation = save.Orientation;
+			Orientation = save.Orientation.ToVector2();
 
 			foreach (CharacterComponent component in _components)
 			{
@@ -47,11 +46,12 @@ namespace Game.Entities.Characters
 
 		public CharacterSave Export()
 		{
-			var save = (CharacterSave)base.Export();
+			var save = base.Export().ToCharacterSave();
+
 			save.Inventory = new(_inventory);
 			save.VisitedZones = new(_visitedZones);
 			save.Zone = _zone;
-			save.Orientation = Orientation;
+			save.Orientation = Orientation.UnitVector.ToVector2Save();
 			save.Components = _components
 				.Cast<CharacterComponent>()
 				.Select(c => c.Export())
@@ -136,7 +136,6 @@ namespace Game.Entities.Characters
 			{
 				c.Initialize();
 				c.SetParent(name.Indexed);
-
 			}
 
 			if (physics.StartPosition != null)

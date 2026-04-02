@@ -4,9 +4,9 @@ namespace Game
 {
 	public static class GameManager
 	{
-		private static GameState _state;
+		private static GameState _state = GameState.None;
 
-		public static GameState state
+		public static GameState State
 		{
 			get => _state;
 			private set
@@ -19,17 +19,20 @@ namespace Game
 
 		public static void FinishGame()
 		{
-			state = GameState.Finished;
+			State = GameState.Finished;
 		}
 
 		public static void StartGame()
-			=> state = GameState.Playing;
+			=> State = GameState.Playing;
+
+		public static void LoadGame()
+			=> State = GameState.Loading;
 
 		public static void PauseGame()
-	=> state = GameState.Paused;
+	=> State = GameState.Paused;
 
 		public static void ResumeGame()
-=> state = GameState.Playing;
+=> State = GameState.Playing;
 
 		private static void AnnounceStatechange(GameState previous, GameState current)
 		{

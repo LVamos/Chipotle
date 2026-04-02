@@ -1,6 +1,7 @@
 ﻿using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
+using Game.Mapping.Saves;
 using Game.Messaging;
 using Game.Messaging.Commands;
 using Game.Messaging.Commands.GameInfo;
@@ -29,21 +30,24 @@ namespace Game.Terrain
 	{
 		public void Restore(MapElementSave data)
 		{
-			Initialize(data.Name, data.Area.Value);
-			_sounds = new(data.Sounds);
+			Initialize(
+				data.Name.ToName(),
+				data.Area.ToRectangle()
+				);
+			_sounds = !data.Sounds.IsNullOrEmpty() ? new(data.Sounds) : null;
 			Usable = data.Usable;
-			UsableWith = new(data.UsableWith);
+			UsableWith = data.UsableWith != null ? new(data.UsableWith) : null;
 		}
 
 		public MapElementSave Export()
 		{
 			MapElementSave save = new()
 			{
-				Name = this.Name,
-				Area = this.Area,
-				Sounds = new(_sounds),
+				Name = Name.ToNameSave(),
+				Area = Area.Value.ToRectangleSave(),
+				Sounds = _sounds != null ? new(_sounds) : null,
 				Usable = this.Usable,
-				UsableWith = new(UsableWith)
+				UsableWith = UsableWith != null ? new(UsableWith) : null
 			};
 			return save;
 		}

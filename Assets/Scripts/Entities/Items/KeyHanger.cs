@@ -1,4 +1,5 @@
-﻿using Game.Messaging.Commands.Physics;
+﻿using Game.Mapping.Saves;
+using Game.Messaging.Commands.Physics;
 using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
 
 
@@ -18,8 +19,8 @@ namespace Game.Entities.Items
 
 			Initialize
 	(
-							data.Name,
-							data.Area.Value,
+							data.Name.ToName(),
+							data.Area.ToRectangle(),
 							data.Type,
 							data.Decorative,
 							data.Pickable,
@@ -44,8 +45,10 @@ namespace Game.Entities.Items
 
 		public KeyHangerSave Export()
 		{
-			var save = (KeyHangerSave)base.Export();
+			var save = base.Export().ToKeyHangerSave();
+
 			save.KeysHanging = KeysHanging;
+
 			return save;
 		}
 

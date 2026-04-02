@@ -4,6 +4,7 @@ using Assets.Scripts.Models;
 using Game.Audio;
 using Game.Entities.Characters;
 using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
@@ -30,11 +31,11 @@ namespace Game.Terrain
 		{
 			base.Restore(data);
 			_ceiling = data.Ceiling;
-			_exits = new(data.Exits);
-			_characters = new(data.Characters);
-			_items = new(data.Items);
+			_exits = !data.Exits.IsNullOrEmpty() ? new(data.Exits) : new();
+			_characters = !data.Characters.IsNullOrEmpty() ? new(data.Characters) : new();
+			_items = !data.Items.IsNullOrEmpty() ? new(data.Items) : new();
 			_neighbours = new(data.Neighbours);
-			_nonwalkables = new(data.Nonwalkables);
+			_nonwalkables = data.Nonwalkables.ToVector2HashSet();
 			DefaultTerrain = data.DefaultTerrain;
 			Description = data.Description;
 			To = data.To;
@@ -43,17 +44,19 @@ namespace Game.Terrain
 
 		public ZoneSave Export()
 		{
-			var save = (ZoneSave)base.Export();
+			var save = base.Export().ToZoneSave();
+
 			save.Ceiling = _ceiling;
 			save.Exits = new(_exits);
 			save.Characters = new(_characters);
 			save.Items = new(_items);
 			save.Neighbours = new(_neighbours);
-			save.Nonwalkables = new(_nonwalkables);
+			save.Nonwalkables = _nonwalkables.ToVector2SaveHashSet();
 			save.DefaultTerrain = DefaultTerrain;
 			save.Description = Description;
 			save.To = To;
 			save.Type = Type;
+
 			return save;
 		}
 

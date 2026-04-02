@@ -1,4 +1,5 @@
 ﻿using Game.Entities.Characters.Components.PhysicsComponent.Results;
+using Game.Mapping.Saves;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
@@ -10,8 +11,6 @@ using Game.Models;
 using Game.PathFinding;
 using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Terrain;
-
-
 
 using System;
 using System.Collections.Generic;
@@ -39,48 +38,50 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 			base.Restore(data);
 			_state = data.State;
-			_area = data.Area;
-			_goal = data.Goal;
+			_area = data.Area.ToRectangle();
+			_goal = data.Goal.ToVector2();
 			_inventory = new(data.Inventory);
 			_maxObjectDistance = data.MaxObjectDistance;
 			_minObjectDistance = data.MinObjectDistance;
 			_navigableObjectsRadius = data.NavigableObjectsRadius;
 			_nearbyWalls = data.NearbyWalls;
 			_objectManipulationHelpRadius = data.ObjectManipulationHelpRadius;
-			_orientation = data.Orientation;
-			_path = data.Path;
+			_orientation = new(data.Orientation.ToVector2());
+			_path = data.Path.ToVector2Queue();
 			_restartApproaching = data.RestartApproaching;
 			_speed = data.Speed;
 			_stepLength = data.StepLength;
 			_targetPlayerDistance = data.TargetPlayerDistance;
 			_wallDistanceThreshold = data.WallDistanceThreshold;
 			Height = data.Height;
-			StartPosition = data.StartPosition;
+			StartPosition = data.StartPosition.ToRectangle();
 			Width = data.Width;
 		}
 
 		public PhysicsSave Export()
 		{
-			var save = (PhysicsSave)base.Export();
+			var save = base.Export().ToPhysicsSave();
+
 			save.State = _state;
-			save.Area = _area;
-			save.Goal = _goal;
+			save.Area = _area.Value.ToRectangleSave();
+			save.Goal = _goal.ToVector2Save();
 			save.Inventory = new(_inventory);
 			save.MaxObjectDistance = _maxObjectDistance;
 			save.MinObjectDistance = _minObjectDistance;
 			save.NavigableObjectsRadius = _navigableObjectsRadius;
 			save.NearbyWalls = _nearbyWalls;
 			save.ObjectManipulationHelpRadius = _objectManipulationHelpRadius;
-			save.Orientation = _orientation;
-			save.Path = _path;
+			save.Orientation = _orientation.UnitVector.ToVector2Save();
+			save.Path = _path.ToVector2SaveQueue();
 			save.RestartApproaching = _restartApproaching;
 			save.Speed = _speed;
 			save.StepLength = _stepLength;
 			save.TargetPlayerDistance = _targetPlayerDistance;
 			save.WallDistanceThreshold = _wallDistanceThreshold;
 			save.Height = Height;
-			save.StartPosition = StartPosition;
+			save.StartPosition = StartPosition.Value.ToRectangleSave();
 			save.Width = Width;
+
 			return save;
 		}
 
@@ -88,7 +89,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 		private void FixedUpdate()
 		{
-			if (GameManager.state == GameState.Playing)
+			if (GameManager.State == GameState.Playing)
 				PerformWalk();
 		}
 

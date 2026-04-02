@@ -1,5 +1,5 @@
-﻿using Game.Serialization.Protobuf.Snapshots.Entities;
-using Game.Terrain;
+﻿using Game.Serialization.Protobuf.Saves;
+using Game.Serialization.Protobuf.Snapshots.Entities;
 
 using ProtoBuf;
 
@@ -13,7 +13,7 @@ namespace Game.Serialization.Protobuf.Snapshots.Characters
 		public HashSet<string> Inventory { get; set; }
 		public HashSet<string> VisitedZones { get; set; }
 		public string Zone { get; set; }
-		public Orientation2D Orientation { get; set; }
+		public Vector2Save Orientation { get; set; }
 		public List<ComponentSave> Components { get; set; }
 	}
 }

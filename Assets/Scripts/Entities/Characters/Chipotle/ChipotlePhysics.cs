@@ -7,6 +7,7 @@ using DavyKager;
 using Game.Audio;
 using Game.Entities.Characters.Components.PhysicsComponent.Results;
 using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging.Commands;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.GameInfo;
@@ -25,8 +26,6 @@ using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Serialization.Protobuf.Snapshots.Characters.Chipotle;
 using Game.Terrain;
 using Game.UI;
-
-
 
 using System;
 using System.Collections.Generic;
@@ -66,7 +65,8 @@ namespace Game.Entities.Characters.Chipotle
 
 		public ChipotlePhysicsSave Export()
 		{
-			var save = (ChipotlePhysicsSave)base.Export();
+			var save = base.Export().ToChipotlePhysicsSave();
+
 			save.CurrentRegion = _currentRegion;
 			save.InVisitedRegion = _inVisitedRegion;
 			save.PhoneCountdown = _phoneCountdown;
@@ -76,6 +76,7 @@ namespace Game.Entities.Characters.Chipotle
 			save.SittingOnChair = _sittingOnChair;
 			save.SteppedIntoPuddle = _steppedIntoPuddle;
 			save.WalshesBenchUsed = _walshesBenchUsed;
+
 			return save;
 		}
 
@@ -1431,7 +1432,10 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Terminates the game and runs the main menu.
 		/// </summary>
-		private void QuitGame() => World.QuitGame();
+		private void QuitGame()
+		{
+			World.QuitGame();
+		}
 
 		/// <summary>
 		/// He puts the NPC on its feet if it is sitting and plays the appropriate sound.

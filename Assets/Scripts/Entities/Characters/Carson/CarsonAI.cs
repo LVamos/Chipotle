@@ -1,13 +1,12 @@
 ﻿using Game.Audio;
 using Game.Entities.Characters.Components;
 using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Serialization.Protobuf.Snapshots.Characters.Carson;
 using Game.Terrain;
-
-
 
 using System.Linq;
 
@@ -33,9 +32,11 @@ namespace Game.Entities.Characters.Carson
 
 		public CarsonAISave Export()
 		{
-			var save = (CarsonAISave)base.Export();
+			var save = base.Export().ToCarsonAISave();
+
 			save.SaidGoodbyeToChipotle = _saidGoodbyeToChipotle;
 			save.YelledAtChipotle = _yelledAtChipotle;
+
 			return save;
 		}
 

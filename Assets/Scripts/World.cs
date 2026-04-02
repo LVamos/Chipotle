@@ -5,6 +5,7 @@ using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
 using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging.Events.GameManagement;
 using Game.Serialization.Protobuf;
 using Game.Serialization.Protobuf.Snapshots.Characters;
@@ -220,7 +221,7 @@ namespace Game
 		/// <summary>
 		/// List of all NPCs
 		/// </summary>
-		private static Dictionary<string, Character> _characters;
+		public static Dictionary<string, Character> _characters;
 
 		/// <summary>
 		/// List of all zones
@@ -293,7 +294,7 @@ namespace Game
 			if (_zones.ContainsKey(zone.Name.Indexed))
 				throw new ArgumentException("Zone already registered");
 
-			_zones.Add(zone.Name.Indexed, zone);
+			_zones[zone.Name.Indexed] = zone;
 			Map.RegisterZone(zone);
 		}
 
@@ -695,6 +696,15 @@ namespace Game
 				throw new ArgumentException(nameof(gameSave));
 
 			Init();
+			Map = map;
+
+			// Restore zones
+			foreach (ZoneSave save in gameSave.Zones)
+			{
+				Zone zone = ZoneFactory.Create(true, save.Name.ToName());
+				zone.Restore(save);
+				Add(zone);
+			}
 
 			// Restore characters
 			if (gameSave.Characters.IsNullOrEmpty())
@@ -706,11 +716,17 @@ namespace Game
 				character.Restore(save);
 				Add(character);
 			}
+			Player = GetCharacter("chipotle");
 
 			// Restore items
 			foreach (ItemSave save in gameSave.Items)
 			{
-				Item item = ItemFactory.Create(true);
+				Item item = ItemFactory.Create(
+					true,
+					save.Name.ToName(),
+					default,
+					save.Type
+					);
 				item.Restore(save);
 				Add(item);
 			}
@@ -718,22 +734,19 @@ namespace Game
 			// Restore passages
 			foreach (PassageSave save in gameSave.Passages)
 			{
-				Passage passage = PassageFactory.Create(true);
+				Passage passage = PassageFactory.Create(
+					true,
+					save.Name.ToName(),
+					default,
+					save.Zones.ToList()
+					);
 				passage.Restore(save);
 				Add(passage);
 			}
 
-			// Restore zones
-			foreach (ZoneSave save in gameSave.Zones)
-			{
-				Zone zone = ZoneFactory.Create(true);
-				zone.Restore(save);
-				Add(zone);
-			}
-
-			// Restore map
-			Map = map;
-
+			// Activate world
+			ActivateWorld();
+			GameManager.StartGame();
 			Reloaded message = new();
 			MessageCharacters(message);
 			MessageZones(message);
@@ -835,8 +848,7 @@ namespace Game
 			Cutscene.Init();
 			Action onDone = () => WindowHandler.MainMenu();
 			Sounds.StopAllSounds(_gameQuittingFadingDuration, onDone);
-			//todo fix game saving
-			//SaveGame();
+			GamePersistence.SaveGame();
 		}
 
 		/// <summary>
@@ -845,6 +857,9 @@ namespace Game
 		/// <param name="message">The message to be sent</param>
 		public static void TakeMessage(Message message)
 		{
+			if (!WorldActive)
+				return;
+
 			foreach (Character c in _characters.Values)
 				c.TakeMessage(message);
 			foreach (Passage p in _passages.Values)
@@ -891,25 +906,32 @@ namespace Game
 			MainScript.GameLoaded = true;
 			Camera.main.transform.rotation = Quaternion.identity;
 
-			foreach (Zone z in _zones.Values)
-				z.Activate();
-
-			foreach (Passage p in _passages.Values)
-				p.Activate();
-
 			CreateCharacters();
-			foreach (Character c in _characters.Values)
-				c.Activate();
+			ActivateWorld();
 
-			foreach (Item i in _items.Values)
-				i.Activate();
-
-			//Play the first cutscene
 			GameManager.StartGame();
 			Cutscene.Init();
 			Cutscene.Play(null, "cs6");
 		}
 
+		private static void ActivateWorld()
+		{
+			foreach (Zone zone in _zones.Values)
+				zone.Activate();
+
+			foreach (Passage passage in _passages.Values)
+				passage.Activate();
+
+			foreach (Character character in _characters.Values)
+				character.Activate();
+
+			foreach (Item item in _items.Values)
+				item.Activate();
+
+			WorldActive = true;
+		}
+
+		public static bool WorldActive { get; private set; }
 		private static void CreateCharacters()
 		{
 			string[] characters = new string[]
@@ -934,7 +956,7 @@ namespace Game
 		/// </summary>
 		public static void UpdateGame()
 		{
-			if (GameManager.state != GameState.Playing)
+			if (GameManager.State != GameState.Playing)
 				return;
 
 			PerformDelayedActions();

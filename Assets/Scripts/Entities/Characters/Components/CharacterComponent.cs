@@ -16,15 +16,14 @@ namespace Game.Entities.Characters.Components
 	{
 		public virtual void Restore(ComponentSave save)
 		{
-			_owner = World.GetCharacter(save.Owner)
-				?? throw new InvalidOperationException("Nonexistant or missing character");
+			_ownerName = save.Owner;
 		}
 
 		public ComponentSave Export()
 		{
 			ComponentSave save = new()
 			{
-				Owner = _owner.Name.Indexed
+				Owner = _ownerName
 			};
 			return save;
 		}

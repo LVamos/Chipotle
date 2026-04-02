@@ -1,11 +1,9 @@
-using Game.Entities.Characters;
+using Game.Serialization.Protobuf.Saves;
 using Game.Terrain;
 
 using ProtoBuf;
 
 using System.Collections.Generic;
-
-using UnityEngine;
 
 namespace Game.Serialization.Protobuf.Snapshots.Entities.Items.Items
 {
@@ -22,14 +20,14 @@ namespace Game.Serialization.Protobuf.Snapshots.Entities.Items.Items
 		public string PlacingSound { get; set; }
 		public bool AudibleOverWalls { get; set; }
 		public ObstacleType LastOccludingObstacle { get; set; }
-		public Vector3? LoopPositionBackup { get; set; }
+		public Vector3Save LoopPositionBackup { get; set; }
 		public bool Pickable { get; set; }
 		public bool QuickActionsAllowed { get; set; }
 		public bool StopWhenPlayerMoves { get; set; }
 		public bool UsableOnce { get; set; }
 		public HashSet<string> Zones { get; set; }
 		public bool Decorative { get; set; }
-		public Character HeldBy { get; set; }
+		public string HeldBy { get; set; }
 		public bool Passable { get; set; }
 		public bool Used { get; set; }
 		public bool UsedOnce { get; set; }

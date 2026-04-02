@@ -67,6 +67,7 @@ namespace Game.UI
 		private List<List<string>> _items = new()
 		{
 			new() { "Nová hra" },
+			new() { "Pokračovat ve hře" },
 			new() { "Test sluchátek" },
 			new() { "Návod" },
 			new() { "Ovládání" },
@@ -157,10 +158,6 @@ namespace Game.UI
 		/// </summary>
 		private void LoadGame()
 		{
-			Tolk.Speak("To musim dodělat... píči už");
-			//todo dodělat
-
-			return;
 			WindowHandler.Switch(GameWindow.CreateInstance());
 
 			StopLoop();

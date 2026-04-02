@@ -455,7 +455,7 @@ namespace Game.UI
 		{
 			base.OnKeyDown(shortcut);
 
-			if (GameManager.state == GameState.Playing)
+			if (GameManager.State == GameState.Playing)
 				World.Player.TakeMessage(new DualSenseKeyPressed(this, shortcut));
 		}
 
@@ -467,7 +467,7 @@ namespace Game.UI
 		{
 			base.OnKeyDown(shortcut);
 
-			if (GameManager.state == GameState.Playing)
+			if (GameManager.State == GameState.Playing)
 				World.Player.TakeMessage(new KeyPressed(this, shortcut));
 		}
 
@@ -477,7 +477,7 @@ namespace Game.UI
 		/// <param name="shortcut">The message to be handled</param>
 		public override void OnKeyUp(KeyboardInput shortcut)
 		{
-			if (GameManager.state == GameState.Playing
+			if (GameManager.State == GameState.Playing
 				&& World.Player != null)
 			{
 				KeyReleased message = new(this, shortcut);
@@ -487,7 +487,7 @@ namespace Game.UI
 
 		public override void OnKeyUp(DualSenseInput shortcut)
 		{
-			if (GameManager.state == GameState.Playing
+			if (GameManager.State == GameState.Playing
 				&& World.Player != null)
 			{
 				DualSenseKeyReleased message = new(this, shortcut);

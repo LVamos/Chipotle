@@ -1,5 +1,6 @@
 ﻿using Game.Audio;
 using Game.Entities.Characters;
+using Game.Mapping.Saves;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Serialization.Protobuf.Snapshots.Entities.Items;
@@ -33,8 +34,8 @@ namespace Game.Entities.Items
 
 			Initialize
 				(
-				data.Name,
-				data.Area.Value,
+				data.Name.ToName(),
+				data.Area.ToRectangle(),
 				data.Type,
 				data.Decorative,
 data.Pickable,
@@ -53,16 +54,27 @@ data.PickingSound,
 data.PlacingSound,
 data.UsableWith
 				);
-			_visitedZones = data.VisitedZones;
+
+			// Collect visited zones
+			_visitedZones = data.VisitedZones
+				.Select(World.GetZone)
+				.ToHashSet();
+
 			_allowedDestinations = data.AllowedDestinations;
 			_descriptionID = data.DescriptionID;
 		}
 
 		public ChipotlesCarSave Export()
 		{
-			var save = (ChipotlesCarSave)base.Export();
-			save.VisitedZones = new(_visitedZones);
+			var save = base.Export().ToChipotlesCarSave();
+
+			// Save visited zones
+			save.VisitedZones = _visitedZones
+				.Select(z => z.Name.Indexed)
+				.ToHashSet();
+
 			save.AllowedDestinations = new(_allowedDestinations);
+
 			return save;
 		}
 

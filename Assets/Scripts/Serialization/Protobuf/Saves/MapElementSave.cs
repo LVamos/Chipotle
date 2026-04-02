@@ -1,7 +1,7 @@
-﻿using Game.Serialization.Protobuf.Snapshots.Entities;
+﻿using Game.Serialization.Protobuf.Saves;
+using Game.Serialization.Protobuf.Snapshots.Entities;
 using Game.Serialization.Protobuf.Snapshots.Spatial;
 using Game.Serialization.Protobuf.Snapshots.Spatial.Passages;
-using Game.Terrain;
 
 using ProtoBuf;
 
@@ -15,9 +15,9 @@ namespace Game.Serialization.Protobuf.Snapshots
 	[ProtoInclude(102, typeof(PassageSave))]
 	public class MapElementSave
 	{
-		public Rectangle? Area { get; set; }
+		public RectangleSave Area { get; set; }
 		public Dictionary<string, string> Sounds { get; set; }
-		public Name Name { get; set; }
+		public NameSave Name { get; set; }
 		public bool Usable { get; set; }
 		public List<string> UsableWith { get; set; }
 	}

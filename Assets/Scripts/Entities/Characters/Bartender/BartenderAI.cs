@@ -1,12 +1,11 @@
 ﻿using Game.Audio;
 using Game.Entities.Characters.Components;
 using Game.Entities.Items;
+using Game.Mapping.Saves;
 using Game.Messaging.Events.Movement;
 using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Serialization.Protobuf.Snapshots.Characters.Bartender;
 using Game.Terrain;
-
-
 
 using System.Collections.Generic;
 using System.Linq;
@@ -34,10 +33,12 @@ namespace Game.Entities.Characters.Bartender
 
 		public BartenderAISave Export()
 		{
-			var save = (BartenderAISave)base.Export();
+			var save = base.Export().ToBartenderAISave();
+
 			save.SayGoodbyeToChipotle = _sayGoodbyeToChipotle;
 			save.VelcomeChipotle = _velcomeChipotle;
 			save.WasChipotleHere = _wasChipotleHere;
+
 			return save;
 		}
 

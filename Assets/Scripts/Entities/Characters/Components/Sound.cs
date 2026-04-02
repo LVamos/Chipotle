@@ -1,10 +1,9 @@
 ﻿using DavyKager;
 
 using Game.Audio;
+using Game.Mapping.Saves;
 using Game.Serialization.Protobuf.Snapshots.Characters;
 using Game.Terrain;
-
-
 
 using System;
 using System.Collections;
@@ -32,7 +31,7 @@ namespace Game.Entities.Characters.Components
 
 		public SoundSave Export()
 		{
-			var save = (SoundSave)base.Export();
+			var save = base.Export().ToSoundSave();
 			save.AnnounceWalls = _announceWalls;
 			save.WalkVolume = _walkVolume;
 			return save;
