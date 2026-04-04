@@ -203,7 +203,6 @@ namespace Game.Mapping.Saves
 			target.TargetPlayerDistance = source.TargetPlayerDistance;
 			target.WallDistanceThreshold = source.WallDistanceThreshold;
 			target.Height = source.Height;
-			target.StartPosition = source.StartPosition;
 			target.Width = source.Width;
 		}
 	}

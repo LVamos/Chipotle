@@ -180,12 +180,6 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			base.Initialize();
 
-			// set initial position.
-			Vector3 dimensions = new(.4f, 2, .4f);
-			transform.localScale = dimensions;
-			Vector2 position = Settings.TestChipotleStartPosition.HasValue ? Settings.TestChipotleStartPosition.Value
-				: new(1032, 1034);
-			StartPosition = Rectangle.FromCenter(position, dimensions.z, dimensions.x);
 			_area = null;
 		}
 
@@ -289,7 +283,6 @@ namespace Game.Entities.Characters.Chipotle
 			};
 			OrientationChanged message = new(this, _orientation, _orientation, TurnType.None, false, true);
 			InnerMessage(message);
-			JumpTo(StartPosition.Value, true);
 		}
 
 		/// <summary>

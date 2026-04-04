@@ -14,16 +14,6 @@ namespace Game.Entities.Characters.Christine
 	/// </summary>
 	public class ChristineAI : AI
 	{
-		/// <summary>
-		/// Processes incoming messages.
-		/// </summary>
-		public override void Activate()
-		{
-			base.Activate();
-			JumpTo(_pointNearDiningTable);
-		}
-
-		private Vector2 _pointNearDiningTable = new(1775.8f, 1114.7f);
 
 		/// <summary>
 		/// Runs a message handler for the specified message.

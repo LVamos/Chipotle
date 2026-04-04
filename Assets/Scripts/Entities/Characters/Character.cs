@@ -32,6 +32,8 @@ namespace Game.Entities.Characters
 		public void Restore(CharacterSave save)
 		{
 			base.Restore((EntitySave)save);
+
+			transform.localScale = save.Dimensions.ToVector3();
 			_inventory = save.Inventory != null ? new(save.Inventory) : null;
 			_visitedZones = save.VisitedZones != null ? new(save.VisitedZones) : null;
 			_zone = save.Zone;
@@ -48,6 +50,7 @@ namespace Game.Entities.Characters
 		{
 			var save = base.Export().ToCharacterSave();
 
+			save.Dimensions = transform.localScale.ToVector3Save();
 			save.Inventory = new(_inventory);
 			save.VisitedZones = new(_visitedZones);
 			save.Zone = _zone;
@@ -119,12 +122,19 @@ namespace Game.Entities.Characters
 		/// <param name="input">Reference to an input component</param>
 		/// <param name="physics">Reference to an physics component</param>
 		/// <param name="sound">Reference to an sound component</param>
-		public new void Initialize(Name name, string type, AI ai, Input input, Physics physics, Sound sound)
+		public new void Initialize(
+			Name name,
+			string type,
+			Vector2 position,
+			Vector3 dimensions,
+			AI ai,
+			Input input,
+			Physics physics,
+			Sound sound)
 		{
 			base.Initialize(name, type, null);
 			_inventory = new();
 			_visitedZones = new();
-			_zone = null;
 
 			Usable = true;
 			_components =
@@ -132,21 +142,21 @@ namespace Game.Entities.Characters
 					.Where(c => c != null)
 					.ToArray();
 
+			InitComponents();
+
+			transform.localScale = dimensions;
+			Rectangle area = Rectangle.FromCenter(position, dimensions.x, dimensions.z);
+			Zone zone = World.GetZone(area.Center);
+			SavePosition(area, zone);
+		}
+
+		private void InitComponents()
+		{
 			foreach (CharacterComponent c in _components)
 			{
 				c.Initialize();
-				c.SetParent(name.Indexed);
+				c.SetParent(Name.Indexed);
 			}
-
-			if (physics.StartPosition != null)
-			{
-				Area = physics.StartPosition;
-				transform.position = Area.Value.Center.ToVector3(2);
-			}
-
-			// Find intersecting zone
-			if (_area != null)
-				_zone = World.GetZone(_area.Value.Center).Name.Indexed;
 		}
 
 		/// <summary>
@@ -220,6 +230,15 @@ namespace Game.Entities.Characters
 		{
 			base.Activate();
 
+			// Start components
+			startComponent(typeof(Sound));
+			startComponent(typeof(Input));
+			startComponent(typeof(Physics));
+			startComponent(typeof(AI));
+
+			// Announce position
+			AnnouncePositionChange(null, Area.Value, null, Zone);
+
 			void startComponent(Type type)
 			{
 				MessagingObject c = _components.FirstOrDefault(c => IsOfTypeOrSubclass(c, type));
@@ -231,11 +250,6 @@ namespace Game.Entities.Characters
 					return componentType.IsSubclassOf(type) || componentType == type;
 				}
 			}
-
-			startComponent(typeof(Sound));
-			startComponent(typeof(Input));
-			startComponent(typeof(Physics));
-			startComponent(typeof(AI));
 		}
 
 		/// <summary>
@@ -261,11 +275,22 @@ namespace Game.Entities.Characters
 		/// <param name="message">The message to be processed</param>
 		protected void OnPositionChanged(PositionChanged message)
 		{
-			Rectangle targetPosition = message.TargetPosition;
-			SetPosition(targetPosition, message.TargetZone);
-			RecordZone(message.SourceZone, message.TargetZone);
-			AnnounceZoneChange(message.SourceZone, message.TargetZone);
-			AnnouncePosition(message.SourcePosition, targetPosition, message.SourceZone, message.TargetZone);
+			SavePosition(message.TargetPosition, message.TargetZone);
+			AnnouncePositionChange(
+						message.SourcePosition.Value,
+						message.TargetPosition,
+						message.SourceZone,
+						message.TargetZone);
+		}
+
+		private void AnnouncePositionChange(Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone)
+		{
+			RecordZone(sourceZone, targetZone);
+			AnnounceZoneChange(sourceZone, targetZone);
+
+			CharacterMoved moved = new(this, sourcePosition, targetPosition, sourceZone, targetZone);
+			World.MessageCharacters(moved);
+			World.MessageZones(moved);
 		}
 
 		private void AnnounceZoneChange(Zone sourceZone, Zone targetZone)
@@ -280,16 +305,7 @@ namespace Game.Entities.Characters
 				World.MessageZones(came);
 		}
 
-		private void AnnouncePosition(Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone, bool messageZones = true)
-		{
-			// todo Implement listener pattern
-			CharacterMoved moved = new(this, sourcePosition, targetPosition, sourceZone, targetZone);
-			World.MessageCharacters(moved);
-			if (messageZones)
-				World.MessageZones(moved);
-		}
-
-		private void SetPosition(Rectangle position, Zone zone)
+		private void SavePosition(Rectangle position, Zone zone)
 		{
 			Area = position;
 			transform.position = Center.ToVector3(1.8f);

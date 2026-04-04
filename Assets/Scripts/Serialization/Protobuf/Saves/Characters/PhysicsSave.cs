@@ -31,7 +31,6 @@ namespace Game.Serialization.Protobuf.Snapshots.Characters
 		public int TargetPlayerDistance { get; set; }
 		public float WallDistanceThreshold { get; set; }
 		public float Height { get; set; } = .4f;
-		public RectangleSave StartPosition { get; set; }
 		public float Width { get; set; } = .4f;
 	}
 }

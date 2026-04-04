@@ -54,7 +54,6 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			_targetPlayerDistance = data.TargetPlayerDistance;
 			_wallDistanceThreshold = data.WallDistanceThreshold;
 			Height = data.Height;
-			StartPosition = data.StartPosition.ToRectangle();
 			Width = data.Width;
 		}
 
@@ -79,7 +78,6 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			save.TargetPlayerDistance = _targetPlayerDistance;
 			save.WallDistanceThreshold = _wallDistanceThreshold;
 			save.Height = Height;
-			save.StartPosition = StartPosition.Value.ToRectangleSave();
 			save.Width = Width;
 
 			return save;
@@ -431,11 +429,6 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			[TerrainType.Clay] = 460,
 			[TerrainType.Bush] = 970
 		};
-
-		/// <summary>
-		/// Defines start position of the NPC.
-		/// </summary>
-		public Rectangle? StartPosition { get; protected set; }
 
 		/// <summary>
 		/// Coordinates of the area currently occupied by the NPC
@@ -1045,6 +1038,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		public override void Activate()
 		{
 			_orientation = new(0, 1);
+			_area = Owner.Area;
 			base.Activate();
 		}
 

@@ -101,12 +101,6 @@ namespace Game.Entities.Characters.Tuttle
 		{
 			base.Activate();
 
-			// Set position
-			if (Settings.AllowTuttlesCustomPosition && Settings.TuttleTestStart.HasValue)
-				JumpTo(Settings.TuttleTestStart.Value);
-			else
-				JumpTo(new Vector2(1031.8f, 1035.5f));
-
 			// scenarios for debugging purposes
 			if (!Settings.SendTuttleToPool && Settings.LetTuttleFollowChipotle)
 				SetState(CharacterState.WatchingPlayer);

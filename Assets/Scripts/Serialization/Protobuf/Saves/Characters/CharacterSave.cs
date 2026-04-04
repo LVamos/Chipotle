@@ -10,6 +10,7 @@ namespace Game.Serialization.Protobuf.Snapshots.Characters
 	[ProtoContract(SkipConstructor = true, ImplicitFields = ImplicitFields.AllFields)]
 	public class CharacterSave : EntitySave
 	{
+		public Vector3Save Dimensions { get; set; }
 		public HashSet<string> Inventory { get; set; }
 		public HashSet<string> VisitedZones { get; set; }
 		public string Zone { get; set; }

@@ -712,7 +712,9 @@ namespace Game
 
 			foreach (CharacterSave save in gameSave.Characters)
 			{
-				Character character = CharacterFactory.Create(save.Type);
+				Vector2 position = save.Area.ToRectangle().Center;
+				Vector3 dimensions = save.Dimensions.ToVector3();
+				Character character = CharacterFactory.Create(save.Type, position, dimensions);
 				character.Restore(save);
 				Add(character);
 			}
@@ -934,21 +936,39 @@ namespace Game
 		public static bool WorldActive { get; private set; }
 		private static void CreateCharacters()
 		{
-			string[] characters = new string[]
-			{
- "Carson",
-		 "Chipotle",
-		 "Christine",
-		 "Mariotti",
-		 "Sweeney",
-		 "Tuttle",
-		 "Bartender"
-	};
+			Vector3 dimensions = new(.4f, 2, .4f);
 
-			foreach (string type in characters)
-				Add(CharacterFactory.Create(type));
+			// Chipotle
+			Vector2 chipotlePosition = Settings.TestChipotleStartPosition ?? new(1032, 1034);
+			Player = CharacterFactory.Create("chipotle", chipotlePosition, dimensions);
+			Add(Player);
 
-			Player = GetCharacter("Chipotle");
+			// Carson
+			Vector2 carsonPosition = new(1225, 1019.4f);
+			Add(CharacterFactory.Create("carson", carsonPosition, dimensions));
+
+			// Christine
+			Vector2 christinePosition = new(1775.8f, 1114.7f);
+			Add(CharacterFactory.Create("christine", christinePosition, dimensions));
+
+			// Mariotti
+			Vector2 mariottiPosition = new(2013.3f, 1129.1f);
+			Add(CharacterFactory.Create("mariotti", mariottiPosition, dimensions));
+
+			// Sweeney
+			Vector2 sweeneyPosition = new(1402.3f, 955.7f);
+			Add(CharacterFactory.Create("sweeney", sweeneyPosition, dimensions));
+
+			// Tuttle
+			Vector2 tuttlePosition;
+			if (Settings.AllowTuttlesCustomPosition && Settings.TuttleTestStart.HasValue)
+				tuttlePosition = Settings.TuttleTestStart.Value;
+			else tuttlePosition = new(1031.8f, 1035.5f);
+			Add(CharacterFactory.Create("tuttle", tuttlePosition, dimensions));
+
+			// Bartender
+			Vector2 bartenderPosition = new(1556.9f, 1073.2f);
+			Add(CharacterFactory.Create("bartender", bartenderPosition, dimensions));
 		}
 
 		/// <summary>

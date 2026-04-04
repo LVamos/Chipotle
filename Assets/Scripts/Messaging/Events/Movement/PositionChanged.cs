@@ -17,6 +17,7 @@ namespace Game.Messaging.Events.Movement
 		public readonly int Line;
 		public readonly string Member;
 		public readonly string File;
+
 		/// <summary>
 		/// Describes type of obstacle between the entity and the player if any.
 		/// </summary>

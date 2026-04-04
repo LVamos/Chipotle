@@ -12,20 +12,9 @@ namespace Game.Entities.Characters.Sweeney
 	/// <summary>
 	/// Controls behavior of the Derreck Sweeney NPC.
 	/// </summary>
-	
+
 	public class SweeneyAI : AI
 	{
-		/// <summary>
-		/// Initializes the component and starts its message loop.
-		/// </summary>
-		public override void Activate()
-		{
-			base.Activate();
-			JumpTo(_pointNearTable);
-		}
-
-		private Vector2 _pointNearTable = new(1402.3f, 955.7f);
-
 		/// <summary>
 		/// Runs a message handler for the specified message.
 		/// </summary>

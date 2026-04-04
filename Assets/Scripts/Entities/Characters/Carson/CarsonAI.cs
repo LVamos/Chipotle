@@ -10,8 +10,6 @@ using Game.Terrain;
 
 using System.Linq;
 
-using UnityEngine;
-
 using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Carson
@@ -51,18 +49,6 @@ namespace Game.Entities.Characters.Carson
 		/// came to the zahrada c1 zone.
 		/// </summary>
 		private bool _yelledAtChipotle;
-
-		/// <summary>
-		/// Initializes the component and starts its message loop.
-		/// </summary>
-		public override void Activate()
-		{
-			base.Activate();
-
-			JumpTo(_pointNearTable);
-		}
-
-		private Vector2 _pointNearTable = new(1225, 1019.4f);
 
 		/// <summary>
 		/// Runs a message handler for the specified message.

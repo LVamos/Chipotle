@@ -141,10 +141,10 @@ namespace Assets.Scripts
 				{
 					save = ProtoBuf.Serializer.Deserialize<GameSave>(stream);
 				}
-				stream?.Close();
 			}
-			catch (ProtoBuf.ProtoException)
+			catch (ProtoBuf.ProtoException e)
 			{
+				MainScript.OnError(e);
 				MainScript.Terminate($"Nepodařilo se načíst hru. Soubor {MainScript.SerializationPath} je v nesprávném formátu.");
 			}
 			catch (Exception e)
