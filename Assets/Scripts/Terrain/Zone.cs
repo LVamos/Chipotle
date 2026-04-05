@@ -170,7 +170,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="l">The zone to be checked</param>
 		/// <returns>True if the specified zone is accessible form this zone</returns>
-		public bool IsBehindDoor(Zone l) => GetZonesBehindDoor().Any(zone => zone.Name.Indexed == l.Name.Indexed);
+		public bool IsBehindDoor(Zone l) => GetZonesBehindDoor().Any(zone => zone.Name.Inner == l.Name.Inner);
 
 		/// <summary>
 		/// Checks if it's possible to get to the specified zone from this zone over doors or open passages.
@@ -203,7 +203,7 @@ namespace Game.Terrain
 				from p in a.GetPerimeterPoints()
 				let l = World.GetZone(p)
 				where l != null
-				select l.Name.Indexed
+				select l.Name.Inner
 			).Distinct().ToList();
 		}
 
@@ -453,7 +453,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="o">The object to be checked</param>
 		/// <returns>True if the object is present in the zone</returns>
-		public bool IsItHere(Item o) => _items.Contains(o.Name.Indexed);
+		public bool IsItHere(Item o) => _items.Contains(o.Name.Inner);
 
 		/// <summary>
 		/// Checks if an entity is present in this zone in the moment.
@@ -511,14 +511,14 @@ namespace Game.Terrain
 			if (IsItHere(p))
 				throw new InvalidOperationException("exit already registered");
 
-			_exits.Add(p.Name.Indexed);
+			_exits.Add(p.Name.Inner);
 		}
 
 		/// <summary>
 		/// Adds a game object to list of present objects.
 		/// </summary>
 		/// <param name="o">The object ot be added</param>
-		private void Register(Item o) => _items.Add(o.Name.Indexed);
+		private void Register(Item o) => _items.Add(o.Name.Inner);
 
 		/// <summary>
 		/// Adds an entity to zone.
@@ -526,7 +526,7 @@ namespace Game.Terrain
 		/// <param name="character">The entity to be added</param>
 		public void Register(Character character)
 		{
-			_characters.Add(character.Name.Indexed);
+			_characters.Add(character.Name.Inner);
 		}
 
 		/// <summary>
@@ -584,13 +584,13 @@ namespace Game.Terrain
 		/// Immediately removes a game object from list of present objects.
 		/// </summary>
 		/// <param name="i"></param>
-		private void Unregister(Item i) => _items.Remove(i.Name.Indexed);
+		private void Unregister(Item i) => _items.Remove(i.Name.Inner);
 
 		/// <summary>
 		/// Immediately removes an entity from list of present entities.
 		/// </summary>
 		/// <param name="e">The entity to be removed</param>
-		public void Unregister(Character e) => _characters.Remove(e.Name.Indexed);
+		public void Unregister(Character e) => _characters.Remove(e.Name.Inner);
 
 		/// <summary>
 		/// Removes a passage from the zone.
@@ -601,7 +601,7 @@ namespace Game.Terrain
 			if (!Exits.Contains(p))
 				throw new InvalidOperationException("Unregistered passage");
 
-			_exits.Remove(p.Name.Indexed);
+			_exits.Remove(p.Name.Inner);
 		}
 
 		/// <summary>

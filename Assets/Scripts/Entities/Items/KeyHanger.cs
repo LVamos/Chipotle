@@ -63,17 +63,17 @@ namespace Game.Entities.Items
 		/// <param name="message">The message to be processed</param>
 		protected override void OnUseObjects(UseObjects message)
 		{
-			string usedObject = message.UsedObject?.Name.Indexed;
-			string target = message.Target?.Name.Indexed;
+			string usedObject = message.UsedObject?.Name.Inner;
+			string target = message.Target?.Name.Inner;
 
 			// Taking the keys
-			if (KeysHanging && usedObject == Name.Indexed && target == null)
+			if (KeysHanging && usedObject == Name.Inner && target == null)
 			{
 				_cutscene = "TakeKeysFromHanger";
 				KeysHanging = false;
 				Usable = false;
 			}
-			else if (!KeysHanging && usedObject == "klíče v1" && target == Name.Indexed)
+			else if (!KeysHanging && usedObject == "klíče v1" && target == Name.Inner)
 			{
 				KeysHanging = true;
 				_cutscene = null;

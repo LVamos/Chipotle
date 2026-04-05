@@ -74,7 +74,7 @@ namespace Game.Narration.WorldDescribers
 			result.Add(distanceDescription);
 			result.Add(angleDescription);
 			if (Settings.SayInnerZoneNames)
-				result.Add($" {info.TargetZone.Name.Indexed}");
+				result.Add($" {info.TargetZone.Name.Inner}");
 
 			// If it's a door and hasn't been opened return one line record for simple searching.
 			if (info.Exit is Door tempDoor && !tempDoor.OpenedPreviously)

@@ -43,7 +43,7 @@ namespace Game.Terrain
 
 		private void OnUseObjects(UseObjects message)
 		{
-			if (message.UsedObject.Name.Indexed != _walshesKeysId)
+			if (message.UsedObject.Name.Inner != _walshesKeysId)
 				return;
 
 			LockOrUnlock(message.ManipulationPoint);

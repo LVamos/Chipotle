@@ -65,7 +65,7 @@ namespace Game.Entities.Items
 		protected string GetPortalDescription(Passage passage)
 		{
 			Zone[] zones = passage.Zones.ToArray();
-			string description = $"portal ({Name.Indexed}); zones: {zones[0].Name.Indexed}, {zones[1].Name.Indexed}";
+			string description = $"portal ({Name.Inner}); zones: {zones[0].Name.Inner}, {zones[1].Name.Inner}";
 			return description;
 		}
 
@@ -366,7 +366,7 @@ namespace Game.Entities.Items
 		protected void LogCollision(Character character, Vector2 point)
 		{
 			string title = "Objekt zaznamenal náraz postavy";
-			string characterName = $"Postava: {character.Name.Indexed}";
+			string characterName = $"Postava: {character.Name.Inner}";
 			string pointOfCollision = $"Bod srážky: {point.GetString()}";
 
 			Logger.LogInfo(title, characterName, pointOfCollision);
@@ -375,11 +375,11 @@ namespace Game.Entities.Items
 		protected void LogUssage(Character character, MapElement usedItem, MapElement target, Vector2 point)
 		{
 			string title = "Objekt zaznamenal použití";
-			string characterName = character.Name.Indexed;
-			string itemName = $"Objekt: {usedItem.Name.Indexed}";
+			string characterName = character.Name.Inner;
+			string itemName = $"Objekt: {usedItem.Name.Inner}";
 			string targetName = string.Empty;
 			if (target != null)
-				targetName = $"Cíl: {target.Name.Indexed}";
+				targetName = $"Cíl: {target.Name.Inner}";
 			string pointMessage = $"Bod: {point.GetString()}";
 
 			Logger.LogInfo(title, characterName, itemName, targetName, pointMessage);
@@ -428,7 +428,7 @@ namespace Game.Entities.Items
 
 			_zones =
 				(from l in World.GetZones(_area.Value)
-				 select l.Name.Indexed)
+				 select l.Name.Inner)
 				 .ToHashSet();
 		}
 
@@ -507,7 +507,7 @@ save.UsableWith
 		{
 			var save = base.Export().ToItemsave();
 
-			save.HeldBy = HeldBy?.Name?.Indexed;
+			save.HeldBy = HeldBy?.Name?.Inner;
 			save.Decorative = Decorative;
 			save.Pickable = _pickable;
 			save.Passable = Passable;
@@ -995,7 +995,7 @@ save.UsableWith
 
 		private string GetAmbientDescription()
 		{
-			return $"loop for {Name.Indexed} item";
+			return $"loop for {Name.Inner} item";
 		}
 
 		/// <summary>
@@ -1038,7 +1038,7 @@ save.UsableWith
 			{
 				ItemAppearedInZone appearedMessage = new(this, this, zone);
 				zone.TakeMessage(appearedMessage);
-				_zones.Add(zone.Name.Indexed);
+				_zones.Add(zone.Name.Inner);
 			}
 
 			Placed();
@@ -1048,7 +1048,7 @@ save.UsableWith
 		protected void LogPlacement(Character character, Rectangle position)
 		{
 			string title = "Objekt zaznamenal pokus o položení";
-			string itemName = $"Objekt: {Name.Indexed}";
+			string itemName = $"Objekt: {Name.Inner}";
 			string pointOfPlacement = string.Empty;
 			pointOfPlacement = $"Bod umístění: {position.ToString()}";
 
@@ -1079,8 +1079,8 @@ save.UsableWith
 		protected void LogPickup(Character character, PickUpItemResult.ResultType result)
 		{
 			string title = "Objekt zaznamenal pokus o sebrání";
-			string itemName = $"Objekt: {Name.Indexed}";
-			string characterName = $"Postava: {character.Name.Indexed}";
+			string itemName = $"Objekt: {Name.Inner}";
+			string characterName = $"Postava: {character.Name.Inner}";
 			string resultDescription = $"Výsledek: {result}";
 
 			Logger.LogInfo(title, itemName, characterName, resultDescription);

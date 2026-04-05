@@ -94,7 +94,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogOutOfMapAttempt(Vector2 position)
 		{
 			string title = "Mimo mapu";
-			string name = Owner.Name.Indexed;
+			string name = Owner.Name.Inner;
 			string positionMessage = $"Poslední vadlidní pozice: {position.GetString()}";
 
 			Logger.LogError(title, name, positionMessage);
@@ -250,7 +250,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 			// Return usable reachable objects.
 			IEnumerable<MapElement> usableReachable = reachable
-				.Where(o => o.Usable || (included != null && included.Contains(o.Name.Indexed)));
+				.Where(o => o.Usable || (included != null && included.Contains(o.Name.Inner)));
 			if (usableReachable.Any())
 				return new(usableReachable.ToList(), UsablesResult.Success);
 
@@ -640,7 +640,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogPosition()
 		{
 			string title = "Krok";
-			string name = Owner.Name.Indexed;
+			string name = Owner.Name.Inner;
 
 			string position = string.Empty;
 			if (Owner.Area == null)
@@ -652,7 +652,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			if (Owner.Zone == null)
 				zone = "Lokace: neznámá";
 			else
-				zone = $"Lokace: {Owner.Zone.Name.Indexed}";
+				zone = $"Lokace: {Owner.Zone.Name.Inner}";
 
 			string relativePosition = string.Empty;
 			if (Owner.Zone != null)
@@ -672,7 +672,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 				if (!query.IsNullOrEmpty())
 				{
 					string[] objects = query
-						.Select(e => e.Name.Indexed)?
+						.Select(e => e.Name.Inner)?
 						.ToArray();
 					objectsBefore = string.Join(',', objects);
 					objectsBefore = $"Objekty před: {objects}";
@@ -1052,9 +1052,9 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogDoorUsage(Door door)
 		{
 			string title = "Postava použila dveře";
-			string name = Owner.Name.Indexed;
+			string name = Owner.Name.Inner;
 			string doorDestination = door.AnotherZone(Zone).To;
-			string doorName = $"Název dveří: {door.Name.Indexed}";
+			string doorName = $"Název dveří: {door.Name.Inner}";
 
 			Logger.LogInfo(title, name, doorDestination, doorName);
 		}
@@ -1227,7 +1227,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogOrientationChange(Orientation2D initial, Orientation2D target, int delta)
 		{
 			string title = "Orientace změněna";
-			string name = Owner.Name.Indexed;
+			string name = Owner.Name.Inner;
 			string initialCardinalDirection = initial.Angle.GetCardinalDirection().GetDescription();
 			string targetCardinalDirection = target.Angle.GetCardinalDirection().GetDescription();
 			float initialCompassDegrees = ((float)initial.Angle.CompassDegrees).Round();
@@ -1243,9 +1243,9 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogDoorCollision(Door door)
 		{
 			string title = "Postava narazila do dveří";
-			string name = $"Postava: {Owner.Name.Indexed}";
+			string name = $"Postava: {Owner.Name.Inner}";
 			string doorDestination = door.AnotherZone(Zone).To;
-			string doorName = $"Název dveří: {door.Name.Indexed}";
+			string doorName = $"Název dveří: {door.Name.Inner}";
 
 			Logger.LogInfo(title, name, doorDestination, doorName);
 		}
@@ -1253,8 +1253,8 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogEntityCollision(Entity entity, Vector2 contactPoint)
 		{
 			string title = "Postava narazila do entity";
-			string character = $"Postava: {Owner.Name.Indexed}";
-			string collidedEntity = $"Kolidovaná entita: {entity.Name.Indexed}";
+			string character = $"Postava: {Owner.Name.Inner}";
+			string collidedEntity = $"Kolidovaná entita: {entity.Name.Inner}";
 			string pointOfCollision = $"Bod srážky: {contactPoint.GetString()}";
 			Logger.LogInfo(title, character, collidedEntity, pointOfCollision);
 		}
@@ -1262,8 +1262,8 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogItemUsage(Items.Item item, Vector2 point)
 		{
 			string title = "Postava použila objekt";
-			string character = Owner.Name.Indexed;
-			string itemName = $"Objekt: {item?.Name.Indexed}";
+			string character = Owner.Name.Inner;
+			string itemName = $"Objekt: {item?.Name.Inner}";
 			string pointMessage = $"Bod: {point.GetString()}";
 
 			Logger.LogInfo(title, character, itemName, pointMessage);
@@ -1272,9 +1272,9 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogItemUsedToTarget(Items.Item itemToUse, MapElement target, Vector2 point)
 		{
 			string title = "Postava použila objekt na objekt";
-			string character = Owner.Name.Indexed;
-			string item1 = $"Objekt: {itemToUse.Name.Indexed}";
-			string item2 = $"Druhý objekt: {target.Name.Indexed}";
+			string character = Owner.Name.Inner;
+			string item1 = $"Objekt: {itemToUse.Name.Inner}";
+			string item2 = $"Druhý objekt: {target.Name.Inner}";
 			string pointMessage = $"Bod: {point.GetString()}";
 
 			Logger.LogInfo(title, character, item1, item2, pointMessage);
@@ -1283,7 +1283,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		protected void LogItemPickup(Item item, PickUpItemResult.ResultType result)
 		{
 			string title = "Postava se pokusila sebrat předmět";
-			string itemName = item == null ? string.Empty : $"Objekt: {item.Name.Indexed}";
+			string itemName = item == null ? string.Empty : $"Objekt: {item.Name.Inner}";
 			string resultDescription = $"Výsledek: {result}";
 
 			Logger.LogInfo(title, itemName, resultDescription);
@@ -1291,8 +1291,8 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 		protected bool PlaceItemInFront(Item item)
 		{
-			if (!_inventory.Contains(item.Name.Indexed))
-				throw new InvalidOperationException($"Item {item.Name.Indexed} isn't in inventary");
+			if (!_inventory.Contains(item.Name.Inner))
+				throw new InvalidOperationException($"Item {item.Name.Inner} isn't in inventary");
 
 			Rectangle? place = FindVacancyForItem(item);
 			if (place == null)
@@ -1301,7 +1301,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 				return false;
 			}
 
-			_inventory.Remove(item.Name.Indexed);
+			_inventory.Remove(item.Name.Inner);
 			InnerMessage(new PlaceItemResult(this, item, true));
 			PlaceItem placeMessage = new(Owner, item, Owner, place);
 			item.TakeMessage(placeMessage);
@@ -1436,7 +1436,7 @@ Rectangle.FromCenter(Center, width, height)
 		{
 			string name = item.Name.Friendly;
 			if (Settings.SayInnerItemNames)
-				name += " " + item.Name.Indexed;
+				name += " " + item.Name.Inner;
 			float distance = World.GetDistance(Owner, item);
 			float angle = GetAngle(item.Area.Value);
 			bool intersects = item.Area.Value.Intersects(Owner.Area.Value);

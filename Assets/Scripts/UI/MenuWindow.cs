@@ -40,7 +40,7 @@ namespace Game.UI
 			{
 				List<string> record = _items[itemIndex];
 				int searchIndex = record.Count == 1 ? 0 : _searchIndex;
-				string item = record[searchIndex]?.PrepareForIndexing();
+				string item = record[searchIndex]?.Sanitize();
 				return !string.IsNullOrEmpty(item) && item.StartsWith(prefix);
 			}
 		}

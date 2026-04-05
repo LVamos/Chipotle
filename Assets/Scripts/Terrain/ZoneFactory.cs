@@ -12,7 +12,7 @@ namespace Game.Terrain
 {
 	public static class ZoneFactory
 	{
-		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.Sanitize() : element?.Attribute(attribute)?.Value;
 
 		public static Zone Create(XElement zoneNode, bool createGameObject = false)
 		{
@@ -69,9 +69,9 @@ namespace Game.Terrain
 			GameObject gameObject = GetHostObject(name, createGameObject);
 			Zone zone = gameObject.GetComponent<Zone>();
 			ZoneMaterials zoneMaterials = null;
-			_materials.TryGetValue(name.Indexed, out zoneMaterials);
+			_materials.TryGetValue(name.Inner, out zoneMaterials);
 			ZoneLoopInfo loopInfo;
-			_zoneLoops.TryGetValue(name.Indexed, out loopInfo);
+			_zoneLoops.TryGetValue(name.Inner, out loopInfo);
 
 			zone.Initialize(
 				name,
@@ -90,8 +90,8 @@ namespace Game.Terrain
 		private static GameObject GetHostObject(Name name, bool create)
 		{
 			return !create
-				? SceneObjects.GetZone(name.Indexed)
-				: SceneObjects.GetOrCreateZone(name.Indexed);
+				? SceneObjects.GetZone(name.Inner)
+				: SceneObjects.GetOrCreateZone(name.Inner);
 		}
 
 		public static void Init()

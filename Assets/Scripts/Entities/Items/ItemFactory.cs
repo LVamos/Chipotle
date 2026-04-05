@@ -15,13 +15,13 @@ namespace Game.Entities.Items
 {
 	public class ItemFactory
 	{
-		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.Sanitize() : element?.Attribute(attribute)?.Value;
 
 		private static GameObject GetHostObject(Name name, bool create)
 		{
 			return !create
-				? SceneObjects.GetItem(name.Indexed)
-				: SceneObjects.GetOrCreateItem(name.Indexed);
+				? SceneObjects.GetItem(name.Inner)
+				: SceneObjects.GetOrCreateItem(name.Inner);
 		}
 
 		private static Type GetItemCLRType(string itemtype)
@@ -50,9 +50,9 @@ namespace Game.Entities.Items
 			bool passable = false
 			)
 		{
-			GameObject obj = new(name.Indexed);
+			GameObject obj = SceneObjects.Create(name.Inner, "Item");
 			obj.AddComponent<Item>();
-			Item item = Create(obj, name, area, type, decorative, pickable, usable, passable);
+			Item item = Create(false, name, area, type, decorative, pickable, usable, passable);
 			World.Add(item);
 			item.Activate();
 			return item;
@@ -66,7 +66,7 @@ namespace Game.Entities.Items
 			bool usable = false,
 			bool passable = false)
 		{
-			GameObject obj = new(name.Indexed);
+			GameObject obj = new(name.Inner);
 			obj.AddComponent(typeof(T));
 			string type = GetItemType(typeof(T));
 			Item item = Create(obj, name, area, type, decorative, pickable, usable, passable);
@@ -185,7 +185,7 @@ namespace Game.Entities.Items
 					throw new ArgumentNullException(nameof(type));
 			}
 
-			GameObject obj = GetHostObject(name.Indexed, createGameObject);
+			GameObject obj = GetHostObject(name.Inner, createGameObject);
 			Item item = null;
 
 			Type clrType = GetItemCLRType(type);
@@ -199,7 +199,9 @@ namespace Game.Entities.Items
 			ItemCreationParametersModel parameters;
 			if (_itemParameters.TryGetValue(type, out parameters))
 			{
-				item = obj.GetComponent<Item>() as Item;
+				item = obj.GetComponent<Item>() as Item
+				?? throw new InvalidOperationException($"Item creation failed: {type}");
+
 				item.Initialize(
 			name,
 			area,

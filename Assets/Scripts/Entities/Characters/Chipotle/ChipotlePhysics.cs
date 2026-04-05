@@ -157,7 +157,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected void OnPickUpObjectResult(PickUpItemResult message)
 		{
 			if (message.Result == PickUpItemResult.ResultType.Success)
-				_inventory.Add(message.Object.Name.Indexed);
+				_inventory.Add(message.Object.Name.Inner);
 		}
 
 		/// <summary>
@@ -350,7 +350,7 @@ namespace Game.Entities.Characters.Chipotle
 			const string vanillaKeys = "klíče v1";
 			const string bench = "lavička w1";
 
-			string tool = message.UsedObject.Name.Indexed;
+			string tool = message.UsedObject.Name.Inner;
 			if (message.Target == null)
 			{
 				switch (tool)
@@ -361,7 +361,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 			}
 
-			string target = message.Target.Name.Indexed;
+			string target = message.Target.Name.Inner;
 			// Two objects used
 			switch (tool, target)
 			{
@@ -430,7 +430,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void OnTakeItem(TakeItem message)
 		{
-			_inventory.Add(message.Item.Name.Indexed);
+			_inventory.Add(message.Item.Name.Inner);
 			PickUpItemResult newMessage = new(this, message.Item, PickUpItemResult.ResultType.Success, true);
 			InnerMessage(newMessage);
 		}
@@ -498,7 +498,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="target">The target item or character</param>
 		private void ApplyItemToTarget(Item source, MapElement target)
 		{
-			bool usable = source.UsableWith != null && source.UsableWith.Contains(target.Name.Indexed);
+			bool usable = source.UsableWith != null && source.UsableWith.Contains(target.Name.Inner);
 			if (!usable)
 			{
 				InteractResult message = new(this, InteractResult.ResultType.NoUsableObjects);
@@ -1159,7 +1159,7 @@ namespace Game.Entities.Characters.Chipotle
 		protected void LogTerrainCollision(TileInfo[] terrainPoints)
 		{
 			string title = "Kolize s terénem";
-			string name = $"Postava: {Owner.Name.Indexed}";
+			string name = $"Postava: {Owner.Name.Inner}";
 
 			string[] terrainDescriptions = terrainPoints.Select(p => $"Bod: {p.Position.GetString()}; terén: {p.Tile.Terrain.GetDescription()}")
 				.ToArray();
@@ -1178,12 +1178,12 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			HashSet<string> nearObjects =
 				(from o in Zone.GetNearByItems(_area.Value.Center, _nearObjectRadius, false)
-				 select o.Name.Indexed)
+				 select o.Name.Inner)
 				.ToHashSet();
 
 			foreach (string o in nearObjects)
 			{
-				if (_navigatedItem != null && _navigatedItem.Name.Indexed == o)
+				if (_navigatedItem != null && _navigatedItem.Name.Inner == o)
 					continue;
 
 				// Announce new objects.

@@ -29,7 +29,7 @@ namespace Game.UI
 
 			string text = SelectedItem.Name.Friendly;
 			if (Settings.SayInnerItemNames)
-				text += ", " + SelectedItem.Name.Indexed;
+				text += ", " + SelectedItem.Name.Inner;
 
 			Tolk.Speak(text, interruptSpeech);
 		}
@@ -112,7 +112,7 @@ namespace Game.UI
 			// Prepare the menu items and sort them by picking time.
 			_inventory = parameters.Inventory;
 			_items =
-				_inventory.Select(o => new List<string> { o.Name.Indexed })
+				_inventory.Select(o => new List<string> { o.Name.Inner })
 					.Reverse()
 					.ToList();
 		}
@@ -209,7 +209,7 @@ namespace Game.UI
 		/// </summary>
 		protected void AssignSelectedObject()
 		{
-			SelectedItem = _inventory.First(o => o.Name.Indexed == _items[_index][0]);
+			SelectedItem = _inventory.First(o => o.Name.Inner == _items[_index][0]);
 		}
 	}
 }

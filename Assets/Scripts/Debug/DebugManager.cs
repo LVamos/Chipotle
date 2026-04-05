@@ -309,7 +309,7 @@ namespace Game.Debug
 		{
 			string distance = World.GetDistance(Tuttle, Player).ToString();
 			string position = Tuttle.Center.ToString();
-			string zone = Tuttle.Zone.Name.Indexed;
+			string zone = Tuttle.Zone.Name.Inner;
 			Tolk.Speak(distance + Environment.NewLine + zone + " " + position, true);
 		}
 
@@ -456,8 +456,8 @@ namespace Game.Debug
 			List<List<string>> items =
 			(
 				from z in zones
-				orderby z.Name.Indexed
-				select (new List<string> { z.Name.Indexed })
+				orderby z.Name.Inner
+				select (new List<string> { z.Name.Inner })
 			).ToList();
 
 			MenuParameters parameters = new

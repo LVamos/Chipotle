@@ -160,8 +160,8 @@ namespace Game.Terrain
 		private void LogDoorHit(Character character, Vector2 point)
 		{
 			string title = "Náraz do dveří";
-			string name = $"Název: {Name.Indexed}";
-			string characterMessage = $"Postava {character.Name.Indexed} v lokaci {character.Zone.Name.Indexed}";
+			string name = $"Název: {Name.Inner}";
+			string characterMessage = $"Postava {character.Name.Inner} v lokaci {character.Zone.Name.Inner}";
 			string type = $"typ dveří: {TypeDescription}";
 			string zones = $"Lokace: {_zones[0]}, {_zones[1]}";
 
@@ -187,7 +187,7 @@ namespace Game.Terrain
 		private void LogClosing()
 		{
 			string title = "Dveře zavřeny";
-			string name = $"Název: {Name.Indexed}";
+			string name = $"Název: {Name.Inner}";
 			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
@@ -196,7 +196,7 @@ namespace Game.Terrain
 		private void LogLocking()
 		{
 			string title = "Dveře zamčeny";
-			string name = $"Název: {Name.Indexed}";
+			string name = $"Název: {Name.Inner}";
 			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
@@ -205,7 +205,7 @@ namespace Game.Terrain
 		private void LogUnlocking()
 		{
 			string title = "Dveře odemčeny";
-			string name = $"Název: {Name.Indexed}";
+			string name = $"Název: {Name.Inner}";
 			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
@@ -360,8 +360,8 @@ namespace Game.Terrain
 		protected void LogUsage(Character sender, Vector2 manipulationPoint)
 		{
 			string title = "Dveře reagují na použití";
-			string doorName = $"Název: {Name.Indexed}";
-			string characterName = $"Postava: {sender.Name.Indexed}";
+			string doorName = $"Název: {Name.Inner}";
+			string characterName = $"Postava: {sender.Name.Inner}";
 			string doorType = $"typ dveří: {TypeDescription}";
 			string doorState = $"Stav dveří: {GetStateDescription()}";
 			string point = $"Bod: {manipulationPoint.GetString()}";
@@ -378,7 +378,7 @@ namespace Game.Terrain
 		private void LogRattling()
 		{
 			string title = "Lomcování dveřmi";
-			string name = $"Název: {Name.Indexed}";
+			string name = $"Název: {Name.Inner}";
 			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
@@ -406,7 +406,7 @@ namespace Game.Terrain
 		private void LogOpening()
 		{
 			string title = "Dveře otevřeny";
-			string name = $"Název: {Name.Indexed}";
+			string name = $"Název: {Name.Inner}";
 			string type = $"typ dveří: {TypeDescription}";
 
 			Logger.LogInfo(title, name, type);
@@ -415,7 +415,7 @@ namespace Game.Terrain
 		protected void Lock()
 		{
 			if (Locked)
-				throw new InvalidOperationException($"Attempt to lock locked door {Name.Indexed}");
+				throw new InvalidOperationException($"Attempt to lock locked door {Name.Inner}");
 
 			State = PassageState.Locked;
 			AnnounceManipulation();
@@ -425,7 +425,7 @@ namespace Game.Terrain
 		protected void Unlock()
 		{
 			if (!Locked)
-				throw new InvalidOperationException($"Attempt to unlock unlocked door {Name.Indexed}");
+				throw new InvalidOperationException($"Attempt to unlock unlocked door {Name.Inner}");
 			State = PassageState.Closed;
 			AnnounceManipulation();
 			LogLocking();

@@ -168,7 +168,7 @@ namespace Game
 		{
 			return
 				from l in GetZones()
-				let name = l.Name.Indexed
+				let name = l.Name.Inner
 				let position = name.Length - 2
 				where name.Substring(position, 1).ToLower() == "h"
 				select l;
@@ -258,10 +258,10 @@ namespace Game
 			if (c == null)
 				throw new ArgumentNullException(nameof(c));
 
-			if (_characters.ContainsKey(c.Name.Indexed))
+			if (_characters.ContainsKey(c.Name.Inner))
 				throw new ArgumentException("entity already registered");
 
-			_characters.Add(c.Name.Indexed, c);
+			_characters.Add(c.Name.Inner, c);
 		}
 
 		/// <summary>
@@ -274,10 +274,10 @@ namespace Game
 			if (o == null)
 				throw new ArgumentNullException(nameof(o));
 
-			if (_items.ContainsKey(o.Name.Indexed))
+			if (_items.ContainsKey(o.Name.Inner))
 				throw new ArgumentException("Object already registered");
 
-			_items.Add(o.Name.Indexed, o);
+			_items.Add(o.Name.Inner, o);
 		}
 
 		/// <summary>
@@ -291,10 +291,10 @@ namespace Game
 				throw new ArgumentNullException(nameof(zone));
 
 			// Isn't the zone already registered?
-			if (_zones.ContainsKey(zone.Name.Indexed))
+			if (_zones.ContainsKey(zone.Name.Inner))
 				throw new ArgumentException("Zone already registered");
 
-			_zones[zone.Name.Indexed] = zone;
+			_zones[zone.Name.Inner] = zone;
 			Map.RegisterZone(zone);
 		}
 
@@ -307,10 +307,10 @@ namespace Game
 			if (p == null)
 				throw new ArgumentNullException(nameof(p));
 
-			if (_passages.ContainsKey(p.Name.Indexed))
+			if (_passages.ContainsKey(p.Name.Inner))
 				throw new ArgumentException("Passage already registered");
 
-			_passages.Add(p.Name.Indexed, p);
+			_passages.Add(p.Name.Inner, p);
 		}
 
 		/// <summary>
@@ -416,7 +416,7 @@ namespace Game
 		public static Zone GetZone(string name)
 		{
 
-			_zones.TryGetValue(name.PrepareForIndexing(), out Zone zone);
+			_zones.TryGetValue(name.Sanitize(), out Zone zone);
 			return zone;
 		}
 
@@ -777,7 +777,7 @@ namespace Game
 			RuntimeTypeModel.Default.Add(typeof(Vector3), false).Add("x", "y", "z");
 		}
 
-		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.Sanitize() : element?.Attribute(attribute)?.Value;
 
 		private static Dictionary<string, GameObject> _zoneObjects;
 		private static Dictionary<string, GameObject> _itemObjects;
@@ -878,19 +878,19 @@ namespace Game
 		/// Unregisters the specified zone.
 		/// </summary>
 		/// <param name="l">The zone to be removed</param>
-		public static void Remove(Zone l) => _delayedActions.Enqueue(() => _zones.Remove(l.Name.Indexed));
+		public static void Remove(Zone l) => _delayedActions.Enqueue(() => _zones.Remove(l.Name.Inner));
 
 		/// <summary>
 		/// Unregisters the specified passage.
 		/// </summary>
 		/// <param name="p">The passage to be removed</param>
-		public static void Remove(Passage p) => _delayedActions.Enqueue(() => _passages.Remove(p.Name.Indexed));
+		public static void Remove(Passage p) => _delayedActions.Enqueue(() => _passages.Remove(p.Name.Inner));
 
 		/// <summary>
 		/// Unregisters the specified object.
 		/// </summary>
 		/// <param name="o">The object to be removed</param>
-		public static void Remove(Entity o) => _delayedActions.Enqueue(() => _items.Remove(o.Name.Indexed));
+		public static void Remove(Entity o) => _delayedActions.Enqueue(() => _items.Remove(o.Name.Inner));
 
 		/// <summary>
 		/// Starts game from the begining.

@@ -47,7 +47,7 @@ List<NavigableItemInfo> info = 				records
 
 			string name = info.Item.Name.Friendly;
 			if (Settings.SayInnerItemNames)
-				name += " " + info.Item.Name.Indexed;
+				name += " " + info.Item.Name.Inner;
 
 			// Join it all
 			List<string> result = new(){name,distanceDescription,angleDescription};

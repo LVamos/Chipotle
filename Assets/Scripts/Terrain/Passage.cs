@@ -33,7 +33,7 @@ namespace Game.Terrain
 		public PassageSave Export()
 		{
 			var save = base.Export().ToPassageSave();
-			save.PlayersZone = _playersZone?.Name?.Indexed;
+			save.PlayersZone = _playersZone?.Name?.Inner;
 			save.Zones = _zones;
 			save.State = State;
 			save.TypeDescription = TypeDescription;
@@ -65,7 +65,7 @@ namespace Game.Terrain
 		/// Returns text description of the passage.
 		/// </summary>
 		/// <returns>text description of the passage</returns>
-		public override string ToString() => $"{TypeDescription}: {_zones[0]}, {_zones[1]}; {Name.Indexed}";
+		public override string ToString() => $"{TypeDescription}: {_zones[0]}, {_zones[1]}; {Name.Inner}";
 
 		public string TypeDescription { get; protected set; }
 
@@ -179,7 +179,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="comparedZone">The zone to be compared</param>
 		/// <returns>The other side of the passage than the specified one</returns>
-		public Zone AnotherZone(Zone comparedZone) => Zones.First(l => l.Name.Indexed != comparedZone.Name.Indexed);
+		public Zone AnotherZone(Zone comparedZone) => Zones.First(l => l.Name.Inner != comparedZone.Name.Inner);
 
 		/// <summary>
 		/// Displays the passage in the game world.

@@ -184,7 +184,7 @@ public static class sceneSetup
 		return obj;
 	}
 
-	private static string Attribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute).Value.PrepareForIndexing() : element.Attribute(attribute).Value;
+	private static string Attribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute).Value.Sanitize() : element.Attribute(attribute).Value;
 
 	private static bool _eventHandlerAssigned;
 

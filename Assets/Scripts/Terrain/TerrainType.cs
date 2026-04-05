@@ -145,7 +145,7 @@ namespace Game.Terrain
 		/// <returns>The terrain type enum</returns>
 		public static TerrainType ToTerrainType(this string s)
 		{
-			string terrainDescription = s.PrepareForIndexing();
+			string terrainDescription = s.Sanitize();
 			int index = Array.IndexOf(_descriptions, terrainDescription);
 			int index2 = Array.IndexOf(_descriptions4Case, terrainDescription);
 

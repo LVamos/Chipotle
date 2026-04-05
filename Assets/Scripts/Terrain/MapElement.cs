@@ -155,7 +155,7 @@ namespace Game.Terrain
 		/// Returns the public name of the element.
 		/// </summary>
 		/// <returns>Public name of the element</returns>
-		public override string ToString() => Name.Indexed;
+		public override string ToString() => Name.Inner;
 
 		/// <summary>
 		/// Destroys the element.
@@ -398,10 +398,10 @@ namespace Game.Terrain
 		{
 			return obj is MapElement element &&
 				   base.Equals(obj) &&
-				   Name.Indexed == element.Name.Indexed;
+				   Name.Inner == element.Name.Inner;
 		}
 
-		public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Name.Indexed);
+		public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Name.Inner);
 
 		public Zone GetZoneNearPlayer()
 		{

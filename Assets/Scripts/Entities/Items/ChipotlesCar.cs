@@ -70,7 +70,7 @@ data.UsableWith
 
 			// Save visited zones
 			save.VisitedZones = _visitedZones
-				.Select(z => z.Name.Indexed)
+				.Select(z => z.Name.Inner)
 				.ToHashSet();
 
 			save.AllowedDestinations = new(_allowedDestinations);
@@ -217,7 +217,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			// When it's not allowed to use the car, play a knocking sound.
 			bool onDriveWay = _zones.Contains("příjezdová cesta w1");
 			bool walschAreaDone = WalshAreaObjectsUsed() && WalshAreaExplored();
-			bool onAsphaltRoad = Zones.Any(l => l.Name.Indexed == "asfaltka c1");
+			bool onAsphaltRoad = Zones.Any(l => l.Name.Inner == "asfaltka c1");
 			bool knock =
 				onDriveWay && !Moved && !walschAreaDone
 				|| onAsphaltRoad && !CarsonsBenchesUsed();
@@ -246,7 +246,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		private void AllowDestination(Zone destination)
 		{
 			if (!AllowedDestinations.Any(d => d == destination))
-				_allowedDestinations.Add(destination.Name.Indexed);
+				_allowedDestinations.Add(destination.Name.Inner);
 		}
 
 		/// <summary>
@@ -330,7 +330,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <completionlist cref="_destinations"/>
 		private void Move(Zone zone)
 		{
-			Vector2 point = _destinations[zone.Name.Indexed];
+			Vector2 point = _destinations[zone.Name.Inner];
 			Rectangle area = Rectangle.FromCenter(point, _area.Value.Height, _area.Value.Width);
 			Move(area);
 		}
@@ -346,7 +346,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// cutscene is defined then a predefined alternative is played.
 		/// </remarks>
 		private void Move(Zone zone, string cutscene)
-			=> Move(new Rectangle(_destinations[zone.Name.Indexed]), cutscene);
+			=> Move(new Rectangle(_destinations[zone.Name.Inner]), cutscene);
 
 		/// <summary>
 		/// Processes the MoveChipotlesCar message.
@@ -361,8 +361,8 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <param name="message">The message to be processed</param>
 		private void OnUnblockZone(UnblockZone message)
 		{
-			if (!_allowedDestinations.Contains(message.Zone.Name.Indexed))
-				_allowedDestinations.Add(message.Zone.Name.Indexed);
+			if (!_allowedDestinations.Contains(message.Zone.Name.Inner))
+				_allowedDestinations.Add(message.Zone.Name.Inner);
 		}
 
 		/// <summary>
@@ -371,7 +371,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <returns>True if all the Walsch's area was explored</returns>
 		private bool WalshAreaExplored()
 			=> Player.VisitedZones.Count() == 14
-			   && Player.VisitedZones.All(l => l.Name.Indexed.ToLower().Contains("w1"));
+			   && Player.VisitedZones.All(l => l.Name.Inner.ToLower().Contains("w1"));
 
 		/// <summary>
 		/// Checks if all crutial objects in Walsch's area were used.

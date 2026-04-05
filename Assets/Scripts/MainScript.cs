@@ -83,11 +83,11 @@ namespace Game
 				Vector2 position = World.Player.Area.Value.Center;
 				text.AppendLine("Verze: " + Version);
 				text.AppendLine("Pozice: " + position.ToString());
-				text.AppendLine("Lokace: " + World.Player.Zone.Name.Indexed);
+				text.AppendLine("Lokace: " + World.Player.Zone.Name.Inner);
 
 				// Get nearest objects
 				string[] objectList = World.GetNearestObjects(position)
-					.Where(o => o.Area.Value.GetDistanceFrom(position) < 10).Select(o => o.Name.Indexed).ToArray<string>();
+					.Where(o => o.Area.Value.GetDistanceFrom(position) < 10).Select(o => o.Name.Inner).ToArray<string>();
 				string objects = objectList.IsNullOrEmpty() ? "žádné" : string.Join(", ", objectList);
 				text.AppendLine("Okolní objekty: " + objects);
 			}

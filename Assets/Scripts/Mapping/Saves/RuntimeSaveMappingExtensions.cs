@@ -91,7 +91,7 @@ namespace Game.Mapping.Saves
 
 			return new()
 			{
-				Indexed = value.Indexed,
+				Indexed = value.Inner,
 				Friendly = value.Friendly
 			};
 		}

@@ -118,7 +118,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			string text = Owner.Zone.Name.Friendly;
 			if (Settings.SayInnerZoneNames)
-				text += " " + Owner.Zone.Name.Indexed;
+				text += " " + Owner.Zone.Name.Inner;
 			Tolk.Speak(text, true);
 		}
 
@@ -296,7 +296,7 @@ namespace Game.Entities.Characters.Chipotle
 				Zone targetZone = message.OccupiedPassage.AnotherZone(Owner.Zone);
 				string to = targetZone.To;
 				if (Settings.SayInnerZoneNames)
-					to += " " + targetZone.Name.Indexed;
+					to += " " + targetZone.Name.Inner;
 				Tolk.Speak($"Stojíš {type}{to}", true);
 				return;
 			}
@@ -394,7 +394,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			string text = _exitDescriber.GetDescription(message.Exit);
 			if (Settings.SayInnerPassageNames)
-				text += " " + message.Exit.Exit.Name.Indexed;
+				text += " " + message.Exit.Exit.Name.Inner;
 			Tolk.Speak(text);
 		}
 
@@ -429,7 +429,7 @@ namespace Game.Entities.Characters.Chipotle
 
 			string text = message.Object.Name.Friendly;
 			if (Settings.SayInnerItemNames && message.Object is Item)
-				text += " " + message.Object.Name.Indexed;
+				text += " " + message.Object.Name.Inner;
 			Tolk.Speak(text);
 		}
 

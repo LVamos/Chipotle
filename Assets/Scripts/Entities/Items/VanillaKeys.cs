@@ -110,7 +110,7 @@ namespace Game.Entities.Items
 
 		private void OnUseObjects(UseObjects message)
 		{
-			string target = message.Target?.Name.Indexed;
+			string target = message.Target?.Name.Inner;
 			if (target == null)
 				_cutscene = "DrumOnCar";
 			else if (target == "věšák v1")

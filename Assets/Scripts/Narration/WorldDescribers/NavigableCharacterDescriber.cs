@@ -43,7 +43,7 @@ List<NavigableCharacterInfo> info = 				records
 			string angleDescription = Angle.GetClockDirection(info.Angle);
 			string name = info.Character.Name.Friendly;
 			if (Settings.SayInnerItemNames)
-				name += " " + info.Character.Name.Indexed;
+				name += " " + info.Character.Name.Inner;
 
 			// Join it all
 			return new(){name,distanceDescription,angleDescription};

@@ -120,12 +120,12 @@ namespace Assets.Scripts.Audio
 
 		private void StopUnusedPortals()
 		{
-			AudioSource ambient2d = AmbientRegistry.TryGet2D(_owner.Name.Indexed);
+			AudioSource ambient2d = AmbientRegistry.TryGet2D(_owner.Name.Inner);
 			foreach (AudioSource portal in _portals.Values)
 			{
 				if (portal != ambient2d)
 				{
-					AmbientRegistry.UnregisterPortal(_owner.Name.Indexed, portal);
+					AmbientRegistry.UnregisterPortal(_owner.Name.Inner, portal);
 					Sounds.SlideVolume(portal, Settings.Ambient3dFadeDuration, 0);
 				}
 			}
@@ -140,12 +140,12 @@ namespace Assets.Scripts.Audio
 
 		private void FadeAmbientTo3d(PortalAnchor anchor)
 		{
-			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Indexed);
-			AmbientRegistry.Unregister2D(_owner.Name.Indexed);
-			AmbientRegistry.RegisterPortal(_owner.Name.Indexed, portal);
+			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Inner);
+			AmbientRegistry.Unregister2D(_owner.Name.Inner);
+			AmbientRegistry.RegisterPortal(_owner.Name.Inner, portal);
 			portal.transform.position = anchor.Position;
 			portal.maxDistance = _loop.PortalMaxDistance.Value;
-			portal.name = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Indexed);
+			portal.name = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Inner);
 			_portals[anchor.Passage] = portal;
 			SetPortalParameters(anchor, portal, false, true, true, true);
 			portal.rolloffMode = AudioRolloffMode.Linear;
@@ -202,16 +202,16 @@ namespace Assets.Scripts.Audio
 
 		private void PlayPortal(PortalAnchor anchor)
 		{
-			string description = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Indexed);
+			string description = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Inner);
 			AudioSource portal = Sounds.Play(_loop.Sound, anchor.Position, 0, true, description: description);
-			AmbientRegistry.RegisterPortal(_owner.Name.Indexed, portal);
+			AmbientRegistry.RegisterPortal(_owner.Name.Inner, portal);
 			SetPortalParameters(anchor, portal);
 			_portals[anchor.Passage] = portal;
 		}
 
 		private IEnumerator FadeAmbientTo3dDelayed(PortalAnchor anchor)
 		{
-			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Indexed);
+			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Inner);
 			if (portal != null)
 				MutePortal(portal);
 			yield return new WaitForSeconds(Settings.Ambient3dFadeDuration);
@@ -424,7 +424,7 @@ PlayersZone.SameAmbients(_loop.Sound)
 
 		private bool AudibleInPlayersZone()
 		{
-			return _loop.PortalAudibleZones.Contains(PlayersZone.Name.Indexed);
+			return _loop.PortalAudibleZones.Contains(PlayersZone.Name.Inner);
 		}
 
 		private void MutePortal(AudioSource portal)

@@ -66,7 +66,7 @@ namespace Game.Entities.Characters
 		private void OnPlaceItemResult(PlaceItemResult message)
 		{
 			if (message.Success)
-				_inventory.Remove(message.Item.Name.Indexed);
+				_inventory.Remove(message.Item.Name.Inner);
 		}
 
 		/// <summary>
@@ -155,7 +155,7 @@ namespace Game.Entities.Characters
 			foreach (CharacterComponent c in _components)
 			{
 				c.Initialize();
-				c.SetParent(Name.Indexed);
+				c.SetParent(Name.Inner);
 			}
 		}
 
@@ -180,7 +180,7 @@ namespace Game.Entities.Characters
 
 		private void OnDiscardInventoryItem(DiscardInventoryItem message)
 		{
-			string name = message.Item.Name.Indexed;
+			string name = message.Item.Name.Inner;
 			_inventory.Remove(name);
 		}
 
@@ -191,7 +191,7 @@ namespace Game.Entities.Characters
 		private void OnPickUpObjectResult(PickUpItemResult m)
 		{
 			if (m.Result == PickUpItemResult.ResultType.Success)
-				_inventory.Add(m.Object.Name.Indexed);
+				_inventory.Add(m.Object.Name.Inner);
 		}
 
 		/// <summary>
@@ -256,7 +256,7 @@ namespace Game.Entities.Characters
 		/// Processes the ZoneChanged message.
 		/// </summary>
 		/// <param name="message">The message to be processed</param>
-		private void OnZoneChanged(ZoneChanged message) => _zone = message.Target.Name.Indexed;
+		private void OnZoneChanged(ZoneChanged message) => _zone = message.Target.Name.Inner;
 
 		/// <summary>
 		/// Processes incoming messages.
@@ -309,7 +309,7 @@ namespace Game.Entities.Characters
 		{
 			Area = position;
 			transform.position = Center.ToVector3(1.8f);
-			_zone = zone.Name.Indexed;
+			_zone = zone.Name.Inner;
 		}
 
 		/// <summary>
@@ -318,7 +318,7 @@ namespace Game.Entities.Characters
 		protected void RecordZone(Zone sourceZone, Zone targetZone)
 		{
 			if (sourceZone != null && sourceZone != targetZone)
-				_visitedZones.Add(sourceZone.Name.Indexed);
+				_visitedZones.Add(sourceZone.Name.Inner);
 		}
 
 		/// <summary>

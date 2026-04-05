@@ -22,7 +22,7 @@ namespace Game
 		/// <summary>
 		/// Inner name for indexing purposes
 		/// </summary>
-		public readonly string Indexed;
+		public readonly string Inner;
 
 		private static readonly Dictionary<string, ushort> _stringsToIDs = new();
 		private static ushort _stringCount = 0;
@@ -41,14 +41,14 @@ namespace Game
 		/// <param name="friendlyName">Public name</param>
 		public Name(string indexedName, string friendlyName)
 		{
-			Indexed = indexedName.PrepareForIndexing();
+			Inner = indexedName.Sanitize();
 			Friendly = friendlyName;
 
 			// Assign an unique ID
-			if (!_stringsToIDs.TryGetValue(Indexed, out ID))
+			if (!_stringsToIDs.TryGetValue(Inner, out ID))
 			{
 				ID = ++_stringCount;
-				_stringsToIDs.Add(Indexed, ID);
+				_stringsToIDs.Add(Inner, ID);
 			}
 		}
 
@@ -56,7 +56,7 @@ namespace Game
 		/// Copy constructor
 		/// </summary>
 		/// <param name="name">An instance of Name</param>
-		public Name(Name name) : this(name.Indexed, name.Friendly) { }
+		public Name(Name name) : this(name.Inner, name.Friendly) { }
 
 		/// <summary>
 		/// Converts a string to Name
@@ -72,7 +72,7 @@ namespace Game
 		/// <param name="b">Second operand</param>
 		/// <returns>True if operands aren't equal</returns>
 		public static bool operator !=(Name a, Name b)
-			=> ReferenceEquals(a, b) || a.Indexed != b.Indexed || a.Friendly != b.Friendly;
+			=> ReferenceEquals(a, b) || a.Inner != b.Inner || a.Friendly != b.Friendly;
 
 		/// <summary>
 		/// Overload of != operator
@@ -150,6 +150,6 @@ namespace Game
 		/// </summary>
 		/// <returns>The string representation of this object</returns>
 		public override string ToString()
-			=> Indexed;
+			=> Inner;
 	}
 }

@@ -50,7 +50,7 @@ namespace Game.Entities
 		{
 			base.Initialize(name, area);
 			_sounds["navigation"] = "SonarLoop";
-			Type = type.PrepareForIndexing();
+			Type = type.Sanitize();
 		}
 
 		/// <summary>

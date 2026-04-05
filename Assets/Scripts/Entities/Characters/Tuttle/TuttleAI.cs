@@ -45,7 +45,7 @@ namespace Game.Entities.Characters.Tuttle
 			save.CollisionInterval = _collisionInterval;
 			save.GoToPoolWhenPositionSet = _goToPoolWhenPositionSet;
 			save.PlayerWasByPool = _playerWasByPool;
-			save.CarTargetZone = _carTargetZone?.Name?.Indexed;
+			save.CarTargetZone = _carTargetZone?.Name?.Inner;
 
 			return save;
 		}
@@ -254,7 +254,7 @@ namespace Game.Entities.Characters.Tuttle
 		{
 			Zone zone = m.Target.GetZones().First();
 
-			if (zone.Name.Indexed != "asfaltka c1")
+			if (zone.Name.Inner != "asfaltka c1")
 				_carMovement = m;
 
 			_carTargetZone = _carMovement.Target.GetZones().First();
@@ -268,7 +268,7 @@ namespace Game.Entities.Characters.Tuttle
 		private void OnZoneEntered(CharacterCameToZone message)
 		{
 			// When the player first time enters the zone start following him.
-			if (message.Character == _player && Owner.Zone.Name.Indexed == "bazén w1" && !_playerWasByPool)
+			if (message.Character == _player && Owner.Zone.Name.Inner == "bazén w1" && !_playerWasByPool)
 			{
 				_playerWasByPool = true;
 

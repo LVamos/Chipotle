@@ -7,6 +7,14 @@ namespace Game
 {
 	public static class SceneObjects
 	{
+		public static GameObject Create(string name, string tag)
+		{
+			GameObject obj = new(name);
+			obj.tag = tag;
+			_items[name] = obj;
+			return obj;
+		}
+
 		private static readonly Dictionary<string, GameObject> _zones = new();
 		private static readonly Dictionary<string, GameObject> _items = new();
 		private static readonly Dictionary<string, GameObject> _passages = new();

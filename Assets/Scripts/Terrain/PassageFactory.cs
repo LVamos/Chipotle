@@ -11,7 +11,7 @@ namespace Game.Terrain
 {
 	public static class PassageFactory
 	{
-		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.PrepareForIndexing() : element?.Attribute(attribute)?.Value;
+		private static string GetAttribute(XElement element, string attribute, bool prepareForIndexing = true) => prepareForIndexing ? element.Attribute(attribute)?.Value.Sanitize() : element?.Attribute(attribute)?.Value;
 
 		public static Passage Create(XElement passageNode, bool createGameObject = false)
 		{
@@ -79,8 +79,8 @@ namespace Game.Terrain
 		private static GameObject GetHostObject(Name name, bool create)
 		{
 			return !create
-				? SceneObjects.GetPassage(name.Indexed)
-				: SceneObjects.GetOrCreatePassage(name.Indexed);
+				? SceneObjects.GetPassage(name.Inner)
+				: SceneObjects.GetOrCreatePassage(name.Inner);
 		}
 
 		/// <summary>
@@ -104,14 +104,14 @@ namespace Game.Terrain
 		{
 			if (!createGameObject)
 			{
-				if (name == null || string.IsNullOrWhiteSpace(name.Indexed))
+				if (name == null || string.IsNullOrWhiteSpace(name.Inner))
 					throw new ArgumentNullException(nameof(name));
 				if (zones.IsNullOrEmpty() || zones.Count() != 2)
 					throw new ArgumentException("Invalid zones.");
 			}
 			GameObject obj = GetHostObject(name, createGameObject);
 			Passage passage = null;
-			if (_types.TryGetValue(name.Indexed, out Type passageType))
+			if (_types.TryGetValue(name.Inner, out Type passageType))
 			{
 				passage = obj.GetComponent(passageType) as Passage;
 				passage.Initialize(name, area, zones);

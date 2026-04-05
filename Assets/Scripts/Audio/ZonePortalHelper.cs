@@ -29,7 +29,7 @@ namespace Game.Audio
 		public static string GetDescription(Passage passage, string zoneName)
 		{
 			Zone[] zones = passage.Zones.ToArray();
-			string description = $"3d portal ambient for {zoneName}; passage between {zones[0].Name.Indexed} and {zones[1].Name.Indexed}";
+			string description = $"3d portal ambient for {zoneName}; passage between {zones[0].Name.Inner} and {zones[1].Name.Inner}";
 			return description;
 		}
 
