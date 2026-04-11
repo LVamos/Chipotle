@@ -132,7 +132,7 @@ namespace Game.UI
 			switch (_usedItems[choice][0])
 			{
 				case "Nová hra": _menuInactive = true; StartCoroutine(StartGame()); break;
-				case "Pokračovat ve hře": _menuInactive = true; LoadGame(); break;
+				case "Pokračovat ve hře": _menuInactive = true; StartCoroutine(LoadGame()); break;
 				case "Test sluchátek": SpeakerTest(); break;
 				case "Návod": Help(); RunMainMenu(); break;
 				case "Ovládání": ControllSettings(); break;
@@ -156,8 +156,9 @@ namespace Game.UI
 		/// <summary>
 		/// Loads a saved game from file.
 		/// </summary>
-		private void LoadGame()
+		private IEnumerator LoadGame()
 		{
+			yield return StopLoop(_jingleBeforeGameEndTrim);
 			WindowHandler.Switch(GameWindow.CreateInstance());
 
 			StopLoop();
