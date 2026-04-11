@@ -19,7 +19,7 @@ namespace Game.Entities.Characters.Bartender
 	/// </summary>
 	public class BartenderAI : AI
 	{
-		public void Restore(ComponentSave save)
+		public override void Restore(ComponentSave save)
 		{
 			if (save is not BartenderAISave data)
 				return;
@@ -29,9 +29,9 @@ namespace Game.Entities.Characters.Bartender
 			_wasChipotleHere = data.WasChipotleHere;
 		}
 
-		public BartenderAISave Export()
+		public override ComponentSave Export()
 		{
-			var save = base.Export().ToBartenderAISave();
+			var save = (base.Export() as AISave).ToBartenderAISave();
 
 			save.SayGoodbyeToChipotle = _sayGoodbyeToChipotle;
 			save.VelcomeChipotle = _velcomeChipotle;
@@ -39,8 +39,6 @@ namespace Game.Entities.Characters.Bartender
 
 			return save;
 		}
-
-		private readonly Zone BonitaStreet = World.GetZone("ulice h1");
 
 		/// <summary>
 		/// Determines whether the bartender NPC should say goodbye to the detective Chipotle NPC
@@ -106,7 +104,11 @@ namespace Game.Entities.Characters.Bartender
 		/// Checks if the Detective's car object is in Bonita street (ulice h1) zone.
 		/// </summary>
 		/// <returns>True if the Detective's car object is in Bonita street (ulice h1) zone</returns>
-		private bool IsChipotlesCarNearBy() => BonitaStreet.IsItHere(ChipotlesCar);
+		private bool IsChipotlesCarNearBy()
+		{
+			Zone street = World.GetZone("ulice h1");
+			return street.IsItHere(ChipotlesCar);
+		}
 
 		/// <summary>
 		/// Processes the EntityMoved message.

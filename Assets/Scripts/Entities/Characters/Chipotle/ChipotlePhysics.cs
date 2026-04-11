@@ -46,12 +46,13 @@ namespace Game.Entities.Characters.Chipotle
 	/// </summary>
 	public class ChipotlePhysics : Physics
 	{
-		public void Restore(ComponentSave save)
+		public override void Restore(ComponentSave save)
 		{
 			if (save is not ChipotlePhysicsSave data)
 				return;
 
 			base.Restore(data);
+
 			_currentRegion = data.CurrentRegion;
 			_inVisitedRegion = data.InVisitedRegion;
 			_phoneCountdown = data.PhoneCountdown;
@@ -63,9 +64,9 @@ namespace Game.Entities.Characters.Chipotle
 			_walshesBenchUsed = data.WalshesBenchUsed;
 		}
 
-		public ChipotlePhysicsSave Export()
+		public override ComponentSave Export()
 		{
-			var save = base.Export().ToChipotlePhysicsSave();
+			var save = (base.Export() as PhysicsSave).ToChipotlePhysicsSave();
 
 			save.CurrentRegion = _currentRegion;
 			save.InVisitedRegion = _inVisitedRegion;
@@ -277,10 +278,6 @@ namespace Game.Entities.Characters.Chipotle
 		public override void Activate()
 		{
 			base.Activate();
-			_orientation = new(0, 1)
-			{
-				Chipotle = true
-			};
 			OrientationChanged message = new(this, _orientation, _orientation, TurnType.None, false, true);
 			InnerMessage(message);
 		}

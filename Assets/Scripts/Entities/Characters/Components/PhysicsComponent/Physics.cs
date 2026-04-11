@@ -31,23 +31,30 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 	public class Physics : CharacterComponent
 	{
-		public void Restore(ComponentSave save)
+		public override void Initialize()
+		{
+			base.Initialize();
+			_random = new();
+		}
+
+		public override void Restore(ComponentSave save)
 		{
 			if (save is not PhysicsSave data)
 				return;
 
 			base.Restore(data);
+
 			_state = data.State;
-			_area = data.Area.ToRectangle();
-			_goal = data.Goal.ToVector2();
-			_inventory = new(data.Inventory);
+			_area = data.Area?.ToRectangle();
+			_goal = data.Goal != null ? data.Goal.ToVector2() : default;
+			_inventory = data.Inventory != null ? new(data.Inventory) : null;
 			_maxObjectDistance = data.MaxObjectDistance;
 			_minObjectDistance = data.MinObjectDistance;
 			_navigableObjectsRadius = data.NavigableObjectsRadius;
 			_nearbyWalls = data.NearbyWalls;
 			_objectManipulationHelpRadius = data.ObjectManipulationHelpRadius;
-			_orientation = new(data.Orientation.ToVector2());
-			_path = data.Path.ToVector2Queue();
+			_orientation = data.Orientation != null ? new(data.Orientation.ToVector2()) : default;
+			_path = !data.Path.IsNullOrEmpty() ? data.Path.ToVector2Queue() : null;
 			_restartApproaching = data.RestartApproaching;
 			_speed = data.Speed;
 			_stepLength = data.StepLength;
@@ -57,21 +64,21 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			Width = data.Width;
 		}
 
-		public PhysicsSave Export()
+		public override ComponentSave Export()
 		{
 			var save = base.Export().ToPhysicsSave();
 
 			save.State = _state;
 			save.Area = _area.Value.ToRectangleSave();
-			save.Goal = _goal.ToVector2Save();
-			save.Inventory = new(_inventory);
+			save.Goal = _goal?.ToVector2Save();
+			save.Inventory = !_inventory.IsNullOrEmpty() ? new(_inventory) : null;
 			save.MaxObjectDistance = _maxObjectDistance;
 			save.MinObjectDistance = _minObjectDistance;
 			save.NavigableObjectsRadius = _navigableObjectsRadius;
 			save.NearbyWalls = _nearbyWalls;
 			save.ObjectManipulationHelpRadius = _objectManipulationHelpRadius;
 			save.Orientation = _orientation.UnitVector.ToVector2Save();
-			save.Path = _path.ToVector2SaveQueue();
+			save.Path = !_path.IsNullOrEmpty() ? _path.ToVector2SaveQueue() : null;
 			save.RestartApproaching = _restartApproaching;
 			save.Speed = _speed;
 			save.StepLength = _stepLength;
@@ -373,7 +380,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		/// <summary>
 		/// The goal that Tuttle is just going to.
 		/// </summary>
-		protected Vector2 _goal;
+		protected Vector2? _goal;
 
 		/// <summary>
 		/// Returns reference to the tile the NPC currently stands on.
@@ -475,10 +482,6 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		/// <param name="message">The message to be handled</param>
 		protected virtual void OnGameReloaded(Reloaded message)
 		{
-			InnerMessage(new OrientationChanged(this, _orientation, _orientation, TurnType.None, true));
-			InnerMessage(new PositionChanged(this, _area.Value, _area.Value, Zone, Zone, ObstacleType.None, true));
-			_random = new();
-
 			// Try to find a new path to the player if necessary.
 			if (_state == CharacterState.GoingToPlayer)
 				FindNewPathToPlayer();
@@ -807,7 +810,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		/// Computes distance between the NPC and the current goal.
 		/// </summary>
 		/// <returns>Distance between the NPC and the current goal</returns>
-		protected float GetDistanceToGoal() => World.GetDistance(_area.Value.Center, _goal);
+		protected float GetDistanceToGoal() => World.GetDistance(_area.Value.Center, _goal.Value);
 
 		protected bool HasReachedTarget() => (_state != CharacterState.GoingToPlayer && _path.IsNullOrEmpty()) || HasReachedPlayer();
 
@@ -855,7 +858,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 				return;
 			}
 
-			_path = FindPath(_goal);
+			_path = FindPath(_goal.Value);
 
 			if (_path == null)
 				return;
@@ -1037,7 +1040,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		/// </summary>
 		public override void Activate()
 		{
-			_orientation = new(0, 1);
+			_orientation = Owner.Orientation;
 			_area = Owner.Area;
 			base.Activate();
 		}
@@ -1164,7 +1167,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			Rectangle area = Rectangle.FromCenter(point.Value, Height, Width);
 			if (DetectCollisions(area))
 			{
-				_path = FindPath(_goal, false);
+				_path = FindPath(_goal.Value, false);
 				return;
 			}
 

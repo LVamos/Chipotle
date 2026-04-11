@@ -27,7 +27,7 @@ namespace Game.Entities.Items
 
 	public class ChipotlesCar : Item
 	{
-		public void Restore(ItemSave save)
+		public override void Restore(ItemSave save)
 		{
 			if (save is not ChipotlesCarSave data)
 				return;
@@ -64,16 +64,18 @@ data.UsableWith
 			_descriptionID = data.DescriptionID;
 		}
 
-		public ChipotlesCarSave Export()
+		public ItemSave Export()
 		{
 			var save = base.Export().ToChipotlesCarSave();
 
 			// Save visited zones
-			save.VisitedZones = _visitedZones
+			if (_visitedZones.IsNullOrEmpty())
+				save.VisitedZones = null;
+			else save.VisitedZones = _visitedZones
 				.Select(z => z.Name.Inner)
 				.ToHashSet();
 
-			save.AllowedDestinations = new(_allowedDestinations);
+			save.AllowedDestinations = !_allowedDestinations.IsNullOrEmpty() ? new(_allowedDestinations) : null;
 
 			return save;
 		}
@@ -128,7 +130,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 
 		public override void Initialize(
 			Name name,
-			Rectangle area,
+			Rectangle? area,
 			string type,
 			bool decorative,
 			bool pickable,

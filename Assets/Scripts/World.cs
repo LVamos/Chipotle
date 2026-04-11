@@ -416,7 +416,7 @@ namespace Game
 		public static Zone GetZone(string name)
 		{
 
-			_zones.TryGetValue(name.Sanitize(), out Zone zone);
+			_zones.TryGetValue(name, out Zone zone);
 			return zone;
 		}
 
@@ -690,16 +690,16 @@ namespace Game
 										&& (p == null || p is { State: PassageState.Open });
 		}
 
-		public static void ApplySave(GameSave gameSave, TileMap map)
+		public static void ApplySave(GameSave game, TileMap map)
 		{
-			if (gameSave == null)
-				throw new ArgumentException(nameof(gameSave));
+			if (game == null)
+				throw new ArgumentException(nameof(game));
 
 			Init();
 			Map = map;
 
 			// Restore zones
-			foreach (ZoneSave save in gameSave.Zones)
+			foreach (ZoneSave save in game.Zones)
 			{
 				Zone zone = ZoneFactory.Create(true, save.Name.ToName());
 				zone.Restore(save);
@@ -707,21 +707,28 @@ namespace Game
 			}
 
 			// Restore characters
-			if (gameSave.Characters.IsNullOrEmpty())
+			if (game.Characters.IsNullOrEmpty())
 				throw new InvalidOperationException("No characters");
 
-			foreach (CharacterSave save in gameSave.Characters)
+			foreach (CharacterSave save in game.Characters)
 			{
-				Vector2 position = save.Area.ToRectangle().Center;
+				Vector2 position = save.Area.ToRectangle().Value.Center;
+				Vector2 orientation = save.Orientation.ToVector2();
 				Vector3 dimensions = save.Dimensions.ToVector3();
-				Character character = CharacterFactory.Create(save.Type, position, dimensions);
+				Character character = CharacterFactory.Create(
+					save.Type,
+					position,
+					orientation,
+					dimensions);
 				character.Restore(save);
 				Add(character);
 			}
-			Player = GetCharacter("chipotle");
+
+			Player = GetCharacter("chipotle")
+				?? throw new InvalidOperationException("Player nto found");
 
 			// Restore items
-			foreach (ItemSave save in gameSave.Items)
+			foreach (ItemSave save in game.Items)
 			{
 				Item item = ItemFactory.Create(
 					true,
@@ -734,7 +741,7 @@ namespace Game
 			}
 
 			// Restore passages
-			foreach (PassageSave save in gameSave.Passages)
+			foreach (PassageSave save in game.Passages)
 			{
 				Passage passage = PassageFactory.Create(
 					true,
@@ -937,38 +944,68 @@ namespace Game
 		private static void CreateCharacters()
 		{
 			Vector3 dimensions = new(.4f, 2, .4f);
+			Vector2 orientation = new(0, 1);
+
 
 			// Chipotle
 			Vector2 chipotlePosition = Settings.TestChipotleStartPosition ?? new(1032, 1034);
-			Player = CharacterFactory.Create("chipotle", chipotlePosition, dimensions);
+			Player = CharacterFactory.Create(
+				"chipotle",
+				chipotlePosition,
+				orientation,
+				dimensions);
 			Add(Player);
 
 			// Carson
 			Vector2 carsonPosition = new(1225, 1019.4f);
-			Add(CharacterFactory.Create("carson", carsonPosition, dimensions));
+			Add(CharacterFactory.Create(
+				"carson",
+				carsonPosition,
+				orientation,
+				dimensions));
 
 			// Christine
 			Vector2 christinePosition = new(1775.8f, 1114.7f);
-			Add(CharacterFactory.Create("christine", christinePosition, dimensions));
+			Add(CharacterFactory.Create(
+				"christine",
+				christinePosition,
+				orientation,
+				dimensions));
 
 			// Mariotti
 			Vector2 mariottiPosition = new(2013.3f, 1129.1f);
-			Add(CharacterFactory.Create("mariotti", mariottiPosition, dimensions));
+			Add(CharacterFactory.Create(
+				"mariotti",
+				mariottiPosition,
+				orientation,
+				dimensions));
 
 			// Sweeney
 			Vector2 sweeneyPosition = new(1402.3f, 955.7f);
-			Add(CharacterFactory.Create("sweeney", sweeneyPosition, dimensions));
+			Add(CharacterFactory.Create(
+				"sweeney",
+				sweeneyPosition,
+				orientation,
+				dimensions));
 
 			// Tuttle
 			Vector2 tuttlePosition;
 			if (Settings.AllowTuttlesCustomPosition && Settings.TuttleTestStart.HasValue)
 				tuttlePosition = Settings.TuttleTestStart.Value;
 			else tuttlePosition = new(1031.8f, 1035.5f);
-			Add(CharacterFactory.Create("tuttle", tuttlePosition, dimensions));
+			Add(CharacterFactory.Create(
+				"tuttle",
+				tuttlePosition,
+				orientation,
+				dimensions));
 
 			// Bartender
 			Vector2 bartenderPosition = new(1556.9f, 1073.2f);
-			Add(CharacterFactory.Create("bartender", bartenderPosition, dimensions));
+			Add(CharacterFactory.Create(
+				"bartender",
+				bartenderPosition,
+				orientation,
+				dimensions));
 		}
 
 		/// <summary>

@@ -18,7 +18,7 @@ namespace Game.Entities.Characters
 {
 	public static class CharacterFactory
 	{
-		private static readonly Dictionary<string, Func<Vector2, Vector3, Character>> _map = new(StringComparer.OrdinalIgnoreCase)
+		private static readonly Dictionary<string, Func<Vector2, Vector2, Vector3, Character>> _map = new(StringComparer.OrdinalIgnoreCase)
 	{
 		{ "Carson", CreateCarson },
 		{ "Chipotle", CreateChipotle },
@@ -29,20 +29,27 @@ namespace Game.Entities.Characters
 		{ "Bartender", CreateBartender }
 	};
 
-		public static Character Create(string type, Vector2 position, Vector3 dimensions)
+		public static Character Create(
+			string type,
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
-			Func<Vector2, Vector3, Character> action;
+			Func<Vector2, Vector2, Vector3, Character> action;
 			if (!_map.TryGetValue(type, out action))
 				throw new Exception($"Unknown character type: {type}");
 
-			return action(position, dimensions);
+			return action(position, orientation, dimensions);
 		}
 
 		/// <summary>
 		/// Creates new instance of the Carson NPC.
 		/// </summary>
 		/// <returns>New instance of the NPC</returns>
-		public static Character CreateCarson(Vector2 position, Vector3 dimensions)
+		public static Character CreateCarson(
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
 			GameObject obj = new("Carson");
 			Character carson = obj.AddComponent<Character>() as Character;
@@ -55,6 +62,7 @@ namespace Game.Entities.Characters
 				new("Carson", "David Carson"),
 				"Carson",
 				position,
+				orientation,
 				dimensions,
 				ai,
 				null,
@@ -68,7 +76,10 @@ namespace Game.Entities.Characters
 		/// Creates new instance of the Detective Chipotle NPC.
 		/// </summary>
 		/// <returns>New instance of the NPC</returns>
-		public static Character CreateChipotle(Vector2 position, Vector3 dimensions)
+		public static Character CreateChipotle(
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
 			GameObject obj = new("Chipotle");
 			Character chipotle = obj.AddComponent<Character>() as Character;
@@ -80,6 +91,7 @@ namespace Game.Entities.Characters
 				new("Chipotle", "detektiv Chipotle"),
 				"Chipotle",
 				position,
+				orientation,
 				dimensions,
 				null,
 				input,
@@ -93,7 +105,10 @@ namespace Game.Entities.Characters
 		/// Creates new instance of the Christine NPC.
 		/// </summary>
 		/// <returns>New instance of the NPC</returns>
-		public static Character CreateChristine(Vector2 position, Vector3 dimensions)
+		public static Character CreateChristine(
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
 			GameObject obj = new("Christine");
 			Character christine = obj.AddComponent<Character>() as Character;
@@ -106,6 +121,7 @@ namespace Game.Entities.Characters
 				new("Christine", "Christine Piercová"),
 				"Christine",
 				position,
+				orientation,
 				dimensions,
 				ai,
 				null,
@@ -119,7 +135,10 @@ namespace Game.Entities.Characters
 		/// Creates new instance of the Mariotti NPC.
 		/// </summary>
 		/// <returns>New instance of the NPC</returns>
-		public static Character CreateMariotti(Vector2 position, Vector3 dimensions)
+		public static Character CreateMariotti(
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
 			GameObject obj = new("Mariotti");
 			Character mariotti = obj.AddComponent<Character>() as Character;
@@ -132,6 +151,7 @@ namespace Game.Entities.Characters
 				new("Mariotti", "Paolo Mariotti"),
 				"Mariotti",
 				position,
+				orientation,
 				dimensions,
 				ai,
 				null,
@@ -145,7 +165,10 @@ namespace Game.Entities.Characters
 		/// Creates new instance of the Sweeney NPC.
 		/// </summary>
 		/// <returns>New instance of the NPC</returns>
-		public static Character CreateSweeney(Vector2 position, Vector3 dimensions)
+		public static Character CreateSweeney(
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
 			GameObject obj = new("Sweeney");
 			Character sweeney = obj.AddComponent<Character>() as Character;
@@ -157,6 +180,7 @@ namespace Game.Entities.Characters
 				new("Sweeney", "Derreck Sweeney"),
 				"Sweeney",
 				position,
+				orientation,
 				dimensions,
 				ai,
 				null,
@@ -170,7 +194,10 @@ namespace Game.Entities.Characters
 		/// Creates new instance of the Tuttle NPC.
 		/// </summary>
 		/// <returns>New instance of the NPC</returns>
-		public static Character CreateTuttle(Vector2 position, Vector3 dimensions)
+		public static Character CreateTuttle(
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
 			GameObject obj = new("Tuttle");
 			Character tuttle = obj.AddComponent<Character>() as Character;
@@ -182,6 +209,7 @@ namespace Game.Entities.Characters
 				new("Tuttle", "parťák"),
 				"Tuttle",
 				position,
+				orientation,
 				dimensions,
 				ai,
 				null,
@@ -195,7 +223,10 @@ namespace Game.Entities.Characters
 		/// Creates new instance of the Bartender NPC.
 		/// </summary>
 		/// <returns>New instance of the NPC</returns>
-		public static Character CreateBartender(Vector2 position, Vector3 dimensions)
+		public static Character CreateBartender(
+			Vector2 position,
+			Vector2 orientation,
+			Vector3 dimensions)
 		{
 			GameObject obj = new("Bartender");
 			Character bartender = obj.AddComponent<Character>() as Character;
@@ -206,6 +237,7 @@ namespace Game.Entities.Characters
 				new("Bartender", "pingl"),
 				"Bartender",
 				position,
+				orientation,
 				dimensions,
 				ai,
 				null,

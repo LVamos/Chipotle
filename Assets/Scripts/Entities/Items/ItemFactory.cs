@@ -199,7 +199,9 @@ namespace Game.Entities.Items
 			ItemCreationParametersModel parameters;
 			if (_itemParameters.TryGetValue(type, out parameters))
 			{
-				item = obj.GetComponent<Item>() as Item
+				if (createGameObject)
+					item = obj.AddComponent<Item>();
+				else item = obj.GetComponent<Item>() as Item
 				?? throw new InvalidOperationException($"Item creation failed: {type}");
 
 				item.Initialize(

@@ -13,7 +13,7 @@ namespace Game.Entities.Items
 	/// <summary>
 	/// Represents the grill object in the zahrada c1 zone.
 	/// </summary>
-	
+
 	public class CarsonsGrill : Item
 	{
 		/// <summary>
@@ -23,7 +23,7 @@ namespace Game.Entities.Items
 		/// <param name="area">The coordinates of the area that the object occupies</param>
 		public override void Initialize(
 			Name name,
-			Rectangle area,
+			Rectangle? area,
 			string type,
 			bool decorative,
 			bool pickable,

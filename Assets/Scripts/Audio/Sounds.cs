@@ -162,7 +162,8 @@ namespace Game.Audio
 		private static float? _volumeBackup;
 		public static void Mute(float duration = .5f) => _soundManager?.Mute(duration);
 
-		public static void Unmute(float duration = .5f) => _soundManager.Unmute();
+		public static void Unmute(float duration = .5f)
+			=> _soundManager?.Unmute();
 
 		public static void SwitchTo2d(AudioSource audioSource, bool disableLowPass = true) => _soundManager.ConvertTo2d(audioSource, disableLowPass);
 

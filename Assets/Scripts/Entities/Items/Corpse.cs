@@ -13,7 +13,7 @@ namespace Game.Entities.Items
 	/// <remarks>
 	/// The object is destroyed when the Detective's car object moves out of the příjezdová cesta w1 zone.
 	/// </remarks>
-	
+
 	public class Corpse : Item
 	{
 		/// <summary>
@@ -23,7 +23,7 @@ namespace Game.Entities.Items
 		/// <param name="area">The coordinates of the area that the object occupies</param>
 		public override void Initialize(
 			Name name,
-			Rectangle area,
+			Rectangle? area,
 			string type,
 			bool decorative,
 			bool pickable,

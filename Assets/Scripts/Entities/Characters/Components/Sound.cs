@@ -19,7 +19,7 @@ namespace Game.Entities.Characters.Components
 
 	public class Sound : CharacterComponent
 	{
-		public void Restore(ComponentSave save)
+		public override void Restore(ComponentSave save)
 		{
 			if (save is not SoundSave data)
 				return;
@@ -29,7 +29,7 @@ namespace Game.Entities.Characters.Components
 			_walkVolume = data.WalkVolume;
 		}
 
-		public SoundSave Export()
+		public override ComponentSave Export()
 		{
 			var save = base.Export().ToSoundSave();
 			save.AnnounceWalls = _announceWalls;

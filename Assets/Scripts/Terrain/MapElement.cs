@@ -32,7 +32,7 @@ namespace Game.Terrain
 		{
 			Initialize(
 				data.Name.ToName(),
-				data.Area.ToRectangle()
+				data.Area != null ? data.Area.ToRectangle() : null
 				);
 			_sounds = !data.Sounds.IsNullOrEmpty() ? new(data.Sounds) : null;
 			Usable = data.Usable;
@@ -44,7 +44,7 @@ namespace Game.Terrain
 			MapElementSave save = new()
 			{
 				Name = Name.ToNameSave(),
-				Area = Area.Value.ToRectangleSave(),
+				Area = Area != null ? Area.Value.ToRectangleSave() : null,
 				Sounds = _sounds != null ? new(_sounds) : null,
 				Usable = this.Usable,
 				UsableWith = UsableWith != null ? new(UsableWith) : null

@@ -19,7 +19,7 @@ namespace Game.Entities.Characters.Carson
 	/// </summary>
 	public class CarsonAI : AI
 	{
-		public void Restore(ComponentSave save)
+		public override void Restore(ComponentSave save)
 		{
 			if (save is not CarsonAISave data)
 				return;
@@ -28,9 +28,9 @@ namespace Game.Entities.Characters.Carson
 			_yelledAtChipotle = data.YelledAtChipotle;
 		}
 
-		public CarsonAISave Export()
+		public override ComponentSave Export()
 		{
-			var save = base.Export().ToCarsonAISave();
+			var save = (base.Export() as AISave).ToCarsonAISave();
 
 			save.SaidGoodbyeToChipotle = _saidGoodbyeToChipotle;
 			save.YelledAtChipotle = _yelledAtChipotle;

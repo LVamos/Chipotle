@@ -24,7 +24,7 @@ namespace Game.Entities.Characters.Components
 
 	public class AI : CharacterComponent
 	{
-		public void Restore(ComponentSave save)
+		public override void Restore(ComponentSave save)
 		{
 			if (save is not AISave data)
 				return;
@@ -37,11 +37,11 @@ namespace Game.Entities.Characters.Components
 			_state = data.State;
 		}
 
-		public AISave Export()
+		public override ComponentSave Export()
 		{
 			var save = base.Export().ToAISave();
 
-			save.Area = _area.ToRectangleSave();
+			save.Area = _area != null ? _area.Value.ToRectangleSave() : null;
 			save.Hidden = _hidden;
 			save.MaxObjectDistance = _maxObjectDistance;
 			save.MinObjectDistance = _minObjectDistance;
@@ -58,7 +58,7 @@ namespace Game.Entities.Characters.Components
 		/// <summary>
 		/// Area occupied by the NPC
 		/// </summary>
-		protected Rectangle _area;
+		protected Rectangle? _area;
 
 		/// <summary>
 		/// Indicates if the NPC is invisible for other NPCs and objects.
@@ -108,7 +108,7 @@ namespace Game.Entities.Characters.Components
 		private List<Vector2> GetPointsAround(Rectangle target, float minDistance, float maxDistance)
 		{
 			return Rectangle.GetPointsAround(target, minDistance, maxDistance, PlacementFinder.ValidplacementsResolution)
-.Where(p => !_area.Contains(p))
+.Where(p => !_area.Value.Contains(p))
 .ToList();
 		}
 

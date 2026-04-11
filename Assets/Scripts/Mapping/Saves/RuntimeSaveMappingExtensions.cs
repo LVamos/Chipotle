@@ -17,11 +17,16 @@ namespace Game.Mapping.Saves
 		LowerRight = value.LowerRightCorner.ToVector2Save()
 	};
 
-		public static Rectangle ToRectangle(this RectangleSave value)
-			=> new(
-				value.UpperLeft.ToVector2(),
-				value.LowerRight.ToVector2()
-				);
+		public static Rectangle? ToRectangle(this RectangleSave value)
+		{
+			if (value == null)
+				return null;
+
+			return new(
+						value.UpperLeft.ToVector2(),
+						value.LowerRight.ToVector2()
+						);
+		}
 
 		public static HashSet<Vector2Save> ToVector2SaveHashSet(this HashSet<Vector2> value)
 		{

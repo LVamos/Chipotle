@@ -26,7 +26,7 @@ namespace Game.Entities.Characters.Tuttle
 
 	public class TuttleAI : AI
 	{
-		public void Restore(ComponentSave save)
+		public override void Restore(ComponentSave save)
 		{
 			if (save is not TuttleAISave data)
 				return;
@@ -35,12 +35,12 @@ namespace Game.Entities.Characters.Tuttle
 			_collisionInterval = data.CollisionInterval;
 			_goToPoolWhenPositionSet = data.GoToPoolWhenPositionSet;
 			_playerWasByPool = data.PlayerWasByPool;
-			_carTargetZone = World.GetZone(data.CarTargetZone);
+			_carTargetZone = data.CarTargetZone != null ? World.GetZone(data.CarTargetZone) : null;
 		}
 
-		public TuttleAISave Export()
+		public override ComponentSave Export()
 		{
-			var save = base.Export().ToTuttleAISave();
+			var save = (base.Export() as AISave).ToTuttleAISave();
 
 			save.CollisionInterval = _collisionInterval;
 			save.GoToPoolWhenPositionSet = _goToPoolWhenPositionSet;

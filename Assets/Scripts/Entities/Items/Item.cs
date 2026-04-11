@@ -475,11 +475,11 @@ namespace Game.Entities.Items
 		/// </summary>
 		protected bool _usableOnce;
 
-		public void Restore(ItemSave save)
+		public virtual void Restore(ItemSave save)
 		{
 			base.Restore((EntitySave)save);
 			Initialize(
-				save.Name.ToName(),
+				save.Name != null ? save.Name.ToName() : null,
 				save.Area.ToRectangle(),
 				save.Type,
 				save.Decorative,
@@ -503,7 +503,7 @@ save.UsableWith
 			HeldBy = save.HeldBy != null ? World.GetCharacter(save.HeldBy) : null;
 		}
 
-		public ItemSave Export()
+		public virtual ItemSave Export()
 		{
 			var save = base.Export().ToItemsave();
 
@@ -553,7 +553,7 @@ save.UsableWith
 		/// </remarks>
 		public virtual void Initialize(
 			Name name,
-			Rectangle area,
+			Rectangle? area,
 			string type,
 			bool decorative,
 			bool pickable,

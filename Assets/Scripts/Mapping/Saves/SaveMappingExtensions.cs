@@ -10,6 +10,8 @@ using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
 using Game.Serialization.Protobuf.Snapshots.Spatial;
 using Game.Serialization.Protobuf.Snapshots.Spatial.Passages;
 
+using System.Linq;
+
 namespace Game.Mapping.Saves
 {
 	public static class SaveMappingExtensions
@@ -26,6 +28,15 @@ namespace Game.Mapping.Saves
 		{
 			PassageSave result = new();
 			MapMapElementSave(save, result);
+
+			return result;
+		}
+
+		public static DoorSave ToDoorSave(this PassageSave save)
+		{
+			DoorSave result = new();
+			MapMapElementSave(save, result);
+			MapPassageSave(save, result);
 
 			return result;
 		}
@@ -120,19 +131,28 @@ namespace Game.Mapping.Saves
 
 		public static ChipotlePhysicsSave ToChipotlePhysicsSave(this PhysicsSave save)
 		{
-			ChipotlePhysicsSave chipotlePhysicsSave = new();
-			MapPhysicsSave(save, chipotlePhysicsSave);
+			ChipotlePhysicsSave RESULT = new();
+			MapPhysicsSave(save, RESULT);
 
-			return chipotlePhysicsSave;
+			return RESULT;
 		}
 
 		private static void MapMapElementSave(MapElementSave source, MapElementSave target)
 		{
 			target.Area = source.Area;
-			target.Sounds = new(source.Sounds);
+			target.Sounds = !source.Sounds.IsNullOrEmpty() ? new(source.Sounds) : null;
 			target.Name = source.Name;
 			target.Usable = source.Usable;
-			target.UsableWith = source.UsableWith != null ? new(source.UsableWith) : null;
+			target.UsableWith = !source.UsableWith.IsNullOrEmpty() ? new(source.UsableWith) : null;
+		}
+
+		private static void MapPassageSave(PassageSave source, PassageSave target)
+		{
+			MapMapElementSave(source, target);
+			target.PlayersZone = source.PlayersZone;
+			target.Zones = !source.Zones.IsNullOrEmpty() ? source.Zones.ToArray() : null;
+			target.State = source.State;
+			target.TypeDescription = source.TypeDescription;
 		}
 
 		private static void MapEntitySave(EntitySave source, EntitySave target)
@@ -159,14 +179,13 @@ namespace Game.Mapping.Saves
 			target.QuickActionsAllowed = source.QuickActionsAllowed;
 			target.StopWhenPlayerMoves = source.StopWhenPlayerMoves;
 			target.UsableOnce = source.UsableOnce;
-			target.Zones = new(source.Zones);
+			target.Zones = !source.Zones.IsNullOrEmpty() ? new(source.Zones) : null;
 			target.Decorative = source.Decorative;
 			target.HeldBy = source.HeldBy;
 			target.Passable = source.Passable;
 			target.Used = source.Used;
 			target.UsedOnce = source.UsedOnce;
 		}
-
 
 		private static void MapComponentSave(ComponentSave source, ComponentSave target)
 		{
@@ -189,7 +208,7 @@ namespace Game.Mapping.Saves
 			target.State = source.State;
 			target.Area = source.Area;
 			target.Goal = source.Goal;
-			target.Inventory = source.Inventory;
+			target.Inventory = !source.Inventory.IsNullOrEmpty() ? new(source.Inventory) : null;
 			target.MaxObjectDistance = source.MaxObjectDistance;
 			target.MinObjectDistance = source.MinObjectDistance;
 			target.NavigableObjectsRadius = source.NavigableObjectsRadius;

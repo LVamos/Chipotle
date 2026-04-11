@@ -26,7 +26,7 @@ namespace Game.Entities.Items
 
 		public override void Initialize(
 			Name name,
-			Rectangle area,
+			Rectangle? area,
 			string type,
 			bool decorative,
 			bool pickable,

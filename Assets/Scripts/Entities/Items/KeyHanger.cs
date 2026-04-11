@@ -12,7 +12,7 @@ namespace Game.Entities.Items
 
 	public class KeyHanger : Item
 	{
-		public void Restore(ItemSave save)
+		public override void Restore(ItemSave save)
 		{
 			if (save is not KeyHangerSave data)
 				return;
@@ -43,7 +43,7 @@ namespace Game.Entities.Items
 			_descriptionID = data.DescriptionID;
 		}
 
-		public KeyHangerSave Export()
+		public override ItemSave Export()
 		{
 			var save = base.Export().ToKeyHangerSave();
 

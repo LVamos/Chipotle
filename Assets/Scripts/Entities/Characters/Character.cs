@@ -7,7 +7,6 @@ using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Serialization.Protobuf.Snapshots.Characters;
-using Game.Serialization.Protobuf.Snapshots.Entities;
 using Game.Terrain;
 
 using System;
@@ -31,7 +30,7 @@ namespace Game.Entities.Characters
 	{
 		public void Restore(CharacterSave save)
 		{
-			base.Restore((EntitySave)save);
+			base.Restore(save);
 
 			transform.localScale = save.Dimensions.ToVector3();
 			_inventory = save.Inventory != null ? new(save.Inventory) : null;
@@ -51,14 +50,16 @@ namespace Game.Entities.Characters
 			var save = base.Export().ToCharacterSave();
 
 			save.Dimensions = transform.localScale.ToVector3Save();
-			save.Inventory = new(_inventory);
-			save.VisitedZones = new(_visitedZones);
+			save.Inventory = !_inventory.IsNullOrEmpty() ? new(_inventory) : null;
+			save.VisitedZones = !_visitedZones.IsNullOrEmpty() ? new(_visitedZones) : null;
 			save.Zone = _zone;
 			save.Orientation = Orientation.UnitVector.ToVector2Save();
-			save.Components = _components
-				.Cast<CharacterComponent>()
-				.Select(c => c.Export())
-				.ToList();
+
+			// Export components
+			List<ComponentSave> exportedComponents = new();
+			foreach (CharacterComponent component in _components)
+				exportedComponents.Add(component.Export());
+			save.Components = exportedComponents;
 
 			return save;
 		}
@@ -126,6 +127,7 @@ namespace Game.Entities.Characters
 			Name name,
 			string type,
 			Vector2 position,
+			Vector2 orientation,
 			Vector3 dimensions,
 			AI ai,
 			Input input,
@@ -148,6 +150,7 @@ namespace Game.Entities.Characters
 			Rectangle area = Rectangle.FromCenter(position, dimensions.x, dimensions.z);
 			Zone zone = World.GetZone(area.Center);
 			SavePosition(area, zone);
+			SaveOrientation(new(orientation));
 		}
 
 		private void InitComponents()
@@ -199,9 +202,11 @@ namespace Game.Entities.Characters
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
 		private void OnOrientationChanged(OrientationChanged message)
+			=> SaveOrientation(message.Target);
+
+		private void SaveOrientation(Orientation2D orientation)
 		{
-			Orientation = message.Target;
-			float degrees = (float)message.Target.Angle.CartesianDegrees;
+			float degrees = (float)orientation.Angle.CartesianDegrees;
 			transform.eulerAngles = new Vector3(0, degrees, 0);
 		}
 

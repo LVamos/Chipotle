@@ -1,6 +1,7 @@
 ﻿using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;
+using Game.Mapping.Saves;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.Physics;
@@ -39,11 +40,13 @@ namespace Game.Terrain
 
 		public DoorSave Export()
 		{
-			var save = (DoorSave)base.Export();
+			var save = base.Export().ToDoorSave();
+
 			save.ClosingSound = _closingSound;
 			save.LockedSound = _lockedSound;
 			save.OpeningSound = _openingSound;
 			save.Type = Type;
+
 			return save;
 		}
 

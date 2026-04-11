@@ -94,7 +94,6 @@ namespace Game.Terrain
 		/// <param name="unitVector">A directional unit vector defining the orientation</param>
 		public Orientation2D(Vector2 unitVector)
 		{
-			Chipotle = false;
 			_unitVector = unitVector;
 			_unitVector.Normalize();
 			_compassDegrees = (int)RadiansToDegrees(Math.Atan2(unitVector.y, unitVector.x));
@@ -204,8 +203,6 @@ namespace Game.Terrain
 
 			return result;
 		}
-
-		public bool Chipotle;
 
 		/// <summary>
 		/// Rotates the orientation.

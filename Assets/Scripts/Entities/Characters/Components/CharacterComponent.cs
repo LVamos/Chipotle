@@ -19,7 +19,7 @@ namespace Game.Entities.Characters.Components
 			_ownerName = save.Owner;
 		}
 
-		public ComponentSave Export()
+		public virtual ComponentSave Export()
 		{
 			ComponentSave save = new()
 			{
