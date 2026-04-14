@@ -926,6 +926,8 @@ namespace Game
 
 		private static void ActivateWorld()
 		{
+			_playerCameraController.Activate();
+
 			foreach (Zone zone in _zones.Values)
 				zone.Activate();
 
@@ -938,7 +940,6 @@ namespace Game
 			foreach (Item item in _items.Values)
 				item.Activate();
 
-			_playerCameraController.Activate();
 			WorldActive = true;
 		}
 
@@ -1030,6 +1031,8 @@ namespace Game
 
 			foreach (Character character in _characters.Values)
 				character.GameUpdate();
+
+			_playerCameraController.GameUpdate();
 
 			WindowHandler.ActiveWindow.GameUpdate();
 		}
