@@ -5,6 +5,7 @@ using Game.Entities.Characters;
 using Game.Mapping.Saves;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Physics;
+using Game.Messaging.Events.Characters.Movement;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;

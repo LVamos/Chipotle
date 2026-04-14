@@ -4,6 +4,7 @@ using Game.Mapping.Saves;
 using Game.Messaging;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Physics;
+using Game.Messaging.Events.Characters.Movement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Serialization.Protobuf.Snapshots.Characters;
@@ -150,7 +151,7 @@ namespace Game.Entities.Characters
 			Rectangle area = Rectangle.FromCenter(position, dimensions.x, dimensions.z);
 			Zone zone = World.GetZone(area.Center);
 			SavePosition(area, zone);
-			SaveOrientation(new(orientation));
+			SetOrientation(new(orientation));
 		}
 
 		private void InitComponents()
@@ -202,9 +203,18 @@ namespace Game.Entities.Characters
 		/// </summary>
 		/// <param name="message">The message to be handled</param>
 		private void OnOrientationChanged(OrientationChanged message)
-			=> SaveOrientation(message.Target);
+		{
+			SetOrientation(message.Target);
+			AnnounceOrientation(message.Source, message.Target);
+		}
 
-		private void SaveOrientation(Orientation2D orientation)
+		private void AnnounceOrientation(Orientation2D source, Orientation2D target)
+		{
+			CharacterRotated message = new(this, source, target, TurnType.None);
+			World.MessagePlayerCameraController(message);
+		}
+
+		private void SetOrientation(Orientation2D orientation)
 		{
 			float degrees = (float)orientation.Angle.CartesianDegrees;
 			transform.eulerAngles = new Vector3(0, degrees, 0);
@@ -242,8 +252,8 @@ namespace Game.Entities.Characters
 			startComponent(typeof(AI));
 
 			// Announce position
-			AnnouncePositionChange(null, Area.Value, null, Zone);
-
+			AnnouncePosition(null, Area.Value, null, Zone);
+			AnnounceOrientation(Orientation, Orientation);
 			void startComponent(Type type)
 			{
 				MessagingObject c = _components.FirstOrDefault(c => IsOfTypeOrSubclass(c, type));
@@ -281,19 +291,20 @@ namespace Game.Entities.Characters
 		protected void OnPositionChanged(PositionChanged message)
 		{
 			SavePosition(message.TargetPosition, message.TargetZone);
-			AnnouncePositionChange(
+			AnnouncePosition(
 						message.SourcePosition.Value,
 						message.TargetPosition,
 						message.SourceZone,
 						message.TargetZone);
 		}
 
-		private void AnnouncePositionChange(Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone)
+		private void AnnouncePosition(Rectangle? sourcePosition, Rectangle targetPosition, Zone sourceZone, Zone targetZone)
 		{
 			RecordZone(sourceZone, targetZone);
 			AnnounceZoneChange(sourceZone, targetZone);
 
 			CharacterMoved moved = new(this, sourcePosition, targetPosition, sourceZone, targetZone);
+			World.MessagePlayerCameraController(moved);
 			World.MessageCharacters(moved);
 			World.MessageZones(moved);
 		}

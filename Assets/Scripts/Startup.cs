@@ -14,7 +14,8 @@ public class Startup : MonoBehaviour
 	public void Start()
 	{
 		Logger.LogInfo("Hra spuštěna");
-		SetCamera(); Application.runInBackground = true;
+		SetCamera();
+		Application.runInBackground = true;
 		Time.fixedDeltaTime = 1f / 30f;
 		Sounds.Initialize();
 		MainMenu();

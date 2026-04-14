@@ -16,6 +16,7 @@ using Game.Messaging.Commands.Movement;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Commands.UI;
 using Game.Messaging.Events.Characters;
+using Game.Messaging.Events.Characters.Movement;
 using Game.Messaging.Events.GameActions;
 using Game.Messaging.Events.GameInfo;
 using Game.Messaging.Events.Movement;

@@ -664,6 +664,7 @@ namespace Game
 			_characters = new(comparer);
 			_passages = new(comparer);
 			Map = null;
+			InitPlayerCameraController();
 		}
 
 		public static CollisionDetector Collisions { get; private set; } = new();
@@ -913,7 +914,7 @@ namespace Game
 				throw;
 			}
 			MainScript.GameLoaded = true;
-			Camera.main.transform.rotation = Quaternion.identity;
+			CameraManager.InitYaw();
 
 			CreateCharacters();
 			ActivateWorld();
@@ -937,6 +938,7 @@ namespace Game
 			foreach (Item item in _items.Values)
 				item.Activate();
 
+			_playerCameraController.Activate();
 			WorldActive = true;
 		}
 
@@ -1053,5 +1055,15 @@ namespace Game
 			foreach (Zone zone in _zones.Values)
 				zone.TakeMessage(message);
 		}
+
+		public static void MessagePlayerCameraController(Message message)
+			=> _playerCameraController.TakeMessage(message);
+
+		private static void InitPlayerCameraController()
+		{
+			GameObject obj = new(nameof(PlayerCameraController));
+			_playerCameraController = obj.AddComponent<PlayerCameraController>();
+		}
+		private static PlayerCameraController _playerCameraController;
 	}
 }

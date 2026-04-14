@@ -10,6 +10,7 @@ using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Events;
 using Game.Messaging.Events.Characters;
+using Game.Messaging.Events.Characters.Movement;
 using Game.Messaging.Events.GameInfo;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
@@ -17,8 +18,7 @@ using Game.Messaging.Events.Sound;
 using Game.Models;
 using Game.Narration.WorldDescribers;
 using Game.Terrain;
-
-
+using Game.UI;
 
 using System;
 using System.Collections.Generic;
@@ -88,7 +88,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void SnapFootstepToListener()
 		{
-			Vector3 position3d = Camera.main.transform.position;
+			Vector3 position3d = CameraManager.Get3dPosition();
 			_footStep.transform.position = new Vector3(position3d.x, 1, position3d.z);
 		}
 
@@ -410,12 +410,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnPositionChanged(PositionChanged message)
 		{
-			Vector2 center = message.TargetPosition.Center;
-			float height = transform.localScale.y;
-			Camera.main.transform.position = center.ToVector3(height);
-
 			if (!message.Silently)
-				PlayStep(center);
+				PlayStep(message.TargetPosition.Center);
 		}
 
 		/// <summary>
@@ -439,10 +435,6 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnOrientationChanged(OrientationChanged message)
 		{
-			float source = (float)message.Source.Angle.CartesianDegrees;
-			float target = (float)message.Target.Angle.CartesianDegrees;
-			Camera.main.transform.Rotate(0, (float)(source - target), 0);
-
 			if (message.Announce)
 				SayOrientation(message.Target);
 		}
