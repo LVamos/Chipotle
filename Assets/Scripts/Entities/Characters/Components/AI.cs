@@ -100,15 +100,15 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		protected void GoNear(Rectangle target, float minDistance, float maxDistance, bool watchPlayer)
 		{
-			List<Vector2> Targets = GetPointsAround(target, minDistance, maxDistance).ToList();
+			List<Vector2> Targets = GetPointsAround(target, minDistance, maxDistance)?.ToList();
 			if (Targets.Count > 0)
 				TryGoTo(Targets, watchPlayer);
 		}
 
 		private List<Vector2> GetPointsAround(Rectangle target, float minDistance, float maxDistance)
 		{
-			return Rectangle.GetPointsAround(target, minDistance, maxDistance, PlacementFinder.ValidplacementsResolution)
-.Where(p => !_area.Value.Contains(p))
+			return Rectangle.GetPointsAround(target, minDistance, maxDistance, PlacementFinder.ValidplacementsResolution)?
+.Where(p => !_area.Value.Contains(p))?
 .ToList();
 		}
 

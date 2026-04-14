@@ -216,6 +216,7 @@ namespace Game.Entities.Characters
 
 		private void SetOrientation(Orientation2D orientation)
 		{
+			Orientation = orientation;
 			float degrees = (float)orientation.Angle.CartesianDegrees;
 			transform.eulerAngles = new Vector3(0, degrees, 0);
 		}
