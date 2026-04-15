@@ -195,7 +195,6 @@ namespace Game.Mapping.Saves
 		private static void MapAISave(AISave source, AISave target)
 		{
 			MapComponentSave(source, target);
-			target.Area = source.Area;
 			target.Hidden = source.Hidden;
 			target.MaxObjectDistance = source.MaxObjectDistance;
 			target.MinObjectDistance = source.MinObjectDistance;

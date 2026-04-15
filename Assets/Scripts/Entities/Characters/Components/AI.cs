@@ -4,7 +4,6 @@ using Game.Mapping.Saves;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Commands.Movement;
 using Game.Messaging.Events.Characters;
-using Game.Messaging.Events.Movement;
 using Game.Serialization.Protobuf.Snapshots.Characters;
 
 using System;
@@ -13,7 +12,6 @@ using System.Linq;
 
 using UnityEngine;
 
-using Message = Game.Messaging.Message;
 using Rectangle = Game.Terrain.Rectangle;
 
 namespace Game.Entities.Characters.Components
@@ -30,7 +28,6 @@ namespace Game.Entities.Characters.Components
 				return;
 
 			base.Restore(data);
-			_area = data.Area.ToRectangle();
 			_hidden = data.Hidden;
 			_maxObjectDistance = data.MaxObjectDistance;
 			_minObjectDistance = data.MinObjectDistance;
@@ -41,7 +38,6 @@ namespace Game.Entities.Characters.Components
 		{
 			var save = base.Export().ToAISave();
 
-			save.Area = _area != null ? _area.Value.ToRectangleSave() : null;
 			save.Hidden = _hidden;
 			save.MaxObjectDistance = _maxObjectDistance;
 			save.MinObjectDistance = _minObjectDistance;
@@ -55,10 +51,6 @@ namespace Game.Entities.Characters.Components
 			_hidden = false;
 			InnerMessage(new Reveal(this, new(target)));
 		}
-		/// <summary>
-		/// Area occupied by the NPC
-		/// </summary>
-		protected Rectangle? _area;
 
 		/// <summary>
 		/// Indicates if the NPC is invisible for other NPCs and objects.
@@ -108,21 +100,8 @@ namespace Game.Entities.Characters.Components
 		private List<Vector2> GetPointsAround(Rectangle target, float minDistance, float maxDistance)
 		{
 			return Rectangle.GetPointsAround(target, minDistance, maxDistance, PlacementFinder.ValidplacementsResolution)?
-.Where(p => !_area.Value.Contains(p))?
+.Where(p => !Owner.Area.Value.Contains(p))?
 .ToList();
-		}
-
-		/// <summary>
-		/// Runs a message handler for the specified message.
-		/// </summary>
-		/// <param name="message">The message to be handled</param>
-		protected override void HandleMessage(Message message)
-		{
-			switch (message)
-			{
-				case PositionChanged pc: OnPositionChanged(pc); break;
-				default: base.HandleMessage(message); break;
-			}
 		}
 
 		/// <summary>
@@ -141,12 +120,6 @@ namespace Game.Entities.Characters.Components
 		/// </summary>
 		/// <param name="message">The message</param>
 		protected void OnCharacterStateChanged(StateChanged message) => _state = message.State;
-
-		/// <summary>
-		/// Processes the PositionChanged message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		protected void OnPositionChanged(PositionChanged message) => _area = message.TargetPosition;
 
 		/// <summary>
 		/// sets state of the NPC and announces the change to other components.
