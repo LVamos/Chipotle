@@ -47,6 +47,22 @@ namespace Game.Debug
 			}
 		}
 
+		[DebugCommand(DebugCommand.SayPlayerOrientation)]
+		private void SayPlayerOrientation()
+		{
+			string message = $"Orientace hráče: {Player.Orientation.Angle.CartesianDegrees}";
+			Tolk.Speak(message, true);
+			GUIUtility.systemCopyBuffer = message;
+		}
+
+		[DebugCommand(DebugCommand.SayCameraInfo)]
+		private void SayCameraInfo()
+		{
+			string message = $"Orientace kamery: {Camera.main.transform.rotation.eulerAngles}{Environment.NewLine}Pozice: {Camera.main.transform.position}";
+			Tolk.Speak(message, true);
+			GUIUtility.systemCopyBuffer = message;
+		}
+
 		[DebugCommand(DebugCommand.JumpToDebugPoint)]
 		private void JumpToDebugPoint()
 		{
