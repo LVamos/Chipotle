@@ -140,6 +140,8 @@ namespace Game.Mapping.Saves
 		private static void MapMapElementSave(MapElementSave source, MapElementSave target)
 		{
 			target.Area = source.Area;
+			target.HostObjectPosition = source.HostObjectPosition;
+			target.HostObjectScale = source.HostObjectScale;
 			target.Sounds = !source.Sounds.IsNullOrEmpty() ? new(source.Sounds) : null;
 			target.Name = source.Name;
 			target.Usable = source.Usable;

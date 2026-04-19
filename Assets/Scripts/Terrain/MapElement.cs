@@ -34,6 +34,9 @@ namespace Game.Terrain
 				data.Name.ToName(),
 				data.Area != null ? data.Area.ToRectangle() : null
 				);
+
+			transform.position = data.HostObjectPosition.ToVector3();
+			transform.localScale = data.HostObjectScale.ToVector3();
 			_sounds = !data.Sounds.IsNullOrEmpty() ? new(data.Sounds) : null;
 			Usable = data.Usable;
 			UsableWith = data.UsableWith != null ? new(data.UsableWith) : null;
@@ -44,6 +47,8 @@ namespace Game.Terrain
 			MapElementSave save = new()
 			{
 				Name = Name.ToNameSave(),
+				HostObjectPosition = transform.position.ToVector3Save(),
+				HostObjectScale = transform.localScale.ToVector3Save(),
 				Area = Area != null ? Area.Value.ToRectangleSave() : null,
 				Sounds = _sounds != null ? new(_sounds) : null,
 				Usable = this.Usable,

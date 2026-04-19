@@ -393,14 +393,13 @@ namespace Game.Terrain
 			temp.MinimumHeight = MinimumHeight;
 			temp.MinimumWidth = MinimumWidth;
 			Area = temp;
-			gameObject.transform.position = new Vector3(area.Center.x, ceiling / 2, area.Center.y);
-			gameObject.transform.localScale = new Vector3(area.Width, ceiling, area.Height);
+			transform.position = area.Center.ToVector3(ceiling / 2);
+			transform.localScale = new Vector3(area.Width, ceiling, area.Height);
 
 			CreateComponents(loop != null);
 			_ambientController.Initialize(this, loop, materials);
 			_portalController?.Initialize(this, loop);
 		}
-
 
 		public TerrainType DefaultTerrain { get; private set; }
 

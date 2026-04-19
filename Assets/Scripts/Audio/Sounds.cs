@@ -70,7 +70,8 @@ namespace Game.Audio
 
 		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
 
-		public static void SetRoomParameters(Zone zone, ZoneMaterials zoneMaterials) => _soundManager.SetRoomParameters(zone, zoneMaterials);
+		public static void SetRoomParameters(Zone zone, ZoneMaterials zoneMaterials)
+			=> _soundManager.SetRoomParameters(zone, zoneMaterials);
 
 		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration, description);
 
