@@ -20,5 +20,12 @@ namespace Game.UI
 
 		public static void RotateYaw(float degrees)
 			=> Transform.Rotate(0, degrees, 0);
+
+		public static void SetOrientation(Vector3
+			orientation)
+			=> Transform.rotation = Quaternion.Euler(orientation);
+
+		public static Vector3 GetOrientation()
+			=> Transform.rotation.eulerAngles;
 	}
 }

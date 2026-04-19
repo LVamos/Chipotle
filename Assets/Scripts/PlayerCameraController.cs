@@ -25,14 +25,10 @@ namespace Game
 		{
 			float source = (float)message.Source.Angle.CartesianDegrees;
 			float target = (float)message.Target.Angle.CartesianDegrees;
-			if (source == target)
-			{
-				CameraManager.SetYaw(target);
-				return;
-			}
-
 			float degrees = (float)(source - target);
-			CameraManager.RotateYaw(degrees);
+
+			if (degrees != 0)
+				CameraManager.RotateYaw(degrees);
 		}
 
 		private void OnCharacterMoved(CharacterMoved message)

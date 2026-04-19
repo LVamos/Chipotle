@@ -50,7 +50,7 @@ namespace Game.Debug
 		[DebugCommand(DebugCommand.SayPlayerOrientation)]
 		private void SayPlayerOrientation()
 		{
-			string message = $"Orientace hráče: {Player.Orientation.Angle.CartesianDegrees}";
+			string message = $"Orientace hráče: {Player.Orientation.Angle.CartesianDegrees}; {Player.gameObject.transform.rotation.eulerAngles}";
 			Tolk.Speak(message, true);
 			GUIUtility.systemCopyBuffer = message;
 		}

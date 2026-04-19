@@ -1,5 +1,4 @@
-﻿using Game.Messaging.Commands.Movement;
-using Game.Terrain;
+﻿using Game.Terrain;
 
 namespace Game.Messaging.Events.Movement
 {
@@ -7,7 +6,7 @@ namespace Game.Messaging.Events.Movement
 	/// Indicates that an character has completed a rotation.
 	/// </summary>
 	/// <remarks>Sent from a descendant of the <see cref="Entities.Characters.Components.CharacterComponent"/> class.</remarks>
-	public class CharacterRotated : ChangeOrientation
+	public class CharacterRotated : Message
 	{
 		/// <summary>
 		/// Original orientation
@@ -28,10 +27,9 @@ namespace Game.Messaging.Events.Movement
 		public CharacterRotated(
 			object sender,
 			Orientation2D source,
-			Orientation2D target,
-			TurnType direction
+			Orientation2D target
 			)
-			: base(sender, direction)
+			: base(sender)
 		{
 			Source = source;
 			Target = target;

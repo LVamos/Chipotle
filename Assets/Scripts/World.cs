@@ -40,6 +40,8 @@ namespace Game
 		public static GameSave CreateSave()
 		{
 			return new(
+								CameraManager.GetOrientation()
+								.ToVector3Save(),
 				_characters.Values.Select(c => c.Export()).ToHashSet(),
 				_items.Values.Select(i => i.Export()).ToHashSet(),
 				_passages.Values.Select(p => p.Export()).ToHashSet(),
@@ -754,6 +756,8 @@ namespace Game
 				Add(passage);
 			}
 
+			// Restore camera
+			CameraManager.SetOrientation(game.CameraOrientation.ToVector3());
 			// Activate world
 			ActivateWorld();
 			GameManager.StartGame();

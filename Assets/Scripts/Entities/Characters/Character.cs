@@ -210,7 +210,7 @@ namespace Game.Entities.Characters
 
 		private void AnnounceOrientation(Orientation2D source, Orientation2D target)
 		{
-			CharacterRotated message = new(this, source, target, TurnType.None);
+			CharacterRotated message = new(this, source, target);
 			World.MessagePlayerCameraController(message);
 		}
 
