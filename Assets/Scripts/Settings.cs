@@ -15,6 +15,20 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float ItemDefaultOcclusionDuration = 1;
+		public static float ItemMaxDistanceMargin = 10;
+		public static float ItemActionRepetetionInterval = .5f;
+		public static float ItemBehindWallVolumeCoefficient = .5f;
+		public static float ItemDoorClosingOcclusionDuration = 1;
+		public static float ItemDoorOpeningOcclusionDuration = 1;
+		public static float ItemOpenPortalVolumeCoefficient = 0.5f;
+		public static float ItemClosedPortalVolumeCoefficient = 0.3f;
+		public static float ItemportalVolumeCoefficient = 0.8f;
+		public static int ItemEnterZoneOcclusionDuration = 1;
+		public static int ItemPassageDistanceAttenuationThreshold = 5;
+		public static AudioRolloffMode ItemAmbientRollofMode = AudioRolloffMode.Linear;
+		public static float ItemAmbientMinDistance = .5f;
+		public static float ItemActionFadingDuration = .5f;
 		public static float ObjectManipulationRadius = .8f;
 		public static float DoorManipulationRadius = .7f;
 		public static string DefaultCollisionSound = "MovCrashDefault";

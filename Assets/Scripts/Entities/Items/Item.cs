@@ -52,7 +52,7 @@ namespace Game.Entities.Items
 			foreach (Passage exit in _portals.Keys)
 			{
 				AudioSource portal = _portals[exit];
-				UpdatePortalOcclusion(portal, exit, _enteringZoneOcclusionDuration);
+				UpdatePortalOcclusion(portal, exit, Settings.ItemEnterZoneOcclusionDuration);
 				UpdatePortalPosition(portal, exit);
 			}
 		}
@@ -97,15 +97,13 @@ namespace Game.Entities.Items
 			return closestPortal;
 		}
 
-		private const int _enteringZoneOcclusionDuration = 1;
-
 		protected bool ReplaceAmbientLoopWithNearestPortal()
 		{
 			AudioSource portal = TryRemovePortalNearPlayer();
 			if (portal == null)
 				return false;
 
-			DisableOcclusion(portal, _enteringZoneOcclusionDuration);
+			DisableOcclusion(portal, Settings.ItemEnterZoneOcclusionDuration);
 			_ambientSource = portal;
 			_ambientSource.transform.position = GetAmbientPosition();
 			return true;
@@ -147,13 +145,11 @@ namespace Game.Entities.Items
 				PlayPortal(portal);
 		}
 
-		private const int _passageDistanceAttenuationThreshold = 5;
-
 		private void UpdatePortalOcclusion(AudioSource portal, Passage exit, float? duration = null)
 		{
 			float finalDuration = duration != null ? duration.Value : GetPortalOcclusionDuration(exit);
 			PassageState state = exit.State;
-			bool farFromPlayer = exit.GetDistanceToPlayer() > _passageDistanceAttenuationThreshold;
+			bool farFromPlayer = exit.GetDistanceToPlayer() > Settings.ItemPassageDistanceAttenuationThreshold;
 			float lowPass = GetPortalOcclusionLowPass(exit, farFromPlayer);
 
 			Sounds.SlideLowPass(portal, finalDuration, lowPass);
@@ -171,34 +167,34 @@ namespace Game.Entities.Items
 		protected float GetPortalOcclusionDuration(Passage exit)
 		{
 			if (exit.State is PassageState.Closed or PassageState.Locked)
-				return _doorClosingOcclusionDuration;
-			return _doorOpeningOcclusionDuration;
+				return Settings.ItemDoorClosingOcclusionDuration;
+			return Settings.ItemDoorOpeningOcclusionDuration;
 		}
 
 		protected void UpdatePortalVolume(AudioSource portal, Passage exit, float duration, bool playerBehindWall = false)
 		{
 			float volume = Sounds.GetLinearRolloffAttenuation(
 				transform.position,
-				_ambientMinDistance,
+				Settings.ItemAmbientMinDistance,
 				GetMaxDistance(),
 				_defaultVolume
 				);
 			float finalVolume = volume * GetPortalVolumeCoefficient(exit);
 			if (playerBehindWall)
-				finalVolume *= _behindWallVolumeCoefficient;
+				finalVolume *= Settings.ItemBehindWallVolumeCoefficient;
 			Sounds.SlideVolume(portal, duration, finalVolume, false);
 		}
 
 		protected float GetPortalVolumeCoefficient(Passage exit)
 		{
 			if (exit is Passage and not Door)
-				return _portalVolumeCoefficient;
+				return Settings.ItemportalVolumeCoefficient;
 
 			return exit.State switch
 			{
-				PassageState.Closed => _portalClosedVolumeCoefficient,
-				PassageState.Locked => _portalClosedVolumeCoefficient,
-				_ => _portalOpenVolumeCoefficient
+				PassageState.Closed => Settings.ItemClosedPortalVolumeCoefficient,
+				PassageState.Locked => Settings.ItemClosedPortalVolumeCoefficient,
+				_ => Settings.ItemOpenPortalVolumeCoefficient
 			};
 		}
 
@@ -300,7 +296,7 @@ namespace Game.Entities.Items
 		{
 			if (_ambientSource != null && _ambientSource.isPlaying)
 			{
-				Sounds.SlideVolume(_ambientSource, _defaultOcclusionDuration, 0);
+				Sounds.SlideVolume(_ambientSource, Settings.ItemDefaultOcclusionDuration, 0);
 				_ambientSource = null;
 			}
 
@@ -311,9 +307,6 @@ namespace Game.Entities.Items
 		private Dictionary<Passage, AudioSource> _portals;
 
 		protected Vector3? _loopPositionBackup;
-		protected const float _portalVolumeCoefficient = 0.8f;
-		protected const float _portalClosedVolumeCoefficient = 0.3f;
-		protected const float _portalOpenVolumeCoefficient = 0.5f;
 
 		protected Vector3 GetPointForPortal(Passage exit)
 		{
@@ -360,9 +353,6 @@ namespace Game.Entities.Items
 			Zone myZone = GetZoneNearPlayer();
 			return myZone.GetPassageInFront(World.Player.Area.Value.Center);
 		}
-
-		private const float _doorOpeningOcclusionDuration = 1;
-		private const float _doorClosingOcclusionDuration = 1;
 
 		protected void LogCollision(Character character, Vector2 point)
 		{
@@ -704,15 +694,13 @@ save.UsableWith
 			StopActionWhenPlayerMoves();
 		}
 
-		private const float _actionFadingDuration = .5f;
-
 		/// <summary>
 		/// Stops the action sound.
 		/// </summary>
 		protected void StopActionWhenPlayerMoves()
 		{
 			if (_stopWhenPlayerMoves && _actionAudio != null && _actionAudio.isPlaying)
-				Sounds.SlideVolume(_actionAudio, _actionFadingDuration, 0);
+				Sounds.SlideVolume(_actionAudio, Settings.ItemActionFadingDuration, 0);
 		}
 
 		protected bool _quickActionsAllowed;
@@ -728,19 +716,12 @@ save.UsableWith
 
 		private AudioSource _passByAudio;
 		protected ObstacleType _lastOccludingObstacle;
-		private const float _behindWallVolumeCoefficient = .5f;
-		protected const float _intervalBetweenActions = .5f;
-		protected const float _maxDistanceMargin = 10;
-		protected const float _ambientMinDistance = .5f;
-		protected const int _loopInitialFadeDuration = 2;
-		protected const float _defaultOcclusionDuration = 1;
-		private const AudioRolloffMode _ambientRollofMode = AudioRolloffMode.Linear;
 
 		protected float GetMaxDistance()
 		{
 			Rectangle myZoneArea = GetZoneNearPlayer().Area.Value;
 			float longerSide = Mathf.Max(myZoneArea.Height, myZoneArea.Width);
-			return longerSide + _maxDistanceMargin;
+			return longerSide + Settings.ItemMaxDistanceMargin;
 		}
 
 		/// <summary>
@@ -804,7 +785,7 @@ save.UsableWith
 			}
 
 			// Play the sound if predefined amount of time has passed since the last use.
-			else if (_quickActionsAllowed && Time.time - _lastUse > _intervalBetweenActions)
+			else if (_quickActionsAllowed && Time.time - _lastUse > Settings.ItemActionRepetetionInterval)
 			{
 				_lastUse = Time.time;
 				Sounds.Play(_sounds["action"], message.ManipulationPoint, _defaultVolume);
@@ -856,7 +837,7 @@ save.UsableWith
 		protected bool IsInAudibleDistance()
 			=> GetDistanceToPlayer() <= _ambientSource.maxDistance;
 
-		protected void UpdateOcclusion(ObstacleType obstacle, float duration = _defaultOcclusionDuration, Door door = null)
+		protected void UpdateOcclusion(ObstacleType obstacle, float? duration = null, Door door = null)
 		{
 			if (_sounds["loop"] == null)
 				return;
@@ -885,12 +866,13 @@ save.UsableWith
 			if (obstacle is ObstacleType.Far or ObstacleType.InDifferentZone)
 				return;
 
+			float finalDuration = duration == null ? Settings.ItemDefaultOcclusionDuration : duration.Value;
 			if (_muffled)
 			{
 				AttenuationModel attenuation = GetAttenuationSettings(obstacle);
-				SetAttenuation(_ambientSource, attenuation, duration);
+				SetAttenuation(_ambientSource, attenuation, finalDuration);
 			}
-			else DisableOcclusion(_ambientSource, duration);
+			else DisableOcclusion(_ambientSource, finalDuration);
 		}
 
 		private Passage GetPassageInFrontPlayer()
@@ -926,14 +908,15 @@ save.UsableWith
 			};
 		}
 
-		private void DisableOcclusion(AudioSource source, float duration = _defaultOcclusionDuration)
+		private void DisableOcclusion(AudioSource source, float? duration)
 		{
-			SetAttenuation(source, new(22000, _defaultVolume), duration, true);
+			float finalDuration = duration == null ? Settings.ItemDefaultOcclusionDuration : duration.Value;
+			SetAttenuation(source, new(22000, _defaultVolume), finalDuration, true);
 		}
 
 		private void SetAttenuation(AudioSource source, AttenuationModel attenuationSetting, float duration, bool disableLowPassAfterwards = false)
 		{
-			float updatedVolume = Sounds.GetLinearRolloffAttenuation(source.transform.position, _ambientMinDistance, GetMaxDistance(), attenuationSetting.Volume);
+			float updatedVolume = Sounds.GetLinearRolloffAttenuation(source.transform.position, Settings.ItemAmbientMinDistance, GetMaxDistance(), attenuationSetting.Volume);
 			Sounds.SlideVolume(source, duration, updatedVolume, false);
 			source.spatialBlend = attenuationSetting.SpatialBlend;
 
@@ -982,16 +965,16 @@ save.UsableWith
 			float distance = Vector3.Distance(source.transform.position, transform.position);
 			source.maxDistance -= distance;
 
-			source.minDistance = _ambientMinDistance;
-			source.rolloffMode = _ambientRollofMode;
+			source.minDistance = Settings.ItemAmbientMinDistance;
+			source.rolloffMode = Settings.ItemAmbientRollofMode;
 		}
 
 
 		private void SetAmbientAttenuation(AudioSource source)
 		{
 			source.maxDistance = GetMaxDistance();
-			source.minDistance = _ambientMinDistance;
-			source.rolloffMode = _ambientRollofMode;
+			source.minDistance = Settings.ItemAmbientMinDistance;
+			source.rolloffMode = Settings.ItemAmbientRollofMode;
 		}
 
 		private string GetAmbientDescription()
