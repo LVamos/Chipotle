@@ -380,7 +380,7 @@ namespace Game.Entities.Items
 		protected AudioSource _ambientSource;
 
 
-		protected AudioSource _actionAudio;
+		protected AudioSource _actionSource;
 
 
 		protected AudioSource _placingAudio;
@@ -566,7 +566,7 @@ save.UsableWith
 		{
 			base.Initialize(name, type, area);
 			HeldBy = null;
-			_actionAudio = null;
+			_actionSource = null;
 			_ambientSource = null;
 			_cutscene = null;
 			_lastOccludingObstacle = default;
@@ -699,8 +699,8 @@ save.UsableWith
 		/// </summary>
 		protected void StopActionWhenPlayerMoves()
 		{
-			if (_stopWhenPlayerMoves && _actionAudio != null && _actionAudio.isPlaying)
-				Sounds.SlideVolume(_actionAudio, Settings.ItemActionFadingDuration, 0);
+			if (_stopWhenPlayerMoves && _actionSource != null && _actionSource.isPlaying)
+				Sounds.SlideVolume(_actionSource, Settings.ItemActionFadingDuration, 0);
 		}
 
 		protected bool _quickActionsAllowed;
@@ -780,7 +780,7 @@ save.UsableWith
 				Cutscene.Play(this, _cutscene);
 			else if (!_quickActionsAllowed)
 			{
-				if (_actionAudio == null || !_actionAudio.isPlaying)
+				if (_actionSource == null || !_actionSource.isPlaying)
 					PlayActionSound(message.ManipulationPoint);
 			}
 
@@ -806,7 +806,7 @@ save.UsableWith
 		{
 			Vector3 position = manipulationPoint.ToVector3(GetSoundHeight());
 			string finalSoundName = soundName ?? _sounds["action"];
-			_actionAudio = Sounds.Play(finalSoundName, position, _defaultVolume);
+			_ambientSource = Sounds.Play(finalSoundName, position, _defaultVolume);
 		}
 
 		/// <summary>
@@ -820,9 +820,8 @@ save.UsableWith
 		/// <param name="attenuated">Determines if the sound of the object should be played over a wall or other obstacles.</param>
 		protected void UpdateAmbientSounds(Rectangle? previousPosition = null, Zone playersPreviousZone = null)
 		{
-			if (string.IsNullOrEmpty(_sounds["loop"]))
-				return;
-			if (!PlayerInSoundRadius)
+			if (string.IsNullOrEmpty(_sounds["loop"])
+				|| !PlayerInSoundRadius)
 				return;
 
 			ObstacleType obstacle = DetectOcclusion();
@@ -839,11 +838,11 @@ save.UsableWith
 
 		protected void UpdateOcclusion(ObstacleType obstacle, float? duration = null, Door door = null)
 		{
-			if (_sounds["loop"] == null)
+			if (string.IsNullOrEmpty(_sounds["loop"]))
 				return;
-
 			if (_lastOccludingObstacle == obstacle && obstacle != default && obstacle != ObstacleType.InDifferentZone)
 				return;
+
 			ObstacleType lastObstacleBackup = _lastOccludingObstacle;
 			_lastOccludingObstacle = obstacle;
 			_muffled = obstacle != ObstacleType.None;
@@ -936,7 +935,7 @@ save.UsableWith
 		/// <param name="obstacle">Type of obstacle between player and this object</param>
 		protected void PlayAmbient()
 		{
-			if (string.IsNullOrEmpty(_sounds["loop"]))
+			if (_sounds["loop"] == null)
 				return;
 
 			Vector3 position = GetAmbientPosition();

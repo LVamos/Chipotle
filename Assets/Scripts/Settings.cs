@@ -102,10 +102,16 @@ namespace Game
 					continue;
 				}
 
-				// Special case for AudioRolloffMode? because YamlDotNet may not correctly deserialize complex types
-				if (field.FieldType != typeof(AudioRolloffMode))
+				if (field.FieldType == typeof(AudioRolloffMode))
 				{
-					field.SetValue(null, Enum.Parse(typeof(AudioRolloffMode), value.ToString()));
+					field.SetValue(null, Enum.Parse(typeof(AudioRolloffMode), value.ToString(), true));
+					continue;
+				}
+
+				// Special case for Vector2? because YamlDotNet may not correctly deserialize complex types
+				if (field.FieldType != typeof(Vector2?))
+				{
+					field.SetValue(null, Convert.ChangeType(value, field.FieldType));
 					continue;
 				}
 
