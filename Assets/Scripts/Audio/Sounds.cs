@@ -113,7 +113,7 @@ namespace Game.Audio
 		/// Lowpass setting for simulation of sounds obstructed by an object.
 		/// </summary>
 		public const int OverWallLowpass = 500;
-		public const int OverClosedDoorLowpass = 1000;
+		public const int OverClosedDoorLowpass = 800;
 		public const int OverOpenDoorLowpass = 5000;
 		public const int OverObjectLowpass = 2000;
 
