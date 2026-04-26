@@ -1014,13 +1014,14 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		/// </summary>
 		protected void GoToPlayerIfTooFar()
 		{
-			float distance = GetDistanceToPlayer();
+			if (_area == null)
+				return;
+
 			if (
-				_state == CharacterState.WatchingPlayer && _area != null
-													 && (distance > _maxPlayerDistance || distance <= _maxPlayerDistance && !_player.SameZone(Owner))
-			)
-				GoToPlayer();
-			else if (_state == CharacterState.GoingToPlayer && distance <= _targetPlayerDistance)
+				_state == CharacterState.WatchingPlayer &&
+				(GetDistanceToPlayer() > _maxPlayerDistance || !_player.SameZone(Owner))
+			) GoToPlayer();
+			else if (_state == CharacterState.GoingToPlayer && (float)GetDistanceToPlayer() <= _targetPlayerDistance)
 				StopWalk();
 		}
 
