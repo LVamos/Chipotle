@@ -1,26 +1,26 @@
-﻿using Assets.Scripts.Terrain;
+﻿using Game.Terrain;
 
 namespace Assets.Scripts.Models
 {
-	public class ZoneMaterials
-	{
-		public Material LeftWall;
-		public Material FrontWall;
-		public Material RightWall;
-		public Material BackWall;
-		public Material Floor;
-		public Material Ceiling;
+    public class ZoneMaterials
+    {
+        public ZoneMaterial LeftWall;
+        public ZoneMaterial FrontWall;
+        public ZoneMaterial RightWall;
+        public ZoneMaterial BackWall;
+        public ZoneMaterial Floor;
+        public ZoneMaterial Ceiling;
 
-		public ZoneMaterials() { }
+        public ZoneMaterials() { }
 
-		public ZoneMaterials(Material leftwall, Material frontwall, Material rightwall, Material backwall, Material floor, Material ceiling)
-		{
-			LeftWall = leftwall;
-			FrontWall = frontwall;
-			RightWall = rightwall;
-			BackWall = backwall;
-			Floor = floor;
-			Ceiling = ceiling;
-		}
-	}
+        public ZoneMaterials(ZoneMaterial leftwall, ZoneMaterial frontwall, ZoneMaterial rightwall, ZoneMaterial backwall, ZoneMaterial floor, ZoneMaterial ceiling)
+        {
+            LeftWall = leftwall;
+            FrontWall = frontwall;
+            RightWall = rightwall;
+            BackWall = backwall;
+            Floor = floor;
+            Ceiling = ceiling;
+        }
+    }
 }

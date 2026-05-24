@@ -1,9 +1,9 @@
-﻿namespace Assets.Scripts.Terrain
+﻿namespace Game.Terrain
 {
 	/// <summary>
 	/// Material enum
 	/// </summary>
-	public enum Material
+	public enum ZoneMaterial
 	{
 		Transparent = 0,              ///< Transparent
 		AcousticCeilingTiles = 1,     ///< Acoustic ceiling tiles
