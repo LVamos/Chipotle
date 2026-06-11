@@ -1,6 +1,4 @@
-﻿using Assets.Scripts.Models;
-
-using Game.Terrain;
+﻿using Game.Terrain;
 
 using System;
 using System.Collections.Generic;
@@ -12,170 +10,171 @@ using UnityEngine.Audio;
 
 namespace Game.Audio
 {
-	public static class Sounds
-	{
-		public static void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null) => _soundManager.SlideSpatialBlend(source, duration, targetBlend, finalAction);
+    public static class Sounds
+    {
+        public static void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null) => _soundManager.SlideSpatialBlend(source, duration, targetBlend, finalAction);
 
-		public static float GetLowPass(AudioSource source) => _soundManager.GetLowPass(source);
-		public static void SetLowPassFrequency(AudioSource source, float frequency) => _soundManager.SetLowPass(source, frequency);
+        public static float GetLowPass(AudioSource source) => _soundManager.GetLowPass(source);
+        public static void SetLowPassFrequency(AudioSource source, float frequency) => _soundManager.SetLowPass(source, frequency);
 
-		public static void MuteSpeech() => _soundManager.MuteSpeech();
-		public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
-		public static float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(position, minDistance, maxDistance, defaultVolume);
+        public static void MuteSpeech() => _soundManager.MuteSpeech();
+        public static float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(source, defaultVolume);
+        public static float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume) => _soundManager.GetLinearRolloffAttenuation(position, minDistance, maxDistance, defaultVolume);
 
-		public static void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false) => _soundManager.SlideLowPass(source, duration, targetFrequency, disableLowPassAfterwards);
+        public static void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false) => _soundManager.SlideLowPass(source, duration, targetFrequency, disableLowPassAfterwards);
 
-		/// <summary>
-		/// Calculates low pass filter cut off frequency.
-		/// </summary>
-		/// <param name="obstacle">Type of an obstacle blocking the sound</param>
-		/// <returns>int</returns>
-		private static int GetLowPassFrequency(ObstacleType obstacle)
-		{
-			return obstacle switch
-			{
-				ObstacleType.Wall => OverWallLowpass,
-				ObstacleType.ClosedDoor => OverClosedDoorLowpass,
-				ObstacleType.ItemOrCharacter => OverObjectLowpass,
-				_ => 22000
-			};
-		}
+        /// <summary>
+        /// Calculates low pass filter cut off frequency.
+        /// </summary>
+        /// <param name="obstacle">Type of an obstacle blocking the sound</param>
+        /// <returns>int</returns>
+        private static int GetLowPassFrequency(ObstacleType obstacle)
+        {
+            return obstacle switch
+            {
+                ObstacleType.Wall => OverWallLowpass,
+                ObstacleType.ClosedDoor => OverClosedDoorLowpass,
+                ObstacleType.ItemOrCharacter => OverObjectLowpass,
+                _ => 22000
+            };
+        }
 
-		/// <summary>
-		/// Calculate volume based on obstacle type.
-		/// </summary>
-		/// <param name="defaultVolume">Default volume for calculation</param>
-		/// <param name="fullVolume">Volume used when nothing blocks the sound</param>
-		/// <param name="obstacle">Type of an obstacle blocking the sound</param>
-		/// <returns>float</returns>
-		public static float GetVolumeByObstacle(ObstacleType obstacle, float defaultVolume, float fullVolume)
-		{
-			return obstacle switch
-			{
-				ObstacleType.Wall => GetOverWallVolume(defaultVolume),
-				ObstacleType.ClosedDoor => GetOverClosedDoorVolume(defaultVolume),
-				ObstacleType.ItemOrCharacter => GetOverObjectVolume(defaultVolume),
-				_ => fullVolume
-			};
-		}
+        /// <summary>
+        /// Calculate volume based on obstacle type.
+        /// </summary>
+        /// <param name="defaultVolume">Default volume for calculation</param>
+        /// <param name="fullVolume">Volume used when nothing blocks the sound</param>
+        /// <param name="obstacle">Type of an obstacle blocking the sound</param>
+        /// <returns>float</returns>
+        public static float GetVolumeByObstacle(ObstacleType obstacle, float defaultVolume, float fullVolume)
+        {
+            return obstacle switch
+            {
+                ObstacleType.Wall => GetOverWallVolume(defaultVolume),
+                ObstacleType.ClosedDoor => GetOverClosedDoorVolume(defaultVolume),
+                ObstacleType.ItemOrCharacter => GetOverObjectVolume(defaultVolume),
+                _ => fullVolume
+            };
+        }
 
-		public static void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
-		{
-			_soundManager.SlideVolume(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone);
-		}
+        public static void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
+        {
+            _soundManager.SlideVolume(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone);
+        }
 
-		public static void DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
+        public static void DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 
-		public static void SetLowPass(AudioSource source, float cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
+        public static void SetLowPass(AudioSource source, float cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
 
-		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
+        public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
 
-		public static void SetRoomParameters(Zone zone, ZoneMaterials zoneMaterials)
-			=> _soundManager.SetRoomParameters(zone, zoneMaterials);
+        public static ResonanceRoomManager RoomManager => _roomManager;
 
-		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration, description);
+        public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration, description);
 
-		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration, description);
+        public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration, description);
 
-		public static AudioMixerGroup ResonanceGroup => _soundManager.ResonanceGroup;
-		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
-		public static void SlideMasterVolume(float duration, float targetVolume) => _soundManager.SlideMasterVolume(duration, targetVolume);
+        public static AudioMixerGroup ResonanceGroup => _soundManager.ResonanceGroup;
+        public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
+        public static void SlideMasterVolume(float duration, float targetVolume) => _soundManager.SlideMasterVolume(duration, targetVolume);
 
-		public static void StopAllSounds(float duration = .5f, Action onDone = null) => _soundManager.StopAllSounds(duration, onDone);
+        public static void StopAllSounds(float duration = .5f, Action onDone = null) => _soundManager.StopAllSounds(duration, onDone);
 
-		public static void Initialize()
-		{
-			GameObject obj = new("Sound manager");
-			_soundManager = obj.AddComponent<SoundManager>();
-		}
+        public static void Initialize()
+        {
+            GameObject obj = new("Sound manager");
+            _soundManager = obj.AddComponent<SoundManager>();
+            _roomManager = new();
+        }
 
-		private static SoundManager _soundManager;
+        private static SoundManager _soundManager;
+        private static ResonanceRoomManager _roomManager;
 
-		/// <summary>
-		/// Volume used with sound attenuation.
-		/// </summary>
-		public static float GetOverClosedDoorVolume(float defaultVolume) => defaultVolume * .6f;
-		public static float GetOverOpenDoorVolume(float defaultVolume) => defaultVolume * .7f;
+        /// <summary>
+        /// Volume used with sound attenuation.
+        /// </summary>
+        public static float GetOverClosedDoorVolume(float defaultVolume) => defaultVolume * .6f;
+        public static float GetOverOpenDoorVolume(float defaultVolume) => defaultVolume * .7f;
 
-		/// <summary>
-		/// Volume used with sound attenuation.
-		/// </summary>
-		public static float GetOverObjectVolume(float defaultVolume) => defaultVolume * .9f;
+        /// <summary>
+        /// Volume used with sound attenuation.
+        /// </summary>
+        public static float GetOverObjectVolume(float defaultVolume) => defaultVolume * .9f;
 
-		/// <summary>             /// <summary>
-		/// Volume used with sound attenuation.
-		/// </summary>
-		public static float GetOverWallVolume(float defaultVolume) => defaultVolume * .4f;
+        /// <summary>             /// <summary>
+        /// Volume used with sound attenuation.
+        /// </summary>
+        public static float GetOverWallVolume(float defaultVolume) => defaultVolume * .4f;
 
-		public const float DefaultMasterVolume = 1;
+        public const float DefaultMasterVolume = 1;
 
-		/// <summary>
-		/// Lowpass setting for simulation of sounds obstructed by an object.
-		/// </summary>
-		public const int OverWallLowpass = 500;
-		public const int OverClosedDoorLowpass = 800;
-		public const int OverOpenDoorLowpass = 5000;
-		public const int OverObjectLowpass = 2000;
+        /// <summary>
+        /// Lowpass setting for simulation of sounds obstructed by an object.
+        /// </summary>
+        public const int OverWallLowpass = 500;
+        public const int OverClosedDoorLowpass = 800;
+        public const int OverOpenDoorLowpass = 5000;
+        public const int OverObjectLowpass = 2000;
 
-		public static AudioClip GetClip(string name, int? variant = null)
-		{
-			return !_clips.TryGetValue(name, out ClipInfo info)
-				? throw new($"Sound not found: {name}.")
-				: variant != null ? info[variant.Value] : info.GetRandomClip();
-		}
+        public static AudioClip GetClip(string name, int? variant = null)
+        {
+            return !_clips.TryGetValue(name, out ClipInfo info)
+                ? throw new($"Sound not found: {name}.")
+                : variant != null ? info[variant.Value] : info.GetRandomClip();
+        }
 
-		/// <summary>
-		/// Loads sound files into memory.
-		/// </summary>
-		public static void LoadClips()
-		{
-			string soundListPath = Path.Combine(MainScript.SoundPath, "soundList").Replace("\\", "/");
-			TextAsset soundList = Resources.Load<TextAsset>(soundListPath);
-			List<string> files = soundList.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-				.ToList();
-			HashSet<string> usedNames = new();
+        /// <summary>
+        /// Loads sound files into memory.
+        /// </summary>
+        public static void LoadClips()
+        {
+            string soundListPath = Path.Combine(MainScript.SoundPath, "soundList").Replace("\\", "/");
+            TextAsset soundList = Resources.Load<TextAsset>(soundListPath);
+            List<string> files = soundList.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+            HashSet<string> usedNames = new();
 
-			foreach (string path in files)
-			{
-				string fileName = Path.GetFileNameWithoutExtension(path);
-				if (!usedNames.Add(fileName))
-					throw new($"Duplicate file name: {path}.");
+            foreach (string path in files)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                if (!usedNames.Add(fileName))
+                    throw new($"Duplicate file name: {path}.");
 
-				string[] nameParts = fileName.Split(' ');
-				if (nameParts.Length < 2 || !int.TryParse(nameParts[1], out int variant) || variant < 0)
-					throw new($"Invalid file name: {path}.");
+                string[] nameParts = fileName.Split(' ');
+                if (nameParts.Length < 2 || !int.TryParse(nameParts[1], out int variant) || variant < 0)
+                    throw new($"Invalid file name: {path}.");
 
-				string shortName = nameParts[0].ToLower();
+                string shortName = nameParts[0].ToLower();
 
-				if (!_clips.TryGetValue(shortName, out ClipInfo info))
-				{
-					info = new ClipInfo(shortName);
-					_clips[shortName] = info;
+                if (!_clips.TryGetValue(shortName, out ClipInfo info))
+                {
+                    info = new ClipInfo(shortName);
+                    _clips[shortName] = info;
 
-					string[] sounds = files
-					.Where(f => Path.GetFileNameWithoutExtension(f).ToLower().StartsWith(shortName + " "))
-						.ToArray();
-					info.LoadClips(sounds);
-				}
-			}
-		}
+                    string[] sounds = files
+                    .Where(f => Path.GetFileNameWithoutExtension(f).ToLower().StartsWith(shortName + " "))
+                        .ToArray();
+                    info.LoadClips(sounds);
+                }
+            }
+        }
 
-		private static float? _volumeBackup;
-		public static void Mute(float duration = .5f) => _soundManager?.Mute(duration);
+        private static float? _volumeBackup;
+        public static void Mute(float duration = .5f) => _soundManager?.Mute(duration);
 
-		public static void Unmute(float duration = .5f)
-			=> _soundManager?.Unmute();
+        public static void Unmute(float duration = .5f)
+            => _soundManager?.Unmute();
 
-		public static void SwitchTo2d(AudioSource audioSource, bool disableLowPass = true) => _soundManager.ConvertTo2d(audioSource, disableLowPass);
+        public static void SwitchTo2d(AudioSource audioSource, bool disableLowPass = true) => _soundManager.ConvertTo2d(audioSource, disableLowPass);
 
-		public static void DisableSpatializer(AudioSource source) => _soundManager.DisableSpatializer(source);
+        public static void DisableSpatializer(AudioSource source) => _soundManager.DisableSpatializer(source);
 
-		public static void EnableSpatializer(AudioSource source) => _soundManager.EnableSpatializer(source);
+        public static void EnableSpatializer(AudioSource source) => _soundManager.EnableSpatializer(source);
 
-		/// <summary>
-		/// All sounds used in the game
-		/// </summary>
-		private static Dictionary<string, ClipInfo> _clips = new(StringComparer.OrdinalIgnoreCase);
+        /// <summary>
+        /// All sounds used in the game
+        /// </summary>
+        private static Dictionary<string, ClipInfo> _clips = new(StringComparer.OrdinalIgnoreCase);
 
-	}
+    }
 }

@@ -222,50 +222,6 @@ namespace Game.Audio
             return source;
         }
 
-        public void SetRoomParameters(Zone zone, ZoneMaterials zoneMaterials)
-        {
-            _roomObject.transform.position = zone.transform.position;
-            Vector3 size = zone.transform.localScale;
-            _resonanceRoom.size = size;
-            ZoneMaterials materials = zoneMaterials;
-            _resonanceRoom.leftWall = _materials[materials.LeftWall];
-            _resonanceRoom.frontWall = _materials[materials.FrontWall];
-            _resonanceRoom.rightWall = _materials[materials.RightWall];
-            _resonanceRoom.backWall = _materials[materials.BackWall];
-            _resonanceRoom.floor = _materials[materials.Floor];
-            _resonanceRoom.ceiling = _materials[materials.Ceiling];
-
-            if (zone.Type == ZoneType.Outdoor)
-                _resonanceRoom.reverbTime = .4f;
-        }
-
-        private Dictionary<ZoneMaterial, ResonanceAudioRoomManager.SurfaceMaterial> _materials = new()
-        {
-    { ZoneMaterial.Transparent, ResonanceAudioRoomManager.SurfaceMaterial.Transparent },
-    { ZoneMaterial.AcousticCeilingTiles, ResonanceAudioRoomManager.SurfaceMaterial.AcousticCeilingTiles },
-    { ZoneMaterial.BrickBare, ResonanceAudioRoomManager.SurfaceMaterial.BrickBare },
-    { ZoneMaterial.BrickPainted, ResonanceAudioRoomManager.SurfaceMaterial.BrickPainted },
-    { ZoneMaterial.ConcreteBlockCoarse, ResonanceAudioRoomManager.SurfaceMaterial.ConcreteBlockCoarse },
-    { ZoneMaterial.ConcreteBlockPainted, ResonanceAudioRoomManager.SurfaceMaterial.ConcreteBlockPainted },
-    { ZoneMaterial.CurtainHeavy, ResonanceAudioRoomManager.SurfaceMaterial.CurtainHeavy },
-    { ZoneMaterial.FiberglassInsulation, ResonanceAudioRoomManager.SurfaceMaterial.FiberglassInsulation },
-    { ZoneMaterial.GlassThin, ResonanceAudioRoomManager.SurfaceMaterial.GlassThin },
-    { ZoneMaterial.GlassThick, ResonanceAudioRoomManager.SurfaceMaterial.GlassThick },
-    { ZoneMaterial.Grass, ResonanceAudioRoomManager.SurfaceMaterial.Grass },
-    { ZoneMaterial.LinoleumOnConcrete, ResonanceAudioRoomManager.SurfaceMaterial.LinoleumOnConcrete },
-    { ZoneMaterial.Marble, ResonanceAudioRoomManager.SurfaceMaterial.Marble },
-    { ZoneMaterial.Metal, ResonanceAudioRoomManager.SurfaceMaterial.Metal },
-    { ZoneMaterial.ParquetOnConcrete, ResonanceAudioRoomManager.SurfaceMaterial.ParquetOnConcrete },
-    { ZoneMaterial.PlasterRough, ResonanceAudioRoomManager.SurfaceMaterial.PlasterRough },
-    { ZoneMaterial.PlasterSmooth, ResonanceAudioRoomManager.SurfaceMaterial.PlasterSmooth },
-    { ZoneMaterial.PlywoodPanel, ResonanceAudioRoomManager.SurfaceMaterial.PlywoodPanel },
-    { ZoneMaterial.PolishedConcreteOrTile, ResonanceAudioRoomManager.SurfaceMaterial.PolishedConcreteOrTile },
-    { ZoneMaterial.Sheetrock, ResonanceAudioRoomManager.SurfaceMaterial.Sheetrock },
-    { ZoneMaterial.WaterOrIceSurface, ResonanceAudioRoomManager.SurfaceMaterial.WaterOrIceSurface },
-    { ZoneMaterial.WoodCeiling, ResonanceAudioRoomManager.SurfaceMaterial.WoodCeiling },
-    { ZoneMaterial.WoodPanel, ResonanceAudioRoomManager.SurfaceMaterial.WoodPanel }
-};
-
         private SoundPool _soundPool;
 
         public void DisableLowPass(AudioSource source) => _soundPool.DisableLowPass(source);
@@ -313,13 +269,6 @@ namespace Game.Audio
         {
             LoadMixer();
             CreateSoundPool();
-            CreateResonanceRoom();
-        }
-
-        private void CreateResonanceRoom()
-        {
-            _roomObject = new("Resonance Audio room");
-            _resonanceRoom = _roomObject.AddComponent<ResonanceAudioRoom>();
         }
 
         private void CreateSoundPool()
@@ -332,9 +281,6 @@ namespace Game.Audio
             GameObject obj = new("Audio mixer");
             _mixer = obj.AddComponent<MixerManager>();
         }
-
-        private GameObject _roomObject;
-        private ResonanceAudioRoom _resonanceRoom;
 
         public AudioMixerGroup ResonanceGroup { get => _mixer.ResonanceGroup; }
         public float MasterVolume

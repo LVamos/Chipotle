@@ -57,7 +57,7 @@ namespace Game.Debug
             int index = int.Parse(input);
             ZoneMaterial material = (ZoneMaterial)index;
             ZoneMaterials materials = new(material, material, material, material, material, material);
-            Sounds.SetRoomParameters(World.Player.Zone, materials);
+            Sounds.RoomManager.SetRoomParameters(World.Player.Zone, materials);
 
             string name = Enum.GetName(typeof(ZoneMaterial), material);
             Tolk.Speak(name);

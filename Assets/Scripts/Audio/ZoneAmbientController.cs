@@ -74,7 +74,7 @@ namespace Game.Audio
 		{
 			if (!_owner.PlayerInHere())
 				return;
-			Sounds.SetRoomParameters(_owner, _materials);
+			Sounds.RoomManager.SetRoomParameters(_owner, _materials);
 			if (AmbientSound == null)
 				return;
 			if (previousZone != null && TryStealAmbient(previousZone))
