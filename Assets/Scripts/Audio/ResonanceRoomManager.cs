@@ -1,7 +1,6 @@
 using Assets.Scripts.Models;
 
 using Game.Mapping.ZoneMaterials;
-using Game.Terrain;
 
 using UnityEngine;
 
@@ -21,14 +20,19 @@ namespace Game.Audio
             _room = _roomObject.AddComponent<ResonanceAudioRoom>();
         }
 
-        public void SetRoomParameters(Zone zone, ZoneMaterials zoneMaterials)
+        public void SetRoomParameters
+            (
+            Vector3 position,
+            Vector3 dimensions,
+            ZoneMaterials materials,
+            bool outdoors
+            )
         {
-            _roomObject.transform.position = zone.transform.position;
-            _room.size = zone.transform.localScale;
-            SetMaterials(zoneMaterials);
+            _roomObject.transform.position = position;
+            _room.size = dimensions;
+            SetMaterials(materials);
 
-            if (zone.Type == ZoneType.Outdoor)
-                _room.reverbTime = .4f;
+            _room.reverbTime = outdoors ? .4f : 1;
         }
 
         private void SetMaterials(ZoneMaterials zoneMaterials)
