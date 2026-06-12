@@ -58,7 +58,7 @@ namespace Game.Debug
             ZoneMaterial material = (ZoneMaterial)index;
             ZoneMaterials materials = new(material, material, material, material, material, material);
             Zone zone = World.Player.Zone;
-            Sounds.RoomManager.SetRoomParameters
+            Sounds.RoomManager.SimulateRoom
                 (
                 zone.transform.position,
                 zone.transform.localScale,
