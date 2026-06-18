@@ -18,34 +18,12 @@ namespace Game.Audio
             Vector3 roomDimensions = World.Player.Zone.transform.localScale;
             obstacleDirection.Normalize();
 
-            float halfWidth = roomDimensions.x * 0.5f;
-            float halfHeight = roomDimensions.z * 0.5f;
-            Vector2 offset = Vector2.zero;
+            Vector2 roomHalfSize = new(roomDimensions.x * 0.5f, roomDimensions.z * 0.5f);
+            Vector2 directionSign = new(Mathf.Sign(obstacleDirection.x), Mathf.Sign(obstacleDirection.y));
+            Vector2 roomOffset = -Vector2.Scale(directionSign, roomHalfSize - Vector2.one * playerRadius);
 
-            // Horizontal wall
-            if (Mathf.Abs(obstacleDirection.x) > 0.0001f)
-            {
-                float horizontalDistance =
-                    halfWidth - playerRadius;
-
-                offset.x =
-                    -Mathf.Sign(obstacleDirection.x) *
-                    horizontalDistance;
-            }
-
-            // Vertical wall
-            if (Mathf.Abs(obstacleDirection.y) > 0.0001f)
-            {
-                float verticalDistance =
-                    halfHeight - playerRadius;
-
-                offset.y =
-                    -Mathf.Sign(obstacleDirection.y) *
-                    verticalDistance;
-            }
-
-            Vector2 floorCenter = playerPosition + offset;
-            _roomObject.transform.position = floorCenter.ToVector3(roomDimensions.y * 0.5f);
+            Vector2 roomCenter = playerPosition + roomOffset;
+            _roomObject.transform.position = roomCenter.ToVector3(roomDimensions.y * 0.5f);
         }
 
         private readonly GameObject _roomObject;
