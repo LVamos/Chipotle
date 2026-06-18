@@ -78,6 +78,7 @@ namespace Game.Entities.Characters.Chipotle
 
         protected new void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None, bool terrainCollided = false)
         {
+            Sounds.RoomManager.SimulateObstacle(new Vector2(-1, 0));
             string sound = GetStepSoundName(position);
             AudioClip clip = Sounds.GetClip(sound);
             if (!terrainCollided)
