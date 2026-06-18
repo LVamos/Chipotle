@@ -16,14 +16,6 @@ namespace Game.Audio
 
         }
 
-        public void SimulateTightRoom(float height, float ceiling)
-        {
-            Vector3 playerPosition = World.Player.transform.position;
-            _roomObject.transform.position = new Vector3(playerPosition.x, height, playerPosition.z);
-            Vector3 size = new(4, ceiling, 4);
-            _room.size = size;
-        }
-
         private readonly GameObject _roomObject;
         private readonly ResonanceAudioRoom _room;
 

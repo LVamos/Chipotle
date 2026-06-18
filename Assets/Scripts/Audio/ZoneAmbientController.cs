@@ -80,8 +80,6 @@ namespace Game.Audio
             _owner.transform.localScale,
             _materials,
             _owner.Type == ZoneType.Outdoor);
-            //test
-            Sounds.RoomManager.SimulateTightRoom(3, 6);
 
             if (AmbientSound == null)
                 return;
