@@ -51,6 +51,7 @@ namespace Game
         public static bool SayInnerItemNames;
         public static bool SayInnerZoneNames;
         public static bool SayInnerPassageNames;
+        public static float AcousticObstacleRadius = 1;
 
         /// <summary>
         /// Saves the settings into a YAML file specified in <see cref="ConfigurationFileName"/>.

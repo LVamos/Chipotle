@@ -424,9 +424,29 @@ namespace Game.Terrain
             }
         }
 
+        /// <summary>
+        /// Gets all acoustic obstacles in the zone within a specified distance from a point, including items marked as obstacles and closed doors.
+        /// </summary>
+        /// <param name="point">The reference point to measure distance from.</param>
+        /// <param name="maxDistance">The maximum allowed distance from the point. If null, no distance filtering is applied.</param>
+        /// <returns>A list of map elements that act as acoustic obstacles within the specified distance.</returns>
+        public List<MapElement> GetAcousticObstacles(Vector2 point, float? maxDistance = null)
+        {
+            IEnumerable<MapElement> obstacles = Items
+                .Where(i => i.AcousticObstacle)
+                .Cast<MapElement>()
+                .Concat(GetClosedDoors())
+                .Concat(Characters);
+
+            if (maxDistance.HasValue)
+                obstacles = obstacles.Where(o => o.Area.Value.GetDistanceFrom(point) <= maxDistance.Value);
+
+            return obstacles.ToList();
+        }
 
         public List<Item> GetMovableItems
-            => Items.Where(i => i.CanBePicked()).ToList();
+            => Items.Where(i => i.CanBePicked())
+            .ToList();
 
         /// <summary>
         /// List of objects present in this zone.

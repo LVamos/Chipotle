@@ -26,11 +26,26 @@ using Rectangle = Game.Terrain.Rectangle;
 namespace Game.Entities.Characters.Components.PhysicsComponent
 {
     /// <summary>
-    /// Controls movement of an NPC.
+    /// Controls movement of a character.
     /// </summary>
-
     public class Physics : CharacterComponent
     {
+        protected MapElement GetLargestAcousticObstacle()
+            => GetAcousticObstacles()
+            .OrderBy(o => o.Area.Value.Size)
+            .FirstOrDefault();
+
+        protected HashSet<MapElement> GetAcousticObstacles()
+        {
+            HashSet<MapElement> obstacles = new();
+            List<Zone> zones = World.GetZones(_area.Value).ToList();
+
+            foreach (Zone z in zones)
+                obstacles.UnionWith(z.GetAcousticObstacles(Center, Settings.AcousticObstacleRadius));
+
+            return obstacles;
+        }
+
         public override void Initialize()
         {
             base.Initialize();

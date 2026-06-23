@@ -153,6 +153,20 @@ namespace Game.Entities.Characters.Chipotle
         }
 
         /// <summary>
+        /// Detects the largest acoustic obstacle and simulates its effect on Resonance Audio room.
+        /// </summary>
+        public void DetectAcousticObstacle()
+        {
+            MapElement obstacle = GetLargestAcousticObstacle();
+            if (obstacle == null)
+                return;
+
+            float angle = GetAngle(obstacle.Area.Value);
+            Vector2 obstacleDirection = Angle.FromCompassDegrees(angle).UnitVector;
+            Sounds.RoomManager.SimulateObstacle(obstacleDirection);
+        }
+
+        /// <summary>
         /// Handles a message.
         /// </summary>
         /// <param name="message">Source of the message</param>
@@ -1058,9 +1072,11 @@ namespace Game.Entities.Characters.Chipotle
 
             Vector2 direction = GetStepDirection();
 
-            if (!DetectCollisions(direction))
-                Move(direction);
-            //ReportObjects();
+            if (DetectCollisions(direction))
+                return;
+
+            DetectAcousticObstacle();
+            Move(direction);
         }
 
         /// <summary>
@@ -1168,34 +1184,6 @@ namespace Game.Entities.Characters.Chipotle
         }
 
         private Vector2 GetContactPoint(MapElement element) => element.Area.Value.GetClosestPoint(_area.Value.Center);
-
-        /// <summary>
-        /// Announces each object in specified radius.
-        /// </summary>
-        protected void ReportObjects()
-        {
-            HashSet<string> nearObjects =
-                (from o in Zone.GetNearByItems(_area.Value.Center, _nearObjectRadius, false)
-                 select o.Name.Inner)
-                .ToHashSet();
-
-            foreach (string o in nearObjects)
-            {
-                if (_navigatedItem != null && _navigatedItem.Name.Inner == o)
-                    continue;
-
-                // Announce new objects.
-                if (!_nearObjects.Contains(o) && nearObjects.Contains(o))
-                {
-                    ReportPosition message = new(Owner);
-                    Item theObject = World.GetItem(o);
-                    theObject.TakeMessage(message);
-                    Tolk.Speak(theObject.Name.Friendly);
-                }
-            }
-
-            _nearObjects = nearObjects;
-        }
 
         /// <summary>
         /// Specifies a radius for near object announcements.
@@ -1314,8 +1302,9 @@ namespace Game.Entities.Characters.Chipotle
             Orientation2D source = _orientation;
             _orientation.Rotate(message.Degrees);
             InnerMessage(new OrientationChanged(this, source, _orientation, message.Direction));
-
             LogOrientationChange(source, _orientation, message.Degrees);
+
+            DetectAcousticObstacle();
         }
 
         /// <summary>
