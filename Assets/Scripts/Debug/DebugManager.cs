@@ -58,12 +58,15 @@ namespace Game.Debug
             ZoneMaterial material = (ZoneMaterial)index;
             ZoneMaterials materials = new(material, material, material, material, material, material);
             Zone zone = World.Player.Zone;
-            Sounds.RoomManager.SimulateRoom
-                (
+
+            ResonanceRoomParameters parameters = new(
                 zone.transform.position,
                 zone.transform.localScale,
                 materials,
-                zone.Type == ZoneType.Outdoor
+                zone.Type == ZoneType.Outdoor);
+            Sounds.RoomManager.SimulateRoom
+                (
+                parameters
                 );
 
             string name = Enum.GetName(typeof(ZoneMaterial), material);

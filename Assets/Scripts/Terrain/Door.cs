@@ -17,421 +17,433 @@ using Message = Game.Messaging.Message;
 
 namespace Game.Terrain
 {
-	/// <summary>
-	/// Represents a door between two zones.
-	/// </summary>
-
-
-
-
-	public class Door : Passage
-	{
-		public void Restore(PassageSave save)
-		{
-			if (save is not DoorSave data)
-				return;
-
-			base.Restore(data);
-			_closingSound = data.ClosingSound;
-			_lockedSound = data.LockedSound;
-			_openingSound = data.OpeningSound;
-			Type = data.Type;
-		}
-
-		public DoorSave Export()
-		{
-			var save = base.Export().ToDoorSave();
-
-			save.ClosingSound = _closingSound;
-			save.LockedSound = _lockedSound;
-			save.OpeningSound = _openingSound;
-			save.Type = Type;
-
-			return save;
-		}
-
-		/// <summary>
-		/// Indicates if the door has been opened previously.
-		/// </summary>
-		public bool OpenedPreviously { get; private set; }
-
-		/// <summary>
-		/// Describes type of the door.
-		/// </summary>
-		public DoorType Type { get; protected set; }
-
-		/// <summary>
-		/// Processes incoming messages.
-		/// </summary>
-		public override void GameUpdate()
-		{
-			base.GameUpdate();
-			WatchTimers();
-		}
-
-		/// <summary>
-		/// Watches and manages timers for door manipulation.
-		/// </summary>
-		private void WatchTimers()
-		{
-			if (_manipulationTimer < _manipulationTimeLimit)
-				_manipulationTimer += World.DeltaTime;
-			if (_pinchTimer < _pinchTimeLimit)
-				_pinchTimer += World.DeltaTime;
-		}
-
-		/// <summary>
-		/// Conts time from last opening / closing.
-		/// </summary>
-		protected int _manipulationTimer = _manipulationTimeLimit;
-
-		/// <summary>
-		/// Conts time from last attempt to pinch an object or entity in the door.
-		/// </summary>
-		protected int _pinchTimer = _pinchTimeLimit;
-
-		/// <summary>
-		/// Sound of the door being opened
-		/// </summary>
-		protected string _openingSound;
-
-		/// <summary>
-		/// Sound of the door being closed
-		/// </summary>
-		protected string _closingSound;
-
-		/// <summary>
-		/// Sound of the door being opened
-		/// </summary>
-		protected string _lockedSound;
-		private AudioSource _openingSource;
-		private AudioSource _closingSource;
-
-		/// <summary>
-		/// constructor
-		/// </summary>
-		/// <param name="name">Inner name for the door</param>
-		/// <param name="closed">Specifies whether the door should be implicitly closed or open</param>
-		/// <param name="area">Location of the door</param>
-		/// <param name="zones">Two zones connected by the door</param>
-		public void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door, bool usable = false)
-		{
-			base.Initialize(name, area, zones);
-			TypeDescription = Type == DoorType.Door ? "dveře" : "vrata";
-			_closingSound = "snd24";
-			_lockedSound = null;
-			_manipulationTimer = 0;
-			_openingSound = "snd23";
-			_pinchTimer = 0;
-			OpenedPreviously = false;
-
-			State = state;
-			Type = type;
-			_sounds["hit"] = "KitchenDoorCrash";
-			_sounds["rattle"] = "DoorKnobRattle";
-			_defaultVolume = Settings.DoorVolume;
-			Usable = usable;
-		}
-
-		/// <summary>
-		/// Runs a message handler for the specified message.
-		/// </summary>
-		/// <param name="message">The message to be handled</param>
-		protected override void HandleMessage(Message message)
-		{
-			switch (message)
-			{
-				case DoorHitByCharacter dh: OnDoorHitByCharacter(dh); break;
-				case UseDoor m: OnUseDoor(m); break;
-				default: base.HandleMessage(message); break;
-			}
-		}
-
-		/// <summary>
-		///  Handles the DoorHit message.
-		/// </summary>
-		/// <param name="message">The message to be handled</param>
-		protected virtual void OnDoorHitByCharacter(DoorHitByCharacter message)
-		{
-			Character character = message.Sender as Character;
-			float characterHeight = character.transform.localScale.y;
-			Vector3 slamPoint = message.Point.ToVector3(characterHeight);
-			PlayDoorHit(slamPoint);
-			LogDoorHit(message.Sender as Character, message.Point);
-		}
-
-		private void LogDoorHit(Character character, Vector2 point)
-		{
-			string title = "Náraz do dveří";
-			string name = $"Název: {Name.Inner}";
-			string characterMessage = $"Postava {character.Name.Inner} v lokaci {character.Zone.Name.Inner}";
-			string type = $"typ dveří: {TypeDescription}";
-			string zones = $"Lokace: {_zones[0]}, {_zones[1]}";
-
-			Logger.LogInfo(title, name, zones, type, characterMessage);
-		}
-
-		private void PlayDoorHit(Vector3 point) => Sounds.Play(_sounds["hit"], point, _defaultVolume);
-
-		/// <summary>
-		/// Closes the door if possible
-		/// </summary>
-		protected virtual void Close(object sender, Vector2 point)
-		{
-			State = PassageState.Closed;
-
-			if (_openingSource != null && _openingSource.isPlaying)
-				Sounds.SlideVolume(_openingSource, .5f, 0, true);
-			_closingSource = Play(_closingSound, sender as Character, point);
-			AnnounceManipulation();
-			LogClosing();
-		}
-
-		private void LogClosing()
-		{
-			string title = "Dveře zavřeny";
-			string name = $"Název: {Name.Inner}";
-			string type = $"typ dveří: {TypeDescription}";
-
-			Logger.LogInfo(title, name, type);
-		}
-
-		private void LogLocking()
-		{
-			string title = "Dveře zamčeny";
-			string name = $"Název: {Name.Inner}";
-			string type = $"typ dveří: {TypeDescription}";
-
-			Logger.LogInfo(title, name, type);
-		}
-
-		private void LogUnlocking()
-		{
-			string title = "Dveře odemčeny";
-			string name = $"Název: {Name.Inner}";
-			string type = $"typ dveří: {TypeDescription}";
-
-			Logger.LogInfo(title, name, type);
-		}
-
-		private void AnnounceManipulation()
-		{
-			DoorUsed message = new(this);
-			List<Zone> zones = World.GetNearestZones(Center, 100, true);
-
-			foreach (Zone zone in zones)
-				zone.TakeMessage(message);
-		}
-
-		/// <summary>
-		/// Plays the specified sound.
-		/// </summary>
-		/// <param name="sound">Name of the sound to be played</param>
-		/// <param name="position"></param>
-		/// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
-		protected AudioSource Play(string sound, Character character, Vector2 point)
-		{
-			// Set attenuation parameters
-			ObstacleType obstacle;
-			if (character != World.Player)
-				obstacle = World.Collisions.DetectOcclusion(character);
-			else
-				obstacle = ObstacleType.None;
-
-			// Set attenuation parameters
-			float volume = _defaultVolume;
-
-			switch (obstacle)
-			{
-				case ObstacleType.Wall:
-					volume = Sounds.GetOverWallVolume(_defaultVolume);
-					break;
-				case ObstacleType.ClosedDoor:
-					volume = Sounds.GetOverClosedDoorVolume(_defaultVolume);
-					break;
-				case ObstacleType.ItemOrCharacter:
-					volume = Sounds.GetOverObjectVolume(_defaultVolume); break;
-			}
-
-			// Play the sound
-			Vector3 position = new(point.x, 1.5f, point.y);
-			return Sounds.Play(sound, position, volume);
-		}
-
-		/// <summary>
-		/// Enumerates objects and entities stand ing near the door.
-		/// </summary>
-		/// <returns>Enumeration of objects and entities</returns>
-		protected List<Entity> GetObstacles()
-		{
-			Rectangle surroundings = Area.Value; // Just copied
-			surroundings.Extend();
-
-			return
-				World.GetCharacters(surroundings)
-	.Cast<Entity>()
-	.Union(World.GetItems(_area.Value))
-	.ToList();
-		}
-
-		/// <summary>
-		/// A time interval in milliseconds between opening and closing.
-		/// </summary>
-		protected const int _manipulationTimeLimit = 800;
-
-		/// <summary>
-		/// A time interval in milliseconds between pinching an object or entity in the door.
-		/// </summary>
-		protected const int _pinchTimeLimit = 2500;
-
-		/// <summary>
-		/// Processes the UseObject message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		protected virtual void OnUseDoor(UseDoor message)
-		{
-			LogUsage(message.Sender, message.ManipulationPoint);
-
-			// Prevent rapidly repeated actions
-			if (_manipulationTimer < _manipulationTimeLimit)
-				return;
-			_manipulationTimer = 0;
-
-			if (State == PassageState.Locked)
-			{
-				Rattle(message.Sender as Character, message.ManipulationPoint);
-				return;
-			}
-
-			if (State == PassageState.Closed)
-			{
-				Open(message.Sender, message.ManipulationPoint);
-				return;
-			}
-
-			// The door is open. Prevent closing it if player is standing in it.
-			if (_area.Value.Contains(World.Player.Area.Value.Center))
-			{
-				Play(_sounds["hit"], message.Sender as Character, message.ManipulationPoint);
-				return;
-			}
-
-			// The door is open. If there are some objects or entities blocking the door then inform them that they were slammed by the door and let the door open.
-			Entity[] obstacles = GetObstacles()
-				.Where(o => o != World.Player)
-				.ToArray();
-			if (obstacles.IsNullOrEmpty()) // No obstacles, close the door.
-			{
-				Close(message.Sender, message.ManipulationPoint);
-				return;
-			}
-
-			// The door is blocked by some objects or entities. Pinch them if the time limit has expired.
-			if (_pinchTimer < _pinchTimeLimit)
-				return;
-
-			PinchEntities(message.Sender as Character, obstacles);
-		}
-
-		private void PinchEntities(Character character, Entity[] entities)
-		{
-			_pinchTimer = 0;
-			float characterHeight = character.transform.localScale.y;
-
-			foreach (Entity entity in entities)
-			{
-				Vector2 center = entity.Area.Value.Center;
-				Vector3 slamPoint = center.ToVector3(characterHeight);
-				Play(_sounds["hit"], character, slamPoint);
-
-				PinchedInDoor pMessage = new(this, character);
-				entity.TakeMessage(pMessage);
-			}
-		}
-
-		protected string GetStateDescription()
-		{
-			return State switch
-			{
-				PassageState.Closed => "zavřené",
-				PassageState.Open => "otevřené",
-				PassageState.Locked => "zamčené",
-				_ => "neznámý stav"
-			};
-		}
-
-		protected void LogUsage(Character sender, Vector2 manipulationPoint)
-		{
-			string title = "Dveře reagují na použití";
-			string doorName = $"Název: {Name.Inner}";
-			string characterName = $"Postava: {sender.Name.Inner}";
-			string doorType = $"typ dveří: {TypeDescription}";
-			string doorState = $"Stav dveří: {GetStateDescription()}";
-			string point = $"Bod: {manipulationPoint.GetString()}";
-
-			Logger.LogInfo(title, doorName, characterName, doorType, doorState, point);
-		}
-
-		protected void Rattle(Character character, Vector2 manipulationPoint)
-		{
-			Play(_sounds["rattle"], character, manipulationPoint);
-			LogRattling();
-		}
-
-		private void LogRattling()
-		{
-			string title = "Lomcování dveřmi";
-			string name = $"Název: {Name.Inner}";
-			string type = $"typ dveří: {TypeDescription}";
-
-			Logger.LogInfo(title, name, type);
-		}
-
-		/// <summary>
-		/// Opens the door if possible.
-		/// </summary>
-		/// <param name="position">
-		/// The coordinates of the place on the door that an NPC is pushing on
-		/// </param>
-		protected virtual void Open(object sender, Vector2 point)
-		{
-			OpenedPreviously = true;
-			State = PassageState.Open;
-
-			if (_closingSource != null && _closingSource.isPlaying)
-				Sounds.SlideVolume(_closingSource, .5f, 0, true);
-
-			_openingSource = Play(_openingSound, sender as Character, point);
-			AnnounceManipulation();
-			LogOpening();
-		}
-
-		private void LogOpening()
-		{
-			string title = "Dveře otevřeny";
-			string name = $"Název: {Name.Inner}";
-			string type = $"typ dveří: {TypeDescription}";
-
-			Logger.LogInfo(title, name, type);
-		}
-
-		protected void Lock()
-		{
-			if (Locked)
-				throw new InvalidOperationException($"Attempt to lock locked door {Name.Inner}");
-
-			State = PassageState.Locked;
-			AnnounceManipulation();
-			LogLocking();
-		}
-
-		protected void Unlock()
-		{
-			if (!Locked)
-				throw new InvalidOperationException($"Attempt to unlock unlocked door {Name.Inner}");
-			State = PassageState.Closed;
-			AnnounceManipulation();
-			LogLocking();
-		}
-	}
+    /// <summary>
+    /// Represents a door between two zones.
+    /// </summary>
+
+
+
+
+    public class Door : Passage
+    {
+        public void Restore(PassageSave save)
+        {
+            if (save is not DoorSave data)
+                return;
+
+            base.Restore(data);
+            _closingSound = data.ClosingSound;
+            _lockedSound = data.LockedSound;
+            _openingSound = data.OpeningSound;
+            Type = data.Type;
+        }
+
+        public DoorSave Export()
+        {
+            var save = base.Export().ToDoorSave();
+
+            save.ClosingSound = _closingSound;
+            save.LockedSound = _lockedSound;
+            save.OpeningSound = _openingSound;
+            save.Type = Type;
+
+            return save;
+        }
+
+        /// <summary>
+        /// Indicates if the door has been opened previously.
+        /// </summary>
+        public bool OpenedPreviously { get; private set; }
+
+        /// <summary>
+        /// Describes type of the door.
+        /// </summary>
+        public DoorType Type { get; protected set; }
+
+        /// <summary>
+        /// Processes incoming messages.
+        /// </summary>
+        public override void GameUpdate()
+        {
+            base.GameUpdate();
+            WatchTimers();
+        }
+
+        /// <summary>
+        /// Watches and manages timers for door manipulation.
+        /// </summary>
+        private void WatchTimers()
+        {
+            if (_manipulationTimer < _manipulationTimeLimit)
+                _manipulationTimer += World.DeltaTime;
+            if (_pinchTimer < _pinchTimeLimit)
+                _pinchTimer += World.DeltaTime;
+        }
+
+        /// <summary>
+        /// Conts time from last opening / closing.
+        /// </summary>
+        protected int _manipulationTimer = _manipulationTimeLimit;
+
+        /// <summary>
+        /// Conts time from last attempt to pinch an object or entity in the door.
+        /// </summary>
+        protected int _pinchTimer = _pinchTimeLimit;
+
+        /// <summary>
+        /// Sound of the door being opened
+        /// </summary>
+        protected string _openingSound;
+
+        /// <summary>
+        /// Sound of the door being closed
+        /// </summary>
+        protected string _closingSound;
+
+        /// <summary>
+        /// Sound of the door being opened
+        /// </summary>
+        protected string _lockedSound;
+        private AudioSource _openingSource;
+        private AudioSource _closingSource;
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="name">Inner name for the door</param>
+        /// <param name="closed">Specifies whether the door should be implicitly closed or open</param>
+        /// <param name="area">Location of the door</param>
+        /// <param name="zones">Two zones connected by the door</param>
+        public virtual void Initialize(
+            Name name,
+            PassageState state,
+            Rectangle area,
+            IEnumerable<string> zones,
+            DoorType type = DoorType.Door,
+            bool usable = false)
+        {
+            base.Initialize(
+                name,
+                area,
+                zones
+                );
+
+            AcousticObstacle = state != PassageState.Open;
+            TypeDescription = Type == DoorType.Door ? "dveře" : "vrata";
+            _closingSound = "snd24";
+            _lockedSound = null;
+            _manipulationTimer = 0;
+            _openingSound = "snd23";
+            _pinchTimer = 0;
+            OpenedPreviously = false;
+
+            State = state;
+            Type = type;
+            _sounds["hit"] = "KitchenDoorCrash";
+            _sounds["rattle"] = "DoorKnobRattle";
+            _defaultVolume = Settings.DoorVolume;
+            Usable = usable;
+        }
+
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(Message message)
+        {
+            switch (message)
+            {
+                case DoorHitByCharacter dh: OnDoorHitByCharacter(dh); break;
+                case UseDoor m: OnUseDoor(m); break;
+                default: base.HandleMessage(message); break;
+            }
+        }
+
+        /// <summary>
+        ///  Handles the DoorHit message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected virtual void OnDoorHitByCharacter(DoorHitByCharacter message)
+        {
+            Character character = message.Sender as Character;
+            float characterHeight = character.transform.localScale.y;
+            Vector3 slamPoint = message.Point.ToVector3(characterHeight);
+            PlayDoorHit(slamPoint);
+            LogDoorHit(message.Sender as Character, message.Point);
+        }
+
+        private void LogDoorHit(Character character, Vector2 point)
+        {
+            string title = "Náraz do dveří";
+            string name = $"Název: {Name.Inner}";
+            string characterMessage = $"Postava {character.Name.Inner} v lokaci {character.Zone.Name.Inner}";
+            string type = $"typ dveří: {TypeDescription}";
+            string zones = $"Lokace: {_zones[0]}, {_zones[1]}";
+
+            Logger.LogInfo(title, name, zones, type, characterMessage);
+        }
+
+        private void PlayDoorHit(Vector3 point) => Sounds.Play(_sounds["hit"], point, _defaultVolume);
+
+        /// <summary>
+        /// Closes the door if possible
+        /// </summary>
+        protected virtual void Close(object sender, Vector2 point)
+        {
+            State = PassageState.Closed;
+
+            if (_openingSource != null && _openingSource.isPlaying)
+                Sounds.SlideVolume(_openingSource, .5f, 0, true);
+            _closingSource = Play(_closingSound, sender as Character, point);
+            AnnounceManipulation();
+            LogClosing();
+        }
+
+        private void LogClosing()
+        {
+            string title = "Dveře zavřeny";
+            string name = $"Název: {Name.Inner}";
+            string type = $"typ dveří: {TypeDescription}";
+
+            Logger.LogInfo(title, name, type);
+        }
+
+        private void LogLocking()
+        {
+            string title = "Dveře zamčeny";
+            string name = $"Název: {Name.Inner}";
+            string type = $"typ dveří: {TypeDescription}";
+
+            Logger.LogInfo(title, name, type);
+        }
+
+        private void LogUnlocking()
+        {
+            string title = "Dveře odemčeny";
+            string name = $"Název: {Name.Inner}";
+            string type = $"typ dveří: {TypeDescription}";
+
+            Logger.LogInfo(title, name, type);
+        }
+
+        private void AnnounceManipulation()
+        {
+            DoorUsed message = new(this);
+            List<Zone> zones = World.GetNearestZones(Center, 100, true);
+
+            foreach (Zone zone in zones)
+                zone.TakeMessage(message);
+        }
+
+        /// <summary>
+        /// Plays the specified sound.
+        /// </summary>
+        /// <param name="sound">Name of the sound to be played</param>
+        /// <param name="position"></param>
+        /// <param name="obstacle">Describes type of obstacle between the entity and the player if any.</param>
+        protected AudioSource Play(string sound, Character character, Vector2 point)
+        {
+            // Set attenuation parameters
+            ObstacleType obstacle;
+            if (character != World.Player)
+                obstacle = World.Collisions.DetectOcclusion(character);
+            else
+                obstacle = ObstacleType.None;
+
+            // Set attenuation parameters
+            float volume = _defaultVolume;
+
+            switch (obstacle)
+            {
+                case ObstacleType.Wall:
+                    volume = Sounds.GetOverWallVolume(_defaultVolume);
+                    break;
+                case ObstacleType.ClosedDoor:
+                    volume = Sounds.GetOverClosedDoorVolume(_defaultVolume);
+                    break;
+                case ObstacleType.ItemOrCharacter:
+                    volume = Sounds.GetOverObjectVolume(_defaultVolume); break;
+            }
+
+            // Play the sound
+            Vector3 position = new(point.x, 1.5f, point.y);
+            return Sounds.Play(sound, position, volume);
+        }
+
+        /// <summary>
+        /// Enumerates objects and entities stand ing near the door.
+        /// </summary>
+        /// <returns>Enumeration of objects and entities</returns>
+        protected List<Entity> GetObstacles()
+        {
+            Rectangle surroundings = Area.Value; // Just copied
+            surroundings.Extend();
+
+            return
+                World.GetCharacters(surroundings)
+    .Cast<Entity>()
+    .Union(World.GetItems(_area.Value))
+    .ToList();
+        }
+
+        /// <summary>
+        /// A time interval in milliseconds between opening and closing.
+        /// </summary>
+        protected const int _manipulationTimeLimit = 800;
+
+        /// <summary>
+        /// A time interval in milliseconds between pinching an object or entity in the door.
+        /// </summary>
+        protected const int _pinchTimeLimit = 2500;
+
+        /// <summary>
+        /// Processes the UseObject message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected virtual void OnUseDoor(UseDoor message)
+        {
+            LogUsage(message.Sender, message.ManipulationPoint);
+
+            // Prevent rapidly repeated actions
+            if (_manipulationTimer < _manipulationTimeLimit)
+                return;
+            _manipulationTimer = 0;
+
+            if (State == PassageState.Locked)
+            {
+                Rattle(message.Sender as Character, message.ManipulationPoint);
+                return;
+            }
+
+            if (State == PassageState.Closed)
+            {
+                Open(message.Sender, message.ManipulationPoint);
+                return;
+            }
+
+            // The door is open. Prevent closing it if player is standing in it.
+            if (_area.Value.Contains(World.Player.Area.Value.Center))
+            {
+                Play(_sounds["hit"], message.Sender as Character, message.ManipulationPoint);
+                return;
+            }
+
+            // The door is open. If there are some objects or entities blocking the door then inform them that they were slammed by the door and let the door open.
+            Entity[] obstacles = GetObstacles()
+                .Where(o => o != World.Player)
+                .ToArray();
+            if (obstacles.IsNullOrEmpty()) // No obstacles, close the door.
+            {
+                Close(message.Sender, message.ManipulationPoint);
+                return;
+            }
+
+            // The door is blocked by some objects or entities. Pinch them if the time limit has expired.
+            if (_pinchTimer < _pinchTimeLimit)
+                return;
+
+            PinchEntities(message.Sender as Character, obstacles);
+        }
+
+        private void PinchEntities(Character character, Entity[] entities)
+        {
+            _pinchTimer = 0;
+            float characterHeight = character.transform.localScale.y;
+
+            foreach (Entity entity in entities)
+            {
+                Vector2 center = entity.Area.Value.Center;
+                Vector3 slamPoint = center.ToVector3(characterHeight);
+                Play(_sounds["hit"], character, slamPoint);
+
+                PinchedInDoor pMessage = new(this, character);
+                entity.TakeMessage(pMessage);
+            }
+        }
+
+        protected string GetStateDescription()
+        {
+            return State switch
+            {
+                PassageState.Closed => "zavřené",
+                PassageState.Open => "otevřené",
+                PassageState.Locked => "zamčené",
+                _ => "neznámý stav"
+            };
+        }
+
+        protected void LogUsage(Character sender, Vector2 manipulationPoint)
+        {
+            string title = "Dveře reagují na použití";
+            string doorName = $"Název: {Name.Inner}";
+            string characterName = $"Postava: {sender.Name.Inner}";
+            string doorType = $"typ dveří: {TypeDescription}";
+            string doorState = $"Stav dveří: {GetStateDescription()}";
+            string point = $"Bod: {manipulationPoint.GetString()}";
+
+            Logger.LogInfo(title, doorName, characterName, doorType, doorState, point);
+        }
+
+        protected void Rattle(Character character, Vector2 manipulationPoint)
+        {
+            Play(_sounds["rattle"], character, manipulationPoint);
+            LogRattling();
+        }
+
+        private void LogRattling()
+        {
+            string title = "Lomcování dveřmi";
+            string name = $"Název: {Name.Inner}";
+            string type = $"typ dveří: {TypeDescription}";
+
+            Logger.LogInfo(title, name, type);
+        }
+
+        /// <summary>
+        /// Opens the door if possible.
+        /// </summary>
+        /// <param name="position">
+        /// The coordinates of the place on the door that an NPC is pushing on
+        /// </param>
+        protected virtual void Open(object sender, Vector2 point)
+        {
+            OpenedPreviously = true;
+            State = PassageState.Open;
+
+            if (_closingSource != null && _closingSource.isPlaying)
+                Sounds.SlideVolume(_closingSource, .5f, 0, true);
+
+            _openingSource = Play(_openingSound, sender as Character, point);
+            AnnounceManipulation();
+            LogOpening();
+        }
+
+        private void LogOpening()
+        {
+            string title = "Dveře otevřeny";
+            string name = $"Název: {Name.Inner}";
+            string type = $"typ dveří: {TypeDescription}";
+
+            Logger.LogInfo(title, name, type);
+        }
+
+        protected void Lock()
+        {
+            if (Locked)
+                throw new InvalidOperationException($"Attempt to lock locked door {Name.Inner}");
+
+            State = PassageState.Locked;
+            AnnounceManipulation();
+            LogLocking();
+        }
+
+        protected void Unlock()
+        {
+            if (!Locked)
+                throw new InvalidOperationException($"Attempt to unlock unlocked door {Name.Inner}");
+            State = PassageState.Closed;
+            AnnounceManipulation();
+            LogLocking();
+        }
+    }
 }

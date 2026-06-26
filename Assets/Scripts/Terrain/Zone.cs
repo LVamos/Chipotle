@@ -432,16 +432,19 @@ namespace Game.Terrain
         /// <returns>A list of map elements that act as acoustic obstacles within the specified distance.</returns>
         public List<MapElement> GetAcousticObstacles(Vector2 point, float? maxDistance = null)
         {
-            IEnumerable<MapElement> obstacles = Items
-                .Where(i => i.AcousticObstacle)
-                .Cast<MapElement>()
-                .Concat(GetClosedDoors())
-                .Concat(Characters);
+            IEnumerable<MapElement> obstacles =
+                Filter(Items)
+                .Concat(Filter(Exits))
+                .Concat(Filter(Characters));
 
             if (maxDistance.HasValue)
-                obstacles = obstacles.Where(o => o.Area.Value.GetDistanceFrom(point) <= maxDistance.Value);
+                obstacles = obstacles
+                    .Where(o => o.Area.Value.GetDistanceFrom(point) <= maxDistance.Value);
 
             return obstacles.ToList();
+
+            IEnumerable<MapElement> Filter(IEnumerable<MapElement> elements) =>
+                elements.Where(e => e.AcousticObstacle);
         }
 
         public List<Item> GetMovableItems

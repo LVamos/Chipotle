@@ -10,59 +10,74 @@ using Rectangle = Game.Terrain.Rectangle;
 
 namespace Game.Entities.Items
 {
-	/// <summary>
-	/// Represents a bench object in the zahrada c1 zone.
-	/// </summary>
+    /// <summary>
+    /// Represents a bench object in the zahrada c1 zone.
+    /// </summary>
 
-	public class CarsonsBench : Item
-	{
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="name">Inner and public name for the object</param>
-		/// <param name="area">The coordinates of the area that the object occupies</param>
-		public override void Initialize(
-			Name name,
-			Rectangle? area,
-			string type,
-			bool decorative,
-			bool pickable,
-			bool usable,
-			bool passable = false,
-			string collisionSound = null,
-			string actionSound = null,
-			string loopSound = null,
-			string cutscene = null,
-			bool usableOnce = false,
-			bool audibleOverWalls = true,
-			float volume = 1,
-			bool stopWhenPlayerMoves = false,
-			bool quickActionsAllowed = false,
-			string pickingSound = null,
-			string placingSound = null,
-			List<string> usableWith = null)
-					=> base.Initialize(name, area, type, decorative, pickable, usable, false, null, null, null, "cs32", true);
+    public class CarsonsBench : Item
+    {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Inner and public name for the object</param>
+        /// <param name="area">The coordinates of the area that the object occupies</param>
+        public override void Initialize(
+            Name name,
+            Rectangle? area,
+            string type,
+            bool decorative,
+            bool pickable,
+            bool usable,
+            bool passable = false,
+            string collisionSound = null,
+            string actionSound = null,
+            string loopSound = null,
+            string cutscene = null,
+            bool usableOnce = false,
+            bool audibleOverWalls = true,
+            float volume = 1,
+            bool stopWhenPlayerMoves = false,
+            bool quickActionsAllowed = false,
+            string pickingSound = null,
+            string placingSound = null,
+            List<string> usableWith = null,
+            bool acousticObstacle = false
+            )
+                    => base.Initialize(
+                        name,
+                        area,
+                        type,
+                        decorative,
+                        pickable,
+                        usable,
+                        false,
+                        null,
+                        null,
+                        null,
+                        "cs32",
+                        true,
+                        acousticObstacle: acousticObstacle);
 
-		/// <summary>
-		/// Returns a reference to the Chipotle's car object.
-		/// </summary>
-		private ChipotlesCar Car
-			=> World.GetItem("detektivovo auto") as ChipotlesCar;
+        /// <summary>
+        /// Returns a reference to the Chipotle's car object.
+        /// </summary>
+        private ChipotlesCar Car
+            => World.GetItem("detektivovo auto") as ChipotlesCar;
 
-		/// <summary>
-		/// Processes the UseObject message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		protected override void OnUseObjects(UseObjects message)
-		{
-			if (
-				!World.GetItemsByType("lavice u Carsona")
-					.Any(o => o.Used)
-			)
-			{
-				base.OnUseObjects(message);
-				Car.TakeMessage(new UnblockZone(this, World.GetZone("ulice v1")));
-			}
-		}
-	}
+        /// <summary>
+        /// Processes the UseObject message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected override void OnUseObjects(UseObjects message)
+        {
+            if (
+                !World.GetItemsByType("lavice u Carsona")
+                    .Any(o => o.Used)
+            )
+            {
+                base.OnUseObjects(message);
+                Car.TakeMessage(new UnblockZone(this, World.GetZone("ulice v1")));
+            }
+        }
+    }
 }

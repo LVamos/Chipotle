@@ -11,6 +11,17 @@ namespace Game.Audio
     /// </summary>
     public class ResonanceRoomManager
     {
+        private bool _obstacleSimulated;
+
+        public void StopSimulatingObstacle()
+        {
+            if (!_obstacleSimulated)
+                return;
+
+            SimulateRoom(_roomParameters);
+            _obstacleSimulated = false;
+        }
+
         public void SimulateObstacle(Vector2 obstacleDirection)
         {
             Vector2 playerPosition = World.Player.Center;
@@ -24,6 +35,7 @@ namespace Game.Audio
 
             Vector2 roomCenter = playerPosition + roomOffset;
             _roomObject.transform.position = roomCenter.ToVector3(roomDimensions.y * 0.5f);
+            _obstacleSimulated = true;
         }
 
         private readonly GameObject _roomObject;
@@ -35,19 +47,16 @@ namespace Game.Audio
             _room = _roomObject.AddComponent<ResonanceAudioRoom>();
         }
 
-        public void SimulateRoom
-            (
-            Vector3 position,
-            Vector3 dimensions,
-            ZoneMaterials materials,
-            bool outdoors
-            )
-        {
-            _roomObject.transform.position = position;
-            _room.size = dimensions;
-            SetMaterials(materials);
+        private ResonanceRoomParameters _roomParameters;
 
-            _room.reverbTime = outdoors ? .4f : 1;
+        public void SimulateRoom(ResonanceRoomParameters parameters)
+        {
+            _roomParameters = parameters;
+            _roomObject.transform.position = parameters.Position;
+            _room.size = parameters.Dimensions;
+            SetMaterials(parameters.Materials);
+
+            _room.reverbTime = parameters.Outdoors ? .4f : 1;
         }
 
         private void SetMaterials(ZoneMaterials zoneMaterials)

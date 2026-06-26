@@ -159,11 +159,16 @@ namespace Game.Entities.Characters.Chipotle
         {
             MapElement obstacle = GetLargestAcousticObstacle();
             if (obstacle == null)
+            {
+                InnerMessage(new NoAcousticObstacleDetected(this));
                 return;
+            }
 
             float angle = GetAngle(obstacle.Area.Value);
             Vector2 obstacleDirection = Angle.FromCompassDegrees(angle).UnitVector;
-            Sounds.RoomManager.SimulateObstacle(obstacleDirection);
+            AcousticObstacleDetected message = new AcousticObstacleDetected(this, obstacleDirection);
+            InnerMessage(message);
+
         }
 
         /// <summary>
@@ -1075,8 +1080,8 @@ namespace Game.Entities.Characters.Chipotle
             if (DetectCollisions(direction))
                 return;
 
-            DetectAcousticObstacle();
             Move(direction);
+            DetectAcousticObstacle();
         }
 
         /// <summary>

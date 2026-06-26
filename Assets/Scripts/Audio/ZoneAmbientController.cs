@@ -75,11 +75,12 @@ namespace Game.Audio
             if (!_owner.PlayerInHere())
                 return;
 
-            Sounds.RoomManager.SimulateRoom(
-            _owner.transform.position,
-            _owner.transform.localScale,
-            _materials,
-            _owner.Type == ZoneType.Outdoor);
+            ResonanceRoomParameters parameters = new(
+                _owner.transform.position,
+                _owner.transform.localScale,
+                _materials,
+                _owner.Type == ZoneType.Outdoor);
+            Sounds.RoomManager.SimulateRoom(parameters);
 
             if (AmbientSound == null)
                 return;

@@ -11,76 +11,76 @@ using Message = Game.Messaging.Message;
 
 namespace Game.Terrain
 {
-	/// <summary>
-	/// Represents a sliding door.
-	/// </summary>
-	
-	public class SlidingDoor : Door
-	{
+    /// <summary>
+    /// Represents a sliding door.
+    /// </summary>
 
-		/// <summary>
-		/// Processes the EntityMoved message.
-		/// </summary>
-		/// <param name="message">The message to be processed</param>
-		protected override void OnCharacterMoved(CharacterMoved message)
-		{
-			base.OnCharacterMoved(message);
+    public class SlidingDoor : Door
+    {
 
-			Character npc = message.Sender as Character;
-			if (npc != World.Player)
-				return;
+        /// <summary>
+        /// Processes the EntityMoved message.
+        /// </summary>
+        /// <param name="message">The message to be processed</param>
+        protected override void OnCharacterMoved(CharacterMoved message)
+        {
+            base.OnCharacterMoved(message);
 
-			Vector2 center = npc.Center;
-			bool opposite = IsInFrontOrBehind(center);
-			bool near = _area.Value.GetDistanceFrom(center) <= _minDistance;
+            Character npc = message.Sender as Character;
+            if (npc != World.Player)
+                return;
 
-			// Find point from which the door sound should be heart.
-			Vector2? point = _area.Value.GetAlignedPoint(center);
-			if (point == null)
-				point = _area.Value.GetClosestPoint(center);
-			if (opposite && near && (State == PassageState.Closed || State == PassageState.Locked))
-				Open(npc, point.Value);
-			else if (!near && State == PassageState.Open)
-				Close(npc, point.Value);
-		}
+            Vector2 center = npc.Center;
+            bool opposite = IsInFrontOrBehind(center);
+            bool near = _area.Value.GetDistanceFrom(center) <= _minDistance;
 
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="name">Inner name of the door</param>
-		/// <param name="area">Coordinates of the area the door occupies</param>
-		/// <param name="zones">The zones connected by the door</param>
-		public override void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
-		{
-			base.Initialize(name, PassageState.Closed, area, zones);
-			State = PassageState.Locked;
-			_openingSound = _closingSound = "SlidingDoor1";
-		}
+            // Find point from which the door sound should be heart.
+            Vector2? point = _area.Value.GetAlignedPoint(center);
+            if (point == null)
+                point = _area.Value.GetClosestPoint(center);
+            if (opposite && near && (State == PassageState.Closed || State == PassageState.Locked))
+                Open(npc, point.Value);
+            else if (!near && State == PassageState.Open)
+                Close(npc, point.Value);
+        }
 
-		/// <summary>
-		/// Specifies the minimum distance between the entity and the door at which the door opens.
-		/// </summary>
-		protected int _minDistance = 4;
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Inner name of the door</param>
+        /// <param name="area">Coordinates of the area the door occupies</param>
+        /// <param name="zones">The zones connected by the door</param>
+        public override void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door, bool usable = false)
+        {
+            base.Initialize(name, PassageState.Closed, area, zones);
+            State = PassageState.Locked;
+            _openingSound = _closingSound = "SlidingDoor1";
+        }
 
-		/// <summary>
-		/// Runs a message handler for the specified message.
-		/// </summary>
-		/// <param name="message">The message to be handled</param>
-		protected override void HandleMessage(Message message)
-		{
-			switch (message)
-			{
-				case CharacterMoved em: OnCharacterMoved(em); break;
-				default: base.HandleMessage(message); break;
-			}
-		}
+        /// <summary>
+        /// Specifies the minimum distance between the entity and the door at which the door opens.
+        /// </summary>
+        protected int _minDistance = 4;
 
-		/// <summary>
-		/// Initializes the door and starts its message loop.
-		/// </summary>
-		public override void Activate()
-		{
-			base.Activate();
-		}
-	}
+        /// <summary>
+        /// Runs a message handler for the specified message.
+        /// </summary>
+        /// <param name="message">The message to be handled</param>
+        protected override void HandleMessage(Message message)
+        {
+            switch (message)
+            {
+                case CharacterMoved em: OnCharacterMoved(em); break;
+                default: base.HandleMessage(message); break;
+            }
+        }
+
+        /// <summary>
+        /// Initializes the door and starts its message loop.
+        /// </summary>
+        public override void Activate()
+        {
+            base.Activate();
+        }
+    }
 }

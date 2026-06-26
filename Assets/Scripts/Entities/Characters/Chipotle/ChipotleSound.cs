@@ -78,7 +78,6 @@ namespace Game.Entities.Characters.Chipotle
 
         protected new void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None, bool terrainCollided = false)
         {
-            Sounds.RoomManager.SimulateObstacle(new Vector2(-1, 0));
             string sound = GetStepSoundName(position);
             AudioClip clip = Sounds.GetClip(sound);
             if (!terrainCollided)
@@ -136,13 +135,15 @@ namespace Game.Entities.Characters.Chipotle
         /// <summary>
         /// Runs a message handler for the specified message.
         /// </summary>
-        /// <param name="message">The message to be handled</param>
+        /// <param name="m">The message to be handled</param>
         protected override void HandleMessage(Message message)
         {
             base.HandleMessage(message);
 
             switch (message)
             {
+                case NoAcousticObstacleDetected m: OnNoAcousticObstacleDetected(m); break;
+                case AcousticObstacleDetected m: OnAcousticObstacleDetected(m); break;
                 case NavigationStopped m:
                     OnNavigationStopped(m); break;
                 case SayNavigatedObjectLocationResult m:
@@ -178,6 +179,11 @@ namespace Game.Entities.Characters.Chipotle
             }
         }
 
+        private void OnNoAcousticObstacleDetected(Message message)
+            => Sounds.RoomManager.StopSimulatingObstacle();
+
+        private void OnAcousticObstacleDetected(AcousticObstacleDetected message)
+            => Sounds.RoomManager.SimulateObstacle(message.Direction);
 
         private void OnNavigationStopped(NavigationStopped message)
         {

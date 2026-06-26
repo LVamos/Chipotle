@@ -10,69 +10,69 @@ using UnityEngine;
 
 namespace Game.Terrain
 {
-	/// <summary>
-	/// Represents a door in the hall of the Vanilla crunch company (hala v1) zone.
-	/// </summary>
-	
-	public class HallDoor : Door
-	{
-		protected override void Open(object sender, Vector2 point)
-		{
-			base.Open(sender, point);
-			Usable = false;
-		}
+    /// <summary>
+    /// Represents a door in the hall of the Vanilla crunch company (hala v1) zone.
+    /// </summary>
 
-		protected override void Close(object sender, Vector2 point)
-		{
-			base.Close(sender, point);
-			Usable = true;
-		}
+    public class HallDoor : Door
+    {
+        protected override void Open(object sender, Vector2 point)
+        {
+            base.Open(sender, point);
+            Usable = false;
+        }
 
-		private const string _walshesKeysId = "klíče w1";
+        protected override void Close(object sender, Vector2 point)
+        {
+            base.Close(sender, point);
+            Usable = true;
+        }
 
-		protected override void HandleMessage(Message message)
-		{
-			switch (message)
-			{
-				case UseObjects objectsUsed:
-					OnUseObjects(objectsUsed);
-					break;
-				default: base.HandleMessage(message); break;
-			}
-		}
+        private const string _walshesKeysId = "klíče w1";
 
-		private void OnUseObjects(UseObjects message)
-		{
-			if (message.UsedObject.Name.Inner != _walshesKeysId)
-				return;
+        protected override void HandleMessage(Message message)
+        {
+            switch (message)
+            {
+                case UseObjects objectsUsed:
+                    OnUseObjects(objectsUsed);
+                    break;
+                default: base.HandleMessage(message); break;
+            }
+        }
 
-			LockOrUnlock(message.ManipulationPoint);
-			Cutscene.Play(this, "HalldoorUnlock");
-		}
+        private void OnUseObjects(UseObjects message)
+        {
+            if (message.UsedObject.Name.Inner != _walshesKeysId)
+                return;
 
-		private void LockOrUnlock(Vector2 manipulationPoint)
-		{
-			if (Locked)
-				Unlock();
-			else Lock();
-		}
+            LockOrUnlock(message.ManipulationPoint);
+            Cutscene.Play(this, "HalldoorUnlock");
+        }
 
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="name">Inner name of the door</param>
-		/// <param name="area">Coordinates of the area the door occupies</param>
-		/// <param name="zones">The zones connected by the door</param>
-		public override void Initialize(Name name, Rectangle area, IEnumerable<string> zones)
-		{
-			base.Initialize(name, PassageState.Locked, area, zones, usable: true);
+        private void LockOrUnlock(Vector2 manipulationPoint)
+        {
+            if (Locked)
+                Unlock();
+            else Lock();
+        }
 
-			UsableWith = new()
-			{
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Inner name of the door</param>
+        /// <param name="area">Coordinates of the area the door occupies</param>
+        /// <param name="zones">The zones connected by the door</param>
+        public override void Initialize(Name name, PassageState state, Rectangle area, IEnumerable<string> zones, DoorType type = DoorType.Door, bool usable = false)
+        {
+            base.Initialize(name, PassageState.Locked, area, zones, usable: true);
+
+            UsableWith = new()
+            {
 "klíče w1"
-			};
-			_openingSound = "HallDoorOpening";
-			_closingSound = "HallDoorClosing";
-		}
-	}
+            };
+            _openingSound = "HallDoorOpening";
+            _closingSound = "HallDoorClosing";
+        }
+    }
 }

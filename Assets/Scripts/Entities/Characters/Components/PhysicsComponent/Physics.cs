@@ -32,6 +32,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
     {
         protected MapElement GetLargestAcousticObstacle()
             => GetAcousticObstacles()
+            .Where(o => o != Owner)
             .OrderBy(o => o.Area.Value.Size)
             .FirstOrDefault();
 

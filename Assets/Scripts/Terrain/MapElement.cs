@@ -122,10 +122,11 @@ namespace Game.Terrain
         /// </summary>
         /// <param name="name">Inner and public name of the element</param>
         /// <param name="area">Coordinates of the area the element occupies</param>
-        public virtual void Initialize(Name name, Rectangle? area)
+        public virtual void Initialize(Name name, Rectangle? area, bool acousticObstacle = false)
         {
             Name = name ?? throw new ArgumentException(nameof(name));
             Area = area;
+            AcousticObstacle = acousticObstacle;
         }
 
         /// <summary>
