@@ -155,20 +155,28 @@ namespace Game.Entities.Characters.Chipotle
         /// <summary>
         /// Detects the largest acoustic obstacle and simulates its effect on Resonance Audio room.
         /// </summary>
-        public void DetectAcousticObstacle()
+        public void FindAcousticObstacle()
         {
-            MapElement obstacle = GetLargestAcousticObstacle();
+            if (NavigationInProgress)
+                return;
+
+            Rectangle? obstacle = GetLargestAcousticObstacle();
             if (obstacle == null)
             {
-                InnerMessage(new NoAcousticObstacleDetected(this));
+                NoAcousticObstacleFound();
                 return;
             }
 
-            float angle = GetAngle(obstacle.Area.Value);
+            float angle = GetAngle(obstacle.Value);
             Vector2 obstacleDirection = Angle.FromCompassDegrees(angle).UnitVector;
             AcousticObstacleDetected message = new AcousticObstacleDetected(this, obstacleDirection);
             InnerMessage(message);
 
+        }
+
+        private void NoAcousticObstacleFound()
+        {
+            InnerMessage(new NoAcousticObstacleDetected(this));
         }
 
         /// <summary>
@@ -457,6 +465,7 @@ namespace Game.Entities.Characters.Chipotle
             _navigatedItem = message.Item;
             StartNavigation newMessage = new(Owner);
             _navigatedItem.TakeMessage(newMessage);
+            NoAcousticObstacleFound();
         }
 
 
@@ -465,6 +474,7 @@ namespace Game.Entities.Characters.Chipotle
             StartNavigation newMessage = new(Owner);
             message.Exit.TakeMessage(newMessage);
             _navigatedExit = message.Exit;
+            NoAcousticObstacleFound();
         }
 
         private void OnNavigateToCharacter(NavigateToCharacter message)
@@ -472,6 +482,7 @@ namespace Game.Entities.Characters.Chipotle
             StartNavigation newMessage = new(Owner);
             message.Character.TakeMessage(newMessage);
             _navigatedCharacter = message.Character;
+            NoAcousticObstacleFound();
         }
 
         private void OnPlaceItem(PlaceItem message)
@@ -1081,7 +1092,6 @@ namespace Game.Entities.Characters.Chipotle
                 return;
 
             Move(direction);
-            DetectAcousticObstacle();
         }
 
         /// <summary>
@@ -1308,8 +1318,6 @@ namespace Game.Entities.Characters.Chipotle
             _orientation.Rotate(message.Degrees);
             InnerMessage(new OrientationChanged(this, source, _orientation, message.Direction));
             LogOrientationChange(source, _orientation, message.Degrees);
-
-            DetectAcousticObstacle();
         }
 
         /// <summary>

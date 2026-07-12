@@ -8,6 +8,7 @@ using Game.Mapping.Saves;
 using Game.Messaging;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
+using Game.Models;
 using Game.Serialization.Protobuf.Snapshots.Spatial;
 
 using System;
@@ -428,20 +429,25 @@ namespace Game.Terrain
         /// Gets all acoustic obstacles in the zone within a specified distance from a point, including items marked as obstacles and closed doors.
         /// </summary>
         /// <param name="point">The reference point to measure distance from.</param>
-        /// <param name="maxDistance">The maximum allowed distance from the point. If null, no distance filtering is applied.</param>
+        /// <param name="radius">The maximum allowed distance from the point. If null, no distance filtering is applied.</param>
         /// <returns>A list of map elements that act as acoustic obstacles within the specified distance.</returns>
-        public List<MapElement> GetAcousticObstacles(Vector2 point, float? maxDistance = null)
+        public AcousticObstacles GetAcousticObstacles(Character character, float radius)
         {
-            IEnumerable<MapElement> obstacles =
+            HashSet<MapElement> objects =
                 Filter(Items)
                 .Concat(Filter(Exits))
-                .Concat(Filter(Characters));
+                .Concat(Filter(Characters))
+                .Where(o => o.Area != null && o != character && o.Area.Value.GetDistanceFrom(character.Center) <= radius)
+                .ToHashSet();
 
-            if (maxDistance.HasValue)
-                obstacles = obstacles
-                    .Where(o => o.Area.Value.GetDistanceFrom(point) <= maxDistance.Value);
+            // Find obstacles in terrain
+            Rectangle area = Rectangle.FromCenter(character.Center, radius, radius);
+            HashSet<TileInfo> tiles = area.GetTiles()
+                .Where(t => !character.Area.Value.Contains(t.Position)
+                && t.Tile.Terrain is TerrainType.Bush or TerrainType.Wall)
+                .ToHashSet();
 
-            return obstacles.ToList();
+            return new(objects, tiles);
 
             IEnumerable<MapElement> Filter(IEnumerable<MapElement> elements) =>
                 elements.Where(e => e.AcousticObstacle);

@@ -30,21 +30,64 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
     /// </summary>
     public class Physics : CharacterComponent
     {
-        protected MapElement GetLargestAcousticObstacle()
-            => GetAcousticObstacles()
-            .Where(o => o != Owner)
-            .OrderBy(o => o.Area.Value.Size)
-            .FirstOrDefault();
-
-        protected HashSet<MapElement> GetAcousticObstacles()
+        protected Rectangle? GetLargestAcousticObstacle()
         {
-            HashSet<MapElement> obstacles = new();
-            List<Zone> zones = World.GetZones(_area.Value).ToList();
+            var obstacles = GetAcousticObstacles();
+            if (!obstacles.Objects.IsNullOrEmpty())
+            {
+                float bestSize = float.MinValue;
+                MapElement bestObject = null;
 
-            foreach (Zone z in zones)
-                obstacles.UnionWith(z.GetAcousticObstacles(Center, Settings.AcousticObstacleRadius));
+                foreach (MapElement obstacle in obstacles.Objects)
+                {
+                    float size = Size(obstacle.Area.Value);
+                    if (size > bestSize)
+                    {
+                        bestSize = size;
+                        bestObject = obstacle;
+                    }
+                }
 
-            return obstacles;
+                return bestObject.Area;
+
+                float Size(Rectangle o)
+            => MathF.Max(o.Height, o.Width);
+            }
+
+            // Tiles
+            if (obstacles.Tiles.IsNullOrEmpty())
+                return null;
+
+            TileInfo bestTile = null;
+            float bestDistance = float.MaxValue;
+
+            foreach (TileInfo tile in obstacles.Tiles)
+            {
+                float distance = _area.Value.GetDistanceFrom(tile.Position);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    bestTile = tile;
+                }
+            }
+
+            return Rectangle.FromCenter(bestTile.Position, .1f, .1f);
+        }
+
+        protected AcousticObstacles GetAcousticObstacles()
+        {
+            AcousticObstacles allObstacles = new(new(), new());
+
+            foreach (Zone z in World.GetZones(_area.Value))
+            {
+                AcousticObstacles zoneObstacles = z.GetAcousticObstacles(
+                    Owner,
+                    Settings.AcousticObstacleRadius
+                    );
+                allObstacles.UnionWith(zoneObstacles);
+            }
+
+            return allObstacles;
         }
 
         public override void Initialize()
@@ -557,7 +600,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
         /// <param name="b"></param>
         /// <param name="orientation"></param>
         /// <returns></returns>
-        protected Angle GetAngle(Vector2 point) => World.GetAngle(point, _area.Value.Center, _orientation);
+        protected Angle GetAngle(Vector2 point) => World.GetAngle(point, Center, _orientation);
 
         /// <summary>
         /// Immediately changes position of the NPC.
