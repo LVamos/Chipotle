@@ -766,8 +766,6 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
             Vector2 orientation = direction != null ? direction.Value : _orientation.UnitVector;
 
             Vector2 targetDirection = targetPoint - characterPosition;
-
-            // Normalizujeme směrový vektor k cíli
             targetDirection.Normalize();
 
             // Calculate the angle between north (0, -1) and toward the goal

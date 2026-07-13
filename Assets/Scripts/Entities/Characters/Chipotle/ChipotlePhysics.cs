@@ -466,6 +466,7 @@ namespace Game.Entities.Characters.Chipotle
             StartNavigation newMessage = new(Owner);
             _navigatedItem.TakeMessage(newMessage);
             NoAcousticObstacleFound();
+            _navigatedObjectBehind = false;
         }
 
 
@@ -475,6 +476,7 @@ namespace Game.Entities.Characters.Chipotle
             message.Exit.TakeMessage(newMessage);
             _navigatedExit = message.Exit;
             NoAcousticObstacleFound();
+            _navigatedObjectBehind = false;
         }
 
         private void OnNavigateToCharacter(NavigateToCharacter message)
@@ -483,6 +485,7 @@ namespace Game.Entities.Characters.Chipotle
             message.Character.TakeMessage(newMessage);
             _navigatedCharacter = message.Character;
             NoAcousticObstacleFound();
+            _navigatedObjectBehind = false;
         }
 
         private void OnPlaceItem(PlaceItem message)
@@ -722,12 +725,9 @@ namespace Game.Entities.Characters.Chipotle
         /// <param name="message">The message to be processed</param>
         private void OnObjectNavigationStopped(NavigationStopped message)
         {
-            if (message.Sender == _navigatedItem)
-                _navigatedItem = null;
-            else if (message.Sender == _navigatedExit)
-                _navigatedExit = null;
-            else if (message.Sender == _navigatedCharacter)
-                _navigatedCharacter = null;
+            _navigatedItem = null;
+            _navigatedExit = null;
+            _navigatedCharacter = null;
         }
 
         /// <summary>
@@ -769,9 +769,9 @@ namespace Game.Entities.Characters.Chipotle
         /// </summary>
         private void StopNavigation()
         {
-            _navigatedItem?.TakeMessage(new StopNavigation(Owner));
-            _navigatedExit?.TakeMessage(new StopNavigation(Owner));
-            _navigatedCharacter?.TakeMessage(new StopNavigation(Owner));
+            _navigatedObjectBehind = false;
+            StopNavigation message = new(Owner);
+            GetNavigatedObject()?.TakeMessage(message);
         }
 
         /// <summary>
@@ -793,6 +793,45 @@ namespace Game.Entities.Characters.Chipotle
         {
             base.GameUpdate();
             CountPhone();
+            WatchNavigatedObject();
+        }
+
+        private MapElement GetNavigatedObject()
+        {
+            if (_navigatedCharacter != null)
+                return _navigatedCharacter;
+            if (_navigatedItem != null)
+                return _navigatedItem;
+            return _navigatedExit;
+        }
+
+        private void WatchNavigatedObject()
+        {
+            MapElement obj = GetNavigatedObject();
+
+            if (obj == null)
+                return;
+
+            float angle = GetAngle(obj.Area.Value);
+            if (angle is >= 135 and < 270)
+            {
+                if (_navigatedObjectBehind)
+                    return;
+
+                _navigatedObjectBehind = true;
+                ObjectGotBehindPlayer message1 = new(Owner, obj);
+                obj.TakeMessage(message1);
+
+                return;
+            }
+
+            // Not behind
+            if (!_navigatedObjectBehind)
+                return;
+
+            _navigatedObjectBehind = false;
+            ObjectStoppedBeingBehindPlayer message2 = new(Owner, obj);
+            obj.TakeMessage(message2);
         }
 
         /// <summary>
@@ -1210,6 +1249,7 @@ namespace Game.Entities.Characters.Chipotle
         /// </summary>
         protected HashSet<string> _nearObjects = new();
         private Character _navigatedCharacter;
+        private bool _navigatedObjectBehind;
         private const float _maxDistanceToCar = 2;
         private const float _minDistanceToCar = 1;
 

@@ -8,6 +8,7 @@ using Game.Messaging.Commands.GameInfo;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Characters;
 using Game.Messaging.Events.GameManagement;
+using Game.Messaging.Events.Movement;
 using Game.Serialization.Protobuf.Snapshots;
 
 using System;
@@ -183,11 +184,35 @@ namespace Game.Terrain
         {
             switch (message)
             {
+                case ObjectGotBehindPlayer m: OnObjectBecameBehindPlayer(m); break;
+                case ObjectStoppedBeingBehindPlayer m: OnObjectStoppedBeingBehindPlayer(m); break;
                 case StartNavigation m: OnStartNavigation(m); break;
                 case StopNavigation m: OnStopNavigation(m); break;
                 case DestroyObject d: OnDestroyObject(d); break;
                 default: base.HandleMessage(message); break;
             }
+        }
+
+        private void OnObjectStoppedBeingBehindPlayer(ObjectStoppedBeingBehindPlayer m)
+        {
+            DisableBehindPlayerBeacon();
+        }
+
+        private void DisableBehindPlayerBeacon()
+        {
+            if (_navigationAudio != null)
+                _navigationAudio.pitch = 1;
+        }
+
+        private void OnObjectBecameBehindPlayer(ObjectGotBehindPlayer message)
+        {
+            EnableBehindPlayerBeacon();
+        }
+
+        private void EnableBehindPlayerBeacon()
+        {
+            if (_navigationAudio != null)
+                _navigationAudio.pitch = Settings.BeaconBehindPlayerPitch;
         }
 
         /// <summary>
@@ -304,7 +329,8 @@ namespace Game.Terrain
                 Sounds.Play(sound, position, Settings.BeaconVolume);
             }
 
-            _navigationAudio.loop = false;
+            _navigationAudio.Stop();
+            DisableBehindPlayerBeacon();
             _navigationAudio = null;
             _navigating = false;
 

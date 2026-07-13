@@ -15,6 +15,7 @@ namespace Game
 {
     public static class Settings
     {
+        public static float BeaconBehindPlayerPitch;
         public static bool PlayZoneLoops = true;
         public static float ItemDefaultOcclusionDuration = 1;
         public static float ItemMaxDistanceMargin = 10;
