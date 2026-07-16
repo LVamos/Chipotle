@@ -28,14 +28,15 @@ using UnityEngine;
 
 using Message = Game.Messaging.Message;
 
-namespace Game.Entities.Characters.Chipotle
+namespace Game.Entities.Characters.Chipotle.SoundComponent
 {
     /// <summary>
     /// Controls the sound output of the detective Chipotle NPC
     /// </summary>
-
     public class ChipotleSound : Sound
     {
+        private Sonar _sonar;
+
         private void Update()
         {
             if (_footStep != null && _footStep.isPlaying)
@@ -74,6 +75,7 @@ namespace Game.Entities.Characters.Chipotle
             _itemDescriber = new();
             _characterDescriber = new();
             _announceWalls = true;
+            _sonar = new();
         }
 
         protected new void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None, bool terrainCollided = false)

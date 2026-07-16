@@ -15,6 +15,8 @@ namespace Game
 {
     public static class Settings
     {
+        public static float SonarVolume = 1;
+        public static string SonarSoundName;
         public static float BeaconBehindPlayerPitch;
         public static bool PlayZoneLoops = true;
         public static float ItemDefaultOcclusionDuration = 1;

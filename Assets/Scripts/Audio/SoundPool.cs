@@ -1,7 +1,5 @@
 ﻿
 using Game;
-using Game.Entities.Characters;
-using Game.Messaging;
 
 using System;
 using System.Collections.Generic;
@@ -14,141 +12,144 @@ using UnityEngine;
 
 namespace Assets.Scripts.Audio
 {
-	public class SoundPool : MonoBehaviour
-	{
-		public void SoundStartedPlaying(AudioSource source)
-		{
-			if (source == null)
-				throw new ArgumentNullException(nameof(source));
+    public class SoundPool : MonoBehaviour
+    {
+        public void SoundStartedPlaying(AudioSource source)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
 
-			if (!source.isActiveAndEnabled)
-				source.gameObject.SetActive(true);
+            if (!source.isActiveAndEnabled)
+                source.gameObject.SetActive(true);
 
-			_pool.Remove(source);
-			_playingSources.Add(source);
-		}
+            _pool.Remove(source);
+            _playingSources.Add(source);
+        }
 
-		public AudioLowPassFilter GetLowPass(AudioSource source)
-		{
-			return _lowPasses[source];
-		}
+        public AudioLowPassFilter GetLowPass(AudioSource source)
+        {
+            return _lowPasses[source];
+        }
 
-		private Dictionary<AudioSource, AudioLowPassFilter> _lowPasses = new();
+        private Dictionary<AudioSource, AudioLowPassFilter> _lowPasses = new();
 
-		private void LogPlayingSounds()
-		{
-			if (!Settings.LogPlayingSounds)
-				return;
+        private void LogPlayingSounds()
+        {
+            if (!Settings.LogPlayingSounds)
+                return;
 
-			(AudioSource[] sounds, string[] names) sounds = GetPlayingSounds();
-			string[] soundDescriptions = sounds.sounds.Select(s => s.name).ToArray();
-			StringBuilder builder = new("Playing sounds");
-			builder.AppendLine();
-			for (int i = 0; i < sounds.names.Length; i++)
-			{
-				builder.AppendLine($"{sounds.names[i]}; {soundDescriptions[i]}");
-			}
+            (AudioSource[] sounds, string[] names) sounds = GetPlayingSounds();
+            string[] soundDescriptions = sounds.sounds.Select(s => s.name).ToArray();
+            StringBuilder builder = new("Playing sounds");
+            builder.AppendLine();
+            for (int i = 0; i < sounds.names.Length; i++)
+            {
+                builder.AppendLine($"{sounds.names[i]}; {soundDescriptions[i]}");
+            }
 
-			string output = builder.ToString();
-			System.Diagnostics.Debug.WriteLine(output);
-		}
+            string output = builder.ToString();
+            System.Diagnostics.Debug.WriteLine(output);
+        }
 
-		/// <summary>
-		/// Returns currently playing sounds.
-		/// </summary>
-		/// <returns>(AudioSource[] sounds, string[] names)</returns>
-		public (AudioSource[] sounds, string[] names) GetPlayingSounds()
-		{
-			AudioSource[] playingSounds = _playingSources.ToArray();
-			string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
-			return (playingSounds, playingSoundNames);
-		}
+        /// <summary>
+        /// Returns currently playing sounds.
+        /// </summary>
+        /// <returns>(AudioSource[] sounds, string[] names)</returns>
+        public (AudioSource[] sounds, string[] names) GetPlayingSounds()
+        {
+            AudioSource[] playingSounds = _playingSources.ToArray();
+            string[] playingSoundNames = playingSounds.Select(s => s.clip.name).ToArray();
+            return (playingSounds, playingSoundNames);
+        }
 
-		public void EnableLowPass(AudioSource source)
-		{
-			AudioLowPassFilter lowPass = GetLowPass(source);
-			lowPass.enabled = true;
-			source.spatializePostEffects = true;
-		}
+        public void EnableLowPass(AudioSource source)
+        {
+            AudioLowPassFilter lowPass = GetLowPass(source);
+            lowPass.enabled = true;
+            source.spatializePostEffects = true;
+        }
 
-		public void DisableLowPass(AudioSource source)
-		{
-			AudioLowPassFilter lowPass = GetLowPass(source);
-			if (!lowPass.enabled)
-				return;
+        public void DisableLowPass(AudioSource source)
+        {
+            AudioLowPassFilter lowPass = GetLowPass(source);
+            if (!lowPass.enabled)
+                return;
 
-			source.spatializePostEffects = false;
-			lowPass.enabled = false;
-		}
+            source.spatializePostEffects = false;
+            lowPass.enabled = false;
+        }
 
-		private HashSet<AudioSource> _playingSources = new(_poolSize);
-		public AudioSource GetSource()
-		{
-			AudioSource source = _pool.FirstOrDefault();
-			if (source == null)
-				source = AddSource();
+        private HashSet<AudioSource> _playingSources = new(_poolSize);
+        public AudioSource GetSource()
+        {
+            AudioSource source = _pool.FirstOrDefault();
+            if (source == null)
+                source = AddSource();
 
-			return source;
-		}
+            // Init settings
+            source.panStereo = 0;
 
-		private HashSet<AudioSource> _pool = new(_poolSize);
-		private const int _poolSize = 20;
+            return source;
+        }
 
-		private void Start()
-		{
-			for (int i = 0; i < _poolSize; i++)
-				AddSource();
-		}
+        private HashSet<AudioSource> _pool = new(_poolSize);
+        private const int _poolSize = 20;
 
-		private void Update()
-		{
-			HashSet<AudioSource> sourcesToRemove = new();
-			foreach (AudioSource source in _playingSources)
-			{
-				StopForbiddenSound(source);
-				if (!source.isPlaying)
-				{
-					Sleep(source);
-					sourcesToRemove.Add(source);
-					_pool.Add(source);
-				}
-			}
+        private void Start()
+        {
+            for (int i = 0; i < _poolSize; i++)
+                AddSource();
+        }
 
-			foreach (AudioSource source in sourcesToRemove)
-			{
-				_playingSources.Remove(source);
-			}
+        private void Update()
+        {
+            HashSet<AudioSource> sourcesToRemove = new();
+            foreach (AudioSource source in _playingSources)
+            {
+                StopForbiddenSound(source);
+                if (!source.isPlaying)
+                {
+                    Sleep(source);
+                    sourcesToRemove.Add(source);
+                    _pool.Add(source);
+                }
+            }
 
-			LogPlayingSounds();
-		}
+            foreach (AudioSource source in sourcesToRemove)
+            {
+                _playingSources.Remove(source);
+            }
 
-		private void StopForbiddenSound(AudioSource source)
-		{
-			if (source.clip == null)
-				return;
+            LogPlayingSounds();
+        }
 
-			if (!string.IsNullOrEmpty(Settings.AllowedSound) && source.clip.name != Settings.AllowedSound)
-				source.Stop();
-		}
+        private void StopForbiddenSound(AudioSource source)
+        {
+            if (source.clip == null)
+                return;
 
-		private static void Sleep(AudioSource source)
-		{
-			source.name = "inactive sound";
-			source.transform.SetParent(null);
-			source.gameObject.SetActive(false);
-		}
+            if (!string.IsNullOrEmpty(Settings.AllowedSound) && source.clip.name != Settings.AllowedSound)
+                source.Stop();
+        }
+
+        private static void Sleep(AudioSource source)
+        {
+            source.name = "inactive sound";
+            source.transform.SetParent(null);
+            source.gameObject.SetActive(false);
+        }
 
 
-		private AudioSource AddSource()
-		{
-			GameObject o = new("Sound");
-			AudioSource source = o.AddComponent<AudioSource>();
-			o.AddComponent<ResonanceAudioSource>();
-			AudioLowPassFilter lowPass = o.AddComponent<AudioLowPassFilter>();
-			o.SetActive(false);
-			_pool.Add(source);
-			_lowPasses[source] = lowPass;
-			return source;
-		}
-	}
+        private AudioSource AddSource()
+        {
+            GameObject o = new("Sound");
+            AudioSource source = o.AddComponent<AudioSource>();
+            o.AddComponent<ResonanceAudioSource>();
+            AudioLowPassFilter lowPass = o.AddComponent<AudioLowPassFilter>();
+            o.SetActive(false);
+            _pool.Add(source);
+            _lowPasses[source] = lowPass;
+            return source;
+        }
+    }
 }
