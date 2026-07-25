@@ -235,7 +235,7 @@ namespace Game.Entities.Items
             parameters.PickingSound,
             parameters.PlacingSound,
             null,
-            parameters.AcousticObstacle
+            acousticObstacle
         );
                 return item;
             }

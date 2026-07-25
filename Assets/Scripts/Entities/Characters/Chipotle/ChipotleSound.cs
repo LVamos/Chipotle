@@ -144,6 +144,10 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
             switch (message)
             {
+                case SonarDetectedNoObstacles m:
+                    OnSonarDetectedNoObstacles(m); break;
+                case SonarDetectedObstacles m:
+                    OnSonarDetectedObstacles(m); break;
                 case NoAcousticObstacleDetected m: OnNoAcousticObstacleDetected(m); break;
                 case AcousticObstacleDetected m: OnAcousticObstacleDetected(m); break;
                 case NavigationStopped m:
@@ -180,6 +184,12 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
                 default: base.HandleMessage(message); break;
             }
         }
+
+        private void OnSonarDetectedNoObstacles(SonarDetectedNoObstacles message)
+            => _sonar.SetState(false, false);
+
+        private void OnSonarDetectedObstacles(SonarDetectedObstacles message)
+            => _sonar.SetState(message.ObstaclesOnLeft, message.ObstaclesOnRight);
 
         private void OnNoAcousticObstacleDetected(Message message)
             => Sounds.RoomManager.StopSimulatingObstacle();

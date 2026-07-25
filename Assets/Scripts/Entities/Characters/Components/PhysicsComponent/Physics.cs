@@ -16,6 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using UnityEditor;
+
 using UnityEngine;
 
 using Item = Game.Entities.Items.Item;
@@ -1404,11 +1406,10 @@ Rectangle.FromCenter(Center, width, height)
                 // Try moving the rectangle to the left and to the right untill it fits.
                 float offset = Mathf.Max(height, width) + .1f;
                 int steps = Mathf.CeilToInt(offset / step) + 1;
-                Vector2 sideDirection1 = Vector2.Perpendicular(_orientation.UnitVector);
-                Vector2 sideDirection2 = new(_orientation.UnitVector.y, -_orientation.UnitVector.x);
+                Vector2[] sideDirections = GetLateralDirections();
 
-                return TryLateralDirection(rectangle, sideDirection1, offset, steps, step)
-                                ?? TryLateralDirection(rectangle, sideDirection2, offset, steps, step);
+                return TryLateralDirection(rectangle, sideDirections[0], offset, steps, step)
+                                ?? TryLateralDirection(rectangle, sideDirections[1], offset, steps, step);
 
                 bool ValidatePosition(Rectangle rectangle)
                 {
@@ -1517,6 +1518,14 @@ Rectangle.FromCenter(Center, width, height)
                 items
                 .Select(GetNavigableItemInfo)
                 .ToList();
+        }
+
+        protected Vector2[] GetLateralDirections()
+        {
+            Vector2 forward = _orientation.UnitVector;
+            Vector2 sideDirection1 = Vector2.Perpendicular(forward);
+            Vector2 sideDirection2 = new(forward.y, -forward.x);
+            return new[] { sideDirection1, sideDirection2 };
         }
     }
 }

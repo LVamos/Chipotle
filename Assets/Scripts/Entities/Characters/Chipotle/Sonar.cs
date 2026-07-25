@@ -9,11 +9,17 @@ namespace Game.Entities.Characters.Chipotle
         public void SetState(bool leftEnabled, bool rightEnabled)
         {
             if (leftEnabled)
-                PlayLeft();
+            {
+                if (_leftSource == null)
+                    PlayLeft();
+            }
             else StopLeft();
 
             if (rightEnabled)
-                PlayRight();
+            {
+                if (_rightSource == null)
+                    PlayRight();
+            }
             else StopRight();
         }
 
@@ -36,10 +42,10 @@ namespace Game.Entities.Characters.Chipotle
         }
 
         private void PlayLeft()
-            => _leftSource = PlayLoop(-1);
+            => _leftSource = PlayLoop(-0.75f);
 
         private void PlayRight()
-            => PlayLoop(1);
+            => _rightSource = PlayLoop(0.75f);
 
         private AudioSource PlayLoop(float panning)
         {

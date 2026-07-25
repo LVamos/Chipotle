@@ -794,7 +794,61 @@ namespace Game.Entities.Characters.Chipotle
             base.GameUpdate();
             CountPhone();
             WatchNavigatedObject();
+            UpdateSonarTimer();
         }
+
+        private void UpdateSonarTimer()
+        {
+            _sonarTimer += Time.deltaTime;
+
+            if (_sonarTimer >= Settings.SonarInterval)
+            {
+                _sonarTimer = 0f;
+                DetectSonarObstacles();
+            }
+        }
+
+        private void DetectSonarObstacles()
+        {
+            Vector2[] sideDirections = GetLateralDirections();
+
+            // Left side
+            TrackCollisionParams parameters = new(
+                sideDirections[0],
+                Settings.SonarRadius,
+                new List<MapElement>() { Owner },
+                _area.Value
+                );
+
+            Collisions collisions = World.Collisions.DetectOnTrack(parameters);
+            bool obstaclesOnLeft = collisions.Obstacles.Any(IsAcousticObstacle);
+
+            // Right
+            parameters.Direction = sideDirections[1];
+            collisions = World.Collisions.DetectOnTrack(parameters);
+            bool obstaclesOnRight = collisions.Obstacles.Any(IsAcousticObstacle);
+
+            // Something detected
+            if (obstaclesOnLeft || obstaclesOnRight)
+            {
+                SonarDetectedObstacles message = new(this, obstaclesOnLeft, obstaclesOnRight);
+                InnerMessage(message);
+                return;
+            }
+
+            // Nothing detected
+            SonarDetectedNoObstacles message2 = new(this);
+            InnerMessage(message2);
+
+            bool IsAcousticObstacle(object obstacle)
+            {
+                return obstacle is TileInfo ||
+                       obstacle is MapElement { AcousticObstacle: true };
+            }
+        }
+
+        private float _sonarTimer;
+
 
         private MapElement GetNavigatedObject()
         {
