@@ -35,6 +35,9 @@ namespace Game.Entities.Characters.Chipotle
 	/// </summary>
 	public class ChipotleInput : Input
 	{
+		private void ToggleSonar()
+			=> InnerMessage(new ToggleSonar(this));
+
 		private void SayNavigatedObjectLocation()
 		{
 			InnerMessage(new SayNavigatedObjectLocation(this));
@@ -136,6 +139,7 @@ namespace Game.Entities.Characters.Chipotle
 		{
 			base.AddCommands();
 
+			AddShortcut(CommandId.GameToggleSonar, ToggleSonar);
 			AddShortcut(CommandId.GameSayAbsoluteCoordinates, SayAbsoluteCoordinates);
 			AddShortcut(CommandId.GameLoadPredefinedSave, LoadPredefinedSave);
 			AddShortcut(CommandId.GameCreatePredefinedSave, CreatePredefinedSave);
@@ -373,7 +377,8 @@ namespace Game.Entities.Characters.Chipotle
 		/// <summary>
 		/// Reports the nearest characters around this character using a screen reader or voice synthesizer.
 		/// </summary>
-		private void SayCharacters() => InnerMessage(new SayCharacters(this));
+		private void SayCharacters()
+			=> InnerMessage(new SayCharacters(this));
 
 		/// <summary>
 		/// Reports the nearest objects around the NPC using a screen reader or voice synthesizer.

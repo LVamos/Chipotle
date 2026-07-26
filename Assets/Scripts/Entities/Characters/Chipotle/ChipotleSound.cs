@@ -30,445 +30,455 @@ using Message = Game.Messaging.Message;
 
 namespace Game.Entities.Characters.Chipotle.SoundComponent
 {
-    /// <summary>
-    /// Controls the sound output of the detective Chipotle NPC
-    /// </summary>
-    public class ChipotleSound : Sound
-    {
-        private Sonar _sonar;
+	/// <summary>
+	/// Controls the sound output of the detective Chipotle NPC
+	/// </summary>
+	public class ChipotleSound : Sound
+	{
+		private Sonar _sonar;
 
-        private void Update()
-        {
-            if (_footStep != null && _footStep.isPlaying)
-                SnapFootstepToListener();
-        }
+		private void Update()
+		{
+			if (_footStep != null && _footStep.isPlaying)
+				SnapFootstepToListener();
+		}
 
-        private void OnSayNavigatedObjectLocationResult(SayNavigatedObjectLocationResult message)
-        {
-            if (message.NoNavigatedObjects)
-                Tolk.Speak("Nevybral jsi cíl.");
-        }
+		private void OnSayNavigatedObjectLocationResult(SayNavigatedObjectLocationResult message)
+		{
+			if (message.NoNavigatedObjects)
+				Tolk.Speak("Nevybral jsi cíl.");
+		}
 
-        protected AudioSource _footStep;
+		protected AudioSource _footStep;
 
-        private void InitFootStepSource()
-        {
-            GameObject obj = new GameObject("FootstepSource");
-            _footStep = obj.AddComponent<AudioSource>();
-            _footStep.spatialBlend = 1f;   // 3D
-            _footStep.dopplerLevel = 0f;
-            _footStep.playOnAwake = false;
-            _footStep.spatialize = true;
-            _footStep.spatializePostEffects = false;
-            _footStep.outputAudioMixerGroup = Sounds.ResonanceGroup;
+		private void InitFootStepSource()
+		{
+			GameObject obj = new GameObject("FootstepSource");
+			_footStep = obj.AddComponent<AudioSource>();
+			_footStep.spatialBlend = 1f;   // 3D
+			_footStep.dopplerLevel = 0f;
+			_footStep.playOnAwake = false;
+			_footStep.spatialize = true;
+			_footStep.spatializePostEffects = false;
+			_footStep.outputAudioMixerGroup = Sounds.ResonanceGroup;
 
-            ResonanceAudioSource resonance = obj.AddComponent<ResonanceAudioSource>();
-            resonance.nearFieldEffectEnabled = true;
-            resonance.occlusionEnabled = true;
-        }
+			ResonanceAudioSource resonance = obj.AddComponent<ResonanceAudioSource>();
+			resonance.nearFieldEffectEnabled = true;
+			resonance.occlusionEnabled = true;
+		}
 
-        public override void Initialize()
-        {
-            base.Initialize();
-            InitFootStepSource();
-            _exitDescriber = new();
-            _itemDescriber = new();
-            _characterDescriber = new();
-            _announceWalls = true;
-            _sonar = new();
-        }
+		public override void Initialize()
+		{
+			base.Initialize();
+			InitFootStepSource();
+			_exitDescriber = new();
+			_itemDescriber = new();
+			_characterDescriber = new();
+			_announceWalls = true;
+			_sonar = new();
+		}
 
-        protected new void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None, bool terrainCollided = false)
-        {
-            string sound = GetStepSoundName(position);
-            AudioClip clip = Sounds.GetClip(sound);
-            if (!terrainCollided)
-            {
-                SnapFootstepToListener();
-                _footStep.PlayOneShot(clip, _walkVolume);
-            }
-            else
-            {
-                float size = 2 * TileMap.TileSize;
-                Rectangle temp = Rectangle.FromCenter(position, size, size);
-                Vector2 tempPoint = temp.GetClosestPoint(Owner.Center);
-                Vector3 finalPosition = tempPoint.ToVector3(1);
-                Sounds.Play(sound, finalPosition, _walkVolume);
-            }
-            AnnounceWall(position);
-        }
+		protected new void PlayStep(Vector2 position, ObstacleType obstacle = ObstacleType.None, bool terrainCollided = false)
+		{
+			string sound = GetStepSoundName(position);
+			AudioClip clip = Sounds.GetClip(sound);
+			if (!terrainCollided)
+			{
+				SnapFootstepToListener();
+				_footStep.PlayOneShot(clip, _walkVolume);
+			}
+			else
+			{
+				float size = 2 * TileMap.TileSize;
+				Rectangle temp = Rectangle.FromCenter(position, size, size);
+				Vector2 tempPoint = temp.GetClosestPoint(Owner.Center);
+				Vector3 finalPosition = tempPoint.ToVector3(1);
+				Sounds.Play(sound, finalPosition, _walkVolume);
+			}
+			AnnounceWall(position);
+		}
 
-        private void SnapFootstepToListener()
-        {
-            Vector3 position3d = CameraManager.Get3dPosition();
-            _footStep.transform.position = new Vector3(position3d.x, 1, position3d.z);
-        }
+		private void SnapFootstepToListener()
+		{
+			Vector3 position3d = CameraManager.Get3dPosition();
+			_footStep.transform.position = new Vector3(position3d.x, 1, position3d.z);
+		}
 
-        public void OnSaySize(SaySize message)
-        {
-            string text = $"{message.Area.Height} krát {message.Area.Width}";
-            Tolk.Speak(text);
-        }
+		public void OnSaySize(SaySize message)
+		{
+			string text = $"{message.Area.Height} krát {message.Area.Width}";
+			Tolk.Speak(text);
+		}
 
-        /// <summary>
-        /// Handles a message.
-        /// </summary>
-        /// <param name="m">The message to be handled</param>
-        protected void OnSayObjectDescription(SayObjectDescription m)
-        {
-            if (m.Object == null)
-                Tolk.Speak("Před tebou nic není");
-            else
-                Tolk.Speak(m.Object.Description);
-        }
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		protected void OnSayObjectDescription(SayObjectDescription m)
+		{
+			if (m.Object == null)
+				Tolk.Speak("Před tebou nic není");
+			else
+				Tolk.Speak(m.Object.Description);
+		}
 
-        /// <summary>
-        /// Processes the SayZone message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        protected void OnSayZoneName(SayZoneName message)
-        {
-            string text = Owner.Zone.Name.Friendly;
-            if (Settings.SayInnerZoneNames)
-                text += " " + Owner.Zone.Name.Inner;
-            Tolk.Speak(text, true);
-        }
+		/// <summary>
+		/// Processes the SayZone message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnSayZoneName(SayZoneName message)
+		{
+			string text = Owner.Zone.Name.Friendly;
+			if (Settings.SayInnerZoneNames)
+				text += " " + Owner.Zone.Name.Inner;
+			Tolk.Speak(text, true);
+		}
 
-        /// <summary>
-        /// Runs a message handler for the specified message.
-        /// </summary>
-        /// <param name="m">The message to be handled</param>
-        protected override void HandleMessage(Message message)
-        {
-            base.HandleMessage(message);
+		private void OnSonarToggled(SonarToggled message)
+		{
+			string state = message.SonarEnabled ? "zapnut" : "vypnut";
+			Tolk.Speak($"Sonar {state}");
 
-            switch (message)
-            {
-                case SonarDetectedNoObstacles m:
-                    OnSonarDetectedNoObstacles(m); break;
-                case SonarDetectedObstacles m:
-                    OnSonarDetectedObstacles(m); break;
-                case NoAcousticObstacleDetected m: OnNoAcousticObstacleDetected(m); break;
-                case AcousticObstacleDetected m: OnAcousticObstacleDetected(m); break;
-                case NavigationStopped m:
-                    OnNavigationStopped(m); break;
-                case SayNavigatedObjectLocationResult m:
-                    OnSayNavigatedObjectLocationResult(m); break;
-                case LeftBycar m: OnLeftBycar(m); break;
-                case NoWallsNearby m:
-                    OnNoWallsNearby(m); break;
-                case NearbywallsDetected m:
-                    OnNearbywallsDetected(m); break;
-                case InteractResult m:
-                    OnInteractResult(m); break;
-                case SayCharactersResult m: OnSayCharactersResult(m); break;
-                case SaySize m: OnSaySize(m); break;
-                case SayObjectDescription m: OnSayObjectDescription(m); break;
-                case SayZoneDescription m: OnSayZoneDescription(m); break;
-                case SayZoneName m: OnSayZoneName(m); break;
-                case PlaceItemResult m: OnPlaceItemResult(m); break;
-                case EmptyInventory m: OnEmptyInventory(m); break;
-                case PickUpItemResult m: OnPickUpItemResult(m); break;
-                case SayCoordinates sc: OnSayCoordinates(sc); break;
-                case SayZoneSize sl: OnSayZoneSize(sl); break;
-                case SayVisitedZoneResult svl: OnSayVisitedZone(svl); break;
-                case SayOrientation m: OnSayOrientation(m); break;
-                case SayExitsResult ser: OnSayExitsResult(ser); break;
-                case SayItemsResult sor: OnSayItemsResult(sor); break;
-                case CutsceneBegan cb: OnCutsceneBegan(cb); break;
-                case CharacterHitDoor m: OnCharacterHitDoor(m); break;
-                case OrientationChanged ocd: OnOrientationChanged(ocd); break;
-                case PositionChanged pcd: OnPositionChanged(pcd); break;
-                case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
-                case TerrainCollided tcl: OnTerrainCollided(tcl); break;
-                default: base.HandleMessage(message); break;
-            }
-        }
+			if (!message.SonarEnabled)
+				_sonar.SetState();
+		}
 
-        private void OnSonarDetectedNoObstacles(SonarDetectedNoObstacles message)
-            => _sonar.SetState(false, false);
+		/// <summary>
+		/// Runs a message handler for the specified message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		protected override void HandleMessage(Message message)
+		{
+			base.HandleMessage(message);
 
-        private void OnSonarDetectedObstacles(SonarDetectedObstacles message)
-            => _sonar.SetState(message.ObstaclesOnLeft, message.ObstaclesOnRight);
+			switch (message)
+			{
+				case SonarToggled m: OnSonarToggled(m); break;
+				case SonarDetectedNoObstacles m:
+					OnSonarDetectedNoObstacles(m); break;
+				case SonarDetectedObstacles m:
+					OnSonarDetectedObstacles(m); break;
+				case NoAcousticObstacleDetected m: OnNoAcousticObstacleDetected(m); break;
+				case AcousticObstacleDetected m: OnAcousticObstacleDetected(m); break;
+				case NavigationStopped m:
+					OnNavigationStopped(m); break;
+				case SayNavigatedObjectLocationResult m:
+					OnSayNavigatedObjectLocationResult(m); break;
+				case LeftBycar m: OnLeftBycar(m); break;
+				case NoWallsNearby m:
+					OnNoWallsNearby(m); break;
+				case NearbywallsDetected m:
+					OnNearbywallsDetected(m); break;
+				case InteractResult m:
+					OnInteractResult(m); break;
+				case SayCharactersResult m: OnSayCharactersResult(m); break;
+				case SaySize m: OnSaySize(m); break;
+				case SayObjectDescription m: OnSayObjectDescription(m); break;
+				case SayZoneDescription m: OnSayZoneDescription(m); break;
+				case SayZoneName m: OnSayZoneName(m); break;
+				case PlaceItemResult m: OnPlaceItemResult(m); break;
+				case EmptyInventory m: OnEmptyInventory(m); break;
+				case PickUpItemResult m: OnPickUpItemResult(m); break;
+				case SayCoordinates sc: OnSayCoordinates(sc); break;
+				case SayZoneSize sl: OnSayZoneSize(sl); break;
+				case SayVisitedZoneResult svl: OnSayVisitedZone(svl); break;
+				case SayOrientation m: OnSayOrientation(m); break;
+				case SayExitsResult ser: OnSayExitsResult(ser); break;
+				case SayItemsResult sor: OnSayItemsResult(sor); break;
+				case CutsceneBegan cb: OnCutsceneBegan(cb); break;
+				case CharacterHitDoor m: OnCharacterHitDoor(m); break;
+				case OrientationChanged ocd: OnOrientationChanged(ocd); break;
+				case PositionChanged pcd: OnPositionChanged(pcd); break;
+				case ObjectsCollided ocl: OnObjectsCollided(ocl); break;
+				case TerrainCollided tcl: OnTerrainCollided(tcl); break;
+				default: base.HandleMessage(message); break;
+			}
+		}
 
-        private void OnNoAcousticObstacleDetected(Message message)
-            => Sounds.RoomManager.StopSimulatingObstacle();
+		private void OnSonarDetectedNoObstacles(SonarDetectedNoObstacles message)
+			=> _sonar.SetState(false, false);
 
-        private void OnAcousticObstacleDetected(AcousticObstacleDetected message)
-            => Sounds.RoomManager.SimulateObstacle(message.Direction);
+		private void OnSonarDetectedObstacles(SonarDetectedObstacles message)
+			=> _sonar.SetState(message.ObstaclesOnLeft, message.ObstaclesOnRight);
 
-        private void OnNavigationStopped(NavigationStopped message)
-        {
-            if (message.TargetReached)
-                Tolk.Output("Jsi u cíle.");
-        }
+		private void OnNoAcousticObstacleDetected(Message message)
+			=> Sounds.RoomManager.StopSimulatingObstacle();
 
-        private void OnLeftBycar(LeftBycar m)
-        {
-            AudioListener.volume = 0;
-            Sounds.SlideMasterVolume(1, Sounds.DefaultMasterVolume);
-        }
+		private void OnAcousticObstacleDetected(AcousticObstacleDetected message)
+			=> Sounds.RoomManager.SimulateObstacle(message.Direction);
 
-        /// <summary>
-        /// Handles a message.
-        /// </summary>
-        /// <param name="message">The message</param>
-        private void OnNearbywallsDetected(NearbywallsDetected message) => throw new NotImplementedException();
+		private void OnNavigationStopped(NavigationStopped message)
+		{
+			if (message.TargetReached)
+				Tolk.Output("Jsi u cíle.");
+		}
 
-        private void OnNoWallsNearby(NoWallsNearby message)
-        {
-            //todo dodělat
-        }
+		private void OnLeftBycar(LeftBycar m)
+		{
+			AudioListener.volume = 0;
+			Sounds.SlideMasterVolume(1, Sounds.DefaultMasterVolume);
+		}
 
-        /// <summary>
-        /// Event handler for the result of an interaction.
-        /// </summary>
-        /// <param name="message">The event to be handled</param>
-        private void OnInteractResult(InteractResult message)
-        {
-            Dictionary<InteractResult.ResultType, string> answers = new()
-            {
-                { InteractResult.ResultType.NoObjects, "Není tu nic co by se dalo použít" },
-                { InteractResult.ResultType.NoUsableObjects, "Tohle se použít nedá" },
-            };
-            if (answers.TryGetValue(message.Result, out string answer))
-                Tolk.Speak(answer);
-        }
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		private void OnNearbywallsDetected(NearbywallsDetected message) => throw new NotImplementedException();
 
-        /// <summary>
-        /// Handles a message.
-        /// </summary>
-        /// <param name="m">The message to be handled</param>
-        private void OnSayZoneDescription(SayZoneDescription m) => Tolk.Speak(Owner.Zone.Description);
+		private void OnNoWallsNearby(NoWallsNearby message)
+		{
+			//todo dodělat
+		}
 
-        /// <summary>
-        /// Handles a message.
-        /// </summary>
-        /// <param name="m">Source of the message</param>
-        private void OnPlaceItemResult(PlaceItemResult m)
-        {
-            if (m.Success)
-                Tolk.Speak("Položeno");
-            else
-                Tolk.Speak("Sem se to nevejde");
-        }
+		/// <summary>
+		/// Event handler for the result of an interaction.
+		/// </summary>
+		/// <param name="message">The event to be handled</param>
+		private void OnInteractResult(InteractResult message)
+		{
+			Dictionary<InteractResult.ResultType, string> answers = new()
+			{
+				{ InteractResult.ResultType.NoObjects, "Není tu nic co by se dalo použít" },
+				{ InteractResult.ResultType.NoUsableObjects, "Tohle se použít nedá" },
+			};
+			if (answers.TryGetValue(message.Result, out string answer))
+				Tolk.Speak(answer);
+		}
 
-        /// <summary>
-        /// Handles a message.
-        /// </summary>
-        /// <param name="m">The message to be handled</param>
-        protected void OnEmptyInventory(EmptyInventory m) => Tolk.Speak("Nic u sebe nemáš");
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		private void OnSayZoneDescription(SayZoneDescription m) => Tolk.Speak(Owner.Zone.Description);
 
-        /// <summary>
-        /// Handles the PickUpObjectResult message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        protected void OnPickUpItemResult(PickUpItemResult message)
-        {
-            if (message.Silently)
-                return;
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">Source of the message</param>
+		private void OnPlaceItemResult(PlaceItemResult m)
+		{
+			if (m.Success)
+				Tolk.Speak("Položeno");
+			else
+				Tolk.Speak("Sem se to nevejde");
+		}
 
-            Dictionary<PickUpItemResult.ResultType, string> resultMessages = new()
-            {
-                { PickUpItemResult.ResultType.Success, "sebráno" },
-                { PickUpItemResult.ResultType.FullInventory, "Víc toho nepobereš." },
-                { PickUpItemResult.ResultType.NothingFound, "Před tebou nic není" },
-                { PickUpItemResult.ResultType.Unpickable, "tohle nejde odnést" }
-            };
+		/// <summary>
+		/// Handles a message.
+		/// </summary>
+		/// <param name="m">The message to be handled</param>
+		protected void OnEmptyInventory(EmptyInventory m) => Tolk.Speak("Nic u sebe nemáš");
 
-            Tolk.Speak(resultMessages[message.Result]);
-        }
+		/// <summary>
+		/// Handles the PickUpObjectResult message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnPickUpItemResult(PickUpItemResult message)
+		{
+			if (message.Silently)
+				return;
 
-        /// <summary>
-        /// Handles the SayCoordinates message.
-        /// </summary>
-        /// <param name="message">The message to be handled</param>
-        private void OnSayCoordinates(SayCoordinates message)
-        {
-            Vector2 coords = message.Relative ? Owner.Area.Value.ToRelative().Center : Owner.Area.Value.Center;
-            int intX = (int)coords.x;
-            string x = coords.x == intX ? intX.ToString() : coords.x.ToString("0.0");
-            int intY = (int)coords.y;
-            string y = coords.y == intY ? intY.ToString() : coords.y.ToString("0.0");
-            string result = x + (message.Relative ? " " : ", ") + y;
-            Tolk.Speak(result, true);
-        }
+			Dictionary<PickUpItemResult.ResultType, string> resultMessages = new()
+			{
+				{ PickUpItemResult.ResultType.Success, "sebráno" },
+				{ PickUpItemResult.ResultType.FullInventory, "Víc toho nepobereš." },
+				{ PickUpItemResult.ResultType.NothingFound, "Před tebou nic není" },
+				{ PickUpItemResult.ResultType.Unpickable, "tohle nejde odnést" }
+			};
 
-        /// <summary>
-        /// Processes the CutsceneBegan message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnSayZoneSize(SayZoneSize message)
-        {
-            Terrain.Rectangle a = Owner.Zone.Area.Value;
-            Tolk.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
-        }
+			Tolk.Speak(resultMessages[message.Result]);
+		}
 
-        private void OnSayVisitedZone(SayVisitedZoneResult message) => Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
+		/// <summary>
+		/// Handles the SayCoordinates message.
+		/// </summary>
+		/// <param name="message">The message to be handled</param>
+		private void OnSayCoordinates(SayCoordinates message)
+		{
+			Vector2 coords = message.Relative ? Owner.Area.Value.ToRelative().Center : Owner.Area.Value.Center;
+			int intX = (int)coords.x;
+			string x = coords.x == intX ? intX.ToString() : coords.x.ToString("0.0");
+			int intY = (int)coords.y;
+			string y = coords.y == intY ? intY.ToString() : coords.y.ToString("0.0");
+			string result = x + (message.Relative ? " " : ", ") + y;
+			Tolk.Speak(result, true);
+		}
 
-        /// <summary>
-        /// Processes the SayExits message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        protected void OnSayExitsResult(SayExitsResult message)
-        {
-            if (message.OccupiedPassage != null)
-            {
-                string type = message.OccupiedPassage.TypeDescription switch
-                {
-                    "průchod" => "v průchodu",
-                    "dveře" => "ve dveřích",
-                    "vrata" => "ve vratech",
-                    _ => null
-                };
+		/// <summary>
+		/// Processes the CutsceneBegan message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		private void OnSayZoneSize(SayZoneSize message)
+		{
+			Terrain.Rectangle a = Owner.Zone.Area.Value;
+			Tolk.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
+		}
 
-                Zone targetZone = message.OccupiedPassage.AnotherZone(Owner.Zone);
-                string to = targetZone.To;
-                if (Settings.SayInnerZoneNames)
-                    to += " " + targetZone.Name.Inner;
-                Tolk.Speak($"Stojíš {type}{to}", true);
-                return;
-            }
+		private void OnSayVisitedZone(SayVisitedZoneResult message) => Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
 
-            if (message.Exits.IsNullOrEmpty())
-            {
-                Tolk.Speak("žádné východy nevidíš", true);
-                return;
-            }
+		/// <summary>
+		/// Processes the SayExits message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnSayExitsResult(SayExitsResult message)
+		{
+			if (message.OccupiedPassage != null)
+			{
+				string type = message.OccupiedPassage.TypeDescription switch
+				{
+					"průchod" => "v průchodu",
+					"dveře" => "ve dveřích",
+					"vrata" => "ve vratech",
+					_ => null
+				};
 
-            int count = message.Exits.Count;
-            if (count == 1)
-            {
-                string exit = _exitDescriber.GetDescription(message.Exits[0]);
-                Tolk.Speak(exit, true);
-                return;
-            }
+				Zone targetZone = message.OccupiedPassage.AnotherZone(Owner.Zone);
+				string to = targetZone.To;
+				if (Settings.SayInnerZoneNames)
+					to += " " + targetZone.Name.Inner;
+				Tolk.Speak($"Stojíš {type}{to}", true);
+				return;
+			}
 
-            string number;
-            if (count is >= 2 and <= 4)
-                number = (count == 2 ? "dva" : count.ToString()) + " východy: ";
-            else number = count.ToString() + " východů: ";
+			if (message.Exits.IsNullOrEmpty())
+			{
+				Tolk.Speak("žádné východy nevidíš", true);
+				return;
+			}
 
-            List<string> exits = message.Exits
-                .Select(e => _exitDescriber.GetDescription(e))
-                .ToList();
-            string formatedList = FormatStringList(exits.ToArray(), true);
-            Tolk.Speak($"{number}{formatedList}.", true);
-        }
+			int count = message.Exits.Count;
+			if (count == 1)
+			{
+				string exit = _exitDescriber.GetDescription(message.Exits[0]);
+				Tolk.Speak(exit, true);
+				return;
+			}
 
-        /// <summary>
-        /// Handles the SayCharactersResult message.
-        /// </summary>
-        /// <param name="message">The message</param>
-        protected void OnSayCharactersResult(SayCharactersResult message)
-        {
-            if (message.Characters.IsNullOrEmpty())
-            {
-                Tolk.Speak("Nikdo tu není", true);
-                return;
-            }
+			string number;
+			if (count is >= 2 and <= 4)
+				number = (count == 2 ? "dva" : count.ToString()) + " východy: ";
+			else number = count.ToString() + " východů: ";
 
-            List<NavigableObjectInfo> info = message.Characters.Cast<NavigableObjectInfo>().ToList();
-            List<string> descriptions = _characterDescriber.GetDescriptions(info);
-            string text = FormatStringList(descriptions.ToArray());
-            Tolk.Speak(text, true);
-        }
+			List<string> exits = message.Exits
+				.Select(e => _exitDescriber.GetDescription(e))
+				.ToList();
+			string formatedList = FormatStringList(exits.ToArray(), true);
+			Tolk.Speak($"{number}{formatedList}.", true);
+		}
 
-        /// <summary>
-        /// Handles the SayNearestObjects message.
-        /// </summary>
-        /// <param name="message">The message</param>
-        protected void OnSayItemsResult(SayItemsResult message)
-        {
-            if (message.Items.IsNullOrEmpty())
-            {
-                Tolk.Speak("Nic tu není", true);
-                return;
-            }
+		/// <summary>
+		/// Handles the SayCharactersResult message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		protected void OnSayCharactersResult(SayCharactersResult message)
+		{
+			if (message.Characters.IsNullOrEmpty())
+			{
+				Tolk.Speak("Nikdo tu není", true);
+				return;
+			}
 
-            var objectInfo = message.Items.Cast<NavigableObjectInfo>().ToList();
-            List<string> describtions = _itemDescriber.GetDescriptions(objectInfo);
-            string output = FormatStringList(describtions.ToArray());
-            Tolk.Speak(output, true);
-        }
+			List<NavigableObjectInfo> info = message.Characters.Cast<NavigableObjectInfo>().ToList();
+			List<string> descriptions = _characterDescriber.GetDescriptions(info);
+			string text = FormatStringList(descriptions.ToArray());
+			Tolk.Speak(text, true);
+		}
 
-        /// <summary>
-        /// Processes the CutsceneBegan message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        protected void OnSayOrientation(SayOrientation message)
-        {
-            SayOrientation(Owner.Orientation);
-        }
+		/// <summary>
+		/// Handles the SayNearestObjects message.
+		/// </summary>
+		/// <param name="message">The message</param>
+		protected void OnSayItemsResult(SayItemsResult message)
+		{
+			if (message.Items.IsNullOrEmpty())
+			{
+				Tolk.Speak("Nic tu není", true);
+				return;
+			}
 
-        /// <summary>
-        /// Reports the current orientation of the Detective Chipotle NPC using a screen reader or
-        /// voice synthesizer..
-        /// </summary>
-        protected void SayOrientation(Orientation2D orientation)
-        {
-            string description = orientation.Angle.GetCardinalDirection().GetDescription();
-            Tolk.Output(description, true);
-        }
+			var objectInfo = message.Items.Cast<NavigableObjectInfo>().ToList();
+			List<string> describtions = _itemDescriber.GetDescriptions(objectInfo);
+			string output = FormatStringList(describtions.ToArray());
+			Tolk.Speak(output, true);
+		}
 
-        NavigableExitDescriber _exitDescriber;
-        private NavigableItemDescriber _itemDescriber;
-        private NavigableCharacterDescriber _characterDescriber;
+		/// <summary>
+		/// Processes the CutsceneBegan message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		protected void OnSayOrientation(SayOrientation message)
+		{
+			SayOrientation(Owner.Orientation);
+		}
 
-        /// <summary>
-        /// Processes the EntityHitDoor message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnCharacterHitDoor(CharacterHitDoor message)
-        {
-            string text = _exitDescriber.GetDescription(message.Exit);
-            if (Settings.SayInnerPassageNames)
-                text += " " + message.Exit.Exit.Name.Inner;
-            Tolk.Speak(text);
-        }
+		/// <summary>
+		/// Reports the current orientation of the Detective Chipotle NPC using a screen reader or
+		/// voice synthesizer..
+		/// </summary>
+		protected void SayOrientation(Orientation2D orientation)
+		{
+			string description = orientation.Angle.GetCardinalDirection().GetDescription();
+			Tolk.Output(description, true);
+		}
 
-        /// <summary>
-        /// Processes the TerrainCollided message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnTerrainCollided(TerrainCollided message)
-            => PlayStep(message.Position, default, true);
+		NavigableExitDescriber _exitDescriber;
+		private NavigableItemDescriber _itemDescriber;
+		private NavigableCharacterDescriber _characterDescriber;
 
-        /// <summary>
-        /// Processes the MovementDone message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnPositionChanged(PositionChanged message)
-        {
-            if (!message.Silently)
-                PlayStep(message.TargetPosition.Center);
-        }
+		/// <summary>
+		/// Processes the EntityHitDoor message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		private void OnCharacterHitDoor(CharacterHitDoor message)
+		{
+			string text = _exitDescriber.GetDescription(message.Exit);
+			if (Settings.SayInnerPassageNames)
+				text += " " + message.Exit.Exit.Name.Inner;
+			Tolk.Speak(text);
+		}
 
-        /// <summary>
-        /// Processes the ObjectsCollided message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnObjectsCollided(ObjectsCollided message)
-        {
-            if (message.Object is Item i && i.Passable)
-                return;
+		/// <summary>
+		/// Processes the TerrainCollided message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		private void OnTerrainCollided(TerrainCollided message)
+			=> PlayStep(message.Position, default, true);
 
-            string text = message.Object.Name.Friendly;
-            if (Settings.SayInnerItemNames && message.Object is Item)
-                text += " " + message.Object.Name.Inner;
-            Tolk.Speak(text);
-        }
+		/// <summary>
+		/// Processes the MovementDone message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		private void OnPositionChanged(PositionChanged message)
+		{
+			if (!message.Silently)
+				PlayStep(message.TargetPosition.Center);
+		}
 
-        /// <summary>
-        /// Processes the TurnoverDone message.
-        /// </summary>
-        /// <param name="message">The message to be processed</param>
-        private void OnOrientationChanged(OrientationChanged message)
-        {
-            if (message.Announce)
-                SayOrientation(message.Target);
-        }
+		/// <summary>
+		/// Processes the ObjectsCollided message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		private void OnObjectsCollided(ObjectsCollided message)
+		{
+			if (message.Object is Item i && i.Passable)
+				return;
 
-        private Vector2 _playerPosition => Owner.Area.Value.Center;
-    }
+			string text = message.Object.Name.Friendly;
+			if (Settings.SayInnerItemNames && message.Object is Item)
+				text += " " + message.Object.Name.Inner;
+			Tolk.Speak(text);
+		}
+
+		/// <summary>
+		/// Processes the TurnoverDone message.
+		/// </summary>
+		/// <param name="message">The message to be processed</param>
+		private void OnOrientationChanged(OrientationChanged message)
+		{
+			if (message.Announce)
+				SayOrientation(message.Target);
+		}
+
+		private Vector2 _playerPosition => Owner.Area.Value.Center;
+	}
 }
