@@ -77,6 +77,7 @@ namespace Game.Entities.Characters.Chipotle
 				{ CommandId.GameSayVisitedRegion, SayVisitedRegion },
 				{ CommandId.GameSayZoneSize, SayZoneSize },
 				{ CommandId.GameSayOrientation, SayOrientation },
+				{ CommandId.GameToggleSonar, ToggleSonar },
 				{ CommandId.GameSayAbsoluteCoordinates, SayAbsoluteCoordinates },
 				{ CommandId.GameSendFeedback, MainScript.SendFeedback },
 				{ CommandId.GameQuit, World.QuitGame },
