@@ -1,9 +1,6 @@
 ﻿using Assets.Scripts.Audio;
-using Assets.Scripts.Models;
 
 using DavyKager;
-
-using Game.Terrain;
 
 using System;
 using System.Collections;
@@ -14,343 +11,343 @@ using UnityEngine.Audio;
 
 namespace Game.Audio
 {
-    public class SoundManager : MonoBehaviour
-    {
-        private MixerManager _mixer;
+	public class SoundManager : MonoBehaviour
+	{
+		private MixerManager _mixer;
 
-        public float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => GetLinearRolloffAttenuation(source.transform.position, source.minDistance, source.maxDistance, defaultVolume);
-        public float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume)
-        {
-            float distance = Vector3.Distance(position, World.Player.transform.position);
+		public float GetLinearRolloffAttenuation(AudioSource source, float defaultVolume) => GetLinearRolloffAttenuation(source.transform.position, source.minDistance, source.maxDistance, defaultVolume);
+		public float GetLinearRolloffAttenuation(Vector3 position, float minDistance, float maxDistance, float defaultVolume)
+		{
+			float distance = Vector3.Distance(position, World.Player.transform.position);
 
-            float t = (distance - minDistance) / (maxDistance - minDistance);
-            float attenuation = 1f - Mathf.Clamp01(t);
-            return defaultVolume * attenuation;
-        }
-
-
-        private Dictionary<AudioSource, Coroutine> _lowPassCoroutines = new();
-        public void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
-        {
-            _soundPool.EnableLowPass(source);
-
-            if (targetFrequency == GetLowPass(source))
-                return;
-
-            Coroutine coroutine;
-            if (_lowPassCoroutines.TryGetValue(source, out coroutine))
-            {
-                StopCoroutine(_lowPassCoroutines[source]);
-                _lowPassCoroutines.Remove(source);
-            }
-
-            Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency, disableLowPassAfterwards));
-            _lowPassCoroutines[source] = newCoroutine;
-        }
-
-        public float GetLowPass(AudioSource source)
-        {
-            AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
-            return lowPass.cutoffFrequency;
-        }
-
-        private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
-        {
-            if (!source.isActiveAndEnabled && !source.isPlaying)
-                DestroyCoroutine();
-
-            float startFrequency = GetLowPass(source);
-
-            for (float t = 0; t < duration; t += Time.deltaTime)
-            {
-                float value = (int)Mathf.Lerp(startFrequency, targetFrequency, t / duration);
-                SetLowPass(source, value);
-                yield return null;
-            }
-            SetLowPass(source, targetFrequency);
-
-            if (disableLowPassAfterwards)
-                _soundPool.DisableLowPass(source);
-
-            DestroyCoroutine();
-
-            void DestroyCoroutine()
-            {
-                Coroutine coroutine;
-                if (_lowPassCoroutines.TryGetValue(source, out coroutine))
-                {
-                    _lowPassCoroutines.Remove(source);
-                    StopCoroutine(coroutine);
-                }
-            }
-        }
-
-        public void Mute(float duration = _fadingDuration)
-        {
-            if (_muted)
-                return;
-
-            _muted = true;
-            SlideMasterVolume(duration, 0.2f);
-        }
-
-        private const float _fullMasterVolume = 1;
-        private const int _fadingDuration = 2;
-        private bool _muted;
-        public void Unmute(float duration = _fadingDuration)
-        {
-            if (!_muted)
-                return;
-
-            _muted = false;
-            SlideMasterVolume(duration, _fullMasterVolume);
-        }
-
-        public AudioSource ConvertTo3d(AudioSource source, Vector3 position, int? lowPassFrequency = null)
-        {
-            source.spatialize = true;
-            source.outputAudioMixerGroup = ResonanceGroup;
-            source.spatialBlend = 1;
-            source.transform.position = position;
-            if (lowPassFrequency != null)
-                SetLowPass(source, lowPassFrequency.Value);
-            return source;
-        }
-
-        public AudioSource ConvertTo2d(AudioSource source, bool disableLowPass = false)
-        {
-            if (disableLowPass)
-                SlideLowPass(source, Settings.Portal2dFadingDuration, 22000, true);
-
-            source.spatialize = false;
-            source.spatializePostEffects = false;
-            source.outputAudioMixerGroup = null;
-            SlideSpatialBlend(source, Settings.PortalBlendSlidingDuration, 0);
-            return source;
-        }
-
-        public void DisableSpatializer(AudioSource source)
-        {
-            source.spatialize = false;
-            source.outputAudioMixerGroup = null;
-        }
-
-        public void EnableSpatializer(AudioSource source)
-        {
-            source.spatialize = true;
-            source.outputAudioMixerGroup = ResonanceGroup;
-        }
-
-        public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
-        {
-            StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone));
-        }
-
-        public void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null)
-        {
-            if (targetBlend == source.spatialBlend)
-                return;
-
-            StartCoroutine(SlideSpatialBlendStep(source, duration, targetBlend, finalAction));
-        }
-
-        private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
-        {
-            float startVolume = sound.volume;
-
-            for (float t = 0; t < duration; t += Time.deltaTime)
-            {
-                sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
-                yield return null;
-            }
-            sound.volume = targetVolume;
-
-            if (targetVolume <= 0)
-            {
-                if (stopWhenDone)
-                    sound.Stop();
-                else if (pauseWhenDone)
-                    sound.Pause();
-                actionWhenDone?.Invoke();
-            }
-        }
-
-        private IEnumerator SlideSpatialBlendStep(AudioSource source, float duration, float targetBlend, Action finalAction)
-        {
-            float startBlend = source.spatialBlend;
-
-            for (float t = 0; t < duration; t += Time.deltaTime)
-            {
-                source.spatialBlend = Mathf.Lerp(startBlend, targetBlend, t / duration);
-                yield return null;
-            }
-
-            source.spatialBlend = targetBlend;
-            finalAction?.Invoke();
-        }
-
-        private void Update()
-        {
-            return;
-        }
-
-        public AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
-        {
-            AudioSource source = _soundPool.GetSource();
-            _soundPool.DisableLowPass(source);
-            source.name = description ?? "sound";
-            source.clip = Sounds.GetClip(soundName);
-            source.spatialize = false;
-            source.spatialBlend = 0;
-            source.loop = loop;
-            source.outputAudioMixerGroup = null;
-            _soundPool.DisableLowPass(source);
-
-            if (fadeIn)
-            {
-                source.volume = 0;
-                source.Play();
-                SlideVolume(source, fadingDuration, volume);
-            }
-            else
-            {
-                source.volume = volume;
-                source.Play();
-            }
-
-            _soundPool.SoundStartedPlaying(source);
-            return source;
-        }
-
-        private SoundPool _soundPool;
-
-        public void DisableLowPass(AudioSource source) => _soundPool.DisableLowPass(source);
+			float t = (distance - minDistance) / (maxDistance - minDistance);
+			float attenuation = 1f - Mathf.Clamp01(t);
+			return defaultVolume * attenuation;
+		}
 
 
-        public void SetLowPass(AudioSource source, float cutOffFrequency)
-        {
-            AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
-            lowPass.cutoffFrequency = cutOffFrequency;
-        }
+		private Dictionary<AudioSource, Coroutine> _lowPassCoroutines = new();
+		public void SlideLowPass(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
+		{
+			_soundPool.EnableLowPass(source);
 
-        public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
-        {
-            AudioSource source = _soundPool.GetSource();
-            source.name = description ?? "sound";
-            source.transform.position = position;
-            source.clip = Sounds.GetClip(soundName);
-            source.spatialBlend = 1; // Full surround sound
-            source.spatialize = true;
-            source.spatializePostEffects = false;
-            source.outputAudioMixerGroup = ResonanceGroup;
-            source.loop = loop;
-            source.dopplerLevel = 0;
+			if (targetFrequency == GetLowPass(source))
+				return;
 
-            ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
-            resonance.bypassRoomEffects = false;
-            resonance.nearFieldEffectEnabled = true;
-            resonance.occlusionEnabled = true;
+			Coroutine coroutine;
+			if (_lowPassCoroutines.TryGetValue(source, out coroutine))
+			{
+				StopCoroutine(coroutine);
+				_lowPassCoroutines.Remove(source);
+			}
 
-            if (fadeIn)
-            {
-                source.volume = 0;
-                source.Play();
-                SlideVolume(source, fadingDuration, volume);
-                return source;
-            }
+			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency, disableLowPassAfterwards));
+			_lowPassCoroutines[source] = newCoroutine;
+		}
 
-            source.volume = volume;
-            source.Play();
-            _soundPool.SoundStartedPlaying(source);
-            return source;
-        }
+		public float GetLowPass(AudioSource source)
+		{
+			AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
+			return lowPass.cutoffFrequency;
+		}
 
-        private void Awake()
-        {
-            LoadMixer();
-            CreateSoundPool();
-        }
+		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
+		{
+			if (!source.isActiveAndEnabled && !source.isPlaying)
+				DestroyCoroutine();
 
-        private void CreateSoundPool()
-        {
-            _soundPool = (new GameObject("Sound pool")).AddComponent<SoundPool>();
-        }
+			float startFrequency = GetLowPass(source);
 
-        private void LoadMixer()
-        {
-            GameObject obj = new("Audio mixer");
-            _mixer = obj.AddComponent<MixerManager>();
-        }
+			for (float t = 0; t < duration; t += Time.deltaTime)
+			{
+				float value = (int)Mathf.Lerp(startFrequency, targetFrequency, t / duration);
+				SetLowPass(source, value);
+				yield return null;
+			}
+			SetLowPass(source, targetFrequency);
 
-        public AudioMixerGroup ResonanceGroup { get => _mixer.ResonanceGroup; }
-        public float MasterVolume
-        {
-            get => AudioListener.volume;
-            set => AudioListener.volume = value;
-        }
+			if (disableLowPassAfterwards)
+				_soundPool.DisableLowPass(source);
 
-        private float _masterVolumeStepSize;
-        private float _masterVolumeTargetVolume;
+			DestroyCoroutine();
 
-        /// <summary>
-        /// Adjusts the volume of an audio source over a specified duration to a target volume.
-        /// </summary>
-        /// <param name="source">An audio source to be adjusted</param>
-        /// <param name="duration">Duration of the adjustment</param>
-        /// <param name="targetVolume">Target volume</param>
-        public void SlideMasterVolume(float duration, float newTargetVolume)
-        {
-            if (newTargetVolume == AudioListener.volume)
-                return;
+			void DestroyCoroutine()
+			{
+				Coroutine coroutine;
+				if (_lowPassCoroutines.TryGetValue(source, out coroutine))
+				{
+					_lowPassCoroutines.Remove(source);
+					StopCoroutine(coroutine);
+				}
+			}
+		}
 
-            _masterVolumeTargetVolume = newTargetVolume;
-            float startVolume = AudioListener.volume;
-            int steps = Mathf.RoundToInt(duration * 100); // 100 kroků za sekundu
-            _masterVolumeStepSize = (_masterVolumeTargetVolume - startVolume) / steps;
-            float stepInterval = duration / steps;
+		public void Mute(float duration = _fadingDuration)
+		{
+			if (_muted)
+				return;
 
-            CancelInvoke(nameof(MasterVolumeSlideStep));
-            InvokeRepeating(nameof(MasterVolumeSlideStep), 0, stepInterval);
+			_muted = true;
+			SlideMasterVolume(duration, 0.2f);
+		}
 
-        }
+		private const float _fullMasterVolume = 1;
+		private const int _fadingDuration = 2;
+		private bool _muted;
+		public void Unmute(float duration = _fadingDuration)
+		{
+			if (!_muted)
+				return;
 
-        private void MasterVolumeSlideStep()
-        {
-            if (Mathf.Abs(AudioListener.volume - _masterVolumeTargetVolume) < Mathf.Abs(_masterVolumeStepSize))
-            {
-                AudioListener.volume = _masterVolumeTargetVolume;
-                CancelInvoke(nameof(MasterVolumeSlideStep));
-                return;
-            }
+			_muted = false;
+			SlideMasterVolume(duration, _fullMasterVolume);
+		}
 
-            AudioListener.volume += _masterVolumeStepSize;
-        }
+		public AudioSource ConvertTo3d(AudioSource source, Vector3 position, int? lowPassFrequency = null)
+		{
+			source.spatialize = true;
+			source.outputAudioMixerGroup = ResonanceGroup;
+			source.spatialBlend = 1;
+			source.transform.position = position;
+			if (lowPassFrequency != null)
+				SetLowPass(source, lowPassFrequency.Value);
+			return source;
+		}
 
-        private IEnumerator StopAllSoundsCoroutine(float duration, Action onDone)
-        {
-            AudioSource[] sounds = _soundPool.GetPlayingSounds().sounds;
-            foreach (AudioSource source in sounds)
-            {
-                if (duration > 0)
-                    SlideVolume(source, duration, 0, true);
-                else source.Stop();
-            }
+		public AudioSource ConvertTo2d(AudioSource source, bool disableLowPass = false)
+		{
+			if (disableLowPass)
+				SlideLowPass(source, Settings.Portal2dFadingDuration, 22000, true);
 
-            if (onDone != null)
-            {
-                yield return new WaitForSeconds(duration);
-                onDone.Invoke();
-            }
-        }
+			source.spatialize = false;
+			source.spatializePostEffects = false;
+			source.outputAudioMixerGroup = null;
+			SlideSpatialBlend(source, Settings.PortalBlendSlidingDuration, 0);
+			return source;
+		}
 
-        public void StopAllSounds(float duration = .5f, Action onDone = null)
-        {
-            StartCoroutine(StopAllSoundsCoroutine(duration, onDone));
-        }
+		public void DisableSpatializer(AudioSource source)
+		{
+			source.spatialize = false;
+			source.outputAudioMixerGroup = null;
+		}
 
-        public void MuteSpeech()
-        {
-            Tolk.Silence();
-        }
-    }
+		public void EnableSpatializer(AudioSource source)
+		{
+			source.spatialize = true;
+			source.outputAudioMixerGroup = ResonanceGroup;
+		}
+
+		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
+		{
+			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone));
+		}
+
+		public void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null)
+		{
+			if (targetBlend == source.spatialBlend)
+				return;
+
+			StartCoroutine(SlideSpatialBlendStep(source, duration, targetBlend, finalAction));
+		}
+
+		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
+		{
+			float startVolume = sound.volume;
+
+			for (float t = 0; t < duration; t += Time.deltaTime)
+			{
+				sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
+				yield return null;
+			}
+			sound.volume = targetVolume;
+
+			if (targetVolume <= 0)
+			{
+				if (stopWhenDone)
+					sound.Stop();
+				else if (pauseWhenDone)
+					sound.Pause();
+				actionWhenDone?.Invoke();
+			}
+		}
+
+		private IEnumerator SlideSpatialBlendStep(AudioSource source, float duration, float targetBlend, Action finalAction)
+		{
+			float startBlend = source.spatialBlend;
+
+			for (float t = 0; t < duration; t += Time.deltaTime)
+			{
+				source.spatialBlend = Mathf.Lerp(startBlend, targetBlend, t / duration);
+				yield return null;
+			}
+
+			source.spatialBlend = targetBlend;
+			finalAction?.Invoke();
+		}
+
+		private void Update()
+		{
+			return;
+		}
+
+		public AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
+		{
+			AudioSource source = _soundPool.GetSource();
+			_soundPool.DisableLowPass(source);
+			source.name = description ?? "sound";
+			source.clip = Sounds.GetClip(soundName);
+			source.spatialize = false;
+			source.spatialBlend = 0;
+			source.loop = loop;
+			source.outputAudioMixerGroup = null;
+			_soundPool.DisableLowPass(source);
+
+			if (fadeIn)
+			{
+				source.volume = 0;
+				source.Play();
+				SlideVolume(source, fadingDuration, volume);
+			}
+			else
+			{
+				source.volume = volume;
+				source.Play();
+			}
+
+			_soundPool.SoundStartedPlaying(source);
+			return source;
+		}
+
+		private SoundPool _soundPool;
+
+		public void DisableLowPass(AudioSource source) => _soundPool.DisableLowPass(source);
+
+
+		public void SetLowPass(AudioSource source, float cutOffFrequency)
+		{
+			AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
+			lowPass.cutoffFrequency = cutOffFrequency;
+		}
+
+		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
+		{
+			AudioSource source = _soundPool.GetSource();
+			source.name = description ?? "sound";
+			source.transform.position = position;
+			source.clip = Sounds.GetClip(soundName);
+			source.spatialBlend = 1; // Full surround sound
+			source.spatialize = true;
+			source.spatializePostEffects = false;
+			source.outputAudioMixerGroup = ResonanceGroup;
+			source.loop = loop;
+			source.dopplerLevel = 0;
+
+			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
+			resonance.bypassRoomEffects = false;
+			resonance.nearFieldEffectEnabled = true;
+			resonance.occlusionEnabled = true;
+
+			if (fadeIn)
+			{
+				source.volume = 0;
+				source.Play();
+				SlideVolume(source, fadingDuration, volume);
+				return source;
+			}
+
+			source.volume = volume;
+			source.Play();
+			_soundPool.SoundStartedPlaying(source);
+			return source;
+		}
+
+		private void Awake()
+		{
+			LoadMixer();
+			CreateSoundPool();
+		}
+
+		private void CreateSoundPool()
+		{
+			_soundPool = (new GameObject("Sound pool")).AddComponent<SoundPool>();
+		}
+
+		private void LoadMixer()
+		{
+			GameObject obj = new("Audio mixer");
+			_mixer = obj.AddComponent<MixerManager>();
+		}
+
+		public AudioMixerGroup ResonanceGroup { get => _mixer.ResonanceGroup; }
+		public float MasterVolume
+		{
+			get => AudioListener.volume;
+			set => AudioListener.volume = value;
+		}
+
+		private float _masterVolumeStepSize;
+		private float _masterVolumeTargetVolume;
+
+		/// <summary>
+		/// Adjusts the volume of an audio source over a specified duration to a target volume.
+		/// </summary>
+		/// <param name="source">An audio source to be adjusted</param>
+		/// <param name="duration">Duration of the adjustment</param>
+		/// <param name="targetVolume">Target volume</param>
+		public void SlideMasterVolume(float duration, float newTargetVolume)
+		{
+			if (newTargetVolume == AudioListener.volume)
+				return;
+
+			_masterVolumeTargetVolume = newTargetVolume;
+			float startVolume = AudioListener.volume;
+			int steps = Mathf.RoundToInt(duration * 100); // 100 kroků za sekundu
+			_masterVolumeStepSize = (_masterVolumeTargetVolume - startVolume) / steps;
+			float stepInterval = duration / steps;
+
+			CancelInvoke(nameof(MasterVolumeSlideStep));
+			InvokeRepeating(nameof(MasterVolumeSlideStep), 0, stepInterval);
+
+		}
+
+		private void MasterVolumeSlideStep()
+		{
+			if (Mathf.Abs(AudioListener.volume - _masterVolumeTargetVolume) < Mathf.Abs(_masterVolumeStepSize))
+			{
+				AudioListener.volume = _masterVolumeTargetVolume;
+				CancelInvoke(nameof(MasterVolumeSlideStep));
+				return;
+			}
+
+			AudioListener.volume += _masterVolumeStepSize;
+		}
+
+		private IEnumerator StopAllSoundsCoroutine(float duration, Action onDone)
+		{
+			AudioSource[] sounds = _soundPool.GetPlayingSounds().sounds;
+			foreach (AudioSource source in sounds)
+			{
+				if (duration > 0)
+					SlideVolume(source, duration, 0, true);
+				else source.Stop();
+			}
+
+			if (onDone != null)
+			{
+				yield return new WaitForSeconds(duration);
+				onDone.Invoke();
+			}
+		}
+
+		public void StopAllSounds(float duration = .5f, Action onDone = null)
+		{
+			StartCoroutine(StopAllSoundsCoroutine(duration, onDone));
+		}
+
+		public void MuteSpeech()
+		{
+			Tolk.Silence();
+		}
+	}
 }
