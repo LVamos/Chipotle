@@ -154,7 +154,7 @@ namespace Game.Entities.Items
 
 			Sounds.SlideLowPass(portal, finalDuration, lowPass);
 
-			bool playerBehindWall = exit.Zones.Any(z => !z.IsAccessible(World.Player.Zone));
+			bool playerBehindWall = !exit.Zones.Any(z => z == World.Player.Zone) && exit.Zones.Any(z => !z.IsAccessible(World.Player.Zone));
 			UpdatePortalVolume(portal, exit, finalDuration, playerBehindWall);
 		}
 

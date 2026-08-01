@@ -12,7 +12,8 @@ namespace Game.Audio
 {
 	public static class Sounds
 	{
-		public static void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null) => _soundManager.SlideSpatialBlend(source, duration, targetBlend, finalAction);
+		public static void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null)
+			=> _soundManager.SlideSpatialBlend(source, duration, targetBlend, finalAction);
 
 		public static float GetLowPass(AudioSource source) => _soundManager.GetLowPassFrequency(source);
 		public static void SetLowPassFrequency(AudioSource source, float frequency) => _soundManager.SetLowPass(source, frequency);
