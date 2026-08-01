@@ -31,7 +31,8 @@ namespace Game.Audio
 		{
 			_soundPool.EnableLowPass(source);
 
-			if (targetFrequency == GetLowPass(source))
+			float startFrequency = GetLowPassFrequency(source);
+			if (targetFrequency == startFrequency)
 				return;
 
 			Coroutine coroutine;
@@ -41,26 +42,34 @@ namespace Game.Audio
 				_lowPassCoroutines.Remove(source);
 			}
 
-			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(source, duration, targetFrequency, disableLowPassAfterwards));
+			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(
+				source,
+				duration,
+				GetLowPassFrequency(source),
+				targetFrequency,
+				disableLowPassAfterwards));
 			_lowPassCoroutines[source] = newCoroutine;
 		}
 
-		public float GetLowPass(AudioSource source)
+		public float GetLowPassFrequency(AudioSource source)
 		{
 			AudioLowPassFilter lowPass = _soundPool.GetLowPass(source);
 			return lowPass.cutoffFrequency;
 		}
 
-		private IEnumerator SlideLowPassStep(AudioSource source, float duration, float targetFrequency, bool disableLowPassAfterwards = false)
+		private IEnumerator SlideLowPassStep(
+			AudioSource source,
+			float duration,
+			float startFrequency,
+			float targetFrequency,
+			bool disableLowPassAfterwards = false)
 		{
 			if (!source.isActiveAndEnabled && !source.isPlaying)
 				DestroyCoroutine();
 
-			float startFrequency = GetLowPass(source);
-
 			for (float t = 0; t < duration; t += Time.deltaTime)
 			{
-				float value = (int)Mathf.Lerp(startFrequency, targetFrequency, t / duration);
+				float value = Mathf.Lerp(startFrequency, targetFrequency, t / duration);
 				SetLowPass(source, value);
 				yield return null;
 			}
@@ -114,10 +123,10 @@ namespace Game.Audio
 			return source;
 		}
 
-		public AudioSource ConvertTo2d(AudioSource source, bool disableLowPass = false)
+		public AudioSource SwitchTo2d(AudioSource source, bool disableLowPass, float lowPasSlidingDuration)
 		{
 			if (disableLowPass)
-				SlideLowPass(source, Settings.Portal2dFadingDuration, 22000, true);
+				SlideLowPass(source, lowPasSlidingDuration, 22000, true);
 
 			source.spatialize = false;
 			source.spatializePostEffects = false;

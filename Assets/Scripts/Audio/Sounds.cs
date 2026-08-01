@@ -14,7 +14,7 @@ namespace Game.Audio
 	{
 		public static void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null) => _soundManager.SlideSpatialBlend(source, duration, targetBlend, finalAction);
 
-		public static float GetLowPass(AudioSource source) => _soundManager.GetLowPass(source);
+		public static float GetLowPass(AudioSource source) => _soundManager.GetLowPassFrequency(source);
 		public static void SetLowPassFrequency(AudioSource source, float frequency) => _soundManager.SetLowPass(source, frequency);
 
 		public static void MuteSpeech() => _soundManager.MuteSpeech();
@@ -165,7 +165,8 @@ namespace Game.Audio
 		public static void Unmute(float duration = .5f)
 			=> _soundManager?.Unmute();
 
-		public static void SwitchTo2d(AudioSource audioSource, bool disableLowPass = true) => _soundManager.ConvertTo2d(audioSource, disableLowPass);
+		public static void SwitchTo2d(AudioSource audioSource, bool disableLowPass, float lowPasSlidingDuration)
+			=> _soundManager.SwitchTo2d(audioSource, disableLowPass, lowPasSlidingDuration);
 
 		public static void DisableSpatializer(AudioSource source) => _soundManager.DisableSpatializer(source);
 
