@@ -147,11 +147,6 @@ namespace Game.Entities.Items
 
 		private void UpdatePortalOcclusion(AudioSource portal, Passage exit, float? duration = null)
 		{
-			//test
-			bool highway = Name.Inner == "dálnice p1";
-			bool hall = exit.Name.Inner == "ulice p1-hala p1";
-			bool garage = World.Player.Zone.Name.Inner == "garáž p1";
-
 			float finalDuration = duration != null ? duration.Value : GetPortalOcclusionDuration(exit);
 			PassageState state = exit.State;
 			bool farFromPlayer = exit.GetDistanceToPlayer() > Settings.ItemPassageDistanceAttenuationThreshold;
