@@ -147,9 +147,27 @@ namespace Game.Audio
 			source.outputAudioMixerGroup = ResonanceGroup;
 		}
 
-		public void SlideVolume(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
+		public void SlideVolume(AudioSource source, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
 		{
-			StartCoroutine(SlideVolumeStep(sound, duration, targetVolume, stopWhenDone, pauseWhenDone, actionWhenDone));
+			if (targetVolume == (float)source.volume)
+				return;
+
+			Coroutine coroutine;
+			if (_volumeCoroutines.TryGetValue(source, out coroutine))
+			{
+				StopCoroutine(coroutine);
+				_volumeCoroutines.Remove(source);
+			}
+
+			Coroutine newCoroutine = StartCoroutine(SlideVolumeStep(
+						source,
+						duration,
+						source.volume,
+						targetVolume,
+						stopWhenDone,
+						pauseWhenDone,
+						actionWhenDone));
+			_volumeCoroutines[source] = newCoroutine;
 		}
 
 		public void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null)
@@ -160,24 +178,42 @@ namespace Game.Audio
 			StartCoroutine(SlideSpatialBlendStep(source, duration, targetBlend, finalAction));
 		}
 
-		private IEnumerator SlideVolumeStep(AudioSource sound, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
+		private IEnumerator SlideVolumeStep(
+			AudioSource source,
+			float duration,
+			float startVolume,
+			float targetVolume,
+			bool stopWhenDone = true,
+			bool pauseWhenDone = false,
+			Action actionWhenDone = null)
 		{
-			float startVolume = sound.volume;
+			if (!source.isActiveAndEnabled && !source.isPlaying)
+				DestroyCoroutine();
 
 			for (float t = 0; t < duration; t += Time.deltaTime)
 			{
-				sound.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
+				source.volume = Mathf.Lerp(startVolume, targetVolume, t / duration);
 				yield return null;
 			}
-			sound.volume = targetVolume;
+			source.volume = targetVolume;
 
 			if (targetVolume <= 0)
 			{
 				if (stopWhenDone)
-					sound.Stop();
+					source.Stop();
 				else if (pauseWhenDone)
-					sound.Pause();
+					source.Pause();
 				actionWhenDone?.Invoke();
+			}
+
+			void DestroyCoroutine()
+			{
+				Coroutine coroutine;
+				if (_volumeCoroutines.TryGetValue(source, out coroutine))
+				{
+					_volumeCoroutines.Remove(source);
+					StopCoroutine(coroutine);
+				}
 			}
 		}
 
@@ -297,6 +333,7 @@ namespace Game.Audio
 
 		private float _masterVolumeStepSize;
 		private float _masterVolumeTargetVolume;
+		private Dictionary<AudioSource, Coroutine> _volumeCoroutines = new();
 
 		/// <summary>
 		/// Adjusts the volume of an audio source over a specified duration to a target volume.
