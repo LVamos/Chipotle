@@ -28,7 +28,7 @@ namespace Game
 			float degrees = (float)(source - target);
 
 			if (degrees != 0)
-				CameraManager.RotateYaw(degrees);
+				StartCoroutine(CameraManager.RotateYaw(degrees, Settings.CameraRotationDuration));
 		}
 
 		private void OnCharacterMoved(CharacterMoved message)

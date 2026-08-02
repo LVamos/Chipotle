@@ -175,7 +175,7 @@ namespace Game.Audio
 			if (targetBlend == source.spatialBlend)
 				return;
 
-			StartCoroutine(SlideSpatialBlendStep(source, duration, targetBlend, finalAction));
+			StartCoroutine(SlideSpatialBlendStep(source, duration, source.spatialBlend, targetBlend, finalAction));
 		}
 
 		private IEnumerator SlideVolumeStep(
@@ -217,9 +217,8 @@ namespace Game.Audio
 			}
 		}
 
-		private IEnumerator SlideSpatialBlendStep(AudioSource source, float duration, float targetBlend, Action finalAction)
+		private IEnumerator SlideSpatialBlendStep(AudioSource source, float duration, float startBlend, float targetBlend, Action finalAction)
 		{
-			float startBlend = source.spatialBlend;
 
 			for (float t = 0; t < duration; t += Time.deltaTime)
 			{

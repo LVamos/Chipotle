@@ -15,6 +15,7 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float CameraRotationDuration = .5f;
 		public static float ItemOcclusionDisablingDuration = .5f;
 		public static float SonarRadius = 1;
 		public static float SonarInterval = 0.5f;
