@@ -1,10 +1,27 @@
-﻿using System.Collections;
+﻿using Game.Terrain;
+
+using System.Collections;
+
 using UnityEngine;
 
 namespace Game.UI
 {
 	public static class CameraManager
 	{
+		public static Vector2 Get2dPosition()
+		{
+			Vector3 position3d = Get3dPosition();
+			return new Vector2(position3d.x, position3d.z);
+		}
+
+		public static Vector2 GetCameraAllignedPoint(Rectangle area)
+		{
+			Vector2 position2d = Get2dPosition();
+
+			return area.GetAlignedPoint(position2d)
+			?? area.GetClosestPoint(position2d);
+		}
+
 		private static Transform Transform => Camera.main.transform;
 
 		public static void SetYaw(float degrees)
@@ -12,6 +29,39 @@ namespace Game.UI
 
 		public static void SetPosition(Vector3 position)
 			=> Transform.position = position;
+
+		/// <summary>
+		/// Moves the camera to the specified position over time.
+		/// </summary>
+		/// <param name="position">The target position.</param>
+		/// <param name="duration">Duration in seconds for smooth movement.</param>
+		/// <returns>IEnumerator for coroutine support.</returns>
+		public static IEnumerator SetPosition(Vector3 position, float duration)
+		{
+			if (duration <= 0f)
+			{
+				Transform.position = position;
+				yield break;
+			}
+
+			int steps = 10;
+			Vector3 startPosition = Transform.position;
+			Vector3 totalMovement = position - startPosition;
+			Vector3 stepMovement = totalMovement / steps;
+			float stepDuration = duration / steps;
+			Vector3 movedSoFar = Vector3.zero;
+
+			for (int i = 0; i < steps - 1; i++)
+			{
+				Transform.position += stepMovement;
+				movedSoFar += stepMovement;
+				yield return new WaitForSeconds(stepDuration);
+			}
+
+			// Last step to ensure exact final position (compensates for floating point errors)
+			Vector3 remainingMovement = totalMovement - movedSoFar;
+			Transform.position += remainingMovement;
+		}
 
 		public static Vector3 Get3dPosition()
 			=> Transform.position;

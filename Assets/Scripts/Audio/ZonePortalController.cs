@@ -7,8 +7,7 @@ using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
 using Game.Terrain;
-
-
+using Game.UI;
 
 using System;
 using System.Collections;
@@ -25,15 +24,15 @@ namespace Assets.Scripts.Audio
 
 		private void Update()
 		{
-			Vector2? newPosition = World.Player.Center;
+			Vector2? newPosition2d = CameraManager.Get2dPosition();
 
-			if (_playersPosition != newPosition)
+			if (_playersPosition != newPosition2d)
 			{
 				Zone previousZone = _playersPosition != null ? World.GetZone(_playersPosition.Value) : null;
 				UpdatePortals(previousZone);
 			}
 
-			_playersPosition = newPosition;
+			_playersPosition = newPosition2d;
 		}
 
 		private List<Zone> _multipleExitZOnes;
@@ -422,7 +421,7 @@ PlayersZone.SameAmbients(_loop.Sound)
 					SnapPortalToPlayer(World.Player.Center, portal);
 				else
 				{
-					MovePortalInFrontOfPlayer(anchor, portal);
+					MovePortalInFrontOfCamera(anchor, portal);
 					SetPortalParameters(anchor, portal, true, true, true, true);
 				}
 			}
@@ -440,11 +439,10 @@ PlayersZone.SameAmbients(_loop.Sound)
 			Sounds.SlideVolume(portal, Settings.Ambient2dFadeDuration, 0, false);
 		}
 
-		private void MovePortalInFrontOfPlayer(PortalAnchor anchor, AudioSource portal)
+		private void MovePortalInFrontOfCamera(PortalAnchor anchor, AudioSource portal)
 		{
-			Vector2? point = anchor.Passage.Area.Value.GetAlignedPoint(World.Player.Center)
-			?? anchor.Passage.Area.Value.GetClosestPoint(World.Player.Center);
-			portal.transform.position = point.Value.ToVector3(2);
+			Rectangle passageArea = anchor.Passage.Area.Value;
+			portal.transform.position = CameraManager.GetCameraAllignedPoint(passageArea).ToVector3(2);
 		}
 
 		private static void SnapPortalToPlayer(Vector2 player, AudioSource portal)

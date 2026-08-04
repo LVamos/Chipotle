@@ -691,7 +691,6 @@ save.UsableWith
 			if (message.Sender != World.Player)
 				return;
 
-			UpdateBeaconPosition();
 			UpdateAmbientSounds(message.SourcePosition, message.SourceZone);
 			StopActionWhenPlayerMoves();
 		}

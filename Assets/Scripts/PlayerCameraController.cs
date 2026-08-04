@@ -26,6 +26,7 @@ namespace Game
 			float source = (float)message.Source.Angle.CartesianDegrees;
 			float target = (float)message.Target.Angle.CartesianDegrees;
 			float degrees = (float)(source - target);
+			degrees = ((degrees + 180f) % 360f + 360f) % 360f - 180f;
 
 			if (degrees != 0)
 				StartCoroutine(CameraManager.RotateYaw(degrees, Settings.CameraRotationDuration));
@@ -33,9 +34,15 @@ namespace Game
 
 		private void OnCharacterMoved(CharacterMoved message)
 		{
+			Vector2? oldPosition2d = message.SourcePosition != null ? message.SourcePosition.Value.Center : null;
+			Vector2 newPosition2d = message.TargetPosition.Center;
 			float y = World.Player.transform.localScale.y;
-			Vector3 position = message.TargetPosition.Center.ToVector3(y);
-			CameraManager.SetPosition(position);
+			Vector3 newPosition3d = message.TargetPosition.Center.ToVector3(y);
+
+			if (oldPosition2d != null
+&& World.GetDistance(oldPosition2d.Value, newPosition2d) < 2)
+				StartCoroutine(CameraManager.SetPosition(newPosition3d, Settings.CameraRotationDuration));
+			else CameraManager.SetPosition(newPosition3d);
 		}
 	}
 }
