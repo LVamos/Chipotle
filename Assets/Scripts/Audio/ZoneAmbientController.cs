@@ -26,10 +26,35 @@ namespace Game.Audio
 
 		public override Zone Owner => _owner ??= World.GetZone(_ownerName) ?? throw new InvalidOperationException(nameof(_ownerName));
 
+		private void OnCharacterMoved(CharacterMoved m)
+			=> UpdatePortalTransparency();
+
+		private void UpdatePortalTransparency()
+		{
+			if (!Owner.PlayerInHere())
+				return;
+
+			var exit = Owner.Exits
+				.FirstOrDefault(e => PlayerNearExit(e));
+
+			if (exit == null)
+				Sounds.RoomManager.EnableReflectivity();
+			else Sounds.RoomManager.DisableReflectivity();
+
+			bool PlayerNearExit(Passage exit)
+			{
+				Vector2 player = World.Player.Center;
+				return exit.IsInOpposite(player)
+					&& exit.Open
+					&& exit.Area.Value.GetDistanceFrom(player) <= Settings.PassageTransparencyMaxDistance;
+			}
+		}
+
 		protected override void HandleMessage(Message message)
 		{
 			switch (message)
 			{
+				case CharacterMoved m: OnCharacterMoved(m); break;
 				case GameStatechanged m:
 					OnGameStatechanged(m); break;
 				case ChipotlesCarMoved m: OnChipotlesCarMoved(m); break;

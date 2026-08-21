@@ -73,7 +73,8 @@ namespace Game.Terrain
 		/// Checks if the specified point lays in front or behind the passage.
 		/// </summary>
 		/// <returns>True if the specified point lays in front or behind the passage</returns>
-		public bool IsInFrontOrBehind(Vector2 point) => IsInRelatedZone(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
+		public bool IsInOpposite(Vector2 point)
+			=> IsInRelatedZone(point) && (IsInHorizontalRange(point) || IsInVerticalRange(point));
 
 		private bool IsInHorizontalRange(Vector2 point) => IsHorizontal() && point.x >= _area.Value.UpperLeftCorner.x && point.x <= _area.Value.UpperRightCorner.x;
 

@@ -31,7 +31,7 @@ namespace Game.Terrain
                 return;
 
             Vector2 center = npc.Center;
-            bool opposite = IsInFrontOrBehind(center);
+            bool opposite = IsInOpposite(center);
             bool near = _area.Value.GetDistanceFrom(center) <= _minDistance;
 
             // Find point from which the door sound should be heart.
