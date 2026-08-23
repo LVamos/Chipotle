@@ -1,4 +1,5 @@
-﻿using Game.Models;
+﻿using Game.Entities.Characters;
+using Game.Models;
 using Game.Terrain;
 
 using System;
@@ -24,6 +25,7 @@ namespace Game.PathFinding
 		private static List<Rectangle> _zones;
 
 		private static HashSet<Vector2> _nonpassables;
+		private static Dictionary<Zone, HashSet<Vector2>> _characterPoints;
 
 		/// <summary>
 		/// Najde cestu.
@@ -40,6 +42,8 @@ namespace Game.PathFinding
 			_box = BoundingBox.Create(parameters.Start, parameters.Goal, _boundingBoxMargin);
 			PathFindingNode startNode = new(parameters.Start, cost: 0, parent: null);
 			startNode.ComputeDistance(parameters.Goal);
+
+			CountCharacterPoints(parameters.IgnoredCharacter);
 
 			PriorityQueue<PathFindingNode, float> openQueue = new(); // For the cheapest node (Price)
 
@@ -105,6 +109,22 @@ namespace Game.PathFinding
 			return null;
 		}
 
+		private static void CountCharacterPoints(Character ignoredCharacter)
+		{
+			_characterPoints = new();
+
+			IEnumerable<Zone> zones = World.GetZones(_box.ToRectangle())
+				.Where(c => c != ignoredCharacter);
+
+			foreach (Zone zone in zones)
+			{
+				HashSet<Vector2> characterPoints = new();
+				foreach (Character character in zone.Characters)
+					characterPoints.UnionWith(character.Area.Value.GetPoints());
+				_characterPoints[zone] = characterPoints;
+			}
+		}
+
 		/// <summary>
 		/// Metoda, která vytváří sousedy (4-směrné)
 		/// </summary>
@@ -142,11 +162,15 @@ namespace Game.PathFinding
 			Rectangle tempArea = parameters.IgnoredCharacter.Area.Value;
 			Rectangle area = Rectangle.FromCenter(node.Coords, tempArea.Height, tempArea.Width);
 			Zone zone = World.Map[area.Center].Zone;
+
 			bool noStaticObjects = zone.IsWalkable(area);
+
 			bool walkableTerrain = area.GetTiles(TileMap.TileSize)
 				.All(t => t != null && t.Tile.Walkable);
 			Tile tile = World.Map[node.Coords];
-			bool noCharacters = !zone.Characters.Any(c => c != parameters.IgnoredCharacter && c.Area.Value.Contains(node.Coords));
+
+			bool noCharacters = !(_characterPoints.ContainsKey(zone) && _characterPoints[zone].Contains(node.Coords));
+
 			bool walkable = walkableTerrain && noStaticObjects && noCharacters;
 			if (!walkable)
 				return false;

@@ -1,5 +1,6 @@
-﻿using System;
+﻿using Game.Terrain;
 
+using System;
 
 using UnityEngine;
 
@@ -7,6 +8,9 @@ namespace Game.PathFinding
 {
 	public class BoundingBox
 	{
+		public Rectangle ToRectangle()
+			=> new Rectangle(Min, Max);
+
 		/// <summary>
 		/// Calculates the bounding box for given start and goal positions with a margin.
 		/// </summary>
