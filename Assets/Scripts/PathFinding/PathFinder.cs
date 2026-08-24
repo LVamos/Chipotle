@@ -1,5 +1,4 @@
 ﻿using Game.Entities.Characters;
-using Game.Models;
 using Game.Terrain;
 
 using System;
@@ -137,19 +136,14 @@ namespace Game.PathFinding
 			bool throughGoal
 		)
 		{
-			List<TileInfo> tiles = World.Map.GetNeighbours4(parent.Coords).ToList();
-
-			foreach (Models.TileInfo tileInfo in tiles)
+			foreach (Models.TileInfo tileInfo in World.Map.GetNeighbours4(parent.Coords))
 			{
-				// => bounding box check tady (nebo klidně v IsWalkable):
-				Vector2 pos = tileInfo.Position;
-				if (pos.x < _box.Min.x || pos.x > _box.Max.x || pos.y < _box.Min.y || pos.y > _box.Max.y)
-				{
-					// je to mimo bounding box => ignoruju
+				Vector2 position = tileInfo.Position;
+				if (position.x < _box.Min.x || position.x > _box.Max.x
+					|| position.y < _box.Min.y || position.x > _box.Max.y)
 					continue;
-				}
 
-				PathFindingNode n = new(pos, cost: 0, parent: null);
+				PathFindingNode n = new(position, cost: 0, parent: null);
 				yield return n;
 			}
 		}
@@ -165,8 +159,19 @@ namespace Game.PathFinding
 				parameters.IgnoredCharacter.Area.Value.Width);
 			Zone zone = World.Map[area.Center].Zone;
 
-			bool walkableTerrain = area.GetPoints(TileMap.TileSize)
-				.All(point => World.Map[point] is { Walkable: true });
+			bool walkableTerrain = true;
+
+			foreach (Vector2 point in area.GetPoints(TileMap.TileSize))
+			{
+				Tile? tile = World.Map[point];
+
+				if (tile is not { Walkable: true })
+				{
+					walkableTerrain = false;
+					break;
+				}
+			}
+
 			bool noCharacters = !(_characterPoints.ContainsKey(zone) && _characterPoints[zone].Contains(node.Coords));
 
 			if (!walkableTerrain || !noCharacters)
