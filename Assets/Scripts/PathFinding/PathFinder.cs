@@ -40,7 +40,7 @@ namespace Game.PathFinding
 			// Calculate bounding box to prevent the algorithm from searching the whole map.
 			_box = BoundingBox.Create(parameters.Start, parameters.Goal, _boundingBoxMargin);
 			PathFindingNode startNode = new(parameters.Start, cost: 0, parent: null);
-			startNode.ComputeDistance(parameters.Goal);
+			startNode.GetDistance(parameters.Goal);
 
 			CountCharacterPoints(parameters.IgnoredCharacter);
 
@@ -85,7 +85,7 @@ namespace Game.PathFinding
 					{
 						neighbour.Cost = newCost;
 						neighbour.Parent = current;
-						neighbour.ComputeDistance(parameters.Goal);
+						neighbour.GetDistance(parameters.Goal);
 
 						openQueue.Enqueue(neighbour, neighbour.Price);
 						open[neighbour.Coords] = neighbour;
@@ -97,7 +97,7 @@ namespace Game.PathFinding
 						{
 							existing.Cost = newCost;
 							existing.Parent = current;
-							existing.ComputeDistance(parameters.Goal);
+							existing.GetDistance(parameters.Goal);
 
 							// re -put in PQ to update the priority
 							openQueue.Enqueue(existing, existing.Price);

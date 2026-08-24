@@ -1,5 +1,7 @@
 ﻿using Game.Terrain;
 
+using System;
+
 using UnityEngine;
 
 namespace Game.PathFinding
@@ -73,6 +75,7 @@ namespace Game.PathFinding
 		/// Calculates distance between this node and the lastnode
 		/// </summary>
 		/// <param name="goal">The last point of requested path</param>
-		public void ComputeDistance(Vector2 goal) => Distance = Vector2.Distance(Coords, goal);
+		public void GetDistance(Vector2 goal)
+			=> Distance = Math.Abs(Coords.x - goal.x) + Math.Abs(Coords.y - goal.y);
 	}
 }
