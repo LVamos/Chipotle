@@ -113,13 +113,11 @@ namespace Game.PathFinding
 		{
 			_characterPoints = new();
 
-			IEnumerable<Zone> zones = World.GetZones(_box.ToRectangle())
-				.Where(c => c != ignoredCharacter);
-
-			foreach (Zone zone in zones)
+			foreach (Zone zone in World.GetZones(_box.ToRectangle()))
 			{
 				HashSet<Vector2> characterPoints = new();
-				foreach (Character character in zone.Characters)
+
+				foreach (Character character in zone.Characters.Where(c => c != ignoredCharacter))
 					characterPoints.UnionWith(character.Area.Value.GetPoints());
 				_characterPoints[zone] = characterPoints;
 			}
