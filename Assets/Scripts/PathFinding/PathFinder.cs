@@ -56,6 +56,8 @@ namespace Game.PathFinding
 			while (openQueue.Count > 0)
 			{
 				PathFindingNode current = openQueue.Dequeue();
+				if (closed.Contains(current.Coords))
+					continue;
 
 				open.Remove(current.Coords);
 
@@ -68,7 +70,6 @@ namespace Game.PathFinding
 				List<PathFindingNode> neighbours = GetNeighbours(current, parameters.Start, parameters.Goal, parameters.SameZone, parameters.ThroughStart, parameters.ThroughGoal).ToList();
 				foreach (PathFindingNode neighbour in neighbours)
 				{
-
 					// Is not walkable or is already closed => skip
 					if (closed.Contains(neighbour.Coords)
 						|| !IsWalkable(neighbour, parameters)
