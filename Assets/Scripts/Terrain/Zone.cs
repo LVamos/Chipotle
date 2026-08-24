@@ -92,9 +92,11 @@ namespace Game.Terrain
 			return points.All(IsWalkable);
 		}
 
-		public bool IsWalkable(Vector2 point) => !_nonwalkables.Contains(point);
+		public bool IsWalkable(Vector2 point)
+			=> !_nonwalkables.Contains(point);
 
 		private HashSet<Vector2> _nonwalkables;
+
 		public void GatherNonwalkables(Item item)
 		{
 			if (item.CanBePicked())

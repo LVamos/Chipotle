@@ -159,20 +159,17 @@ namespace Game.PathFinding
 		/// </summary>
 		private static bool IsWalkable(PathFindingNode node, PathfindingParams parameters)
 		{
-			Rectangle tempArea = parameters.IgnoredCharacter.Area.Value;
-			Rectangle area = Rectangle.FromCenter(node.Coords, tempArea.Height, tempArea.Width);
+			Rectangle area = Rectangle.FromCenter(
+				node.Coords,
+				parameters.IgnoredCharacter.Area.Value.Height,
+				parameters.IgnoredCharacter.Area.Value.Width);
 			Zone zone = World.Map[area.Center].Zone;
 
-			bool noStaticObjects = zone.IsWalkable(area);
-
-			bool walkableTerrain = area.GetTiles(TileMap.TileSize)
-				.All(t => t != null && t.Tile.Walkable);
-			Tile tile = World.Map[node.Coords];
-
+			bool walkableTerrain = area.GetPoints(TileMap.TileSize)
+				.All(point => World.Map[point] is { Walkable: true });
 			bool noCharacters = !(_characterPoints.ContainsKey(zone) && _characterPoints[zone].Contains(node.Coords));
 
-			bool walkable = walkableTerrain && noStaticObjects && noCharacters;
-			if (!walkable)
+			if (!walkableTerrain || !noCharacters)
 				return false;
 
 			// If the node lays on start or goal, exclude it if not allowed.
