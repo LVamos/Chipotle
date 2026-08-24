@@ -24,7 +24,14 @@ namespace Game.PathFinding
 		private static List<Rectangle> _zones;
 
 		private static HashSet<Vector2> _nonpassables;
-		private static Dictionary<Zone, HashSet<Vector2>> _characterPoints;
+
+		private static Dictionary<Zone, HashSet<Vector2>> _characterPoints = new();
+
+		private static PriorityQueue<PathFindingNode, float> _openQueue = new(); // For the cheapest node (Price)
+
+		private static Dictionary<Vector2, PathFindingNode> _open = new(); // Dictionary to a quick finding, if the node is already there
+
+		private static HashSet<Vector2> _closed = new(); // set of closed nodes
 
 		/// <summary>
 		/// Najde cestu.
@@ -39,56 +46,56 @@ namespace Game.PathFinding
 
 			// Calculate bounding box to prevent the algorithm from searching the whole map.
 			_box = BoundingBox.Create(parameters.Start, parameters.Goal, _boundingBoxMargin);
+
 			PathFindingNode startNode = new(parameters.Start, cost: 0, parent: null);
 			startNode.GetDistance(parameters.Goal);
 
 			CountCharacterPoints(parameters.IgnoredCharacter);
 
-			PriorityQueue<PathFindingNode, float> openQueue = new(); // For the cheapest node (Price)
-
-			Dictionary<Vector2, PathFindingNode> open = new(); // Dictionary to a quick finding, if the node is already there
-			HashSet<Vector2> closed = new(); // set of closed nodes
+			_openQueue = new();
+			_open.Clear();
+			_closed.Clear();
 
 			// I put the start
-			openQueue.Enqueue(startNode, startNode.Price);
-			open[parameters.Start] = startNode;
+			_openQueue.Enqueue(startNode, startNode.Price);
+			_open[parameters.Start] = startNode;
 
-			while (openQueue.Count > 0)
+			while (_openQueue.Count > 0)
 			{
-				PathFindingNode current = openQueue.Dequeue();
-				if (closed.Contains(current.Coords))
+				PathFindingNode current = _openQueue.Dequeue();
+				if (_closed.Contains(current.Coords))
 					continue;
 
-				open.Remove(current.Coords);
+				_open.Remove(current.Coords);
 
 				// If Current is close to the target, I am returning the path
 				if (Vector2.Distance(current.Coords, parameters.Goal) <= _distanceToleration)
 					return GetPath(current, parameters.ThroughStart, parameters.ThroughGoal);
 
-				closed.Add(current.Coords);
+				_closed.Add(current.Coords);
 
-				List<PathFindingNode> neighbours = GetNeighbours(current, parameters.Start, parameters.Goal, parameters.SameZone, parameters.ThroughStart, parameters.ThroughGoal).ToList();
+				IEnumerable<PathFindingNode> neighbours = GetNeighbours(current, parameters.Start, parameters.Goal, parameters.SameZone, parameters.ThroughStart, parameters.ThroughGoal);
 				foreach (PathFindingNode neighbour in neighbours)
 				{
 					// Is not walkable or is already closed => skip
-					if (closed.Contains(neighbour.Coords)
+					if (_closed.Contains(neighbour.Coords)
 						|| !IsWalkable(neighbour, parameters)
 						)
 					{
-						closed.Add(neighbour.Coords);
+						_closed.Add(neighbour.Coords);
 						continue;
 					}
 
 					// I'll try if it's a new node or there is already there
 					float newCost = current.Cost + 1;
-					if (!open.TryGetValue(neighbour.Coords, out PathFindingNode existing))
+					if (!_open.TryGetValue(neighbour.Coords, out PathFindingNode existing))
 					{
 						neighbour.Cost = newCost;
 						neighbour.Parent = current;
 						neighbour.GetDistance(parameters.Goal);
 
-						openQueue.Enqueue(neighbour, neighbour.Price);
-						open[neighbour.Coords] = neighbour;
+						_openQueue.Enqueue(neighbour, neighbour.Price);
+						_open[neighbour.Coords] = neighbour;
 					}
 					else
 					{
@@ -100,7 +107,7 @@ namespace Game.PathFinding
 							existing.GetDistance(parameters.Goal);
 
 							// re -put in PQ to update the priority
-							openQueue.Enqueue(existing, existing.Price);
+							_openQueue.Enqueue(existing, existing.Price);
 						}
 					}
 				}
@@ -111,11 +118,12 @@ namespace Game.PathFinding
 
 		private static void CountCharacterPoints(Character ignoredCharacter)
 		{
-			_characterPoints = new();
+			_characterPoints.Clear();
+			HashSet<Vector2> characterPoints = new();
 
 			foreach (Zone zone in World.GetZones(_box.ToRectangle()))
 			{
-				HashSet<Vector2> characterPoints = new();
+				characterPoints.Clear();
 
 				foreach (Character character in zone.Characters.Where(c => c != ignoredCharacter))
 					characterPoints.UnionWith(character.Area.Value.GetPoints());
