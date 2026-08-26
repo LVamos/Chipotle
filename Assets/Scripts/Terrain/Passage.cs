@@ -201,9 +201,6 @@ namespace Game.Terrain
 			}
 			foreach (Zone zone in Zones)
 				zone.Register(this);
-
-			foreach (Zone l in Zones)
-				l.Register(this);
 		}
 
 		/// <summary>

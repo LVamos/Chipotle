@@ -308,16 +308,7 @@ namespace Game.Terrain
 		/// All exits from the zone
 		/// </summary>
 
-		public Passage[] Exits
-		{
-			get
-			{
-				_exits ??= new();
-
-				return _exits.Select(World.GetPassage).Where(p => p != null)
-.ToArray();
-			}
-		}
+		public IReadOnlyList<Passage> Exits => _resolvedExits;
 
 		/// <summary>
 		/// Text description of the zone
@@ -364,6 +355,47 @@ namespace Game.Terrain
 		/// </summary>
 		private HashSet<string> _exits;
 
+		/// <summary>
+		/// Cache of resolved <see cref="Character"/> objects corresponding to <see cref="_characters"/>.
+		/// Kept in sync by <see cref="Register(Character)"/>/<see cref="Unregister(Character)"/>; rebuilt from
+		/// scratch in <see cref="Activate"/>, because at deserialization time (<see cref="Restore"/>) the
+		/// referenced characters/items/passages don't exist in <see cref="World"/> yet.
+		/// </summary>
+		private List<Character> _resolvedCharacters = new();
+
+		/// <summary>
+		/// Cache of resolved <see cref="Item"/> objects corresponding to <see cref="_items"/>. See <see cref="_resolvedCharacters"/> for lifecycle.
+		/// </summary>
+		private List<Item> _resolvedItems = new();
+
+		/// <summary>
+		/// Cache of resolved <see cref="Passage"/> objects corresponding to <see cref="_exits"/>. See <see cref="_resolvedCharacters"/> for lifecycle.
+		/// </summary>
+		private List<Passage> _resolvedExits = new();
+
+		/// <summary>
+		/// (Re)builds the resolved object caches from the name sets. Must run only after all characters, items
+		/// and passages have been added to <see cref="World"/> (see <see cref="Activate"/>) - calling it earlier
+		/// (e.g. directly from <see cref="Restore"/>) would fail to resolve names of objects that haven't been
+		/// deserialized yet.
+		/// </summary>
+		private void RebuildResolvedCaches()
+		{
+			_resolvedCharacters = _characters
+				.Select(name => World.GetCharacter(name) ?? throw new ArgumentNullException($"Character {name} not found"))
+				.ToList();
+
+			_resolvedItems = _items
+				.Select(World.GetItem)
+				.Where(o => o != null)
+				.ToList();
+
+			_resolvedExits = _exits
+				.Select(World.GetPassage)
+				.Where(p => p != null)
+				.ToList();
+		}
+
 		private void CreateComponents(bool loopExists)
 		{
 			List<MessagingObject> components = new();
@@ -384,6 +416,9 @@ namespace Game.Terrain
 			_characters = new();
 			_exits = new();
 			_items = new();
+			_resolvedCharacters = new();
+			_resolvedExits = new();
+			_resolvedItems = new();
 			_neighbours = null;
 			_nonwalkables = new();
 			Description = description;
@@ -412,20 +447,7 @@ namespace Game.Terrain
 		/// List of NPCs present in this zone.
 		/// </summary>
 
-		public List<Character> Characters
-		{
-			get
-			{
-				List<Character> result = new();
-				foreach (string name in _characters)
-				{
-					Character character = World.GetCharacter(name)
-					?? throw new ArgumentNullException($"Character {name} not found");
-					result.Add(character);
-				}
-				return result;
-			}
-		}
+		public IReadOnlyList<Character> Characters => _resolvedCharacters;
 
 		/// <summary>
 		/// Gets all acoustic obstacles in the zone within a specified distance from a point, including items marked as obstacles and closed doors.
@@ -455,24 +477,22 @@ namespace Game.Terrain
 				elements.Where(e => e.AcousticObstacle);
 		}
 
-		public List<Item> GetMovableItems
-			=> Items.Where(i => i.CanBePicked())
-			.ToList();
+		/// <summary>
+		/// List of movable (pickable) objects present in this zone.
+		/// </summary>
+		/// <remarks>
+		/// Unlike <see cref="Items"/>, this isn't kept as a persistently-maintained cache, because
+		/// pickability (<see cref="Item.CanBePicked"/>) can change (item picked up/dropped) without
+		/// the item leaving the zone, i.e. without a <see cref="Register(Item)"/>/<see cref="Unregister(Item)"/>
+		/// call. It's still cheap: it just filters the already-resolved <see cref="Items"/> cache, with no
+		/// per-item name lookups.
+		/// </remarks>
+		public IReadOnlyList<Item> MovableItems => _resolvedItems.Where(i => i.CanBePicked()).ToList();
 
 		/// <summary>
 		/// List of objects present in this zone.
 		/// </summary>
-
-		public IEnumerable<Item> Items
-		{
-			get
-			{
-				_items ??= new();
-
-				return _items.Select(World.GetItem)
-					.Where(o => o != null);
-			}
-		}
+		public IReadOnlyList<Item> Items => _resolvedItems;
 
 		/// <summary>
 		/// Returns all adjecting zones to which it's possible to get from this zone.
@@ -544,13 +564,18 @@ namespace Game.Terrain
 				throw new InvalidOperationException("exit already registered");
 
 			_exits.Add(p.Name.Inner);
+			_resolvedExits?.Add(p);
 		}
 
 		/// <summary>
 		/// Adds a game object to list of present objects.
 		/// </summary>
 		/// <param name="o">The object ot be added</param>
-		private void Register(Item o) => _items.Add(o.Name.Inner);
+		private void Register(Item o)
+		{
+			_items.Add(o.Name.Inner);
+			_resolvedItems?.Add(o);
+		}
 
 		/// <summary>
 		/// Adds an entity to zone.
@@ -559,6 +584,7 @@ namespace Game.Terrain
 		public void Register(Character character)
 		{
 			_characters.Add(character.Name.Inner);
+			_resolvedCharacters?.Add(character);
 		}
 
 		/// <summary>
@@ -567,6 +593,7 @@ namespace Game.Terrain
 		public override void Activate()
 		{
 			base.Activate();
+			RebuildResolvedCaches();
 			ActivateComponents();
 			FindNeighbours();
 		}
@@ -616,13 +643,21 @@ namespace Game.Terrain
 		/// Immediately removes a game object from list of present objects.
 		/// </summary>
 		/// <param name="i"></param>
-		private void Unregister(Item i) => _items.Remove(i.Name.Inner);
+		private void Unregister(Item i)
+		{
+			_items.Remove(i.Name.Inner);
+			_resolvedItems?.Remove(i);
+		}
 
 		/// <summary>
 		/// Immediately removes an entity from list of present entities.
 		/// </summary>
 		/// <param name="e">The entity to be removed</param>
-		public void Unregister(Character e) => _characters.Remove(e.Name.Inner);
+		public void Unregister(Character e)
+		{
+			_characters.Remove(e.Name.Inner);
+			_resolvedCharacters?.Remove(e);
+		}
 
 		/// <summary>
 		/// Removes a passage from the zone.
@@ -634,6 +669,7 @@ namespace Game.Terrain
 				throw new InvalidOperationException("Unregistered passage");
 
 			_exits.Remove(p.Name.Inner);
+			_resolvedExits?.Remove(p);
 		}
 
 		/// <summary>

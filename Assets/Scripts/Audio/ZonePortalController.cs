@@ -24,6 +24,9 @@ namespace Assets.Scripts.Audio
 
 		private void Update()
 		{
+			if (!World.WorldActive)
+				return;
+
 			Vector2? newPosition2d = CameraManager.Get2dPosition();
 
 			if (_playersPosition != newPosition2d)
