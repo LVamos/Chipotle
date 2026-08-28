@@ -17,8 +17,7 @@ namespace Assets.Scripts.Spatial
 		{
 			List<Vector2> placements = new();
 
-			HashSet<Vector2> points = areaToAvoid.GetPoints(ValidplacementsResolution);
-			foreach (Vector2 point in points)
+			foreach (Vector2 point in areaToAvoid.GetPoints(ValidplacementsResolution))
 			{
 				CollisionParams parameters = new(
 					ignoredElements,

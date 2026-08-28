@@ -140,8 +140,7 @@ namespace Game.Terrain
 
 		private void DrawTerrain(Rectangle area, TerrainType terrain, bool permeable = true)
 		{
-			HashSet<Vector2> points = area.GetPoints(TileSize);
-			foreach (Vector2 point in points)
+			foreach (Vector2 point in area.GetPoints(TileSize))
 				PutTile(point, new(terrain, permeable, null));
 		}
 

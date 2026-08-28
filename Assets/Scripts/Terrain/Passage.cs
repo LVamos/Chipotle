@@ -53,12 +53,9 @@ namespace Game.Terrain
 
 		public HashSet<Vector2> GetPointsOfZone(Zone zone)
 		{
-			HashSet<Vector2> points = _area.Value.GetPoints(.1f, false);
-
-			HashSet<Vector2> pointsOfZone = points
+			return _area.Value.GetPoints(.1f, false)
 				.Where(p => zone.Area.Value.Contains(p))
 				.ToHashSet();
-			return pointsOfZone;
 		}
 
 		/// <summary>

@@ -87,10 +87,7 @@ namespace Game.Terrain
 		}
 
 		public bool IsWalkable(Rectangle area)
-		{
-			HashSet<Vector2> points = area.GetPoints(TileMap.TileSize);
-			return points.All(IsWalkable);
-		}
+			=> area.GetPoints(TileMap.TileSize).All(IsWalkable);
 
 		public bool IsWalkable(Vector2 point)
 			=> !_nonwalkables.Contains(point);
@@ -104,10 +101,8 @@ namespace Game.Terrain
 
 			float tileSize = TileMap.TileSize;
 
-			HashSet<Vector2> points = item.Area.Value.GetPoints(tileSize);
-
 			// I "snap" each point to the nearest half and put it in the list of non-passable points
-			foreach (Vector2 point in points)
+			foreach (Vector2 point in item.Area.Value.GetPoints(tileSize))
 				_nonwalkables.Add(TileMap.SnapToGrid(point));
 		}
 
