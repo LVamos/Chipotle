@@ -1,9 +1,7 @@
-﻿using Game.Entities.Characters;
+using Game.Entities.Characters;
 using Game.Terrain;
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using UnityEngine;
 
@@ -13,89 +11,135 @@ namespace Game.PathFinding
 	/// Implementation of A* algorithm with PriorityQueue + Dictionary for open set,
 	/// plus a bounding box to limit the search area.
 	/// </summary>
-	[Serializable]
+	/// <remarks>
+	/// <see cref="FindPath"/> is a pure function of its <see cref="PathfindingParams"/> argument - no
+	/// static mutable state, and no reads of <c>World</c>/<c>Zone</c>/<c>Character</c> - so it's safe to
+	/// call from a background thread (e.g. via <c>Task.Run</c>). All the live-world reading happens up
+	/// front, synchronously, on the calling (main) thread, in <see cref="BuildSnapshot"/>.
+	/// </remarks>
 	public static class PathFinder
 	{
 		private const float _distanceToleration = .5f;
 		private const float _boundingBoxMargin = 5;
 
-		static BoundingBox _box;
-
-		private static List<Rectangle> _zones;
-
-		private static HashSet<Vector2> _nonpassables;
-
-		private static Dictionary<Zone, HashSet<Vector2>> _characterPoints = new();
-
-		private static PriorityQueue<PathFindingNode, float> _openQueue = new(); // For the cheapest node (Price)
-
-		private static Dictionary<Vector2, PathFindingNode> _open = new(); // Dictionary to a quick finding, if the node is already there
-
-		private static HashSet<Vector2> _closed = new(); // set of closed nodes
+		// Left, Up, Right, Down - same 4 directions as DirectionExtension.BasicDirections, but expressed
+		// as plain math instead of going through TileMap.GetNeighbours4 (which reads World.Map and
+		// therefore isn't safe to call once a search is running on a background thread).
+		private static readonly Vector2[] _cardinalOffsets = { new(-1, 0), new(0, 1), new(1, 0), new(0, -1) };
 
 		/// <summary>
-		/// Najde cestu.
+		/// Builds a thread-safe snapshot of the world data needed to find a path between
+		/// <paramref name="start"/> and <paramref name="goal"/>.
+		/// </summary>
+		/// <remarks>
+		/// Must be called on the main thread - reads <c>World</c>, <c>Zone</c> and
+		/// <paramref name="ignoredCharacter"/> live. Once this returns, the resulting
+		/// <see cref="PathfindingSnapshot"/> is safe to hand to a background thread: nothing in it is
+		/// shared with anything the main thread can still mutate.
+		/// </remarks>
+		/// <param name="ignoredCharacter">
+		/// The character the path is being found for. Only its current footprint size/position is read
+		/// here, on the main thread; the reference itself is never touched again after this call, so the
+		/// search doesn't care if this character keeps moving on the main thread while it runs.
+		/// </param>
+		public static PathfindingSnapshot BuildSnapshot(Vector2 start, Vector2 goal, Character ignoredCharacter, float margin = _boundingBoxMargin)
+		{
+			BoundingBox box = BoundingBox.Create(start, goal, margin);
+			Rectangle boxRect = box.ToRectangle();
+
+			// Positions currently occupied by some other character's footprint - checked once here,
+			// instead of on every node visited during the search (which is what made this expensive
+			// before it was snapshotted).
+			HashSet<Vector2> blockedByCharacters = new();
+			foreach (Zone zone in World.GetZones(boxRect))
+			{
+				foreach (Character character in zone.Characters)
+				{
+					if (character == ignoredCharacter || character.Area == null)
+						continue;
+
+					// Don't let a character block the very point we're trying to reach - if the goal
+					// lies inside their own footprint (e.g. the goal IS that character's position,
+					// as with GoToPlayer), that's who we're trying to get to, not an obstacle.
+					if (character.Area.Value.Contains(goal))
+						continue;
+
+					blockedByCharacters.UnionWith(character.Area.Value.GetPoints());
+				}
+			}
+
+			// Single-tile walkability: terrain passable, not covered by a static obstacle
+			// (Zone.IsWalkable / Zone._nonwalkables), and not occupied by another character.
+			HashSet<Vector2> walkable = new();
+			foreach (Vector2 point in boxRect.GetPoints(TileMap.TileSize))
+			{
+				Tile tile = World.Map[point];
+				if (tile is not { Walkable: true })
+					continue;
+
+				if (tile.Zone != null && !tile.Zone.IsWalkable(point))
+					continue;
+
+				if (blockedByCharacters.Contains(point))
+					continue;
+
+				walkable.Add(point);
+			}
+
+			return new PathfindingSnapshot(box, walkable);
+		}
+
+		/// <summary>
+		/// Najde cestu. Pure function of <paramref name="parameters"/> - safe to call from any thread.
 		/// </summary>
 		public static Queue<Vector2> FindPath(PathfindingParams parameters)
 		{
-			// validate the sameZone parameter.
-			Zone startZone = World.GetZone(parameters.Start);
-			Zone targetZone = World.GetZone(parameters.Goal);
-			if (parameters.SameZone && startZone != targetZone)
-				return null;
-
-			// Calculate bounding box to prevent the algorithm from searching the whole map.
-			_box = BoundingBox.Create(parameters.Start, parameters.Goal, _boundingBoxMargin);
+			BoundingBox box = parameters.Snapshot.Box;
 
 			PathFindingNode startNode = new(parameters.Start, cost: 0, parent: null);
 			startNode.GetDistance(parameters.Goal);
 
-			CountCharacterPoints(parameters.IgnoredCharacter);
-
-			_openQueue = new();
-			_open.Clear();
-			_closed.Clear();
+			PriorityQueue<PathFindingNode, float> openQueue = new(); // For the cheapest node (Price)
+			Dictionary<Vector2, PathFindingNode> open = new(); // Dictionary to a quick finding, if the node is already there
+			HashSet<Vector2> closed = new(); // set of closed nodes
 
 			// I put the start
-			_openQueue.Enqueue(startNode, startNode.Price);
-			_open[parameters.Start] = startNode;
+			openQueue.Enqueue(startNode, startNode.Price);
+			open[parameters.Start] = startNode;
 
-			while (_openQueue.Count > 0)
+			while (openQueue.Count > 0)
 			{
-				PathFindingNode current = _openQueue.Dequeue();
-				if (_closed.Contains(current.Coords))
+				PathFindingNode current = openQueue.Dequeue();
+				if (closed.Contains(current.Coords))
 					continue;
 
-				_open.Remove(current.Coords);
+				open.Remove(current.Coords);
 
 				// If Current is close to the target, I am returning the path
 				if (Vector2.Distance(current.Coords, parameters.Goal) <= _distanceToleration)
 					return GetPath(current, parameters.ThroughStart, parameters.ThroughGoal);
 
-				_closed.Add(current.Coords);
+				closed.Add(current.Coords);
 
-				IEnumerable<PathFindingNode> neighbours = GetNeighbours(current, parameters.Start, parameters.Goal, parameters.SameZone, parameters.ThroughStart, parameters.ThroughGoal);
-				foreach (PathFindingNode neighbour in neighbours)
+				foreach (PathFindingNode neighbour in GetNeighbours(current, box))
 				{
 					// Is not walkable or is already closed => skip
-					if (_closed.Contains(neighbour.Coords)
-						|| !IsWalkable(neighbour, parameters)
-						)
+					if (closed.Contains(neighbour.Coords) || !IsWalkable(neighbour, parameters))
 					{
-						_closed.Add(neighbour.Coords);
+						closed.Add(neighbour.Coords);
 						continue;
 					}
 
 					// I'll try if it's a new node or there is already there
 					float newCost = current.Cost + 1;
-					if (!_open.TryGetValue(neighbour.Coords, out PathFindingNode existing))
+					if (!open.TryGetValue(neighbour.Coords, out PathFindingNode existing))
 					{
 						neighbour.Cost = newCost;
 						neighbour.Parent = current;
 						neighbour.GetDistance(parameters.Goal);
 
-						_openQueue.Enqueue(neighbour, neighbour.Price);
-						_open[neighbour.Coords] = neighbour;
+						openQueue.Enqueue(neighbour, neighbour.Price);
+						open[neighbour.Coords] = neighbour;
 					}
 					else
 					{
@@ -107,7 +151,7 @@ namespace Game.PathFinding
 							existing.GetDistance(parameters.Goal);
 
 							// re -put in PQ to update the priority
-							_openQueue.Enqueue(existing, existing.Price);
+							openQueue.Enqueue(existing, existing.Price);
 						}
 					}
 				}
@@ -116,42 +160,22 @@ namespace Game.PathFinding
 			return null;
 		}
 
-		private static void CountCharacterPoints(Character ignoredCharacter)
-		{
-			_characterPoints.Clear();
-			HashSet<Vector2> characterPoints = new();
-
-			foreach (Zone zone in World.GetZones(_box.ToRectangle()))
-			{
-				characterPoints.Clear();
-
-				foreach (Character character in zone.Characters.Where(c => c != ignoredCharacter))
-					characterPoints.UnionWith(character.Area.Value.GetPoints());
-				_characterPoints[zone] = characterPoints;
-			}
-		}
-
 		/// <summary>
 		/// Metoda, která vytváří sousedy (4-směrné)
 		/// </summary>
-		private static IEnumerable<PathFindingNode> GetNeighbours(
-			PathFindingNode parent,
-			Vector2 start,
-			Vector2 goal,
-			bool sameZone,
-			bool throughStart,
-			bool throughGoal
-		)
+		private static IEnumerable<PathFindingNode> GetNeighbours(PathFindingNode parent, BoundingBox box)
 		{
-			foreach (Models.TileInfo tileInfo in World.Map.GetNeighbours4(parent.Coords))
+			foreach (Vector2 offset in _cardinalOffsets)
 			{
-				Vector2 position = tileInfo.Position;
-				if (position.x < _box.Min.x || position.x > _box.Max.x
-					|| position.y < _box.Min.y || position.x > _box.Max.y)
+				Vector2 position = new(
+					(parent.Coords.x + offset.x * TileMap.TileSize).Round(),
+					(parent.Coords.y + offset.y * TileMap.TileSize).Round());
+
+				if (position.x < box.Min.x || position.x > box.Max.x
+					|| position.y < box.Min.y || position.y > box.Max.y)
 					continue;
 
-				PathFindingNode n = new(position, cost: 0, parent: null);
-				yield return n;
+				yield return new(position, cost: 0, parent: null);
 			}
 		}
 
@@ -160,29 +184,13 @@ namespace Game.PathFinding
 		/// </summary>
 		private static bool IsWalkable(PathFindingNode node, PathfindingParams parameters)
 		{
-			Rectangle area = Rectangle.FromCenter(
-				node.Coords,
-				parameters.IgnoredCharacter.Area.Value.Height,
-				parameters.IgnoredCharacter.Area.Value.Width);
-			Zone zone = World.Map[area.Center].Zone;
-
-			bool walkableTerrain = true;
+			Rectangle area = Rectangle.FromCenter(node.Coords, parameters.CharacterHeight, parameters.CharacterWidth);
 
 			foreach (Vector2 point in area.GetPoints(TileMap.TileSize))
 			{
-				Tile? tile = World.Map[point];
-
-				if (tile is not { Walkable: true })
-				{
-					walkableTerrain = false;
-					break;
-				}
+				if (!parameters.Snapshot.WalkablePositions.Contains(point))
+					return false;
 			}
-
-			bool noCharacters = !(_characterPoints.ContainsKey(zone) && _characterPoints[zone].Contains(node.Coords));
-
-			if (!walkableTerrain || !noCharacters)
-				return false;
 
 			// If the node lays on start or goal, exclude it if not allowed.
 			if ((!parameters.ThroughStart && node.Coords == parameters.Start) ||

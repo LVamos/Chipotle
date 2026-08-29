@@ -1,10 +1,13 @@
-﻿using Game.Entities.Characters;
-
 using UnityEngine;
 
 /// <summary>
 /// Parameters used for pathfinding requests.
 /// </summary>
+/// <remarks>
+/// Deliberately holds only plain data and the pre-built <see cref="Game.PathFinding.PathfindingSnapshot"/> -
+/// no live reference to a <c>Character</c>, <c>Zone</c> or <c>World</c> - so that
+/// <see cref="Game.PathFinding.PathFinder.FindPath"/> can safely run on a background thread.
+/// </remarks>
 public class PathfindingParams
 {
 	/// <summary>
@@ -33,9 +36,19 @@ public class PathfindingParams
 	public bool ThroughGoal { get; set; }
 
 	/// <summary>
-	/// Character reference used in pathfinding.
+	/// Height of the searching character's footprint (captured once, up front - not a live reference).
 	/// </summary>
-	public Character IgnoredCharacter { get; set; }
+	public float CharacterHeight { get; set; }
+
+	/// <summary>
+	/// Width of the searching character's footprint (captured once, up front - not a live reference).
+	/// </summary>
+	public float CharacterWidth { get; set; }
+
+	/// <summary>
+	/// Pre-built, thread-safe snapshot of the world data the search needs.
+	/// </summary>
+	public Game.PathFinding.PathfindingSnapshot Snapshot { get; set; }
 
 	public PathfindingParams(
 		Vector2 start,
@@ -43,7 +56,9 @@ public class PathfindingParams
 		bool sameZone,
 		bool throughStart,
 		bool throughGoal,
-		Character ignoredCharacter
+		float characterHeight,
+		float characterWidth,
+		Game.PathFinding.PathfindingSnapshot snapshot
 		)
 	{
 		Start = start;
@@ -51,6 +66,8 @@ public class PathfindingParams
 		SameZone = sameZone;
 		ThroughStart = throughStart;
 		ThroughGoal = throughGoal;
-		IgnoredCharacter = ignoredCharacter;
+		CharacterHeight = characterHeight;
+		CharacterWidth = characterWidth;
+		Snapshot = snapshot;
 	}
 }
