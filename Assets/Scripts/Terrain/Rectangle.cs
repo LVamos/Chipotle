@@ -937,17 +937,14 @@ namespace Game.Terrain
 		/// Enumerates all tiles intersecting with the plane.
 		/// </summary>
 		/// <returns>all tiles intersecting with the plane</returns>
-		public List<TileInfo> GetTiles(float resolution = .1f)
+		public IEnumerable<TileInfo> GetTiles(float resolution = .1f)
 		{
-			List<TileInfo> tiles = new();
 			foreach (Vector2 point in GetPoints(resolution))
 			{
 				Tile tile = World.Map[point];
 				if (tile != null)
-					tiles.Add(new(point, tile));
+					yield return new(point, tile);
 			}
-
-			return tiles;
 		}
 
 		/// <summary>

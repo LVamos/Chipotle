@@ -188,9 +188,7 @@ namespace Game.Terrain
 		/// </summary>
 		protected void Appear()
 		{
-			List<TileInfo> tiles = Area.Value.GetTiles();
-
-			foreach (TileInfo info in tiles)
+			foreach (TileInfo info in Area.Value.GetTiles())
 			{
 				Zone zone = World.GetZone(info.Position);
 				if (zone != null)

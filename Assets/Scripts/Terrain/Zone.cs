@@ -463,7 +463,7 @@ namespace Game.Terrain
 			Rectangle area = Rectangle.FromCenter(character.Center, radius, radius);
 			HashSet<TileInfo> tiles = area.GetTiles()
 				.Where(t => !character.Area.Value.Contains(t.Position)
-				&& t.Tile.Terrain is TerrainType.Bush or TerrainType.Wall)
+					&& t.Tile.Terrain is TerrainType.Bush or TerrainType.Wall)
 				.ToHashSet();
 
 			return new(objects, tiles);

@@ -191,11 +191,9 @@ namespace Game.Terrain
 
 		private static List<TileInfo> CheckTerrain(CollisionParams parameters)
 		{
-			List<TileInfo> allTiles = parameters.Area.GetTiles(TileMap.TileSize);
-			List<TileInfo> inaccessibleTiles = allTiles
+			return parameters.Area.GetTiles(TileMap.TileSize)
 				.Where(t => !t.Tile.Walkable)
-				.Distinct().ToList();
-			return inaccessibleTiles;
+				.ToList();
 		}
 
 		private void CheckElements(

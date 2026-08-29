@@ -190,7 +190,8 @@ namespace Game
 		/// Enumerates all zones.
 		/// </summary>
 		/// <returns>Enumeration of all zones</returns>
-		public static IEnumerable<Zone> GetZones() => _zones.Values.AsEnumerable();
+		public static IEnumerable<Zone> GetZones()
+			=> _zones.Values.AsEnumerable();
 
 		/// <summary>
 		/// Enumerates all zones intersecting with the speciifed area.
@@ -198,12 +199,8 @@ namespace Game
 		/// <param name="area">The area the zones should intersect with</param>
 		/// <returns>enumeration of zones</returns>
 		public static IEnumerable<Zone> GetZones(Rectangle area)
-		{
-			IEnumerable<Zone> zones = _zones.Values
-				.Where(l => l.Area.Value.Intersects(area))
-				.Distinct();
-			return zones;
-		}
+			=> _zones.Values
+			.Where(l => l.Area.Value.Intersects(area));
 
 		/// <summary>
 		/// Interval between game loop ticks
