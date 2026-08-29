@@ -205,18 +205,31 @@ namespace Game.Terrain
 		{
 			bool IsIgnored(MapElement e) => parameters.Ignored?.Contains(e) ?? false;
 
-			HashSet<MapElement> newObstacles = elements
-				.Where(e => e.Area != null && !IsIgnored(e))
-				.Where(e => e.Area.Value.IntersectsStrict(parameters.Area)
-						 || e.Area.Value.Contains(parameters.Area)
-						 || parameters.Area.Contains(e.Area.Value))
-				.Where(e => !ignoreSmall || e.Area.Value.Size > _subtleObjectSizeThreshold)
-				.Where(e => !ignoreItems || (e is Item i && i.Type == "zeď"))
-				.ToHashSet();
+			HashSet<MapElement> newObstacles = new();
+
+			foreach (MapElement element in elements)
+			{
+				if (element.Area == null || IsIgnored(element))
+					continue;
+
+				Rectangle area = element.Area.Value;
+
+				if (!area.IntersectsStrict(parameters.Area)
+					&& !area.Contains(parameters.Area)
+					&& !parameters.Area.Contains(area))
+					continue;
+
+				if (ignoreSmall && area.Size <= _subtleObjectSizeThreshold)
+					continue;
+
+				if (ignoreItems && (element is not Item item || item.Type != "zeď"))
+					continue;
+
+				newObstacles.Add(element);
+			}
 
 			if (newObstacles.Count > 0)
 				obstacles.UnionWith(newObstacles);
 		}
-
 	}
 }
