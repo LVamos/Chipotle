@@ -58,7 +58,6 @@ namespace Game.Audio
 				case GameStatechanged m:
 					OnGameStatechanged(m); break;
 				case ChipotlesCarMoved m: OnChipotlesCarMoved(m); break;
-				case Reloaded: OnGameReloaded(); break;
 				case CharacterCameToZone m: OnCharacterCameToZone(m); break;
 				default: base.HandleMessage(message); break;
 			}
@@ -184,8 +183,6 @@ namespace Game.Audio
 			}
 			_ambientSource = null;
 		}
-
-		private void OnGameReloaded() => UpdateAmbient();
 
 		private void OnChipotlesCarMoved(ChipotlesCarMoved _)
 		{
