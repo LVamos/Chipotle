@@ -500,9 +500,7 @@ namespace Game.UI
 		/// Quits the game.
 		/// </summary>
 		private void QuitGame()
-		{
-			World.QuitGame();
-		}
+			=> World.QuitGame();
 
 		private void QuitGameMenu()
 		{

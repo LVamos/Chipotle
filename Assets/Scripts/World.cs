@@ -855,6 +855,7 @@ namespace Game
 		/// </summary>
 		public static void QuitGame()
 		{
+			World.WorldActive = false;
 			GameManager.PauseGame();
 			Cutscene.Init();
 			Action onDone = () => WindowHandler.MainMenu();
