@@ -33,9 +33,9 @@ namespace Game.Audio
 		{
 			return obstacle switch
 			{
-				ObstacleType.Wall => OverWallLowpass,
-				ObstacleType.ClosedDoor => OverClosedDoorLowpass,
-				ObstacleType.ItemOrCharacter => OverObjectLowpass,
+				ObstacleType.Wall => Settings.OverWallLowPass,
+				ObstacleType.ClosedDoor => Settings.OverClosedDoorLowPass,
+				ObstacleType.ItemOrCharacter => Settings.OverObjectLowPass,
 				_ => 22000
 			};
 		}
@@ -106,16 +106,6 @@ namespace Game.Audio
 		/// Volume used with sound attenuation.
 		/// </summary>
 		public static float GetOverWallVolume(float defaultVolume) => defaultVolume * .4f;
-
-		public const float DefaultMasterVolume = 1;
-
-		/// <summary>
-		/// Lowpass setting for simulation of sounds obstructed by an object.
-		/// </summary>
-		public const int OverWallLowpass = 500;
-		public const int OverClosedDoorLowpass = 800;
-		public const int OverOpenDoorLowpass = 2000;
-		public const int OverObjectLowpass = 2000;
 
 		public static AudioClip GetClip(string name, int? variant = null)
 		{

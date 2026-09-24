@@ -161,8 +161,8 @@ namespace Game.Entities.Items
 		protected float GetPortalOcclusionLowPass(Passage exit, bool farFromPlayer = false)
 		{
 			if (exit.State is PassageState.Closed or PassageState.Locked)
-				return farFromPlayer ? Sounds.OverWallLowpass : Sounds.OverClosedDoorLowpass;
-			return farFromPlayer ? Sounds.OverClosedDoorLowpass : Sounds.OverOpenDoorLowpass;
+				return farFromPlayer ? Settings.OverWallLowPass : Settings.OverClosedDoorLowPass;
+			return farFromPlayer ? Settings.OverClosedDoorLowPass : Settings.OverOpenDoorLowPass;
 		}
 
 		protected float GetPortalOcclusionDuration(Passage exit)
@@ -886,11 +886,11 @@ save.UsableWith
 			return obstacle switch
 			{
 				ObstacleType.Wall => new(
-					Sounds.OverWallLowpass,
+					Settings.OverWallLowPass,
 					Sounds.GetOverWallVolume(_defaultVolume)
 				),
 				ObstacleType.ClosedDoor => new(
-					Sounds.OverClosedDoorLowpass,
+					Settings.OverClosedDoorLowPass,
 					Sounds.GetOverClosedDoorVolume(_defaultVolume)
 				),
 				ObstacleType.OpenDoor => new(
@@ -898,7 +898,7 @@ save.UsableWith
 					Sounds.GetOverOpenDoorVolume(_defaultVolume)
 				),
 				ObstacleType.ItemOrCharacter => new(
-					Sounds.OverObjectLowpass,
+					Settings.OverObjectLowPass,
 					Sounds.GetOverObjectVolume(_defaultVolume)
 				),
 				_ => new(

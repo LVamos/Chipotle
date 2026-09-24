@@ -216,7 +216,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private void OnLeftBycar(LeftBycar m)
 		{
 			AudioListener.volume = 0;
-			Sounds.SlideMasterVolume(1, Sounds.DefaultMasterVolume);
+			Sounds.SlideMasterVolume(1, Settings.DefaultMasterVolume);
 		}
 
 		/// <summary>

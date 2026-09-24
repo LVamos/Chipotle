@@ -337,7 +337,7 @@ namespace Assets.Scripts.Audio
 
 			void Closed(bool doubleAttenuation)
 			{
-				float frequency = doubleAttenuation ? Sounds.OverWallLowpass : Sounds.OverClosedDoorLowpass;
+				float frequency = doubleAttenuation ? Settings.OverWallLowPass : Settings.OverClosedDoorLowPass;
 				Sounds.SlideLowPass(portal, Settings.DoorClosingOcclusionDuration, frequency);
 				portal.outputAudioMixerGroup = Sounds.ResonanceGroup;
 				portal.spatialize = true;
@@ -348,7 +348,7 @@ namespace Assets.Scripts.Audio
 				if (attenuate)
 				{
 					float duration = fadingTo3d ? Settings.Portal2dFadingDuration : Settings.DoorOpeningOcclusionDuration;
-					Sounds.SlideLowPass(portal, duration, Sounds.OverOpenDoorLowpass);
+					Sounds.SlideLowPass(portal, duration, Settings.OverOpenDoorLowPass);
 				}
 				else Sounds.SlideLowPass(portal, Settings.DoorOpeningOcclusionDuration, 22000, true);
 			}

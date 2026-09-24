@@ -15,6 +15,11 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float DefaultMasterVolume = 1;
+		public static int OverOpenDoorLowPass = 2000;
+		public static int OverClosedDoorLowPass = 800;
+		public static int OverWallLowPass = 500;
+		public static int OverObjectLowPass = 2500;
 		public static float CameraRotationDuration = .5f;
 		public static float ItemOcclusionDisablingDuration = .5f;
 		public static float SonarRadius = 1;

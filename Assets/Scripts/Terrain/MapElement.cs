@@ -390,12 +390,12 @@ namespace Game.Terrain
 
 			if (obstacle == ObstacleType.Wall)
 			{
-				Sounds.SetLowPass(_navigationAudio, Sounds.OverWallLowpass);
+				Sounds.SetLowPass(_navigationAudio, Settings.OverWallLowPass);
 				Sounds.SlideVolume(_navigationAudio, .5f, Sounds.GetOverWallVolume(_navigationAudio.volume));
 			}
 			else if (obstacle == ObstacleType.ItemOrCharacter)
 			{
-				Sounds.SetLowPass(_navigationAudio, Sounds.OverObjectLowpass);
+				Sounds.SetLowPass(_navigationAudio, Settings.OverObjectLowPass);
 				Sounds.SlideVolume(_navigationAudio, .5f, Sounds.GetOverObjectVolume(_navigationAudio.volume));
 			}
 			else if (_muffled)
