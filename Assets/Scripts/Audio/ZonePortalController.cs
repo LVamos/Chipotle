@@ -221,18 +221,28 @@ namespace Assets.Scripts.Audio
 
 		private IEnumerator FadeAmbientTo3dDelayed(PortalAnchor anchor)
 		{
-			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Inner);
-			if (portal != null)
+			try
+			{
+				AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Inner);
+				if (portal == null)
+					yield break;
+
 				MutePortal(portal);
-			yield return new WaitForSeconds(Settings.Ambient3dFadeDuration);
-			if (portal != null)
+				yield return new WaitForSeconds(Settings.Ambient3dFadeDuration);
+
 				FadeAmbientTo3d(anchor);
+			}
+			finally
+			{
+				_fadeToPortal = null;
+			}
 		}
 
 		private void PlayPortals(Zone previousZone = null)
 		{
-			// Portals already playing
-			if (previousZone != null && PortalsPlaying())
+			// Portals already playing or fading in progress
+			if ((previousZone != null && PortalsPlaying())
+				|| _fadeToPortal != null)
 				return;
 
 			List<PortalAnchor> anchors = ZonePortalHelper.GetAnchors(_owner, _loop);
@@ -246,7 +256,7 @@ namespace Assets.Scripts.Audio
 				if (!PlayersZone.SameAmbients(_loop.Sound))
 				{
 					if (!PlayersZone.IsAccessible(_owner))
-						StartCoroutine(FadeAmbientTo3dDelayed(closestPortal));
+						_fadeToPortal = StartCoroutine(FadeAmbientTo3dDelayed(closestPortal));
 					else FadeAmbientTo3d(closestPortal);
 				}
 			}
@@ -255,6 +265,8 @@ namespace Assets.Scripts.Audio
 			foreach (PortalAnchor anchor in anchors)
 				PlayPortal(anchor);
 		}
+
+		private Coroutine _fadeToPortal;
 
 		private bool PortalsPlaying()
 		{
@@ -414,7 +426,7 @@ PlayersZone.SameAmbients(_loop.Sound)
 		{
 			PlayPortalsIfNeeded(previousZone);
 
-			List<PortalAnchor> anchors = ZonePortalHelper.GetAnchors(_owner, _loop)
+			var anchors = ZonePortalHelper.GetAnchors(_owner, _loop)
 				.Where(p => _portals.ContainsKey(p.Passage))
 				.ToList();
 			foreach (PortalAnchor anchor in anchors)
