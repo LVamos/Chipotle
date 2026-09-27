@@ -37,6 +37,15 @@ namespace Game
 	/// </summary>
 	public static class World
 	{
+		public static IEnumerable<Item> GetItems()
+			=> _items.Values.AsEnumerable();
+
+		public static IEnumerable<Character> GetCharacters()
+			=> _characters.Values.AsEnumerable();
+
+		public static IEnumerable<Passage> GetPassages()
+			=> _passages.Values.AsEnumerable();
+
 		public static GameSave CreateSave()
 		{
 			return new(
