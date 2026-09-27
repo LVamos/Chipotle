@@ -30,10 +30,7 @@ namespace Assets.Scripts.Audio
 			Vector2? newPosition2d = CameraManager.Get2dPosition();
 
 			if (_playersPosition != newPosition2d)
-			{
-				Zone previousZone = _playersPosition != null ? World.GetZone(_playersPosition.Value) : null;
-				UpdatePortals(previousZone);
-			}
+				RepositionPlayingPortals();
 
 			_playersPosition = newPosition2d;
 		}
@@ -151,6 +148,9 @@ namespace Assets.Scripts.Audio
 		private void FadeAmbientTo3d(PortalAnchor anchor)
 		{
 			AudioSource portal = AmbientRegistry.TryGet2D(_owner.Name.Inner);
+			if (portal == null)
+				return;
+
 			AmbientRegistry.Unregister2D(_owner.Name.Inner);
 			AmbientRegistry.RegisterPortal(_owner.Name.Inner, portal);
 			portal.transform.position = anchor.Position;
@@ -425,7 +425,11 @@ PlayersZone.SameAmbients(_loop.Sound)
 		private void UpdatePortals(Zone previousZone = null)
 		{
 			PlayPortalsIfNeeded(previousZone);
+			RepositionPlayingPortals();
+		}
 
+		private void RepositionPlayingPortals()
+		{
 			var anchors = ZonePortalHelper.GetAnchors(_owner, _loop)
 				.Where(p => _portals.ContainsKey(p.Passage))
 				.ToList();
