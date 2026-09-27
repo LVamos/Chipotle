@@ -1050,9 +1050,9 @@ namespace Game
 
 		public static void MessageCharacters(Message message)
 		{
-			IEnumerable<object> characters = _characters.Values.Except(new[] { message.Sender });
-			foreach (Character character in characters)
-				character.TakeMessage(message);
+			foreach (Character character in _characters.Values)
+				if (character != message.Sender)
+					character.TakeMessage(message);
 		}
 
 		public static void MessageZones(Message message)

@@ -66,7 +66,7 @@ namespace Game.Terrain
 		public override void TakeMessage(Message message)
 		{
 			base.TakeMessage(message);
-			if (_messagingEnabled && _components != null && _components.Any())
+			if (_messagingEnabled && _components != null)
 				Broadcast(message);
 		}
 

@@ -1,8 +1,4 @@
-﻿using Game.Entities.Characters.Chipotle;
-using Game.Entities.Characters.Components;
-using Game.Messaging.Events.Input;
-using Game.Messaging.Events.Sound;
-using Game.Terrain;
+﻿using Game.Messaging.Events.Sound;
 
 
 
@@ -10,7 +6,6 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 namespace Game.Messaging
 {
@@ -24,7 +19,7 @@ namespace Game.Messaging
 		/// <summary>
 		/// Stores the messages before they are processed.
 		/// </summary>
-		
+
 		protected Queue<Message> _messages = new();
 
 		/// <summary>
@@ -85,7 +80,7 @@ namespace Game.Messaging
 		/// </summary>
 		public virtual void GameUpdate()
 		{
-			if (_messagingEnabled && !_messages.IsNullOrEmpty())
+			if (_messagingEnabled && _messages.Count > 0)
 				HandleMessage(DequeueMessage());
 		}
 
