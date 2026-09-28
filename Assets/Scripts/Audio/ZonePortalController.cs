@@ -101,17 +101,16 @@ namespace Assets.Scripts.Audio
 		{
 			List<PortalAnchor> anchors = ZonePortalHelper.GetAnchors(_owner, _loop);
 
-			if (_portals.ContainsKey(message.Sender))
+			if (TryGetPortal(message.Sender, out AudioSource portal))
 			{
 				PortalAnchor anchor = anchors.First(l => l.Passage == message.Sender);
-				AudioSource portal = _portals[message.Sender];
 				SetPortalParameters(anchor, portal, false, true, true, false);
 			}
 
 			foreach (PortalAnchor anchor in anchors.Where(p => p.Passage is not Door))
 			{
-				if (_portals.ContainsKey(anchor.Passage))
-					SetPortalParameters(anchor, _portals[anchor.Passage], false, false, true, false);
+				if (TryGetPortal(anchor.Passage, out AudioSource p2))
+					SetPortalParameters(anchor, p2, false, false, true, false);
 			}
 		}
 
@@ -134,12 +133,15 @@ namespace Assets.Scripts.Audio
 		private void StopUnusedPortals()
 		{
 			AudioSource ambient2d = AmbientRegistry.TryGet2D(_owner.Name.Inner);
-			foreach (AudioSource portal in _portals.Values)
+			foreach (var entry in _portals.Values)
 			{
-				if (portal != ambient2d)
+				if (Sounds.GetGeneration(entry.Source) != entry.Generation)
+					continue;
+
+				if (entry.Source != ambient2d)
 				{
-					AmbientRegistry.UnregisterPortal(_owner.Name.Inner, portal);
-					Sounds.SlideVolume(portal, Settings.Ambient3dFadeDuration, 0);
+					AmbientRegistry.UnregisterPortal(_owner.Name.Inner, entry.Source);
+					Sounds.SlideVolume(entry.Source, Settings.Ambient3dFadeDuration, 0);
 				}
 			}
 			_portals = new();
@@ -156,7 +158,7 @@ namespace Assets.Scripts.Audio
 			portal.transform.position = anchor.Position;
 			portal.maxDistance = _loop.PortalMaxDistance.Value;
 			portal.name = ZonePortalHelper.GetDescription(anchor.Passage, _owner.Name.Inner);
-			_portals[anchor.Passage] = portal;
+			SetPortal(anchor.Passage, portal);
 			SetPortalParameters(anchor, portal, false, true, true, true);
 			portal.rolloffMode = AudioRolloffMode.Linear;
 		}
@@ -186,7 +188,23 @@ namespace Assets.Scripts.Audio
 		/// Stores the identifiers of location audio loops played in passages.
 		/// </summary>
 
-		private Dictionary<Passage, AudioSource> _portals;
+		private Dictionary<Passage, (AudioSource Source, int Generation)> _portals;
+
+		private void SetPortal(Passage passage, AudioSource source)
+			=> _portals[passage] = (source, Sounds.GetGeneration(source));
+
+		private bool TryGetPortal(Passage passage, out AudioSource source)
+		{
+			if (_portals.TryGetValue(passage, out var entry) && Sounds.GetGeneration(entry.Source) == entry.Generation)
+			{
+				source = entry.Source;
+				return true;
+			}
+
+			_portals.Remove(passage);
+			source = null;
+			return false;
+		}
 
 		private float GetVolume(Passage passage, AudioSource portal)
 		{
@@ -216,7 +234,7 @@ namespace Assets.Scripts.Audio
 			AudioSource portal = Sounds.Play(_loop.Sound, anchor.Position, 0, true, description: description);
 			AmbientRegistry.RegisterPortal(_owner.Name.Inner, portal);
 			SetPortalParameters(anchor, portal);
-			_portals[anchor.Passage] = portal;
+			SetPortal(anchor.Passage, portal);
 		}
 
 		private IEnumerator FadeAmbientTo3dDelayed(PortalAnchor anchor)
@@ -270,7 +288,8 @@ namespace Assets.Scripts.Audio
 
 		private bool PortalsPlaying()
 		{
-			return _portals != null && _portals.Any(p => p.Value.isPlaying);
+			return _portals != null && _portals.Any(p =>
+				Sounds.GetGeneration(p.Value.Source) == p.Value.Generation && p.Value.Source.isPlaying);
 		}
 
 		protected PortalAnchor RemoveAnchorNearPlayer(List<PortalAnchor> anchors)
@@ -403,8 +422,11 @@ PlayersZone.SameAmbients(_loop.Sound)
 
 		private void StopPortals()
 		{
-			foreach (AudioSource loop in _portals.Values)
-				Sounds.SlideVolume(loop, .5f, 0);
+			foreach (var entry in _portals.Values)
+			{
+				if (Sounds.GetGeneration(entry.Source) == entry.Generation)
+					Sounds.SlideVolume(entry.Source, .5f, 0);
+			}
 
 			_portals = new();
 		}
@@ -430,12 +452,12 @@ PlayersZone.SameAmbients(_loop.Sound)
 
 		private void RepositionPlayingPortals()
 		{
-			var anchors = ZonePortalHelper.GetAnchors(_owner, _loop)
-				.Where(p => _portals.ContainsKey(p.Passage))
-				.ToList();
+			var anchors = ZonePortalHelper.GetAnchors(_owner, _loop);
 			foreach (PortalAnchor anchor in anchors)
 			{
-				AudioSource portal = _portals[(Passage)anchor.Passage];
+				if (!TryGetPortal(anchor.Passage, out AudioSource portal))
+					continue;
+
 				if (PlayerInPassage(anchor.Passage))
 					SnapPortalToPlayer(World.Player.Center, portal);
 				else

@@ -31,7 +31,13 @@ namespace Assets.Scripts.Audio
             return _lowPasses[source];
         }
 
+        public int GetGeneration(AudioSource source)
+        {
+            return _generations.TryGetValue(source, out int generation) ? generation : -1;
+        }
+
         private Dictionary<AudioSource, AudioLowPassFilter> _lowPasses = new();
+        private Dictionary<AudioSource, int> _generations = new();
 
         private void LogPlayingSounds()
         {
@@ -132,11 +138,12 @@ namespace Assets.Scripts.Audio
                 source.Stop();
         }
 
-        private static void Sleep(AudioSource source)
+        private void Sleep(AudioSource source)
         {
             source.name = "inactive sound";
             source.transform.SetParent(null);
             source.gameObject.SetActive(false);
+            _generations[source]++;
         }
 
 
@@ -149,6 +156,7 @@ namespace Assets.Scripts.Audio
             o.SetActive(false);
             _pool.Add(source);
             _lowPasses[source] = lowPass;
+            _generations[source] = 0;
             return source;
         }
     }

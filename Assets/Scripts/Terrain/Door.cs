@@ -105,7 +105,12 @@ namespace Game.Terrain
         /// </summary>
         protected string _lockedSound;
         private AudioSource _openingSource;
+        private int _openingSourceGeneration;
         private AudioSource _closingSource;
+        private int _closingSourceGeneration;
+
+        private static bool IsSourceCurrent(AudioSource source, int generation)
+            => source != null && Sounds.GetGeneration(source) == generation;
 
         /// <summary>
         /// constructor
@@ -192,9 +197,10 @@ namespace Game.Terrain
         {
             State = PassageState.Closed;
 
-            if (_openingSource != null && _openingSource.isPlaying)
+            if (IsSourceCurrent(_openingSource, _openingSourceGeneration) && _openingSource.isPlaying)
                 Sounds.SlideVolume(_openingSource, .5f, 0, true);
             _closingSource = Play(_closingSound, sender as Character, point);
+            _closingSourceGeneration = Sounds.GetGeneration(_closingSource);
             AnnounceManipulation();
             LogClosing();
         }
@@ -410,10 +416,11 @@ namespace Game.Terrain
             OpenedPreviously = true;
             State = PassageState.Open;
 
-            if (_closingSource != null && _closingSource.isPlaying)
+            if (IsSourceCurrent(_closingSource, _closingSourceGeneration) && _closingSource.isPlaying)
                 Sounds.SlideVolume(_closingSource, .5f, 0, true);
 
             _openingSource = Play(_openingSound, sender as Character, point);
+            _openingSourceGeneration = Sounds.GetGeneration(_openingSource);
             AnnounceManipulation();
             LogOpening();
         }

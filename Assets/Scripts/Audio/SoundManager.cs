@@ -230,11 +230,6 @@ namespace Game.Audio
 			finalAction?.Invoke();
 		}
 
-		private void Update()
-		{
-			return;
-		}
-
 		public AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
@@ -267,6 +262,8 @@ namespace Game.Audio
 
 		public void DisableLowPass(AudioSource source) => _soundPool.DisableLowPass(source);
 
+		public int GetGeneration(AudioSource source) => _soundPool.GetGeneration(source);
+
 
 		public void SetLowPass(AudioSource source, float cutOffFrequency)
 		{
@@ -277,6 +274,7 @@ namespace Game.Audio
 		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
+			_soundPool.DisableLowPass(source);
 			source.name = description ?? "sound";
 			source.transform.position = position;
 			source.clip = Sounds.GetClip(soundName);

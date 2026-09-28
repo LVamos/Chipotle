@@ -65,6 +65,8 @@ namespace Game.Audio
 
 		public static void DisableLowpass(AudioSource source) => _soundManager.DisableLowPass(source);
 
+		public static int GetGeneration(AudioSource source) => _soundManager.GetGeneration(source);
+
 		public static void SetLowPass(AudioSource source, float cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
 
 		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
