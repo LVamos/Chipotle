@@ -1614,7 +1614,9 @@ Rectangle.FromCenter(Center, width, height)
 				name += " " + item.Name.Inner;
 			float distance = World.GetDistance(Owner, item);
 			float angle = GetAngle(item.Area.Value);
-			bool intersects = item.Area.Value.Intersects(Owner.Area.Value);
+			bool intersects = item.Area.Value.IntersectsStrict(Owner.Area.Value)
+				|| item.Area.Value.Contains(Owner.Area.Value)
+				|| Owner.Area.Value.Contains(item.Area.Value);
 
 			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner, intersects);
 			return info;
