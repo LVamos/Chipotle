@@ -1715,7 +1715,8 @@ namespace Game.Entities.Characters.Chipotle
 		protected bool SlipThroughDoor(Door door)
 		{
 			Rectangle doorArea = door.Area.Value;
-			Vector2? doorPoint = doorArea.GetAlignedPoint(Center);
+			float clearance = Mathf.Min(_area.Value.Width, _area.Value.Height) / 2f;
+			Vector2? doorPoint = doorArea.GetAlignedPoint(Center, clearance);
 			if (doorPoint == null)
 				return false;
 
@@ -1730,13 +1731,12 @@ namespace Game.Entities.Characters.Chipotle
 				{
 					if (!IsWalkable(newPosition))
 					{
-						newPosition = _area.Value.Move(direction, .1f);
+						newPosition = newPosition.Move(direction, .1f);
 						continue; // The position is blocked, try the next one.
 					}
 
 					// The position is free, move there.
-					_area = _area.Value.WithUpdatedCenter(newPosition.Center);
-					MakeStep();
+					JumpTo(newPosition);
 					return true;
 				} while (doorArea.Intersects(newPosition));
 			}

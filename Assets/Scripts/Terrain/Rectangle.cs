@@ -914,23 +914,9 @@ namespace Game.Terrain
 			if (!alignedVertically && !alignedHorizontally)
 				return null;
 
-			float x = point.x;
-			float y = point.y;
-
-			if (alignedVertically)
-			{
-				if (point.y > MaxY)
-					y = MaxY - distanceFromEdge;
-				else if (point.y < MinY)
-					y = MinY + distanceFromEdge;
-			}
-			else if (alignedHorizontally)
-			{
-				if (point.x < MinX)
-					x = MinX + distanceFromEdge;
-				else if (point.x > MaxX)
-					x = MaxX - distanceFromEdge;
-			}
+			// Keep at least distanceFromEdge clearance from both edges, even on the axis that was already in range.
+			float x = Mathf.Clamp(point.x, MinX + distanceFromEdge, MaxX - distanceFromEdge);
+			float y = Mathf.Clamp(point.y, MinY + distanceFromEdge, MaxY - distanceFromEdge);
 
 			Vector2 result = new(x, y);
 			return clamp ? copy.ClampPoint(result) : result;
