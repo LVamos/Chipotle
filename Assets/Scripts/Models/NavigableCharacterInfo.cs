@@ -13,11 +13,13 @@ namespace Game.Models
 	public class NavigableCharacterInfo:NavigableObjectInfo
 	{
 		public Character Character;
+		public int ClockHour;
 
-		public NavigableCharacterInfo(float distance, Character character, float angle, float observerStepLength,Character observer)
+		public NavigableCharacterInfo(float distance, Character character, float angle, float observerStepLength,Character observer, int clockHour)
 			:base(distance, angle, observerStepLength, observer)
 		{
 			Character = character;
+			ClockHour = clockHour;
 		}
 	}
 }

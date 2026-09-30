@@ -7,12 +7,14 @@ namespace Game.Models
 	{
 		public Passage Exit;
 		public Zone TargetZone;
+		public int ClockHour;
 
-		public NavigableExitInfo(float distance, Passage exit, float angle, float observerStepLength, Zone targetZone, Character observer)
+		public NavigableExitInfo(float distance, Passage exit, float angle, float observerStepLength, Zone targetZone, Character observer, int clockHour)
 			: base(distance, angle, observerStepLength, observer)
 		{
 			Exit = exit;
 			TargetZone = targetZone;
+			ClockHour = clockHour;
 		}
 	}
 }

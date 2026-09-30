@@ -357,10 +357,11 @@ namespace Game.Terrain
 			=> NormalizeDegrees((float)(radians * 180 / PI));
 
 		public static string GetClockDirection(float degrees)
+			=> GetClockDirection((int)Math.Round((degrees % 360) / 30) % 12);
+
+		public static string GetClockDirection(int clockHour)
 		{
-			int clockDirection = (int)Math.Round((degrees % 360) / 30);
-			clockDirection = clockDirection % 12;
-			string description = clockDirection switch
+			string description = clockHour switch
 			{
 				0 => "na dvanácti hodinách",
 				1 => "na jedné hodině",
@@ -374,7 +375,7 @@ namespace Game.Terrain
 				9 => "na devíti hodinách",
 				10 => "na deseti hodinách",
 				11 => "na jedenácti hodinách",
-				_ => throw new ArgumentOutOfRangeException(nameof(degrees), degrees, null)
+				_ => throw new ArgumentOutOfRangeException(nameof(clockHour), clockHour, null)
 			};
 			return description;
 		}

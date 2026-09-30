@@ -26,6 +26,46 @@ namespace Game.Terrain
 					 plane.MinY >= this.MaxY);
 		}
 
+		/// <summary>
+		/// Checks whether a ray starting at the given origin and going in the given direction hits this rectangle.
+		/// </summary>
+		/// <param name="origin">Starting point of the ray</param>
+		/// <param name="direction">Direction of the ray (does not have to be normalized)</param>
+		/// <returns>True if the ray hits the rectangle</returns>
+		public bool IntersectsRay(Vector2 origin, Vector2 direction)
+		{
+			float tMin = float.NegativeInfinity;
+			float tMax = float.PositiveInfinity;
+
+			if (Mathf.Approximately(direction.x, 0))
+			{
+				if (origin.x < MinX || origin.x > MaxX)
+					return false;
+			}
+			else
+			{
+				float t1 = (MinX - origin.x) / direction.x;
+				float t2 = (MaxX - origin.x) / direction.x;
+				tMin = Mathf.Max(tMin, Mathf.Min(t1, t2));
+				tMax = Mathf.Min(tMax, Mathf.Max(t1, t2));
+			}
+
+			if (Mathf.Approximately(direction.y, 0))
+			{
+				if (origin.y < MinY || origin.y > MaxY)
+					return false;
+			}
+			else
+			{
+				float t1 = (MinY - origin.y) / direction.y;
+				float t2 = (MaxY - origin.y) / direction.y;
+				tMin = Mathf.Max(tMin, Mathf.Min(t1, t2));
+				tMax = Mathf.Min(tMax, Mathf.Max(t1, t2));
+			}
+
+			return tMax >= tMin && tMax >= 0;
+		}
+
 
 		/// <summary>
 		/// Returns a new Rectangle with its center partially updated to match the given position.

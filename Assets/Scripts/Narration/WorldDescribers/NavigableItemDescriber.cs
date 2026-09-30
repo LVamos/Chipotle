@@ -43,7 +43,7 @@ List<NavigableItemInfo> info = 				records
 			string angleDescription;
 			if (info.IntersectsWithCharacter)
 				angleDescription = "tady";
-			else angleDescription = Angle.GetClockDirection(info.Angle);
+			else angleDescription = Angle.GetClockDirection(info.ClockHour);
 
 			string name = info.Item.Name.Friendly;
 			if (Settings.SayInnerItemNames)

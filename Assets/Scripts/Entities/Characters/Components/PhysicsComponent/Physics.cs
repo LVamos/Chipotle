@@ -1581,8 +1581,9 @@ Rectangle.FromCenter(Center, width, height)
 		{
 			float distance = World.GetDistance(Owner, exit);
 			float angle = GetAngle(exit.Area.Value);
+			int clockHour = GetClockHour(exit.Area.Value, angle);
 			Zone targetZone = exit.AnotherZone(Zone);
-			NavigableExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner);
+			NavigableExitInfo info = new(distance, exit, angle, _stepLength, targetZone, Owner, clockHour);
 			return info;
 		}
 
@@ -1590,7 +1591,8 @@ Rectangle.FromCenter(Center, width, height)
 		{
 			float distance = World.GetDistance(Owner, character);
 			float angle = GetAngle(character.Area.Value);
-			NavigableCharacterInfo info = new(distance, character, angle, _stepLength, Owner);
+			int clockHour = GetClockHour(character.Area.Value, angle);
+			NavigableCharacterInfo info = new(distance, character, angle, _stepLength, Owner, clockHour);
 			return info;
 		}
 
@@ -1607,6 +1609,30 @@ Rectangle.FromCenter(Center, width, height)
 			return info;
 		}
 
+		/// <summary>
+		/// Rounds the given relative angle to the nearest clock hour. If the nearest hour is one of the four
+		/// cardinal step directions (12, 3, 6, 9) but walking that exact direction from the character's center
+		/// would miss the target, the hour is nudged to its non-cardinal neighbor instead.
+		/// </summary>
+		protected int GetClockHour(Rectangle target, float relativeAngle)
+		{
+			int hour = (int)Math.Round((relativeAngle % 360) / 30) % 12;
+
+			if (hour % 3 != 0)
+				return hour;
+
+			int cardinalDegrees = hour * 30;
+			Orientation2D stepOrientation = _orientation;
+			if (cardinalDegrees != 0)
+				stepOrientation.Rotate(cardinalDegrees);
+
+			if (target.IntersectsRay(Center, stepOrientation.UnitVector))
+				return hour;
+
+			float diff = ((relativeAngle - cardinalDegrees) + 540) % 360 - 180;
+			return diff >= 0 ? (hour + 1) % 12 : (hour + 11) % 12;
+		}
+
 		protected NavigableItemInfo GetNavigableItemInfo(Item item)
 		{
 			string name = item.Name.Friendly;
@@ -1614,11 +1640,12 @@ Rectangle.FromCenter(Center, width, height)
 				name += " " + item.Name.Inner;
 			float distance = World.GetDistance(Owner, item);
 			float angle = GetAngle(item.Area.Value);
+			int clockHour = GetClockHour(item.Area.Value, angle);
 			bool intersects = item.Area.Value.IntersectsStrict(Owner.Area.Value)
 				|| item.Area.Value.Contains(Owner.Area.Value)
 				|| Owner.Area.Value.Contains(item.Area.Value);
 
-			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner, intersects);
+			NavigableItemInfo info = new(distance, item, angle, _stepLength, Owner, intersects, clockHour);
 			return info;
 		}
 

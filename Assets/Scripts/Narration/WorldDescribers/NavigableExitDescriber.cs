@@ -62,7 +62,7 @@ namespace Game.Narration.WorldDescribers
 				to2 = to.Substring(index + 1);
 			}
 
-			string angleDescription = Angle.GetClockDirection(info.Angle);
+			string angleDescription = Angle.GetClockDirection(info.ClockHour);
 
 			// Join it all
 
