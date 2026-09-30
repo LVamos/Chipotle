@@ -69,7 +69,7 @@ namespace DavyKager
 		public static bool HasSpeech() { return Tolk_HasSpeech(); }
 		public static bool HasBraille() { return Tolk_HasBraille(); }
 		public static bool Output(String str, bool interrupt = false) { return Tolk_Output(str, interrupt); }
-		public static bool Speak(String str, bool interrupt = false) { return Tolk_Speak(str, interrupt); }
+		public static bool Speak(String str, bool interrupt = true) { return Tolk_Speak(str, interrupt); }
 		public static bool Braille(String str) { return Tolk_Braille(str); }
 		public static bool IsSpeaking() { return Tolk_IsSpeaking(); }
 		public static bool Silence() { return Tolk_Silence(); }
