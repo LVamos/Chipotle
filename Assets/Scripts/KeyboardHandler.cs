@@ -50,24 +50,20 @@ public class KeyboardHandler : MonoBehaviour
 			if (IsModifier(key))
 				continue;
 
-			// Key down
-			if (keyControl.wasPressedThisFrame)
-			{
-				if (heldKeys.Add(key))
-				{
-					KeyboardInput shortcut = new(ctrl, shift, alt, key);
-					WindowHandler.OnKeyDown(shortcut);
-				}
-			}
+			bool isPressed = keyControl.isPressed;
+			bool wasHeld = heldKeys.Contains(key);
 
-			// Key up
-			if (keyControl.wasReleasedThisFrame)
+			if (isPressed && !wasHeld)
 			{
-				if (heldKeys.Remove(key))
-				{
-					KeyboardInput shortcut = new(shift, alt, ctrl, key);
-					WindowHandler.OnKeyUp(shortcut);
-				}
+				heldKeys.Add(key);
+				KeyboardInput shortcut = new(ctrl, shift, alt, key);
+				WindowHandler.OnKeyDown(shortcut);
+			}
+			else if (!isPressed && wasHeld)
+			{
+				heldKeys.Remove(key);
+				KeyboardInput shortcut = new(ctrl, shift, alt, key);
+				WindowHandler.OnKeyUp(shortcut);
 			}
 		}
 	}
