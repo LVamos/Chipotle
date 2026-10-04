@@ -1,4 +1,6 @@
-﻿namespace Game.Models
+﻿using System.Collections.Generic;
+
+namespace Game.Models
 {
     /// <summary>
     /// Describes parameters for item creation.
@@ -66,6 +68,11 @@
         public string PlacingSound { get; }
 
         /// <summary>
+        /// Names of the objects the item can be applied to.
+        /// </summary>
+        public List<string> UsableWith { get; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="collisionSound">Sound played on collision</param>
@@ -79,6 +86,7 @@
         /// <param name="quickActionsAllowed">Indicates if the action sound can be played repeatedly in a short interval</param>
         /// <param name="pickingSound">Sound played on picking</param>
         /// <param name="placingSound">Sound played on placing</param>
+        /// <param name="usableWith">Names of the objects the item can be applied to</param>
         public ItemCreationParameters(
             string collisionSound = null,
             string actionSound = null,
@@ -90,7 +98,8 @@
             bool stopWhenPlayerMoves = false,
             bool quickActionsAllowed = false,
             string pickingSound = null,
-            string placingSound = null)
+            string placingSound = null,
+            List<string> usableWith = null)
         {
             CollisionSound = collisionSound;
             ActionSound = actionSound;
@@ -103,6 +112,7 @@
             QuickActionsAllowed = quickActionsAllowed;
             PickingSound = pickingSound;
             PlacingSound = placingSound;
+            UsableWith = usableWith;
         }
     }
 }

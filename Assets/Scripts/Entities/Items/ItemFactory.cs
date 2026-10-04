@@ -126,7 +126,8 @@ namespace Game.Entities.Items
                     item.StopWhenPlayerMoves,
                     item.QuickActionsAllowed,
                     item.PickingSound,
-                    item.PlacingSound
+                    item.PlacingSound,
+                    item.UsableWith
                 );
             }
         }
@@ -234,7 +235,7 @@ namespace Game.Entities.Items
             parameters.QuickActionsAllowed,
             parameters.PickingSound,
             parameters.PlacingSound,
-            null,
+            parameters.UsableWith,
             acousticObstacle
         );
                 return item;
