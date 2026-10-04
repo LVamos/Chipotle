@@ -855,7 +855,7 @@ namespace Game.Entities.Characters.Chipotle
 			bool IsAcousticObstacle(object obstacle)
 			{
 				return obstacle is TileInfo ||
-					   obstacle is MapElement { AcousticObstacle: true };
+					   (obstacle is MapElement && !(obstacle is Item { Passable: true }));
 			}
 		}
 
