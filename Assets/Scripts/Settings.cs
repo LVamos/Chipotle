@@ -25,6 +25,7 @@ namespace Game
 		public static float SonarRadius = 1;
 		public static float SonarInterval = 0.5f;
 		public static float SonarVolume = 1;
+		public static float SonarFrontPitch = 1.5f;
 		public static string SonarSoundName;
 		public static float BeaconBehindPlayerPitch;
 		public static bool PlayZoneLoops = true;

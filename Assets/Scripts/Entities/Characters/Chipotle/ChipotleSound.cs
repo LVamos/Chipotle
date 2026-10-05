@@ -199,7 +199,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			=> _sonar.SetState(false, false);
 
 		private void OnSonarDetectedObstacles(SonarDetectedObstacles message)
-			=> _sonar.SetState(message.ObstaclesOnLeft, message.ObstaclesOnRight);
+			=> _sonar.SetState(message.ObstaclesOnLeft, message.ObstaclesOnRight, message.ObstaclesInFront);
 
 		private void OnNoAcousticObstacleDetected(Message message)
 			=> Sounds.RoomManager.StopSimulatingObstacle();

@@ -840,10 +840,15 @@ namespace Game.Entities.Characters.Chipotle
 			collisions = World.Collisions.DetectOnTrack(parameters);
 			bool obstaclesOnRight = collisions.Obstacles.Any(IsAcousticObstacle);
 
+			// Front
+			parameters.Direction = _orientation.UnitVector;
+			collisions = World.Collisions.DetectOnTrack(parameters);
+			bool obstaclesInFront = collisions.Obstacles.Any(IsAcousticObstacle);
+
 			// Something detected
-			if (obstaclesOnLeft || obstaclesOnRight)
+			if (obstaclesOnLeft || obstaclesOnRight || obstaclesInFront)
 			{
-				SonarDetectedObstacles message = new(this, obstaclesOnLeft, obstaclesOnRight);
+				SonarDetectedObstacles message = new(this, obstaclesOnLeft, obstaclesOnRight, obstaclesInFront);
 				InnerMessage(message);
 				return;
 			}

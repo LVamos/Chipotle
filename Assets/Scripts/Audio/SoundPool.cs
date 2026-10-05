@@ -94,6 +94,7 @@ namespace Assets.Scripts.Audio
 
             // Init settings
             source.panStereo = 0;
+            source.pitch = 1;
 
             return source;
         }
