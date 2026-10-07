@@ -1322,8 +1322,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 			if (_state is CharacterState.GoingToPlayer or CharacterState.GoingToTargetAndWatchingPlayer)
 				SetState(CharacterState.WatchingPlayer);
-			else
-				SetState(CharacterState.Waiting);
+			else SetState(CharacterState.Waiting);
 		}
 
 		/// <summary>

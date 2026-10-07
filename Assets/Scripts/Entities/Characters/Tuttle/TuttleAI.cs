@@ -204,7 +204,7 @@ namespace Game.Entities.Characters.Tuttle
 
 			_goToPoolWhenPositionSet = false;
 			Vector2 goal = new(1005, 1051);
-			GoToPoint(goal);
+			GoToPoint(goal, true);
 		}
 
 		/// <summary>
