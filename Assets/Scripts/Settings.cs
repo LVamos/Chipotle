@@ -150,6 +150,7 @@ namespace Game
 		public static string Configuration { get; private set; }
 
 		public static float PassageTransparencyMaxDistance { get; set; } = 1;
+		public static string ObjectNavigationLoop { get; set; } = "ObjectNavigationLoop";
 
 		public static float PortalBlendSlidingDuration = 2;
 
