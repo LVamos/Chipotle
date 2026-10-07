@@ -17,6 +17,7 @@ public class MenuParameters
 	public string UpperEdgeSound { get; }
 	public string LowerEdgeSound { get; }
 	public Action<int> MenuClosed { get; }
+	public Func<int, bool> DeleteItem { get; }
 	public int DefaultIndex { get; }
 
 	public MenuParameters(
@@ -34,7 +35,8 @@ public class MenuParameters
 		string lowerEdgeSound = null,
 		Action<int> menuClosed = null,
 		int defaultIndex = 0,
-		bool sayItemAtStartup = true
+		bool sayItemAtStartup = true,
+		Func<int, bool> deleteItem = null
 		)
 	{
 		Items = items;
@@ -52,5 +54,6 @@ public class MenuParameters
 		MenuClosed = menuClosed;
 		DefaultIndex = defaultIndex;
 		SayItemAtStartup = sayItemAtStartup;
+		DeleteItem = deleteItem;
 	}
 }

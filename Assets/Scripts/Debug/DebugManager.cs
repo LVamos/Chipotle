@@ -252,7 +252,7 @@ namespace Game.Debug
 			if (_macroRecorder != null && _macroRecorder.IsRecording)
 				return;
 
-			// English: Gather macro files from configured macro folder
+			// Gather macro files from configured macro folder
 			string folder = MainScript.MacroPath;
 			if (!Directory.Exists(folder))
 			{
@@ -260,7 +260,6 @@ namespace Game.Debug
 				return;
 			}
 
-			// English: Get *.txt macro files and strip extensions
 			string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.TopDirectoryOnly);
 			List<string> names = files
 				.Select(Path.GetFileNameWithoutExtension)
@@ -274,10 +273,8 @@ namespace Game.Debug
 				return;
 			}
 
-			// English: Build menu items (single-column, macro names)
+			// Run menu
 			List<List<string>> items = names.Select(n => new List<string> { n }).ToList();
-
-			// English: Open menu and run selected macro in the callback
 			MenuParameters parameters = new(
 				items: items,
 				introText: "Vyber makro",
@@ -289,9 +286,26 @@ namespace Game.Debug
 
 					string selected = items[index][0];
 					PlayMacroByName(selected);
-				}
+				},
+				deleteItem: (index) => DeleteMacro(items[index][0])
 			);
 			WindowHandler.Menu(parameters);
+		}
+
+		private static bool DeleteMacro(string name)
+		{
+			try
+			{
+				string path = Path.Combine(MainScript.MacroPath, name + ".txt");
+				File.Delete(path);
+				File.Delete(path + ".meta");
+				return true;
+			}
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			{
+				Tolk.Speak("Makro se nepodařilo smazat", true);
+				return false;
+			}
 		}
 
 		[DebugCommand(DebugCommand.StartMacroRecording)]

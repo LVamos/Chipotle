@@ -1,11 +1,13 @@
 ﻿using DavyKager;
 
 using Game.Controls;
+using Game.Controls.Keyboard;
 
 using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.UI
 {
@@ -165,6 +167,7 @@ namespace Game.UI
 			_upperEdgeSound = parameters.UpperEdgeSound;
 			_lowerEdgeSound = parameters.LowerEdgeSound;
 			_menuClosed = parameters.MenuClosed;
+			_deleteItem = parameters.DeleteItem;
 			_index = parameters.DefaultIndex;
 			_sayItemAtStartup = parameters.SayItemAtStartup;
 		}
@@ -184,6 +187,30 @@ namespace Game.UI
 		}
 
 		private Action<int> _menuClosed;
+
+		private Func<int, bool> _deleteItem;
+
+		public override void OnKeyDown(KeyboardInput shortcut)
+		{
+			base.OnKeyDown(shortcut);
+
+			if (shortcut.Key == Key.Delete && !shortcut.Control && !shortcut.Shift && !shortcut.Alt)
+				DeleteSelectedItem();
+		}
+
+		private void DeleteSelectedItem()
+		{
+			if (_deleteItem == null || IndexOffEdge() || !_deleteItem(Index))
+				return;
+
+			_items.RemoveAt(Index);
+			Tolk.Speak("Smazáno", true);
+
+			if (_items.Count == 0)
+				Quit();
+			else if (Index > _lastItem)
+				Index = _lastItem;
+		}
 
 		/// <summary>
 		/// Sets the cursor to the last item and announces it.
