@@ -131,16 +131,17 @@ public class EditorWindowTitleChanger
 			ShowWindow(main, SW_MINIMIZE);
 
 		IntPtr game = FindWindow(t => t == "Running" || t == "Game", false);
-		if (game != IntPtr.Zero)
-			SetWindowPos(game, IntPtr.Zero, 0, 0, GameWindowWidth, GameWindowHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-
-		if (game == IntPtr.Zero || (IsWindowVisible(game) && GetForegroundWindow() == game))
+		if (game == IntPtr.Zero)
 			return;
 
+		SetWindowPos(game, IntPtr.Zero, 0, 0, GameWindowWidth, GameWindowHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 		keybd_event(VK_MENU, 0, 0, UIntPtr.Zero);
 		keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
 		ShowWindow(game, SW_SHOWNORMAL);
 		SetForegroundWindow(game);
+
+		if (GetForegroundWindow() == game)
+			EditorApplication.update -= KeepGameWindowFocused;
 	}
 
 	private static void RestoreMainWindow()
