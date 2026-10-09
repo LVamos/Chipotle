@@ -17,6 +17,10 @@ public class Startup : MonoBehaviour
 		SetCamera();
 		Application.runInBackground = true;
 		Time.fixedDeltaTime = 1f / 30f;
+		Application.targetFrameRate = 30;
+		UnityEngine.Rendering.OnDemandRendering.renderFrameInterval = 30;
+		if (!Application.isEditor)
+			Screen.SetResolution(640, 360, Screen.fullScreenMode);
 		Sounds.Initialize();
 		MainMenu();
 	}

@@ -93,6 +93,15 @@ public class EditorWindowTitleChanger
 	private const byte VK_MENU = 0x12;
 	private const uint KEYEVENTF_KEYUP = 2;
 
+	private const int GameWindowWidth = 400;
+	private const int GameWindowHeight = 300;
+	private const uint SWP_NOMOVE = 2;
+	private const uint SWP_NOZORDER = 4;
+	private const uint SWP_NOACTIVATE = 0x10;
+
+	[DllImport("user32.dll")]
+	private static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int width, int height, uint flags);
+
 	[DllImport("user32.dll")]
 	private static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extraInfo);
 
@@ -122,6 +131,9 @@ public class EditorWindowTitleChanger
 			ShowWindow(main, SW_MINIMIZE);
 
 		IntPtr game = FindWindow(t => t == "Running" || t == "Game", false);
+		if (game != IntPtr.Zero)
+			SetWindowPos(game, IntPtr.Zero, 0, 0, GameWindowWidth, GameWindowHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+
 		if (game == IntPtr.Zero || (IsWindowVisible(game) && GetForegroundWindow() == game))
 			return;
 
