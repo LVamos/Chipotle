@@ -1069,16 +1069,21 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			PathfindingParams parameters1 = new(start, goal1, sameZone, withStart, withGoal, height, width, snapshot1);
 
 			PathfindingParams parameters2 = null;
+			bool atEntrance = false;
 			if (!sameZone)
 			{
 				// Construct the rest of the path from the entrance to the goal.
 				PathfindingSnapshot snapshot2 = PathFinder.BuildSnapshot(goal1, goal2, Owner);
 				parameters2 = new(goal1, goal2, true, false, withGoal, height, width, snapshot2);
+				atEntrance = PathFinder.IsAtGoal(start, goal1);
 			}
 
 			Task<Queue<Vector2>> task = Task.Run(() =>
 			{
 				Queue<Vector2> path1 = PathFinder.FindPath(parameters1);
+				if (path1 == null && atEntrance)
+					path1 = new();
+
 				if (path1 == null || parameters2 == null)
 					return path1;
 

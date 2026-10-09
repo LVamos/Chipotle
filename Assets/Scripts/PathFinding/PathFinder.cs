@@ -116,7 +116,7 @@ namespace Game.PathFinding
 				open.Remove(current.Coords);
 
 				// If Current is close to the target, I am returning the path
-				if (Vector2.Distance(current.Coords, parameters.Goal) <= _distanceToleration)
+				if (IsAtGoal(current.Coords, parameters.Goal))
 					return GetPath(current, parameters.ThroughStart, parameters.ThroughGoal);
 
 				closed.Add(current.Coords);
@@ -159,6 +159,12 @@ namespace Game.PathFinding
 
 			return null;
 		}
+
+		/// <summary>
+		/// Checks if the position is close enough to the goal to count as reached.
+		/// </summary>
+		public static bool IsAtGoal(Vector2 position, Vector2 goal)
+			=> Vector2.Distance(position, goal) <= _distanceToleration;
 
 		/// <summary>
 		/// Metoda, která vytváří sousedy (4-směrné)
