@@ -1087,6 +1087,8 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 				if (path1 == null || parameters2 == null)
 					return path1;
 
+				// Continue where the first leg ended so that no step skips the passage.
+				parameters2.Start = path1.Count > 0 ? path1.Last() : start;
 				Queue<Vector2> path2 = PathFinder.FindPath(parameters2);
 				if (path2 == null)
 					return null;
