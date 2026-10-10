@@ -768,12 +768,6 @@ save.UsableWith
 		/// <param name="message">The message to be processed</param>
 		protected virtual void OnUseObjects(UseObjects message)
 		{
-			if (_usableOnce && Used)
-			{
-				Usable = false;
-				return;
-			}
-
 			if (string.IsNullOrEmpty(_sounds["action"]) && string.IsNullOrEmpty(_cutscene))
 				return;
 
@@ -792,8 +786,9 @@ save.UsableWith
 				Sounds.Play(_sounds["action"], message.ManipulationPoint, _defaultVolume);
 			}
 
-			UsedOnce = !Used;
 			Used = true;
+			if (_usableOnce && Used)
+				Usable = false;
 
 			if (message.UsedObject != this)
 				return;
