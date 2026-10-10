@@ -69,7 +69,6 @@ namespace Game.Entities.Characters.Chipotle
 			_phoneInterval = data.PhoneInterval;
 			_sittingAtPubTable = data.SittingAtPubTable;
 			_sittingOnChair = data.SittingOnChair;
-			_steppedIntoPuddle = data.SteppedIntoPuddle;
 			_walshesBenchUsed = data.WalshesBenchUsed;
 		}
 
@@ -84,7 +83,6 @@ namespace Game.Entities.Characters.Chipotle
 			save.PhoneInterval = _phoneInterval;
 			save.SittingAtPubTable = _sittingAtPubTable;
 			save.SittingOnChair = _sittingOnChair;
-			save.SteppedIntoPuddle = _steppedIntoPuddle;
 			save.WalshesBenchUsed = _walshesBenchUsed;
 
 			return save;
@@ -97,7 +95,6 @@ namespace Game.Entities.Characters.Chipotle
 			RecordRegion(target); // Record visited region
 
 			// Watch important events
-			WatchPuddle(target); // Check if player walked in a puddle
 			WatchPhone();
 			return target;
 		}
@@ -277,11 +274,6 @@ namespace Game.Entities.Characters.Chipotle
 		/// </summary>
 
 		private StartWalk _startWalkMessage;
-
-		/// <summary>
-		/// Indicates if the NPC stepped into the puddle in the pool (bazén w1) zone.
-		/// </summary>
-		private bool _steppedIntoPuddle;
 
 		/// <summary>
 		/// Indicates if the Chipotle NPC is currently walking.
@@ -1608,24 +1600,6 @@ namespace Game.Entities.Characters.Chipotle
 				_phoneCountdown = false;
 				World.GetItem("detektivovo auto").TakeMessage(new UnblockZone(Owner, World.GetZone("ulice s1")));
 				Cutscene.Play(Owner, "cs22");
-			}
-		}
-
-		/// <summary>
-		/// Plays an appropriate cutscene if the Detective Chipotle NPC stepped into the puddle next
-		/// to the Walsch's pool (bazén w1) object.
-		/// </summary>
-		/// <param name="point">
-		/// Coordintes of a tile the Detective Chipotle NPC is gonna step on to.
-		/// </param>
-		private void WatchPuddle(Vector2 point)
-		{
-			if (!_steppedIntoPuddle
-				&& CurrentTile.tile.Terrain == TerrainType.Puddle
-				&& World.GetItem("bazén w1").Area.Value.GetDistanceFrom(CurrentTile.position) <= _puddleRadius)
-			{
-				_steppedIntoPuddle = true;
-				Cutscene.Play(Owner, "cs2");
 			}
 		}
 
