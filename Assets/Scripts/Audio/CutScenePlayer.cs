@@ -19,7 +19,7 @@ namespace Game.Audio
 
 		private void DetectPlaybackEnd()
 		{
-			if (_audio == null)
+			if (_audio == null || Paused)
 				return;
 
 			if (_audio.isPlaying)
@@ -72,13 +72,13 @@ namespace Game.Audio
 
 		public void Resume()
 		{
-			if (!Settings.PlayCutscenes || _audio == null)
+			if (!Settings.PlayCutscenes || _audio == null || !Paused)
 				return;
 
 			if (!_audio.isPlaying)
 				_audio = Sounds.Play2d(_cutsceneName, 0);
 
-			_audio.time = _pauseTime - 3;
+			_audio.time = Mathf.Max(0, _pauseTime - 3);
 			Sounds.SlideVolume(_audio, 2, 1);
 			Paused = false;
 		}
