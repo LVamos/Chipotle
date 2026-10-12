@@ -262,9 +262,7 @@ namespace Game.Terrain
 		/// </summary>
 		/// <param name="message">Source of the message</param>
 		protected void OnStopNavigation(StopNavigation message)
-		{
-			StopNavigation();
-		}
+			=> StopNavigation();
 
 		/// <summary>
 		/// Processes the StartNavigation message.
@@ -327,6 +325,9 @@ namespace Game.Terrain
 		/// </summary>
 		protected void StopNavigation(bool hasBeenReached = false)
 		{
+			if (!_navigating)
+				return;
+
 			if (!hasBeenReached)
 			{
 				string sound = "SonarTurnedOff";
