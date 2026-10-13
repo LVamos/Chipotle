@@ -81,8 +81,13 @@ namespace Game.Debug
 
 		[DebugCommand(DebugCommand.SetWallMaterials)]
 		private void SetWallMaterials()
+			=> WindowHandler.InputBox("Zadej číslo materiálu", "Materiály zdí", string.Empty, ApplyWallMaterial);
+
+		private void ApplyWallMaterial(string input)
 		{
-			string input = WindowHandler.InputBox("Zadej číslo materiálu", "Materiály zdí");
+			if (string.IsNullOrEmpty(input))
+				return;
+
 			int index = int.Parse(input);
 			ZoneMaterial material = (ZoneMaterial)index;
 			ZoneMaterials materials = new(material, material, material, material, material, material);

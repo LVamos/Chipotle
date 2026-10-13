@@ -88,14 +88,15 @@ namespace Assets.Scripts
 			stream?.Close();
 		}
 
-		public static bool CreateNamedSave()
+		public static void CreateNamedSave()
+			=> WindowHandler.InputBox(string.Empty, "Zadej název sejvu", string.Empty, SaveNamed);
+
+		private static void SaveNamed(string name)
 		{
-			string name = null;
-			//Interaction.InputBox(String.Empty, "Zadej název sejvu");
 			if (string.IsNullOrEmpty(name))
 			{
 				Tolk.Speak("Tak nic");
-				return false;
+				return;
 			}
 
 			if (!Directory.Exists(MainScript.PredefinedSavesPath))
@@ -107,7 +108,6 @@ namespace Assets.Scripts
 			path = Path.Combine(path, "game.sav");
 			SaveGame(path);
 			Tolk.Speak("uloženo");
-			return true;
 		}
 
 		/// <summary>

@@ -115,7 +115,11 @@ namespace Game.Debug.UI
 
 			string title = "Zadej hodnotu";
 			string defaultValue = FormatValue(entry.Getter());
-			string input = Interaction.InputBox(string.Empty, title, defaultValue);
+			WindowHandler.InputBox(string.Empty, title, defaultValue, input => ApplyInput(entry, input));
+		}
+
+		private void ApplyInput(SettingEntry entry, string input)
+		{
 			if (string.IsNullOrEmpty(input))
 			{
 				SayItem();

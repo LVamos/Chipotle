@@ -98,11 +98,10 @@ namespace Game
 		}
 
 		public static void SendFeedback()
-		{
-			GameManager.PauseGame();
-			string message = Interaction.InputBox("", "Zadej zprávu pro autora", "");
-			GameManager.ResumeGame();
+			=> WindowHandler.InputBox("", "Zadej zprávu pro autora", "", SendFeedbackMessage);
 
+		private static void SendFeedbackMessage(string message)
+		{
 			if (string.IsNullOrEmpty(message))
 			{
 				Tolk.Speak("Tak nic no");
@@ -116,8 +115,7 @@ namespace Game
 
 			if (!SendMeMail(subject, body, attachment))
 				Tolk.Speak("Zprávu se nepodařilo odeslat.");
-			else
-				Tolk.Speak("Odesláno");
+			else Tolk.Speak("Odesláno");
 		}
 
 		private static Attachment GetAttachment()
@@ -254,7 +252,7 @@ Application.Quit();
 			Action action = () =>
 			{
 				// Ask for problem description
-				string description = Microsoft.VisualBasic.Interaction.InputBox("", "          Ta zkurvená hra spadla! Napiš Lukimu, co se stalo, než mu definitivně jebne.", "");
+				string description = Game.UI.WindowHandler.InputBox("", "          Ta zkurvená hra spadla! Napiš Lukimu, co se stalo, než mu definitivně jebne.", "");
 
 				// Prepare an error message
 				StringBuilder text = new(GetUserInfo());

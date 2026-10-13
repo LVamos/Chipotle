@@ -65,13 +65,28 @@ namespace Game.UI
 
 		public static string InputBox(string prompt, string title, string defaultValue = "")
 		{
-			string input = null;
 			try
 			{
-				input = Interaction.InputBox(prompt, title, defaultValue);
+				return NativeInputDialog.ShowModal(prompt, title, defaultValue);
 			}
-			catch (Exception) { }
-			return input;
+			catch (Exception)
+			{
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// Shows a native input dialog without blocking the game. The game is paused until the dialog is closed.
+		/// </summary>
+		/// <param name="inputClosed">Receives the entered text, or null when the dialog was canceled.</param>
+		public static void InputBox(string prompt, string title, string defaultValue, Action<string> inputClosed)
+		{
+			GameManager.PauseGame();
+			NativeInputDialog.Show(prompt, title, defaultValue, text =>
+			{
+				GameManager.ResumeGame();
+				inputClosed?.Invoke(text);
+			});
 		}
 
 		public static void OpenDebugSettings()

@@ -53,7 +53,11 @@ namespace Game.Debug
 			IsRecording = false;
 			_stopwatch?.Stop();
 
-			string name = WindowHandler.InputBox("Název makra (bez pøípony):", "Uložit makro", "macro1");
+			WindowHandler.InputBox("Název makra (bez pøípony):", "Uložit makro", "macro1", SaveMacro);
+		}
+
+		private void SaveMacro(string name)
+		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
 				_buffer.Clear();

@@ -74,8 +74,10 @@ namespace Game.Debug
 		/// On success, the method speaks a confirmation using a screen reader.
 		/// </summary>
 		public static void PlaceDebugPoint()
+			=> WindowHandler.InputBox("Zadej název testovacího bodu", "Testovací bod", string.Empty, SaveDebugPoint);
+
+		private static void SaveDebugPoint(string pointName)
 		{
-			string pointName = WindowHandler.InputBox("Zadej název testovacího bodu", "Testovací bod");
 			if (string.IsNullOrWhiteSpace(pointName))
 				return;
 
