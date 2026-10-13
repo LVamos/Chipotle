@@ -37,7 +37,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 	{
 		private Sonar _sonar;
 
-		private void Update()
+		private void LateUpdate()
 		{
 			if (_footStep != null && _footStep.isPlaying)
 				SnapFootstepToListener();
