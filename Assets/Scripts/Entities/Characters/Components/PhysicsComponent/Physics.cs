@@ -109,7 +109,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			_state = data.State;
 			_area = data.Area?.ToRectangle();
 			_goal = data.Goal != null ? data.Goal.ToVector2() : default;
-			_inventory = data.Inventory != null ? new(data.Inventory) : null;
+			_inventory = data.Inventory != null ? new(data.Inventory) : new();
 			_maxObjectDistance = data.MaxObjectDistance;
 			_minObjectDistance = data.MinObjectDistance;
 			_navigableObjectsRadius = data.NavigableObjectsRadius;
