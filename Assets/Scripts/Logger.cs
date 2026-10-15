@@ -112,9 +112,7 @@ public static class Logger
 	/// <param name="title">The title of the error message.</param>
 	/// <param name="messages">The error messages to log.</param>
 	public static void LogError(string title, params string[] messages)
-	{
-		Log(isError: true, title, messages);
-	}
+		=> Log(isError: true, title, messages);
 
 	/// <summary>
 	/// Logs an informational message or multiple informational messages with a title.

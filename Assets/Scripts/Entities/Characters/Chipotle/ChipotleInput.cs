@@ -22,7 +22,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using UnityEngine;
 using UnityEngine.InputSystem;
 
 using Input = Game.Entities.Characters.Components.Input;
@@ -267,12 +266,7 @@ namespace Game.Entities.Characters.Chipotle
 		private void SayZoneSize() => InnerMessage(new SayZoneSize(this));
 
 		private void SayAbsoluteCoordinates()
-		{
-			Vector2 coords = Owner.Area.Value.Center;
-			string result = coords.GetString();
-			GUIUtility.systemCopyBuffer = result;
-			InnerMessage(new SayCoordinates(this, false));
-		}
+			=> InnerMessage(new SayCoordinates(this, false));
 
 		/// <summary>
 		/// Lists exits from current zone.

@@ -302,6 +302,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			string y = coords.y == intY ? intY.ToString() : coords.y.ToString("0.0");
 			string result = x + (message.Relative ? " " : ", ") + y;
 			Tolk.Speak(result, true);
+			GUIUtility.systemCopyBuffer = coords.GetString();
 		}
 
 		/// <summary>

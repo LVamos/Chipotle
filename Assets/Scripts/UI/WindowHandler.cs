@@ -76,6 +76,20 @@ namespace Game.UI
 		}
 
 		/// <summary>
+		/// Shows a text in a native read-only edit box with an OK button and waits until it is closed.
+		/// </summary>
+		public static void ShowText(string text, string title)
+		{
+			try
+			{
+				NativeInputDialog.ShowReadOnly(text, title);
+			}
+			catch (Exception)
+			{
+			}
+		}
+
+		/// <summary>
 		/// Shows a native input dialog without blocking the game. The game is paused until the dialog is closed.
 		/// </summary>
 		/// <param name="inputClosed">Receives the entered text, or null when the dialog was canceled.</param>

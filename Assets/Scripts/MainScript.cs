@@ -7,14 +7,14 @@ using Game.Serialization;
 using Game.Terrain;
 using Game.UI;
 
-using Microsoft.VisualBasic;
-
 using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -80,7 +80,7 @@ namespace Game
 
 			if (World.Player != null)
 			{
-				Vector2 position = World.Player.Area.Value.Center;
+				Vector2 position = World.Player.Center;
 				text.AppendLine("Verze: " + Version);
 				text.AppendLine("Pozice: " + position.ToString());
 				text.AppendLine("Lokace: " + World.Player.Zone.Name.Inner);
@@ -108,14 +108,10 @@ namespace Game
 				return;
 			}
 
-			string subject = null;
-			//string subject = "Chipotle: " + WindowsIdentity.GetCurrent().Name + " posílá připomínku";
-			string body = "Zpráva: " + message + Environment.NewLine + GetUserInfo();
-			Attachment attachment = GetAttachment();
-
-			if (!SendMeMail(subject, body, attachment))
-				Tolk.Speak("Zprávu se nepodařilo odeslat.");
-			else Tolk.Speak("Odesláno");
+			string subject = $"Chipotle: {Environment.UserName} posílá připomínku";
+			if (!SendReport(subject, "Zpráva: " + message))
+				WindowHandler.ShowText("Zprávu se nepodařilo odeslat.", "");
+			else WindowHandler.ShowText("Už to má v těch línejch programátorskejch prackách", "");
 		}
 
 		private static Attachment GetAttachment()
@@ -133,6 +129,46 @@ namespace Game
 			}
 		}
 
+		private static Attachment GetSaveAttachment()
+		{
+			string path = TryCreateCrashSave() ?? SerializationPath;
+			try
+			{
+				if (!File.Exists(path))
+					return null;
+
+				using FileStream file = new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+				MemoryStream stream = new();
+				file.CopyTo(stream);
+				stream.Position = 0;
+				return new Attachment(stream, Path.GetFileName(SerializationPath), "application/octet-stream");
+			}
+			catch (Exception)
+			{
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// Tries to save the current game state into a separate file so that a possibly broken state
+		/// never overwrites the regular save.
+		/// </summary>
+		/// <returns>Path to the created save or null if the game could not be saved.</returns>
+		private static string TryCreateCrashSave()
+		{
+			string path = Path.Combine(Application.persistentDataPath, "crash.sav");
+			try
+			{
+				GamePersistence.SaveGame(path);
+				return path;
+			}
+			catch (Exception)
+			{
+				try { File.Delete(path); } catch (Exception) { }
+				return null;
+			}
+		}
+
 		/// <summary>
 		/// Current version of the game
 		/// </summary>
@@ -144,11 +180,11 @@ namespace Game
 		/// <param name="subject">Subject for the message</param>
 		/// <param name="body">Body of the message</param>
 		/// <returns>True if the message is sent properly</returns>
-		private static bool SendMeMail(string subject, string body, Attachment attachment = null)
+		private static bool SendMeMail(string subject, string body, params Attachment[] attachments)
 		{
 			MailAddress fromAddress = new("lukas.vamos@gmail.com", Environment.UserName);
 			MailAddress toAddress = new("lukas.vamos@gmail.com", "Lukáš Vámoš");
-			const string fromPassword = "yhfk gdui kund nfjm";
+			const string fromPassword = "ajks pagf uxqp mgge";
 
 			SmtpClient smtp = new()
 			{
@@ -161,7 +197,6 @@ namespace Game
 			};
 
 			// Send it
-
 			try
 			{
 				using MailMessage message = new(fromAddress, toAddress)
@@ -169,8 +204,11 @@ namespace Game
 					Subject = subject,
 					Body = body
 				};
-				if (attachment != null)
-					message.Attachments.Add(attachment);
+				foreach (Attachment attachment in attachments)
+				{
+					if (attachment != null)
+						message.Attachments.Add(attachment);
+				}
 
 				smtp.Send(message);
 			}
@@ -190,11 +228,54 @@ namespace Game
 		/// <returns>True if it¨s successful</returns>
 		public static bool ReportError(string message, bool addUserInfo = true)
 		{
-			Attachment attachment = GetAttachment();
-			string subject = null;
-			//string subject=  "Chipotle: " + WindowsIdentity.GetCurrent().Name + " hlásí kritickou chybu";
-			string body = message + Environment.NewLine + GetUserInfo();
-			return SendMeMail(subject, body, attachment);
+			string subject = $"{Environment.UserName} hlásí chybu";
+			return SendReport(subject, message, addUserInfo);
+		}
+
+		/// <summary>
+		/// Sends a report to the author's mail address with the game log and a fresh save attached.
+		/// The player's IP address is always added to the body.
+		/// </summary>
+		/// <param name="subject">Subject of the message</param>
+		/// <param name="message">Text of the report</param>
+		/// <param name="addUserInfo">Appends information about the user and the game state</param>
+		/// <returns>True if the message is sent properly</returns>
+		private static bool SendReport(string subject, string message, bool addUserInfo = true)
+		{
+			Tolk.Speak("Posílám");
+			string body = addUserInfo ? message + Environment.NewLine + GetUserInfo() : message;
+			body += Environment.NewLine + "IP adresa: " + GetIpAddress();
+			return SendMeMail(subject, body, GetAttachment(), GetSaveAttachment());
+		}
+
+		/// <summary>
+		/// Finds the public IP address of the player. Falls back to the local addresses when the lookup fails.
+		/// </summary>
+		private static string GetIpAddress()
+		{
+			try
+			{
+				HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://api.ipify.org");
+				request.Timeout = 3000;
+				using WebResponse response = request.GetResponse();
+				using StreamReader reader = new(response.GetResponseStream());
+				string address = reader.ReadToEnd().Trim();
+				if (!string.IsNullOrEmpty(address))
+					return address;
+			}
+			catch (Exception)
+			{
+			}
+
+			try
+			{
+				string local = string.Join(", ", Dns.GetHostEntry(Dns.GetHostName()).AddressList.Select(a => a.ToString()));
+				return "nezjištěna (lokální: " + local + ")";
+			}
+			catch (Exception)
+			{
+				return "nezjištěna";
+			}
 		}
 
 		/// <summary>
@@ -219,6 +300,9 @@ namespace Game
 		/// <param name="ex">The exception</param>
 		public static void OnError(Exception ex, string message = null)
 		{
+			if (!Settings.ThrowExceptions && Interlocked.Exchange(ref _errorHandled, 1) == 1)
+				return;
+
 			if (ex == null)
 			{
 				LogException(new Exception("OnError called with null exception. Message: " + (message ?? "none")));
@@ -228,16 +312,14 @@ namespace Game
 			try
 			{
 				GUIUtility.systemCopyBuffer = ex.ToString();
+				LogException(ex);
 			}
 			catch (Exception copyEx)
 			{
-				// If copying to clipboard fails, just log it
-				LogException(new Exception("Failed to copy exception to clipboard", copyEx));
 			}
 
 			if (Settings.ThrowExceptions)
 				throw ex;
-			LogException(ex);
 			EnableJAWSKeyHook(); // Restore JAWS key hook
 
 			if (!Settings.ReportErrors || !GameLoaded)
@@ -252,7 +334,7 @@ Application.Quit();
 			Action action = () =>
 			{
 				// Ask for problem description
-				string description = Game.UI.WindowHandler.InputBox("", "          Ta zkurvená hra spadla! Napiš Lukimu, co se stalo, než mu definitivně jebne.", "");
+				string description = WindowHandler.InputBox("", "          Ta zkurvená hra spadla! Napiš Lukimu, co se stalo, než mu definitivně jebne.", "");
 
 				// Prepare an error message
 				StringBuilder text = new(GetUserInfo());
@@ -268,14 +350,14 @@ Application.Quit();
 				text.AppendLine("Stack trace" + Environment.NewLine + ex.StackTrace);
 
 				string report = text.ToString();
-				bool ok = ReportError(report); // send e-mail with the error message to me.
+				bool ok = ReportError(report, addUserInfo: false); // send e-mail with the error message to me.
 				if (!ok)
 					File.WriteAllText(_errorReportPath, report);
 
 				report = ok
 					? "Už to má na mailu. Ten bude mít radost."
 					: "Nepovedlo se to. Hlášení se odešle při příštím spuštění.";
-				Interaction.MsgBox(report, MsgBoxStyle.OkOnly, "");
+				WindowHandler.ShowText(report, "");
 			};
 
 			if (Settings.ReportErrors)
@@ -291,7 +373,24 @@ Application.Quit();
 #endif
 		}
 
-		private static void LogException(Exception ex) => Logger.LogError("Výjimka", ex.ToString());
+		/// <summary>
+		/// Indicates that an error is already being handled. The game terminates after the first error is reported.
+		/// </summary>
+		private static int _errorHandled;
+
+		/// <summary>
+		/// Catches exceptions that Unity swallows itself (e.g. thrown from Update) and passes them to OnError.
+		/// </summary>
+		private static void OnLogMessage(string condition, string stackTrace, LogType type)
+		{
+			if (type != LogType.Exception || Settings.ThrowExceptions)
+				return;
+
+			OnError(new Exception(condition + Environment.NewLine + stackTrace), "Unity");
+		}
+
+		private static void LogException(Exception ex)
+			=> Logger.LogError("Výjimka", ex.ToString());
 
 		/// <summary>
 		/// An error handler
@@ -404,6 +503,9 @@ Application.Quit();
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		public static void AfterSceneLoad()
 		{
+			Application.logMessageReceivedThreaded += OnLogMessage;
+			TaskScheduler.UnobservedTaskException += (sender, e) => OnError(e.Exception, sender?.ToString());
+
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
 			{
 				Exception ex = e.ExceptionObject as Exception;

@@ -44,6 +44,12 @@ namespace Game.UI
 		public static string ShowModal(string prompt, string title, string defaultValue)
 			=> RunDialog(BuildTemplate(prompt, title), defaultValue ?? string.Empty, GetGameWindow());
 
+		/// <summary>
+		/// Shows a text in a read-only edit box with the default OK button and waits until it is closed.
+		/// </summary>
+		public static void ShowReadOnly(string text, string title)
+			=> RunDialog(BuildReadOnlyTemplate(title), text ?? string.Empty, GetGameWindow(), readOnly: true);
+
 		private const int IdOk = 1;
 		private const int IdCancel = 2;
 		private const int IdEdit = 1001;
@@ -64,6 +70,10 @@ namespace Game.UI
 		private const uint DS_SETFONT = 0x40;
 		private const uint SS_NOPREFIX = 0x80;
 		private const uint ES_AUTOHSCROLL = 0x80;
+		private const uint ES_MULTILINE = 0x04;
+		private const uint ES_AUTOVSCROLL = 0x40;
+		private const uint ES_READONLY = 0x800;
+		private const uint WS_VSCROLL = 0x00200000;
 		private const uint BS_DEFPUSHBUTTON = 0x01;
 
 		private const ushort ClassButton = 0x0080;
@@ -130,7 +140,7 @@ namespace Game.UI
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
 		private static extern IntPtr GetModuleHandle(string moduleName);
 
-		private static string RunDialog(byte[] template, string defaultValue, IntPtr owner)
+		private static string RunDialog(byte[] template, string defaultValue, IntPtr owner, bool readOnly = false)
 		{
 			string result = null;
 			IntPtr memory = Marshal.AllocHGlobal(template.Length);
@@ -146,7 +156,7 @@ namespace Game.UI
 							CenterOverOwner(hwnd, owner);
 							SetDlgItemText(hwnd, IdEdit, defaultValue);
 							IntPtr edit = GetDlgItem(hwnd, IdEdit);
-							SendMessage(edit, EM_SETSEL, IntPtr.Zero, new IntPtr(-1));
+							SendMessage(edit, EM_SETSEL, IntPtr.Zero, new IntPtr(readOnly ? 0 : -1));
 							SetForegroundWindow(hwnd);
 							SetFocus(edit);
 							return IntPtr.Zero;
@@ -242,6 +252,31 @@ namespace Game.UI
 			WriteItem(writer, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL, 7, editTop, 226, 14, IdEdit, ClassEdit, string.Empty);
 			WriteItem(writer, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON, 126, buttonTop, 50, 14, IdOk, ClassButton, "OK");
 			WriteItem(writer, WS_CHILD | WS_VISIBLE | WS_TABSTOP, 183, buttonTop, 50, 14, IdCancel, ClassButton, "Zrušit");
+
+			writer.Flush();
+			return stream.ToArray();
+		}
+
+		private static byte[] BuildReadOnlyTemplate(string title)
+		{
+			using MemoryStream stream = new();
+			using BinaryWriter writer = new(stream, Encoding.Unicode);
+
+			writer.Write(WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME | DS_SETFONT);
+			writer.Write(0u);
+			writer.Write((ushort)2);
+			writer.Write((short)0);
+			writer.Write((short)0);
+			writer.Write((short)240);
+			writer.Write((short)100);
+			writer.Write((ushort)0); // no menu
+			writer.Write((ushort)0); // default dialog class
+			WriteString(writer, title ?? string.Empty);
+			writer.Write((ushort)9);
+			WriteString(writer, "MS Shell Dlg");
+
+			WriteItem(writer, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 7, 7, 226, 66, IdEdit, ClassEdit, string.Empty);
+			WriteItem(writer, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON, 183, 79, 50, 14, IdOk, ClassButton, "OK");
 
 			writer.Flush();
 			return stream.ToArray();
