@@ -1,6 +1,6 @@
-﻿using Assets.Scripts;
-using Assets.Scripts.Spatial;
+﻿using Assets.Scripts.Spatial;
 
+using Game;
 using Game.Audio;
 using Game.Entities;
 using Game.Entities.Characters;

@@ -7,8 +7,6 @@ using Game.Controls.Keyboard;
 using Game.Debug;
 using Game.Debug.UI;
 
-using Microsoft.VisualBasic;
-
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -24,12 +22,12 @@ namespace Game.UI
 	{
 		private static void ShowVersion()
 		{
-			IntPtr window = FindWindowByName(null, Application.productName); // najde okno podle původního titulku
+			string version = Resources.Load<TextAsset>(MainScript.VersionPath).text;
+			IntPtr window = FindWindowByName(null, Application.productName);
 			if (window != IntPtr.Zero)
-			{
-				SetWindowText(window, $"Chipotle {MainScript.Version}");
-			}
+				SetWindowText(window, $"Chipotle {version}");
 		}
+
 		[DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
 		static extern IntPtr FindWindowByName(string lpClassName, string lpWindowName);
 

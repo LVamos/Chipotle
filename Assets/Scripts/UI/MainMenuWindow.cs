@@ -1,6 +1,4 @@
-﻿using Assets.Scripts;
-
-using DavyKager;
+﻿using DavyKager;
 
 using Game.Audio;
 using Game.Controls.Keyboard;

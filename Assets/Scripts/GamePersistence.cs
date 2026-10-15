@@ -1,6 +1,5 @@
 ﻿using DavyKager;
 
-using Game;
 using Game.Audio;
 using Game.Serialization.Protobuf;
 using Game.Terrain;
@@ -14,7 +13,7 @@ using System.Xml.Linq;
 
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Game
 {
 	public static class GamePersistence
 	{

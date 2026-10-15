@@ -1,5 +1,4 @@
-﻿using Assets.Scripts;
-using Assets.Scripts.Messaging.Commands.Characters;
+﻿using Assets.Scripts.Messaging.Commands.Characters;
 using Assets.Scripts.Messaging.Events.Characters;
 
 using DavyKager;

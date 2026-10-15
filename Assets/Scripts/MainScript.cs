@@ -39,6 +39,11 @@ namespace Game
 		/// </summary>
 		public static string ItemsPath => Path.Combine(DataPath, "Items/items").Replace("\\", "/");
 
+		/// <summary>
+		/// Path to a text file containing current version of the game.
+		/// </summary>
+		public static string VersionPath => Path.Combine(DataPath, "Version").Replace("\\", "/");
+
 		public static string DefaultInputMappingPath => Path.Combine(DataPath, "INput/DefaultLayout").Replace("\\", "/");
 
 		public static string CommandNamesPath => Path.Combine(DataPath, "INput/CommandNames").Replace("\\", "/");
