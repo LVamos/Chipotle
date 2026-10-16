@@ -37,6 +37,12 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 	{
 		private Sonar _sonar;
 
+		private void OnDestroy()
+		{
+			if (_footStep != null)
+				Destroy(_footStep.gameObject);
+		}
+
 		private void LateUpdate()
 		{
 			if (_footStep != null && _footStep.isPlaying)

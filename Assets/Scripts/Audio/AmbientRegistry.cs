@@ -39,6 +39,15 @@ namespace Game.Audio
 				portals.Remove(portal);
 		}
 
+		/// <summary>
+		/// Forgets all registered sounds. Needed when the world is rebuilt (e.g. a save is loaded), otherwise stale sources of the previous world would be reused.
+		/// </summary>
+		public static void Clear()
+		{
+			_zone2D.Clear();
+			_portals.Clear();
+		}
+
 		public static IEnumerable<string> Active2D => _zone2D.Keys;
 		public static IEnumerable<string> ActivePortals => _portals.Keys;
 	}

@@ -115,10 +115,7 @@ namespace Assets.Scripts.Audio
 		}
 
 		private void OnGameReloaded()
-		{
-			_portals = new();
-			UpdatePortals();
-		}
+			=> UpdatePortals();
 
 		private void OnCharacterCameToZone(CharacterCameToZone message)
 		{

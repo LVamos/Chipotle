@@ -393,6 +393,12 @@ namespace Game.Terrain
 
 		private void CreateComponents(bool loopExists)
 		{
+			// The zone lives on a reused scene object, so controllers from a previous load must not survive.
+			foreach (ZoneAmbientController old in GetComponents<ZoneAmbientController>())
+				Destroy(old);
+			foreach (ZonePortalController old in GetComponents<ZonePortalController>())
+				Destroy(old);
+
 			List<MessagingObject> components = new();
 			_ambientController = gameObject.AddComponent<ZoneAmbientController>();
 			components.Add(_ambientController);

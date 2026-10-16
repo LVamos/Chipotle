@@ -35,7 +35,7 @@ namespace Game.Entities.Characters
 
 			transform.localScale = save.Dimensions.ToVector3();
 			_inventory = save.Inventory != null ? new(save.Inventory) : new();
-			_visitedZones = save.VisitedZones != null ? new(save.VisitedZones) : null;
+			_visitedZones = save.VisitedZones != null ? new(save.VisitedZones) : new();
 			_zone = save.Zone;
 			Orientation = save.Orientation.ToVector2();
 

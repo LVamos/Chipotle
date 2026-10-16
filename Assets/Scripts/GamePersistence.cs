@@ -27,9 +27,8 @@ namespace Game
 		/// <summary>
 		/// Starts the menu for selecting a predefined save and loads the selected save into memory.
 		/// </summary>
-		/// <returns>True if a save was selected.</returns>
 		/// <remarks>for testing purposes only.</remarks>
-		public static bool LoadNamedSave()
+		public static void LoadNamedSave()
 		{
 			string[] saves = null;
 
@@ -42,26 +41,31 @@ namespace Game
 			if (saves.IsNullOrEmpty())
 			{
 				Tolk.Speak("Žádný sejvy tady nevidim.");
-				return false;
+				return;
 			}
 
 			List<List<string>> items =
 				saves.Select(s => new List<string> { Path.GetFileName(s) })
 					.ToList();
 
-			int i = WindowHandler.Menu(new(items, "Kterej sejv chceš načíst?"));
+			WindowHandler.Menu(new(
+				items,
+				"Kterej sejv chceš načíst?",
+				menuClosed: index => LoadSelectedSave(saves, index)));
+		}
 
-			if (i == -1)
+		private static void LoadSelectedSave(string[] saves, int index)
+		{
+			if (index == -1)
 			{
 				Tolk.Speak("Tak nic");
-				return false;
+				return;
 			}
 
-			Sounds.StopAllSounds();
-			string path = Path.Combine(saves[i], "game.sav");
+			Sounds.StopAllSounds(0);
+			string path = Path.Combine(saves[index], "game.sav");
 			LoadGame(path);
 			Tolk.Speak("Načteno.");
-			return true;
 		}
 
 

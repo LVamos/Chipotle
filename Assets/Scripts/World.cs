@@ -666,6 +666,7 @@ namespace Game
 		/// </summary>
 		public static void Init()
 		{
+			AmbientRegistry.Clear();
 			var comparer = StringComparer.OrdinalIgnoreCase;
 			_items = new(comparer);
 			_zones = new(comparer);
@@ -699,11 +700,28 @@ namespace Game
 										&& (p == null || p is { State: PassageState.Open });
 		}
 
+		/// <summary>
+		/// Characters are created as new game objects on every load, so the previous ones have to be removed.
+		/// Zones, items and passages live on scene objects which are reused (see <see cref="SceneObjects"/>).
+		/// </summary>
+		private static void DestroyPreviousCharacters()
+		{
+			if (_characters == null)
+				return;
+
+			foreach (Character character in _characters.Values)
+			{
+				if (character != null)
+					UnityEngine.Object.Destroy(character.gameObject);
+			}
+		}
+
 		public static void ApplySave(GameSave game, TileMap map)
 		{
 			if (game == null)
 				throw new ArgumentException(nameof(game));
 
+			DestroyPreviousCharacters();
 			Init();
 			Map = map;
 
@@ -1075,6 +1093,9 @@ namespace Game
 
 		private static void InitPlayerCameraController()
 		{
+			if (_playerCameraController != null)
+				UnityEngine.Object.Destroy(_playerCameraController.gameObject);
+
 			GameObject obj = new(nameof(PlayerCameraController));
 			_playerCameraController = obj.AddComponent<PlayerCameraController>();
 		}
