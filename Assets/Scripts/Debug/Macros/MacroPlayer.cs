@@ -166,10 +166,19 @@ namespace Game.Debug
 		{
 			IsPlaying = true;
 			Tolk.Speak("Pøehrávám", true);
+			double start = Time.realtimeSinceStartupAsDouble;
+			double due = 0;
+			int lastDispatchFrame = -1;
+
 			foreach (MacroEvent @event in events)
 			{
-				if (@event.DelayMilliseconds > 0)
-					yield return new WaitForSeconds(@event.DelayMilliseconds / 1000f);
+				due += @event.DelayMilliseconds / 1000.0;
+				while (Time.realtimeSinceStartupAsDouble - start < due)
+					yield return null;
+
+				if (@event.DelayMilliseconds > 0 && Time.frameCount == lastDispatchFrame)
+					yield return null;
+				lastDispatchFrame = Time.frameCount;
 
 				try
 				{
