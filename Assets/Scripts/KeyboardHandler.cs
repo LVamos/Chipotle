@@ -1,4 +1,5 @@
-﻿using Game.Controls.Keyboard;
+﻿using Game;
+using Game.Controls.Keyboard;
 using Game.UI;
 
 using System.Collections.Generic;
@@ -14,6 +15,8 @@ using UnityEngine.InputSystem.Controls;
 public class KeyboardHandler : MonoBehaviour
 {
 	private readonly HashSet<Key> heldKeys = new();
+
+	private bool _controlHeld;
 
 	/// <summary>
 	/// Indicates whether any non-modifier key is currently held.
@@ -39,6 +42,10 @@ public class KeyboardHandler : MonoBehaviour
 		bool shift = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
 		bool ctrl = keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed;
 		bool alt = keyboard.leftAltKey.isPressed || keyboard.rightAltKey.isPressed;
+
+		if (ctrl && !_controlHeld)
+			ScreenReader.Silence();
+		_controlHeld = ctrl;
 
 		foreach (KeyControl keyControl in keyboard.allKeys)
 		{
