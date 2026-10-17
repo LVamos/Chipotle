@@ -1,4 +1,4 @@
-﻿using DavyKager;
+﻿using Game;
 
 using Game.Audio;
 using Game.Controls.Keyboard;
@@ -44,7 +44,7 @@ namespace Game.UI
 				return;
 
 			//if (_voicingEnabled)
-			//	Tolk.Speak("Hlavní menu", true);
+			//	ScreenReader.Speak("Hlavní menu", true);
 
 			RunMainMenu();
 		}
@@ -244,11 +244,11 @@ namespace Game.UI
 		/// </summary>
 		private void Help()
 		{
-			Tolk.Speak("Jo, ještě musim vlastně napsat návod... ty vole fakt... mrdat želvu do ucha");
+			ScreenReader.Speak("Jo, ještě musim vlastně napsat návod... ty vole fakt... mrdat želvu do ucha");
 			//todo dodělat
 			return;
 
-			Tolk.Speak("Otvírám nápovědu", true);
+			ScreenReader.Speak("Otvírám nápovědu", true);
 			System.Diagnostics.Process.Start("help.html");
 		}
 

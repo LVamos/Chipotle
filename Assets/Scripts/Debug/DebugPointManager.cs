@@ -1,4 +1,4 @@
-using DavyKager;
+using Game;
 
 using Game.Serialization;
 using Game.UI;
@@ -112,7 +112,7 @@ namespace Game.Debug
 			string yaml = serializer.Serialize(pointsToSave);
 			File.WriteAllText(path, yaml, Encoding.UTF8);
 
-			Tolk.Speak("Bod uložen", true);
+			ScreenReader.Speak("Bod uložen", true);
 		}
 
 		/// <summary>

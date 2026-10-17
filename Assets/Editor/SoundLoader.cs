@@ -29,7 +29,7 @@ namespace Assets.Editor
 			string content = string.Join("\n", soundNames);
 			content = content.Replace("\\", "/");
 			File.WriteAllText(soundListPath, content);
-			TolkTolk.Speak("Seznam zvuků vytvořen");
+			ScreenReader.Speak("Seznam zvuků vytvořen");
 		}
 
 		private static List<string> FindSoundFiles(string path)

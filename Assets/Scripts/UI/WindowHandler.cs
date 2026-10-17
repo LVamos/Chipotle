@@ -1,4 +1,4 @@
-﻿using DavyKager;
+﻿using Game;
 
 using Game.Audio;
 using Game.Controls;
@@ -110,7 +110,7 @@ namespace Game.UI
 
 		public static void ResetGame()
 		{
-			Tolk.Speak("Restartuju hru");
+			ScreenReader.Speak("Restartuju hru");
 			Sounds.StopAllSounds(0);
 			StartGame();
 		}

@@ -3,7 +3,7 @@ using Assets.Scripts.Messaging.Events.Input;
 using Assets.Scripts.Models;
 using Assets.Scripts.Narration.WorldDescribers;
 
-using DavyKager;
+using Game;
 
 using Game.Controls;
 using Game.Controls.DualSense;
@@ -530,10 +530,10 @@ namespace Game.UI
 		{
 			if (quit)
 			{
-				Tolk.Speak("Tak si naser");
+				ScreenReader.Speak("Tak si naser");
 				QuitGame();
 			}
-			else Tolk.Speak("Tak si hraj, tu máš kohouta.");
+			else ScreenReader.Speak("Tak si hraj, tu máš kohouta.");
 		}
 	}
 }

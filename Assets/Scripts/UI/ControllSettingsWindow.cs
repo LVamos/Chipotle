@@ -1,4 +1,4 @@
-﻿using DavyKager;
+﻿using Game;
 
 using Game.Controls;
 using Game.Controls.DualSense;
@@ -94,7 +94,7 @@ namespace Game.UI
 		private void RestoreCommands()
 		{
 			InputConfig.RestoreCommands();
-			Tolk.Speak("Obnoveno");
+			ScreenReader.Speak("Obnoveno");
 			TopLevelMenu();
 		}
 
@@ -210,20 +210,20 @@ namespace Game.UI
 		private void RestoreDualSenseBinding(CommandId command)
 		{
 			InputConfig.RestoreDualsenseBinding(command);
-			Tolk.Speak("Obnoveno");
+			ScreenReader.Speak("Obnoveno");
 			BindingMenu(command, 3);
 		}
 
 		private void SetDualSenseBinding(CommandId command)
 		{
-			Tolk.Speak("Zadej kombinaci tlačítek");
+			ScreenReader.Speak("Zadej kombinaci tlačítek");
 			InputConfig.StartDualSenseBinding(command, DualSenseBindingFinished);
 		}
 
 		private void RestoreKeyboardBinding(CommandId command)
 		{
 			InputConfig.RestoreKeyboardBinding(command);
-			Tolk.Speak("Obnoveno");
+			ScreenReader.Speak("Obnoveno");
 			BindingMenu(command, 1);
 		}
 
@@ -232,7 +232,7 @@ namespace Game.UI
 			if (result.CommandWithSameShortcut != null)
 				AnnounceBlockedShortcut(result.CommandWithSameShortcut.Value);
 			else if (result.Success)
-				Tolk.Speak("Nastaveno");
+				ScreenReader.Speak("Nastaveno");
 			BindingMenu(result.Command);
 		}
 
@@ -241,13 +241,13 @@ namespace Game.UI
 			if (result.CommandWithSameShortcut != null)
 				AnnounceBlockedShortcut(result.CommandWithSameShortcut.Value);
 			else if (result.Success)
-				Tolk.Speak("Nastaveno");
+				ScreenReader.Speak("Nastaveno");
 			BindingMenu(result.Command, 2);
 		}
 
 		private void SetKeyboardBinding(CommandId command)
 		{
-			Tolk.Speak("Zadej klávesovou zkratku");
+			ScreenReader.Speak("Zadej klávesovou zkratku");
 			InputConfig.StartKeyboardBinding(command, KeyboardBindingFinished);
 		}
 
@@ -255,7 +255,7 @@ namespace Game.UI
 		{
 			string blockingCommandName = InputConfig.GetCommandName(blockingCommand);
 			string message = $"Tuhle zkratku už máš nastavenou pro příkaz {blockingCommandName}.";
-			Tolk.Speak(message);
+			ScreenReader.Speak(message);
 		}
 	}
 }

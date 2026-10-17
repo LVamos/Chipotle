@@ -1,4 +1,4 @@
-using DavyKager;
+using Game;
 
 using Game.Controls.Keyboard;
 using Game.UI;
@@ -22,7 +22,7 @@ namespace Game.Debug.UI
 	{
 		public override void Close()
 		{
-			Tolk.Speak("Hra");
+			ScreenReader.Speak("Hra");
 			base.Close();
 		}
 
@@ -152,7 +152,7 @@ namespace Game.Debug.UI
 			bool current = (bool)entry.Getter();
 			bool newValue = !current;
 			entry.Setter(newValue);
-			Tolk.Speak(newValue ? "zapnuto" : "vypnuto", true);
+			ScreenReader.Speak(newValue ? "zapnuto" : "vypnuto", true);
 			Settings.SaveSettings();
 			RefreshItem(Index);
 		}

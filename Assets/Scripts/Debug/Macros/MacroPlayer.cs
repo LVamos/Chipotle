@@ -1,4 +1,4 @@
-using DavyKager;
+using Game;
 
 using Game.Controls.Keyboard;
 using Game.Messaging;
@@ -42,7 +42,7 @@ namespace Game.Debug
 			string path = Path.Combine(MainScript.MacroPath, name + ".txt");
 			if (!File.Exists(path))
 			{
-				Tolk.Speak("Makro nenalezeno", true);
+				ScreenReader.Speak("Makro nenalezeno", true);
 				return false;
 			}
 
@@ -157,7 +157,7 @@ namespace Game.Debug
 			}
 			catch
 			{
-				Tolk.Speak("Chyba pøi naèítání makra", true);
+				ScreenReader.Speak("Chyba pøi naèítání makra", true);
 				return null;
 			}
 		}
@@ -165,7 +165,7 @@ namespace Game.Debug
 		private IEnumerator PlayCoroutine(List<MacroEvent> events)
 		{
 			IsPlaying = true;
-			Tolk.Speak("Pøehrávám", true);
+			ScreenReader.Speak("Pøehrávám", true);
 			double start = Time.realtimeSinceStartupAsDouble;
 			double due = 0;
 			int lastDispatchFrame = -1;
@@ -198,7 +198,7 @@ namespace Game.Debug
 				catch { }
 			}
 
-			Tolk.Speak("Pøehrávání dokonèeno", true);
+			ScreenReader.Speak("Pøehrávání dokonèeno", true);
 			IsPlaying = false;
 			_playCoroutine = null;
 		}

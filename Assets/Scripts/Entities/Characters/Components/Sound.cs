@@ -1,4 +1,4 @@
-﻿using DavyKager;
+﻿using Game;
 
 using Game.Audio;
 using Game.Mapping.Saves;
@@ -143,7 +143,7 @@ namespace Game.Entities.Characters.Components
 		{
 			TerrainType terrain = World.Map[position].Terrain;
 			if (terrain == TerrainType.Wall && _announceWalls)
-				Tolk.Speak("zeď");
+				ScreenReader.Speak("zeď");
 		}
 	}
 }

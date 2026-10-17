@@ -1,8 +1,6 @@
 ﻿using Assets.Scripts.Messaging.Events.Characters;
 using Assets.Scripts.Narration.WorldDescribers;
 
-using DavyKager;
-
 using Game.Audio;
 using Game.Entities.Characters.Components;
 using Game.Entities.Items;
@@ -52,7 +50,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private void OnSayNavigatedObjectLocationResult(SayNavigatedObjectLocationResult message)
 		{
 			if (message.NoNavigatedObjects)
-				Tolk.Speak("Nevybral jsi cíl.");
+				ScreenReader.Speak("Nevybral jsi cíl.");
 		}
 
 		protected AudioSource _footStep;
@@ -113,7 +111,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		public void OnSaySize(SaySize message)
 		{
 			string text = $"{message.Area.Height} krát {message.Area.Width}";
-			Tolk.Speak(text);
+			ScreenReader.Speak(text);
 		}
 
 		/// <summary>
@@ -123,9 +121,9 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		protected void OnSayObjectDescription(SayObjectDescription m)
 		{
 			if (m.Object == null)
-				Tolk.Speak("Před tebou nic není");
+				ScreenReader.Speak("Před tebou nic není");
 			else
-				Tolk.Speak(m.Object.Description);
+				ScreenReader.Speak(m.Object.Description);
 		}
 
 		/// <summary>
@@ -137,13 +135,13 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			string text = Owner.Zone.Name.Friendly;
 			if (Settings.SayInnerZoneNames)
 				text += " " + Owner.Zone.Name.Inner;
-			Tolk.Speak(text, true);
+			ScreenReader.Speak(text, true);
 		}
 
 		private void OnSonarToggled(SonarToggled message)
 		{
 			string state = message.SonarEnabled ? "zapnut" : "vypnut";
-			Tolk.Speak($"Sonar {state}");
+			ScreenReader.Speak($"Sonar {state}");
 
 			if (!message.SonarEnabled)
 				_sonar.SetState();
@@ -216,7 +214,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private void OnNavigationStopped(NavigationStopped message)
 		{
 			if (message.TargetReached)
-				Tolk.Output("Jsi u cíle.");
+				ScreenReader.Output("Jsi u cíle.");
 		}
 
 		private void OnLeftBycar(LeftBycar m)
@@ -248,14 +246,15 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 				{ InteractResult.ResultType.NoUsableObjects, "Tohle se použít nedá" },
 			};
 			if (answers.TryGetValue(message.Result, out string answer))
-				Tolk.Speak(answer);
+				ScreenReader.Speak(answer);
 		}
 
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		private void OnSayZoneDescription(SayZoneDescription m) => Tolk.Speak(Owner.Zone.Description);
+		private void OnSayZoneDescription(SayZoneDescription m)
+			=> ScreenReader.Speak(Owner.Zone.Description);
 
 		/// <summary>
 		/// Handles a message.
@@ -264,16 +263,17 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private void OnPlaceItemResult(PlaceItemResult m)
 		{
 			if (m.Success)
-				Tolk.Speak("Položeno");
+				ScreenReader.Speak("Položeno");
 			else
-				Tolk.Speak("Sem se to nevejde");
+				ScreenReader.Speak("Sem se to nevejde");
 		}
 
 		/// <summary>
 		/// Handles a message.
 		/// </summary>
 		/// <param name="m">The message to be handled</param>
-		protected void OnEmptyInventory(EmptyInventory m) => Tolk.Speak("Nic u sebe nemáš");
+		protected void OnEmptyInventory(EmptyInventory m)
+			=> ScreenReader.Speak("Nic u sebe nemáš");
 
 		/// <summary>
 		/// Handles the PickUpObjectResult message.
@@ -292,7 +292,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 				{ PickUpItemResult.ResultType.Unpickable, "tohle nejde odnést" }
 			};
 
-			Tolk.Speak(resultMessages[message.Result]);
+			ScreenReader.Speak(resultMessages[message.Result]);
 		}
 
 		/// <summary>
@@ -307,7 +307,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			int intY = (int)coords.y;
 			string y = coords.y == intY ? intY.ToString() : coords.y.ToString("0.0");
 			string result = x + (message.Relative ? " " : ", ") + y;
-			Tolk.Speak(result, true);
+			ScreenReader.Speak(result, true);
 			GUIUtility.systemCopyBuffer = coords.GetString();
 		}
 
@@ -318,10 +318,11 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private void OnSayZoneSize(SayZoneSize message)
 		{
 			Terrain.Rectangle a = Owner.Zone.Area.Value;
-			Tolk.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
+			ScreenReader.Speak($"{a.Height.ToString()} krát {a.Width.ToString()}");
 		}
 
-		private void OnSayVisitedZone(SayVisitedZoneResult message) => Tolk.Speak(message.Visited ? "jo jo" : "ne", true);
+		private void OnSayVisitedZone(SayVisitedZoneResult message)
+			=> ScreenReader.Speak(message.Visited ? "jo jo" : "ne", true);
 
 		/// <summary>
 		/// Processes the SayExits message.
@@ -343,13 +344,13 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 				string to = targetZone.To;
 				if (Settings.SayInnerZoneNames)
 					to += " " + targetZone.Name.Inner;
-				Tolk.Speak($"Stojíš {type}{to}", true);
+				ScreenReader.Speak($"Stojíš {type}{to}", true);
 				return;
 			}
 
 			if (message.Exits.IsNullOrEmpty())
 			{
-				Tolk.Speak("žádné východy nevidíš", true);
+				ScreenReader.Speak("žádné východy nevidíš", true);
 				return;
 			}
 
@@ -357,7 +358,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			if (count == 1)
 			{
 				string exit = _exitDescriber.GetDescription(message.Exits[0]);
-				Tolk.Speak(exit, true);
+				ScreenReader.Speak(exit, true);
 				return;
 			}
 
@@ -370,7 +371,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 				.Select(e => _exitDescriber.GetDescription(e))
 				.ToList();
 			string formatedList = FormatStringList(exits.ToArray(), true);
-			Tolk.Speak($"{number}{formatedList}.", true);
+			ScreenReader.Speak($"{number}{formatedList}.", true);
 		}
 
 		/// <summary>
@@ -381,14 +382,14 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		{
 			if (message.Characters.IsNullOrEmpty())
 			{
-				Tolk.Speak("Nikdo tu není", true);
+				ScreenReader.Speak("Nikdo tu není", true);
 				return;
 			}
 
 			List<NavigableObjectInfo> info = message.Characters.Cast<NavigableObjectInfo>().ToList();
 			List<string> descriptions = _characterDescriber.GetDescriptions(info);
 			string text = FormatStringList(descriptions.ToArray());
-			Tolk.Speak(text, true);
+			ScreenReader.Speak(text, true);
 		}
 
 		/// <summary>
@@ -399,14 +400,14 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		{
 			if (message.Items.IsNullOrEmpty())
 			{
-				Tolk.Speak("Nic tu není", true);
+				ScreenReader.Speak("Nic tu není", true);
 				return;
 			}
 
 			var objectInfo = message.Items.Cast<NavigableObjectInfo>().ToList();
 			List<string> describtions = _itemDescriber.GetDescriptions(objectInfo);
 			string output = FormatStringList(describtions.ToArray());
-			Tolk.Speak(output, true);
+			ScreenReader.Speak(output, true);
 		}
 
 		/// <summary>
@@ -425,7 +426,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		protected void SayOrientation(Orientation2D orientation)
 		{
 			string description = orientation.Angle.GetCardinalDirection().GetDescription();
-			Tolk.Output(description, true);
+			ScreenReader.Output(description, true);
 		}
 
 		NavigableExitDescriber _exitDescriber;
@@ -441,7 +442,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			string text = _exitDescriber.GetDescription(message.Exit);
 			if (Settings.SayInnerPassageNames)
 				text += " " + message.Exit.Exit.Name.Inner;
-			Tolk.Speak(text);
+			ScreenReader.Speak(text);
 		}
 
 		/// <summary>
@@ -473,7 +474,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			string text = message.Object.Name.Friendly;
 			if (Settings.SayInnerItemNames && message.Object is Item)
 				text += " " + message.Object.Name.Inner;
-			Tolk.Speak(text);
+			ScreenReader.Speak(text);
 		}
 
 		/// <summary>

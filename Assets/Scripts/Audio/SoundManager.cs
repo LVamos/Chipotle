@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.Audio;
 
-using DavyKager;
+using Game;
 
 using System;
 using System.Collections;
@@ -390,7 +390,7 @@ namespace Game.Audio
 
 		public void MuteSpeech()
 		{
-			Tolk.Silence();
+			ScreenReader.Silence();
 		}
 	}
 }

@@ -190,7 +190,7 @@ public static class sceneSetup
 
 	private static void Log(string message)
 	{
-		TolkTolk.Speak(message);
+		ScreenReader.Speak(message);
 		FileLogger.LogMessage(message);
 	}
 
@@ -234,7 +234,7 @@ public static class sceneSetup
 
 	private static void InitializeVoiceOutput()
 	{
-		TolkTolk.Load();
+		ScreenReader.Load();
 		return;
 		if (!_eventHandlerAssigned)
 		{

@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.Models;
 
-using DavyKager;
+using Game;
 
 using game.debug;
 
@@ -47,7 +47,7 @@ namespace Game.Debug
 			{
 				_lastPlayerPosition = Player.Center;
 				if (DebugPointManager.GetPoints().TryGetValue(Player.Center, out string name))
-					Tolk.Speak(name, true);
+					ScreenReader.Speak(name, true);
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace Game.Debug
 				.AppendLine(namesRecord).AppendLine();
 
 			GUIUtility.systemCopyBuffer = output.ToString();
-			Tolk.Speak("Seznam průchozích objektů máš ve schránce.");
+			ScreenReader.Speak("Seznam průchozích objektů máš ve schránce.");
 		}
 
 		[DebugCommand(DebugCommand.SetWallMaterials)]
@@ -104,14 +104,14 @@ namespace Game.Debug
 				);
 
 			string name = Enum.GetName(typeof(ZoneMaterial), material);
-			Tolk.Speak(name);
+			ScreenReader.Speak(name);
 		}
 
 		[DebugCommand(DebugCommand.SayPlayerOrientation)]
 		private void SayPlayerOrientation()
 		{
 			string message = $"Orientace hráče: {Player.Orientation.Angle.CartesianDegrees}; {Player.gameObject.transform.rotation.eulerAngles}";
-			Tolk.Speak(message, true);
+			ScreenReader.Speak(message, true);
 			GUIUtility.systemCopyBuffer = message;
 		}
 
@@ -119,7 +119,7 @@ namespace Game.Debug
 		private void SayCameraInfo()
 		{
 			string message = $"Orientace kamery: {Camera.main.transform.rotation.eulerAngles}{Environment.NewLine}Pozice: {Camera.main.transform.position}";
-			Tolk.Speak(message, true);
+			ScreenReader.Speak(message, true);
 			GUIUtility.systemCopyBuffer = message;
 		}
 
@@ -129,7 +129,7 @@ namespace Game.Debug
 			Dictionary<Vector2, string> points = DebugPointManager.GetPoints();
 			if (points == null || points.Count == 0)
 			{
-				Tolk.Speak("Žádné uložené body", true);
+				ScreenReader.Speak("Žádné uložené body", true);
 				return;
 			}
 
@@ -156,12 +156,12 @@ namespace Game.Debug
 			var tester = player.GetComponent<ChipotleTuttleCollisionTester>();
 			if (tester != null)
 			{
-				Tolk.Speak("Vypnuto");
+				ScreenReader.Speak("Vypnuto");
 				Destroy(tester);
 				return;
 			}
 
-			Tolk.Speak("Strkám do Tuttla");
+			ScreenReader.Speak("Strkám do Tuttla");
 			tester = player.AddComponent<ChipotleTuttleCollisionTester>();
 			tester.Initialize();
 			tester.Activate();
@@ -261,7 +261,7 @@ namespace Game.Debug
 			string folder = MainScript.MacroPath;
 			if (!Directory.Exists(folder))
 			{
-				Tolk.Speak("Složka s makry neexistuje", true);
+				ScreenReader.Speak("Složka s makry neexistuje", true);
 				return;
 			}
 
@@ -274,7 +274,7 @@ namespace Game.Debug
 
 			if (names.Count == 0)
 			{
-				Tolk.Speak("Žádná makra nenalezena", true);
+				ScreenReader.Speak("Žádná makra nenalezena", true);
 				return;
 			}
 
@@ -308,7 +308,7 @@ namespace Game.Debug
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 			{
-				Tolk.Speak("Makro se nepodařilo smazat", true);
+				ScreenReader.Speak("Makro se nepodařilo smazat", true);
 				return false;
 			}
 		}
@@ -388,7 +388,7 @@ namespace Game.Debug
 		{
 			Settings.TestChipotleStartPosition = Player.Center;
 			Settings.SaveSettings();
-			Tolk.Speak("Startovní pozice uložena", true);
+			ScreenReader.Speak("Startovní pozice uložena", true);
 		}
 
 		/// <summary>
@@ -400,7 +400,7 @@ namespace Game.Debug
 			string distance = World.GetDistance(Tuttle, Player).ToString();
 			string position = Tuttle.Center.ToString();
 			string zone = Tuttle.Zone.Name.Inner;
-			Tolk.Speak(distance + Environment.NewLine + zone + " " + position, true);
+			ScreenReader.Speak(distance + Environment.NewLine + zone + " " + position, true);
 		}
 
 		/// <summary>
@@ -431,7 +431,7 @@ namespace Game.Debug
 
 			Settings.TestChipotleStartPosition = null;
 			Settings.SaveSettings();
-			Tolk.Speak("Startovní pozice obnovena", true);
+			ScreenReader.Speak("Startovní pozice obnovena", true);
 		}
 
 

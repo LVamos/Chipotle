@@ -1,4 +1,4 @@
-using DavyKager;
+using Game;
 
 using Game.Controls.Keyboard;
 using Game.UI;
@@ -39,7 +39,7 @@ namespace Game.Debug
 			_lastTimeStamp = 0;
 			IsRecording = true;
 
-			Tolk.Speak("Nahrávám", true);
+			ScreenReader.Speak("Nahrávám", true);
 		}
 
 		/// <summary>
@@ -101,7 +101,7 @@ namespace Game.Debug
 						));
 					}
 				}
-				Tolk.Speak("Makro uloženo", true);
+				ScreenReader.Speak("Makro uloženo", true);
 			}
 			catch
 			{

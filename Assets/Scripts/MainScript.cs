@@ -1,4 +1,4 @@
-using DavyKager;
+using Game;
 
 using Game.Audio;
 using Game.Controls;
@@ -109,7 +109,7 @@ namespace Game
 		{
 			if (string.IsNullOrEmpty(message))
 			{
-				Tolk.Speak("Tak nic no");
+				ScreenReader.Speak("Tak nic no");
 				return;
 			}
 
@@ -247,7 +247,7 @@ namespace Game
 		/// <returns>True if the message is sent properly</returns>
 		private static bool SendReport(string subject, string message, bool addUserInfo = true)
 		{
-			Tolk.Speak("Posílám");
+			ScreenReader.Speak("Posílám");
 			string body = addUserInfo ? message + Environment.NewLine + GetUserInfo() : message;
 			body += Environment.NewLine + "IP adresa: " + GetIpAddress();
 			return SendMeMail(subject, body, GetAttachment(), GetSaveAttachment());
@@ -526,8 +526,8 @@ Application.Quit();
 				YamlHelper.Initialize();
 				WindowHandler.Initialize();
 				InitRuntime();
-				Tolk.Load();
-				Tolk.TrySAPI(false);
+				ScreenReader.Load();
+				Application.quitting += ScreenReader.Unload;
 				DisableJAWSKeyHook();
 				ResendErrorReport();
 				Settings.LoadSettings();

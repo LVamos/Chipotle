@@ -1,4 +1,4 @@
-﻿using DavyKager;
+﻿using Game;
 
 using Game.Controls;
 using Game.Controls.Keyboard;
@@ -204,7 +204,7 @@ namespace Game.UI
 				return;
 
 			_items.RemoveAt(Index);
-			Tolk.Speak("Smazáno", true);
+			ScreenReader.Speak("Smazáno", true);
 
 			if (_items.Count == 0)
 				Quit();
@@ -264,7 +264,7 @@ namespace Game.UI
 			Play(_introSound);
 
 			if (!string.IsNullOrWhiteSpace(_introText))
-				Tolk.Speak(_introText, false);
+				ScreenReader.Speak(_introText, false);
 			if (_sayItemAtStartup)
 				SayItem(false, false);
 		}
@@ -378,7 +378,7 @@ namespace Game.UI
 				Play(_selectionSound);
 
 			string text = string.Join(_divider, _items[Index]);
-			Tolk.Speak(text, interruptSpeech);
+			ScreenReader.Speak(text, interruptSpeech);
 		}
 
 		/// <summary>

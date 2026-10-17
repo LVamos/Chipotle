@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.Models;
 
-using DavyKager;
+using Game;
 
 using Game.Controls;
 using Game.Entities.Items;
@@ -31,7 +31,7 @@ namespace Game.UI
 			if (Settings.SayInnerItemNames)
 				text += ", " + SelectedItem.Name.Inner;
 
-			Tolk.Speak(text, interruptSpeech);
+			ScreenReader.Speak(text, interruptSpeech);
 		}
 
 		public override void OnActivate()
@@ -138,7 +138,7 @@ namespace Game.UI
 			bool usable = SelectedItem.Usable || SelectedItem.UsableWith != null;
 			if (!usable)
 			{
-				Tolk.Speak("Tohle se použít nedá");
+				ScreenReader.Speak("Tohle se použít nedá");
 				Close();
 				return;
 			}
@@ -163,7 +163,7 @@ namespace Game.UI
 		{
 			if (!SelectedItem.Usable)
 			{
-				Tolk.Speak("Tohle se použít nedá");
+				ScreenReader.Speak("Tohle se použít nedá");
 				Close();
 				return;
 			}

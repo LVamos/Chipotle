@@ -1,4 +1,4 @@
-﻿using DavyKager;
+﻿using Game;
 
 using Game.Audio;
 using Game.Serialization.Protobuf;
@@ -40,7 +40,7 @@ namespace Game
 
 			if (saves.IsNullOrEmpty())
 			{
-				Tolk.Speak("Žádný sejvy tady nevidim.");
+				ScreenReader.Speak("Žádný sejvy tady nevidim.");
 				return;
 			}
 
@@ -58,14 +58,14 @@ namespace Game
 		{
 			if (index == -1)
 			{
-				Tolk.Speak("Tak nic");
+				ScreenReader.Speak("Tak nic");
 				return;
 			}
 
 			Sounds.StopAllSounds(0);
 			string path = Path.Combine(saves[index], "game.sav");
 			LoadGame(path);
-			Tolk.Speak("Načteno.");
+			ScreenReader.Speak("Načteno.");
 		}
 
 
@@ -98,7 +98,7 @@ namespace Game
 		{
 			if (string.IsNullOrEmpty(name))
 			{
-				Tolk.Speak("Tak nic");
+				ScreenReader.Speak("Tak nic");
 				return;
 			}
 
@@ -110,7 +110,7 @@ namespace Game
 
 			path = Path.Combine(path, "game.sav");
 			SaveGame(path);
-			Tolk.Speak("uloženo");
+			ScreenReader.Speak("uloženo");
 		}
 
 		/// <summary>
