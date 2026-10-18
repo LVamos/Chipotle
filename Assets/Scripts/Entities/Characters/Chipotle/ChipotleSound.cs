@@ -16,7 +16,6 @@ using Game.Messaging.Events.Sound;
 using Game.Models;
 using Game.Narration.WorldDescribers;
 using Game.Terrain;
-using Game.UI;
 
 using System;
 using System.Collections.Generic;
@@ -43,8 +42,23 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 		private void LateUpdate()
 		{
-			if (_footStep != null && _footStep.isPlaying)
-				SnapFootstepToListener();
+			UpdateClockOffset();
+			FinishWarmUp();
+		}
+
+		/// <summary>
+		/// The audio clock advances in whole buffers, so a single reading is imprecise. Averaging the difference
+		/// against the real time over many frames gives a stable mapping between the two clocks.
+		/// </summary>
+		private void UpdateClockOffset()
+		{
+			double offset = AudioSettings.dspTime - Time.realtimeSinceStartupAsDouble;
+			if (!_clockOffsetKnown)
+			{
+				_clockOffset = offset;
+				_clockOffsetKnown = true;
+			}
+			else _clockOffset += ClockOffsetSmoothing * (offset - _clockOffset);
 		}
 
 		private void OnSayNavigatedObjectLocationResult(SayNavigatedObjectLocationResult message)
@@ -53,7 +67,24 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 				ScreenReader.Speak("Nevybral jsi cíl.");
 		}
 
-		protected AudioSource _footStep;
+		/// <summary>Moves the source slightly ahead of the listener. Straight below it the direction of the sound is not defined and it can jump to the side.</summary>
+		private const float FootstepForwardOffset = 0.3f;
+
+		/// <summary>Delay between a step and its sound. The sound is scheduled on the audio clock at the exact time instead of starting at the next audio buffer.</summary>
+		private const double StepSoundLead = 0.05;
+
+		private const double StepSoundMinLead = 0.01;
+
+		/// <summary>Weight of one frame in the smoothed difference between the audio clock and the real time.</summary>
+		private const double ClockOffsetSmoothing = 0.02;
+
+		private const int WarmUpFrameCount = 15;
+
+		private AudioSource _footStep;
+		private double _clockOffset;
+		private bool _clockOffsetKnown;
+		private AudioClip _warmUpClip;
+		private int _warmUpFrames;
 
 		private void InitFootStepSource()
 		{
@@ -69,6 +100,32 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			ResonanceAudioSource resonance = obj.AddComponent<ResonanceAudioSource>();
 			resonance.nearFieldEffectEnabled = true;
 			resonance.occlusionEnabled = true;
+
+			WarmUpFootStep();
+		}
+
+		/// <summary>
+		/// A source that plays for the first time can start with an undefined direction and sound at the side.
+		/// Playing a silent clip first lets the spatializer get the right position before the first step.
+		/// </summary>
+		private void WarmUpFootStep()
+		{
+			AttachFootStepToCamera();
+			_warmUpClip = AudioClip.Create("footstep warm-up", 4410, 1, 44100, false);
+			_footStep.clip = _warmUpClip;
+			_footStep.volume = 0;
+			_footStep.loop = true;
+			_footStep.Play();
+			_warmUpFrames = WarmUpFrameCount;
+		}
+
+		private void FinishWarmUp()
+		{
+			if (_warmUpFrames <= 0 || --_warmUpFrames > 0 || _footStep.clip != _warmUpClip)
+				return;
+
+			_footStep.Stop();
+			_footStep.loop = false;
 		}
 
 		public override void Initialize()
@@ -87,10 +144,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			string sound = GetStepSoundName(position);
 			AudioClip clip = Sounds.GetClip(sound);
 			if (!terrainCollided)
-			{
-				SnapFootstepToListener();
-				_footStep.PlayOneShot(clip, _walkVolume);
-			}
+				PlayFootStep(clip);
 			else
 			{
 				float size = 2 * TileMap.TileSize;
@@ -102,10 +156,37 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			AnnounceWall(position);
 		}
 
-		private void SnapFootstepToListener()
+		/// <summary>
+		/// The source is a child of the camera (listener), so it follows it no matter in which order the scripts
+		/// move the camera. It sits below and slightly ahead of the listener, because the direction of a sound at zero distance
+		/// or exactly below the listener is not defined and it can jump to the side.
+		/// </summary>
+		private void AttachFootStepToCamera()
 		{
-			Vector3 position3d = CameraManager.Get3dPosition();
-			_footStep.transform.position = new Vector3(position3d.x, 1, position3d.z);
+			Transform camera = Camera.main != null ? Camera.main.transform : null;
+			if (camera == null || _footStep.transform.parent == camera)
+				return;
+
+			_footStep.transform.SetParent(camera, false);
+			_footStep.transform.localPosition = new Vector3(0, -Mathf.Max(0.3f, camera.position.y - 1f), FootstepForwardOffset);
+		}
+
+		/// <summary>
+		/// Plays a step sound at an exact time on the audio clock so the intervals between steps stay even.
+		/// </summary>
+		private void PlayFootStep(AudioClip clip)
+		{
+			AttachFootStepToCamera();
+			if (!_clockOffsetKnown)
+				UpdateClockOffset();
+
+			double start = Time.realtimeSinceStartupAsDouble + _clockOffset + StepSoundLead;
+			start = Math.Max(start, AudioSettings.dspTime + StepSoundMinLead);
+
+			_footStep.loop = false;
+			_footStep.clip = clip;
+			_footStep.volume = _walkVolume;
+			_footStep.PlayScheduled(start);
 		}
 
 		public void OnSaySize(SaySize message)
