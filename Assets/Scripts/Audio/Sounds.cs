@@ -69,7 +69,21 @@ namespace Game.Audio
 
 		public static void SetLowPass(AudioSource source, float cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
 
-		public static void SetLowPass(AudioSource source, ObstacleType obstacle) => _soundManager.SetLowPass(source, GetLowPassFrequency(obstacle));
+		/// <summary>
+		/// Muffles the sound according to the obstacle. Without an obstacle the low pass filter is switched off.
+		/// </summary>
+		public static void SetLowPass(AudioSource source, ObstacleType obstacle)
+		{
+			int frequency = GetLowPassFrequency(obstacle);
+			if (frequency >= 22000)
+			{
+				_soundManager.DisableLowPass(source);
+				return;
+			}
+
+			_soundManager.EnableLowPass(source);
+			_soundManager.SetLowPass(source, frequency);
+		}
 
 		public static ResonanceRoomManager RoomManager => _roomManager;
 

@@ -1,7 +1,5 @@
 ﻿using Assets.Scripts.Audio;
 
-using Game;
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -261,6 +259,9 @@ namespace Game.Audio
 		private SoundPool _soundPool;
 
 		public void DisableLowPass(AudioSource source) => _soundPool.DisableLowPass(source);
+
+		public void EnableLowPass(AudioSource source)
+			=> _soundPool.EnableLowPass(source);
 
 		public int GetGeneration(AudioSource source) => _soundPool.GetGeneration(source);
 

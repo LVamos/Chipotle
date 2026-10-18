@@ -19,8 +19,7 @@ namespace Game.Terrain
 		public ObstacleType DetectOcclusion(
 			MapElement emittingObject,
 			bool ignoreSubtleObjects = true,
-			bool ignoreItems = true,
-			bool playerInsameZone = true)
+			bool wholeTrack = false)
 		{
 			Vector2 playerCenter = World.Player.Center;
 			Vector2 closestPoint = emittingObject.Area.Value.GetClosestPoint(playerCenter);
@@ -31,15 +30,17 @@ namespace Game.Terrain
 
 			List<MapElement> ignored = new() { emittingObject, World.Player };
 
+			// Whole track: terrain, all items and every step of the track are checked. It's more precise but slower.
 			TrackCollisionParams parameters = new(
 				direction,
 				distance,
 				ignored,
 				ray,
-				false,
-				false,
-				false,
-				ignoreItems
+				firstHit: false,
+				terrain: wholeTrack,
+				ignoreSmall: wholeTrack && ignoreSubtleObjects,
+				ignoreItems: !wholeTrack,
+				mode: wholeTrack ? TrackStopMode.WholeTrack : TrackStopMode.Blocking
 			);
 
 			Collisions result = DetectOnTrack(parameters);
@@ -53,21 +54,23 @@ namespace Game.Terrain
 				.ToHashSet();
 			result = new Collisions(filtered, result.OutOfMap);
 
-			return ClassifyObstacle(result.Obstacles, playerInsameZone);
+			return ClassifyObstacle(result.Obstacles);
 		}
 
-		private ObstacleType ClassifyObstacle(IEnumerable<object> obstacles, bool playerInSameZone)
+		/// <summary>
+		/// Returns the strongest obstacle from the acoustic obstacles found between the player and a sound source.
+		/// A wall muffles the sound the most, a closed door less and other obstacles (characters, items marked as acoustic obstacles,
+		/// bushes and walls of the terrain) the least.
+		/// </summary>
+		private ObstacleType ClassifyObstacle(IEnumerable<object> obstacles)
 		{
 			if (obstacles.Any(o => o is Item i && i.Type == "zeď"))
-				return playerInSameZone ? ObstacleType.ItemOrCharacter : ObstacleType.Wall;
+				return ObstacleType.Wall;
 
 			if (obstacles.Any(o => o is Door d && d.State is PassageState.Closed or PassageState.Locked))
 				return ObstacleType.ClosedDoor;
 
-			if (obstacles.Any(o => o is Character))
-				return ObstacleType.ItemOrCharacter;
-
-			return ObstacleType.None;
+			return obstacles.Any() ? ObstacleType.ItemOrCharacter : ObstacleType.None;
 		}
 
 		/// <summary>

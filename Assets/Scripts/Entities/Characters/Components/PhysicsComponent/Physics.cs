@@ -738,7 +738,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			Character player = World.Player;
 			ObstacleType obstacle = ObstacleType.None;
 			if (Owner != player && Owner.Area != null) // Ignore until the NPC is initialized.
-				obstacle = World.Collisions.DetectOcclusion(Owner);
+				obstacle = World.Collisions.DetectOcclusion(Owner, wholeTrack: true);
 
 			// Announce changes
 			PositionChanged changed = new(this, sourcePosition, target, sourceZone, targetZone, obstacle, silently);
