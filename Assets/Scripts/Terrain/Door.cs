@@ -196,6 +196,7 @@ namespace Game.Terrain
         protected virtual void Close(object sender, Vector2 point)
         {
             State = PassageState.Closed;
+            MovePlayerOutOfDoor();
 
             if (IsSourceCurrent(_openingSource, _openingSourceGeneration) && _openingSource.isPlaying)
                 Sounds.SlideVolume(_openingSource, .5f, 0, true);
@@ -203,6 +204,57 @@ namespace Game.Terrain
             _closingSourceGeneration = Sounds.GetGeneration(_closingSource);
             AnnounceManipulation();
             LogClosing();
+        }
+
+        /// <summary>
+        /// Moves the player standing in the closing door to the side where most of his body is.
+        /// If both sides are equal, he ends up on the side behind him.
+        /// </summary>
+        private void MovePlayerOutOfDoor()
+        {
+            Character player = World.Player;
+            if (player?.Area == null)
+                return;
+
+            Rectangle body = player.Area.Value;
+            Rectangle door = _area.Value;
+            if (!body.Intersects(door))
+                return;
+
+            Zone[] zones = Zones.ToArray();
+            if (zones.Length != 2)
+                return;
+
+            bool alongX = door.Width <= door.Height;
+            int[] sides = zones
+                .Select(z => Math.Sign(alongX ? z.Area.Value.Center.x - door.Center.x : z.Area.Value.Center.y - door.Center.y))
+                .ToArray();
+            int[] counts = zones
+                .Select(z => body.GetPoints(.1f, false).Count(p => z.Area.Value.Contains(p)))
+                .ToArray();
+
+            int chosen;
+            if (counts[0] != counts[1])
+                chosen = counts[0] > counts[1] ? 0 : 1;
+            else
+            {
+                Vector2 facing = player.Orientation.UnitVector;
+                float[] dots = sides.Select(s => (alongX ? facing.x : facing.y) * s).ToArray();
+                chosen = dots[0] <= dots[1] ? 0 : 1;
+            }
+
+            int side = sides[chosen];
+            float half = (alongX ? body.Width : body.Height) / 2 + .1f;
+            Vector2 target = body.Center;
+            if (alongX)
+                target.x = side > 0 ? door.LowerRightCorner.x + half : door.UpperLeftCorner.x - half;
+            else target.y = side > 0 ? door.UpperLeftCorner.y + half : door.LowerRightCorner.y - half;
+
+            Vector2 push = alongX ? new Vector2(side * .1f, 0) : new Vector2(0, side * .1f);
+            for (int i = 0; i < 5 && Rectangle.FromCenter(target, body.Height, body.Width).Intersects(door); i++)
+                target += push;
+
+            player.TakeMessage(new Messaging.Commands.Movement.SetPosition(this, target, true));
         }
 
         private void LogClosing()
@@ -324,13 +376,6 @@ namespace Game.Terrain
             if (State == PassageState.Closed)
             {
                 Open(message.Sender, message.ManipulationPoint);
-                return;
-            }
-
-            // The door is open. Prevent closing it if player is standing in it.
-            if (_area.Value.Contains(World.Player.Area.Value.Center))
-            {
-                Play(_sounds["hit"], message.Sender as Character, message.ManipulationPoint);
                 return;
             }
 

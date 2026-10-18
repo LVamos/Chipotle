@@ -1427,7 +1427,7 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		protected void OnInteract(Interact message)
 		{
-			Door door = GetDoorBefore(null, false, Zone);
+			Door door = GetDoorBefore(null, false, Zone, true);
 			Usables objects = GetUsables(Settings.ObjectManipulationRadius);
 
 			if (door != null)

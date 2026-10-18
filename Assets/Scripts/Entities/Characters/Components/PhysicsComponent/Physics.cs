@@ -850,14 +850,14 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		/// <summary>
 		/// Returns the nearest door in front of the NPC.
 		/// </summary>
-		protected Door GetDoorBefore(Vector2? direction = null, bool inOneStep = false, Zone leadingTo = null)
+		protected Door GetDoorBefore(Vector2? direction = null, bool inOneStep = false, Zone leadingTo = null, bool includeCurrent = false)
 		{
 			float radius = inOneStep
 				? _stepLength
 				: Settings.DoorManipulationRadius + _area.Value.DistanceFromCenterToCorner;
 
 			Vector2 finalDirection = direction ?? GetStepDirection();
-			List<Door> doors = World.GetNearestDoors(Center, radius)
+			List<Door> doors = World.GetNearestDoors(Center, radius, includeCurrent)
 				.Where(d => AngleAllowed(d, finalDirection))
 				.ToList();
 
@@ -869,6 +869,9 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 			bool AngleAllowed(Door door, Vector2 direction)
 			{
+				if (includeCurrent && door.Area.Value.Intersects(_area.Value))
+					return true;
+
 				const float epsilon = 45; // epsilon for float angle comparison
 				float angle = Math.Abs(GetAngle(door.Area.Value, direction));
 				return angle < epsilon || angle >= 360 - epsilon;

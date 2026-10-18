@@ -577,9 +577,12 @@ namespace Game
 		/// <param name="point">The point whose surrounding is to be searched</param>
 		/// <param name="maxDistance">Max allowed distance from the specified point</param>
 		/// <returns>Enumeration of doors</returns>
-		public static List<Door> GetNearestDoors(Vector2 point, float maxDistance)
+		public static List<Door> GetNearestDoors(Vector2 point, float maxDistance, bool includeContaining = false)
 		{
-			List<Door> doors = GetNearestPassages(point)
+			IEnumerable<Passage> passages = includeContaining
+				? _passages.Values.OrderBy(p => p.Area.Value.GetDistanceFrom(point))
+				: GetNearestPassages(point);
+			List<Door> doors = passages
 				.OfType<Door>()
 				.ToList();
 			IEnumerable<Door> result =
