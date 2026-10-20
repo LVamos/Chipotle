@@ -303,7 +303,7 @@ namespace Game.Terrain
 		/// All exits from the zone
 		/// </summary>
 
-		public IReadOnlyList<Passage> Exits => _resolvedExits;
+		public IReadOnlyCollection<Passage> Exits => _resolvedExits;
 
 		/// <summary>
 		/// Text description of the zone
@@ -356,17 +356,17 @@ namespace Game.Terrain
 		/// scratch in <see cref="Activate"/>, because at deserialization time (<see cref="Restore"/>) the
 		/// referenced characters/items/passages don't exist in <see cref="World"/> yet.
 		/// </summary>
-		private List<Character> _resolvedCharacters = new();
+		private HashSet<Character> _resolvedCharacters = new();
 
 		/// <summary>
 		/// Cache of resolved <see cref="Item"/> objects corresponding to <see cref="_items"/>. See <see cref="_resolvedCharacters"/> for lifecycle.
 		/// </summary>
-		private List<Item> _resolvedItems = new();
+		private HashSet<Item> _resolvedItems = new();
 
 		/// <summary>
 		/// Cache of resolved <see cref="Passage"/> objects corresponding to <see cref="_exits"/>. See <see cref="_resolvedCharacters"/> for lifecycle.
 		/// </summary>
-		private List<Passage> _resolvedExits = new();
+		private HashSet<Passage> _resolvedExits = new();
 
 		/// <summary>
 		/// (Re)builds the resolved object caches from the name sets. Must run only after all characters, items
@@ -378,17 +378,17 @@ namespace Game.Terrain
 		{
 			_resolvedCharacters = _characters
 				.Select(name => World.GetCharacter(name) ?? throw new ArgumentNullException($"Character {name} not found"))
-				.ToList();
+				.ToHashSet();
 
 			_resolvedItems = _items
 				.Select(World.GetItem)
 				.Where(o => o != null)
-				.ToList();
+				.ToHashSet();
 
 			_resolvedExits = _exits
 				.Select(World.GetPassage)
 				.Where(p => p != null)
-				.ToList();
+				.ToHashSet();
 		}
 
 		private void CreateComponents(bool loopExists)
@@ -448,7 +448,7 @@ namespace Game.Terrain
 		/// List of NPCs present in this zone.
 		/// </summary>
 
-		public IReadOnlyList<Character> Characters => _resolvedCharacters;
+		public IReadOnlyCollection<Character> Characters => _resolvedCharacters;
 
 		/// <summary>
 		/// Gets all acoustic obstacles in the zone within a specified distance from a point, including items marked as obstacles and closed doors.
@@ -493,7 +493,7 @@ namespace Game.Terrain
 		/// <summary>
 		/// List of objects present in this zone.
 		/// </summary>
-		public IReadOnlyList<Item> Items => _resolvedItems;
+		public IReadOnlyCollection<Item> Items => _resolvedItems;
 
 		/// <summary>
 		/// Returns all adjecting zones to which it's possible to get from this zone.
