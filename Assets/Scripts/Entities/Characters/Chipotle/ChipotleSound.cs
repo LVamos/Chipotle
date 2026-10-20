@@ -520,7 +520,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		/// <param name="message">The message to be processed</param>
 		private void OnCharacterHitDoor(CharacterHitDoor message)
 		{
-			string text = _exitDescriber.GetDescription(message.Exit);
+			string text = _exitDescriber.GetShortDescription(message.Exit);
 			if (Settings.SayInnerPassageNames)
 				text += " " + message.Exit.Exit.Name.Inner;
 			ScreenReader.Speak(text);

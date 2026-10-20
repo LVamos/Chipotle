@@ -36,10 +36,17 @@ namespace Game.Narration.WorldDescribers
 			return descriptions;
 		}
 
-		public override List<string> GetStructuredDescription(NavigableObjectInfo record)
-		{
-			NavigableExitInfo info = record as NavigableExitInfo;
+		/// <summary>
+		/// Describes the exit without distance and direction, e.g. when the observer bumps into it.
+		/// </summary>
+		public string GetShortDescription(NavigableExitInfo info)
+			=> string.Join(' ', GetStructuredDescription(info, false).Where(s => !string.IsNullOrEmpty(s)));
 
+		public override List<string> GetStructuredDescription(NavigableObjectInfo record)
+			=> GetStructuredDescription(record as NavigableExitInfo, true);
+
+		private List<string> GetStructuredDescription(NavigableExitInfo info, bool includePosition)
+		{
 			string type = info.Exit.TypeDescription;
 			string distanceDescription = GetDistanceDescription(info);
 
@@ -71,8 +78,11 @@ namespace Game.Narration.WorldDescribers
 				result.Add(type);
 			result.Add(to1);
 			result.Add(to2);
-			result.Add(distanceDescription);
-			result.Add(angleDescription);
+			if (includePosition)
+			{
+				result.Add(distanceDescription);
+				result.Add(angleDescription);
+			}
 			if (Settings.SayInnerZoneNames)
 				result.Add($" {info.TargetZone.Name.Inner}");
 
