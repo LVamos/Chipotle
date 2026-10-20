@@ -1238,6 +1238,7 @@ namespace Game.Entities.Characters.Chipotle
 			// If there's a wall and other items in the same time, exclude the wall from announcements.
 			List<Entity> entityList = entities.ToList();
 			IEnumerable<string> types = entityList
+				.Where(e => e is not Item { Passable: true })
 				.Select(e => e.Type)
 				.Distinct();
 			if (types.Contains("zeď") && types.Count() > 1)
@@ -1265,7 +1266,7 @@ namespace Game.Entities.Characters.Chipotle
 				LogEntityCollision(entity, contactPoint);
 			}
 
-			return true;
+			return entityList.Any(e => e is not Item { Passable: true });
 
 			float GetDistance(MapElement element)
 				=> World.GetDistance(GetContactPoint(element), _area.Value.Center);
