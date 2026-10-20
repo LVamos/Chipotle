@@ -922,6 +922,41 @@ namespace Game.Terrain
 			return clamp ? copy.ClampPoint(result) : result;
 		}
 
+		/// <summary>
+		/// Projects a point lying outside of this rectangle, but aligned to one of its edges, into the rectangle.
+		/// The point is pushed inside by distanceFromEdge only along the axis in which it was outside.
+		/// </summary>
+		public Vector2? GetProjectedPoint(Vector2 point, float distanceFromEdge = 0, bool clamp = false)
+		{
+			Rectangle copy = this;
+
+			bool alignedVertically = point.x >= MinX && point.x <= MaxX;
+			bool alignedHorizontally = point.y >= MinY && point.y <= MaxY;
+			if (!alignedVertically && !alignedHorizontally)
+				return null;
+
+			float x = point.x;
+			float y = point.y;
+
+			if (alignedVertically)
+			{
+				if (point.y > MaxY)
+					y = MaxY - distanceFromEdge;
+				else if (point.y < MinY)
+					y = MinY + distanceFromEdge;
+			}
+			else if (alignedHorizontally)
+			{
+				if (point.x < MinX)
+					x = MinX + distanceFromEdge;
+				else if (point.x > MaxX)
+					x = MaxX - distanceFromEdge;
+			}
+
+			Vector2 result = new(x, y);
+			return clamp ? copy.ClampPoint(result) : result;
+		}
+
 		public float MinX => UpperLeftCorner.x;
 		public float MaxX => UpperRightCorner.x;
 		public float MinY => LowerRightCorner.y;

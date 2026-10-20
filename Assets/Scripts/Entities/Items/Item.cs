@@ -315,7 +315,7 @@ namespace Game.Entities.Items
 			float distance = _area.Value.GetDistanceFrom(exitPoint);
 			Zone myZone = GetZoneNearPlayer();
 
-			Vector2 projectionPoint = myZone.Area.Value.GetAlignedPoint(exitPoint, distance, true).Value;
+			Vector2 projectionPoint = myZone.Area.Value.GetProjectedPoint(exitPoint, distance, true).Value;
 			float height = GetSoundHeight();
 			Vector3 result = projectionPoint.ToVector3(height);
 			return result;
