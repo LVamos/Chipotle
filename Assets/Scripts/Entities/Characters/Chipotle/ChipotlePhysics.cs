@@ -1229,22 +1229,16 @@ namespace Game.Entities.Characters.Chipotle
 		private bool HandleEntityCollisions(HashSet<object> elements)
 		{
 			bool doorColided = elements.Any(e => e is Door);
-			IEnumerable<Entity> entities = elements.OfType<Entity>();
-			if (doorColided)
-				entities = entities.Where(e => e is Item i && i.Type != "zeď");
-			if (entities.IsNullOrEmpty())
+			List<Entity> entityList = elements
+				.OfType<Entity>()
+				.Where(e => !doorColided || (e is Item i && i.Type != "zeď"))
+				.ToList();
+			if (entityList.Count == 0)
 				return false;
 
-			// If there's a wall and other items in the same time, exclude the wall from announcements.
-			List<Entity> entityList = entities.ToList();
-			IEnumerable<string> types = entityList
-				.Where(e => e is not Item { Passable: true })
-				.Select(e => e.Type)
-				.Distinct();
-			if (types.Contains("zeď") && types.Count() > 1)
-				entityList =
-					entityList.Where(i => i.Type != "zeď")
-					.ToList();
+			// If there's a wall and other solid objects in the same time, exclude the wall from announcements.
+			if (entityList.Any(e => e is not Item { Passable: true } && e.Type != "zeď"))
+				entityList.RemoveAll(e => e.Type == "zeď");
 
 			IEnumerable<IGrouping<string, Entity>> groupedElements = entityList
 				.GroupBy(o => o.Name.Friendly);
