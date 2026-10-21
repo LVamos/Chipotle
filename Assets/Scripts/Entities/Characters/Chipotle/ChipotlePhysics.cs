@@ -460,6 +460,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void OnNavigateToItem(NavigateToItem message)
 		{
+			ResetNavigation(message.Item);
 			_navigatedItem = message.Item;
 			StartNavigation newMessage = new(Owner);
 			_navigatedItem.TakeMessage(newMessage);
@@ -470,6 +471,7 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void OnNavigateToExit(NavigateToExit message)
 		{
+			ResetNavigation(message.Exit);
 			StartNavigation newMessage = new(Owner);
 			message.Exit.TakeMessage(newMessage);
 			_navigatedExit = message.Exit;
@@ -479,11 +481,25 @@ namespace Game.Entities.Characters.Chipotle
 
 		private void OnNavigateToCharacter(NavigateToCharacter message)
 		{
+			ResetNavigation(message.Character);
 			StartNavigation newMessage = new(Owner);
 			message.Character.TakeMessage(newMessage);
 			_navigatedCharacter = message.Character;
 			NoAcousticObstacleFound();
 			_navigatedObjectBehind = false;
+		}
+
+		/// <summary>
+		/// Stops navigation to a previous target, if any, so that only one target is navigated at a time.
+		/// </summary>
+		private void ResetNavigation(MapElement newTarget)
+		{
+			if (GetNavigatedObject() is MapElement previous && previous != newTarget)
+				StopNavigation();
+
+			_navigatedItem = null;
+			_navigatedExit = null;
+			_navigatedCharacter = null;
 		}
 
 		private void OnPlaceItem(PlaceItem message)
@@ -723,6 +739,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// <param name="message">The message to be processed</param>
 		private void OnObjectNavigationStopped(NavigationStopped message)
 		{
+			if (message.Sender != GetNavigatedObject())
+				return;
+
 			_navigatedItem = null;
 			_navigatedExit = null;
 			_navigatedCharacter = null;

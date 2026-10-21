@@ -230,7 +230,7 @@ namespace Game.Terrain
 
 			if (!keepNavigating)
 			{
-				StopNavigation(true);
+				World.Player.TakeMessage(new NavigationStopped(this, PlayerNearBy()));
 				return;
 			}
 
