@@ -29,16 +29,16 @@ namespace Game.Audio
 		{
 			_soundPool.EnableLowPass(source);
 
-			float startFrequency = GetLowPassFrequency(source);
-			if (targetFrequency == startFrequency)
-				return;
-
 			Coroutine coroutine;
 			if (_lowPassCoroutines.TryGetValue(source, out coroutine))
 			{
 				StopCoroutine(coroutine);
 				_lowPassCoroutines.Remove(source);
 			}
+
+			float startFrequency = GetLowPassFrequency(source);
+			if (targetFrequency == startFrequency)
+				return;
 
 			Coroutine newCoroutine = StartCoroutine(SlideLowPassStep(
 				source,
@@ -147,15 +147,15 @@ namespace Game.Audio
 
 		public void SlideVolume(AudioSource source, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
 		{
-			if (targetVolume == (float)source.volume)
-				return;
-
 			Coroutine coroutine;
 			if (_volumeCoroutines.TryGetValue(source, out coroutine))
 			{
 				StopCoroutine(coroutine);
 				_volumeCoroutines.Remove(source);
 			}
+
+			if (targetVolume == (float)source.volume)
+				return;
 
 			Coroutine newCoroutine = StartCoroutine(SlideVolumeStep(
 						source,
@@ -168,12 +168,20 @@ namespace Game.Audio
 			_volumeCoroutines[source] = newCoroutine;
 		}
 
+		private Dictionary<AudioSource, Coroutine> _blendCoroutines = new();
+
 		public void SlideSpatialBlend(AudioSource source, float duration, float targetBlend, Action finalAction = null)
 		{
+			if (_blendCoroutines.TryGetValue(source, out Coroutine coroutine))
+			{
+				StopCoroutine(coroutine);
+				_blendCoroutines.Remove(source);
+			}
+
 			if (targetBlend == source.spatialBlend)
 				return;
 
-			StartCoroutine(SlideSpatialBlendStep(source, duration, source.spatialBlend, targetBlend, finalAction));
+			_blendCoroutines[source] = StartCoroutine(SlideSpatialBlendStep(source, duration, source.spatialBlend, targetBlend, finalAction));
 		}
 
 		private IEnumerator SlideVolumeStep(
