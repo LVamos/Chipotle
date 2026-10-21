@@ -1,6 +1,4 @@
-﻿using Game;
-
-using Game.Audio;
+﻿using Game.Audio;
 using Game.Controls.Keyboard;
 
 using System;
@@ -219,7 +217,6 @@ namespace Game.UI
 		{
 			if (_speakerTestAudio.IsPlaying())
 				Sounds.SlideVolume(_speakerTestAudio, .5f, 0, true);
-			MainScript.EnableJAWSKeyHook();
 			yield return StopLoop();
 			Quit();
 		}

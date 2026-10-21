@@ -1,5 +1,3 @@
-using Game;
-
 using Game.Audio;
 using Game.Controls;
 using Game.Entities.Items;
@@ -18,8 +16,6 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-using Object = System.Object;
 
 namespace Game
 {
@@ -325,7 +321,6 @@ namespace Game
 
 			if (Settings.ThrowExceptions)
 				throw ex;
-			EnableJAWSKeyHook(); // Restore JAWS key hook
 
 			if (!Settings.ReportErrors || !GameLoaded)
 			{
@@ -441,62 +436,12 @@ Application.Quit();
 		}
 
 		/// <summary>
-		/// Stores reference to JAWS COM object.
-		/// </summary>
-		private static Type _jaws;
-
-		private static Object _jawsObject;
-
-		/// <summary>
-		/// Sets access to JAWS COM object.
-		/// </summary>
-		/// <returns>True if JAWS could be initialized</returns>
-		private static bool InitJAWS()
-		{
-			if (_jaws != null)
-				return true;
-
-			_jaws = Type.GetTypeFromProgID("FreedomSci.JawsApi");
-
-			if (_jaws == null)
-				return false;
-
-			_jawsObject = Activator.CreateInstance(_jaws);
-			return true;
-		}
-
-		/// <summary>
-		/// Enables JAWS keyhook.
-		/// </summary>
-		public static void EnableJAWSKeyHook()
-		{
-			if (!Settings.DisableJawsKeyHook || !InitJAWS())
-				return;
-
-			_jaws.InvokeMember("Enable", System.Reflection.BindingFlags.InvokeMethod, null, _jawsObject,
-				new object[] { true });
-		}
-
-		/// <summary>
-		/// Removes JAWS keyhook.
-		/// </summary>
-		public static void DisableJAWSKeyHook()
-		{
-			if (!Settings.DisableJawsKeyHook || !InitJAWS())
-				return;
-
-			_jaws.InvokeMember("Disable", System.Reflection.BindingFlags.InvokeMethod, null, _jawsObject, null);
-		}
-
-		/// <summary>
 		/// Displays an error announcement and terminates the program.
 		/// </summary>
 		/// <param name="prompt">The prompt to be shown</param>
 		public static void Terminate(string prompt)
 		{
 			string message = string.IsNullOrEmpty(prompt) ? "Došlo k neznámé chybě. Hra bude ukončena." : prompt;
-			//Interaction.MsgBox(prompt, MsgBoxStyle.Critical, "Chyba");
-			EnableJAWSKeyHook();
 			Environment.Exit(0);
 		}
 
@@ -528,7 +473,6 @@ Application.Quit();
 				InitRuntime();
 				ScreenReader.Load();
 				Application.quitting += ScreenReader.Unload;
-				DisableJAWSKeyHook();
 				ResendErrorReport();
 				Settings.LoadSettings();
 				Sounds.LoadClips();
@@ -538,7 +482,6 @@ Application.Quit();
 			{
 				OnError(ex);
 			}
-			EnableJAWSKeyHook();
 
 			AddStartup();
 		}
