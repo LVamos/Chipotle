@@ -36,8 +36,11 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 		private void OnDestroy()
 		{
-			if (_footStep != null)
-				Destroy(_footStep.gameObject);
+			foreach (AudioSource footStep in _footSteps)
+			{
+				if (footStep != null)
+					Destroy(footStep.gameObject);
+			}
 		}
 
 		private void LateUpdate()
@@ -80,7 +83,11 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 		private const int WarmUpFrameCount = 15;
 
-		private AudioSource _footStep;
+		/// <summary>
+		/// One source per foot. Consecutive steps alternate, so a step doesn't cut off the previous one.
+		/// </summary>
+		private readonly AudioSource[] _footSteps = new AudioSource[2];
+		private int _nextFootStep;
 		private double _clockOffset;
 		private bool _clockOffsetKnown;
 		private AudioClip _warmUpClip;
@@ -88,20 +95,27 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 		private void InitFootStepSource()
 		{
-			GameObject obj = new GameObject("FootstepSource");
-			_footStep = obj.AddComponent<AudioSource>();
-			_footStep.spatialBlend = 1f;   // 3D
-			_footStep.dopplerLevel = 0f;
-			_footStep.playOnAwake = false;
-			_footStep.spatialize = true;
-			_footStep.spatializePostEffects = false;
-			_footStep.outputAudioMixerGroup = Sounds.ResonanceGroup;
+			for (int i = 0; i < _footSteps.Length; i++)
+				_footSteps[i] = CreateFootStepSource($"FootstepSource{i + 1}");
+
+			WarmUpFootStep();
+		}
+
+		private AudioSource CreateFootStepSource(string name)
+		{
+			GameObject obj = new GameObject(name);
+			AudioSource source = obj.AddComponent<AudioSource>();
+			source.spatialBlend = 1f;   // 3D
+			source.dopplerLevel = 0f;
+			source.playOnAwake = false;
+			source.spatialize = true;
+			source.spatializePostEffects = false;
+			source.outputAudioMixerGroup = Sounds.ResonanceGroup;
 
 			ResonanceAudioSource resonance = obj.AddComponent<ResonanceAudioSource>();
 			resonance.nearFieldEffectEnabled = true;
 			resonance.occlusionEnabled = true;
-
-			WarmUpFootStep();
+			return source;
 		}
 
 		/// <summary>
@@ -112,20 +126,29 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		{
 			AttachFootStepToCamera();
 			_warmUpClip = AudioClip.Create("footstep warm-up", 4410, 1, 44100, false);
-			_footStep.clip = _warmUpClip;
-			_footStep.volume = 0;
-			_footStep.loop = true;
-			_footStep.Play();
+			foreach (AudioSource footStep in _footSteps)
+			{
+				footStep.clip = _warmUpClip;
+				footStep.volume = 0;
+				footStep.loop = true;
+				footStep.Play();
+			}
 			_warmUpFrames = WarmUpFrameCount;
 		}
 
 		private void FinishWarmUp()
 		{
-			if (_warmUpFrames <= 0 || --_warmUpFrames > 0 || _footStep.clip != _warmUpClip)
+			if (_warmUpFrames <= 0 || --_warmUpFrames > 0)
 				return;
 
-			_footStep.Stop();
-			_footStep.loop = false;
+			foreach (AudioSource footStep in _footSteps)
+			{
+				if (footStep.clip != _warmUpClip)
+					continue;
+
+				footStep.Stop();
+				footStep.loop = false;
+			}
 		}
 
 		public override void Initialize()
@@ -164,11 +187,17 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private void AttachFootStepToCamera()
 		{
 			Transform camera = Camera.main != null ? Camera.main.transform : null;
-			if (camera == null || _footStep.transform.parent == camera)
+			if (camera == null)
 				return;
 
-			_footStep.transform.SetParent(camera, false);
-			_footStep.transform.localPosition = new Vector3(0, -Mathf.Max(0.3f, camera.position.y - 1f), FootstepForwardOffset);
+			foreach (AudioSource footStep in _footSteps)
+			{
+				if (footStep.transform.parent == camera)
+					continue;
+
+				footStep.transform.SetParent(camera, false);
+				footStep.transform.localPosition = new Vector3(0, -Mathf.Max(0.3f, camera.position.y - 1f), FootstepForwardOffset);
+			}
 		}
 
 		/// <summary>
@@ -183,10 +212,13 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			double start = Time.realtimeSinceStartupAsDouble + _clockOffset + StepSoundLead;
 			start = Math.Max(start, AudioSettings.dspTime + StepSoundMinLead);
 
-			_footStep.loop = false;
-			_footStep.clip = clip;
-			_footStep.volume = _walkVolume;
-			_footStep.PlayScheduled(start);
+			AudioSource footStep = _footSteps[_nextFootStep];
+			_nextFootStep = (_nextFootStep + 1) % _footSteps.Length;
+
+			footStep.loop = false;
+			footStep.clip = clip;
+			footStep.volume = _walkVolume;
+			footStep.PlayScheduled(start);
 		}
 
 		public void OnSaySize(SaySize message)
@@ -539,8 +571,12 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		/// <param name="message">The message to be processed</param>
 		private void OnPositionChanged(PositionChanged message)
 		{
-			if (!message.Silently)
-				PlayStep(message.TargetPosition.Center);
+			if (message.Silently)
+				return;
+
+			Vector2 position = message.TargetPosition.Center;
+			PlayStep(position);
+			RegisterStep(message.StepDuration, () => PlayStep(position));
 		}
 
 		/// <summary>

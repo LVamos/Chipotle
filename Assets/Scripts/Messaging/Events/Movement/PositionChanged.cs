@@ -29,6 +29,11 @@ namespace Game.Messaging.Events.Movement
 		public readonly bool Silently;
 
 		/// <summary>
+		/// Duration of the step in seconds; 0 if unknown.
+		/// </summary>
+		public readonly float StepDuration;
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="sender">Source of the message</param>
@@ -38,6 +43,7 @@ namespace Game.Messaging.Events.Movement
 		/// <param name="targetZone">Target zone of the NPC</param>
 		/// <param name="obstacle">Describes type of obstacle between the entity and the player if any</param>
 		/// <param name="silently">Determines if the fott steps of the NPC should be audible</param>
+		/// <param name="stepDuration">Duration of the step in seconds; 0 if unknown</param>
 		public PositionChanged(
 			object sender,
 			Rectangle? sourcePosition,
@@ -46,6 +52,7 @@ namespace Game.Messaging.Events.Movement
 			Zone targetZone,
 			ObstacleType obstacle = ObstacleType.None,
 			bool silently = false,
+			float stepDuration = 0,
 					[CallerLineNumber] int line = 0,
 		[CallerMemberName] string member = "",
 		[CallerFilePath] string file = ""
@@ -54,6 +61,7 @@ namespace Game.Messaging.Events.Movement
 		{
 			Obstacle = obstacle;
 			Silently = silently;
+			StepDuration = stepDuration;
 			Line = line;
 			Member = member;
 			File = file;

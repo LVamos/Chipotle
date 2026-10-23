@@ -2,6 +2,7 @@
 using Game.Entities.Characters.Components;
 using Game.Messaging.Commands.Characters;
 using Game.Messaging.Events.Movement;
+using Game.Terrain;
 
 
 
@@ -128,7 +129,10 @@ namespace Game.Entities.Characters.Tuttle
 			if (message.Silently)
 				return;
 
-			PlayStep(message.TargetPosition.Center, message.Obstacle);
+			Vector2 position = message.TargetPosition.Center;
+			ObstacleType obstacle = message.Obstacle;
+			PlayStep(position, obstacle);
+			RegisterStep(message.StepDuration, () => PlayStep(position, obstacle));
 
 			// Slide voice of the NPC if talking
 			if (_movingSpeechAudio == null || !_movingSpeechAudio.isPlaying)

@@ -139,6 +139,47 @@ namespace Game.Entities.Characters.Components
 			AnnounceWall(position);
 		}
 
+		/// <summary>
+		/// How many step intervals without a step end the walk.
+		/// </summary>
+		private const float WalkEndFactor = 1.2f;
+
+		/// <summary>
+		/// Step duration used when the step message doesn't contain it.
+		/// </summary>
+		private const float DefaultStepDuration = .5f;
+
+		private int _stepsInWalk;
+		private float _lastStepTime = float.NegativeInfinity;
+		private Coroutine _closingStep;
+
+		/// <summary>
+		/// Counts the steps of the current walk. If the walk ends after the first step, the other foot is brought alongside,
+		/// so the closing step is played.
+		/// </summary>
+		/// <param name="stepDuration">Duration of the step in seconds; 0 if unknown</param>
+		/// <param name="playClosingStep">Plays the closing step</param>
+		protected void RegisterStep(float stepDuration, Action playClosingStep)
+		{
+			float interval = stepDuration > 0 ? stepDuration : DefaultStepDuration;
+			float now = Time.time;
+			_stepsInWalk = now - _lastStepTime > interval * WalkEndFactor ? 1 : _stepsInWalk + 1;
+			_lastStepTime = now;
+
+			if (_closingStep != null)
+				StopCoroutine(_closingStep);
+			_closingStep = _stepsInWalk == 1 ? StartCoroutine(PlayClosingStep(interval * WalkEndFactor, playClosingStep)) : null;
+		}
+
+		private IEnumerator PlayClosingStep(float delay, Action playClosingStep)
+		{
+			yield return new WaitForSeconds(delay);
+			_closingStep = null;
+			_stepsInWalk = 0;
+			_lastStepTime = float.NegativeInfinity;
+			playClosingStep();
+		}
+
 		protected void AnnounceWall(Vector2 position)
 		{
 			TerrainType terrain = World.Map[position].Terrain;

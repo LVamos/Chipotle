@@ -741,7 +741,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 				obstacle = World.Collisions.DetectOcclusion(Owner, wholeTrack: true);
 
 			// Announce changes
-			PositionChanged changed = new(this, sourcePosition, target, sourceZone, targetZone, obstacle, silently);
+			PositionChanged changed = new(this, sourcePosition, target, sourceZone, targetZone, obstacle, silently, _speed / 1000f);
 			InnerMessage(changed);
 
 			if (targetZone != sourceZone)
