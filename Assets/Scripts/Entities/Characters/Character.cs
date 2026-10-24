@@ -139,7 +139,7 @@ namespace Game.Entities.Characters
 			_inventory = new();
 			_visitedZones = new();
 
-			Usable = true;
+			Usable = false;
 			_components =
 				new CharacterComponent[] { ai, physics, input, sound }
 					.Where(c => c != null)
