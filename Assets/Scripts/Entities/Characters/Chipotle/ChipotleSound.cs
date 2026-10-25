@@ -74,7 +74,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private const float FootstepForwardOffset = 0.3f;
 
 		/// <summary>Delay between a step and its sound. The sound is scheduled on the audio clock at the exact time instead of starting at the next audio buffer.</summary>
-		private const double StepSoundLead = 0.05;
+		private const double StepSoundLead = 0.025;
 
 		private const double StepSoundMinLead = 0.01;
 
