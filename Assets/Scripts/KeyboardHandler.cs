@@ -39,9 +39,14 @@ public class KeyboardHandler : MonoBehaviour
 	private void HandleKeys(Keyboard keyboard)
 	{
 		// Read modifier state directly in this frame
-		bool shift = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
-		bool ctrl = keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed;
-		bool alt = keyboard.leftAltKey.isPressed || keyboard.rightAltKey.isPressed;
+		bool shift = IsDown(keyboard.leftShiftKey) || IsDown(keyboard.rightShiftKey);
+		bool ctrl = IsDown(keyboard.leftCtrlKey) || IsDown(keyboard.rightCtrlKey);
+		bool alt = IsDown(keyboard.leftAltKey) || IsDown(keyboard.rightAltKey);
+
+		// Modifiers released in this frame, needed for a whole combination tapped between two frames
+		bool shiftInFrame = shift || keyboard.leftShiftKey.wasReleasedThisFrame || keyboard.rightShiftKey.wasReleasedThisFrame;
+		bool ctrlInFrame = ctrl || keyboard.leftCtrlKey.wasReleasedThisFrame || keyboard.rightCtrlKey.wasReleasedThisFrame;
+		bool altInFrame = alt || keyboard.leftAltKey.wasReleasedThisFrame || keyboard.rightAltKey.wasReleasedThisFrame;
 
 		if (ctrl && !_controlHeld)
 			ScreenReader.Silence();
@@ -58,15 +63,18 @@ public class KeyboardHandler : MonoBehaviour
 				continue;
 
 			bool isPressed = keyControl.isPressed;
-			bool wasHeld = heldKeys.Contains(key);
 
-			if (isPressed && !wasHeld)
+			if (IsDown(keyControl) && !heldKeys.Contains(key))
 			{
 				heldKeys.Add(key);
-				KeyboardInput shortcut = new(ctrl, shift, alt, key);
+				bool tappedInFrame = !isPressed;
+				KeyboardInput shortcut = tappedInFrame
+					? new(ctrlInFrame, shiftInFrame, altInFrame, key)
+					: new(ctrl, shift, alt, key);
 				WindowHandler.OnKeyDown(shortcut);
 			}
-			else if (!isPressed && wasHeld)
+
+			if (!isPressed && heldKeys.Contains(key))
 			{
 				heldKeys.Remove(key);
 				KeyboardInput shortcut = new(ctrl, shift, alt, key);
@@ -74,6 +82,11 @@ public class KeyboardHandler : MonoBehaviour
 			}
 		}
 	}
+
+	/// <summary>
+	/// A key pressed and released between two frames isn't pressed anymore, but it still has to count as a press.
+	/// </summary>
+	private static bool IsDown(KeyControl key) => key.isPressed || key.wasPressedThisFrame;
 
 	private void HandleCharacterInput()
 	{
