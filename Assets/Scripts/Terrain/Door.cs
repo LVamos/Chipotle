@@ -495,7 +495,7 @@ namespace Game.Terrain
                 throw new InvalidOperationException($"Attempt to unlock unlocked door {Name.Inner}");
             State = PassageState.Closed;
             AnnounceManipulation();
-            LogLocking();
+            LogUnlocking();
         }
     }
 }
