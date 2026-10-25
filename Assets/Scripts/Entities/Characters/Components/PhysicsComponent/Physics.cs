@@ -304,7 +304,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			List<MapElement> objects = GetEntitiesBefore(Settings.ObjectManipulationRadius)
 				.Cast<MapElement>()
 				?.ToList();
-			Door door = GetDoorBefore(GetStepDirection(), true);
+			Door door = GetDoorBefore(GetStepDirection(), false);
 			if (door != null)
 				objects.Add(door);
 
