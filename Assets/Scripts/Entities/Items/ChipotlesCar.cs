@@ -29,42 +29,21 @@ namespace Game.Entities.Items
 	{
 		public override void Restore(ItemSave save)
 		{
+			base.Restore(save);
 			if (save is not ChipotlesCarSave data)
 				return;
 
-			Initialize
-				(
-				data.Name.ToName(),
-				data.Area.ToRectangle(),
-				data.Type,
-				data.Decorative,
-data.Pickable,
-data.Usable,
-data.Passable,
-data.CollisionSound,
-data.ActionSound,
-data.LoopSound,
-data.Cutscene,
-data.UsableOnce,
-data.AudibleOverWalls,
-_defaultVolume,
-data.StopWhenPlayerMoves,
-data.QuickActionsAllowed,
-data.PickingSound,
-data.PlacingSound,
-data.UsableWith
-				);
-
 			// Collect visited zones
-			_visitedZones = data.VisitedZones
+			_visitedZones = data.VisitedZones?
 				.Select(World.GetZone)
-				.ToHashSet();
+				.ToHashSet() ?? new();
 
-			_allowedDestinations = data.AllowedDestinations;
+			_allowedDestinations = data.AllowedDestinations ?? new();
 			_descriptionID = data.DescriptionID;
+			Moved = data.Moved;
 		}
 
-		public ItemSave Export()
+		public override ItemSave Export()
 		{
 			var save = base.Export().ToChipotlesCarSave();
 
@@ -76,6 +55,7 @@ data.UsableWith
 				.ToHashSet();
 
 			save.AllowedDestinations = !_allowedDestinations.IsNullOrEmpty() ? new(_allowedDestinations) : null;
+			save.Moved = Moved;
 
 			return save;
 		}

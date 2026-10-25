@@ -11,5 +11,6 @@ namespace Game.Serialization.Protobuf.Snapshots.Entities.Items
 	{
 		public HashSet<string> AllowedDestinations { get; set; }
 		public HashSet<string> VisitedZones { get; set; }
+		public bool Moved { get; set; }
 	}
 }
