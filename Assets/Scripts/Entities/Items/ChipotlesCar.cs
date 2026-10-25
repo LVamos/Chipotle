@@ -361,7 +361,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// </summary>
 		/// <returns>True if all the Walsch's area was explored</returns>
 		private bool WalshAreaExplored()
-			=> Player.VisitedZones.Count() == 14
+			=> Player.VisitedZones.Count() == 15
 			   && Player.VisitedZones.All(l => l.Name.Inner.ToLower().Contains("w1"));
 
 		/// <summary>
