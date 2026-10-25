@@ -357,11 +357,12 @@ namespace Game.Entities.Items
 
 		protected void LogCollision(Character character, Vector2 point)
 		{
-			string title = "Objekt zaznamenal náraz postavy";
+			string title = Passable ? "Objekt zaznamenal průchod postavy" : "Objekt zaznamenal náraz postavy";
+			string itemName = $"Objekt: {Name.Inner}";
 			string characterName = $"Postava: {character.Name.Inner}";
 			string pointOfCollision = $"Bod srážky: {point.GetString()}";
 
-			Logger.LogInfo(title, characterName, pointOfCollision);
+			Logger.LogInfo(title, itemName, characterName, pointOfCollision);
 		}
 
 		protected void LogUssage(Character character, MapElement usedItem, MapElement target, Vector2 point)

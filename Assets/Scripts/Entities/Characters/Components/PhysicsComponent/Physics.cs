@@ -1437,9 +1437,10 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 		protected void LogEntityCollision(Entity entity, Vector2 contactPoint)
 		{
-			string title = "Postava narazila do entity";
+			bool passable = entity is Items.Item { Passable: true };
+			string title = passable ? "Postava prošla průchozím objektem" : "Postava narazila do entity";
 			string character = $"Postava: {Owner.Name.Inner}";
-			string collidedEntity = $"Kolidovaná entita: {entity.Name.Inner}";
+			string collidedEntity = passable ? $"Objekt: {entity.Name.Inner}" : $"Kolidovaná entita: {entity.Name.Inner}";
 			string pointOfCollision = $"Bod srážky: {contactPoint.GetString()}";
 			Logger.LogInfo(title, character, collidedEntity, pointOfCollision);
 		}

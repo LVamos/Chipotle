@@ -1292,6 +1292,8 @@ namespace Game.Entities.Characters.Chipotle
 					.GroupBy(tile => tile.Tile.Terrain)
 	.Select(group => group.First())
 				.ToArray();
+			if (terrainPoints.Length == 0)
+				return;
 
 			foreach (TileInfo tile in terrainPoints)
 				InnerMessage(new TerrainCollided(this, tile.Position));
