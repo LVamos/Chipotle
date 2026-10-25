@@ -755,20 +755,20 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			string name = Owner.Name.Inner;
 
 			string position = string.Empty;
-			if (Owner.Area == null)
+			if (_area == null)
 				position += ": pozice: nenastavena";
 			else
-				position += $"Pozice: {Owner.Area.Value.Center.GetString()}";
+				position += $"Pozice: {_area.Value.Center.GetString()}";
 
 			string zone = string.Empty;
-			if (Owner.Zone == null)
+			if (Zone == null)
 				zone = "Lokace: neznámá";
 			else
-				zone = $"Lokace: {Owner.Zone.Name.Inner}";
+				zone = $"Lokace: {Zone.Name.Inner}";
 
 			string relativePosition = string.Empty;
-			if (Owner.Zone != null)
-				relativePosition = $"Relativní pozice: {Rectangle.GetRelativeCoordinates(Owner.Area.Value.Center)}";
+			if (Zone != null)
+				relativePosition = $"Relativní pozice: {Rectangle.GetRelativeCoordinates(_area.Value.Center)}";
 
 			string objectsBefore = GetObjectsBeforeForLog();
 
