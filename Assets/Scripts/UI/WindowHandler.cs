@@ -10,6 +10,7 @@ using Game.Debug.UI;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using UnityEngine;
 
@@ -122,9 +123,118 @@ namespace Game.UI
 		private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
 		private const int SW_RESTORE = 9;
+		private const int SW_MINIMIZE = 6;
+		private const int SW_SHOWNORMAL = 1;
+
+		private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		private static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
+
+		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+		private static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int maxCount);
+
+		[DllImport("user32.dll")]
+		private static extern bool IsWindowVisible(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+		[DllImport("user32.dll")]
+		private static extern IntPtr GetForegroundWindow();
+
+		[DllImport("kernel32.dll")]
+		private static extern uint GetCurrentThreadId();
+
+		[DllImport("user32.dll")]
+		private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool attach);
+
+		[DllImport("user32.dll")]
+		private static extern bool BringWindowToTop(IntPtr hWnd);
+
+		private static IntPtr FindOwnWindow(Func<string, bool> titleMatches, bool visibleOnly = true)
+		{
+			uint ownProcess = (uint)Process.GetCurrentProcess().Id;
+			IntPtr found = IntPtr.Zero;
+			EnumWindows((hWnd, _) =>
+			{
+				GetWindowThreadProcessId(hWnd, out uint processId);
+				if (processId != ownProcess || (visibleOnly && !IsWindowVisible(hWnd)))
+					return true;
+
+				StringBuilder title = new(256);
+				GetWindowText(hWnd, title, title.Capacity);
+				if (!titleMatches(title.ToString()))
+					return true;
+
+				found = hWnd;
+				return false;
+			}, IntPtr.Zero);
+			return found;
+		}
+
+		private static IntPtr _previousForeground;
+
+		private static IntPtr FindGameWindow() => FindOwnWindow(t => t == "Running" || t == "Game", false);
+
+		/// <summary>
+		/// Checks that the game window is really the foreground window and Unity knows about it.
+		/// </summary>
+		public static bool IsGameWindowActive()
+			=> Application.isFocused && (!Application.isEditor || GetForegroundWindow() == FindGameWindow());
+
+		/// <summary>
+		/// Activates the game window once more through the previously active window, so that Unity notices the focus change.
+		/// </summary>
+		public static void RefocusGameWindow()
+		{
+			if (!Application.isEditor)
+				return;
+
+			IntPtr game = FindGameWindow();
+			if (game != IntPtr.Zero)
+				ActivateGameWindow(game, _previousForeground);
+		}
+
+		private static void ActivateGameWindow(IntPtr game, IntPtr bounceVia)
+		{
+			// Activating from the main thread inside Update leaves Unity unfocused, so the keyboard stays disabled.
+			new System.Threading.Thread(() =>
+			{
+				if (bounceVia != IntPtr.Zero)
+				{
+					SetForegroundWindow(bounceVia);
+					System.Threading.Thread.Sleep(150);
+				}
+
+				uint foregroundThread = GetWindowThreadProcessId(GetForegroundWindow(), out _);
+				uint ownThread = GetCurrentThreadId();
+				bool attached = foregroundThread != ownThread && AttachThreadInput(ownThread, foregroundThread, true);
+				ShowWindow(game, SW_SHOWNORMAL);
+				BringWindowToTop(game);
+				SetForegroundWindow(game);
+				if (attached)
+					AttachThreadInput(ownThread, foregroundThread, false);
+			}) { IsBackground = true }.Start();
+		}
 
 		public static void FocusGameWindow()
 		{
+			if (Application.isEditor)
+			{
+				IntPtr main = FindOwnWindow(t => t.Contains(" - Unity "));
+				if (main != IntPtr.Zero)
+					ShowWindow(main, SW_MINIMIZE);
+
+				IntPtr game = FindGameWindow();
+				if (game == IntPtr.Zero)
+					return;
+
+				_previousForeground = GetForegroundWindow();
+				ActivateGameWindow(game, IntPtr.Zero);
+				return;
+			}
+
 			IntPtr hwnd = Process.GetCurrentProcess().MainWindowHandle;
 
 			if (hwnd != IntPtr.Zero)

@@ -78,6 +78,36 @@ namespace Game.Debug.integration
 				try { action(); }
 				catch { }
 			}
+
+			CheckGameFocus();
+		}
+
+		private const float FocusCheckDelay = .5f;
+		private const int MaxFocusRetries = 3;
+		private float _focusCheckTime;
+		private int _focusRetries;
+
+		private void FocusGameWindow()
+		{
+			WindowHandler.FocusGameWindow();
+			_focusCheckTime = Time.realtimeSinceStartup + FocusCheckDelay;
+			_focusRetries = MaxFocusRetries;
+		}
+
+		private void CheckGameFocus()
+		{
+			if (_focusRetries == 0 || Time.realtimeSinceStartup < _focusCheckTime)
+				return;
+
+			if (WindowHandler.IsGameWindowActive())
+			{
+				_focusRetries = 0;
+				return;
+			}
+
+			_focusRetries--;
+			_focusCheckTime = Time.realtimeSinceStartup + FocusCheckDelay;
+			WindowHandler.RefocusGameWindow();
 		}
 
 		private void ServerLoop()
@@ -127,7 +157,7 @@ namespace Game.Debug.integration
 			try
 			{
 				WindowHandler.DebugManager.MoveTuttleToCoords(coordinates);
-				WindowHandler.FocusGameWindow();
+				FocusGameWindow();
 			}
 			catch { }
 		}
@@ -173,7 +203,7 @@ namespace Game.Debug.integration
 			try
 			{
 				WindowHandler.DebugManager.GoToCoords(coordinates);
-				WindowHandler.FocusGameWindow();
+				FocusGameWindow();
 			}
 			catch { }
 		}
