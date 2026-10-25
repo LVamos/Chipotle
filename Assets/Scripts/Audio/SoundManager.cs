@@ -247,6 +247,7 @@ namespace Game.Audio
 			source.loop = loop;
 			source.outputAudioMixerGroup = null;
 			_soundPool.DisableLowPass(source);
+			_soundPool.SoundStartedPlaying(source);
 
 			if (fadeIn)
 			{
@@ -260,7 +261,6 @@ namespace Game.Audio
 				source.Play();
 			}
 
-			_soundPool.SoundStartedPlaying(source);
 			return source;
 		}
 
@@ -298,6 +298,7 @@ namespace Game.Audio
 			resonance.bypassRoomEffects = false;
 			resonance.nearFieldEffectEnabled = true;
 			resonance.occlusionEnabled = true;
+			_soundPool.SoundStartedPlaying(source);
 
 			if (fadeIn)
 			{
@@ -309,7 +310,6 @@ namespace Game.Audio
 
 			source.volume = volume;
 			source.Play();
-			_soundPool.SoundStartedPlaying(source);
 			return source;
 		}
 

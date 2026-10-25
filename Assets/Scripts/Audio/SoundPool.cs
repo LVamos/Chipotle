@@ -152,6 +152,7 @@ namespace Assets.Scripts.Audio
         {
             GameObject o = new("Sound");
             AudioSource source = o.AddComponent<AudioSource>();
+            source.playOnAwake = false;
             o.AddComponent<ResonanceAudioSource>();
             AudioLowPassFilter lowPass = o.AddComponent<AudioLowPassFilter>();
             o.SetActive(false);
