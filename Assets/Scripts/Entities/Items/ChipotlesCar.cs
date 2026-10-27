@@ -3,6 +3,7 @@ using Game.Entities.Characters;
 using Game.Mapping.Saves;
 using Game.Messaging.Commands.Physics;
 using Game.Messaging.Events.Movement;
+using Game.Messaging.Events.Physics;
 using Game.Serialization.Protobuf.Snapshots.Entities.Items;
 using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
 using Game.Terrain;
@@ -98,8 +99,8 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			["ulice h1"] = new(1543.4f, 1058.9f), // At the pub
 			["ulice s1"] = new(1350.1f, 962), // In safe distance from Sweeney's house
 			["příjezdová cesta w1"] = new(1032.7f, 1031.1f), // At a fence
-			["ulice v1"] = new(1786, 1123), // On park place next to Vanilla crunch
-			["asfaltka c1"] = new(1786, 1123) // At the edge of "cesta c1"
+			["ulice v1"] = new(2006, 1097), // On park place next to Vanilla crunch
+			["asfaltka c1"] = new(1208, 986) // At the edge of "cesta c1"
 		};
 
 		/// <summary>
@@ -191,7 +192,18 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <param name="target">Coordinates of the target location</param>
 		protected override void Move(Rectangle target)
 		{
+			foreach (Zone zone in Zones)
+				zone.TakeMessage(new ItemLeftZone(this, this, zone));
+
 			base.Move(target);
+
+			_zones = new();
+			foreach (Zone zone in World.GetZones(_area.Value))
+			{
+				zone.TakeMessage(new ItemAppearedInZone(this, this, zone));
+				_zones.Add(zone.Name.Inner);
+			}
+
 			ChipotlesCarMoved message = new(this, target);
 			Player.TakeMessage(message);
 			_tuttle.TakeMessage(message);
@@ -209,10 +221,9 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			bool onDriveWay = _zones.Contains("příjezdová cesta w1");
 			bool walschAreaDone = WalshAreaObjectsUsed() && WalshAreaExplored();
 			bool onAsphaltRoad = Zones.Any(l => l.Name.Inner == "asfaltka c1");
-			bool knock =
-				onDriveWay && !Moved && !walschAreaDone
-				|| onAsphaltRoad && !CarsonsBenchesUsed();
-			if (knock)
+
+			if (onDriveWay && !Moved && !walschAreaDone
+				|| onAsphaltRoad && !CarsonsBenchesUsed())
 			{
 				Cutscene.Play(this, "DrumOnCar");
 				return;
@@ -274,6 +285,12 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 				destinations[l.Name.Friendly] = l;
 			}
 
+			if (destinations.Count == 0)
+			{
+				Cutscene.Play(this, "DrumOnCar");
+				return;
+			}
+
 			if (destinations.Count == 1)
 			{
 				Move(destinations.First().Value, cutscene);
@@ -284,7 +301,6 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 				destinations.Keys.ToArray()
 					.Select(k => new List<string>() { k })
 					.ToList();
-			//_allowedDestinations.Select(d => d.Name.Friendly).ToList();
 			int item = WindowHandler.Menu(new(items, "Kam chceš jet?"));
 
 			if (item >= 0)
@@ -337,7 +353,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// cutscene is defined then a predefined alternative is played.
 		/// </remarks>
 		private void Move(Zone zone, string cutscene)
-			=> Move(new Rectangle(_destinations[zone.Name.Inner]), cutscene);
+			=> Move(Rectangle.FromCenter(_destinations[zone.Name.Inner], _area.Value.Height, _area.Value.Width), cutscene);
 
 		/// <summary>
 		/// Processes the MoveChipotlesCar message.
@@ -369,6 +385,6 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// </summary>
 		/// <returns>True if all crutial objects in Walsch's area were used</returns>
 		private bool WalshAreaObjectsUsed()
-			=> WalshAreaObjects.All(o => o.Used);
+			=> WalshAreaObjects.All(o => o == null || o.Used);
 	}
 }
