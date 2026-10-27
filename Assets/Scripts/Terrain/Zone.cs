@@ -539,6 +539,13 @@ namespace Game.Terrain
 		}
 
 		/// <summary>
+		/// Gets a message without distributing it to the objects, NPCs and passages in the zone.
+		/// </summary>
+		/// <param name="message">The message to be received</param>
+		public void TakeMessageWithoutRouting(Message message)
+			=> base.TakeMessage(message);
+
+		/// <summary>
 		/// Gets a message from another messaging object and stores it for processing.
 		/// </summary>
 		/// <param name="message">The message to be received</param>

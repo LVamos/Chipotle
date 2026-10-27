@@ -894,9 +894,10 @@ namespace Game
 		}
 
 		/// <summary>
-		/// Sends a message to all NPCs.
+		/// Sends a message to all NPCs, objects, passages and zones.
 		/// </summary>
 		/// <param name="message">The message to be sent</param>
+		/// <remarks>Each recipient gets the message only once.</remarks>
 		public static void TakeMessage(Message message)
 		{
 			if (!WorldActive)
@@ -904,14 +905,11 @@ namespace Game
 
 			foreach (Character c in _characters.Values)
 				c.TakeMessage(message);
-			foreach (Passage p in _passages.Values)
-			{
-				if (p is Door)
-					p.TakeMessage(message);
-			}
+			MessageItems(message);
+			MessagePassages(message);
 
 			foreach (Zone z in _zones.Values)
-				z.TakeMessage(message);
+				z.TakeMessageWithoutRouting(message);
 		}
 
 		/// <summary>
