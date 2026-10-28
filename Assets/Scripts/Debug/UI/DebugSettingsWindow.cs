@@ -64,6 +64,8 @@ namespace Game.Debug.UI
 		{
 			base.OnActivate();
 			PopulateList();
+			if (!IndexOffEdge())
+				SayItem(false, false);
 		}
 
 		/// <summary>
