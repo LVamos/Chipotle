@@ -46,7 +46,6 @@ namespace Game.UI
 
 		public static void Initialize()
 		{
-			CreateDebugManager();
 			AddKeyboardHandler();
 			AddDualSenseHandler();
 			ShowVersion();
@@ -60,7 +59,11 @@ namespace Game.UI
 
 		private static DualSenseHandler _dualSenseHandler;
 
-		private static void CreateDebugManager() => DebugManager = DebugManager.CreateInstance();
+		public static void CreateDebugManager()
+		{
+			if (Settings.TestCommandsEnabled && DebugManager == null)
+				DebugManager = DebugManager.CreateInstance();
+		}
 
 		public static string InputBox(string prompt, string title, string defaultValue = "")
 		{
@@ -250,7 +253,7 @@ namespace Game.UI
 		/// <param name="letter">The key that was pressed</param>
 		public static void OnKeyPress(char letter)
 		{
-			DebugManager.OnKeyPress(letter);
+			DebugManager?.OnKeyPress(letter);
 			ActiveWindow.OnKeyPress(letter);
 		}
 
@@ -306,7 +309,7 @@ namespace Game.UI
 				return;
 			}
 
-			DebugManager.OnKeyDown(inpuut);
+			DebugManager?.OnKeyDown(inpuut);
 			ActiveWindow?.OnKeyDown(inpuut);
 		}
 
@@ -325,7 +328,7 @@ namespace Game.UI
 				}
 			}
 
-			DebugManager.OnKeyUp(input);
+			DebugManager?.OnKeyUp(input);
 			ActiveWindow?.OnKeyUp(input);
 		}
 

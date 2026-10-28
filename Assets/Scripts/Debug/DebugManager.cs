@@ -18,6 +18,7 @@ using Game.Testing.Characters.Chipotle;
 using Game.UI;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,7 +52,7 @@ namespace Game.Debug
 			}
 		}
 
-		[DebugCommand(DebugCommand.ExportPassableItems)]
+		[DebugCommand(DebugCommand.ExportPassableItems, "Zkopírovat průchozí objekty do schránky")]
 		private void ExportPassableItems()
 		{
 			var passableItems = World.GetItems().Where(i => i.Passable)
@@ -79,7 +80,7 @@ namespace Game.Debug
 			ScreenReader.Speak("Seznam průchozích objektů máš ve schránce.");
 		}
 
-		[DebugCommand(DebugCommand.SetWallMaterials)]
+		[DebugCommand(DebugCommand.SetWallMaterials, "Nastavit materiál zdí")]
 		private void SetWallMaterials()
 			=> WindowHandler.InputBox("Zadej číslo materiálu", "Materiály zdí", string.Empty, ApplyWallMaterial);
 
@@ -107,7 +108,7 @@ namespace Game.Debug
 			ScreenReader.Speak(name);
 		}
 
-		[DebugCommand(DebugCommand.SayPlayerOrientation)]
+		[DebugCommand(DebugCommand.SayPlayerOrientation, "Říct orientaci hráče")]
 		private void SayPlayerOrientation()
 		{
 			string message = $"Orientace hráče: {Player.Orientation.Angle.CartesianDegrees}; {Player.gameObject.transform.rotation.eulerAngles}";
@@ -115,7 +116,7 @@ namespace Game.Debug
 			GUIUtility.systemCopyBuffer = message;
 		}
 
-		[DebugCommand(DebugCommand.SayCameraInfo)]
+		[DebugCommand(DebugCommand.SayCameraInfo, "Říct orientaci a pozici kamery")]
 		private void SayCameraInfo()
 		{
 			string message = $"Orientace kamery: {Camera.main.transform.rotation.eulerAngles}{Environment.NewLine}Pozice: {Camera.main.transform.position}";
@@ -123,7 +124,7 @@ namespace Game.Debug
 			GUIUtility.systemCopyBuffer = message;
 		}
 
-		[DebugCommand(DebugCommand.JumpToDebugPoint)]
+		[DebugCommand(DebugCommand.JumpToDebugPoint, "Skočit na ladicí bod")]
 		private void JumpToDebugPoint()
 		{
 			Dictionary<Vector2, string> points = DebugPointManager.GetPoints();
@@ -149,7 +150,7 @@ namespace Game.Debug
 			WindowHandler.Menu(parameters);
 		}
 
-		[DebugCommand(DebugCommand.TestTuttleCollisions)]
+		[DebugCommand(DebugCommand.TestTuttleCollisions, "Zapnout nebo vypnout test kolizí s Tuttlem")]
 		private void TestTuttleCollisions()
 		{
 			GameObject player = World.Player.gameObject;
@@ -167,13 +168,13 @@ namespace Game.Debug
 			tester.Activate();
 		}
 
-		[DebugCommand(DebugCommand.OpenTuttleInEditor)]
+		[DebugCommand(DebugCommand.OpenTuttleInEditor, "Ukázat Tuttla v editoru map")]
 		private void OpenTuttleInEditor()
 		{
 			_pipeServer.SendJumpToCoordinates(Tuttle.Center);
 		}
 
-		[DebugCommand(DebugCommand.MoveTuttleToClipboardCoords)]
+		[DebugCommand(DebugCommand.MoveTuttleToClipboardCoords, "Přesunout Tuttla na souřadnice ze schránky")]
 		public void MoveTuttleToClipboardCoords()
 		{
 			try
@@ -198,10 +199,10 @@ namespace Game.Debug
 
 		MapEditorPipeServer _pipeServer;
 
-		[DebugCommand(DebugCommand.OpenEditorOnPoint)]
+		[DebugCommand(DebugCommand.OpenEditorOnPoint, "Ukázat hráče v editoru map")]
 		private void OpenEditorOnPoint() => _pipeServer.SendJumpToCoordinates(Player.Center);
 
-		[DebugCommand(DebugCommand.PlaceDebugPoint)]
+		[DebugCommand(DebugCommand.PlaceDebugPoint, "Umístit ladicí bod")]
 		public void PlaceDebugPoint() => DebugPointManager.PlaceDebugPoint();
 
 		public static DebugManager CreateInstance()
@@ -251,7 +252,7 @@ namespace Game.Debug
 			return false;
 		}
 
-		[DebugCommand(DebugCommand.PlayMacroPrompt)]
+		[DebugCommand(DebugCommand.PlayMacroPrompt, "Přehrát makro")]
 		private void PlayMacroPrompt()
 		{
 			if (_macroRecorder != null && _macroRecorder.IsRecording)
@@ -313,7 +314,7 @@ namespace Game.Debug
 			}
 		}
 
-		[DebugCommand(DebugCommand.StartMacroRecording)]
+		[DebugCommand(DebugCommand.StartMacroRecording, "Spustit nahrávání makra")]
 		private void StartMacroRecording()
 		{
 			if (_macroPlayer != null && _macroPlayer.IsPlaying)
@@ -322,7 +323,7 @@ namespace Game.Debug
 			_macroRecorder?.StartRecording();
 		}
 
-		[DebugCommand(DebugCommand.StopMacroRecording)]
+		[DebugCommand(DebugCommand.StopMacroRecording, "Zastavit nahrávání makra")]
 		private void StopMacroRecording()
 		{
 			_macroRecorder?.StopAndSave();
@@ -345,11 +346,48 @@ namespace Game.Debug
 			_macroPlayer?.Play(name);
 		}
 
-		[DebugCommand(DebugCommand.OpenSettings)]
+		[DebugCommand(DebugCommand.OpenSettings, "Otevřít ladicí nastavení")]
 		public void OpenSettings() => WindowHandler.OpenDebugSettings();
 
-		[DebugCommand(DebugCommand.OpenLog)]
+		[DebugCommand(DebugCommand.OpenLog, "Otevřít log")]
 		public void OpenLog() => Logger.OpenLog();
+
+		/// <summary>
+		/// Opens a menu with all debug commands and their keyboard shortcuts and runs the selected one.
+		/// </summary>
+		[DebugCommand(DebugCommand.OpenDebugMenu, "Ladicí menu")]
+		private void OpenDebugMenu()
+		{
+			List<DebugCommand> commands = _commands.Keys
+				.Where(c => c != DebugCommand.OpenDebugMenu)
+				.OrderBy(c => _commands[c].Description, StringComparer.CurrentCultureIgnoreCase)
+				.ToList();
+
+			List<List<string>> items = commands
+				.Select(c => new List<string>
+				{
+					_commands[c].Description,
+					_commandShortcuts.TryGetValue(c, out KeyboardInput shortcut) ? shortcut.ToString() : "bez zkratky"
+				})
+				.ToList();
+
+			MenuParameters parameters = new(
+				items: items,
+				introText: "Ladicí menu",
+				divider: ", ",
+				menuClosed: index =>
+				{
+					if (index != -1)
+						StartCoroutine(RunAfterMenuClosed(_commands[commands[index]].Action));
+				});
+			WindowHandler.Menu(parameters);
+		}
+
+		private IEnumerator RunAfterMenuClosed(Action action)
+		{
+			yield return null;
+			action();
+		}
 
 		public override void OnKeyDown(KeyboardInput shortcut)
 		{
@@ -375,6 +413,8 @@ namespace Game.Debug
 		}
 
 		private Dictionary<KeyboardInput, Action> _keyboardCommands = new();
+		private Dictionary<DebugCommand, (string Description, Action Action)> _commands = new();
+		private Dictionary<DebugCommand, KeyboardInput> _commandShortcuts = new();
 		private Dictionary<DualSenseInput, Action> _gamepadCommands = new();
 
 		private Character Tuttle => World.GetCharacter("tuttle");
@@ -383,7 +423,7 @@ namespace Game.Debug
 		/// <summary>
 		/// A test method that saves current position as start position.
 		/// </summary>
-		[DebugCommand(DebugCommand.SaveStartPosition)]
+		[DebugCommand(DebugCommand.SaveStartPosition, "Uložit startovní pozici")]
 		private void SaveStartPosition()
 		{
 			Settings.TestChipotleStartPosition = Player.Center;
@@ -394,7 +434,7 @@ namespace Game.Debug
 		/// <summary>
 		/// Test function to announce Tuttle's position
 		/// </summary>
-		[DebugCommand(DebugCommand.SayTuttlesPosition)]
+		[DebugCommand(DebugCommand.SayTuttlesPosition, "Říct Tuttlovu pozici")]
 		private void SayTuttlesPosition()
 		{
 			string distance = World.GetDistance(Tuttle, Player).ToString();
@@ -406,24 +446,24 @@ namespace Game.Debug
 		/// <summary>
 		/// Reports current position of the player in relative coordinates.
 		/// </summary>
-		[DebugCommand(DebugCommand.SayRelativeCoordinates)]
+		[DebugCommand(DebugCommand.SayRelativeCoordinates, "Říct relativní souřadnice")]
 		private void SayRelativeCoordinates()
 		{
 			SayCoordinates message = new(this);
 			Player.TakeMessage(message);
 		}
 
-		[DebugCommand(DebugCommand.SayItemSize)]
+		[DebugCommand(DebugCommand.SayItemSize, "Říct velikost objektu")]
 		private void SayItemSize()
 		{
 			SayItemSize message = new(this);
 			Player.TakeMessage(message);
 		}
 
-		[DebugCommand(DebugCommand.ResetGame)]
+		[DebugCommand(DebugCommand.ResetGame, "Restartovat hru")]
 		private void ResetGame() => WindowHandler.ResetGame();
 
-		[DebugCommand(DebugCommand.RestoreStartPosition)]
+		[DebugCommand(DebugCommand.RestoreStartPosition, "Obnovit výchozí startovní pozici")]
 		private void RestoreStartPosition()
 		{
 			if (!Settings.TestCommandsEnabled)
@@ -438,7 +478,7 @@ namespace Game.Debug
 		/// <summary>
 		/// Test method that moves Chipotle to coords taken from clipboard
 		/// </summary>
-		[DebugCommand(DebugCommand.GoToClipboardCoords)]
+		[DebugCommand(DebugCommand.GoToClipboardCoords, "Přesunout hráče na souřadnice ze schránky")]
 		private void GoToClipboardCoords()
 		{
 			try
@@ -480,18 +520,19 @@ namespace Game.Debug
 
 				// Get all DebugManager methods with DebugCommand attribute
 				MethodInfo[] methods = typeof(DebugManager).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-				Dictionary<DebugCommand, Action> commandMethods = methods
+				_commands = methods
 					.Select(m => new
 					{
 						Method = m,
 						Attr = m.GetCustomAttribute<DebugCommandAttribute>()
 					})
 					.Where(x => x.Attr != null)
-					.ToDictionary(x => x.Attr.Command, x => (Action)Delegate.CreateDelegate(typeof(Action), this, x.Method));
+					.ToDictionary(x => x.Attr.Command, x => (x.Attr.Description, (Action)Delegate.CreateDelegate(typeof(Action), this, x.Method)));
 
 				// Clear old dictionaries
 				_keyboardCommands.Clear();
 				_gamepadCommands.Clear();
+				_commandShortcuts.Clear();
 
 				foreach (KeyValuePair<string, YamlCommandBindings> pair in rawMap)
 				{
@@ -500,14 +541,16 @@ namespace Game.Debug
 						continue;
 
 					// Skip if there is no method for this DebugCommand
-					if (!commandMethods.TryGetValue(command, out Action action))
+					if (!_commands.TryGetValue(command, out var entry))
 						continue;
+					Action action = entry.Action;
 
 					// Add keyboard input to dictionary if present
 					if (!string.IsNullOrEmpty(pair.Value.Keyboard))
 					{
 						KeyboardInput keyboardInput = new KeyboardInput(pair.Value.Keyboard);
 						_keyboardCommands[keyboardInput] = action;
+						_commandShortcuts[command] = keyboardInput;
 					}
 
 					// Add DualSense input to dictionary if present
@@ -539,7 +582,7 @@ namespace Game.Debug
 		/// <summary>
 		/// Opens a menu with all zones and jumps to the nearest walkable position in the selected zone.
 		/// </summary>
-		[DebugCommand(DebugCommand.JumpToZoneMenu)]
+		[DebugCommand(DebugCommand.JumpToZoneMenu, "Skočit do lokace")]
 		private void JumpToZoneMenu()
 		{
 			IEnumerable<Zone> zones = World.GetZones();

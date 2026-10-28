@@ -156,6 +156,9 @@ namespace Game.Debug.integration
 		{
 			try
 			{
+				if (WindowHandler.DebugManager == null)
+					return;
+
 				WindowHandler.DebugManager.MoveTuttleToCoords(coordinates);
 				FocusGameWindow();
 			}
@@ -202,6 +205,9 @@ namespace Game.Debug.integration
 		{
 			try
 			{
+				if (WindowHandler.DebugManager == null)
+					return;
+
 				WindowHandler.DebugManager.GoToCoords(coordinates);
 				FocusGameWindow();
 			}

@@ -25,6 +25,7 @@
 		MoveTuttleToClipboardCoords,
 		OpenTuttleInEditor,
 		PlaceDebugPoint,
-		JumpToDebugPoint
+		JumpToDebugPoint,
+		OpenDebugMenu
 	}
 }

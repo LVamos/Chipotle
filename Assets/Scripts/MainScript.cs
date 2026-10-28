@@ -475,6 +475,7 @@ Application.Quit();
 				Application.quitting += ScreenReader.Unload;
 				ResendErrorReport();
 				Settings.LoadSettings();
+				WindowHandler.CreateDebugManager();
 				Sounds.LoadClips();
 				InputConfig.LoadBindings();
 			}
