@@ -33,7 +33,10 @@ namespace Game.Debug.UI
 			public Type DataType;
 			public Func<object> Getter;
 			public Action<object> Setter;
+			public Action Activate;
 		}
+
+		private static readonly string[] _configurations = { "Debug", "Test", "Release" };
 
 		private List<SettingEntry> _entries = new List<SettingEntry>();
 
@@ -79,6 +82,16 @@ namespace Game.Debug.UI
 				typeof(bool), typeof(string), typeof(float), typeof(int), typeof(Vector2), typeof(Vector2?)
 			};
 
+			SettingEntry configuration = new()
+			{
+				Name = "Konfigurace",
+				DataType = typeof(string),
+				Getter = () => Settings.Configuration,
+				Activate = ChooseConfiguration
+			};
+			_entries.Add(configuration);
+			items.Add(new List<string> { configuration.Name, FormatValue(configuration.Getter()) });
+
 			// Fields
 			FieldInfo[] fields = settingsType.GetFields(flags);
 			foreach (FieldInfo f in fields)
@@ -109,6 +122,12 @@ namespace Game.Debug.UI
 				return;
 
 			SettingEntry entry = _entries[Index];
+			if (entry.Activate != null)
+			{
+				entry.Activate();
+				return;
+			}
+
 			// Edit non-boolean values via input box
 			if (entry.DataType == typeof(bool))
 				return;
@@ -116,6 +135,34 @@ namespace Game.Debug.UI
 			string title = "Zadej hodnotu";
 			string defaultValue = FormatValue(entry.Getter());
 			WindowHandler.InputBox(string.Empty, title, defaultValue, input => ApplyInput(entry, input));
+		}
+
+		/// <summary>
+		/// Opens a menu with available configurations and loads the selected one.
+		/// </summary>
+		private void ChooseConfiguration()
+		{
+			List<List<string>> items = new();
+			foreach (string name in _configurations)
+				items.Add(new List<string> { name });
+
+			int current = Array.FindIndex(_configurations, c => string.Equals(c, Settings.Configuration, StringComparison.OrdinalIgnoreCase));
+			MenuParameters parameters = new(
+				items: items,
+				introText: "Vyber konfiguraci",
+				wrappingAllowed: false,
+				defaultIndex: Math.Max(current, 0),
+				menuClosed: index =>
+				{
+					if (index == -1)
+						return;
+
+					string selected = _configurations[index];
+					Settings.SwitchConfiguration(selected);
+					WindowHandler.CreateDebugManager();
+					ScreenReader.Speak($"Naètena konfigurace {selected}", true);
+				});
+			WindowHandler.Menu(parameters);
 		}
 
 		private void ApplyInput(SettingEntry entry, string input)

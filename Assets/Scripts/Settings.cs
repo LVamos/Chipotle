@@ -95,9 +95,8 @@ namespace Game
 		/// <param name="configurationName">Name of a YAML file without extension</param>
 		public static void LoadSettings()
 		{
-			string path = Path.Combine(MainScript.ConfigPath, "config.dat");
-			string configName = File.ReadAllText(path);
-			path = Path.Combine(MainScript.ConfigPath, configName) + ".yaml";
+			string configName = File.ReadAllText(ConfigNamePath);
+			string path = Path.Combine(MainScript.ConfigPath, configName) + ".yaml";
 			Dictionary<string, object> settingsDictionary = null;
 			YamlHelper.LoadFromFile(path, out settingsDictionary);
 
@@ -142,6 +141,18 @@ namespace Game
 
 			Configuration = configName;
 			ConfigurationFileName = path;
+		}
+
+		private static string ConfigNamePath => Path.Combine(MainScript.ConfigPath, "config.dat");
+
+		/// <summary>
+		/// Stores the configuration name into config.dat and loads settings from that configuration.
+		/// </summary>
+		/// <param name="configurationName">Name of a YAML file without extension</param>
+		public static void SwitchConfiguration(string configurationName)
+		{
+			File.WriteAllText(ConfigNamePath, configurationName);
+			LoadSettings();
 		}
 
 		/// <summary>
