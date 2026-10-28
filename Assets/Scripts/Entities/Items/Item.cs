@@ -494,6 +494,8 @@ save.UsableWith
 				);
 
 			HeldBy = save.HeldBy != null ? World.GetCharacter(save.HeldBy) : null;
+			Used = save.Used;
+			UsedOnce = save.UsedOnce;
 		}
 
 		public virtual ItemSave Export()
@@ -514,6 +516,8 @@ save.UsableWith
 			save.QuickActionsAllowed = _quickActionsAllowed;
 			save.PickingSound = _sounds["picking"];
 			save.PlacingSound = _sounds["placing"];
+			save.Used = Used;
+			save.UsedOnce = UsedOnce;
 
 			return save;
 		}

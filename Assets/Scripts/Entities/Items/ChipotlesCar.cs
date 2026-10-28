@@ -167,10 +167,8 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// <summary>
 		/// List of all crutial object in the Walsch's area
 		/// </summary>
-		private IEnumerable<Item> WalshAreaObjects =>
-			(new string[]
-				{"louže w1", "tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w1"})
-			.Select(o => World.GetItem(o) as Item);
+		private readonly string[] _walshItems =
+				{"louže w1", "tělo w1", "hadice w1", "popelnice w1", "prkno w1", "lavička w1"};
 
 		/// <summary>
 		/// Runs a message handler for the specified message.
@@ -219,7 +217,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 
 			// When it's not allowed to use the car, play a knocking sound.
 			bool onDriveWay = _zones.Contains("příjezdová cesta w1");
-			bool walschAreaDone = WalshAreaObjectsUsed() && WalshAreaExplored();
+			bool walschAreaDone = WalshItemsUsed() && WalshAreaExplored();
 			bool onAsphaltRoad = Zones.Any(l => l.Name.Inner == "asfaltka c1");
 
 			if (onDriveWay && !Moved && !walschAreaDone
@@ -230,7 +228,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			}
 
 			// If player didn't leave Walsh area but used required objects and went through all area
-			if (!Moved && WalshAreaObjectsUsed() && WalshAreaExplored())
+			if (!Moved && WalshItemsUsed() && WalshAreaExplored())
 			{
 				AllowDestination(World.GetZone("ulice p1"));
 				DestinationMenu("cs20");
@@ -377,14 +375,23 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 		/// </summary>
 		/// <returns>True if all the Walsch's area was explored</returns>
 		private bool WalshAreaExplored()
-			=> Player.VisitedZones.Count() == 15
-			   && Player.VisitedZones.All(l => l.Name.Inner.ToLower().Contains("w1"));
+			=>
+				Player.VisitedZones.Where(l => l.Name.Inner.ToLower().Contains("w1"))
+				.Count() == 15;
 
 		/// <summary>
 		/// Checks if all crutial objects in Walsch's area were used.
 		/// </summary>
 		/// <returns>True if all crutial objects in Walsch's area were used</returns>
-		private bool WalshAreaObjectsUsed()
-			=> WalshAreaObjects.All(o => o == null || o.Used);
+		private bool WalshItemsUsed()
+		{
+			foreach (string itemName in _walshItems)
+			{
+				Item item = World.GetItem(itemName);
+				if (!item.Used)
+					return false;
+			}
+			return true;
+		}
 	}
 }
