@@ -1625,10 +1625,9 @@ namespace Game.Entities.Characters.Chipotle
 		/// <remarks>The Detective Chiptole and Tuttle NPCs should move with the car afterwards.</remarks>
 		private void WatchSweeneysRoom()
 		{
-			bool tableUsed = Used("stůl s1") || Used("stůl s5");
 			if (
 				Used("trezor s1")
-				&& tableUsed
+				&& Used("stůl s1")
 				&& Used("počítač s1")
 				&& Used("mobil s1")
 			)
