@@ -30,12 +30,12 @@ namespace Game
 		/// <remarks>for testing purposes only.</remarks>
 		public static void LoadNamedSave()
 		{
-			string[] saves = null;
+			List<string> saves = null;
 
 			if (Directory.Exists(MainScript.PredefinedSavesPath))
 			{
 				saves =
-					Directory.GetDirectories(MainScript.PredefinedSavesPath);
+					Directory.GetDirectories(MainScript.PredefinedSavesPath).ToList();
 			}
 
 			if (saves.IsNullOrEmpty())
@@ -51,10 +51,27 @@ namespace Game
 			WindowHandler.Menu(new(
 				items,
 				"Kterej sejv chceš načíst?",
-				menuClosed: index => LoadSelectedSave(saves, index)));
+				menuClosed: index => LoadSelectedSave(saves, index),
+				deleteItem: index => DeleteSave(saves, index)));
 		}
 
-		private static void LoadSelectedSave(string[] saves, int index)
+		private static bool DeleteSave(List<string> saves, int index)
+		{
+			try
+			{
+				Directory.Delete(saves[index], true);
+				File.Delete(saves[index] + ".meta");
+				saves.RemoveAt(index);
+				return true;
+			}
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			{
+				ScreenReader.Speak("Sejv se nepodařilo smazat", true);
+				return false;
+			}
+		}
+
+		private static void LoadSelectedSave(List<string> saves, int index)
 		{
 			if (index == -1)
 			{
