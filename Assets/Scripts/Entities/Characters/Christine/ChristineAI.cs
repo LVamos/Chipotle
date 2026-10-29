@@ -50,6 +50,6 @@ namespace Game.Entities.Characters.Christine
 			JumpTo(_pointNearBedroomMirror);
 		}
 
-		private Vector2 _pointNearBedroomMirror = new(1769.3f, 1119.9f);
+		private Vector2 _pointNearBedroomMirror = new(1767.5f, 1122.8f);
 	}
 }
