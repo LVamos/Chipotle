@@ -89,9 +89,10 @@ public static class Logger
 		StringBuilder listItems = new();
 		foreach (string message in messages)
 		{
-			string processed = WebUtility.HtmlEncode(message.Replace(Environment.NewLine, "<br>"));
+			string processed = WebUtility.HtmlEncode(message).Replace(Environment.NewLine, "<br>");
 			listItems.AppendLine($"<li>{processed}</li>");
 		}
+
 		// Append timestamp as the last list item
 		listItems.AppendLine($"<li><em>{timestamp}</em></li>");
 

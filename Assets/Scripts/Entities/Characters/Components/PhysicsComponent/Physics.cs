@@ -788,11 +788,8 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 				IEnumerable<Entity> query = GetEntitiesBefore(Settings.ObjectManipulationRadius);
 				if (!query.IsNullOrEmpty())
 				{
-					string[] objects = query
-						.Select(e => e.Name.Inner)?
-						.ToArray();
-					objectsBefore = string.Join(',', objects);
-					objectsBefore = $"Objekty před: {objects}";
+					IEnumerable<string> objects = query.Select(e => e.Name.Inner);
+					objectsBefore = $"Objekty před: {string.Join(", ", objects)}";
 				}
 			}
 
