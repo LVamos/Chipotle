@@ -299,10 +299,11 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 				destinations.Keys.ToArray()
 					.Select(k => new List<string>() { k })
 					.ToList();
-			int item = WindowHandler.Menu(new(items, "Kam chceš jet?"));
-
-			if (item >= 0)
-				Move(destinations[items[item][0]], cutscene);
+			WindowHandler.Menu(new(items, "Kam chceš jet?", menuClosed: (item) =>
+			{
+				if (item >= 0)
+					Move(destinations[items[item][0]], cutscene);
+			}));
 		}
 
 		/// <summary>
