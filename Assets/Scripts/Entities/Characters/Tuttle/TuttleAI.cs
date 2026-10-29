@@ -75,6 +75,7 @@ namespace Game.Entities.Characters.Tuttle
 		private const int _maxPlayerDistance = 5;
 		private const int _minDistanceToCar = 1;
 		private const int _maxDistanceToCar = 2;
+		private const int _maxDistanceToCarForTuttle = 5;
 		private const float _minPlayerDistanceWhenMovingAside = 2;
 		private const int _maxPlayerDistanceWhenMovingAside = 4;
 
@@ -231,7 +232,7 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void JumpToChristinesHall() => JumpTo(_pointInChristinesHall);
 
-		private Vector2 _pointInChristinesHall = new(1772.4f, 1119.6f);
+		private Vector2 _pointInChristinesHall = new(1770.9f, 1119.6f);
 
 		/// <summary>
 		/// Stops following the player.
@@ -298,11 +299,21 @@ namespace Game.Entities.Characters.Tuttle
 			if (_hidden || _carMovement == null)
 				return;
 
+			// Wait until the player gets out of the car so that his new position can be avoided.
+			Rectangle playerArea = _player.Area.Value;
+			if (playerArea.GetDistanceFrom(_carMovement.Target) > _maxDistanceToCar)
+				return;
+
 			float height = transform.localScale.y;
 			float width = transform.localScale.x;
 			List<MapElement> ignored = new() { Owner };
-			Vector2? target = World.Placements.GetFreePlacementsNear(ignored, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCar)
-				.FirstOrDefault();
+			Vector2[] points = World.Placements.GetFreePlacementsNear(ignored, _carMovement.Target, height, width, _minDistanceToCar, _maxDistanceToCarForTuttle)
+				.ToArray();
+			Vector2? target = points
+				.Where(p => playerArea.GetDistanceFrom(Rectangle.FromCenter(p, height, width)) >= _minPlayerDistance)
+				.Cast<Vector2?>()
+				.FirstOrDefault()
+				?? points.Cast<Vector2?>().LastOrDefault();
 			if (target == null)
 				throw new ArgumentNullException("No walkable tile found.");
 
@@ -317,6 +328,7 @@ namespace Game.Entities.Characters.Tuttle
 		{
 			base.GameUpdate();
 			TryGoToPool();
+			WatchCar();
 			WaitForPlayer();
 			WatchTimers();
 		}
