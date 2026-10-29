@@ -255,10 +255,12 @@ namespace Game.Entities.Characters.Tuttle
 		{
 			Zone zone = m.Target.GetZones().First();
 
-			if (zone.Name.Inner != "asfaltka c1")
-				_carMovement = m;
+			// Tuttle doesn't ride to the asphalt road (asfaltka c1), he's hidden after cs19.
+			if (zone.Name.Inner == "asfaltka c1")
+				return;
 
-			_carTargetZone = _carMovement.Target.GetZones().First();
+			_carMovement = m;
+			_carTargetZone = zone;
 			InnerMessage(new StopFollowingPlayer(this)); // This tells the NPC to stop following the Chipotle NPC till they both arrive to new zone.
 		}
 
