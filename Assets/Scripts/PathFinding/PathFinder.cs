@@ -2,6 +2,7 @@ using Game.Entities.Characters;
 using Game.Terrain;
 
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -117,7 +118,7 @@ namespace Game.PathFinding
 
 				// If Current is close to the target, I am returning the path
 				if (IsAtGoal(current.Coords, parameters.Goal))
-					return GetPath(current, parameters.ThroughStart, parameters.ThroughGoal);
+					return SplitIntoSteps(GetPath(current, parameters.ThroughStart, parameters.ThroughGoal), parameters);
 
 				closed.Add(current.Coords);
 
@@ -190,13 +191,8 @@ namespace Game.PathFinding
 		/// </summary>
 		private static bool IsWalkable(PathFindingNode node, PathfindingParams parameters)
 		{
-			Rectangle area = Rectangle.FromCenter(node.Coords, parameters.CharacterHeight, parameters.CharacterWidth);
-
-			foreach (Vector2 point in area.GetPoints(TileMap.TileSize))
-			{
-				if (!parameters.Snapshot.WalkablePositions.Contains(point))
-					return false;
-			}
+			if (!IsFootprintWalkable(node.Coords, parameters))
+				return false;
 
 			// If the node lays on start or goal, exclude it if not allowed.
 			if ((!parameters.ThroughStart && node.Coords == parameters.Start) ||
@@ -204,6 +200,126 @@ namespace Game.PathFinding
 				return false;
 
 			return true;
+		}
+
+		/// <summary>
+		/// Checks if the character's footprint centered at the given position covers only walkable positions.
+		/// </summary>
+		private static bool IsFootprintWalkable(Vector2 center, PathfindingParams parameters)
+		{
+			Rectangle area = Rectangle.FromCenter(center, parameters.CharacterHeight, parameters.CharacterWidth);
+
+			foreach (Vector2 point in area.GetPoints(TileMap.TileSize))
+			{
+				if (!parameters.Snapshot.WalkablePositions.Contains(point))
+					return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Checks if the character can walk straight from one position to another.
+		/// </summary>
+		private static bool IsLineWalkable(Vector2 from, Vector2 to, PathfindingParams parameters)
+		{
+			float distance = Vector2.Distance(from, to);
+			int samples = Mathf.CeilToInt(distance / _lineSamplingStep);
+
+			for (int i = 1; i <= samples; i++)
+			{
+				if (!IsFootprintWalkable(Vector2.Lerp(from, to, (float)i / samples), parameters))
+					return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Distance between the positions checked along a straight line.
+		/// </summary>
+		private const float _lineSamplingStep = .1f;
+
+		/// <summary>
+		/// Straightens the grid path and splits it into steps of the character's step length.
+		/// </summary>
+		/// <remarks>
+		/// The grid nodes are only <see cref="TileMap.TileSize"/> apart and the path zigzags in 4 directions.
+		/// Every step is checked against the same walkable positions as the grid search, so it never crosses an obstacle.
+		/// </remarks>
+		private static Queue<Vector2> SplitIntoSteps(Queue<Vector2> path, PathfindingParams parameters)
+		{
+			float stepLength = parameters.StepLength;
+			if (path.IsNullOrEmpty() || stepLength <= 0)
+				return path;
+
+			List<Vector2> nodes = new() { parameters.Start };
+			nodes.AddRange(path.Where(p => p != parameters.Start));
+			List<Vector2> corners = GetCorners(nodes, parameters);
+
+			Queue<Vector2> steps = new();
+			if (parameters.ThroughStart)
+				steps.Enqueue(parameters.Start);
+
+			Vector2 position = corners[0];
+			int index = 1;
+			while (index < corners.Count)
+			{
+				Vector2 corner = corners[index];
+				float distance = Vector2.Distance(position, corner);
+
+				if (distance > stepLength)
+				{
+					position += (corner - position) / distance * stepLength;
+					steps.Enqueue(position);
+					continue;
+				}
+
+				bool lastCorner = index == corners.Count - 1;
+				if (lastCorner)
+				{
+					if (distance > _minStepLength)
+						steps.Enqueue(corner);
+					break;
+				}
+
+				// The corner is closer than one step, so try to finish the step behind it.
+				Vector2 next = corners[index + 1];
+				float rest = Mathf.Min(stepLength - distance, Vector2.Distance(corner, next));
+				Vector2 candidate = corner + (next - corner).normalized * rest;
+				position = IsLineWalkable(position, candidate, parameters) ? candidate : corner;
+				steps.Enqueue(position);
+				index++;
+			}
+
+			return steps.Count > 0 ? steps : path;
+		}
+
+		/// <summary>
+		/// Shortest step that is worth making at the end of a path.
+		/// </summary>
+		private const float _minStepLength = .05f;
+
+		/// <summary>
+		/// Leaves only the nodes where the path has to turn, so that the character walks straight between them.
+		/// </summary>
+		private static List<Vector2> GetCorners(List<Vector2> nodes, PathfindingParams parameters)
+		{
+			List<Vector2> corners = new() { nodes[0] };
+			int anchor = 0;
+
+			for (int i = 2; i < nodes.Count; i++)
+			{
+				if (!IsLineWalkable(nodes[anchor], nodes[i], parameters))
+				{
+					anchor = i - 1;
+					corners.Add(nodes[anchor]);
+				}
+			}
+
+			if (nodes.Count > 1)
+				corners.Add(nodes[^1]);
+			return corners;
 		}
 
 		/// <summary>

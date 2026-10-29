@@ -223,6 +223,11 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		/// Specifies the maximum distance allowed for path finding.
 		/// </summary>
 		protected const int _maxPathFindingDistance = 60;
+
+		/// <summary>
+		/// Specifies how far the player can move from the goal of an ongoing walk to him before a new path is found.
+		/// </summary>
+		private const float _goalRefreshDistance = 2;
 		private const int _tightZoneThreshold = 2;
 
 		protected virtual Vector2 GetStepDirection() => _orientation.UnitVector;
@@ -972,6 +977,11 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 
 				_path = path;
 				_goal = goal;
+
+				// A recalculated path continues the ongoing walk without delaying the next step.
+				if (_state == CharacterState.GoingToPlayer)
+					return;
+
 				SetState(CharacterState.GoingToPlayer);
 				_walkTimer = 0;
 				_targetPlayerDistance = _random.Next(_minPlayerDistance, _maxPlayerDistance);
@@ -1069,7 +1079,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			float width = _area.Value.Width;
 
 			PathfindingSnapshot snapshot1 = PathFinder.BuildSnapshot(start, goal1, Owner);
-			PathfindingParams parameters1 = new(start, goal1, sameZone, withStart, withGoal, height, width, snapshot1);
+			PathfindingParams parameters1 = new(start, goal1, sameZone, withStart, withGoal, height, width, snapshot1, _stepLength);
 
 			PathfindingParams parameters2 = null;
 			bool atEntrance = false;
@@ -1077,7 +1087,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 			{
 				// Construct the rest of the path from the entrance to the goal.
 				PathfindingSnapshot snapshot2 = PathFinder.BuildSnapshot(goal1, goal2, Owner);
-				parameters2 = new(goal1, goal2, true, false, withGoal, height, width, snapshot2);
+				parameters2 = new(goal1, goal2, true, false, withGoal, height, width, snapshot2, _stepLength);
 				atEntrance = PathFinder.IsAtGoal(start, goal1);
 			}
 
@@ -1146,7 +1156,18 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		private void OnCharacterMoved(CharacterMoved message)
 		{
 			// Test if the component has been initialized.
-			if (Owner.Area == null || _state != CharacterState.WatchingPlayer || message.Sender != _player)
+			if (Owner.Area == null || message.Sender != _player)
+				return;
+
+			// The player keeps walking away from the planned goal, so aim at his current position.
+			if (_state == CharacterState.GoingToPlayer)
+			{
+				if (_goal != null && World.GetDistance(_player.Center, _goal.Value) > _goalRefreshDistance)
+					GoToPlayer();
+				return;
+			}
+
+			if (_state != CharacterState.WatchingPlayer)
 				return;
 
 			// Avoid too long paths.

@@ -50,6 +50,11 @@ public class PathfindingParams
 	/// </summary>
 	public Game.PathFinding.PathfindingSnapshot Snapshot { get; set; }
 
+	/// <summary>
+	/// Length of the searching character's step. The found path is split into steps of this length; zero keeps the raw grid path.
+	/// </summary>
+	public float StepLength { get; set; }
+
 	public PathfindingParams(
 		Vector2 start,
 		Vector2 goal,
@@ -58,9 +63,11 @@ public class PathfindingParams
 		bool throughGoal,
 		float characterHeight,
 		float characterWidth,
-		Game.PathFinding.PathfindingSnapshot snapshot
+		Game.PathFinding.PathfindingSnapshot snapshot,
+		float stepLength = 0
 		)
 	{
+		StepLength = stepLength;
 		Start = start;
 		Goal = goal;
 		SameZone = sameZone;
