@@ -71,7 +71,7 @@ namespace Game
 		private static GameObject GetOrCreateObject(Dictionary<string, GameObject> objects, string name, string tag)
 		{
 			GameObject obj = null;
-			if (!objects.TryGetValue(name, out obj))
+			if (!objects.TryGetValue(name, out obj) || obj == null)
 			{
 				obj = new(name);
 				obj.tag = tag;

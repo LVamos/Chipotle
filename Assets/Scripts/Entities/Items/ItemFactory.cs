@@ -199,7 +199,7 @@ namespace Game.Entities.Items
 			Type clrType = GetItemCLRType(type);
 			if (clrType != null)
 			{
-				item = obj.GetComponent(clrType) as Item;
+				item = obj.GetComponent(clrType) as Item ?? AddComponent(obj, type);
 				item.Initialize(
 					name,
 					area,

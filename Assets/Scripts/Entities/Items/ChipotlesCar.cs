@@ -388,7 +388,7 @@ StringComparer.InvariantCultureIgnoreCase) // zone inner name/rectangle coordina
 			foreach (string itemName in _walshItems)
 			{
 				Item item = World.GetItem(itemName);
-				if (!item.Used)
+				if (item != null && !item.Used)
 					return false;
 			}
 			return true;
