@@ -164,7 +164,7 @@ namespace Game.Entities.Characters.Components.PhysicsComponent
 		{
 			string title = "Mimo mapu";
 			string name = Owner.Name.Inner;
-			string positionMessage = $"Poslední vadlidní pozice: {position.GetString()}";
+			string positionMessage = $"Poslední validní pozice: {position.GetString()}";
 
 			Logger.LogError(title, name, positionMessage);
 		}

@@ -1691,7 +1691,7 @@ namespace Game.Entities.Characters.Chipotle
 				_startWalkMessage = null;
 			}
 
-			if (collisions.OutOfMap)
+			if (collisions.OutOfMap && !obstaclesFound)
 				LogOutOfMapAttempt(_area.Value.Center);
 			if (collisions.Obstacles.Count > 0)
 			{
