@@ -485,6 +485,12 @@ namespace Game.Debug
 			{
 				string coords = GUIUtility.systemCopyBuffer;
 				Vector2 target = coords.ToVector2();
+				if (World.Map[target]?.Zone == null)
+				{
+					ScreenReader.Speak("Souřadnice jsou mimo mapu", true);
+					return;
+				}
+
 				GoToCoords(target);
 			}
 			catch (Exception) { }

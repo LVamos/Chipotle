@@ -156,7 +156,7 @@ namespace Game.Debug.integration
 		{
 			try
 			{
-				if (WindowHandler.DebugManager == null)
+				if (WindowHandler.DebugManager == null || !IsOnMap(coordinates))
 					return;
 
 				WindowHandler.DebugManager.MoveTuttleToCoords(coordinates);
@@ -205,13 +205,22 @@ namespace Game.Debug.integration
 		{
 			try
 			{
-				if (WindowHandler.DebugManager == null)
+				if (WindowHandler.DebugManager == null || !IsOnMap(coordinates))
 					return;
 
 				WindowHandler.DebugManager.GoToCoords(coordinates);
 				FocusGameWindow();
 			}
 			catch { }
+		}
+
+		private static bool IsOnMap(Vector2 coordinates)
+		{
+			if (World.Map[coordinates]?.Zone != null)
+				return true;
+
+			ScreenReader.Speak("Souřadnice jsou mimo mapu", true);
+			return false;
 		}
 
 		public void SendJumpToCoordinates(Vector2 coordinates)
