@@ -36,7 +36,7 @@ namespace Game.Terrain
 			_characters = !data.Characters.IsNullOrEmpty() ? new(data.Characters) : new();
 			_items = !data.Items.IsNullOrEmpty() ? new(data.Items) : new();
 			_neighbours = new(data.Neighbours);
-			_nonwalkables = data.Nonwalkables.ToVector2HashSet();
+			_nonwalkables = data.Nonwalkables.ToVector2HashSet() ?? new();
 			DefaultTerrain = data.DefaultTerrain;
 			Description = data.Description;
 			To = data.To;
