@@ -42,7 +42,9 @@ namespace Game.UI
 
 		protected override void FinalizeMenu()
 		{
-			_menuClosed?.Invoke(Index, Action);
+			// The menu lists the items in reverse order, the caller expects an index to the inventory.
+			int index = Index < 0 || SelectedItem == null ? -1 : _inventory.IndexOf(SelectedItem);
+			_menuClosed?.Invoke(index, Action);
 		}
 
 		private Action<int, InventoryAction> _menuClosed;

@@ -400,7 +400,7 @@ namespace Game.Entities.Characters.Chipotle
 				return;
 
 			_vanillaKeys = ItemFactory.CreateAndActivate<VanillaKeys>(
-			new("klíče v1", "klíče"),
+			new("klíče v1", "Klíče z garáže"),
 			pickable: true,
 			passable: true
 			) as VanillaKeys;
