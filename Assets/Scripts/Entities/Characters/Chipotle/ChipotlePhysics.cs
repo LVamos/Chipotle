@@ -1446,7 +1446,7 @@ namespace Game.Entities.Characters.Chipotle
 			Door door = GetDoorBefore(null, false, Zone, true);
 			Usables objects = GetUsables(Settings.ObjectManipulationRadius);
 
-			if (door != null)
+			if (door != null && door.ManuallyOperable)
 			{
 				HandleDoorAndObjectsInteractions(door, objects);
 				return;

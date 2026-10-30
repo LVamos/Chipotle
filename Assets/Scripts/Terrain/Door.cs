@@ -65,6 +65,11 @@ namespace Game.Terrain
 		public DoorType Type { get; protected set; }
 
 		/// <summary>
+		/// Indicates if the player can open and close the door manually.
+		/// </summary>
+		public virtual bool ManuallyOperable => true;
+
+		/// <summary>
 		/// Processes incoming messages.
 		/// </summary>
 		public override void GameUpdate()
