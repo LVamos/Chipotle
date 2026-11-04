@@ -8,20 +8,18 @@ namespace Game.Audio
 {
 	public class MixerManager : MonoBehaviour
 	{
-		public AudioMixerGroup ResonanceGroup { get; private set; }
-		private void Awake()
-		{
-			LoadMixer();
-		}
+		public AudioMixerGroup SpatializedGroup { get; private set; }
 
+		private void Awake()
+			=> LoadMixer();
 
 		private const string _mixerName = "MyMixer";
-		private const string _resonanceGroupName = "Spatialized";
+		private const string _spatializedGroupName = "Spatialized";
 
 		private void LoadMixer()
 		{
 			_mixer = Resources.Load<AudioMixer>(_mixerName) ?? throw new InvalidOperationException($"{_mixerName} mixer not loaded");
-			ResonanceGroup = _mixer.FindMatchingGroups(_resonanceGroupName).FirstOrDefault()
+			SpatializedGroup = _mixer.FindMatchingGroups(_spatializedGroupName).FirstOrDefault()
 				?? throw new InvalidOperationException("Mixer group not found");
 		}
 

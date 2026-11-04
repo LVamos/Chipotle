@@ -437,8 +437,8 @@ namespace Game.Terrain
 
 			CreateComponents(loop != null && Settings.PlayZoneLoops);
 			if (!Settings.PlayZoneLoops)
-				_ambientController.Initialize(this, null, materials);
-			else _ambientController.Initialize(this, loop, materials);
+				_ambientController.Initialize(this, null);
+			else _ambientController.Initialize(this, loop);
 			_portalController?.Initialize(this, loop);
 		}
 

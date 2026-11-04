@@ -1,11 +1,15 @@
 ﻿using Assets.Scripts.Audio;
 
+using SteamAudio;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.Audio;
+
+using Vector3 = UnityEngine.Vector3;
 
 namespace Game.Audio
 {
@@ -113,12 +117,31 @@ namespace Game.Audio
 		public AudioSource ConvertTo3d(AudioSource source, Vector3 position, int? lowPassFrequency = null)
 		{
 			source.spatialize = true;
-			source.outputAudioMixerGroup = ResonanceGroup;
+			source.outputAudioMixerGroup = SpatializedGroup;
 			source.spatialBlend = 1;
 			source.transform.position = position;
+
 			if (lowPassFrequency != null)
 				SetLowPass(source, lowPassFrequency.Value);
+
+			SimulateReflections(source);
+
 			return source;
+		}
+
+		/// <summary>
+		/// Simulates reflections of a source that has just become 3D; sources outside the pool keep their own settings.
+		/// </summary>
+		private void SimulateReflections(AudioSource source)
+		{
+			if (!source.TryGetComponent(out SteamAudioSource steam) || SpatialAudio.IsPlacedByGame(steam))
+				return;
+
+			steam.reflections = true;
+			steam.reflectionsMixLevel = SpatialAudio.GetReflectionsMixLevel(source.transform.position);
+			if (_soundPool.Owns(source))
+				_soundPool.Simulate(source);
+			else SpatialAudio.Simulate(steam);
 		}
 
 		public AudioSource SwitchTo2d(AudioSource source, bool disableLowPass, float lowPasSlidingDuration)
@@ -133,6 +156,27 @@ namespace Game.Audio
 			return source;
 		}
 
+		/// <summary>
+		/// Lets the game place and muffle the sound itself, as it does with portals; Steam Audio only gives it direction.
+		/// </summary>
+		public void LeaveAcousticsToGame(AudioSource source)
+		{
+			if (source.TryGetComponent(out SteamAudioSource steam))
+				SpatialAudio.LeaveAcousticsToGame(steam);
+		}
+
+		/// <summary>
+		/// Lets Steam Audio occlude the sound and simulate its reflections again, e.g. when a portal becomes the loop of an object.
+		/// </summary>
+		public void UseGeometricAcoustics(AudioSource source)
+		{
+			if (!source.TryGetComponent(out SteamAudioSource steam))
+				return;
+
+			SpatialAudio.UseGeometricAcoustics(steam);
+			SimulateReflections(source);
+		}
+
 		public void DisableSpatializer(AudioSource source)
 		{
 			source.spatialize = false;
@@ -142,7 +186,8 @@ namespace Game.Audio
 		public void EnableSpatializer(AudioSource source)
 		{
 			source.spatialize = true;
-			source.outputAudioMixerGroup = ResonanceGroup;
+			source.outputAudioMixerGroup = SpatializedGroup;
+			SimulateReflections(source);
 		}
 
 		public void SlideVolume(AudioSource source, float duration, float targetVolume, bool stopWhenDone = true, bool pauseWhenDone = false, Action actionWhenDone = null)
@@ -286,31 +331,37 @@ namespace Game.Audio
 			_soundPool.DisableLowPass(source);
 			source.name = description ?? "sound";
 			source.transform.position = position;
-			source.clip = Sounds.GetClip(soundName);
+			AudioClip clip = Sounds.GetClip(soundName);
+			source.clip = loop ? clip : SpatialAudio.AddReflectionTail(clip);
 			source.spatialBlend = 1; // Full surround sound
 			source.spatialize = true;
 			source.spatializePostEffects = false;
-			source.outputAudioMixerGroup = ResonanceGroup;
+			source.outputAudioMixerGroup = SpatializedGroup;
 			source.loop = loop;
 			source.dopplerLevel = 0;
 
-			ResonanceAudioSource resonance = source.GetComponent<ResonanceAudioSource>();
-			resonance.bypassRoomEffects = false;
-			resonance.nearFieldEffectEnabled = true;
-			resonance.occlusionEnabled = true;
+			SteamAudioSource steam = _soundPool.GetSteamAudio(source);
+			steam.reflections = true;
+			steam.reflectionsMixLevel = SpatialAudio.GetReflectionsMixLevel(position);
 			_soundPool.SoundStartedPlaying(source);
+			source.volume = fadeIn ? 0 : volume;
 
-			if (fadeIn)
+			if (loop)
 			{
-				source.volume = 0;
-				source.Play();
-				SlideVolume(source, fadingDuration, volume);
+				StartPlaying(source, volume, fadeIn, fadingDuration);
+				_soundPool.Simulate(source);
 				return source;
 			}
 
-			source.volume = volume;
-			source.Play();
+			_soundPool.PlayWhenSimulated(source, () => StartPlaying(source, volume, fadeIn, fadingDuration));
 			return source;
+		}
+
+		private void StartPlaying(AudioSource source, float volume, bool fadeIn, float fadingDuration)
+		{
+			source.Play();
+			if (fadeIn)
+				SlideVolume(source, fadingDuration, volume);
 		}
 
 		private void Awake()
@@ -330,7 +381,8 @@ namespace Game.Audio
 			_mixer = obj.AddComponent<MixerManager>();
 		}
 
-		public AudioMixerGroup ResonanceGroup { get => _mixer.ResonanceGroup; }
+		public AudioMixerGroup SpatializedGroup { get => _mixer.SpatializedGroup; }
+
 		public float MasterVolume
 		{
 			get => AudioListener.volume;

@@ -196,10 +196,7 @@ public static class sceneSetup
 
 	private static void HandleLog(string logString, string stackTrace, LogType type)
 	{
-		// Prevent logging useless warnings related to Resonance Audio.
-		const string resonanceWarning = "Make sure AudioSource is routed to a mixer that ResonanceAudioRenderer is attached to.";
-		if (!string.Equals(resonanceWarning, logString, StringComparison.OrdinalIgnoreCase))
-			Log(logString);
+		Log(logString);
 
 		if (Application.isPlaying && type == LogType.Exception)
 		{
@@ -218,6 +215,7 @@ public static class sceneSetup
 		DeleteObjects();
 		LoadMap();
 		CollectSounds();
+		AcousticGeometryBuilder.Build();
 	}
 
 	private static void CollectSounds()

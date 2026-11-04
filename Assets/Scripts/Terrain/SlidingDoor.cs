@@ -46,7 +46,7 @@ namespace Game.Terrain
 
 		/// <summary>
 		/// The door is operated by a photocell, the player can't open or close it manually.
-		/// </summary>
+		/// </summary> 
 		public override bool ManuallyOperable => false;
 
 		/// <summary>

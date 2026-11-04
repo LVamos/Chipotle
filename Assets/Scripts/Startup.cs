@@ -50,11 +50,15 @@ public class Startup : MonoBehaviour
 			Camera.main.gameObject.AddComponent<AudioListener>();
 			Logger.LogInfo("Listener vytvořen");
 		}
-		if (Camera.main.GetComponent<ResonanceAudioListener>() == null)
+		if (Camera.main.GetComponent<SteamAudio.SteamAudioListener>() == null)
 		{
-			Camera.main.gameObject.AddComponent<ResonanceAudioListener>();
-			Logger.LogInfo("ResonanceAudioListener vytvořen");
+			// Reverb is simulated per source; a listener-centric reverb would put the same reverb on every sound.
+			Camera.main.gameObject.AddComponent<SteamAudio.SteamAudioListener>().applyReverb = false;
+			Logger.LogInfo("SteamAudioListener vytvořen");
 		}
+
+		// Steam Audio looks for the listener only when a scene loads, before the camera exists.
+		SteamAudio.SteamAudioManager.NotifyAudioListenerChanged();
 
 		Camera.main.clearFlags = CameraClearFlags.Nothing;
 		Camera.main.cullingMask = 0;

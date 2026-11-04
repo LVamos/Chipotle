@@ -22,6 +22,7 @@ namespace Game.Audio
 			if (!_portals.ContainsKey(soundName))
 				_portals[soundName] = new();
 			_portals[soundName].Add(source);
+			Sounds.LeaveAcousticsToGame(source);
 		}
 
 		public static HashSet<AudioSource> TryGetPortals(string soundName)

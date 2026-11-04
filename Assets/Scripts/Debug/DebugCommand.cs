@@ -3,7 +3,6 @@
 	public enum DebugCommand
 	{
 		ExportPassableItems,
-		SetWallMaterials,
 		SayPlayerOrientation,
 		SayCameraInfo,
 		ToggleBoolean,

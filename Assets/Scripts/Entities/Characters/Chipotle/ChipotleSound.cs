@@ -36,6 +36,9 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 		private void OnDestroy()
 		{
+			SpatialAudio.GeometryChanged -= OnGeometryChanged;
+			SpatialAudio.Simulated -= OnSimulated;
+
 			foreach (AudioSource footStep in _footSteps)
 			{
 				if (footStep != null)
@@ -47,6 +50,9 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		{
 			UpdateClockOffset();
 			FinishWarmUp();
+			RenewSteamSources();
+			PlayLateSteps();
+			PrepareNextFootStep();
 		}
 
 		/// <summary>
@@ -70,8 +76,27 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 				ScreenReader.Speak("Nevybral jsi cíl.");
 		}
 
-		/// <summary>Moves the source slightly ahead of the listener. Straight below it the direction of the sound is not defined and it can jump to the side.</summary>
-		private const float FootstepForwardOffset = 0.3f;
+		/// <summary>
+		/// Position of the footsteps relative to the listener: just below the ears and slightly ahead. Lower, a generic HRTF puts the steps
+		/// deep below the head; straight below the listener the direction of a sound is not defined and it can jump to the side.
+		/// </summary>
+		private static readonly Vector3 FootStepOffset = new(0, -.1f, .35f);
+
+		/// <summary>
+		/// Longest pause between two steps of one walk in seconds; after a longer pause the next step is expected on the spot.
+		/// </summary>
+		private const float WalkPause = 1;
+
+		/// <summary>
+		/// Longest distance between two steps of one walk in meters; a longer jump is a teleport.
+		/// </summary>
+		private const float MaxStepLength = 1;
+
+		/// <summary>
+		/// Shortest distance in meters between the place a step source was simulated and the step that means a teleport, not a wrong guess
+		/// of the next step: the reverb belongs to another place.
+		/// </summary>
+		private const float TeleportDistance = 2;
 
 		/// <summary>Delay between a step and its sound. The sound is scheduled on the audio clock at the exact time instead of starting at the next audio buffer.</summary>
 		private const double StepSoundLead = 0.025;
@@ -84,19 +109,38 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private const int WarmUpFrameCount = 15;
 
 		/// <summary>
-		/// One source per foot. Consecutive steps alternate, so a step doesn't cut off the previous one.
+		/// Steps take turns in these sources, so a step doesn't cut off the reverb of the previous ones.
 		/// </summary>
-		private readonly AudioSource[] _footSteps = new AudioSource[2];
+		private readonly AudioSource[] _footSteps = new AudioSource[8];
+
+		private readonly SteamAudio.SteamAudioSource[] _footStepSteam = new SteamAudio.SteamAudioSource[8];
+
 		private int _nextFootStep;
+
+		/// <summary>
+		/// The last two steps and when the last one sounded, for guessing where the next step will be.
+		/// </summary>
+		private Vector2? _lastStep;
+
+		private Vector2? _stepBeforeLast;
+
+		private float _lastFootStepTime = float.NegativeInfinity;
+
 		private double _clockOffset;
+
 		private bool _clockOffsetKnown;
+
 		private AudioClip _warmUpClip;
+
 		private int _warmUpFrames;
 
 		private void InitFootStepSource()
 		{
 			for (int i = 0; i < _footSteps.Length; i++)
+			{
 				_footSteps[i] = CreateFootStepSource($"FootstepSource{i + 1}");
+				_footStepSteam[i] = _footSteps[i].GetComponent<SteamAudio.SteamAudioSource>();
+			}
 
 			WarmUpFootStep();
 		}
@@ -110,12 +154,56 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			source.playOnAwake = false;
 			source.spatialize = true;
 			source.spatializePostEffects = false;
-			source.outputAudioMixerGroup = Sounds.ResonanceGroup;
+			source.outputAudioMixerGroup = Sounds.SpatializedGroup;
 
-			ResonanceAudioSource resonance = obj.AddComponent<ResonanceAudioSource>();
-			resonance.nearFieldEffectEnabled = true;
-			resonance.occlusionEnabled = true;
+			SpatialAudio.Configure(obj.AddComponent<SteamAudio.SteamAudioSource>());
 			return source;
+		}
+
+		/// <summary>
+		/// Lets the source of the next step simulate its reflections where the step is expected, so the step can start on time with reflections
+		/// of its own place. While walking straight the guess is exact.
+		/// </summary>
+		private void PrepareNextFootStep()
+		{
+			Transform camera = Camera.main != null ? Camera.main.transform : null;
+			if (camera == null || _warmUpFrames > 0 || _renewing[_nextFootStep])
+				return;
+
+			AudioSource footStep = _footSteps[_nextFootStep];
+			SteamAudio.SteamAudioSource steam = _footStepSteam[_nextFootStep];
+			if (SpatialAudio.IsSimulating(steam))
+				return;
+
+			Vector3 ears = SpatialAudio.InFrontOfGeometry(camera.position, PredictNextStep().ToVector3(camera.position.y));
+			Vector3 position = SpatialAudio.InFrontOfGeometry(ears, ears + camera.rotation * FootStepOffset);
+			if (footStep.transform.parent == null && Vector3.Distance(footStep.transform.position, position) < .1f)
+				return;
+
+			footStep.transform.SetParent(null);
+			footStep.transform.position = position;
+			SpatialAudio.Simulate(steam);
+		}
+
+		/// <summary>
+		/// The next step was simulated before a door opened or closed; it simulates again where it waits.
+		/// </summary>
+		private void OnGeometryChanged()
+		{
+			if (_renewing[_nextFootStep])
+				return;
+
+			AudioSource footStep = _footSteps[_nextFootStep];
+			SteamAudio.SteamAudioSource steam = _footStepSteam[_nextFootStep];
+			if (footStep != null && footStep.transform.parent == null && !SpatialAudio.IsSimulating(steam))
+				SpatialAudio.Simulate(steam);
+		}
+
+		private Vector2 PredictNextStep()
+		{
+			bool walking = _lastStep != null && _stepBeforeLast != null && Time.time - _lastFootStepTime < WalkPause
+				&& Vector2.Distance(Owner.Center, _lastStep.Value) < MaxStepLength;
+			return walking ? _lastStep.Value + (_lastStep.Value - _stepBeforeLast.Value) : Owner.Center;
 		}
 
 		/// <summary>
@@ -124,15 +212,17 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		/// </summary>
 		private void WarmUpFootStep()
 		{
-			AttachFootStepToCamera();
 			_warmUpClip = AudioClip.Create("footstep warm-up", 4410, 1, 44100, false);
+
 			foreach (AudioSource footStep in _footSteps)
 			{
+				AttachFootStepToCamera(footStep);
 				footStep.clip = _warmUpClip;
 				footStep.volume = 0;
 				footStep.loop = true;
 				footStep.Play();
 			}
+
 			_warmUpFrames = WarmUpFrameCount;
 		}
 
@@ -155,6 +245,8 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		{
 			base.Initialize();
 			InitFootStepSource();
+			SpatialAudio.GeometryChanged += OnGeometryChanged;
+			SpatialAudio.Simulated += OnSimulated;
 			_exitDescriber = new();
 			_itemDescriber = new();
 			_characterDescriber = new();
@@ -167,7 +259,13 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			string sound = GetStepSoundName(position);
 			AudioClip clip = Sounds.GetClip(sound);
 			if (!terrainCollided)
-				PlayFootStep(clip);
+			{
+				bool sameWalk = _lastStep != null && Time.time - _lastFootStepTime < WalkPause && Vector2.Distance(position, _lastStep.Value) < MaxStepLength;
+				_stepBeforeLast = sameWalk ? _lastStep : null;
+				_lastStep = position;
+				_lastFootStepTime = Time.time;
+				PlayFootStep(clip, position);
+			}
 			else
 			{
 				float size = 2 * TileMap.TileSize;
@@ -180,45 +278,172 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		}
 
 		/// <summary>
-		/// The source is a child of the camera (listener), so it follows it no matter in which order the scripts
-		/// move the camera. It sits below and slightly ahead of the listener, because the direction of a sound at zero distance
-		/// or exactly below the listener is not defined and it can jump to the side.
+		/// The source is a child of the camera (listener), so it follows it no matter in which order the scripts move the camera.
+		/// In front of a wall or a door it stays on the near side.
 		/// </summary>
-		private void AttachFootStepToCamera()
+		private void AttachFootStepToCamera(AudioSource footStep)
 		{
 			Transform camera = Camera.main != null ? Camera.main.transform : null;
 			if (camera == null)
 				return;
 
-			foreach (AudioSource footStep in _footSteps)
-			{
-				if (footStep.transform.parent == camera)
-					continue;
-
+			if (footStep.transform.parent != camera)
 				footStep.transform.SetParent(camera, false);
-				footStep.transform.localPosition = new Vector3(0, -Mathf.Max(0.3f, camera.position.y - 1f), FootstepForwardOffset);
-			}
+			footStep.transform.position = SpatialAudio.InFrontOfGeometry(camera.position, camera.TransformPoint(FootStepOffset));
 		}
 
 		/// <summary>
 		/// Plays a step sound at an exact time on the audio clock so the intervals between steps stay even.
 		/// </summary>
-		private void PlayFootStep(AudioClip clip)
+		/// <remarks>The reflections were simulated in advance and are frozen for the whole step.</remarks>
+		/// <param name="position">Where the step is; after a teleport the camera gets there only after the step starts</param>
+		private void PlayFootStep(AudioClip clip, Vector2 position)
 		{
-			AttachFootStepToCamera();
 			if (!_clockOffsetKnown)
 				UpdateClockOffset();
 
 			double start = Time.realtimeSinceStartupAsDouble + _clockOffset + StepSoundLead;
 			start = Math.Max(start, AudioSettings.dspTime + StepSoundMinLead);
 
-			AudioSource footStep = _footSteps[_nextFootStep];
+			int index = _nextFootStep;
+			AudioSource footStep = _footSteps[index];
 			_nextFootStep = (_nextFootStep + 1) % _footSteps.Length;
 
+			AttachFootStepToCamera(footStep);
+			bool teleported = _simulatedAt[index] is Vector3 simulatedAt && Vector2.Distance(new(simulatedAt.x, simulatedAt.z), position) > TeleportDistance;
+			if (teleported)
+				ForgetReverbHistory();
+
+			AudioClip stepClip = SpatialAudio.AddReflectionTail(clip);
+			if (_renewing[index])
+				_lateSteps[index] = new(stepClip, position, Time.realtimeSinceStartup);
+			else
+			{
+				if (!SpatialAudio.IsSimulating(_footStepSteam[index]))
+					SpatialAudio.Freeze(_footStepSteam[index]);
+				PlayStepClip(index, stepClip, start);
+			}
+			PrepareNextFootStep();
+		}
+
+		private void PlayStepClip(int index, AudioClip clip, double start)
+		{
+			AudioSource footStep = _footSteps[index];
+			// The usual distance, so a step in front of a wall has as much reverb as elsewhere.
+			_footStepSteam[index].reflectionsMixLevel = SpatialAudio.GetReflectionsMixLevel(FootStepOffset.magnitude);
 			footStep.loop = false;
 			footStep.clip = clip;
 			footStep.volume = _walkVolume;
 			footStep.PlayScheduled(start);
+		}
+
+		/// <summary>
+		/// Steps waiting for reflections of their own place, e.g. the first step after a teleport, by the index of their source.
+		/// </summary>
+		private readonly Dictionary<int, LateStep> _lateSteps = new();
+
+		private class LateStep
+		{
+			public readonly AudioClip Clip;
+			public readonly Vector2 Position;
+			public readonly float Requested;
+			public bool Simulating;
+
+			public LateStep(AudioClip clip, Vector2 position, float requested)
+			{
+				Clip = clip;
+				Position = position;
+				Requested = requested;
+			}
+		}
+
+		/// <summary>
+		/// Longest wait of a step for its reflections in seconds.
+		/// </summary>
+		private const float MaxSimulationWait = 1;
+
+		/// <summary>
+		/// Where each step source was when the reflections it carries were simulated.
+		/// </summary>
+		private readonly Vector3?[] _simulatedAt = new Vector3?[8];
+
+		/// <summary>
+		/// Step sources whose Steam Audio source is being replaced. Steam Audio averages the reflections of a source over its simulations,
+		/// so a source simulated before a teleport would keep mixing the reverb of the old place into its new reflections.
+		/// </summary>
+		private readonly bool[] _renewing = new bool[8];
+
+		/// <summary>
+		/// Stops the step sources and replaces their Steam Audio sources with new ones without the history of the old place.
+		/// </summary>
+		/// <remarks>Destroy takes effect at the end of the frame; the new sources are added in the next one.</remarks>
+		private void ForgetReverbHistory()
+		{
+			for (int i = 0; i < _footSteps.Length; i++)
+			{
+				if (_renewing[i])
+					continue;
+
+				_footSteps[i].Stop();
+				SpatialAudio.Forget(_footStepSteam[i]);
+				Destroy(_footStepSteam[i]);
+				_simulatedAt[i] = null;
+				_renewing[i] = true;
+			}
+		}
+
+		private void RenewSteamSources()
+		{
+			for (int i = 0; i < _footSteps.Length; i++)
+			{
+				if (!_renewing[i] || _footStepSteam[i] != null)
+					continue;
+
+				_footStepSteam[i] = _footSteps[i].gameObject.AddComponent<SteamAudio.SteamAudioSource>();
+				SpatialAudio.Configure(_footStepSteam[i]);
+				_renewing[i] = false;
+			}
+		}
+
+		private void OnSimulated(SteamAudio.SteamAudioSource steam)
+		{
+			int index = Array.IndexOf(_footStepSteam, steam);
+			if (index < 0)
+				return;
+
+			_simulatedAt[index] = _footSteps[index].transform.position;
+			if (_lateSteps.TryGetValue(index, out LateStep step) && step.Simulating)
+			{
+				_lateSteps.Remove(index);
+				PlayStepClip(index, step.Clip, AudioSettings.dspTime + StepSoundMinLead);
+			}
+		}
+
+		/// <summary>
+		/// Lets a late step simulate once its source is new and the camera carried it to the step; a step can start before the camera moves.
+		/// </summary>
+		private void PlayLateSteps()
+		{
+			foreach (var (index, step) in _lateSteps.ToList())
+			{
+				if (_renewing[index])
+					continue;
+
+				if (Time.realtimeSinceStartup - step.Requested > MaxSimulationWait)
+				{
+					_lateSteps.Remove(index);
+					PlayStepClip(index, step.Clip, AudioSettings.dspTime + StepSoundMinLead);
+				}
+				else if (!step.Simulating)
+				{
+					Vector3 source = _footSteps[index].transform.position;
+					if (Vector2.Distance(new(source.x, source.z), step.Position) > TeleportDistance)
+						continue;
+
+					SpatialAudio.Simulate(_footStepSteam[index]);
+					step.Simulating = true;
+				}
+			}
 		}
 
 		public void OnSaySize(SaySize message)
@@ -275,8 +500,6 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 					OnSonarDetectedNoObstacles(m); break;
 				case SonarDetectedObstacles m:
 					OnSonarDetectedObstacles(m); break;
-				case NoAcousticObstacleDetected m: OnNoAcousticObstacleDetected(m); break;
-				case AcousticObstacleDetected m: OnAcousticObstacleDetected(m); break;
 				case NavigationStopped m:
 					OnNavigationStopped(m); break;
 				case SayNavigatedObjectLocationResult m:
@@ -317,12 +540,6 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 		private void OnSonarDetectedObstacles(SonarDetectedObstacles message)
 			=> _sonar.SetState(message.ObstaclesOnLeft, message.ObstaclesOnRight, message.ObstaclesInFront);
-
-		private void OnNoAcousticObstacleDetected(Message message)
-			=> Sounds.RoomManager.StopSimulatingObstacle();
-
-		private void OnAcousticObstacleDetected(AcousticObstacleDetected message)
-			=> Sounds.RoomManager.SimulateObstacle(message.Direction);
 
 		private void OnNavigationStopped(NavigationStopped message)
 		{

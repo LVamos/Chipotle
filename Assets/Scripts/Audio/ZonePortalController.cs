@@ -355,7 +355,7 @@ namespace Assets.Scripts.Audio
 			{
 				float frequency = doubleAttenuation ? Settings.OverWallLowPass : Settings.OverClosedDoorLowPass;
 				Sounds.SlideLowPass(portal, Settings.DoorClosingOcclusionDuration, frequency);
-				portal.outputAudioMixerGroup = Sounds.ResonanceGroup;
+				portal.outputAudioMixerGroup = Sounds.SpatializedGroup;
 				portal.spatialize = true;
 			}
 

@@ -1,6 +1,4 @@
-﻿using Assets.Scripts.Models;
-
-using Game.Audio;
+﻿using Game.Audio;
 using Game.Entities.Characters;
 using Game.Mapping.Saves;
 using Game.Messaging.Commands.GameInfo;
@@ -9,7 +7,6 @@ using Game.Messaging.Events.Characters.Movement;
 using Game.Messaging.Events.GameManagement;
 using Game.Messaging.Events.Movement;
 using Game.Messaging.Events.Physics;
-using Game.Models;
 using Game.Serialization.Protobuf.Snapshots.Entities;
 using Game.Serialization.Protobuf.Snapshots.Entities.Items.Items;
 using Game.Terrain;
@@ -44,315 +41,14 @@ namespace Game.Entities.Items
 	{
 		public bool Passable { get; protected set; }
 
-		private void UpdatePortals()
-		{
-			if (_portals == null)
-				PlayPortals();
-
-			foreach (Passage exit in _portals.Keys)
-			{
-				AudioSource portal = _portals[exit];
-				UpdatePortalOcclusion(portal, exit, Settings.ItemEnterZoneOcclusionDuration);
-				UpdatePortalPosition(portal, exit);
-			}
-		}
-
-		private void UpdatePortalPosition(AudioSource portal, Passage exit)
-		{
-			Vector3 position = GetPointForPortal(exit);
-			portal.transform.position = position;
-		}
-
-		protected string GetPortalDescription(Passage passage)
-		{
-			Zone[] zones = passage.Zones.ToArray();
-			string description = $"portal ({Name.Inner}); zones: {zones[0].Name.Inner}, {zones[1].Name.Inner}";
-			return description;
-		}
-
-
-		private void MoveAmbientToPortal(PortalAnchor portal, float volume)
-		{
-			_ambientSource.transform.position = portal.Position;
-			AudioSource newPortal = _ambientSource;
-			_ambientSource = null;
-			SetPortalAttenuation(newPortal);
-			newPortal.name = GetPortalDescription(portal.Passage);
-			_portals[portal.Passage] = newPortal;
-		}
-
-		protected PortalAnchor GetReadyPortalByPassage(List<PortalAnchor> portals, Passage passage)
-		{
-			PortalAnchor result = portals
-				.First(loop => loop.Passage == passage);
-			return result;
-		}
-
-		protected PortalAnchor RemoveReadyPortalNearPlayer(List<PortalAnchor> portals)
-		{
-			List<Passage> passages = ReadyPortalsToPassages(portals);
-			Passage closestPassage = World.GetClosestElement(passages, World.Player) as Passage;
-			PortalAnchor closestPortal = GetReadyPortalByPassage(portals, closestPassage);
-			portals.Remove(closestPortal);
-			return closestPortal;
-		}
-
-		protected bool ReplaceAmbientLoopWithNearestPortal()
-		{
-			AudioSource portal = TryRemovePortalNearPlayer();
-			if (portal == null)
-				return false;
-
-			DisableOcclusion(portal, Settings.ItemOcclusionDisablingDuration);
-			_ambientSource = portal;
-			_ambientSource.transform.position = GetAmbientPosition();
-			return true;
-		}
-
-		protected AudioSource TryRemovePortalNearPlayer()
-		{
-			if (_portals == null)
-				return null;
-
-			Passage closestPassage = World.GetClosestElement(_portals.Keys, World.Player) as Passage;
-			AudioSource closestPortal = _portals[closestPassage];
-			_portals.Remove(closestPassage);
-			return closestPortal;
-		}
-
-		private void PlayPortals()
-		{
-			// Portal ambients already playing
-			if (_portals != null)
-				return;
-
-			_portals = new();
-			Zone playersZone = World.Player.Zone;
-			List<PortalAnchor> readyPortals = PreparePortals();
-
-			/* 
-			 * Enuse original ambient sound if already playing.
-			 */
-			if (_ambientSource != null && _ambientSource.isPlaying)
-			{
-				// place it into  the nearest exit.
-				PortalAnchor closestPortal = RemoveReadyPortalNearPlayer(readyPortals);
-				MoveAmbientToPortal(closestPortal, GetPortalVolume(closestPortal.Passage));
-			}
-
-			// Start playback in The remaining exits.
-			foreach (PortalAnchor portal in readyPortals)
-				PlayPortal(portal);
-		}
-
-		private void UpdatePortalOcclusion(AudioSource portal, Passage exit, float? duration = null)
-		{
-			float finalDuration = duration != null ? duration.Value : GetPortalOcclusionDuration(exit);
-			PassageState state = exit.State;
-			bool farFromPlayer = exit.GetDistanceToPlayer() > Settings.ItemPassageDistanceAttenuationThreshold;
-			float lowPass = GetPortalOcclusionLowPass(exit, farFromPlayer);
-
-			Sounds.SlideLowPass(portal, finalDuration, lowPass);
-
-			bool playerBehindWall = !exit.Zones.Any(z => z == World.Player.Zone) && exit.Zones.Any(z => !z.IsAccessible(World.Player.Zone));
-			UpdatePortalVolume(portal, exit, finalDuration, playerBehindWall);
-		}
-
-		protected float GetPortalOcclusionLowPass(Passage exit, bool farFromPlayer = false)
-		{
-			if (exit.State is PassageState.Closed or PassageState.Locked)
-				return farFromPlayer ? Settings.OverWallLowPass : Settings.OverClosedDoorLowPass;
-			return farFromPlayer ? Settings.OverClosedDoorLowPass : Settings.OverOpenDoorLowPass;
-		}
-
-		protected float GetPortalOcclusionDuration(Passage exit)
-		{
-			if (exit.State is PassageState.Closed or PassageState.Locked)
-				return Settings.ItemDoorClosingOcclusionDuration;
-			return Settings.ItemDoorOpeningOcclusionDuration;
-		}
-
-		protected void UpdatePortalVolume(AudioSource portal, Passage exit, float duration, bool playerBehindWall = false)
-		{
-			float volume = Sounds.GetLinearRolloffAttenuation(
-				transform.position,
-				Settings.ItemAmbientMinDistance,
-				GetMaxDistance(),
-				_defaultVolume
-				);
-			float finalVolume = volume * GetPortalVolumeCoefficient(exit);
-			if (playerBehindWall)
-				finalVolume *= Settings.ItemBehindWallVolumeCoefficient;
-			Sounds.SlideVolume(portal, duration, finalVolume, false);
-		}
-
-		protected float GetPortalVolumeCoefficient(Passage exit)
-		{
-			if (exit is Passage and not Door)
-				return Settings.ItemportalVolumeCoefficient;
-
-			return exit.State switch
-			{
-				PassageState.Closed => Settings.ItemClosedPortalVolumeCoefficient,
-				PassageState.Locked => Settings.ItemClosedPortalVolumeCoefficient,
-				_ => Settings.ItemOpenPortalVolumeCoefficient
-			};
-		}
-
-		private List<Passage> ReadyPortalsToPassages(List<PortalAnchor> portals)
-		{
-			List<Passage> result = portals
-				.Select(loop => loop.Passage)
-				.ToList();
-			return result;
-		}
-
-		private void PlayPortal(PortalAnchor readyPortal)
-		{
-			string description = GetPortalDescription(readyPortal.Passage);
-			string name = _sounds["loop"];
-			AudioSource newPortal = Sounds.Play(name, readyPortal.Position, 0, true, false, description: description);
-			SetPortalAttenuation(newPortal);
-
-			_portals[readyPortal.Passage] = newPortal;
-		}
-
-		public List<Passage> GetExitsFromZones()
-		{
-			List<Zone> zones = Zones;
-			List<Passage> exits =
-				zones.SelectMany(z => z.Exits)
-				.ToList();
-			return exits;
-		}
-
-		private List<PortalAnchor> PreparePortals()
-		{
-			Zone playersZone = World.Player.Zone;
-			List<PortalAnchor> portals = new();
-			List<Passage> exits = GetExitsFromZones();
-
-			foreach (Passage exit in exits)
-			{
-				Vector3 position = GetPointForPortal(exit);
-				portals.Add(new(exit, position, false));
-			}
-
-			return portals;
-		}
-
-		private float GetPortalVolume(Passage exit)
-		{
-			float volume = _defaultVolume;
-			if (exit.State != PassageState.Open)
-				volume = Sounds.GetOverClosedDoorVolume(volume);
-			return volume;
-		}
-
-		private AudioSource TakeClosestPassageLoop()
-		{
-			Passage closest = _portals.Keys
-				.OrderBy(p => p.Area.Value.GetDistanceFrom(World.Player.Area.Value))
-				.FirstOrDefault();
-			if (closest == null)
-				return null;
-
-			AudioSource loop = _portals[closest];
-			_portals.Remove(closest);
-			return loop;
-		}
-
-		private void StopPortals()
-		{
-			if (_portals == null)
-				return;
-
-			foreach (AudioSource loop in _portals.Values)
-				Sounds.SlideVolume(loop, .5f, 0);
-
-			_portals = null;
-		}
-
-		private void StopLoops()
-		{
-			Stop(ref _ambientSource);
-			foreach (AudioSource loop in _portals.Values)
-			{
-				AudioSource tmp = loop;
-				Stop(ref tmp);
-			}
-			_portals = new();
-
-			void Stop(ref AudioSource source)
-			{
-				if (source != null && source.isPlaying)
-				{
-					source.Stop();
-					source = null;
-				}
-			}
-		}
-
+		/// <summary>
+		/// Fades out and stops the sound loop of this object.
+		/// </summary>
 		private void StopAmbientSounds()
 		{
-			if (_ambientSource != null && _ambientSource.isPlaying)
-			{
+			if (LoopPlaying)
 				Sounds.SlideVolume(_ambientSource, Settings.ItemDefaultOcclusionDuration, 0);
-				_ambientSource = null;
-			}
-
-			StopPortals();
-		}
-
-
-		private Dictionary<Passage, AudioSource> _portals;
-
-		protected Vector3? _loopPositionBackup;
-
-		protected Vector3 GetPointForPortal(Passage exit)
-		{
-			Vector2 exitPoint = exit.GetClosestPointToPlayer();
-			float distance = _area.Value.GetDistanceFrom(exitPoint);
-			Zone myZone = GetZoneNearPlayer();
-
-			Vector2 projectionPoint = myZone.Area.Value.GetProjectedPoint(exitPoint, distance, true).Value;
-			float height = GetSoundHeight();
-			Vector3 result = projectionPoint.ToVector3(height);
-			return result;
-		}
-
-		protected void RestoreLoopPosition()
-		{
-			_ambientSource.transform.position = _loopPositionBackup.Value;
-			_loopPositionBackup = null;
-		}
-
-		public ObstacleType DetectOcclusion()
-		{
-			Zone playersZone = World.Player.Zone;
-			Vector2 closestPoint = GetClosestPointToPlayer();
-			Zone myZone = World.GetZone(closestPoint);
-
-			// If the item is in the same zone as the player, use raycasting.
-			if (playersZone == myZone)
-				return World.Collisions.DetectOcclusion(this);
-
-			// Player in a different zone. Simplify occlusion detection.
-			bool neighbourZone = playersZone.IsNeighbour(myZone);
-			bool accessibleZone = myZone.IsAccessible(playersZone);
-
-			// Adjecting zones
-			if (neighbourZone && accessibleZone)
-				return ObstacleType.InDifferentZone;
-
-			// Player in inadjecting inaccesible zone.
-			return ObstacleType.Far;
-		}
-
-		private Passage GetPassageInFrontOfPlayer()
-		{
-			Zone myZone = GetZoneNearPlayer();
-			return myZone.GetPassageInFront(World.Player.Area.Value.Center);
+			_ambientSource = null;
 		}
 
 		protected void LogCollision(Character character, Vector2 point)
@@ -576,11 +272,9 @@ save.UsableWith
 			_actionSource = null;
 			_ambientSource = null;
 			_cutscene = null;
-			_lastOccludingObstacle = default;
-			_loopPositionBackup = null;
+			_loopStopped = false;
 			_passByAudio = null;
 			_placingAudio = null;
-			_portals = null;
 			_zones = new();
 			_audibleOverWalls = false;
 
@@ -633,7 +327,6 @@ save.UsableWith
 				l.TakeMessage(new ItemAppearedInZone(this, this, l));
 
 			// Play loop sound if any and if the player can hear it.
-			PlayAmbient();
 			UpdateAmbientSounds();
 		}
 
@@ -644,48 +337,20 @@ save.UsableWith
 		private void OnOrientationChanged(OrientationChanged message) => StopActionWhenPlayerMoves();
 
 		/// <summary>
-		/// Handles the DoorManipulated message.
-		/// </summary>
-		/// <param name="message">The message</param>
-		protected void OnDoorUsed(DoorUsed message)
-		{
-			if (_sounds["loop"] == null)
-				return;
-
-			Door door = message.Sender as Door;
-			Zone myZone = GetZoneNearPlayer();
-			if (!door.LeadsTo(myZone))
-				return;
-			if (IsPlayerHere())
-				return;
-
-			if (_portals == null)
-				UpdateAmbientSounds();
-			if (_portals != null)
-				UpdatePortalOcclusion(_portals[door], door);
-		}
-
-		private bool IsPlayerHere()
-		{
-			return World.Player.Zone == GetZoneNearPlayer();
-		}
-
-		/// <summary>
-		/// Stops sound loop of this object, if any.
+		/// Stops sound loop of this object for good, if any.
 		/// </summary>
 		protected void StopLoop()
 		{
-			if (_ambientSource != null)
-				Sounds.SlideVolume(_ambientSource, .5f, 0);
+			_loopStopped = true;
+			StopAmbientSounds();
 		}
+
+		private bool _loopStopped;
 
 		/// <summary>
 		/// Determines if the object should be heart over walls and closed doors in other zones.
 		/// </summary>
 		protected bool _audibleOverWalls;
-
-		private bool PlayerInSoundRadius
-		{ get => GetDistanceToPlayer() <= GetMaxDistance(); }
 
 		/// <summary>
 		/// Processes the EntityMoved message.
@@ -696,7 +361,7 @@ save.UsableWith
 			if (message.Sender != World.Player)
 				return;
 
-			UpdateAmbientSounds(message.SourcePosition, message.SourceZone);
+			UpdateAmbientSounds();
 			StopActionWhenPlayerMoves();
 		}
 
@@ -721,14 +386,6 @@ save.UsableWith
 
 
 		private AudioSource _passByAudio;
-		protected ObstacleType _lastOccludingObstacle;
-
-		protected float GetMaxDistance()
-		{
-			Rectangle myZoneArea = GetZoneNearPlayer().Area.Value;
-			float longerSide = Mathf.Max(myZoneArea.Height, myZoneArea.Width);
-			return longerSide + Settings.ItemMaxDistanceMargin;
-		}
 
 		/// <summary>
 		/// Destroys the object.
@@ -754,18 +411,17 @@ save.UsableWith
 			if (string.IsNullOrEmpty(_sounds["collision"]))
 				return;
 
-			Vector3 position = message.ContactPoint.ToVector3(GetSoundHeight());
+			Vector3 position = OutOfObstacle(message.ContactPoint).ToVector3(GetSoundHeight());
 			string soundName = _sounds["collision"];
 			Sounds.Play(soundName, position, _defaultVolume);
 		}
 
+		/// <summary>
+		/// Returns the height of the object's sounds, at most the height of the player's ears.
+		/// </summary>
+		/// <remarks>The camera rises to the ears only after the objects start their loops.</remarks>
 		private float GetSoundHeight()
-		{
-			float itemHeight = transform.localScale.y;
-			float cameraHeight = Camera.main.transform.position.y;
-			float height = itemHeight < cameraHeight ? itemHeight : cameraHeight;
-			return height;
-		}
+			=> Mathf.Min(transform.localScale.y, World.Player.transform.localScale.y);
 
 		/// <summary>
 		/// Processes the UseObject message.
@@ -788,7 +444,7 @@ save.UsableWith
 			else if (_quickActionsAllowed && Time.time - _lastUse > Settings.ItemActionRepetetionInterval)
 			{
 				_lastUse = Time.time;
-				Sounds.Play(_sounds["action"], message.ManipulationPoint, _defaultVolume);
+				Sounds.Play(_sounds["action"], OutOfObstacle(message.ManipulationPoint).ToVector3(GetSoundHeight()), _defaultVolume);
 			}
 
 			Used = true;
@@ -805,9 +461,9 @@ save.UsableWith
 
 		protected void PlayActionSound(Vector2 manipulationPoint, string soundName = null)
 		{
-			Vector3 position = manipulationPoint.ToVector3(GetSoundHeight());
+			Vector3 position = OutOfObstacle(manipulationPoint).ToVector3(GetSoundHeight());
 			string finalSoundName = soundName ?? _sounds["action"];
-			_ambientSource = Sounds.Play(finalSoundName, position, _defaultVolume);
+			_actionSource = Sounds.Play(finalSoundName, position, _defaultVolume);
 		}
 
 		/// <summary>
@@ -816,166 +472,63 @@ save.UsableWith
 		private void OnGameReloaded() => UpdateAmbientSounds();
 
 		/// <summary>
-		/// Plays the sound loop of this object if there's any.
+		/// Distance at which the direct sound of a loop is 40 dB weaker than 1 m from it; a farther loop is inaudible and stops.
 		/// </summary>
-		/// <param name="attenuated">Determines if the sound of the object should be played over a wall or other obstacles.</param>
-		protected void UpdateAmbientSounds(Rectangle? previousPosition = null, Zone playersPreviousZone = null)
+		private const float _maxLoopDistance = 100;
+
+		/// <summary>
+		/// Keeps the sound loop of this object playing at the object while the player can hear it. Steam Audio attenuates it physically:
+		/// with distance, with walls and closed doors on the direct path, and lets its reflections through open passages.
+		/// </summary>
+		protected void UpdateAmbientSounds()
 		{
-			if (string.IsNullOrEmpty(_sounds["loop"])
-				|| !PlayerInSoundRadius)
+			if (string.IsNullOrEmpty(_sounds["loop"]) || _loopStopped)
 				return;
 
-			ObstacleType obstacle = DetectOcclusion();
-
-			bool nowInSameZone = Zones.Contains(World.Player.Zone);
-			bool previouslyInSameZone = Zones.Contains(playersPreviousZone);
-			if (!previouslyInSameZone && !nowInSameZone)
-				UpdateOcclusion(obstacle, 0);
-			else UpdateOcclusion(obstacle);
-		}
-
-		protected bool IsInAudibleDistance()
-			=> GetDistanceToPlayer() <= _ambientSource.maxDistance;
-
-		protected void UpdateOcclusion(ObstacleType obstacle, float? duration = null, Door door = null)
-		{
-			if (string.IsNullOrEmpty(_sounds["loop"]))
-				return;
-			if (_lastOccludingObstacle == obstacle && obstacle != default && obstacle != ObstacleType.InDifferentZone)
-				return;
-
-			ObstacleType lastObstacleBackup = _lastOccludingObstacle;
-			_lastOccludingObstacle = obstacle;
-			_muffled = obstacle != ObstacleType.None;
-
-			if (obstacle == ObstacleType.InDifferentZone)
-			{
-				UpdatePortals();
-				return;
-			}
-
-			if (obstacle == ObstacleType.Far)
+			if (_area == null || GetDistanceToPlayer() > _maxLoopDistance)
 			{
 				StopAmbientSounds();
 				return;
 			}
 
-			if (lastObstacleBackup is ObstacleType.InDifferentZone or ObstacleType.Far && obstacle is not ObstacleType.Far and not ObstacleType.InDifferentZone)
+			if (!LoopPlaying)
 				PlayAmbient();
-
-			if (obstacle is ObstacleType.Far or ObstacleType.InDifferentZone)
-				return;
-
-			float finalDuration = duration == null ? Settings.ItemDefaultOcclusionDuration : duration.Value;
-			if (_muffled)
-			{
-				AttenuationModel attenuation = GetAttenuationSettings(obstacle);
-				SetAttenuation(_ambientSource, attenuation, finalDuration);
-			}
-			else DisableOcclusion(_ambientSource, finalDuration);
-		}
-
-		private Passage GetPassageInFrontPlayer()
-		{
-			Zone myZone = GetZoneNearPlayer();
-			return myZone.GetPassageInFront(World.Player.Area.Value.Center);
-		}
-
-		protected AttenuationModel GetAttenuationSettings(ObstacleType obstacle)
-		{
-			return obstacle switch
-			{
-				ObstacleType.Wall => new(
-					Settings.OverWallLowPass,
-					Sounds.GetOverWallVolume(_defaultVolume)
-				),
-				ObstacleType.ClosedDoor => new(
-					Settings.OverClosedDoorLowPass,
-					Sounds.GetOverClosedDoorVolume(_defaultVolume)
-				),
-				ObstacleType.OpenDoor => new(
-					null,
-					Sounds.GetOverOpenDoorVolume(_defaultVolume)
-				),
-				ObstacleType.ItemOrCharacter => new(
-					Settings.OverObjectLowPass,
-					Sounds.GetOverObjectVolume(_defaultVolume)
-				),
-				_ => new(
-					null,
-					0
-				)
-			};
-		}
-
-		private void DisableOcclusion(AudioSource source, float? duration)
-		{
-			float finalDuration = duration == null ? Settings.ItemDefaultOcclusionDuration : duration.Value;
-			SetAttenuation(source, new(22000, _defaultVolume), finalDuration, true);
-		}
-
-		private void SetAttenuation(AudioSource source, AttenuationModel attenuationSetting, float duration, bool disableLowPassAfterwards = false)
-		{
-			float updatedVolume = Sounds.GetLinearRolloffAttenuation(source.transform.position, Settings.ItemAmbientMinDistance, GetMaxDistance(), attenuationSetting.Volume);
-			Sounds.SlideVolume(source, duration, updatedVolume, false);
-			source.spatialBlend = attenuationSetting.SpatialBlend;
-
-			if (attenuationSetting.LowPassFrequency != null)
-			{
-				Sounds.SlideLowPass(source, duration, attenuationSetting.LowPassFrequency.Value, disableLowPassAfterwards);
-				return;
-			}
-
-			if (_muffled)
-				Sounds.SlideLowPass(source, duration, 22000);
+			else if (AcousticObstacle)
+				_ambientSource.transform.position = GetAmbientPosition();
 		}
 
 		/// <summary>
-		/// Plays sound loop of the object with sound attenuation.
+		/// Generation of the pooled source of the loop; the pool gives the source to other sounds once the loop stops.
 		/// </summary>
-		/// <param name="obstacle">Type of obstacle between player and this object</param>
+		private int _ambientGeneration;
+
+		private bool LoopPlaying
+			=> _ambientSource != null && Sounds.GetGeneration(_ambientSource) == _ambientGeneration;
+
+		/// <summary>
+		/// Plays sound loop of the object.
+		/// </summary>
 		protected void PlayAmbient()
 		{
-			if (_sounds["loop"] == null)
-				return;
-
-			Vector3 position = GetAmbientPosition();
-			string description = GetAmbientDescription();
-
-			if (ReplaceAmbientLoopWithNearestPortal())
-			{
-				StopPortals();
-				return;
-			}
-
-			string name = _sounds["loop"];
-			_ambientSource = Sounds.Play(name, position, 0, true, false, description: description);
-			SetAmbientAttenuation(_ambientSource);
+			_ambientSource = Sounds.Play(_sounds["loop"], GetAmbientPosition(), _defaultVolume, true, true, description: GetAmbientDescription());
+			_ambientGeneration = Sounds.GetGeneration(_ambientSource);
 		}
 
 		private Vector3 GetAmbientPosition()
-		{
-			return _area.Value.Center.ToVector3(GetSoundHeight());
-		}
+			=> (AcousticObstacle ? GetSurfaceTowardsPlayer() : _area.Value.Center).ToVector3(GetSoundHeight());
 
-		private void SetPortalAttenuation(AudioSource portal)
-		{
-			AudioSource source = portal;
-			source.maxDistance = GetMaxDistance();
-			float distance = Vector3.Distance(source.transform.position, transform.position);
-			source.maxDistance -= distance;
+		/// <summary>
+		/// Returns the point of the object nearest to the player, moved slightly out of it. An acoustic obstacle is solid geometry
+		/// for Steam Audio, and a sound starting inside it would be occluded and would have no reflections.
+		/// </summary>
+		private Vector2 GetSurfaceTowardsPlayer()
+			=> OutOfObstacle(_area.Value.GetClosestPoint(World.Player.Center));
 
-			source.minDistance = Settings.ItemAmbientMinDistance;
-			source.rolloffMode = Settings.ItemAmbientRollofMode;
-		}
-
-
-		private void SetAmbientAttenuation(AudioSource source)
-		{
-			source.maxDistance = GetMaxDistance();
-			source.minDistance = Settings.ItemAmbientMinDistance;
-			source.rolloffMode = Settings.ItemAmbientRollofMode;
-		}
+		/// <summary>
+		/// Moves a point of the object towards the player, out of its geometry.
+		/// </summary>
+		private Vector2 OutOfObstacle(Vector2 point)
+			=> AcousticObstacle ? Vector2.MoveTowards(point, World.Player.Center, .15f) : point;
 
 		private string GetAmbientDescription()
 		{
@@ -995,7 +548,6 @@ save.UsableWith
 				case ReportPosition m: OnReportPosition(m); break;
 				case OrientationChanged oc: OnOrientationChanged(oc); break;
 				case CharacterMoved em: OnCharacterMoved(em); break;
-				case DoorUsed dm: OnDoorUsed(dm); break;
 				case Reloaded gr: OnGameReloaded(); break;
 				case ObjectsCollided oc: OnObjectsCollided(oc); break;
 				case UseObjects uo: OnUseObjects(uo); break;

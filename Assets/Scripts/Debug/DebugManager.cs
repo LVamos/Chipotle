@@ -80,34 +80,6 @@ namespace Game.Debug
 			ScreenReader.Speak("Seznam průchozích objektů máš ve schránce.");
 		}
 
-		[DebugCommand(DebugCommand.SetWallMaterials, "Nastavit materiál zdí")]
-		private void SetWallMaterials()
-			=> WindowHandler.InputBox("Zadej číslo materiálu", "Materiály zdí", string.Empty, ApplyWallMaterial);
-
-		private void ApplyWallMaterial(string input)
-		{
-			if (string.IsNullOrEmpty(input))
-				return;
-
-			int index = int.Parse(input);
-			ZoneMaterial material = (ZoneMaterial)index;
-			ZoneMaterials materials = new(material, material, material, material, material, material);
-			Zone zone = World.Player.Zone;
-
-			ResonanceRoomParameters parameters = new(
-				zone.transform.position,
-				zone.transform.localScale,
-				materials,
-				zone.Type == ZoneType.Outdoor);
-			Sounds.RoomManager.SimulateRoom
-				(
-				parameters
-				);
-
-			string name = Enum.GetName(typeof(ZoneMaterial), material);
-			ScreenReader.Speak(name);
-		}
-
 		[DebugCommand(DebugCommand.SayPlayerOrientation, "Říct orientaci hráče")]
 		private void SayPlayerOrientation()
 		{

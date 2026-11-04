@@ -41,7 +41,6 @@ AudioMixerGroupController:
   m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 24400004}
-  - {fileID: 3366966752144101571}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0
@@ -89,21 +88,7 @@ AudioMixerEffectController:
     m_GUID: be2193bd6f86d4547accb176bc50036b
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
-  m_Bypass: 0
---- !u!244 &3366966752144101571
-AudioMixerEffectController:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_EffectID: eee7198f104d0fc418f4fac8ef3a258e
-  m_EffectName: Resonance Audio Renderer
-  m_MixLevel: ea362203ce7dab74b811cda7fc9692a2
-  m_Parameters: []
-  m_SendTarget: {fileID: 0}
-  m_EnableWetMix: 0
-  m_Bypass: 0
+  m_Bypass: 1
 --- !u!244 &5185062836850547012
 AudioMixerEffectController:
   m_ObjectHideFlags: 3

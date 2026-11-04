@@ -359,10 +359,14 @@ namespace Game.Terrain
 			return result;
 		}
 
+		/// <summary>
+		/// The point of the object closest to the player. A closed door or an obstacle would muffle a beacon inside it, so it sounds just in front.
+		/// </summary>
 		private Vector3 GetBeaconPosition()
 		{
 			Vector2 position2d = _area.Value.GetClosestPoint(CameraManager.Get2dPosition());
-			return position2d.ToVector3(Camera.main.transform.position.y);
+			Vector3 listener = Camera.main.transform.position;
+			return SpatialAudio.OutOfGeometry(listener, position2d.ToVector3(listener.y));
 		}
 
 		/// <summary>

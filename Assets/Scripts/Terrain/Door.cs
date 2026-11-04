@@ -181,10 +181,18 @@ namespace Game.Terrain
 		{
 			Character character = message.Sender as Character;
 			float characterHeight = character.transform.localScale.y;
-			Vector3 slamPoint = message.Point.ToVector3(characterHeight);
+			Vector3 slamPoint = InFrontOfDoor(message.Point).ToVector3(characterHeight);
+
 			PlayDoorHit(slamPoint);
 			LogDoorHit(message.Sender as Character, message.Point);
 		}
+
+		/// <summary>
+		/// Moves a point of the door towards the player so the sound does not start inside the door geometry, where Steam Audio
+		/// would occlude it and it would have no reflections.
+		/// </summary>
+		private static Vector2 InFrontOfDoor(Vector2 point)
+			=> Vector2.MoveTowards(point, World.Player.Center, .2f);
 
 		private void LogDoorHit(Character character, Vector2 point)
 		{
@@ -333,7 +341,8 @@ namespace Game.Terrain
 			}
 
 			// Play the sound
-			Vector3 position = new(point.x, 1.5f, point.y);
+			Vector2 audiblePoint = InFrontOfDoor(point);
+			Vector3 position = new(audiblePoint.x, 1.5f, audiblePoint.y);
 			return Sounds.Play(sound, position, volume);
 		}
 

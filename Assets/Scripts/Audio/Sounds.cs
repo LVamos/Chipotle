@@ -85,13 +85,13 @@ namespace Game.Audio
 			_soundManager.SetLowPass(source, frequency);
 		}
 
-		public static ResonanceRoomManager RoomManager => _roomManager;
+		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
+			=> _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration, description);
 
-		public static AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play(soundName, position, volume, loop, fadeIn, fadingDuration, description);
+		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
+			=> _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration, description);
 
-		public static AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null) => _soundManager.Play2d(soundName, volume, loop, fadeIn, fadingDuration, description);
-
-		public static AudioMixerGroup ResonanceGroup => _soundManager.ResonanceGroup;
+		public static AudioMixerGroup SpatializedGroup => _soundManager.SpatializedGroup;
 		public static float MasterVolume { get => _soundManager.MasterVolume; set => _soundManager.MasterVolume = value; }
 		public static void SlideMasterVolume(float duration, float targetVolume) => _soundManager.SlideMasterVolume(duration, targetVolume);
 
@@ -101,11 +101,9 @@ namespace Game.Audio
 		{
 			GameObject obj = new("Sound manager");
 			_soundManager = obj.AddComponent<SoundManager>();
-			_roomManager = new();
 		}
 
 		private static SoundManager _soundManager;
-		private static ResonanceRoomManager _roomManager;
 
 		/// <summary>
 		/// Volume used with sound attenuation.
@@ -179,6 +177,10 @@ namespace Game.Audio
 
 		public static void EnableSpatializer(AudioSource source) => _soundManager.EnableSpatializer(source);
 
+		public static void LeaveAcousticsToGame(AudioSource source)
+			=> _soundManager.LeaveAcousticsToGame(source);
+
+		public static void UseGeometricAcoustics(AudioSource source) => _soundManager.UseGeometricAcoustics(source);
 		/// <summary>
 		/// All sounds used in the game
 		/// </summary>
