@@ -332,7 +332,7 @@ namespace Game.Audio
 			source.name = description ?? "sound";
 			source.transform.position = position;
 			AudioClip clip = Sounds.GetClip(soundName);
-			source.clip = loop ? clip : SpatialAudio.AddReflectionTail(clip);
+			source.clip = loop ? SpatialAudio.MakeSeamless(clip) : SpatialAudio.AddReflectionTail(clip);
 			source.spatialBlend = 1; // Full surround sound
 			source.spatialize = true;
 			source.spatializePostEffects = false;

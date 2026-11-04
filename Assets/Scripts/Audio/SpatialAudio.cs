@@ -270,5 +270,114 @@ namespace Game.Audio
 			_clipsWithTail[clip] = extended;
 			return extended;
 		}
+
+		private static readonly Dictionary<AudioClip, AudioClip> _seamlessLoops = new();
+
+		private const float LoopCrossfade = .02f;
+
+		/// <summary>
+		/// How far before the end a loop may be cut so that its tone continues in phase, in seconds; covers one period down to 40 Hz.
+		/// </summary>
+		private const float LoopCutSearch = .025f;
+
+		/// <summary>
+		/// Makes a loop continue in phase where it wraps. A hum whose phase jumps there cancels against its own reverb tail and flutters.
+		/// </summary>
+		public static AudioClip MakeSeamless(AudioClip clip)
+		{
+			if (clip == null)
+				return null;
+			if (_seamlessLoops.TryGetValue(clip, out AudioClip seamless))
+				return seamless;
+
+			_seamlessLoops[clip] = clip;
+			if (clip.loadType != AudioClipLoadType.DecompressOnLoad)
+				return clip;
+			if (clip.loadState != AudioDataLoadState.Loaded)
+				clip.LoadAudioData();
+
+			int channels = clip.channels;
+			float[] samples = new float[clip.samples * channels];
+			int fade = Mathf.RoundToInt(LoopCrossfade * clip.frequency);
+			int search = Mathf.RoundToInt(LoopCutSearch * clip.frequency);
+			if (!clip.GetData(samples, 0) || clip.samples < (fade + search) * 4)
+				return clip;
+
+			(int length, float similarity) = FindLoopCut(samples, channels, fade, search);
+			bool tonal = similarity >= .5f;
+			if (!tonal)
+			{
+				if (!HasSeam(samples, channels))
+					return clip;
+				length = clip.samples - fade;
+			}
+
+			float[] result = new float[length * channels];
+			Array.Copy(samples, result, result.Length);
+			for (int i = 0; i < fade; i++)
+			{
+				float t = (i + .5f) / fade;
+				float fadeIn = tonal ? t : Mathf.Sin(t * Mathf.PI / 2);
+				float fadeOut = tonal ? 1 - t : Mathf.Cos(t * Mathf.PI / 2);
+				for (int c = 0; c < channels; c++)
+					result[i * channels + c] = samples[i * channels + c] * fadeIn + samples[(length + i) * channels + c] * fadeOut;
+			}
+
+			seamless = AudioClip.Create(clip.name, length, channels, clip.frequency, false);
+			seamless.SetData(result, 0);
+			_seamlessLoops[clip] = seamless;
+			return seamless;
+		}
+
+		/// <summary>
+		/// Finds the length near the end of a clip after which its beginning follows most smoothly, with the correlation of the two.
+		/// </summary>
+		private static (int Length, float Similarity) FindLoopCut(float[] samples, int channels, int window, int search)
+		{
+			int frames = samples.Length / channels;
+			float[] mono = new float[frames];
+			for (int i = 0; i < frames; i++)
+				for (int c = 0; c < channels; c++)
+					mono[i] += samples[i * channels + c];
+
+			double startEnergy = 0;
+			for (int i = 0; i < window; i++)
+				startEnergy += mono[i] * mono[i];
+
+			(int Length, float Similarity) best = (frames - window, -1);
+			for (int length = frames - window - search; length <= frames - window; length++)
+			{
+				double product = 0, energy = 0;
+				for (int i = 0; i < window; i++)
+				{
+					product += mono[i] * mono[length + i];
+					energy += mono[length + i] * mono[length + i];
+				}
+
+				float similarity = (float)(product / Math.Sqrt(startEnergy * energy + 1e-20));
+				if (similarity > best.Similarity)
+					best = (length, similarity);
+			}
+			return best;
+		}
+
+		/// <summary>
+		/// Whether the jump from the last sample to the first is bigger than 99 % of the steps inside the clip.
+		/// </summary>
+		private static bool HasSeam(float[] samples, int channels)
+		{
+			int frames = samples.Length / channels;
+			float[] steps = new float[frames - 1];
+			for (int i = 1; i < frames; i++)
+				for (int c = 0; c < channels; c++)
+					steps[i - 1] = Mathf.Max(steps[i - 1], Mathf.Abs(samples[i * channels + c] - samples[(i - 1) * channels + c]));
+			Array.Sort(steps);
+			float typical = steps[(int)(steps.Length * .99f)];
+
+			float seam = 0;
+			for (int c = 0; c < channels; c++)
+				seam = Mathf.Max(seam, Mathf.Abs(samples[c] - samples[(frames - 1) * channels + c]));
+			return seam > typical;
+		}
 	}
 }
