@@ -74,8 +74,30 @@ namespace Game.Audio
 		/// </summary>
 		public static void Simulate(SteamAudioSource steam)
 		{
+			Nudge(steam);
 			Unfreeze(steam);
 			_simulating[steam] = SteamAudioManager.SimulationsStarted;
+		}
+
+		/// <summary>
+		/// Sources lifted by <see cref="ResetDistance"/>.
+		/// </summary>
+		private static readonly HashSet<SteamAudioSource> _nudged = new();
+
+		/// <summary>
+		/// How far a source moves to make Steam Audio forget its reflections, in meters; Steam Audio averages them while the source and the listener stay within 0.1 mm.
+		/// </summary>
+		private const float ResetDistance = .001f;
+
+		/// <summary>
+		/// Moves the source by a millimeter up or back down, so a closed door does not keep the reverb averaged while it was open.
+		/// </summary>
+		private static void Nudge(SteamAudioSource steam)
+		{
+			bool down = _nudged.Remove(steam);
+			if (!down)
+				_nudged.Add(steam);
+			steam.transform.position += (down ? -ResetDistance : ResetDistance) * Vector3.up;
 		}
 
 		public static bool IsSimulating(SteamAudioSource steam)
@@ -110,6 +132,7 @@ namespace Game.Audio
 		public static void Forget(SteamAudioSource steam)
 		{
 			_simulating.Remove(steam);
+			_nudged.Remove(steam);
 			if (_placedByGame.Remove(steam))
 				Configure(steam);
 			Freeze(steam);
