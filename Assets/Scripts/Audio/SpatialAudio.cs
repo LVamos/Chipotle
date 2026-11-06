@@ -32,6 +32,7 @@ namespace Game.Audio
 			steam.transmission = true;
 			steam.transmissionType = TransmissionType.FrequencyDependent;
 			steam.transmissionInput = TransmissionInput.SimulationDefined;
+			steam.maxTransmissionSurfaces = 16;
 			steam.reflections = true;
 			steam.applyHRTFToReflections = true;
 			steam.useDistanceCurveForReflections = false;
