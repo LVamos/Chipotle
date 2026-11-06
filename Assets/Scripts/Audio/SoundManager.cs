@@ -335,7 +335,8 @@ namespace Game.Audio
 			source.clip = loop ? SpatialAudio.MakeSeamless(clip) : SpatialAudio.AddReflectionTail(clip);
 			source.spatialBlend = 1; // Full surround sound
 			source.spatialize = true;
-			source.spatializePostEffects = false;
+			// Filters on the source, such as the door transmission, then act on its reflections too.
+			source.spatializePostEffects = true;
 			source.outputAudioMixerGroup = SpatializedGroup;
 			source.loop = loop;
 			source.dopplerLevel = 0;

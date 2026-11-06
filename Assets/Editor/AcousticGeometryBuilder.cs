@@ -265,6 +265,8 @@ public static class AcousticGeometryBuilder
 			["Ceramic"] = GetMaterial("Ceramic", .01f, .01f, .02f, .4f, .06f, .044f, .011f),
 			["Glass"] = GetMaterial("Glass", .06f, .03f, .02f, .2f, .06f, .044f, .011f),
 			["Wood"] = GetMaterial("Wood", .11f, .07f, .06f, .5f, .07f, .014f, .005f),
+			// An interior door with its gaps insulates about 15/25/30 dB; Steam Audio uses the transmission as an amplitude gain.
+			["Door"] = GetMaterial("Door", .14f, .1f, .08f, .5f, .178f, .056f, .032f),
 			["Metal"] = GetMaterial("Metal", .2f, .07f, .06f, .3f, .2f, .025f, .01f),
 			["Carpet"] = GetMaterial("Carpet", .24f, .69f, .73f, .5f, .02f, .005f, .003f),
 			["Linoleum"] = GetMaterial("Linoleum", .02f, .03f, .04f, .4f, .02f, .005f, .003f),
@@ -574,7 +576,7 @@ public static class AcousticGeometryBuilder
 			bool gate = IsGate(passage);
 			Area area = ToArea(ParseNumbers(Attr(passage, "coordinates")));
 			string name = Attr(passage, "indexedname").Sanitize();
-			GameObject door = CreateBox(name, area, 0, gate ? _gateHeight : _doorHeight, gate ? _materials["Metal"] : _materials["Wood"], root.transform);
+			GameObject door = CreateBox(name, area, 0, gate ? _gateHeight : _doorHeight, gate ? _materials["Metal"] : _materials["Door"], root.transform);
 			door.AddComponent<SteamAudioDynamicObject>().asset = GetSerializedData($"{_doorFolder}/Door{index++}.asset");
 		}
 	}

@@ -86,7 +86,6 @@ namespace Assets.Scripts.Audio
 			if (!lowPass.enabled)
 				return;
 
-			source.spatializePostEffects = false;
 			lowPass.enabled = false;
 		}
 
@@ -104,11 +103,19 @@ namespace Assets.Scripts.Audio
 			source.minDistance = 1;
 			source.maxDistance = 500;
 			_steamSources[source].reflectionsMixLevel = 1;
+			_transmissionFilters[source].enabled = false;
+			_steamSources[source].transmissionInput = TransmissionInput.SimulationDefined;
 
 			return source;
 		}
 
 		public SteamAudioSource GetSteamAudio(AudioSource source) => _steamSources[source];
+
+		public TransmissionFilter GetTransmissionFilter(AudioSource source) => _transmissionFilters[source];
+
+		private readonly Dictionary<AudioSource, TransmissionFilter> _transmissionFilters = new();
+
+		private DoorTransmission _doorTransmission;
 
 		public bool Owns(AudioSource source)
 			=> _steamSources.ContainsKey(source);
@@ -173,12 +180,14 @@ namespace Assets.Scripts.Audio
 		{
 			SpatialAudio.Simulated += OnSimulated;
 			SpatialAudio.GeometryChanged += OnGeometryChanged;
+			_doorTransmission = new(this);
 		}
 
 		private void OnDestroy()
 		{
 			SpatialAudio.Simulated -= OnSimulated;
 			SpatialAudio.GeometryChanged -= OnGeometryChanged;
+			_doorTransmission.Dispose();
 		}
 
 		/// <summary>
@@ -282,6 +291,7 @@ namespace Assets.Scripts.Audio
 			if (refreshLoop && listener != null)
 				RefreshNearestLoop(listener.Value);
 
+			_doorTransmission.Update(_playingSources);
 			LogPlayingSounds();
 		}
 
@@ -344,6 +354,9 @@ namespace Assets.Scripts.Audio
 			o.SetActive(false);
 			_pool.Add(source);
 			_lowPasses[source] = lowPass;
+			TransmissionFilter transmission = o.AddComponent<TransmissionFilter>();
+			transmission.enabled = false;
+			_transmissionFilters[source] = transmission;
 			_generations[source] = 0;
 			return source;
 		}
