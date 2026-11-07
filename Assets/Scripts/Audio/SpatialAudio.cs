@@ -3,6 +3,8 @@ using SteamAudio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 using UnityEngine;
 
@@ -36,10 +38,141 @@ namespace Game.Audio
 			steam.reflections = true;
 			steam.applyHRTFToReflections = true;
 			steam.useDistanceCurveForReflections = false;
-			steam.pathing = false;
-			steam.applyHRTFToPathing = false;
-			steam.findAlternatePaths = false;
+			steam.pathingProbeBatch = PathingProbes;
+			steam.pathing = steam.pathingProbeBatch != null;
+			steam.pathValidation = true;
+			steam.findAlternatePaths = true;
+			steam.applyHRTFToPathing = true;
+			steam.pathingMixLevel = 0;
 			Freeze(steam);
+		}
+
+		/// <summary>
+		/// Name of the object with the pathing probes of the buildings.
+		/// </summary>
+		public const string ProbeBatchName = "Steam Audio pathing probes";
+
+		private static SteamAudioProbeBatch _probeBatch;
+		private static float _probeSearchTime = float.NegativeInfinity;
+
+		/// <summary>
+		/// Probes with the baked paths of sound around corners and through doorways, or null if they were not baked.
+		/// </summary>
+		private static SteamAudioProbeBatch PathingProbes
+		{
+			get
+			{
+				if (_probeBatch == null && Time.realtimeSinceStartup - _probeSearchTime > 1)
+				{
+					_probeSearchTime = Time.realtimeSinceStartup;
+					_probeBatch = UnityEngine.Object.FindAnyObjectByType<SteamAudioProbeBatch>();
+				}
+				return _probeBatch != null && _probeBatch.asset != null ? _probeBatch : null;
+			}
+		}
+
+		/// <summary>
+		/// Lets the sound of a hidden source come around corners and through doorways. Steam Audio gives the path as the direct sound
+		/// when the source is in sight, which the direct sound already carries.
+		/// </summary>
+		private static void SyncPathing(AudioSource source, SteamAudioSource steam)
+		{
+			if (steam.pathingProbeBatch == null)
+				steam.pathingProbeBatch = PathingProbes;
+
+			bool pathing = steam.pathingProbeBatch != null && source.spatialize && !_placedByGame.Contains(steam);
+			if (steam.pathing != pathing)
+				steam.pathing = pathing;
+			if (!pathing)
+			{
+				steam.pathingMixLevel = 0;
+				return;
+			}
+
+			if (!_paths.TryGetValue(steam, out SimulatedPath path))
+				_paths[steam] = path = new();
+			steam.pathingMixLevel = path.Valid ? 1 - steam.occlusionValue : 0;
+		}
+
+		/// <summary>
+		/// Pathing outputs of a source and the positions they were simulated for. Steam Audio keeps the last outputs
+		/// when it finds no probe in sight of the source or the listener, e.g. after a jump to another room.
+		/// </summary>
+		private class SimulatedPath
+		{
+			public readonly float[] Outputs = new float[7];
+
+			/// <summary>
+			/// Positions read by the simulation that runs now.
+			/// </summary>
+			public (Vector3 Source, Vector3 Listener)? Inputs;
+
+			public (Vector3 Source, Vector3 Listener) Simulated;
+			public bool Valid;
+		}
+
+		private static readonly Dictionary<SteamAudioSource, SimulatedPath> _paths = new();
+		private static readonly float[] _pathOutputs = new float[7];
+
+		/// <summary>
+		/// A path counts once Steam Audio changed it, and only as long as it changes whenever the listener moves.
+		/// It starts at the probe nearest to the source, so it stays the same while the source moves within a few meters.
+		/// </summary>
+		private static void CheckPaths()
+		{
+			if (Camera.main == null)
+				return;
+
+			Vector3 listener = Camera.main.transform.position;
+			foreach (SteamAudioSource steam in _paths.Keys.ToList())
+			{
+				if (steam == null)
+				{
+					_paths.Remove(steam);
+					continue;
+				}
+				if (!steam.isActiveAndEnabled)
+					continue;
+
+				SimulatedPath path = _paths[steam];
+				ReadPathOutputs(steam, _pathOutputs);
+				if (!path.Inputs.HasValue)
+					Array.Copy(_pathOutputs, path.Outputs, _pathOutputs.Length);
+				else
+				{
+					(Vector3 Source, Vector3 Listener) inputs = path.Inputs.Value;
+					if (!_pathOutputs.SequenceEqual(path.Outputs))
+					{
+						Array.Copy(_pathOutputs, path.Outputs, _pathOutputs.Length);
+						path.Simulated = inputs;
+						path.Valid = true;
+					}
+					else if (Vector3.Distance(inputs.Listener, path.Simulated.Listener) > _listenerTolerance
+						|| Vector3.Distance(inputs.Source, path.Simulated.Source) > _sourceTolerance)
+						path.Valid = false;
+				}
+				path.Inputs = (steam.transform.position, listener);
+			}
+		}
+
+		/// <summary>
+		/// Movement of the listener in meters a path must follow.
+		/// </summary>
+		private const float _listenerTolerance = .01f;
+
+		/// <summary>
+		/// Movement of the source in meters that surely brings it to another probe.
+		/// </summary>
+		private const float _sourceTolerance = 3;
+
+		private static void ReadPathOutputs(SteamAudioSource steam, float[] outputs)
+		{
+			PathEffectParams pathing = steam.GetOutputs(SimulationFlags.Pathing).pathing;
+			outputs[0] = pathing.eqCoeffsLow;
+			outputs[1] = pathing.eqCoeffsMid;
+			outputs[2] = pathing.eqCoeffsHigh;
+			if (pathing.shCoeffs != IntPtr.Zero)
+				Marshal.Copy(pathing.shCoeffs, outputs, 3, 4);
 		}
 
 		/// <summary>
@@ -56,6 +189,8 @@ namespace Game.Audio
 			DistanceAttenuationInput input = physical ? DistanceAttenuationInput.PhysicsBased : DistanceAttenuationInput.CurveDriven;
 			if (steam.distanceAttenuationInput != input)
 				steam.distanceAttenuationInput = input;
+
+			SyncPathing(source, steam);
 		}
 
 		/// <summary>
@@ -68,7 +203,35 @@ namespace Game.Audio
 		/// </summary>
 		private static readonly Dictionary<SteamAudioSource, int> _simulating = new();
 
-		static SpatialAudio() => SteamAudioManager.SimulationApplied += OnSimulationApplied;
+		static SpatialAudio()
+		{
+			SteamAudioManager.SimulationApplied += OnSimulationApplied;
+			Application.wantsToQuit += () =>
+			{
+				StopAudioBeforeShutdown();
+				return true;
+			};
+#if UNITY_EDITOR
+			UnityEditor.EditorApplication.playModeStateChanged += state =>
+			{
+				if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode)
+					StopAudioBeforeShutdown();
+			};
+#endif
+		}
+
+		/// <summary>
+		/// Steam Audio frees its HRTF and context when the game quits, while the audio thread may still be spatializing the playing sounds,
+		/// which crashes Unity. The sounds stop first and the audio thread gets time to finish the buffers it is mixing.
+		/// </summary>
+		private static void StopAudioBeforeShutdown()
+		{
+			foreach (AudioSource source in UnityEngine.Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+				source.Stop();
+
+			UnityEngine.AudioSettings.GetDSPBufferSize(out int bufferLength, out int buffers);
+			Thread.Sleep(Mathf.CeilToInt(1000f * bufferLength * (buffers + 1) / UnityEngine.AudioSettings.outputSampleRate));
+		}
 
 		/// <summary>
 		/// Lets Steam Audio simulate reflections of the source once more at its current position and freezes them as soon as they arrive.
@@ -78,6 +241,8 @@ namespace Game.Audio
 			Nudge(steam);
 			Unfreeze(steam);
 			_simulating[steam] = SteamAudioManager.SimulationsStarted;
+			if (!_paths.ContainsKey(steam))
+				_paths[steam] = new();
 		}
 
 		/// <summary>
@@ -152,6 +317,8 @@ namespace Game.Audio
 			steam.occlusion = false;
 			steam.transmission = false;
 			steam.reflections = false;
+			steam.pathing = false;
+			steam.pathingMixLevel = 0;
 			Freeze(steam);
 		}
 
@@ -180,6 +347,8 @@ namespace Game.Audio
 				Freeze(steam);
 				Simulated?.Invoke(steam);
 			}
+
+			CheckPaths();
 		}
 
 		/// <summary>

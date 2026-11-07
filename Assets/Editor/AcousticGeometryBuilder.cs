@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 
 using UnityEditor;
@@ -28,6 +29,32 @@ public static class AcousticGeometryBuilder
 	private const string _materialFolder = _dataFolder + "/Materials";
 	private const string _doorFolder = _dataFolder + "/Doors";
 	private const string _sceneDataPath = _dataFolder + "/SampleScene.asset";
+	private const string _pathingDataPath = _dataFolder + "/Pathing.asset";
+
+	/// <summary>
+	/// Spacing of the pathing probes in rooms and in halls; Steam Audio keeps a path between every two probes, so halls get fewer.
+	/// </summary>
+	private const float _probeSpacing = 1;
+	private const float _hallProbeSpacing = 2;
+	private const float _hallArea = 200;
+
+	private const float _probeHeight = 1.5f;
+
+	/// <summary>
+	/// Distance of the probe grid from the walls of a room.
+	/// </summary>
+	private const float _probeInset = .3f;
+
+	/// <summary>
+	/// Distance of the probes in front of a passage from its middle.
+	/// </summary>
+	private const float _passageProbeDistance = .5f;
+
+	/// <summary>
+	/// Longest straight segment of a path between two probes and longest path, in meters.
+	/// </summary>
+	private const float _probeVisibilityRange = 20;
+	private const float _pathRange = 50;
 
 	/// <summary>
 	/// Size of one map tile; map coordinates are tile centers.
@@ -324,6 +351,7 @@ public static class AcousticGeometryBuilder
 		CreateMaterials();
 		_unknownTypes = new();
 		_boxCount = 0;
+		_probeRooms = new();
 		RemovePreviousGeometry();
 
 		XDocument document = XDocument.Load(_mapPath);
@@ -345,6 +373,8 @@ public static class AcousticGeometryBuilder
 		if (_unknownTypes.Count > 0)
 			Debug.Log("Typy překážek bez pravidla: " + string.Join(", ", _unknownTypes));
 		Log($"Akustická geometrie postavena, {_boxCount} kvádrů");
+
+		BakePathing(staticMesh.asset, passages);
 	}
 
 	private const string _mapObjectName = "Map acoustics";
@@ -354,9 +384,142 @@ public static class AcousticGeometryBuilder
 	{
 		foreach (GameObject obj in SceneManager.GetActiveScene().GetRootGameObjects())
 		{
-			if (obj.name is _mapObjectName or _staticMeshObjectName or AcousticDoors.ObjectName)
+			if (obj.name is _mapObjectName or _staticMeshObjectName or AcousticDoors.ObjectName or SpatialAudio.ProbeBatchName)
 				UnityEngine.Object.DestroyImmediate(obj);
 		}
+	}
+
+	/// <summary>
+	/// Indoor localities with their height; the pathing probes cover the buildings.
+	/// </summary>
+	private static List<(Area area, float height)> _probeRooms;
+
+	/// <summary>
+	/// Places probes in the buildings and bakes the shortest paths of sound between them, so Steam Audio lets the sound
+	/// of a hidden source bend around door frames and corners. Doors are dynamic objects missing in the bake;
+	/// Steam Audio checks the paths against the closed ones while the game runs and looks for others.
+	/// </summary>
+	private static void BakePathing(SerializedData sceneData, List<XElement> passages)
+	{
+		SetPathingSettings();
+
+		SteamAudioProbeBatch batch = new GameObject(SpatialAudio.ProbeBatchName).AddComponent<SteamAudioProbeBatch>();
+		batch.asset = GetSerializedData(_pathingDataPath);
+		batch.heightAboveFloor = _probeHeight;
+		int count = GenerateProbes(batch, sceneData, GetPassageProbes(passages));
+		SaveScene();
+
+		Log($"{count} sond, peču cesty zvuku");
+		SteamAudioProbeBatch.BeginBake(new[] { batch });
+		EditorApplication.update += WaitForPathing;
+	}
+
+	/// <summary>
+	/// The settings lie in the plugin folder, which is not in the repository. A path between two probes needs a clear line
+	/// between their centers, so it cannot cut through the edge of a wall.
+	/// </summary>
+	private static void SetPathingSettings()
+	{
+		SteamAudioSettings settings = SteamAudioSettings.Singleton;
+		settings.bakingVisibilityRadius = 0;
+		settings.bakingVisibilityRange = _probeVisibilityRange;
+		settings.bakingPathRange = _pathRange;
+		EditorUtility.SetDirty(settings);
+		AssetDatabase.SaveAssets();
+	}
+
+	/// <summary>
+	/// A probe in the middle of each passage of a building and one on each side of it, so every doorway joins the rooms it connects.
+	/// </summary>
+	private static List<Vector3> GetPassageProbes(List<XElement> passages)
+	{
+		List<Vector3> probes = new();
+		foreach (XElement passage in passages)
+		{
+			Area area = ToArea(ParseNumbers(Attr(passage, "coordinates")));
+			if (!_probeRooms.Any(r => r.area.Overlaps(area)))
+				continue;
+
+			Vector3 center = new((area.MinX + area.MaxX) / 2, Mathf.Min(_probeHeight, GetPassageHeight(passage) - .3f), (area.MinZ + area.MaxZ) / 2);
+			Vector3 normal = area.Width < area.Depth ? Vector3.right : Vector3.forward;
+			probes.Add(center);
+			probes.Add(center + _passageProbeDistance * normal);
+			probes.Add(center - _passageProbeDistance * normal);
+		}
+		return probes;
+	}
+
+	/// <summary>
+	/// Places a grid of probes above the floor of each room and the given single probes, and saves them to the probe batch.
+	/// </summary>
+	/// <returns>Number of probes</returns>
+	private static int GenerateProbes(SteamAudioProbeBatch batch, SerializedData sceneData, List<Vector3> singleProbes)
+	{
+		SteamAudioManager.Initialize(ManagerInitReason.GeneratingProbes);
+		SteamAudioManager.LoadScene(SceneManager.GetActiveScene(), SteamAudioManager.Context, false);
+		SteamAudio.Scene scene = SteamAudioManager.CurrentScene;
+		StaticMesh staticMesh = new(SteamAudioManager.Context, scene, sceneData);
+		ProbeBatch probes = new(SteamAudioManager.Context);
+		Transform box = new GameObject("Probe box").transform;
+		try
+		{
+			staticMesh.AddToScene(scene);
+			scene.Commit();
+
+			List<Sphere> spheres = new();
+			foreach (var (area, height) in _probeRooms)
+			{
+				Area grid = area.Expand(-_probeInset);
+				float top = height - .05f;
+				box.position = new Vector3((grid.MinX + grid.MaxX) / 2, top / 2, (grid.MinZ + grid.MaxZ) / 2);
+				box.localScale = new Vector3(grid.Width, top, grid.Depth);
+
+				ProbeArray array = new(SteamAudioManager.Context);
+				array.GenerateProbes(scene, new ProbeGenerationParams
+				{
+					type = ProbeGenerationType.UniformFloor,
+					spacing = area.Width * area.Depth > _hallArea ? _hallProbeSpacing : _probeSpacing,
+					height = _probeHeight,
+					transform = Common.ConvertTransform(box)
+				});
+				for (int i = 0; i < array.GetNumProbes(); i++)
+					spheres.Add(array.GetProbe(i));
+				probes.AddProbeArray(array);
+				array.Release();
+			}
+
+			foreach (Vector3 point in singleProbes)
+			{
+				Sphere sphere = new() { center = Common.ConvertVector(point), radius = _probeSpacing };
+				probes.AddProbe(sphere);
+				spheres.Add(sphere);
+			}
+
+			batch.probeDataSize = probes.Save(batch.asset);
+			typeof(SteamAudioProbeBatch).GetField("mProbeSpheres", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(batch, spheres.ToArray());
+			batch.ResetLayers();
+			EditorUtility.SetDirty(batch);
+			return spheres.Count;
+		}
+		finally
+		{
+			UnityEngine.Object.DestroyImmediate(box.gameObject);
+			probes.Release();
+			staticMesh.Release();
+			SteamAudioManager.ShutDown();
+			UnityEngine.Object.DestroyImmediate(SteamAudioManager.Singleton.gameObject);
+		}
+	}
+
+	private static void WaitForPathing()
+	{
+		if (Baker.IsBakeActive())
+			return;
+
+		EditorApplication.update -= WaitForPathing;
+		SaveScene();
+		SteamAudioProbeBatch batch = UnityEngine.Object.FindAnyObjectByType<SteamAudioProbeBatch>();
+		Log(batch != null && batch.GetNumLayers() > 0 ? "Cesty zvuku upečeny" : "Cesty zvuku se nepodařilo upéct");
 	}
 
 	/// <summary>
@@ -375,6 +538,8 @@ public static class AcousticGeometryBuilder
 
 		Transform parent = new GameObject(name).transform;
 		parent.SetParent(map, false);
+		if (Attr(locality, "type").Equals("indoor", StringComparison.OrdinalIgnoreCase))
+			_probeRooms.Add((area, height));
 
 		CreateBox("Floor", area, -_slab, 0, GetFloorMaterial(terrain), parent);
 		CreatePanels(locality.Elements("panel"), upperLeft, indoor, height, parent);
@@ -586,7 +751,11 @@ public static class AcousticGeometryBuilder
 		SteamAudioManager.ExportActiveScene();
 		foreach (SteamAudioDynamicObject door in UnityEngine.Object.FindObjectsByType<SteamAudioDynamicObject>(FindObjectsSortMode.None))
 			SteamAudioManager.ExportDynamicObject(door, false);
+		SaveScene();
+	}
 
+	private static void SaveScene()
+	{
 		Scene scene = SceneManager.GetActiveScene();
 		EditorSceneManager.MarkSceneDirty(scene);
 		EditorSceneManager.SaveScene(scene);
