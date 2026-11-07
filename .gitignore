@@ -76,4 +76,11 @@ crashlytics-build.properties
 /Assets/Scenes/SampleScene.unity
 /Assets/_Recovery
 /Data/Saves
-/Assets/Plugins
+/Assets/Plugins/*
+# Steam Audio settings (rays, bounces, pathing bake) are part of the project
+!/Assets/Plugins/SteamAudio/
+/Assets/Plugins/SteamAudio/*
+!/Assets/Plugins/SteamAudio/Resources/
+/Assets/Plugins/SteamAudio/Resources/*
+!/Assets/Plugins/SteamAudio/Resources/SteamAudioSettings.asset
+!/Assets/Plugins/SteamAudio/Resources/SteamAudioSettings.asset.meta
