@@ -648,7 +648,7 @@ namespace Assets.Scripts.Audio
 
 				state.Gain = gain;
 				TransmissionFilter filter = _pool.GetTransmissionFilter(origin);
-				filter.enabled = gain < 1;
+				filter.Active = gain < 1;
 				origin.spatializePostEffects = true;
 				filter.SetGains(gain, gain, gain);
 			}
@@ -689,7 +689,7 @@ namespace Assets.Scripts.Audio
 			_origins.Remove(origin);
 			if (origin != null && _pool.GetGeneration(origin) == state.Generation)
 			{
-				_pool.GetTransmissionFilter(origin).enabled = false;
+				_pool.GetTransmissionFilter(origin).Active = false;
 				_waiting.Remove(_pool.GetSteamAudio(origin));
 			}
 		}
@@ -722,7 +722,7 @@ namespace Assets.Scripts.Audio
 			steam.reflectionsMixLevel = SpatialAudio.GetReflectionsMixLevel(position);
 
 			TransmissionFilter filter = _pool.GetTransmissionFilter(source);
-			filter.enabled = true;
+			filter.Active = true;
 
 			_pool.SoundStartedPlaying(source);
 			source.Play();

@@ -103,7 +103,7 @@ namespace Assets.Scripts.Audio
 			source.minDistance = 1;
 			source.maxDistance = 500;
 			_steamSources[source].reflectionsMixLevel = 1;
-			_transmissionFilters[source].enabled = false;
+			_transmissionFilters[source].Active = false;
 			_steamSources[source].transmissionInput = TransmissionInput.SimulationDefined;
 
 			return source;
@@ -400,7 +400,6 @@ namespace Assets.Scripts.Audio
 			_pool.Add(source);
 			_lowPasses[source] = lowPass;
 			TransmissionFilter transmission = o.AddComponent<TransmissionFilter>();
-			transmission.enabled = false;
 			_transmissionFilters[source] = transmission;
 			_generations[source] = 0;
 			return source;

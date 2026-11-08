@@ -32,28 +32,39 @@ namespace Game.Audio
 
 		private void Awake() => _sampleRate = AudioSettings.outputSampleRate;
 
-		private void OnEnable()
-		{
-			_lowShelf.Clear();
-			_highShelf.Clear();
-			_active = true;
-		}
-
 		/// <summary>
-		/// Unity keeps calling the filter of a disabled script, so a pool source reused for another sound would stay muffled.
+		/// Whether the filter shapes the sound. The component stays enabled: a pool source whose script filter was disabled
+		/// after it had run gave no spatialized sound any more.
 		/// </summary>
-		private void OnDisable()
+		public bool Active
 		{
-			_active = false;
-			SetGains(1, 1, 1);
+			get => _active;
+			set
+			{
+				if (value == _active)
+					return;
+
+				if (value)
+					_clear = true;
+				else
+					SetGains(1, 1, 1);
+				_active = value;
+			}
 		}
 
-		private volatile bool _active;
+		private volatile bool _active, _clear;
 
 		private void OnAudioFilterRead(float[] data, int channels)
 		{
 			if (!_active)
 				return;
+
+			if (_clear)
+			{
+				_lowShelf.Clear();
+				_highShelf.Clear();
+				_clear = false;
+			}
 
 			float low = _low, mid = _mid, high = _high;
 			if (low != _appliedLow || mid != _appliedMid || high != _appliedHigh)
