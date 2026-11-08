@@ -124,10 +124,7 @@ namespace Assets.Scripts.Audio
 		/// Lets Steam Audio simulate reflections of the source once more at its current position.
 		/// </summary>
 		public void Simulate(AudioSource source)
-		{
-			SpatialAudio.Simulate(_steamSources[source]);
-			_positionsAtSimulation[source] = (source.transform.position, ListenerPosition ?? source.transform.position);
-		}
+			=> SpatialAudio.Simulate(_steamSources[source]);
 
 		/// <summary>
 		/// Starts a sound after its reflections were simulated where it plays, otherwise its early reflections would come from where the source was before.
@@ -143,11 +140,6 @@ namespace Assets.Scripts.Audio
 		/// </summary>
 		private readonly Dictionary<AudioSource, (Action Play, float Requested)> _pendingPlays = new();
 
-		/// <summary>
-		/// Positions of each source and of the listener at the last simulation of its reflections.
-		/// </summary>
-		private readonly Dictionary<AudioSource, (Vector3 Source, Vector3 Listener)> _positionsAtSimulation = new();
-
 		private readonly Dictionary<AudioSource, SteamAudioSource> _steamSources = new();
 
 		/// <summary>
@@ -156,11 +148,6 @@ namespace Assets.Scripts.Audio
 		/// <remarks>A sound started earlier gets its reverb only in the middle. In a closed room a simulation takes up to about 0.1 s
 		/// and a sound waits for two or three of them.</remarks>
 		private const float _maxSimulationWait = 1;
-
-		/// <summary>
-		/// How far the listener or a playing loop may move before the reflections of the loop are simulated again, in meters.
-		/// </summary>
-		private const float _loopRefreshDistance = 1.5f;
 
 		/// <summary>
 		/// How far the listener may move within one frame, in meters; a longer move is a teleport.
@@ -191,10 +178,14 @@ namespace Assets.Scripts.Audio
 		}
 
 		/// <summary>
-		/// Makes the playing loops simulate their reflections again in the next update.
+		/// Lets Steam Audio start the reverb of the playing loops afresh; it averages their reverb while they and the listener stay put,
+		/// which would mix in the doorway as it was before.
 		/// </summary>
 		private void OnGeometryChanged()
-			=> _positionsAtSimulation.Clear();
+		{
+			foreach (AudioSource source in _playingSources.Where(s => s.loop && _steamSources[s].reflections))
+				Simulate(source);
+		}
 
 		private void OnSimulated(SteamAudioSource steam)
 		{
@@ -219,7 +210,7 @@ namespace Assets.Scripts.Audio
 			{
 				_steamSources[source].reflectionsMixLevel = 0;
 				_staleLoops.Add(source);
-				_positionsAtSimulation.Remove(source);
+				Simulate(source);
 			}
 		}
 
@@ -288,38 +279,92 @@ namespace Assets.Scripts.Audio
 				_playingSources.Remove(source);
 			}
 
-			if (refreshLoop && listener != null)
-				RefreshNearestLoop(listener.Value);
+			if (listener != null)
+			{
+				if (Vector3.Distance(listener.Value, _stillListener) > _settleTolerance)
+				{
+					_stillListener = listener.Value;
+					_stillSince = Time.realtimeSinceStartup;
+				}
+				if (refreshLoop)
+					RefreshNextLoop(listener.Value);
+			}
 
 			_doorTransmission.Update(_playingSources);
 			LogPlayingSounds();
 		}
 
 		/// <summary>
-		/// Simulates reflections of the nearest playing loop that it or the listener moved away from where they were simulated.
+		/// Where the listener stands and since when, by the real time.
+		/// </summary>
+		private Vector3 _stillListener;
+		private float _stillSince;
+
+		/// <summary>
+		/// Last simulation of the reflections of each playing loop: when, where the loop and the listener were,
+		/// and how many simulations in a row Steam Audio averaged there.
+		/// </summary>
+		private readonly Dictionary<AudioSource, (float Time, Vector3 Source, Vector3 Listener, int Settled)> _loopRefreshes = new();
+
+		/// <summary>
+		/// Movement in meters below which Steam Audio averages the simulations of a source.
+		/// </summary>
+		private const float _settleTolerance = .0005f;
+
+		/// <summary>
+		/// Simulations averaged where the listener stopped; the reverb of a place then sounds the same each time.
+		/// </summary>
+		private const int _settleSimulations = 4;
+
+		/// <summary>
+		/// How long in seconds the listener stands before the loops settle there.
+		/// </summary>
+		private const float _stillTime = .3f;
+
+		/// <summary>
+		/// Movement of a walking listener or of a loop after which the loop is simulated again, in meters; a farther loop changes less.
+		/// </summary>
+		private const float _refreshStep = .1f, _refreshStepPerMeter = .03f;
+
+		/// <summary>
+		/// Simulates reflections of the loop that waited longest among those due: a walking listener or a moving loop gets new reverb
+		/// in small steps, a standing one the average of several simulations at the place.
 		/// </summary>
 		/// <remarks>The caller lets one loop at a time simulate and only while no sound waits for its reflections: each simulated source
 		/// slows the whole simulation down, and a starting sound must not wait for loops.</remarks>
-		private void RefreshNearestLoop(Vector3 listener)
+		private void RefreshNextLoop(Vector3 listener)
 		{
-			AudioSource nearest = _playingSources
-				.Where(s => IsOutOfDate(s, listener))
-				.OrderBy(s => Vector3.Distance(s.transform.position, listener))
+			bool still = Time.realtimeSinceStartup - _stillSince > _stillTime;
+			AudioSource next = _playingSources
+				.Where(s => s.loop && s.isPlaying && _steamSources[s].reflections && !_pendingPlays.ContainsKey(s) && IsLoopDue(s, listener, still))
+				.OrderBy(s => _loopRefreshes.TryGetValue(s, out var last) ? last.Time : float.NegativeInfinity)
 				.FirstOrDefault();
-			if (nearest != null)
-				Simulate(nearest);
+			if (next == null)
+				return;
+
+			Vector3 position = next.transform.position;
+			int settled = _loopRefreshes.TryGetValue(next, out var previous) && Moved(previous, position, listener) < _settleTolerance ? previous.Settled + 1 : 1;
+			SpatialAudio.Refresh(_steamSources[next]);
+			_loopRefreshes[next] = (Time.realtimeSinceStartup, position, listener, settled);
 		}
 
-		private bool IsOutOfDate(AudioSource source, Vector3 listener)
+		private bool IsLoopDue(AudioSource source, Vector3 listener, bool still)
 		{
-			SteamAudioSource steam = _steamSources[source];
-			if (!source.loop || !source.isPlaying || !steam.reflections || SpatialAudio.IsSimulating(steam))
-				return false;
+			if (!_loopRefreshes.TryGetValue(source, out var last))
+				return true;
 
-			return !_positionsAtSimulation.TryGetValue(source, out var last)
-				|| Vector3.Distance(last.Listener, listener) > _loopRefreshDistance
-				|| Vector3.Distance(last.Source, source.transform.position) > _loopRefreshDistance;
+			Vector3 position = source.transform.position;
+			float moved = Moved(last, position, listener);
+			if (still && moved < _settleTolerance)
+				return last.Settled < _settleSimulations;
+			if (still)
+				return true;
+
+			return moved > _refreshStep + _refreshStepPerMeter * Vector3.Distance(position, listener);
 		}
+
+		private static float Moved((float Time, Vector3 Source, Vector3 Listener, int Settled) last, Vector3 source, Vector3 listener)
+			=> Mathf.Max(Vector3.Distance(last.Source, source), Vector3.Distance(last.Listener, listener));
 
 		private void StopForbiddenSound(AudioSource source)
 		{
@@ -335,8 +380,8 @@ namespace Assets.Scripts.Audio
 			source.name = "inactive sound";
 			source.transform.SetParent(null);
 			SpatialAudio.Forget(_steamSources[source]);
-			_positionsAtSimulation.Remove(source);
 			_staleLoops.Remove(source);
+			_loopRefreshes.Remove(source);
 			source.gameObject.SetActive(false);
 			_generations[source]++;
 		}

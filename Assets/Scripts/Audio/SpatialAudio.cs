@@ -89,9 +89,7 @@ namespace Game.Audio
 				return;
 			}
 
-			if (!_paths.TryGetValue(steam, out SimulatedPath path))
-				_paths[steam] = path = new();
-			steam.pathingMixLevel = path.Valid ? 1 - steam.occlusionValue : 0;
+			steam.pathingMixLevel = TrackPath(steam).Valid ? 1 - steam.occlusionValue : 0;
 		}
 
 		/// <summary>
@@ -100,7 +98,10 @@ namespace Game.Audio
 		/// </summary>
 		private class SimulatedPath
 		{
-			public readonly float[] Outputs = new float[7];
+			/// <summary>
+			/// A new source has none yet; the first outputs Steam Audio gives it count as its path where it and the listener stand.
+			/// </summary>
+			public readonly float[] Outputs = Enumerable.Repeat(float.NaN, 7).ToArray();
 
 			/// <summary>
 			/// Positions read by the simulation that runs now.
@@ -109,6 +110,13 @@ namespace Game.Audio
 
 			public (Vector3 Source, Vector3 Listener) Simulated;
 			public bool Valid;
+		}
+
+		private static SimulatedPath TrackPath(SteamAudioSource steam)
+		{
+			if (!_paths.TryGetValue(steam, out SimulatedPath path))
+				_paths[steam] = path = new();
+			return path;
 		}
 
 		private static readonly Dictionary<SteamAudioSource, SimulatedPath> _paths = new();
@@ -137,7 +145,11 @@ namespace Game.Audio
 				SimulatedPath path = _paths[steam];
 				ReadPathOutputs(steam, _pathOutputs);
 				if (!path.Inputs.HasValue)
+				{
+					path.Valid = float.IsNaN(path.Outputs[0]);
+					path.Simulated = (steam.transform.position, listener);
 					Array.Copy(_pathOutputs, path.Outputs, _pathOutputs.Length);
+				}
 				else
 				{
 					(Vector3 Source, Vector3 Listener) inputs = path.Inputs.Value;
@@ -241,8 +253,17 @@ namespace Game.Audio
 			Nudge(steam);
 			Unfreeze(steam);
 			_simulating[steam] = SteamAudioManager.SimulationsStarted;
-			if (!_paths.ContainsKey(steam))
-				_paths[steam] = new();
+			TrackPath(steam);
+		}
+
+		/// <summary>
+		/// Lets Steam Audio simulate reflections of the source once more and freezes them as soon as they arrive. Unlike <see cref="Simulate"/>
+		/// it keeps what Steam Audio found before: while the source and the listener stay put, it averages the simulations into a steady reverb.
+		/// </summary>
+		public static void Refresh(SteamAudioSource steam)
+		{
+			Unfreeze(steam);
+			_simulating[steam] = SteamAudioManager.SimulationsStarted;
 		}
 
 		/// <summary>

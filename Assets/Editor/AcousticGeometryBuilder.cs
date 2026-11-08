@@ -41,6 +41,12 @@ public static class AcousticGeometryBuilder
 	private const float _probeHeight = 1.5f;
 
 	/// <summary>
+	/// Radius of the probes that the listener and the sources take paths from, in multiples of their spacing. Steam Audio weighs
+	/// them by distance, so a probe coming within reach of a walking listener turns the path only slightly; it takes at most 8 of them.
+	/// </summary>
+	private const float _probeReach = 1.5f;
+
+	/// <summary>
 	/// Distance of the probe grid from the walls of a room.
 	/// </summary>
 	private const float _probeInset = .3f;
@@ -483,14 +489,18 @@ public static class AcousticGeometryBuilder
 					transform = Common.ConvertTransform(box)
 				});
 				for (int i = 0; i < array.GetNumProbes(); i++)
-					spheres.Add(array.GetProbe(i));
-				probes.AddProbeArray(array);
+				{
+					Sphere sphere = array.GetProbe(i);
+					sphere.radius *= _probeReach;
+					probes.AddProbe(sphere);
+					spheres.Add(sphere);
+				}
 				array.Release();
 			}
 
 			foreach (Vector3 point in singleProbes)
 			{
-				Sphere sphere = new() { center = Common.ConvertVector(point), radius = _probeSpacing };
+				Sphere sphere = new() { center = Common.ConvertVector(point), radius = _probeSpacing * _probeReach };
 				probes.AddProbe(sphere);
 				spheres.Add(sphere);
 			}
