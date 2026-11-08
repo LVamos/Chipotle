@@ -42,7 +42,7 @@ namespace Game
 		{
 			Vector2? oldPosition2d = message.SourcePosition != null ? message.SourcePosition.Value.Center : null;
 			Vector2 newPosition2d = message.TargetPosition.Center;
-			float y = World.Player.transform.localScale.y;
+			float y = Settings.ListenerHeight;
 			Vector3 newPosition3d = message.TargetPosition.Center.ToVector3(y);
 
 			if (_movement != null)

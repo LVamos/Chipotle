@@ -77,10 +77,10 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		}
 
 		/// <summary>
-		/// Position of the footsteps relative to the listener: just below the ears and slightly ahead. Lower, a generic HRTF puts the steps
-		/// deep below the head; straight below the listener the direction of a sound is not defined and it can jump to the side.
+		/// Position of the footsteps relative to the listener: at <see cref="Settings.FootStepHeight"/> above the ground and slightly ahead,
+		/// as straight below the listener the direction of a sound is not defined and it can jump to the side.
 		/// </summary>
-		private static readonly Vector3 FootStepOffset = new(0, -.1f, .35f);
+		private static Vector3 FootStepOffset => new(0, Settings.FootStepHeight - Camera.main.transform.position.y, .35f);
 
 		/// <summary>
 		/// Longest pause between two steps of one walk in seconds; after a longer pause the next step is expected on the spot.

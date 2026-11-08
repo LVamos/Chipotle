@@ -719,21 +719,18 @@ public static class AcousticGeometryBuilder
 			shape = _defaultShape;
 		}
 
-		float top = Mathf.Min(shape.Top, ceiling - .01f);
-		switch (shape.Kind)
-		{
-			case ShapeKind.Box:
-				CreateBox(name, area, shape.Bottom, top, _materials[shape.Material], parent);
-				break;
-			case ShapeKind.OnWall:
-				CreateBox(name, area.Expand(.01f), shape.Bottom, top, _materials[shape.Material], parent);
-				break;
-			case ShapeKind.Tree:
-				CreateBox(name + " trunk", area.Square(Mathf.Min(area.Width, .4f)), 0, 2.5f, _materials["Wood"], parent);
-				CreateBox(name + " crown", area.Square(Mathf.Max(area.Width, 2)), 2.2f, 6, _materials["Foliage"], parent);
-				break;
-		}
+		if (shape.Kind == ShapeKind.Skip)
+			return;
+
+		// A solid box standing on the ground, higher than the listener, so the steps and other sounds clearly reflect off it.
+		float top = float.IsInfinity(ceiling) ? _outdoorObstacleHeight : Mathf.Min(Settings.ListenerHeight + _indoorObstacleClearance, ceiling - .01f);
+		CreateBox(name, area, 0, top, _materials[shape.Material ?? _defaultShape.Material], parent);
 	}
+
+	/// <summary>
+	/// Height of the acoustic obstacles outdoors and how far they reach above the listener indoors, in meters.
+	/// </summary>
+	private const float _outdoorObstacleHeight = 7, _indoorObstacleClearance = .5f;
 
 	/// <summary>
 	/// Doors are dynamic objects, so the game can remove them when they open.
