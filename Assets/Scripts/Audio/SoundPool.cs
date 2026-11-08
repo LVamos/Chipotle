@@ -103,6 +103,7 @@ namespace Assets.Scripts.Audio
 			source.minDistance = 1;
 			source.maxDistance = 500;
 			_steamSources[source].reflectionsMixLevel = 1;
+			_reverbLevels.Remove(source);
 			_transmissionFilters[source].Active = false;
 			_steamSources[source].transmissionInput = TransmissionInput.SimulationDefined;
 
@@ -110,6 +111,20 @@ namespace Assets.Scripts.Audio
 		}
 
 		public SteamAudioSource GetSteamAudio(AudioSource source) => _steamSources[source];
+
+		/// <summary>
+		/// Share of the simulated reverb the sources get where it is not the natural one, e.g. beacons whose reverb blurs their direction.
+		/// </summary>
+		private readonly Dictionary<AudioSource, float> _reverbLevels = new();
+
+		public void SetReverbLevel(AudioSource source, float level)
+		{
+			_reverbLevels[source] = level;
+			_steamSources[source].reflectionsMixLevel = GetReflectionsMixLevel(source);
+		}
+
+		private float GetReflectionsMixLevel(AudioSource source)
+			=> SpatialAudio.GetReflectionsMixLevel(source.transform.position) * _reverbLevels.GetValueOrDefault(source, 1);
 
 		public TransmissionFilter GetTransmissionFilter(AudioSource source) => _transmissionFilters[source];
 
@@ -194,7 +209,7 @@ namespace Assets.Scripts.Audio
 				return;
 
 			if (_staleLoops.Remove(source))
-				steam.reflectionsMixLevel = SpatialAudio.GetReflectionsMixLevel(source.transform.position);
+				steam.reflectionsMixLevel = GetReflectionsMixLevel(source);
 			StartPendingPlay(source);
 		}
 

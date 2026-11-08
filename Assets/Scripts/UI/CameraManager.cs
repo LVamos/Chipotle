@@ -46,21 +46,15 @@ namespace Game.UI
 
 			int steps = 10;
 			Vector3 startPosition = Transform.position;
-			Vector3 totalMovement = position - startPosition;
-			Vector3 stepMovement = totalMovement / steps;
 			float stepDuration = duration / steps;
-			Vector3 movedSoFar = Vector3.zero;
 
-			for (int i = 0; i < steps - 1; i++)
+			for (int i = 1; i < steps; i++)
 			{
-				Transform.position += stepMovement;
-				movedSoFar += stepMovement;
+				Transform.position = Vector3.Lerp(startPosition, position, (float)i / steps);
 				yield return new WaitForSeconds(stepDuration);
 			}
 
-			// Last step to ensure exact final position (compensates for floating point errors)
-			Vector3 remainingMovement = totalMovement - movedSoFar;
-			Transform.position += remainingMovement;
+			Transform.position = position;
 		}
 
 		public static Vector3 Get3dPosition()

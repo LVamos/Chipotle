@@ -318,6 +318,8 @@ namespace Game.Audio
 
 		public int GetGeneration(AudioSource source) => _soundPool.GetGeneration(source);
 
+		public void SetReverbLevel(AudioSource source, float level) => _soundPool.SetReverbLevel(source, level);
+
 
 		public void SetLowPass(AudioSource source, float cutOffFrequency)
 		{

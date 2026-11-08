@@ -32,6 +32,12 @@ namespace Game
 				StartCoroutine(CameraManager.RotateYaw(degrees, Settings.CameraRotationDuration));
 		}
 
+		/// <summary>
+		/// Glide of the camera to the last position of the player. A new step takes over from where the camera is;
+		/// two glides at once added up and left the camera, the listener, beyond the player, even behind a wall.
+		/// </summary>
+		private Coroutine _movement;
+
 		private void OnCharacterMoved(CharacterMoved message)
 		{
 			Vector2? oldPosition2d = message.SourcePosition != null ? message.SourcePosition.Value.Center : null;
@@ -39,9 +45,13 @@ namespace Game
 			float y = World.Player.transform.localScale.y;
 			Vector3 newPosition3d = message.TargetPosition.Center.ToVector3(y);
 
+			if (_movement != null)
+				StopCoroutine(_movement);
+			_movement = null;
+
 			if (oldPosition2d != null
 && World.GetDistance(oldPosition2d.Value, newPosition2d) < 2)
-				StartCoroutine(CameraManager.SetPosition(newPosition3d, Settings.CameraRotationDuration));
+				_movement = StartCoroutine(CameraManager.SetPosition(newPosition3d, Settings.CameraRotationDuration));
 			else CameraManager.SetPosition(newPosition3d);
 		}
 	}

@@ -70,6 +70,11 @@ namespace Game.Audio
 		public static void SetLowPass(AudioSource source, float cutOffFrequency) => _soundManager.SetLowPass(source, cutOffFrequency);
 
 		/// <summary>
+		/// Scales the simulated reverb of a sound; 1 is the natural level.
+		/// </summary>
+		public static void SetReverbLevel(AudioSource source, float level) => _soundManager.SetReverbLevel(source, level);
+
+		/// <summary>
 		/// Muffles the sound according to the obstacle. Without an obstacle the low pass filter is switched off.
 		/// </summary>
 		public static void SetLowPass(AudioSource source, ObstacleType obstacle)

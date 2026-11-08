@@ -247,6 +247,7 @@ namespace Game.Terrain
 			Vector3 position = GetBeaconPosition();
 			string sound = _sounds["navigation"];
 			_navigationAudio = Sounds.Play(sound, position, Settings.BeaconVolume, loop);
+			Sounds.SetReverbLevel(_navigationAudio, Settings.BeaconReverbLevel);
 			_navigationAudio.maxDistance = _beaconMaxDistance;
 			_navigationAudio.minDistance = _beaconMinDistance;
 			_navigationAudio.rolloffMode = _beaconRolloffMode;
@@ -332,7 +333,8 @@ namespace Game.Terrain
 			{
 				string sound = "SonarTurnedOff";
 				Vector3 position = GetBeaconPosition();
-				Sounds.Play(sound, position, Settings.BeaconVolume);
+				AudioSource endSound = Sounds.Play(sound, position, Settings.BeaconVolume);
+				Sounds.SetReverbLevel(endSound, Settings.BeaconReverbLevel);
 			}
 
 			_navigationAudio.Stop();
@@ -364,9 +366,25 @@ namespace Game.Terrain
 		/// </summary>
 		private Vector3 GetBeaconPosition()
 		{
-			Vector2 position2d = _area.Value.GetClosestPoint(CameraManager.Get2dPosition());
+			Vector2 player = CameraManager.Get2dPosition();
+			Vector2 position2d = _area.Value.GetClosestPoint(player);
+			if (this is Passage)
+				position2d += IntoPlayersLocality(position2d, player);
 			Vector3 listener = Camera.main.transform.position;
 			return SpatialAudio.OutOfGeometry(listener, position2d.ToVector3(listener.y));
+		}
+
+		/// <summary>
+		/// A passage reaches 0.1 m into each locality; its point by the door frame would hide behind the frame, so the beacon sounds
+		/// 0.1 m further in the locality of the player, across the passage.
+		/// </summary>
+		private Vector2 IntoPlayersLocality(Vector2 point, Vector2 player)
+		{
+			const float depth = .1f;
+			Rectangle area = _area.Value;
+			if (area.Width < area.Height)
+				return new(player.x >= area.Center.x ? depth : -depth, 0);
+			return new(0, player.y >= area.Center.y ? depth : -depth);
 		}
 
 		/// <summary>
