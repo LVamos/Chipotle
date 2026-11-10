@@ -52,7 +52,24 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			FinishWarmUp();
 			RenewSteamSources();
 			PlayLateSteps();
+			KeepStepsInFrontOfGeometry();
 			PrepareNextFootStep();
+		}
+
+		/// <summary>
+		/// A playing step follows the camera, which glides on after the step started, e.g. up to a car; the step stays on its near side.
+		/// </summary>
+		private void KeepStepsInFrontOfGeometry()
+		{
+			Transform camera = Camera.main != null ? Camera.main.transform : null;
+			if (camera == null)
+				return;
+
+			foreach (AudioSource footStep in _footSteps)
+			{
+				if (footStep != null && footStep.isPlaying && footStep.transform.parent == camera)
+					footStep.transform.position = SpatialAudio.InFrontOfGeometry(camera.position, camera.TransformPoint(FootStepOffset));
+			}
 		}
 
 		/// <summary>
