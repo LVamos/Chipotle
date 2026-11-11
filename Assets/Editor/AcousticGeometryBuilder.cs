@@ -286,7 +286,7 @@ public static class AcousticGeometryBuilder
 	private static void CreateMaterials()
 	{
 		// Absorption low/mid/high, scattering, transmission low/mid/high.
-		// Scattering is at least 0.4: the boxes lack frames, mouldings and clutter, and Steam Audio renders scattered energy
+		// Indoors scattering is at least 0.4: the boxes lack frames, mouldings and clutter, and Steam Audio renders scattered energy
 		// as a smooth tail, while mostly specular surfaces give a sparse, crackling one.
 		_materials = new()
 		{
@@ -301,14 +301,20 @@ public static class AcousticGeometryBuilder
 			// An interior door with its gaps insulates about 15/25/30 dB; Steam Audio uses the transmission as an amplitude gain.
 			["Door"] = GetMaterial("Door", .14f, .1f, .08f, .5f, .178f, .056f, .032f),
 			["Metal"] = GetMaterial("Metal", .2f, .07f, .06f, .3f, .2f, .025f, .01f),
-			["Carpet"] = GetMaterial("Carpet", .24f, .69f, .73f, .5f, .02f, .005f, .003f),
-			["Linoleum"] = GetMaterial("Linoleum", .02f, .03f, .04f, .4f, .02f, .005f, .003f),
-			["Asphalt"] = GetMaterial("Asphalt", .02f, .04f, .07f, .4f, 0, 0, 0),
-			["Cobblestones"] = GetMaterial("Cobblestones", .02f, .04f, .06f, .5f, 0, 0, 0),
-			["Grass"] = GetMaterial("Grass", .15f, .4f, .6f, .6f, 0, 0, 0),
-			["Soil"] = GetMaterial("Soil", .15f, .35f, .5f, .5f, 0, 0, 0),
-			["Gravel"] = GetMaterial("Gravel", .25f, .6f, .65f, .6f, 0, 0, 0),
-			["Water"] = GetMaterial("Water", .01f, .01f, .02f, .1f, 0, 0, 0),
+			["Carpet"] = GetMaterial("Carpet", .24f, .69f, .73f, .6f, .02f, .005f, .003f),
+			["Linoleum"] = GetMaterial("Linoleum", .02f, .03f, .03f, .4f, .02f, .005f, .003f),
+			["Parquet"] = GetMaterial("Parquet", .12f, .07f, .07f, .45f, .07f, .014f, .005f),
+			["ConcreteFloor"] = GetMaterial("ConcreteFloor", .01f, .02f, .03f, .4f, 0, 0, 0),
+			// The open ground has no tail to smooth, and scattered energy returns from all of it as a hiss after every step.
+			["Paving"] = GetMaterial("Paving", .01f, .02f, .02f, .1f, 0, 0, 0),
+			["ConcreteGround"] = GetMaterial("ConcreteGround", .01f, .02f, .03f, .1f, 0, 0, 0),
+			["Asphalt"] = GetMaterial("Asphalt", .02f, .04f, .07f, .15f, 0, 0, 0),
+			["Cobblestones"] = GetMaterial("Cobblestones", .02f, .04f, .06f, .3f, 0, 0, 0),
+			["Decking"] = GetMaterial("Decking", .12f, .08f, .07f, .3f, 0, 0, 0),
+			["Grass"] = GetMaterial("Grass", .2f, .6f, .8f, .6f, 0, 0, 0),
+			["Soil"] = GetMaterial("Soil", .15f, .4f, .55f, .4f, 0, 0, 0),
+			["Gravel"] = GetMaterial("Gravel", .25f, .6f, .65f, .7f, 0, 0, 0),
+			["Water"] = GetMaterial("Water", .01f, .01f, .02f, .05f, 0, 0, 0),
 			["Upholstery"] = GetMaterial("Upholstery", .35f, .6f, .65f, .6f, .1f, .05f, .02f),
 			["Fabric"] = GetMaterial("Fabric", .15f, .45f, .6f, .7f, .3f, .2f, .1f),
 			["Foliage"] = GetMaterial("Foliage", .1f, .25f, .4f, .9f, .8f, .6f, .4f),
@@ -316,19 +322,19 @@ public static class AcousticGeometryBuilder
 		};
 	}
 
-	private static SteamAudioMaterial GetFloorMaterial(string terrain) => terrain switch
+	private static SteamAudioMaterial GetFloorMaterial(string terrain, bool indoor) => terrain switch
 	{
 		"asfalt" or "asphalt" => _materials["Asphalt"],
-		"tiles" => _materials["Ceramic"],
+		"tiles" => _materials[indoor ? "Ceramic" : "Paving"],
 		"carpet" => _materials["Carpet"],
 		"linoleum" => _materials["Linoleum"],
-		"wood" => _materials["Wood"],
+		"wood" => _materials[indoor ? "Parquet" : "Decking"],
 		"grass" or "bush" => _materials["Grass"],
 		"gravel" => _materials["Gravel"],
 		"clay" or "mud" => _materials["Soil"],
 		"puddle" => _materials["Water"],
 		"cobblestones" => _materials["Cobblestones"],
-		_ => _materials["Concrete"]
+		_ => _materials[indoor ? "ConcreteFloor" : "ConcreteGround"]
 	};
 
 	/// <summary>
@@ -551,7 +557,7 @@ public static class AcousticGeometryBuilder
 		if (Attr(locality, "type").Equals("indoor", StringComparison.OrdinalIgnoreCase))
 			_probeRooms.Add((area, height));
 
-		CreateBox("Floor", area, -_slab, 0, GetFloorMaterial(terrain), parent);
+		CreateBox("Floor", area, -_slab, 0, GetFloorMaterial(terrain, indoor), parent);
 		CreatePanels(locality.Elements("panel"), upperLeft, indoor, height, parent);
 
 		if (indoor)
@@ -635,7 +641,7 @@ public static class AcousticGeometryBuilder
 		else if (terrain == "concrete" && !walkable)
 			CreateBox("Concrete block", area, 0, 1, _materials["Concrete"], parent);
 		else // A floor 5 mm above the floor of the locality, so the rays hit it first.
-			CreateBox("Terrain " + terrain, area, -_slab, .005f, GetFloorMaterial(terrain), parent);
+			CreateBox("Terrain " + terrain, area, -_slab, .005f, GetFloorMaterial(terrain, indoor), parent);
 	}
 
 	/// <summary>

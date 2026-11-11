@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cb82a87a4954a947923856a12b49b38, type: 3}
   m_Name: Grass
   m_EditorClassIdentifier: SteamAudioUnity::SteamAudio.SteamAudioMaterial
-  lowFreqAbsorption: 0.15
-  midFreqAbsorption: 0.4
-  highFreqAbsorption: 0.6
+  lowFreqAbsorption: 0.2
+  midFreqAbsorption: 0.6
+  highFreqAbsorption: 0.8
   scattering: 0.6
   lowFreqTransmission: 0
   midFreqTransmission: 0

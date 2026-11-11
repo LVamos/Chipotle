@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Soil
   m_EditorClassIdentifier: SteamAudioUnity::SteamAudio.SteamAudioMaterial
   lowFreqAbsorption: 0.15
-  midFreqAbsorption: 0.35
-  highFreqAbsorption: 0.5
-  scattering: 0.5
+  midFreqAbsorption: 0.4
+  highFreqAbsorption: 0.55
+  scattering: 0.4
   lowFreqTransmission: 0
   midFreqTransmission: 0
   highFreqTransmission: 0

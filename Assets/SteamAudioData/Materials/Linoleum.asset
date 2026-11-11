@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SteamAudioUnity::SteamAudio.SteamAudioMaterial
   lowFreqAbsorption: 0.02
   midFreqAbsorption: 0.03
-  highFreqAbsorption: 0.04
+  highFreqAbsorption: 0.03
   scattering: 0.4
   lowFreqTransmission: 0.02
   midFreqTransmission: 0.005
