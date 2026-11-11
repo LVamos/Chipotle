@@ -50,6 +50,7 @@ namespace Game
 		public static float NearPlayerThreshold = 1;
 		public static float BeaconVolume = 1;
 		public static float BeaconReverbLevel = 1 / 3f;
+		public static int MaxReverbs = 18;
 		public static float FootStepHeight = .1f;
 		public static float ListenerHeight = 2;
 		public static float MenuMusicVolume = .4f;

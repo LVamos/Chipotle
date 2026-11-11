@@ -472,6 +472,11 @@ namespace Assets.Scripts.Audio
 		private readonly HashSet<AudioSource> _radiatorSources = new();
 
 		/// <summary>
+		/// A door source lives as long as the source behind the door.
+		/// </summary>
+		public bool IsRadiator(AudioSource source) => _radiatorSources.Contains(source);
+
+		/// <summary>
 		/// Quietest door source played, as an amplitude gain against the source behind the door.
 		/// </summary>
 		private const float _minGain = 1e-4f;

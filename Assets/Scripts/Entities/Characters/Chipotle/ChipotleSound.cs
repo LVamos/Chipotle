@@ -54,7 +54,20 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			RenewSteamSources();
 			PlayLateSteps();
 			KeepStepsInFrontOfGeometry();
+			StopFadedSteps();
 			PrepareNextFootStep();
+		}
+
+		/// <summary>
+		/// A step source that only plays silence costs the audio thread as much as one that sounds.
+		/// </summary>
+		private void StopFadedSteps()
+		{
+			foreach (AudioSource footStep in _footSteps)
+			{
+				if (footStep != null && SpatialAudio.HasFadedOut(footStep))
+					footStep.Stop();
+			}
 		}
 
 		/// <summary>

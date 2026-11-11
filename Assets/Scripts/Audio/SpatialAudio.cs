@@ -45,6 +45,29 @@ namespace Game.Audio
 			steam.applyHRTFToPathing = true;
 			steam.pathingMixLevel = 0;
 			Freeze(steam);
+			_sources[steam] = steam.GetComponent<AudioSource>();
+		}
+
+		/// <summary>
+		/// All sources set up by <see cref="Configure"/>.
+		/// </summary>
+		private static readonly Dictionary<SteamAudioSource, AudioSource> _sources = new();
+
+		/// <summary>
+		/// Number of sources whose reflections the audio thread renders now. Each takes a few percent of its time
+		/// whether its reflections still sound or not; with too many of them the sound crackles.
+		/// </summary>
+		public static int CountReverbs()
+		{
+			int count = 0;
+			foreach (var (steam, source) in _sources.ToList())
+			{
+				if (steam == null || source == null)
+					_sources.Remove(steam);
+				else if (steam.reflections && source.isPlaying && !source.isVirtual)
+					count++;
+			}
+			return count;
 		}
 
 		/// <summary>
@@ -482,7 +505,67 @@ namespace Game.Audio
 			extended = AudioClip.Create(clip.name, clip.samples + tailSamples, clip.channels, clip.frequency, false);
 			extended.SetData(samples, 0);
 			_clipsWithTail[clip] = extended;
+			_soundLengths[extended] = clip.length;
 			return extended;
+		}
+
+		/// <summary>
+		/// Lengths of the sounds in the clips made by <see cref="AddReflectionTail"/>, in seconds.
+		/// </summary>
+		private static readonly Dictionary<AudioClip, float> _soundLengths = new();
+
+		/// <summary>
+		/// For how long a source has played only the silence appended by <see cref="AddReflectionTail"/>, in seconds; negative while its sound lasts.
+		/// </summary>
+		public static float GetRingingTime(AudioSource source)
+			=> !source.loop && source.isPlaying && source.clip != null && _soundLengths.TryGetValue(source.clip, out float length) ? source.time - length : -1;
+
+		/// <summary>
+		/// Peak level below which a sound counts as silent: -80 dB of full scale.
+		/// </summary>
+		private const float _audibleLevel = 1e-4f;
+
+		/// <summary>
+		/// How long the reflections of a sound must stay silent before its source stops, in seconds.
+		/// An echo of a wall 50 m away returns after 0.3 s of silence.
+		/// </summary>
+		private const float _silenceBeforeStop = .35f;
+
+		private static readonly Dictionary<AudioSource, float> _silences = new();
+		private static readonly float[] _outputSamples = new float[4096];
+
+		/// <summary>
+		/// Whether a sound and its reflections have died away, so its source can stop before the appended silence ends.
+		/// </summary>
+		/// <remarks>Only for sources with <see cref="AudioSource.spatializePostEffects"/> off: Unity gives their output
+		/// after the spatializer, with the reflections. The output of the others is the sound before it.</remarks>
+		public static bool HasFadedOut(AudioSource source)
+		{
+			if (GetRingingTime(source) < 0 || IsAudible(source))
+			{
+				_silences.Remove(source);
+				return false;
+			}
+
+			// Only the time the output was watched counts: a frame may take longer than the samples Unity keeps.
+			float watched = (float)_outputSamples.Length / UnityEngine.AudioSettings.outputSampleRate;
+			float silence = _silences.GetValueOrDefault(source) + Mathf.Min(Time.unscaledDeltaTime, watched);
+			_silences[source] = silence;
+			return silence > _silenceBeforeStop;
+		}
+
+		private static bool IsAudible(AudioSource source)
+		{
+			for (int channel = 0; channel < 2; channel++)
+			{
+				source.GetOutputData(_outputSamples, channel);
+				foreach (float sample in _outputSamples)
+				{
+					if (sample > _audibleLevel || sample < -_audibleLevel)
+						return true;
+				}
+			}
+			return false;
 		}
 
 		private static readonly Dictionary<AudioClip, AudioClip> _seamlessLoops = new();

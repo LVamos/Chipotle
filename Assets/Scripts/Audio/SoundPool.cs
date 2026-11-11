@@ -306,7 +306,26 @@ namespace Assets.Scripts.Audio
 			}
 
 			_doorTransmission.Update(_playingSources);
+			LimitReverbs();
 			LogPlayingSounds();
+		}
+
+		/// <summary>
+		/// Keeps the reverbs within <see cref="Settings.MaxReverbs"/>: of the sounds that only ring out, those that ended first stop.
+		/// Loops and the steps of the player stay.
+		/// </summary>
+		private void LimitReverbs()
+		{
+			int excess = SpatialAudio.CountReverbs() - Settings.MaxReverbs;
+			if (excess <= 0)
+				return;
+
+			IEnumerable<AudioSource> oldest = _playingSources
+				.Where(s => !_pendingPlays.ContainsKey(s) && !_doorTransmission.IsRadiator(s) && SpatialAudio.GetRingingTime(s) > 0)
+				.OrderByDescending(SpatialAudio.GetRingingTime)
+				.Take(excess);
+			foreach (AudioSource source in oldest.ToList())
+				source.Stop();
 		}
 
 		/// <summary>
