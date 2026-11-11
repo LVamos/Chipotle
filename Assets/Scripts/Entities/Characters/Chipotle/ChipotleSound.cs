@@ -30,6 +30,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 	/// <summary>
 	/// Controls the sound output of the detective Chipotle NPC
 	/// </summary>
+	[DefaultExecutionOrder(-1000)]
 	public class ChipotleSound : Sound
 	{
 		private Sonar _sonar;
