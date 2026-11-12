@@ -250,10 +250,10 @@ public static class AcousticGeometryBuilder
 		new(ShapeKind.Box, 0, .4f, "Ceramic", "záchod", "mísa", "bidet"),
 		new(ShapeKind.Box, 0, 2, "Glass", "sprchový kout", "sprcháč"),
 
-		new(ShapeKind.Box, .4f, 2.2f, "Metal", "náklaďák"),
+		new(ShapeKind.Box, .4f, 2.2f, "Car", "náklaďák"),
 		new(ShapeKind.Box, .4f, 1, "Wood", "valník"),
 		new(ShapeKind.Box, .3f, 1.1f, "Metal", "motorka"),
-		new(ShapeKind.Box, .3f, 1.45f, "Metal", "auto", "volkswagen"),
+		new(ShapeKind.Box, .3f, 1.45f, "Car", "auto", "volkswagen"),
 
 		new(ShapeKind.Box, 0, 4, "Concrete", "sloup"),
 		new(ShapeKind.Box, 0, 5, "Metal", "lampa"),
@@ -301,6 +301,14 @@ public static class AcousticGeometryBuilder
 			// An interior door with its gaps insulates about 15/25/30 dB; Steam Audio uses the transmission as an amplitude gain.
 			["Door"] = GetMaterial("Door", .14f, .1f, .08f, .5f, .178f, .056f, .032f),
 			["Metal"] = GetMaterial("Metal", .2f, .07f, .06f, .3f, .2f, .025f, .01f),
+			// Thin boards on a frame resonate and leak; the values also stand for the bed and other furniture the map leaves out.
+			["Boards"] = GetMaterial("Boards", .3f, .22f, .18f, .5f, .2f, .06f, .03f),
+			// Walls hidden behind heaps of bags, boxes and broken furniture.
+			["Clutter"] = GetMaterial("Clutter", .22f, .3f, .3f, .7f, .056f, .056f, .004f),
+			// Wood wool insulation boards, usual under the ceiling of a large garage.
+			["CeilingPanels"] = GetMaterial("CeilingPanels", .25f, .55f, .65f, .6f, 0, 0, 0),
+			// Thin resonating panels, glass, wheel arches and the gap under the body.
+			["Car"] = GetMaterial("Car", .3f, .2f, .15f, .6f, .2f, .025f, .01f),
 			["Carpet"] = GetMaterial("Carpet", .24f, .69f, .73f, .6f, .02f, .005f, .003f),
 			["Linoleum"] = GetMaterial("Linoleum", .02f, .03f, .03f, .4f, .02f, .005f, .003f),
 			["Parquet"] = GetMaterial("Parquet", .12f, .07f, .07f, .45f, .07f, .014f, .005f),
@@ -338,16 +346,35 @@ public static class AcousticGeometryBuilder
 	};
 
 	/// <summary>
+	/// Localities with a concrete floor whose walls and ceiling are plastered.
+	/// </summary>
+	private static readonly HashSet<string> _plasteredLocalities = new() { "garáž v1", "garáž w1", "garáž p1", "sklep w1" };
+
+	/// <summary>
+	/// Localities full of junk that the map does not list as obstacles.
+	/// </summary>
+	private static readonly HashSet<string> _clutteredLocalities = new() { "garáž s1", "hala s1" };
+
+	/// <summary>
+	/// Localities with sound absorbing boards under the ceiling.
+	/// </summary>
+	private static readonly HashSet<string> _paneledCeilings = new() { "garáž v1" };
+
+	/// <summary>
 	/// Bathrooms and toilets are tiled, garages and the cellar are bare concrete, the cottage is wooden.
 	/// </summary>
 	private static SteamAudioMaterial GetWallMaterial(string locality, string terrain)
 	{
+		if (_clutteredLocalities.Contains(locality))
+			return _materials["Clutter"];
+		if (_plasteredLocalities.Contains(locality))
+			return _materials["Plaster"];
 		if (locality.Contains("koupelna") || locality.Contains("záchod"))
 			return _materials["Ceramic"];
 		if (terrain == "concrete")
 			return _materials["Concrete"];
 		if (terrain == "wood")
-			return _materials["Wood"];
+			return _materials["Boards"];
 		return _materials["Plaster"];
 	}
 
@@ -563,6 +590,8 @@ public static class AcousticGeometryBuilder
 		if (indoor)
 		{
 			SteamAudioMaterial ceilingMaterial = wallMaterial == _materials["Ceramic"] ? _materials["Plaster"] : wallMaterial;
+			if (_paneledCeilings.Contains(name))
+				ceilingMaterial = _materials["CeilingPanels"];
 			CreateBox("Ceiling", area, height, height + _slab, ceilingMaterial, parent);
 			CreateWalls(area, height, wallMaterial, GetOpenings(area, passages), parent);
 		}
