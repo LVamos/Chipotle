@@ -141,7 +141,12 @@ public static class AcousticGeometryBuilder
 		/// <summary>
 		/// A trunk with a crown of foliage.
 		/// </summary>
-		Tree
+		Tree,
+
+		/// <summary>
+		/// A box that keeps its real height outdoors.
+		/// </summary>
+		Low
 	}
 
 	/// <summary>
@@ -192,6 +197,7 @@ public static class AcousticGeometryBuilder
 		new(ShapeKind.OnWall, 0, _gateHeight, "Metal", "vrata"),
 		new(ShapeKind.OnWall, 0, 1.8f, "Metal", "brána", "branka"),
 
+		new(ShapeKind.Low, 0, 1.2f, "RottenFence", "plot dřevěný zpráchnivělý"),
 		new(ShapeKind.Box, 0, 1.8f, "Foliage", "plot živý"),
 		new(ShapeKind.Box, 0, 2, "Metal", "plot plechový"),
 		new(ShapeKind.Box, 0, 1.6f, "Wood", "plot"),
@@ -303,6 +309,8 @@ public static class AcousticGeometryBuilder
 			["Metal"] = GetMaterial("Metal", .2f, .07f, .06f, .3f, .2f, .025f, .01f),
 			// Thin boards on a frame resonate and leak; the values also stand for the bed and other furniture the map leaves out.
 			["Boards"] = GetMaterial("Boards", .3f, .22f, .18f, .5f, .2f, .06f, .03f),
+			// Rotten pickets with gaps: most of the sound passes or is lost, little comes back.
+			["RottenFence"] = GetMaterial("RottenFence", .5f, .6f, .7f, .8f, .8f, .7f, .6f),
 			// Walls hidden behind heaps of bags, boxes and broken furniture.
 			["Clutter"] = GetMaterial("Clutter", .22f, .3f, .3f, .7f, .056f, .056f, .004f),
 			// Wood wool insulation boards, usual under the ceiling of a large garage.
@@ -758,7 +766,7 @@ public static class AcousticGeometryBuilder
 			return;
 
 		// A solid box standing on the ground, higher than the listener, so the steps and other sounds clearly reflect off it.
-		float top = float.IsInfinity(ceiling) ? _outdoorObstacleHeight : Mathf.Min(Settings.ListenerHeight + _indoorObstacleClearance, ceiling - .01f);
+		float top = shape.Kind == ShapeKind.Low ? shape.Top : float.IsInfinity(ceiling) ? _outdoorObstacleHeight : Mathf.Min(Settings.ListenerHeight + _indoorObstacleClearance, ceiling - .01f);
 		CreateBox(name, area, 0, top, _materials[shape.Material ?? _defaultShape.Material], parent);
 	}
 
