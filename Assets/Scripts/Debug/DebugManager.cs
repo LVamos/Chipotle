@@ -368,9 +368,24 @@ namespace Game.Debug
 			if (_macroRecorder != null && _macroRecorder.IsRecording && !IsMacroControlShortcut(shortcut))
 				_macroRecorder.FeedKeyDown(shortcut);
 
+			if (WindowHandler.ActiveWindow is MenuWindow && TypesCharacter(shortcut))
+				return;
+
 			Action action = null;
 			if (_keyboardCommands.TryGetValue(shortcut, out action))
 				action();
+		}
+
+		/// <summary>
+		/// Letters and digits search for an item in a menu, so they don't run debug commands there.
+		/// </summary>
+		private static bool TypesCharacter(KeyboardInput shortcut)
+		{
+			UnityEngine.InputSystem.Key key = shortcut.Key;
+			return !shortcut.Control && !shortcut.Alt
+				&& (key is >= UnityEngine.InputSystem.Key.A and <= UnityEngine.InputSystem.Key.Z
+				|| key is >= UnityEngine.InputSystem.Key.Digit1 and <= UnityEngine.InputSystem.Key.Digit0
+				|| key is >= UnityEngine.InputSystem.Key.Numpad0 and <= UnityEngine.InputSystem.Key.Numpad9);
 		}
 
 		/// <summary>
