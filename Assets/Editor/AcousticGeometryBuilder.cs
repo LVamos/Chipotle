@@ -311,6 +311,13 @@ public static class AcousticGeometryBuilder
 			["Boards"] = GetMaterial("Boards", .3f, .22f, .18f, .5f, .2f, .06f, .03f),
 			// Rotten pickets with gaps: most of the sound passes or is lost, little comes back.
 			["RottenFence"] = GetMaterial("RottenFence", .5f, .6f, .7f, .8f, .8f, .7f, .6f),
+			// Plaster with the cabinets, appliances, beds, sofas, tables and benches the map leaves out.
+			["FurnishedPlaster"] = GetMaterial("FurnishedPlaster", .25f, .3f, .3f, .6f, .056f, .056f, .004f),
+			// A taproom full of tables, benches and guests.
+			["CrowdedPlaster"] = GetMaterial("CrowdedPlaster", .32f, .4f, .4f, .7f, .056f, .056f, .004f),
+			["LightlyFurnishedPlaster"] = GetMaterial("LightlyFurnishedPlaster", .18f, .2f, .18f, .5f, .056f, .056f, .004f),
+			// Tiles up to the door height with towels, a curtain, fixtures and a door; bare tiles ring for almost 3 s.
+			["TiledRoom"] = GetMaterial("TiledRoom", .12f, .16f, .18f, .4f, .06f, .044f, .011f),
 			// Walls hidden behind heaps of bags, boxes and broken furniture.
 			["Clutter"] = GetMaterial("Clutter", .22f, .3f, .3f, .7f, .056f, .056f, .004f),
 			// Wood wool insulation boards, usual under the ceiling of a large garage.
@@ -364,6 +371,18 @@ public static class AcousticGeometryBuilder
 	private static readonly HashSet<string> _clutteredLocalities = new() { "garáž s1", "hala s1" };
 
 	/// <summary>
+	/// Localities whose furniture the map mostly does not list as obstacles: kitchens, dining rooms, the pub.
+	/// </summary>
+	private static readonly HashSet<string> _furnishedLocalities = new()
+	{
+		"chodba h1", "jídelna p1", "kuchyň p1", "kuchyň s1", "kuchyň w1", "pokoj pro hosty w1", "salón w1"
+	};
+
+	private static readonly HashSet<string> _lightlyFurnishedLocalities = new() { "chodbička w1", "jídelna w1", "ložnice w1" };
+
+	private static readonly HashSet<string> _crowdedLocalities = new() { "výčep h1" };
+
+	/// <summary>
 	/// Localities with sound absorbing boards under the ceiling.
 	/// </summary>
 	private static readonly HashSet<string> _paneledCeilings = new() { "garáž v1" };
@@ -377,8 +396,14 @@ public static class AcousticGeometryBuilder
 			return _materials["Clutter"];
 		if (_plasteredLocalities.Contains(locality))
 			return _materials["Plaster"];
+		if (_furnishedLocalities.Contains(locality))
+			return _materials["FurnishedPlaster"];
+		if (_crowdedLocalities.Contains(locality))
+			return _materials["CrowdedPlaster"];
+		if (_lightlyFurnishedLocalities.Contains(locality))
+			return _materials["LightlyFurnishedPlaster"];
 		if (locality.Contains("koupelna") || locality.Contains("záchod"))
-			return _materials["Ceramic"];
+			return _materials["TiledRoom"];
 		if (terrain == "concrete")
 			return _materials["Concrete"];
 		if (terrain == "wood")
@@ -597,7 +622,7 @@ public static class AcousticGeometryBuilder
 
 		if (indoor)
 		{
-			SteamAudioMaterial ceilingMaterial = wallMaterial == _materials["Ceramic"] ? _materials["Plaster"] : wallMaterial;
+			SteamAudioMaterial ceilingMaterial = wallMaterial == _materials["TiledRoom"] ? _materials["Plaster"] : wallMaterial;
 			if (_paneledCeilings.Contains(name))
 				ceilingMaterial = _materials["CeilingPanels"];
 			CreateBox("Ceiling", area, height, height + _slab, ceilingMaterial, parent);
