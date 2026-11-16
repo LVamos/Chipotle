@@ -28,7 +28,7 @@ MonoBehaviour:
   realTimeRays: 32768
   realTimeBounces: 64
   realTimeDuration: 1.5
-  realTimeAmbisonicOrder: 1
+  realTimeAmbisonicOrder: 2
   realTimeMaxSources: 64
   realTimeCPUCoresPercentage: 80
   realTimeIrradianceMinDistance: 0.5

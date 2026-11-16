@@ -4,6 +4,7 @@ using Game.UI;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 
 using UnityEngine;
@@ -41,7 +42,7 @@ namespace Game.Debug.UI
 			GameObject obj = new();
 			DebugSettingsWindow instance = obj.AddComponent<DebugSettingsWindow>();
 
-			List<List<string>> items = new List<List<string>>();
+			List<List<string>> items = new();
 			MenuParameters parameters = new(items, "Nastavení pro ladìní", " ", defaultIndex: -1, sayItemAtStartup: false);
 			instance.Initialize(parameters);
 			return instance;
@@ -69,8 +70,8 @@ namespace Game.Debug.UI
 		/// </summary>
 		private void PopulateList()
 		{
-			_entries = new List<SettingEntry>();
-			List<List<string>> items = new List<List<string>>();
+			_entries = new();
+			List<List<string>> items = new();
 			BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
 			Type settingsType = typeof(Settings);
 
@@ -110,7 +111,7 @@ namespace Game.Debug.UI
 			}
 
 			// Replace items and reset index
-			_items = items;
+			_items = items.OrderBy(i => i[0]).ToList();
 			Index = _items.Count > 0 ? 0 : -1;
 		}
 
