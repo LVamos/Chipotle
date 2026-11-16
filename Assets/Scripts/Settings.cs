@@ -15,6 +15,7 @@ namespace Game
 {
 	public static class Settings
 	{
+		public static float AmbientVolume = 0.4f;
 		public static float DefaultMasterVolume = 1;
 		public static int OverOpenDoorLowPass = 2000;
 		public static int OverClosedDoorLowPass = 800;

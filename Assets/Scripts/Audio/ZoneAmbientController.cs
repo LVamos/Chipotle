@@ -129,7 +129,7 @@ namespace Game.Audio
 				FadePortalTo2d(description, portals);
 
 			AmbientRegistry.Register2D(_owner.Name.Inner, _ambientSource);
-			Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, _defaultVolume);
+			Sounds.SlideVolume(_ambientSource, Settings.Ambient2dFadeDuration, Settings.AmbientVolume);
 		}
 
 		private void FadePortalTo2d(string description, HashSet<AudioSource> portals)
