@@ -42,21 +42,14 @@ namespace Game.Entities.Characters.Tuttle
 		protected Vector3 _voiceSlidePosition;
 
 		/// <summary>
-		/// Specifies how the current position of Tuttle's voice changes in one step when voice sliding is being performed.
+		/// Position the current voice slide started at.
 		/// </summary>
-		
-		protected Vector3 _voiceSlideDelta;
+		protected Vector3 _voiceSlideSource;
 
 		/// <summary>
-		/// Specifies how much steps are needed to perform the voice slide.
+		/// Time elapsed since the voice slide started, in seconds; negative when no slide is running.
 		/// </summary>
-		protected int _voiceSlideTicks => _voiceSlideInterval / World.DeltaTime;
-
-		/// <summary>
-		/// A counter used for voice sliding.
-		/// </summary>
-		
-		protected int _voiceSlideTimer = -1;
+		protected float _voiceSlideTime = -1;
 
 		/// <summary>
 		/// Sound with reaction on collision with Chipotle.
@@ -64,10 +57,9 @@ namespace Game.Entities.Characters.Tuttle
 		private const string _chipotleCollisionSound = "TuttleHitByDoor";
 
 		/// <summary>
-		/// Specifies how long it takes to slide position of Tuttle's voice from one tile to another one.
+		/// Specifies how long it takes to slide position of Tuttle's voice from one tile to another one, in seconds.
 		/// </summary>
-		
-		protected const int _voiceSlideInterval = 500;
+		protected const float _voiceSlideDuration = .5f;
 
 		/// <summary>
 		/// Constructor
@@ -140,11 +132,11 @@ namespace Game.Entities.Characters.Tuttle
 
 			float height = transform.localScale.y;
 			Vector3 source = message.SourcePosition.Value.Center.ToVector3(height);
+			_voiceSlideSource = source;
 			_voiceSlidePosition = source;
 			_voiceSlideTarget = message.TargetPosition.Center.ToVector3(height);
-			Vector3 difference = _voiceSlideTarget - _voiceSlidePosition;
-			_voiceSlideDelta = new(difference.x / _voiceSlideTicks, 0, difference.z / _voiceSlideTicks);
-			_voiceSlideTimer = 0;
+			_voiceSlideTarget.y = source.y;
+			_voiceSlideTime = 0;
 		}
 
 		/// <summary>
@@ -161,17 +153,15 @@ namespace Game.Entities.Characters.Tuttle
 		/// </summary>
 		private void DoVoiceSliding()
 		{
-			if (_voiceSlideTimer == -1 || _movingSpeechAudio is { isPlaying: false })
+			if (_voiceSlideTime < 0 || _movingSpeechAudio == null || !_movingSpeechAudio.isPlaying)
 				return;
 
-			_voiceSlidePosition += _voiceSlideDelta;
+			_voiceSlideTime += Time.deltaTime;
+			_voiceSlidePosition = Vector3.Lerp(_voiceSlideSource, _voiceSlideTarget, _voiceSlideTime / _voiceSlideDuration);
 			_movingSpeechAudio.transform.position = _voiceSlidePosition;
 
-			if (++_voiceSlideTimer >= _voiceSlideTicks)
-			{
-				_voiceSlideTimer = -1;
-				_voiceSlideDelta = default;
-			}
+			if (_voiceSlideTime >= _voiceSlideDuration)
+				_voiceSlideTime = -1;
 		}
 	}
 }

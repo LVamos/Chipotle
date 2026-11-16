@@ -212,9 +212,11 @@ namespace Game
 			.Where(l => l.Area.Value.Intersects(area));
 
 		/// <summary>
-		/// Interval between game loop ticks
+		/// Interval between game loop ticks in milliseconds. Fractions carry over to the next tick, so timers keep real time at any frame rate.
 		/// </summary>
-		public static int DeltaTime => (int)(1000 * Time.deltaTime);
+		public static int DeltaTime { get; private set; }
+
+		private static float _deltaTimeRemainder;
 
 		/// <summary>
 		/// sets speed of the game loop.
@@ -1048,6 +1050,10 @@ namespace Game
 		{
 			if (GameManager.State != GameState.Playing)
 				return;
+
+			float elapsed = 1000 * Time.deltaTime + _deltaTimeRemainder;
+			DeltaTime = (int)elapsed;
+			_deltaTimeRemainder = elapsed - DeltaTime;
 
 			PerformDelayedActions();
 			foreach (Zone zone in _zones.Values)
