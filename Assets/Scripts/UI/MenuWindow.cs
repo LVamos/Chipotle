@@ -1,6 +1,7 @@
 ﻿using Game;
 
 using Game.Controls;
+using Game.Controls.DualSense;
 using Game.Controls.Keyboard;
 
 using System;
@@ -190,8 +191,17 @@ namespace Game.UI
 
 		private Func<int, bool> _deleteItem;
 
+		public override void OnKeyDown(DualSenseInput input)
+		{
+			if (!Closed)
+				base.OnKeyDown(input);
+		}
+
 		public override void OnKeyDown(KeyboardInput shortcut)
 		{
+			if (Closed)
+				return;
+
 			base.OnKeyDown(shortcut);
 
 			if (shortcut.Key == Key.Delete && !shortcut.Control && !shortcut.Shift && !shortcut.Alt)
@@ -396,6 +406,9 @@ namespace Game.UI
 		/// <param name="letter">The key that was pressed</param>
 		public override void OnKeyPress(char letter)
 		{
+			if (Closed)
+				return;
+
 			base.OnKeyPress(letter);
 			Navigate(letter);
 		}
