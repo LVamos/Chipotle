@@ -17,6 +17,8 @@ public class Startup : MonoBehaviour
 		SetCamera();
 		Application.runInBackground = true;
 		Time.fixedDeltaTime = 1f / 30f;
+		// With vSync on the frame rate limit is ignored; the frames that are not rendered then run unthrottled and the game time runs ahead of real time.
+		QualitySettings.vSyncCount = 0;
 		Application.targetFrameRate = 30;
 		UnityEngine.Rendering.OnDemandRendering.renderFrameInterval = 30;
 		if (!Application.isEditor)
