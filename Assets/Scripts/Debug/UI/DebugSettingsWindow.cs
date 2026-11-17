@@ -89,7 +89,6 @@ namespace Game.Debug.UI
 				Activate = ChooseConfiguration
 			};
 			_entries.Add(configuration);
-			items.Add(new List<string> { configuration.Name, FormatValue(configuration.Getter()) });
 
 			// Fields
 			FieldInfo[] fields = settingsType.GetFields(flags);
@@ -107,11 +106,15 @@ namespace Game.Debug.UI
 					Setter = v => f.SetValue(null, v)
 				};
 				_entries.Add(entry);
-				items.Add(new List<string> { entry.Name, FormatValue(entry.Getter()) });
 			}
 
+			// The entries keep the order of the items, an item finds its entry by its index.
+			_entries = _entries.OrderBy(e => e.Name).ToList();
+			foreach (SettingEntry entry in _entries)
+				items.Add(new List<string> { entry.Name, FormatValue(entry.Getter()) });
+
 			// Replace items and reset index
-			_items = items.OrderBy(i => i[0]).ToList();
+			_items = items;
 			Index = _items.Count > 0 ? 0 : -1;
 		}
 
