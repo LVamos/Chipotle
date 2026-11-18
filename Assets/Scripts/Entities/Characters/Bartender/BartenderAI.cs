@@ -121,13 +121,13 @@ namespace Game.Entities.Characters.Bartender
 
 			Character player = World.Player;
 			Passage door = World.GetPassage("duvh1");
-			bool tableUsed = World.GetItemsByType("hospodský stůl").Any(o => o.Used);
+			bool benchUsed = World.GetItemsByType("hospodská lavice").Any(o => o.Used);
 
 			if (
 				_sayGoodbyeToChipotle
-				&& tableUsed
+				&& benchUsed
 				&& player.SameZone(Owner)
-				&& door.Area.Value.GetDistanceFrom(player.Area.Value.Center) == 1
+				&& door.Area.Value.GetDistanceFrom(player.Center) <= 1
 			)
 			{
 				Cutscene.Play(Owner, IsChipotleAlone() ? "cs28" : "cs29");
