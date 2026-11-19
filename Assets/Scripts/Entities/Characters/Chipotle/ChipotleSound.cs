@@ -238,18 +238,20 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		}
 
 		/// <summary>
-		/// A source that plays for the first time can start with an undefined direction and sound at the side.
-		/// Playing a silent clip first lets the spatializer get the right position before the first step.
+		/// A source that plays for the first time can start with an undefined direction and sound at the side,
+		/// and Steam Audio prepares its reflections only after the first non-zero samples.
+		/// Playing an inaudible clip first lets the spatializer get ready before the first step.
 		/// </summary>
 		private void WarmUpFootStep()
 		{
 			_warmUpClip = AudioClip.Create("footstep warm-up", 4410, 1, 44100, false);
+			_warmUpClip.SetData(Enumerable.Repeat(InaudibleSample, _warmUpClip.samples).ToArray(), 0);
 
 			foreach (AudioSource footStep in _footSteps)
 			{
 				AttachFootStepToCamera(footStep);
 				footStep.clip = _warmUpClip;
-				footStep.volume = 0;
+				footStep.volume = 1;
 				footStep.loop = true;
 				footStep.Play();
 			}
@@ -363,9 +365,50 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			// The usual distance, so a step in front of a wall has as much reverb as elsewhere.
 			_footStepSteam[index].reflectionsMixLevel = SpatialAudio.GetReflectionsMixLevel(FootStepOffset.magnitude);
 			footStep.loop = false;
-			footStep.clip = clip;
+			var withLeadIn = AddLeadIn(clip);
+			footStep.clip = withLeadIn.Clip;
 			footStep.volume = _walkVolume;
-			footStep.PlayScheduled(start);
+			footStep.PlayScheduled(Math.Max(start - withLeadIn.LeadIn, AudioSettings.dspTime + StepSoundMinLead));
+		}
+
+		/// <summary>
+		/// Copies of step clips with silence in front, indexed by the original clips.
+		/// </summary>
+		private static readonly Dictionary<AudioClip, (AudioClip Clip, double LeadIn)> _clipsWithLeadIn = new();
+
+		/// <summary>
+		/// A sample at -140 dB that makes Steam Audio start processing a source.
+		/// </summary>
+		private const float InaudibleSample = 1e-7f;
+
+		/// <summary>
+		/// Returns a copy of the clip that starts with one audio buffer of silence, and the length of the silence in seconds.
+		/// </summary>
+		/// <remarks>
+		/// Steam Audio starts processing a source at its first non-zero sample and fades the direct sound and the reflections in over that buffer,
+		/// which would swallow the attack of the step and most of its early reflections. The silence starts with an inaudible sample instead.
+		/// </remarks>
+		private static (AudioClip Clip, double LeadIn) AddLeadIn(AudioClip clip)
+		{
+			if (clip == null || clip.loadType != AudioClipLoadType.DecompressOnLoad)
+				return (clip, 0);
+			if (_clipsWithLeadIn.TryGetValue(clip, out var cached))
+				return cached;
+
+			AudioSettings.GetDSPBufferSize(out int bufferLength, out _);
+			int lead = Mathf.CeilToInt((float)bufferLength * clip.frequency / AudioSettings.outputSampleRate) + 1;
+			float[] samples = new float[clip.samples * clip.channels];
+			clip.GetData(samples, 0);
+			float[] extended = new float[samples.Length + lead * clip.channels];
+			Array.Copy(samples, 0, extended, lead * clip.channels, samples.Length);
+			for (int i = 0; i < clip.channels; i++)
+				extended[i] = InaudibleSample;
+
+			AudioClip copy = AudioClip.Create(clip.name, clip.samples + lead, clip.channels, clip.frequency, false);
+			copy.SetData(extended, 0);
+			var result = (copy, (double)lead / clip.frequency);
+			_clipsWithLeadIn[clip] = result;
+			return result;
 		}
 
 		/// <summary>
