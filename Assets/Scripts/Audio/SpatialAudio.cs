@@ -664,17 +664,21 @@ namespace Game.Audio
 		private static bool HasSeam(float[] samples, int channels)
 		{
 			int frames = samples.Length / channels;
-			float[] steps = new float[frames - 1];
-			for (int i = 1; i < frames; i++)
-				for (int c = 0; c < channels; c++)
-					steps[i - 1] = Mathf.Max(steps[i - 1], Mathf.Abs(samples[i * channels + c] - samples[(i - 1) * channels + c]));
-			Array.Sort(steps);
-			float typical = steps[(int)(steps.Length * .99f)];
-
 			float seam = 0;
 			for (int c = 0; c < channels; c++)
 				seam = Mathf.Max(seam, Mathf.Abs(samples[c] - samples[(frames - 1) * channels + c]));
-			return seam > typical;
+
+			// Counting the smaller steps avoids sorting millions of them in a long clip.
+			int smaller = 0;
+			for (int i = 1; i < frames; i++)
+			{
+				float step = 0;
+				for (int c = 0; c < channels; c++)
+					step = Mathf.Max(step, Mathf.Abs(samples[i * channels + c] - samples[(i - 1) * channels + c]));
+				if (step < seam)
+					smaller++;
+			}
+			return smaller > (int)((frames - 1) * .99f);
 		}
 	}
 }

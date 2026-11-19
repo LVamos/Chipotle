@@ -134,6 +134,18 @@ namespace Game.Audio
 		}
 
 		/// <summary>
+		/// Prepares all variants of a loop so that it can start without delay.
+		/// </summary>
+		public static void PrepareLoop(string name)
+		{
+			if (string.IsNullOrEmpty(name) || !_clips.TryGetValue(name, out ClipInfo info))
+				return;
+
+			for (int i = 0; i < info.Variants; i++)
+				SpatialAudio.MakeSeamless(info[i]);
+		}
+
+		/// <summary>
 		/// Loads sound files into memory.
 		/// </summary>
 		public static void LoadClips()
