@@ -284,6 +284,8 @@ namespace Game.Audio
 		public AudioSource Play2d(string soundName, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
+			if (_lowPassCoroutines.Remove(source, out Coroutine slide))
+				StopCoroutine(slide);
 			_soundPool.DisableLowPass(source);
 			source.name = description ?? "sound";
 			source.clip = Sounds.GetClip(soundName);
@@ -330,6 +332,8 @@ namespace Game.Audio
 		public AudioSource Play(string soundName, Vector3 position, float volume = 1, bool loop = false, bool fadeIn = false, float fadingDuration = .5f, string description = null)
 		{
 			AudioSource source = _soundPool.GetSource();
+			if (_lowPassCoroutines.Remove(source, out Coroutine slide))
+				StopCoroutine(slide);
 			_soundPool.DisableLowPass(source);
 			source.name = description ?? "sound";
 			source.transform.position = position;

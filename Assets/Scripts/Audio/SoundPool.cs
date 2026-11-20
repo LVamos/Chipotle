@@ -83,9 +83,7 @@ namespace Assets.Scripts.Audio
 		public void DisableLowPass(AudioSource source)
 		{
 			AudioLowPassFilter lowPass = GetLowPass(source);
-			if (!lowPass.enabled)
-				return;
-
+			lowPass.cutoffFrequency = 22000;
 			lowPass.enabled = false;
 		}
 
