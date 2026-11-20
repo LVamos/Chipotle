@@ -120,13 +120,19 @@ namespace Game.Audio
 			{
 				// A scene must not change while a simulation traces rays in it.
 				if (!sceneChanging)
+				{
+					HoldManager(true);
 					return;
+				}
 				_idle.WaitOne();
 			}
 
 			FinishSimulation();
 			if (sceneChanging)
+			{
+				HoldManager(false);
 				return;
+			}
 
 			if (_commitRequired)
 			{
@@ -134,8 +140,44 @@ namespace Game.Audio
 				_simulator.Commit();
 				_commitRequired = false;
 			}
-			StartSimulation();
+
+			_requests.RemoveAll(r => r.Source == null || !_sources.TryGetValue(r.Source, out bool moved) || !moved);
+			bool waiting = _requests.Count > 0;
+			if (waiting && !ManagerSimulating())
+				StartSimulation();
+			HoldManager(waiting);
 		}
+
+		/// <summary>
+		/// Whether the simulation thread of <see cref="SteamAudioManager"/> traces rays now.
+		/// </summary>
+		private static bool ManagerSimulating()
+		{
+			SteamAudioManager manager = SteamAudioManager.Singleton;
+			if (manager == null)
+				return false;
+
+			_managerThread ??= typeof(SteamAudioManager).GetField("mSimulationThread", BindingFlags.NonPublic | BindingFlags.Instance);
+			return _managerThread?.GetValue(manager) is Thread thread && thread.ThreadState != ThreadState.WaitSleepJoin;
+		}
+
+		/// <summary>
+		/// Keeps <see cref="SteamAudioManager"/> from starting a simulation while the steps simulate or wait for it.
+		/// Each simulator takes the share of CPU cores set in Steam Audio; two at once leave the audio thread too little time and the sound breaks up.
+		/// </summary>
+		private static void HoldManager(bool hold)
+		{
+			SteamAudioManager manager = SteamAudioManager.Singleton;
+			if (manager == null || (!hold && !_holding))
+				return;
+
+			_managerElapsed ??= typeof(SteamAudioManager).GetField("mSimulationUpdateTimeElapsed", BindingFlags.NonPublic | BindingFlags.Instance);
+			_managerElapsed?.SetValue(manager, hold ? float.NegativeInfinity : SteamAudioSettings.Singleton.simulationUpdateInterval);
+			_holding = hold;
+		}
+
+		private static FieldInfo _managerThread, _managerElapsed;
+		private static bool _holding;
 
 		private static bool EnsureSimulator()
 		{
@@ -209,10 +251,6 @@ namespace Game.Audio
 
 		private static void StartSimulation()
 		{
-			_requests.RemoveAll(r => r.Source == null || !_sources.TryGetValue(r.Source, out bool moved) || !moved);
-			if (_requests.Count == 0)
-				return;
-
 			_running = _requests[0];
 			_requests.RemoveAt(0);
 
@@ -321,6 +359,7 @@ namespace Game.Audio
 			_requests.Clear();
 			_running = null;
 			_commitRequired = false;
+			HoldManager(false);
 		}
 	}
 }
