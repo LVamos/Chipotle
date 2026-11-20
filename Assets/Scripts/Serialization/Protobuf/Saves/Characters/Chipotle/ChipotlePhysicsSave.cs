@@ -12,5 +12,8 @@
 		public bool SittingOnChair { get; set; }
 		public bool SteppedIntoPuddle { get; set; }
 		public bool WalshesBenchUsed { get; set; }
+
+		[ProtoBuf.ProtoMember(100)]
+		public bool SonarEnabled { get; set; }
 	}
 }

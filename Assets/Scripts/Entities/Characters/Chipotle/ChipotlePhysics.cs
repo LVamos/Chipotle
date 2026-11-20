@@ -67,6 +67,7 @@ namespace Game.Entities.Characters.Chipotle
 			_sittingAtPubTable = data.SittingAtPubTable;
 			_sittingOnChair = data.SittingOnChair;
 			_walshesBenchUsed = data.WalshesBenchUsed;
+			SonarEnabled = data.SonarEnabled;
 		}
 
 		public override ComponentSave Export()
@@ -81,6 +82,7 @@ namespace Game.Entities.Characters.Chipotle
 			save.SittingAtPubTable = _sittingAtPubTable;
 			save.SittingOnChair = _sittingOnChair;
 			save.WalshesBenchUsed = _walshesBenchUsed;
+			save.SonarEnabled = SonarEnabled;
 
 			return save;
 		}
