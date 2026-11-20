@@ -414,7 +414,7 @@ save.UsableWith
 			if (string.IsNullOrEmpty(_sounds["collision"]))
 				return;
 
-			Vector3 position = OutOfObstacle(message.ContactPoint).ToVector3(GetSoundHeight());
+			Vector3 position = SoundPosition(message.ContactPoint);
 			string soundName = _sounds["collision"];
 			Sounds.Play(soundName, position, _defaultVolume);
 		}
@@ -425,6 +425,9 @@ save.UsableWith
 		/// <remarks>The camera rises to the ears only after the objects start their loops.</remarks>
 		private float GetSoundHeight()
 			=> Mathf.Min(transform.localScale.y, World.Player.transform.localScale.y);
+
+		private Vector3 SoundPosition(Vector2 point)
+			=> SpatialAudio.OutOfGeometry(Camera.main.transform.position, OutOfObstacle(point).ToVector3(GetSoundHeight()));
 
 		/// <summary>
 		/// Processes the UseObject message.
@@ -447,7 +450,7 @@ save.UsableWith
 			else if (_quickActionsAllowed && Time.time - _lastUse > Settings.ItemActionRepetetionInterval)
 			{
 				_lastUse = Time.time;
-				Sounds.Play(_sounds["action"], OutOfObstacle(message.ManipulationPoint).ToVector3(GetSoundHeight()), _defaultVolume);
+				Sounds.Play(_sounds["action"], SoundPosition(message.ManipulationPoint), _defaultVolume);
 			}
 
 			Used = true;
