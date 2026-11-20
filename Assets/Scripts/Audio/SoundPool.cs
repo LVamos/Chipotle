@@ -348,12 +348,12 @@ namespace Assets.Scripts.Audio
 		/// <summary>
 		/// Simulations averaged where the listener stopped; the reverb of a place then sounds the same each time.
 		/// </summary>
-		private const int _settleSimulations = 4;
+		private const int _settleSimulations = 16;
 
 		/// <summary>
 		/// How long in seconds the listener stands before the loops settle there.
 		/// </summary>
-		private const float _stillTime = .3f;
+		private const float _stillTime = .1f;
 
 		/// <summary>
 		/// Movement of a walking listener or of a loop after which the loop is simulated again, in meters; a farther loop changes less.
@@ -377,8 +377,10 @@ namespace Assets.Scripts.Audio
 				return;
 
 			Vector3 position = next.transform.position;
-			int settled = _loopRefreshes.TryGetValue(next, out var previous) && Moved(previous, position, listener) < _settleTolerance ? previous.Settled + 1 : 1;
-			SpatialAudio.Refresh(_steamSources[next]);
+			bool settling = _loopRefreshes.TryGetValue(next, out var previous) && Moved(previous, position, listener) < _settleTolerance;
+			int simulations = settling ? _settleSimulations - previous.Settled : 1;
+			int settled = settling ? _settleSimulations : 1;
+			SpatialAudio.Refresh(_steamSources[next], simulations);
 			_loopRefreshes[next] = (Time.realtimeSinceStartup, position, listener, settled);
 		}
 

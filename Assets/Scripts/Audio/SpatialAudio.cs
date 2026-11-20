@@ -261,6 +261,7 @@ namespace Game.Audio
 		/// </summary>
 		private static void StopAudioBeforeShutdown()
 		{
+			StepReflections.Shutdown();
 			foreach (AudioSource source in UnityEngine.Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
 				source.Stop();
 
@@ -283,10 +284,10 @@ namespace Game.Audio
 		/// Lets Steam Audio simulate reflections of the source once more and freezes them as soon as they arrive. Unlike <see cref="Simulate"/>
 		/// it keeps what Steam Audio found before: while the source and the listener stay put, it averages the simulations into a steady reverb.
 		/// </summary>
-		public static void Refresh(SteamAudioSource steam)
+		public static void Refresh(SteamAudioSource steam, int simulations = 1)
 		{
 			Unfreeze(steam);
-			_simulating[steam] = SteamAudioManager.SimulationsStarted;
+			_simulating[steam] = SteamAudioManager.SimulationsStarted + simulations - 1;
 		}
 
 		/// <summary>

@@ -300,6 +300,7 @@ save.UsableWith
 			_sounds["placing"] = placingSound;
 			_sounds["loop"] = loopSound;
 			_sounds["passBy"] = "ObjectPassBy";
+
 			// Preparing a long loop takes a while; while loading it does not stop the game.
 			Sounds.PrepareLoop(loopSound);
 

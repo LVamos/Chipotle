@@ -38,7 +38,10 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		private void OnDestroy()
 		{
 			SpatialAudio.GeometryChanged -= OnGeometryChanged;
-			SpatialAudio.Simulated -= OnSimulated;
+			StepReflections.Simulated -= OnSimulated;
+
+			foreach (SteamAudio.SteamAudioSource steam in _footStepSteam)
+				StepReflections.Release(steam);
 
 			foreach (AudioSource footStep in _footSteps)
 			{
@@ -56,6 +59,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			KeepStepsInFrontOfGeometry();
 			StopFadedSteps();
 			PrepareNextFootStep();
+			StepReflections.Tick(Camera.main != null ? Camera.main.transform : null);
 		}
 
 		/// <summary>
@@ -171,6 +175,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			{
 				_footSteps[i] = CreateFootStepSource($"FootstepSource{i + 1}");
 				_footStepSteam[i] = _footSteps[i].GetComponent<SteamAudio.SteamAudioSource>();
+				StepReflections.Adopt(_footStepSteam[i]);
 			}
 
 			WarmUpFootStep();
@@ -192,8 +197,8 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		}
 
 		/// <summary>
-		/// Lets the source of the next step simulate its reflections where the step is expected, so the step can start on time with reflections
-		/// of its own place. While walking straight the guess is exact.
+		/// Lets the source of the next step simulate its reflections where the step is expected, for the ears where they will be then,
+		/// so the step can start on time with reflections of its own place. While walking straight the guess is exact.
 		/// </summary>
 		private void PrepareNextFootStep()
 		{
@@ -203,18 +208,24 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 			AudioSource footStep = _footSteps[_nextFootStep];
 			SteamAudio.SteamAudioSource steam = _footStepSteam[_nextFootStep];
-			if (SpatialAudio.IsSimulating(steam))
+			if (StepReflections.IsSimulating(steam))
 				return;
 
-			Vector3 ears = SpatialAudio.InFrontOfGeometry(camera.position, PredictNextStep().ToVector3(camera.position.y));
+			Vector3 ears = SpatialAudio.InFrontOfGeometry(camera.position, PredictEars(camera));
 			Vector3 position = SpatialAudio.InFrontOfGeometry(ears, ears + camera.rotation * FootStepOffset);
 			if (footStep.transform.parent == null && Vector3.Distance(footStep.transform.position, position) < .1f)
 				return;
 
 			footStep.transform.SetParent(null);
 			footStep.transform.position = position;
-			SpatialAudio.Simulate(steam);
+			_preparedEars = (ears, camera.rotation);
+			StepReflections.Simulate(steam, ears, camera.rotation);
 		}
+
+		/// <summary>
+		/// Where the ears were simulated for the step that waits in the next source.
+		/// </summary>
+		private (Vector3 Position, Quaternion Rotation) _preparedEars;
 
 		/// <summary>
 		/// The next step was simulated before a door opened or closed; it simulates again where it waits.
@@ -226,15 +237,19 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 			AudioSource footStep = _footSteps[_nextFootStep];
 			SteamAudio.SteamAudioSource steam = _footStepSteam[_nextFootStep];
-			if (footStep != null && footStep.transform.parent == null && !SpatialAudio.IsSimulating(steam))
-				SpatialAudio.Simulate(steam);
+			if (footStep != null && footStep.transform.parent == null && !StepReflections.IsSimulating(steam))
+				StepReflections.Simulate(steam, _preparedEars.Position, _preparedEars.Rotation);
 		}
 
-		private Vector2 PredictNextStep()
+		/// <summary>
+		/// Where the player will stand when the next step sounds; reflections of steps are heard there, not where the gliding camera is.
+		/// </summary>
+		private Vector3 PredictEars(Transform camera)
 		{
 			bool walking = _lastStep != null && _stepBeforeLast != null && Time.time - _lastFootStepTime < WalkPause
 				&& Vector2.Distance(Owner.Center, _lastStep.Value) < MaxStepLength;
-			return walking ? _lastStep.Value + (_lastStep.Value - _stepBeforeLast.Value) : Owner.Center;
+			Vector2 next = walking ? Owner.Center + (_lastStep.Value - _stepBeforeLast.Value) : Owner.Center;
+			return next.ToVector3(camera.position.y);
 		}
 
 		/// <summary>
@@ -279,7 +294,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			base.Initialize();
 			InitFootStepSource();
 			SpatialAudio.GeometryChanged += OnGeometryChanged;
-			SpatialAudio.Simulated += OnSimulated;
+			StepReflections.Simulated += OnSimulated;
 			_exitDescriber = new();
 			_itemDescriber = new();
 			_characterDescriber = new();
@@ -352,7 +367,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 				_lateSteps[index] = new(stepClip, position, Time.realtimeSinceStartup);
 			else
 			{
-				if (!SpatialAudio.IsSimulating(_footStepSteam[index]))
+				if (!StepReflections.IsSimulating(_footStepSteam[index]))
 					SpatialAudio.Freeze(_footStepSteam[index]);
 				PlayStepClip(index, stepClip, start);
 			}
@@ -459,6 +474,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 					continue;
 
 				_footSteps[i].Stop();
+				StepReflections.Release(_footStepSteam[i]);
 				SpatialAudio.Forget(_footStepSteam[i]);
 				Destroy(_footStepSteam[i]);
 				_simulatedAt[i] = null;
@@ -475,6 +491,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 				_footStepSteam[i] = _footSteps[i].gameObject.AddComponent<SteamAudio.SteamAudioSource>();
 				SpatialAudio.Configure(_footStepSteam[i]);
+				StepReflections.Adopt(_footStepSteam[i]);
 				_renewing[i] = false;
 			}
 		}
@@ -514,7 +531,8 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 					if (Vector2.Distance(new(source.x, source.z), step.Position) > TeleportDistance)
 						continue;
 
-					SpatialAudio.Simulate(_footStepSteam[index]);
+					Transform camera = Camera.main.transform;
+					StepReflections.Simulate(_footStepSteam[index], camera.position, camera.rotation);
 					step.Simulating = true;
 				}
 			}
