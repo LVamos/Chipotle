@@ -124,8 +124,7 @@ namespace Game.Entities.Characters.Components
 
 			// Set attenuation parameters
 			float volume = _walkVolume;
-			float height = transform.localScale.y;
-			Vector3 position3d = position.ToVector3(height);
+			Vector3 position3d = position.ToVector3(Settings.FootStepHeight);
 			if (obstacle is not ObstacleType.None and not ObstacleType.IndirectPath)
 			{
 				volume = Sounds.GetVolumeByObstacle(obstacle, _walkVolume, _walkVolume * 2);
