@@ -894,6 +894,11 @@ namespace Game.Entities.Characters.Chipotle
 			StopWalk();
 			StopNavigation();
 			CatchSitting(message);
+			if (SonarEnabled)
+			{
+				SonarEnabled = false;
+				InnerMessage(new SonarToggled(this, false, false));
+			}
 		}
 
 		protected void SaveGame()

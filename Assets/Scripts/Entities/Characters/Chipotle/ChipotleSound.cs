@@ -570,8 +570,8 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 
 		private void OnSonarToggled(SonarToggled message)
 		{
-			string state = message.SonarEnabled ? "zapnut" : "vypnut";
-			ScreenReader.Speak($"Sonar {state}");
+			if (message.Announce)
+				ScreenReader.Speak($"Sonar {(message.SonarEnabled ? "zapnut" : "vypnut")}");
 
 			if (!message.SonarEnabled)
 				_sonar.SetState();
