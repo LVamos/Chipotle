@@ -551,7 +551,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 		protected void OnSayObjectDescription(SayObjectDescription m)
 		{
 			if (m.Object == null)
-				ScreenReader.Speak("Před tebou nic není");
+				ScreenReader.Speak("Nevidíš tady nic zajímavého");
 			else
 				ScreenReader.Speak(m.Object.Description);
 		}
@@ -710,7 +710,7 @@ namespace Game.Entities.Characters.Chipotle.SoundComponent
 			{
 				{ PickUpItemResult.ResultType.Success, "sebráno" },
 				{ PickUpItemResult.ResultType.FullInventory, "Víc toho nepobereš." },
-				{ PickUpItemResult.ResultType.NothingFound, "Před tebou nic není" },
+				{ PickUpItemResult.ResultType.NothingFound, "Nevidíš nic, co by se dalo odstěhovat" },
 				{ PickUpItemResult.ResultType.Unpickable, "tohle nejde odnést" }
 			};
 
