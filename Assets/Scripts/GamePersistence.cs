@@ -1,6 +1,4 @@
-﻿using Game;
-
-using Game.Audio;
+﻿using Game.Audio;
 using Game.Serialization.Protobuf;
 using Game.Terrain;
 using Game.UI;
@@ -109,7 +107,7 @@ namespace Game
 		}
 
 		public static void CreateNamedSave()
-			=> WindowHandler.InputBox(string.Empty, "Zadej název sejvu", string.Empty, SaveNamed);
+			=> WindowHandler.InputBox("Název sejvu", "Uložit hru", string.Empty, SaveNamed);
 
 		private static void SaveNamed(string name)
 		{
