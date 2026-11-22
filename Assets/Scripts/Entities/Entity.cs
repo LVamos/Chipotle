@@ -66,7 +66,9 @@ namespace Game.Entities
 		/// Returns the hash code for this object.
 		/// </summary>
 		/// <returns>The hash code</returns>
-		public override int GetHashCode() => unchecked(3000 * (2000 + Area.GetHashCode()) * (3000 + Type.GetHashCode()) * 4000);
+		/// <remarks>It must not change when the object moves, otherwise the sets of zones lose track of it.</remarks>
+		public override int GetHashCode()
+			=> GetInstanceID();
 
 		/// <summary>
 		/// Returns public name of the object.
